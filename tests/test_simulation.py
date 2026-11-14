@@ -255,7 +255,7 @@ class ServerTests(unittest.TestCase):
 
     def test_viewer_and_recording_api(self):
         with self.request('/') as response:
-            self.assertIn(b'Ecosystem Lab', response.read())
+            self.assertIn(b'Wildlife Trial Framework', response.read())
         with self.request('/api/recordings') as response:
             self.assertEqual(json.load(response)[0]['id'], 'recorded_test')
         with self.request('/api/recordings/recorded_test') as response:

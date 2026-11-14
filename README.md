@@ -1,4 +1,6 @@
-# Ecosystem Lab
+# WTF — Wildlife Trial Framework
+
+**Reinforcement Learning Ecosystem Simulator**
 
 A Python ecosystem simulation with individually learning prey and predators, JSON environments, reproducible experiments, and a JavaScript canvas viewer.
 

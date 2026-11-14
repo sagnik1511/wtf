@@ -13,7 +13,7 @@ from .recording import Recorder, settings
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Run a reproducible learning ecosystem experiment')
+    parser = argparse.ArgumentParser(description='WTF — Wildlife Trial Framework: run RL ecosystem experiments')
     parser.add_argument('environment', nargs='?', default='environments/baseline.json')
     parser.add_argument('--mode', choices=('train', 'evaluate', 'random'), default=None)
     parser.add_argument('--runs', type=int)

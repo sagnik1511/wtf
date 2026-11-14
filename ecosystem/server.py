@@ -62,12 +62,12 @@ def make_handler(state):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Serve saved ecosystem recordings without loading simulation brains')
+    parser = argparse.ArgumentParser(description='WTF — Wildlife Trial Framework: serve saved RL ecosystem recordings')
     parser.add_argument('--port', type=int, default=8000)
     parser.add_argument('--results', type=Path, default=ROOT / 'results')
     args = parser.parse_args()
     server = ThreadingHTTPServer(('127.0.0.1', args.port), make_handler(State(args.results)))
-    print(f'Ecosystem playback: http://127.0.0.1:{server.server_port}', flush=True)
+    print(f'WTF playback: http://127.0.0.1:{server.server_port}', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

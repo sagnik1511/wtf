@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ecosystem Lab · Playback</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>WTF — Wildlife Trial Framework · RL Playback</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
 <body>
-<header><div><span class="eyebrow">RECORDED ECOSYSTEM EXPERIMENTS</span><h1>Ecosystem Lab <span>PLAYBACK</span></h1></div><div id="connection" class="badge">Loading recordings</div></header>
+<header><div><span class="eyebrow">REINFORCEMENT LEARNING ECOSYSTEM SIMULATOR</span><h1>WTF <span>Wildlife Trial Framework</span></h1></div><div id="connection" class="badge">Loading recordings</div></header>
 <main>
 <section class="workspace">
 <div class="toolbar"><label>Saved experiment<select id="recording"></select></label><button id="refresh">Refresh list</button><button id="load">Load recording</button><span class="spacer"></span><button id="back">Back</button><button id="step">Next frame</button><button id="play" class="primary" disabled>Play recording</button></div>
@@ -19,5 +19,5 @@
 <section class="panel"><h2>Create another recording</h2><p class="muted">Run the Python simulator separately. After it finishes, refresh the recording list here.</p><pre class="command">.venv/bin/python -m ecosystem.cli
 ./run.sh</pre><p class="muted">Playback loads one chunk at a time. It never starts a simulation or restores a learning checkpoint.</p></section>
 </aside>
-</main><div id="error" role="alert" hidden></div><footer>Python records to disk · JavaScript replays saved frames · Playback speed does not affect simulation outcomes</footer>
+</main><div id="error" role="alert" hidden></div><footer>WTF · Python records to disk · JavaScript replays saved frames · Playback speed does not affect simulation outcomes</footer>
 </body></html>
