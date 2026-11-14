@@ -3,7 +3,7 @@ import copy
 import math
 import random
 from collections import defaultdict
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 
@@ -113,30 +113,47 @@ class World:
                 return False
         return True
 
-    def observe(self, a):
+    def _observation_context(self):
+        occupied, food, prey, predators = set(), [], [], []
+        species = self.config['species']
+        for i, animal in self.animals.items():
+            position = animal.position
+            occupied.add(position)
+            (prey if species[animal.species]['diet'] == 'resource' else predators).append((i, position))
+        for position, patch in self.resources.items():
+            if patch.quantity > .001:
+                food.append(position)
+        return occupied, food, prey, predators
+
+    def observe(self, a, context=None):
         body = self.body(a)
         radius = body['vision_radius']
-        occupied = {other.position for other in self.animals.values() if other.id != a.id}
+        occupied, food, prey, predators = self._observation_context() if context is None else context
         features = [a.energy / body['max_energy'], a.health / body['max_health'], *DIRECTIONS[a.heading]]
         for offset in range(4):
             dx, dy = DIRECTIONS[(a.heading + offset) % 4]
             p = a.x + dx, a.y + dy
             features.append(float(self.blocked(p) or p in occupied))
+        radius_squared = radius * radius
         def nearest(points):
-            best = None
-            distance = float('inf')
+            best, best_squared = None, float('inf')
             for p in points:
-                d = math.hypot(p[0] - a.x, p[1] - a.y)
-                if d <= radius and d < distance and self.visible(a.position, p):
-                    best, distance = p, d
-            return [0., 0., 0., 0.] if best is None else [(best[0] - a.x) / radius, (best[1] - a.y) / radius, distance / radius, 1.]
-        features += nearest(p for p, r in self.resources.items() if r.quantity > .001)
-        features += nearest(b.position for b in self.animals.values() if b.id != a.id and self.diet(b) == 'resource')
-        features += nearest(b.position for b in self.animals.values() if b.id != a.id and self.diet(b) == 'prey')
+                dx, dy = p[0] - a.x, p[1] - a.y
+                squared = dx * dx + dy * dy
+                if squared <= radius_squared and squared < best_squared and self.visible(a.position, p):
+                    best, best_squared = p, squared
+            # Keep hypot and division order identical to the reference model.
+            return [0., 0., 0., 0.] if best is None else [(best[0] - a.x) / radius, (best[1] - a.y) / radius, math.hypot(best[0] - a.x, best[1] - a.y) / radius, 1.]
+        features += nearest(food)
+        features += nearest(p for i, p in prey if i != a.id)
+        features += nearest(p for i, p in predators if i != a.id)
         return tuple(features)
 
     def observe_all(self):
-        return {i: self.observe(a) for i, a in self.animals.items()}
+        # Shared only within this phase: manual edits and future steps cannot
+        # accidentally reuse stale positions or resource quantities.
+        context = self._observation_context()
+        return {i: self.observe(a, context) for i, a in self.animals.items()}
 
     def step(self, actions):
         if set(actions) != set(self.animals):
@@ -262,7 +279,7 @@ class World:
         return dict(tick=self.tick, populations={s: sum(a.species == s for a in self.animals.values()) for s in self.config['species']}, food=sum(r.quantity for r in self.resources.values()), deaths=dict(self.deaths), energy_gained=dict(self.total_energy_gained), kills=dict(self.kills))
 
     def snapshot(self):
-        return dict(width=self.width, height=self.height, tick=self.tick, resource_capacity=self.config['resources']['capacity_per_patch'], obstacles=sorted(self.obstacles), resources=[asdict(r) for r in self.resources.values()], animals=[asdict(a) for a in self.animals.values()], events=[asdict(e) for e in self.events], metrics=self.metrics())
+        return dict(width=self.width, height=self.height, tick=self.tick, resource_capacity=self.config['resources']['capacity_per_patch'], obstacles=sorted(self.obstacles), resources=[vars(r).copy() for r in self.resources.values()], animals=[vars(a).copy() for a in self.animals.values()], events=[vars(e).copy() for e in self.events], metrics=self.metrics())
 
     def checkpoint(self):
         return dict(config=self.config, seed=self.seed, snapshot=self.snapshot(), rng_state=self.rng.getstate(), lifespans=self.lifespans)

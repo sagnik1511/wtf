@@ -1,19 +1,18 @@
 """Small independent Q network, replay, target network and clipped loss.
 
 Lists and standard-library math keep installation self-contained. Networks are
-small deliberately; a future NumPy backend can implement the same interface.
+small deliberately; immutable replay tuples and native map operations reduce overhead.
 """
 import copy
 import math
 import random
-from dataclasses import dataclass
-from typing import Optional
+from operator import mul
+from typing import NamedTuple, Optional
 
 INPUTS = 20
 
 
-@dataclass(frozen=True)
-class Experience:
+class Experience(NamedTuple):
     observation: tuple
     action: str
     reward: float
@@ -36,15 +35,18 @@ class Brain:
             'w2': [init.uniform(-1, 1) * math.sqrt(6 / (self.hidden + len(actions))) for _ in range(self.hidden * len(actions))],
             'b2': [0.] * len(actions),
         }
-        self.target = copy.deepcopy(self.weights)
+        self.target = {k: v.copy() for k, v in self.weights.items()}
         self.replay = []
         self.cursor = self.steps = self.updates = 0
         self.epsilon = config['exploration']['initial']
 
     def forward(self, observation, weights=None):
         w = self.weights if weights is None else weights
-        h = [math.tanh(w['b1'][j] + sum(x * w['w1'][j * INPUTS + i] for i, x in enumerate(observation))) for j in range(self.hidden)]
-        q = [w['b2'][a] + sum(x * w['w2'][a * self.hidden + j] for j, x in enumerate(h)) for a in range(len(self.actions))]
+        w1, w2, hidden = w['w1'], w['w2'], self.hidden
+        # map(mul) avoids millions of Python generator/index operations while
+        # preserving the exact multiplication and summation order.
+        h = [math.tanh(bias + sum(map(mul, observation, w1[j * INPUTS:(j + 1) * INPUTS]))) for j, bias in enumerate(w['b1'])]
+        q = [bias + sum(map(mul, h, w2[a * hidden:(a + 1) * hidden])) for a, bias in enumerate(w['b2'])]
         return h, q
 
     def choose(self, observation, explore=True, random_baseline=False):
@@ -65,6 +67,8 @@ class Brain:
         if len(self.replay) < max(c['learning_starts_after'], c['batch_size']) or self.steps % c['train_every_steps']:
             return
         gradients = {k: [0.] * len(v) for k, v in self.weights.items()}
+        gw1, gb1, gw2, gb2 = (gradients[k] for k in ('w1', 'b1', 'w2', 'b2'))
+        w2, hidden = self.weights['w2'], self.hidden
         for e in self.training_rng.sample(self.replay, c['batch_size']):
             h, q = self.forward(e.observation)
             a = self.actions.index(e.action)
@@ -72,24 +76,23 @@ class Brain:
             if not e.terminated:
                 expected += c['discount_factor'] * max(self.forward(e.next_observation, self.target)[1])
             delta = max(-1., min(1., q[a] - expected))
-            gradients['b2'][a] += delta
+            gb2[a] += delta
             for j in range(self.hidden):
-                gradients['w2'][a * self.hidden + j] += delta * h[j]
-                dh = delta * self.weights['w2'][a * self.hidden + j] * (1 - h[j] ** 2)
-                gradients['b1'][j] += dh
+                gw2[a * hidden + j] += delta * h[j]
+                dh = delta * w2[a * hidden + j] * (1 - h[j] ** 2)
+                gb1[j] += dh
                 for i, x in enumerate(e.observation):
-                    gradients['w1'][j * INPUTS + i] += dh * x
+                    gw1[j * INPUTS + i] += dh * x
         scale = c['learning_rate'] / c['batch_size']
         for k, gradient in gradients.items():
             for i, value in enumerate(gradient):
                 self.weights[k][i] -= scale * value
         self.updates += 1
         if self.updates % c['target_update_every_training_steps'] == 0:
-            self.target = copy.deepcopy(self.weights)
+            self.target = {k: v.copy() for k, v in self.weights.items()}
 
     def checkpoint(self):
-        from dataclasses import asdict
-        return dict(config=copy.deepcopy(self.config), actions=self.actions[:], weights=copy.deepcopy(self.weights), target=copy.deepcopy(self.target), replay=[asdict(e) for e in self.replay], cursor=self.cursor, steps=self.steps, updates=self.updates, epsilon=self.epsilon, rng_state=self.rng.getstate(), training_rng_state=self.training_rng.getstate())
+        return dict(config=copy.deepcopy(self.config), actions=self.actions[:], weights={k: v.copy() for k, v in self.weights.items()}, target={k: v.copy() for k, v in self.target.items()}, replay=[dict(observation=tuple(e.observation), action=e.action, reward=e.reward, next_observation=tuple(e.next_observation) if e.next_observation is not None else None, terminated=e.terminated, truncated=e.truncated) for e in self.replay], cursor=self.cursor, steps=self.steps, updates=self.updates, epsilon=self.epsilon, rng_state=self.rng.getstate(), training_rng_state=self.training_rng.getstate())
 
     @classmethod
     def restore(cls, state):

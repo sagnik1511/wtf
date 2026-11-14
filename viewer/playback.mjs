@@ -24,7 +24,7 @@ export class Playback {
     this.runs = runs;
     return this.changeRun(runs[0].run);
   }
-  async changeRun(run) {
+  async changeRun(run, selected = null) {
     const entry = this.runs.find(entry => entry.run === Number(run));
     if (!entry) throw new Error('Recorded run not found');
     this.run = entry;
@@ -38,9 +38,9 @@ export class Playback {
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
-    return this.seek(0);
+    return this.seek(0, selected);
   }
-  async seek(index) {
+  async seek(index, selected = null) {
     if (!Number.isInteger(index) || index < 0 || index >= this.run.frame_count) throw new Error('Frame outside recording');
     const size = this.metadata.recording.frames_per_chunk;
     const chunkIndex = Math.floor(index / size);
@@ -67,15 +67,15 @@ export class Playback {
       this.chunkIndex = chunkIndex;
     }
     this.frameIndex = index;
-    return this.snapshot();
+    return this.snapshot(selected);
   }
   get atEnd() {
     return this.frameIndex === this.run.frame_count - 1 && this.run === this.runs[this.runs.length - 1];
   }
-  async advance() {
-    if (this.frameIndex < this.run.frame_count - 1) return this.seek(this.frameIndex + 1);
+  async advance(selected = null) {
+    if (this.frameIndex < this.run.frame_count - 1) return this.seek(this.frameIndex + 1, selected);
     const next = this.runs[this.runs.indexOf(this.run) + 1];
-    return next ? this.changeRun(next.run) : this.snapshot();
+    return next ? this.changeRun(next.run, selected) : this.snapshot(selected);
   }
   snapshot(selected = null) {
     const local = this.frameIndex % this.metadata.recording.frames_per_chunk;

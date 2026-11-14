@@ -89,7 +89,8 @@ class Recorder:
             self.last_diagnostic_tick = tick
         if self.chunk_frames:
             self.stream.write(',\n')
-        json.dump(frame, self.stream, separators=(',', ':'), allow_nan=False)
+        # Encode a single frame with the C encoder, never an entire run.
+        self.stream.write(json.dumps(frame, separators=(',', ':'), allow_nan=False))
         self.chunk_frames += 1
         self.last_tick = tick
         if self.chunk_frames >= self.options['frames_per_chunk']:

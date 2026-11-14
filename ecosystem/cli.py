@@ -93,12 +93,13 @@ def run_experiment(experiment, folder, save, recorder):
                     recorder.end_run(experiment)
                 run = experiment.run_index + 1
                 print(f'Run {run} (seed {experiment.world.seed}): {experiment.world.metrics()}', flush=True)
-                if run % experiment.config['experiment']['checkpoint_every_runs'] == 0:
-                    save(f'checkpoints/run_{run:04d}.json', experiment.checkpoint())
-            handle.flush()
+                if not experiment.done and run % experiment.config['experiment']['checkpoint_every_runs'] == 0:
+                    experiment.write_checkpoint(folder / f'checkpoints/run_{run:04d}.json')
+            if experiment.last_record is not None or experiment.finished_run:
+                handle.flush()
     save('run_seeds.json', experiment.run_seeds)
     save('summary.json', experiment.summaries)
-    save('checkpoints/final.json', experiment.checkpoint())
+    experiment.write_checkpoint(folder / 'checkpoints/final.json')
 
 
 if __name__ == '__main__':

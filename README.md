@@ -57,7 +57,7 @@ Each invocation creates a unique folder inside `results/` containing:
 - `run_seeds.json`: actual world seeds used.
 - `metrics.csv`: per-run population, food, cumulative energy gained, hunts and deaths.
 - `summary.json`: per-run outcomes, lifespans of dead animals, and ages of survivors. Survivor ages are censored observations, not completed lifespans.
-- `checkpoints/`: scheduled learning checkpoints and a final checkpoint.
+- `checkpoints/`: scheduled intermediate learning checkpoints and a final checkpoint. The final run writes `final.json` once instead of duplicating the same state in a numbered file.
 - `playback/recording.json`: versioned recording manifest and static layout per run.
 - `playback/run_0001_chunk_000000.json`, etc.: small arrays of recorded frames.
 
@@ -121,11 +121,11 @@ Each environment has a recording section:
 
 Previous configurations without this section use the same defaults. Set `enabled` to `false` or pass `--no-record` for metrics/checkpoints only. Increase `frame_every_steps` to reduce disk usage; initial and final frames are always saved. Intermediate events between sampled frames are omitted, while sampled metrics retain cumulative outcomes. Set `diagnostics_every_steps` to `0` to omit brain diagnostics entirely. When enabled, diagnostics are also sampled at chunk boundaries so chunks can be inspected independently.
 
-The recorder writes each frame directly to an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
+The recorder encodes one frame at a time into an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
 
 The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, and experience buffers are absent from playback files; recorded diagnostics include only observation features, action values, exploration, and counts. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
-Training still needs the live brains and replay buffers. Learning checkpoint serialization also temporarily copies training state. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
+Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes compact JSON. Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a JSON checkpoint still parses that complete file. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
 
 The read-only server exposes `GET /api/recordings`, `GET /api/recordings/{id}`, `GET /api/recordings/{id}/runs/{run}/chunks/{index}`, and `GET /api/recordings/{id}/runs/{run}/metrics`. The previous live simulation POST endpoints return 405. Use `./run.sh --results PATH` to view recordings stored under a custom CLI `--output` directory.
 
@@ -164,6 +164,34 @@ The same brain template can be referenced by multiple species without sharing li
 `train` explores and learns; `evaluate` chooses greedily and does not learn; `random` chooses random allowed actions and does not learn. A population that survives longer is not by itself evidence of learning. Compare frozen trained brains with fresh and random policies across multiple held-out seeds. The initial settings are experimental, not calibrated for stable coexistence. Independent simultaneous learners can be unstable. Each new CLI invocation without `--resume` starts fresh brains. With `--seed` or a deterministic seed policy, repeating a single run reproduces its outcome; it does not continue learning from a previous invocation. Randomized mode varies fresh runs but is not a substitute for retaining or resuming learned brains. Use several runs with retained brains or resume an intermediate checkpoint to continue training. Making successful attacks lethal increases predation opportunities; it is a physical rule change, not evidence that the model learned to hunt.
 
 The standard-library implementation prioritizes inspectability and small populations. Large worlds and many private networks will be slower than a vectorized implementation. CLI metrics stream to disk, and playback charts retain the current run’s lightweight history across world-chunk changes. The simulation runner retains at most 2,000 sampled metric points per current run for checkpoint compatibility; this is separate from playback recording.
+
+## Performance
+
+The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. Squared-distance filtering reduces distance calculations while preserving target order and visibility. Small networks use native multiplication iterators with the original summation order. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
+
+Recording buffers only one encoded frame. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values and format version remain compatible with existing files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
+
+Playback reuses the loaded snapshot when rendering and avoids clearing/reallocating the canvas backing store or writing identical layout dimensions every frame. Chunk loading, chart history, selection and death effects remain available.
+
+Local results (median of three separate-process measurements, 180 steps, 48 prey + 12 predators, Python 3.9.6):
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Simulation | 3.09 s | 1.69 s |
+| Simulation + recording | 3.67 s | 1.80 s |
+| Checkpoint writing | 1.04 s | 0.15 s |
+| Peak RSS, including checkpoint writing | 114.53 MiB | 29.25 MiB |
+
+Every before/after run produced the same complete-state digest. Ordinary simulation RAM changed only slightly; the large memory reduction is specifically in checkpoint writing.
+
+A local before/after benchmark and repeated measurements are saved under `work/performance/`. Run the optimized probe with:
+
+```sh
+.venv/bin/python -m work.performance.benchmark --case record --steps 180 --output work/performance/local-record.json
+.venv/bin/python -m work.performance.benchmark --case checkpoint --steps 180 --output work/performance/local-checkpoint.json
+```
+
+The benchmark fixes seed 42 with the baseline 48 prey/12 predators and checks a digest of the complete world, brain, replay and random-generator state. It measures process peak RSS before constructing the comparison digest; checkpoint-case peak RSS includes both simulation and checkpoint saving. These are local measurements for a small workload, not guarantees for every environment. Large populations still incur independent-brain and perception costs, and the growing collection of completed-run summaries remains in memory for experiment reporting.
 
 ## Verification
 

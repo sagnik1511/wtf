@@ -27,14 +27,16 @@ function fitWorld() {
   const width=Math.min(holder.clientWidth,holder.clientHeight*ratio);
   // Match the element's actual bounds to the drawn board so click-to-inspect
   // stays accurate when a wide window leaves space beside the smaller board.
-  canvas.style.width=`${width}px`;
-  canvas.style.height=`${width/ratio}px`;
+  const cssWidth=`${width}px`,cssHeight=`${width/ratio}px`;
+  if(canvas.style.width!==cssWidth)canvas.style.width=cssWidth;
+  if(canvas.style.height!==cssHeight)canvas.style.height=cssHeight;
 }
 new ResizeObserver(fitWorld).observe($('world').parentElement);
 function drawWorld() {
   const canvas = $('world'), ctx = canvas.getContext('2d');
-  canvas.height = Math.round(canvas.width * state.height / state.width);
-  fitWorld();
+  const height=Math.round(canvas.width * state.height / state.width);
+  if(canvas.height!==height){canvas.height=height;fitWorld();}
+  else if(!canvas.style.width)fitWorld();
   const cw = canvas.width / state.width, ch = canvas.height / state.height;
   ctx.fillStyle = '#101a22'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = '#172630'; ctx.lineWidth = .6;
@@ -122,8 +124,8 @@ function drawInspector() {
   const features=text('details','','feature-details');features.append(text('summary','Observation features (20)'));
   features.append(text('pre',JSON.stringify(b.features.map(v=>Number(v.toFixed(3))),null,2)));box.append(features);
 }
-function render() {
-  state=player.snapshot(selected);
+function render(snapshot = null) {
+  state=snapshot??player.snapshot(selected);
   $('tick').textContent=state.tick.toLocaleString();$('run').textContent=`${state.run} / ${state.total_runs}`;
   let prey=0,predators=0;for(const [name,s] of Object.entries(state.species)) {if(s.diet==='resource')prey+=state.metrics.populations[name];else predators+=state.metrics.populations[name];}
   $('prey').textContent=prey;$('predator').textContent=predators;$('food').textContent=Math.round(state.metrics.food).toLocaleString();$('updates').textContent=state.total_updates.toLocaleString();
@@ -164,17 +166,17 @@ async function refreshCatalog() {
 }
 async function loop() {
   if(!playing)return;
-  await operation(async()=>{await player.advance();render();});
+  await operation(async()=>{render(await player.advance(selected));});
   const hold=$('hold-kills').checked && state && [...state.kill_highlights,...state.natural_death_highlights].some(e=>e.frame_index===state.frame_index);
   if(playing)setTimeout(loop,Math.max(1000/Number($('speed').value),hold?900:0));
 }
 $('play').onclick=()=>{if(playing){pause();return;}if(!state||state.done)return;playing=true;$('play').textContent='Pause';loop();};
-$('step').onclick=()=>{pause();if(state)operation(async()=>{await player.advance();render();});};
-$('back').onclick=()=>{pause();if(state)operation(async()=>{await player.seek(Math.max(0,player.frameIndex-1));render();});};
+$('step').onclick=()=>{pause();if(state)operation(async()=>{render(await player.advance(selected));});};
+$('back').onclick=()=>{pause();if(state)operation(async()=>{render(await player.seek(Math.max(0,player.frameIndex-1),selected));});};
 $('load').onclick=()=>{pause();operation(openRecording);};
 $('refresh').onclick=()=>{pause();operation(refreshCatalog);};
-$('recorded-run').onchange=()=>{pause();if(state)operation(async()=>{selected=null;await player.changeRun($('recorded-run').value);render();});};
-$('timeline').onchange=()=>{pause();if(state)operation(async()=>{await player.seek(Number($('timeline').value));render();});};
+$('recorded-run').onchange=()=>{pause();if(state)operation(async()=>{selected=null;render(await player.changeRun($('recorded-run').value,selected));});};
+$('timeline').onchange=()=>{pause();if(state)operation(async()=>{render(await player.seek(Number($('timeline').value),selected));});};
 $('speed').oninput=()=>{$('speed-value').textContent=$('speed').value;};
 $('world').onclick=event=>{if(busy||!state)return;const rect=$('world').getBoundingClientRect(),x=Math.floor((event.clientX-rect.left)/rect.width*state.width),y=Math.floor((event.clientY-rect.top)/rect.height*state.height);selected=state.animals.find(a=>a.x===x&&a.y===y)?.id??null;render();};
 operation(refreshCatalog);

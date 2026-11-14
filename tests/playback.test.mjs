@@ -154,3 +154,13 @@ test('Natural death effects locate first-frame chunk deaths and survive seeking'
   assert.equal(p.frames.length,3);assert.equal(p.previousAgents.length,1);
   await p.changeRun(2);assert.equal(p.snapshot().natural_death_highlights.length,0);
 });
+
+test('Advance returns a ready-to-render snapshot with selected agent diagnostics',async()=>{
+  const {p}=setup();await p.open('test');
+  const next=await p.advance(7);
+  assert.equal(next.tick,1);
+  assert.deepEqual(next.selected,p.snapshot(7).selected);
+  assert.equal(next.selected.tick,0);
+  const sought=await p.seek(4,7);
+  assert.equal(sought.tick,4);assert.equal(sought.selected.tick,3);
+});

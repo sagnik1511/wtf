@@ -1,0 +1,29 @@
+{
+  "case": "checkpoint",
+  "steps": 180,
+  "python": "3.9.6",
+  "platform": "Darwin",
+  "simulation_seconds": 1.6198219999999999,
+  "checkpoint_seconds": 0.15643799999999985,
+  "peak_rss_mib": 29.76171875,
+  "output_bytes": 6597171,
+  "metrics": {
+    "tick": 180,
+    "populations": {
+      "prey": 43,
+      "predator": 12
+    },
+    "food": 1519.8,
+    "deaths": {
+      "predation": 5
+    },
+    "energy_gained": {
+      "prey": 483.8,
+      "predator": 147.7000000000006
+    },
+    "kills": {
+      "predator": 5
+    }
+  },
+  "state_sha256": "7e8badb10ea311913e42685995819627a7d306ddb7138f7ee2d952726d3f64fa"
+}

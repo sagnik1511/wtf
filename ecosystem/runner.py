@@ -1,5 +1,7 @@
 """Experiment lifecycle, training, evaluation and exact JSON checkpoints."""
 import copy
+import json
+from pathlib import Path
 import random
 import secrets
 from .brain import Brain, Experience
@@ -95,8 +97,34 @@ class Experiment:
             data['selected'] = dict(id=selected, features=o, action_values=dict(zip(brain.actions, brain.forward(o)[1])), epsilon=brain.epsilon, updates=brain.updates, replay_size=len(brain.replay))
         return data
 
-    def checkpoint(self):
-        return dict(checkpoint_version=1, randomization_seed=self.randomization_seed, seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None, config=copy.deepcopy(self.config), mode=self.mode, run_index=self.run_index, world=self.world.checkpoint(), brains={str(i): b.checkpoint() for i, b in self.brains.items()}, history=copy.deepcopy(self.history), summaries=copy.deepcopy(self.summaries), run_seeds=self.run_seeds[:], finished_run=self.finished_run)
+    def checkpoint(self, include_brains=True):
+        state = dict(checkpoint_version=1, randomization_seed=self.randomization_seed, seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None, config=copy.deepcopy(self.config), mode=self.mode, run_index=self.run_index, world=self.world.checkpoint(), history=copy.deepcopy(self.history), summaries=copy.deepcopy(self.summaries), run_seeds=self.run_seeds[:], finished_run=self.finished_run)
+        if include_brains:
+            state['brains'] = {str(i): b.checkpoint() for i, b in self.brains.items()}
+        return state
+
+    def write_checkpoint(self, path):
+        """Atomic compact JSON, buffering just one copied brain at a time.
+
+        checkpoint() remains available for detached in-memory snapshots. The
+        CLI avoids materializing every replay buffer plus a giant JSON string.
+        """
+        path = Path(path)
+        temporary = path.with_suffix(path.suffix + '.tmp')
+        try:
+            with temporary.open('w') as handle:
+                metadata = json.dumps(self.checkpoint(include_brains=False), separators=(',', ':'), allow_nan=False)
+                handle.write(metadata[:-1] + ',"brains":{')
+                for index, (animal_id, brain) in enumerate(self.brains.items()):
+                    if index:
+                        handle.write(',')
+                    handle.write(json.dumps(str(animal_id)) + ':')
+                    handle.write(json.dumps(brain.checkpoint(), separators=(',', ':'), allow_nan=False))
+                handle.write('}}\n')
+            temporary.replace(path)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
 
     @classmethod
     def restore(cls, state, mode=None):
