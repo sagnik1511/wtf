@@ -21,9 +21,12 @@ def config():
     c = load(ROOT / 'environments/baseline.json')
     c['species']['prey']['initial_population'] = 3
     c['species']['predator']['initial_population'] = 1
+    # Mechanics fixtures intentionally exercise multi-hit combat, independently
+    # of the baseline scenario's stronger one-hit predators.
+    c['species']['predator']['body']['attack_damage'] = 10
     c['resources']['patch_count'] = 8
     c['world'].update(width=10, height=8, max_steps=20)
-    c['experiment'].update(runs=2, record_metrics_every_steps=2)
+    c['experiment'].update(runs=2, record_metrics_every_steps=2, world_seed_policy='increment')
     b = c['brains']['small_q']
     b.update(hidden_layers=[4], batch_size=2, learning_starts_after=2, train_every_steps=1, target_update_every_training_steps=3)
     return c
@@ -260,6 +263,8 @@ class ServerTests(unittest.TestCase):
         with self.request('/api/recordings/recorded_test/runs/1/chunks/0') as response:
             frames = json.load(response)
             self.assertEqual([f['tick'] for f in frames], [0, 1, 2, 3])
+        with self.request('/api/recordings/recorded_test/runs/1/metrics') as response:
+            self.assertEqual([m['tick'] for m in json.load(response)], [0, 1, 2, 3])
         self.assertFalse(hasattr(self.state, 'experiment'))
 
     def test_all_live_simulation_endpoints_removed(self):

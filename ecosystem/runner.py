@@ -1,5 +1,7 @@
 """Experiment lifecycle, training, evaluation and exact JSON checkpoints."""
 import copy
+import random
+import secrets
 from .brain import Brain, Experience
 from .config import validate
 from .world import World
@@ -11,6 +13,9 @@ class Experiment:
             raise ValueError('mode must be train, evaluate, or random')
         self.config = copy.deepcopy(validate(config))
         self.mode = mode
+        randomized = self.config['experiment']['world_seed_policy'] == 'random'
+        self.randomization_seed = secrets.randbits(64) if randomized else None
+        self.seed_rng = random.Random(self.randomization_seed) if randomized else None
         self.run_index = 0
         self.brains = {}
         self.history = []
@@ -21,16 +26,26 @@ class Experiment:
 
     def _start_run(self):
         c = self.config
-        seed = (c['seed'] + (self.run_index if c['experiment']['world_seed_policy'] == 'increment' else 0)) % 2**32
+        policy = c['experiment']['world_seed_policy']
+        if policy == 'random':
+            used = set(self.run_seeds)
+            seed = self.seed_rng.getrandbits(32)
+            while seed in used:
+                seed = self.seed_rng.getrandbits(32)
+        else:
+            seed = (c['seed'] + (self.run_index if policy == 'increment' else 0)) % 2**32
+        # Retained brains keep their learning and individual RNG states.
+        # Newly initialized random-mode brains use the actual run seed.
+        brain_seed = seed if policy == 'random' else c['seed']
         self.run_seeds.append(seed)
         self.world = World(c, seed)
         if not self.brains or not c['experiment']['retain_brains_between_runs']:
             self.brains = {}
             for species_index, (species, spec) in enumerate(c['species'].items()):
-                base_seed = c['seed'] + 1000003 * (species_index + 1)
+                base_seed = brain_seed + 1000003 * (species_index + 1)
                 for i, a in self.world.animals.items():
                     if a.species == species:
-                        self.brains[i] = Brain(c['brains'][spec['brain']], spec['allowed_actions'], base_seed, c['seed'] + i * 7919 + 13)
+                        self.brains[i] = Brain(c['brains'][spec['brain']], spec['allowed_actions'], base_seed, brain_seed + i * 7919 + 13)
         self.observations = self.world.observe_all()
         self.finished_run = False
         self.history = [self.world.metrics()]
@@ -81,7 +96,7 @@ class Experiment:
         return data
 
     def checkpoint(self):
-        return dict(checkpoint_version=1, config=copy.deepcopy(self.config), mode=self.mode, run_index=self.run_index, world=self.world.checkpoint(), brains={str(i): b.checkpoint() for i, b in self.brains.items()}, history=copy.deepcopy(self.history), summaries=copy.deepcopy(self.summaries), run_seeds=self.run_seeds[:], finished_run=self.finished_run)
+        return dict(checkpoint_version=1, randomization_seed=self.randomization_seed, seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None, config=copy.deepcopy(self.config), mode=self.mode, run_index=self.run_index, world=self.world.checkpoint(), brains={str(i): b.checkpoint() for i, b in self.brains.items()}, history=copy.deepcopy(self.history), summaries=copy.deepcopy(self.summaries), run_seeds=self.run_seeds[:], finished_run=self.finished_run)
 
     @classmethod
     def restore(cls, state, mode=None):
@@ -94,6 +109,15 @@ class Experiment:
             raise ValueError('Invalid checkpoint mode')
         for key in ('run_index', 'history', 'summaries', 'run_seeds', 'finished_run'):
             setattr(e, key, copy.deepcopy(state[key]))
+        e.randomization_seed = state.get('randomization_seed')
+        e.seed_rng = None
+        if e.config['experiment']['world_seed_policy'] == 'random':
+            if state.get('seed_rng_state') is None:
+                raise ValueError('Randomized checkpoint is missing the seed generator state')
+            def tuples(value):
+                return tuple(tuples(x) for x in value) if isinstance(value, (list, tuple)) else value
+            e.seed_rng = random.Random(0)
+            e.seed_rng.setstate(tuples(state['seed_rng_state']))
         e.world = World.restore(state['world'])
         e.brains = {int(i): Brain.restore(b) for i, b in state['brains'].items()}
         e.observations = e.world.observe_all()

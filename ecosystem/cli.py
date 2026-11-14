@@ -18,13 +18,14 @@ def main():
     parser.add_argument('--mode', choices=('train', 'evaluate', 'random'), default=None)
     parser.add_argument('--runs', type=int)
     parser.add_argument('--steps', type=int)
-    parser.add_argument('--seed', type=int)
+    parser.add_argument('--seed', type=int, help='Use a reproducible base seed (defaults seed policy to increment)')
+    parser.add_argument('--seed-policy', choices=('random', 'fixed', 'increment'), help='Override the environment seed policy')
     parser.add_argument('--resume', type=Path, help='Resume an exact JSON checkpoint; environment and overrides are ignored')
     parser.add_argument('--no-record', action='store_true', help='Skip playback recording (metrics and checkpoints still saved)')
     parser.add_argument('--output', type=Path, default=Path('results'))
     args = parser.parse_args()
     if args.resume:
-        if any(v is not None for v in (args.runs, args.steps, args.seed)):
+        if any(v is not None for v in (args.runs, args.steps, args.seed, args.seed_policy)):
             parser.error('Configuration overrides cannot be used with --resume')
         experiment = Experiment.restore(json.loads(args.resume.read_text()), mode=args.mode)
     else:
@@ -34,7 +35,12 @@ def main():
         if args.steps is not None:
             config['world']['max_steps'] = args.steps
         if args.seed is not None:
+            if args.seed_policy == 'random':
+                parser.error('--seed cannot be combined with --seed-policy random')
             config['seed'] = args.seed
+            config['experiment']['world_seed_policy'] = args.seed_policy or 'increment'
+        elif args.seed_policy is not None:
+            config['experiment']['world_seed_policy'] = args.seed_policy
         experiment = Experiment(config, args.mode or 'train')
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     folder = args.output / f'{experiment.config["name"]}_{stamp}_{uuid.uuid4().hex[:6]}'
@@ -43,7 +49,8 @@ def main():
     def save(name, data):
         (folder / name).write_text(json.dumps(data, indent=2, allow_nan=False) + '\n')
     save('environment.json', experiment.config)
-    save('manifest.json', {'mode': experiment.mode, 'python': sys.version, 'platform': platform.platform(), 'resumed_from': str(args.resume) if args.resume else None, 'checkpoint_version': 1, 'observation_version': 1, 'playback_recording': not args.no_record and settings(experiment.config)['enabled']})
+    save('manifest.json', {'mode': experiment.mode, 'python': sys.version, 'platform': platform.platform(), 'resumed_from': str(args.resume) if args.resume else None, 'randomization_seed': experiment.randomization_seed, 'checkpoint_version': 1, 'observation_version': 1, 'playback_recording': not args.no_record and settings(experiment.config)['enabled']})
+    save('run_seeds.json', experiment.run_seeds)
     recorder = Recorder(folder, experiment.config, experiment.mode) if not args.no_record and settings(experiment.config)['enabled'] else None
     completed = False
     try:
@@ -72,6 +79,7 @@ def run_experiment(experiment, folder, save, recorder):
         while not experiment.done:
             if experiment.finished_run:
                 experiment.next_run()
+                save('run_seeds.json', experiment.run_seeds)
                 record(experiment.world.metrics())
                 if recorder is not None:
                     recorder.begin_run(experiment)
@@ -84,7 +92,7 @@ def run_experiment(experiment, folder, save, recorder):
                 if recorder is not None:
                     recorder.end_run(experiment)
                 run = experiment.run_index + 1
-                print(f'Run {run}: {experiment.world.metrics()}', flush=True)
+                print(f'Run {run} (seed {experiment.world.seed}): {experiment.world.metrics()}', flush=True)
                 if run % experiment.config['experiment']['checkpoint_every_runs'] == 0:
                     save(f'checkpoints/run_{run:04d}.json', experiment.checkpoint())
             handle.flush()

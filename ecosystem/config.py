@@ -117,9 +117,9 @@ def validate(c):
         num(s['body']['vision_radius'], p + '.body.vision_radius', 1, 256, True)
         if s['body']['initial_energy'] > s['body']['max_energy']:
             fail(p + '.body.initial_energy', 'exceeds maximum')
-        obj(s['rewards'], p + '.rewards', ('per_energy_gained', 'per_damage_taken', 'death'))
+        obj(s['rewards'], p + '.rewards', ('per_energy_gained', 'per_damage_taken', 'death'), optional=('per_damage_dealt',))
         for k, value in s['rewards'].items():
-            num(value, f'{p}.rewards.{k}', -100000, 100000)
+            num(value, f'{p}.rewards.{k}', 0 if k == 'per_damage_dealt' else -100000, 100000)
     if not population:
         fail('species', 'total population must be positive')
     blocked = len(cells) if o['generation'] == 'explicit' else int(w['width'] * w['height'] * o['occupied_fraction'])
@@ -132,8 +132,8 @@ def validate(c):
         num(e[k], f'experiment.{k}', 1, 1000000, True)
     if type(e['retain_brains_between_runs']) is not bool:
         fail('experiment.retain_brains_between_runs', 'must be boolean')
-    if e['world_seed_policy'] not in ('fixed', 'increment'):
-        fail('experiment.world_seed_policy', 'must be fixed or increment')
+    if e['world_seed_policy'] not in ('random', 'fixed', 'increment'):
+        fail('experiment.world_seed_policy', 'must be random, fixed, or increment')
     if 'recording' in c:
         r = c['recording']
         obj(r, 'recording', ('enabled', 'frame_every_steps', 'frames_per_chunk', 'diagnostics_every_steps'))

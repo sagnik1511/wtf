@@ -12,7 +12,7 @@ cd /Users/tensored/wtf
 ./run.sh
 ```
 
-Open <http://127.0.0.1:8000>, select a saved experiment, and click **Play recording**. Use the frame slider to seek, select a recorded run, or click an animal to inspect its recorded state and sampled diagnostics. **Refresh list** discovers newly recorded experiments. Kills have red board markers, an attacker highlight, an identity banner, and a dedicated cumulative counter. **Hold briefly on kills** adds a 0.9-second playback hold at recorded kill frames; uncheck it for uninterrupted playback. Markers persist briefly across sequential chunk boundaries and clear when switching runs. Existing recordings work without regeneration; events skipped by a reduced recording frequency cannot be highlighted.
+Open <http://127.0.0.1:8000>, select a saved experiment, and click **Play recording**. Use the frame slider to seek, select a recorded run, or click an animal to inspect its recorded state and sampled diagnostics. **Refresh list** discovers newly recorded experiments. Kills have red board markers, an attacker highlight, an identity banner, and a dedicated cumulative counter. Natural deaths (currently starvation) use matching amber rings, a DIED marker, and a banner naming the animal and cause. **Hold briefly on deaths** adds a 0.9-second playback hold at kill or natural-death frames; uncheck it for uninterrupted playback. Markers persist briefly across sequential chunk boundaries and clear when switching runs. Existing recordings work without regeneration; events skipped by a reduced recording frequency cannot be highlighted.
 
 You can close the simulator before starting playback. The playback server does not import the simulation or learning modules. Existing results created before playback recording was added have metrics/checkpoints only and do not appear in the recording catalog; run another experiment to create a recording.
 
@@ -29,7 +29,7 @@ Python 3.9+ is supported. There are no third-party application dependencies. Fut
 
 Each JSON file is a complete experiment definition:
 
-- `environments/baseline.json`: 24 prey, 6 predators, moderate food.
+- `environments/baseline.json`: 48 prey, 12 predators, moderate food; predator damage 30 against prey health 30. Successful attacks are lethal, but reaching and attacking prey remain learned decisions.
 - `environments/scarce_food.json`: slower regrowth; otherwise the baseline settings.
 - `environments/dense_obstacles.json`: more obstructed cells.
 - `environments/predator_heavy.json`: 14 predators.
@@ -61,7 +61,34 @@ Each invocation creates a unique folder inside `results/` containing:
 - `playback/recording.json`: versioned recording manifest and static layout per run.
 - `playback/run_0001_chunk_000000.json`, etc.: small arrays of recorded frames.
 
-Pass `--output PATH` to choose another result directory. For comparisons, use the same base seed and world seed policy across scenarios and repeat with several base seeds. Layouts differ when obstacle or population settings differ, even with the same seed.
+Pass `--output PATH` to choose another result directory.
+
+### Randomized and reproducible runs
+
+Example environments default to `"world_seed_policy": "random"`. Each fresh CLI invocation gets a new random seed stream, and every run in that experiment gets a distinct seed. Positions, resource locations, obstacle layouts and conflict outcomes vary. Newly initialized species base brains and individual exploration streams vary too. Animals still begin from copied species base weights, and `retain_brains_between_runs: true` preserves learned brains across the different worlds.
+
+The three policies are:
+
+| `experiment.world_seed_policy` | Behavior |
+| --- | --- |
+| `random` | New random seed for each run and fresh invocation; JSON `seed` is not used |
+| `increment` | Reproducible seeds `seed`, `seed + 1`, etc. |
+| `fixed` | Same world seed on each run; retained learning can still change behavior |
+
+Run normally to randomize:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 3
+```
+
+For reproducible comparisons, `--seed 42` automatically selects `increment` unless you explicitly choose `--seed-policy fixed`. `--seed-policy random` explicitly enables randomization for an older fixed configuration. Combining `--seed` with `--seed-policy random` is rejected to avoid silently ignoring an explicit seed.
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 3 --seed 42
+.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 3 --seed 42 --seed-policy fixed
+```
+
+Actual world seeds are printed, written to `run_seeds.json` as runs start, and stored with recordings and summaries. `manifest.json` also records the experiment's randomization seed. The viewer's run selector displays each recorded world seed. Checkpoints preserve the seed generator state, so restoring continues the same future seed sequence and learning trajectory, rather than starting a fresh random sequence. Old deterministic checkpoints remain supported. To compare configurations, use the same explicit base seed and policy and repeat with several seeds. Layouts differ when obstacle or population settings differ, even with the same seed.
 
 Resume a checkpoint:
 
@@ -96,11 +123,11 @@ Previous configurations without this section use the same defaults. Set `enabled
 
 The recorder writes each frame directly to an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
 
-The browser retains one decoded chunk at a time, loads the necessary chunk for seeking, and builds its chart from that chunk only. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, and experience buffers are absent from playback files; recorded diagnostics include only observation features, action values, exploration, and counts. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
+The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, and experience buffers are absent from playback files; recorded diagnostics include only observation features, action values, exploration, and counts. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
 Training still needs the live brains and replay buffers. Learning checkpoint serialization also temporarily copies training state. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
 
-The read-only server exposes `GET /api/recordings`, `GET /api/recordings/{id}`, and `GET /api/recordings/{id}/runs/{run}/chunks/{index}`. The previous live simulation POST endpoints return 405. Use `./run.sh --results PATH` to view recordings stored under a custom CLI `--output` directory.
+The read-only server exposes `GET /api/recordings`, `GET /api/recordings/{id}`, `GET /api/recordings/{id}/runs/{run}/chunks/{index}`, and `GET /api/recordings/{id}/runs/{run}/metrics`. The previous live simulation POST endpoints return 405. Use `./run.sh --results PATH` to view recordings stored under a custom CLI `--output` directory.
 
 ## Simulation and learning
 
@@ -115,7 +142,7 @@ The world collects all actions before changing animal state:
 5. Record deaths and individual rewards, remove dead bodies, regrow resources up to capacity, and construct the next observations.
 6. Give each learning agent its own experience, including a terminal experience on death.
 
-Food rewards use actual energy gained. Damage and death give configurable penalties. There is no reward for approaching targets, simply surviving a step, moving or resting. There is no reproduction, corpse persistence, health recovery, or population replenishment within a run.
+Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. The baseline now uses 30 attack damage against 30 prey health, giving `1.5` damage reward for a healthy prey killed by one attack; a kill still earns the existing food reward, up to `4.0` for 40 energy at `0.1` per energy point. Other scenarios can keep weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no reward for approaching targets, simply surviving a step, moving or resting. There is no reproduction, corpse persistence, health recovery, or population replenishment within a run.
 
 The observation vector has 20 entries:
 
@@ -134,9 +161,9 @@ Brains use one small tanh hidden layer and linear action-value outputs, independ
 
 The same brain template can be referenced by multiple species without sharing live weights. Learning updates occur at the configured cadence. Time limits are truncations and retain bootstrapped future value; death is terminal. Resetting a body can preserve its learned weights, exploration state and experience buffer, or reinitialize its brain according to configuration. Species base weights are reproducible across resets.
 
-`train` explores and learns; `evaluate` chooses greedily and does not learn; `random` chooses random allowed actions and does not learn. A population that survives longer is not by itself evidence of learning. Compare frozen trained brains with fresh and random policies across multiple held-out seeds. The initial settings are experimental, not calibrated for stable coexistence. Independent simultaneous learners can be unstable.
+`train` explores and learns; `evaluate` chooses greedily and does not learn; `random` chooses random allowed actions and does not learn. A population that survives longer is not by itself evidence of learning. Compare frozen trained brains with fresh and random policies across multiple held-out seeds. The initial settings are experimental, not calibrated for stable coexistence. Independent simultaneous learners can be unstable. Each new CLI invocation without `--resume` starts fresh brains. With `--seed` or a deterministic seed policy, repeating a single run reproduces its outcome; it does not continue learning from a previous invocation. Randomized mode varies fresh runs but is not a substitute for retaining or resuming learned brains. Use several runs with retained brains or resume an intermediate checkpoint to continue training. Making successful attacks lethal increases predation opportunities; it is a physical rule change, not evidence that the model learned to hunt.
 
-The standard-library implementation prioritizes inspectability and small populations. Large worlds and many private networks will be slower than a vectorized implementation. CLI metrics stream to disk, and playback charts show only the currently loaded chunk. The simulation runner retains at most 2,000 sampled metric points per current run for checkpoint compatibility; this is separate from playback recording.
+The standard-library implementation prioritizes inspectability and small populations. Large worlds and many private networks will be slower than a vectorized implementation. CLI metrics stream to disk, and playback charts retain the current run’s lightweight history across world-chunk changes. The simulation runner retains at most 2,000 sampled metric points per current run for checkpoint compatibility; this is separate from playback recording.
 
 ## Verification
 
@@ -146,6 +173,6 @@ python -m unittest discover -v
 node --test tests/playback.test.mjs
 ```
 
-Tests cover strict configuration validation, resource limits, blocked and contested movement, feeding rewards, simultaneous hunts, starvation, occlusion, independent weights, positive-feedback learning, terminal versus truncated experience, evaluation behavior, deterministic runs, exact JSON checkpoint continuation, resets, streamed recording correctness, recording transparency, committed-chunk visibility, bounded playback chunk loading, seeking, and read-only HTTP endpoints.
+Tests cover strict configuration validation, resource limits, blocked and contested movement, feeding rewards, simultaneous hunts, starvation, occlusion, independent weights, positive-feedback learning, terminal versus truncated experience, evaluation behavior, deterministic and randomized runs, exact JSON checkpoint continuation including future random seeds, resets, streamed recording correctness, recording transparency, committed-chunk visibility, bounded playback chunk loading, seeking, and read-only HTTP endpoints.
 
 The server binds only to `127.0.0.1`. Use `--port 8001` if the default port is occupied. Close the terminal process or press Ctrl-C to stop it.

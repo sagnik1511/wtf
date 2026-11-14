@@ -2,3 +2,79 @@
 .toolbar select#recording{max-width:360px}.timeline{display:flex;gap:14px;align-items:center;margin:6px 0 20px;flex-wrap:wrap}.timeline label{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:11px}.timeline input{flex:1;min-width:160px;accent-color:var(--mint)}.timeline output{color:var(--muted);font-size:11px}.command{font:11px/1.7 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--mint)}
 
 .stats{grid-template-columns:repeat(7,minmax(0,1fr))}.stats .kill-stat{border-left:3px solid #ff5268;background:#ff52680c;border-radius:4px;padding-top:4px;padding-bottom:4px}.kill-stat span{color:#ffabb4}.kill-stat strong{color:#ff6c7f;font-weight:700}.kill-stat.kill-now{background:#ff526828;box-shadow:0 0 18px #ff52681c}.kill-banner{position:absolute;top:14px;left:14px;max-width:calc(100% - 28px);padding:11px 15px;background:#28131deb;border:1px solid #ff6c7f;border-left:4px solid #ff5268;border-radius:5px;color:#ffe0df;font-size:12px;font-weight:600;letter-spacing:.3px;box-shadow:0 3px 22px #0006;pointer-events:none}.kill-banner[hidden]{display:none}.kill-legend{color:#ff6c7f}.legend{flex-wrap:wrap}.hold-control input{accent-color:#ff6c7f}@media(max-width:1100px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:600px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.kill-banner{font-size:10px;padding:8px 10px}.world-footer{align-items:start}}
+
+/* Keep the playback board and its controls within a desktop viewport. */
+@media (min-width: 901px) and (min-height: 600px) {
+  body {
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+  header { padding: 10px 20px; }
+  h1 { font-size: 22px; margin-top: 3px; }
+  .eyebrow { font-size: 9px; }
+  main {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 10px 20px;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+  .workspace {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+  }
+  .toolbar { gap: 6px; }
+  .toolbar select#recording { width: clamp(180px, 21vw, 310px); }
+  .toolbar label { gap: 3px; }
+  .toolbar button, .toolbar select { padding: 6px 8px; font-size: 12px; }
+  .stats { padding: 10px 0; gap: 6px; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .stats > div { padding-left: 8px; }
+  .stats span { font-size: 8px; letter-spacing: .5px; }
+  .stats strong { font-size: 20px; margin-top: 3px; }
+  .world-wrap {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #world {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    flex: 0 1 auto;
+    min-width: 0;
+    min-height: 0;
+  }
+  .world-footer { padding: 8px 0; gap: 8px; font-size: 10px; }
+  .legend { gap: 9px; }
+  .timeline { margin: 0 0 8px; gap: 10px; }
+  .timeline select { padding: 5px 7px; font-size: 11px; }
+  .chart-panel { padding: 9px 12px; margin-bottom: 0; }
+  .chart-panel summary { cursor: pointer; }
+  #chart { height: 85px; margin-top: 7px; }
+  aside { min-height: 0; overflow-y: auto; scrollbar-gutter: stable; }
+  aside .panel { padding: 13px; margin-bottom: 10px; }
+  aside textarea { min-height: 140px; }
+  footer { padding: 5px 20px 8px; font-size: 10px; }
+}
+@media (max-width: 900px), (max-height: 599px) {
+  .world-wrap { display: flex; align-items: center; justify-content: center; height: min(48vh, 420px); }
+  #world { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; min-width: 0; min-height: 0; }
+  .chart-panel summary { cursor: pointer; }
+}
+
+/* Match chart labels to UI typography; canvas draws at native screen density. */
+#chart { font-family: inherit; font-size: 12px; font-weight: 400; }
+
+.natural-legend{color:#f1c36b}.kill-banner.natural-death{background:#2b2316eb;border-color:#f1c36b;color:#fff0cb}
+
+.kill-banner.natural-death.prey-natural-death{background:#102c23eb;border-color:#7de2bd;color:#d4fff0}

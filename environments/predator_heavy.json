@@ -46,7 +46,8 @@
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
-        "death": -10
+        "death": -10,
+        "per_damage_dealt": 0.0
       }
     },
     "predator": {
@@ -75,7 +76,8 @@
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
-        "death": -10
+        "death": -10,
+        "per_damage_dealt": 0.05
       }
     }
   },
@@ -102,7 +104,7 @@
   "experiment": {
     "runs": 5,
     "retain_brains_between_runs": true,
-    "world_seed_policy": "increment",
+    "world_seed_policy": "random",
     "record_metrics_every_steps": 10,
     "checkpoint_every_runs": 1
   },

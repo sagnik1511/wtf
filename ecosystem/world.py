@@ -195,7 +195,13 @@ class World:
                     attacks[target.id].append(i)
         for target_id, ids in attacks.items():
             target = self.animals[target_id]
-            damage = min(target.health, sum(self.body(self.animals[i])['attack_damage'] for i in ids))
+            attempted_damage = sum(self.body(self.animals[i])['attack_damage'] for i in ids)
+            damage = min(target.health, attempted_damage)
+            # Attribute only actual damage, proportional to each attacker's
+            # contribution. Overkill cannot multiply the hit reward.
+            for i in ids:
+                contribution = damage * (self.body(self.animals[i])['attack_damage'] / attempted_damage)
+                events.append(Event('damage_dealt', i, target_id, contribution, 'attack'))
             target.health -= damage
             events.append(Event('damage_taken', target_id, amount=damage, cause='attack'))
             if target.health <= 0:
@@ -233,6 +239,8 @@ class World:
             if e.kind == 'energy_gained':
                 rewards[e.actor] += e.amount * r['per_energy_gained']
                 self.total_energy_gained[a.species] += e.amount
+            elif e.kind == 'damage_dealt':
+                rewards[e.actor] += e.amount * r.get('per_damage_dealt', 0.)
             elif e.kind == 'damage_taken':
                 rewards[e.actor] += e.amount * r['per_damage_taken']
             elif e.kind == 'died':

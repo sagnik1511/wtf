@@ -4,6 +4,7 @@ This module depends on neither the simulation nor the learning implementation.
 Only committed chunks are advertised in the atomically replaced manifest.
 """
 import copy
+import csv
 import json
 from pathlib import Path
 
@@ -141,6 +142,52 @@ class RecordingStore:
         if m.get('recording_version') != 1:
             raise ValueError('Unsupported recording version')
         return m
+
+    def metrics(self, recording_id, run, max_points=2048):
+        """Bounded, lightweight history independent of decoded world chunks.
+
+        Existing CLI recordings already have metrics.csv. Standalone playback
+        exports without that file are read one committed chunk at a time.
+        """
+        if type(run) is not int or type(max_points) is not int or not 2 <= max_points <= 2048:
+            raise ValueError('Invalid run or metrics sample limit')
+        manifest = self.metadata(recording_id)
+        entry = next((r for r in manifest['runs'] if r['run'] == run), None)
+        if entry is None or not entry['chunk_count']:
+            raise FileNotFoundError('Recorded run not found')
+        folder = self._folder(recording_id)
+        metrics_path = (folder.parent / 'metrics.csv').resolve()
+        if metrics_path.parent != folder.parent:
+            raise ValueError('Metrics path outside recording folder')
+
+        def rows():
+            if metrics_path.is_file():
+                with metrics_path.open(newline='') as handle:
+                    for row in csv.DictReader(handle):
+                        if int(row['run']) == run:
+                            yield dict(tick=int(row['tick']), food=float(row['food']), populations={name: int(row[f'{name}_population']) for name in manifest['config']['species']})
+            else:
+                for index in range(entry['chunk_count']):
+                    frames = json.loads(self.chunk(recording_id, run, index).read_text())
+                    for frame in frames:
+                        yield frame['metrics']
+                    del frames
+
+        points, last, stride, count = [], None, 1, 0
+        for metric in rows():
+            if not entry['first_tick'] <= metric['tick'] <= entry['last_tick']:
+                continue
+            # Store only chart values, never agents, events or diagnostics.
+            last = dict(tick=metric['tick'], food=metric['food'], populations=metric['populations'])
+            if count % stride == 0:
+                points.append(last)
+            count += 1
+            if len(points) > max_points - 1:
+                points = points[::2]
+                stride *= 2
+        if last is not None and (not points or points[-1]['tick'] != last['tick']):
+            points.append(last)
+        return points
 
     def chunk(self, recording_id, run, index):
         m = self.metadata(recording_id)

@@ -96,6 +96,43 @@ class RecordingTests(unittest.TestCase):
             self.assertEqual(manifest['runs'][0]['frame_count'], 3)
             self.assertFalse(manifest['runs'][0]['complete'])
 
+    def test_full_run_metrics_from_existing_chunks(self):
+        c = config()
+        c['recording']['frames_per_chunk'] = 3
+        with tempfile.TemporaryDirectory() as directory:
+            self.record(Path(directory) / 'export', Experiment(c))
+            store = RecordingStore(directory)
+            # Standalone recordings have no CSV; history spans every chunk.
+            history = store.metrics('export', 1)
+            self.assertEqual([m['tick'] for m in history], list(range(21)))
+            self.assertTrue(all(set(m) == {'tick', 'populations', 'food'} for m in history))
+            small = store.metrics('export', 1, max_points=8)
+            self.assertLessEqual(len(small), 8)
+            self.assertEqual(small[0], history[0])
+            self.assertEqual(small[-1], history[-1])
+            with self.assertRaises(FileNotFoundError):
+                store.metrics('export', 999)
+
+    def test_csv_history_is_bounded_and_isolated_by_run(self):
+        import csv
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory) / 'long'
+            (folder / 'playback').mkdir(parents=True)
+            manifest = dict(recording_version=1, config={'species': {'prey': {}}}, runs=[dict(run=1, chunk_count=1, first_tick=0, last_tick=10000)])
+            (folder / 'playback/recording.json').write_text(json.dumps(manifest))
+            with (folder / 'metrics.csv').open('w', newline='') as handle:
+                writer = csv.writer(handle)
+                writer.writerow(['run', 'tick', 'food', 'prey_population'])
+                for tick in range(10001):
+                    writer.writerow([1, tick, tick, 5])
+                writer.writerow([2, 0, 999999, 99])
+            # No chunk files exist: the CSV path must not decode world frames.
+            history = RecordingStore(directory).metrics('long', 1, max_points=32)
+            self.assertLessEqual(len(history), 32)
+            self.assertEqual(history[0]['tick'], 0)
+            self.assertEqual(history[-1]['tick'], 10000)
+            self.assertTrue(all(m['food'] == m['tick'] and m['populations'] == {'prey': 5} for m in history))
+
     def test_path_traversal_is_rejected(self):
         store = RecordingStore('/tmp')
         for name in ('..', '.', '../outside', '/absolute'):
