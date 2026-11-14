@@ -4,3 +4,8 @@ __pycache__/
 results/
 .DS_Store
 .cache/
+
+# Generated benchmarks and source snapshots; retain runnable scripts.
+work/performance/*
+!work/performance/benchmark.py
+!work/performance/repeat.py
