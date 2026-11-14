@@ -1,0 +1,483 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "world": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 256
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 256
+        },
+        "boundary": {
+          "const": "closed"
+        },
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "boundary",
+        "max_steps"
+      ],
+      "additionalProperties": false
+    },
+    "obstacles": {
+      "type": "object",
+      "properties": {
+        "generation": {
+          "enum": [
+            "scattered",
+            "explicit"
+          ]
+        },
+        "occupied_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.8
+        },
+        "explicit_cells": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        }
+      },
+      "required": [
+        "generation",
+        "occupied_fraction",
+        "explicit_cells"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "patch_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        },
+        "capacity_per_patch": {
+          "type": "number",
+          "minimum": 0.001
+        },
+        "initial_quantity_per_patch": {
+          "type": "number",
+          "minimum": 0
+        },
+        "growth_per_step": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "patch_count",
+        "capacity_per_patch",
+        "initial_quantity_per_patch",
+        "growth_per_step"
+      ],
+      "additionalProperties": false
+    },
+    "species": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "initial_population": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "diet": {
+            "enum": [
+              "resource",
+              "prey"
+            ]
+          },
+          "allowed_actions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "move_forward",
+                "turn_left",
+                "turn_right",
+                "rest",
+                "eat",
+                "attack"
+              ]
+            }
+          },
+          "body": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "initial_energy": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "max_energy": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "max_health": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "living_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "movement_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "starvation_damage": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "vision_radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 256
+                  },
+                  "bite_size": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "energy_per_food_unit": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "initial_energy",
+                  "max_energy",
+                  "max_health",
+                  "living_cost",
+                  "movement_cost",
+                  "starvation_damage",
+                  "vision_radius",
+                  "bite_size",
+                  "energy_per_food_unit"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "initial_energy": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "max_energy": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "max_health": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "living_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "movement_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "starvation_damage": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "vision_radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 256
+                  },
+                  "attack_damage": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "attack_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "energy_per_kill": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "initial_energy",
+                  "max_energy",
+                  "max_health",
+                  "living_cost",
+                  "movement_cost",
+                  "starvation_damage",
+                  "vision_radius",
+                  "attack_damage",
+                  "attack_cost",
+                  "energy_per_kill"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "brain": {
+            "type": "string"
+          },
+          "rewards": {
+            "type": "object",
+            "properties": {
+              "per_energy_gained": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "per_damage_taken": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "death": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              }
+            },
+            "required": [
+              "per_energy_gained",
+              "per_damage_taken",
+              "death"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "initial_population",
+          "diet",
+          "allowed_actions",
+          "body",
+          "brain",
+          "rewards"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "brains": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "q_network"
+          },
+          "hidden_layers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            }
+          },
+          "learning_rate": {
+            "type": "number",
+            "minimum": 1e-06,
+            "maximum": 1
+          },
+          "discount_factor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "batch_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "replay_capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "learning_starts_after": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "train_every_steps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "target_update_every_training_steps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "exploration": {
+            "type": "object",
+            "properties": {
+              "initial": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minimum": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "decay_per_decision": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "initial",
+              "minimum",
+              "decay_per_decision"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "hidden_layers",
+          "learning_rate",
+          "discount_factor",
+          "batch_size",
+          "replay_capacity",
+          "learning_starts_after",
+          "train_every_steps",
+          "target_update_every_training_steps",
+          "exploration"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "experiment": {
+      "type": "object",
+      "properties": {
+        "runs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "retain_brains_between_runs": {
+          "type": "boolean"
+        },
+        "world_seed_policy": {
+          "enum": [
+            "fixed",
+            "increment"
+          ]
+        },
+        "record_metrics_every_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "checkpoint_every_runs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "runs",
+        "retain_brains_between_runs",
+        "world_seed_policy",
+        "record_metrics_every_steps",
+        "checkpoint_every_runs"
+      ],
+      "additionalProperties": false
+    },
+    "recording": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "frame_every_steps",
+        "frames_per_chunk",
+        "diagnostics_every_steps"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "frame_every_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "frames_per_chunk": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "diagnostics_every_steps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "name",
+    "description",
+    "seed",
+    "world",
+    "obstacles",
+    "resources",
+    "species",
+    "brains",
+    "experiment"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ecosystem environment v1"
+}

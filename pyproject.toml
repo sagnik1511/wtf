@@ -1,0 +1,6 @@
+[project]
+name = "learning-ecosystem"
+version = "0.1.0"
+description = "Independently learning predator-prey ecosystem"
+requires-python = ">=3.9"
+dependencies = []
