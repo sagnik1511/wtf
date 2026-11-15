@@ -1,4 +1,5 @@
 import { recentNaturalDeaths } from './death-highlights.mjs';
+import { recentBirths } from './birth-highlights.mjs';
 import { recentKills } from './kill-highlights.mjs';
 // File-format reader only: no simulation, model weights, or learning code.
 // One decoded chunk is retained, regardless of total recording duration.
@@ -9,6 +10,7 @@ export class Playback {
     this.metrics = [];
     this.killCarry = [];
     this.deathCarry = [];
+    this.birthCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
@@ -35,6 +37,7 @@ export class Playback {
     this.frames = [];
     this.killCarry = [];
     this.deathCarry = [];
+    this.birthCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
@@ -49,6 +52,7 @@ export class Playback {
       const previousSnapshot = sequential ? this.snapshot() : null;
       this.killCarry = previousSnapshot?.kill_highlights ?? [];
       this.deathCarry = previousSnapshot?.natural_death_highlights ?? [];
+      this.birthCarry = previousSnapshot?.birth_highlights ?? [];
       this.previousTick = sequential ? this.frames.at(-1).tick : null;
       this.previousAgents = sequential ? this.frames.at(-1).animals.map(({id,x,y,heading,species})=>({id,x,y,heading,species})) : [];
       this.frames = []; // Release the previous chunk before decoding another.
@@ -101,6 +105,7 @@ export class Playback {
       run: this.run.run, total_runs: c.experiment?.runs ?? this.runs.length, done: this.atEnd,
       // Full-run lightweight metrics survive chunk changes; no future points.
       history,
+      birth_highlights: recentBirths(this.frames, this.chunkIndex * this.metadata.recording.frames_per_chunk, local, this.birthCarry),
       natural_death_highlights: recentNaturalDeaths(this.frames, this.chunkIndex * this.metadata.recording.frames_per_chunk, local, this.deathCarry, this.previousAgents, this.previousTick),
       kill_highlights: recentKills(this.frames, this.chunkIndex * this.metadata.recording.frames_per_chunk, local, this.killCarry),
       frame_index: this.frameIndex, frame_count: this.run.frame_count

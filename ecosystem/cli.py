@@ -72,13 +72,13 @@ def main():
 def run_experiment(experiment, folder, save, recorder, progress=None):
     species = list(experiment.config['species'])
     with (folder / 'metrics.csv').open('w', newline='') as handle:
-        fields = ['run', 'seed', 'tick', 'food', 'starvation', 'predation'] + [f'{s}_{metric}' for s in species for metric in ('population', 'energy_gained', 'kills')]
+        fields = ['run', 'seed', 'tick', 'food', 'starvation', 'predation'] + [f'{s}_{metric}' for s in species for metric in ('population', 'energy_gained', 'kills', 'births')]
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         def record(m):
             row = dict(run=experiment.run_index + 1, seed=experiment.world.seed, tick=m['tick'], food=m['food'], starvation=m['deaths'].get('starvation', 0), predation=m['deaths'].get('predation', 0))
             for s in species:
-                row.update({f'{s}_population': m['populations'][s], f'{s}_energy_gained': m['energy_gained'].get(s, 0), f'{s}_kills': m['kills'].get(s, 0)})
+                row.update({f'{s}_population': m['populations'][s], f'{s}_energy_gained': m['energy_gained'].get(s, 0), f'{s}_kills': m['kills'].get(s, 0), f'{s}_births': m['births'].get(s, 0)})
             writer.writerow(row)
         record(experiment.world.metrics())
         if recorder is not None:

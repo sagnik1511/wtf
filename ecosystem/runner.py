@@ -5,7 +5,7 @@ from pathlib import Path
 import random
 import secrets
 from .brain import Experience
-from .brains import create_brain, restore_brain
+from .brains import create_brain, restore_brain, inherit_brain, offspring_seed
 from .config import validate
 from .world import World
 
@@ -21,6 +21,8 @@ class Experiment:
         self.seed_rng = random.Random(self.randomization_seed) if randomized else None
         self.run_index = 0
         self.brains = {}
+        self.retired_updates = 0
+        self.inherited_updates = {}
         self.history = []
         self.summaries = []
         self.run_seeds = []
@@ -42,6 +44,7 @@ class Experiment:
         brain_seed = seed if policy == 'random' else c['seed']
         self.run_seeds.append(seed)
         self.world = World(c, seed)
+        self._retire_brains(set(self.brains) - set(self.world.animals))
         if not self.brains or not c['experiment']['retain_brains_between_runs']:
             self.brains = {}
             for species_index, (species, spec) in enumerate(c['species'].items()):
@@ -82,6 +85,13 @@ class Experiment:
         for i, observation in self.observations.items():
             if self.mode == 'train':
                 self.brains[i].learn(Experience(observation, actions[i], result.rewards[i], result.observations.get(i), i in result.dead_ids, limit and i not in result.dead_ids))
+        # Parents receive the current step's feedback before model inheritance.
+        for event in result.events:
+            if event.kind == 'born':
+                self.brains[event.target] = inherit_brain(self.brains[event.actor], offspring_seed(self.world, event.target))
+                self.inherited_updates[event.target] = self.brains[event.target].updates
+        founders = sum(s['initial_population'] for s in self.config['species'].values())
+        self._retire_brains(i for i in result.dead_ids if i >= founders)
         self.observations = result.observations
         self.last_record = None
         self.finished_run = limit or not self.world.animals
@@ -94,6 +104,12 @@ class Experiment:
             self.summaries.append(dict(run=self.run_index + 1, seed=self.world.seed, **self.world.metrics(), lifespans=copy.deepcopy(self.world.lifespans), survivors=[dict(id=a.id, species=a.species, age=a.age) for a in self.world.animals.values()]))
         return None
 
+    def _retire_brains(self, ids):
+        # Keep only the bounded founding population for cross-run retention;
+        # deceased descendants must not accumulate models/replay forever.
+        for i in ids:
+            self.retired_updates += self.brains.pop(i).updates - self.inherited_updates.pop(i, 0)
+
     def next_run(self):
         if not self.finished_run or self.done:
             return False
@@ -101,9 +117,14 @@ class Experiment:
         self._start_run()
         return True
 
+    @property
+    def total_updates(self):
+        # Inherited optimizer counters do not represent new training work.
+        return self.retired_updates + sum(b.updates - self.inherited_updates.get(i, 0) for i, b in self.brains.items())
+
     def snapshot(self, selected=None):
         data = self.world.snapshot()
-        data.update(run=self.run_index + 1, total_runs=self.config['experiment']['runs'], done=self.done, finished_run=self.finished_run, mode=self.mode, history=self.history, summaries=self.summaries, name=self.config['name'], species={k: {'diet': v['diet'], 'body': v['body']} for k, v in self.config['species'].items()}, total_updates=sum(b.updates for b in self.brains.values()))
+        data.update(run=self.run_index + 1, total_runs=self.config['experiment']['runs'], done=self.done, finished_run=self.finished_run, mode=self.mode, history=self.history, summaries=self.summaries, name=self.config['name'], species={k: {'diet': v['diet'], 'body': v['body']} for k, v in self.config['species'].items()}, total_updates=self.total_updates)
         if selected in self.world.animals:
             brain = self.brains[selected]
             o = self.observations[selected]
@@ -111,7 +132,7 @@ class Experiment:
         return data
 
     def checkpoint(self, include_brains=True):
-        state = dict(checkpoint_version=1, randomization_seed=self.randomization_seed, seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None, config=copy.deepcopy(self.config), mode=self.mode, run_index=self.run_index, world=self.world.checkpoint(), history=copy.deepcopy(self.history), summaries=copy.deepcopy(self.summaries), run_seeds=self.run_seeds[:], finished_run=self.finished_run)
+        state = dict(checkpoint_version=1, retired_updates=self.retired_updates, inherited_updates={str(i): n for i, n in self.inherited_updates.items()}, randomization_seed=self.randomization_seed, seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None, config=copy.deepcopy(self.config), mode=self.mode, run_index=self.run_index, world=self.world.checkpoint(), history=copy.deepcopy(self.history), summaries=copy.deepcopy(self.summaries), run_seeds=self.run_seeds[:], finished_run=self.finished_run)
         if include_brains:
             state['brains'] = {str(i): b.checkpoint() for i, b in self.brains.items()}
         return state
@@ -145,6 +166,8 @@ class Experiment:
             raise ValueError('Unsupported checkpoint version')
         e = cls.__new__(cls)
         e.config = copy.deepcopy(validate(state['config']))
+        e.retired_updates = state.get('retired_updates', 0)
+        e.inherited_updates = {int(i): n for i, n in state.get('inherited_updates', {}).items()}
         e.mode = mode or state['mode']
         if e.mode not in ('train', 'evaluate', 'random'):
             raise ValueError('Invalid checkpoint mode')

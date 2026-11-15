@@ -295,6 +295,51 @@
               "death"
             ],
             "additionalProperties": false
+          },
+          "reproduction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "health_threshold": {
+                "type": "number",
+                "minimum": 0
+              },
+              "min_age_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000
+              },
+              "cooldown_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000
+              },
+              "min_energy": {
+                "type": "number",
+                "minimum": 0
+              },
+              "energy_cost": {
+                "type": "number",
+                "minimum": 0.001
+              },
+              "max_population": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              }
+            },
+            "required": [
+              "enabled",
+              "health_threshold",
+              "min_age_steps",
+              "cooldown_steps",
+              "min_energy",
+              "energy_cost",
+              "max_population"
+            ]
           }
         },
         "required": [

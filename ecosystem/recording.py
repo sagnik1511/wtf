@@ -77,7 +77,7 @@ class Recorder:
         frame = experiment.world.snapshot()
         for key in ('obstacles', 'width', 'height', 'resource_capacity'):
             frame.pop(key)
-        frame['total_updates'] = sum(b.updates for b in experiment.brains.values())
+        frame['total_updates'] = experiment.total_updates
         frame['finished_run'] = experiment.finished_run
         diagnostic_interval = self.options['diagnostics_every_steps']
         if diagnostic_interval and (self.chunk_frames == 0 or force or self.last_diagnostic_tick is None or tick - self.last_diagnostic_tick >= diagnostic_interval):

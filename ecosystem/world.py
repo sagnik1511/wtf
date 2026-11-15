@@ -20,6 +20,9 @@ class Animal:
     age: int = 0
     last_action: str = 'rest'
     last_reward: float = 0.
+    parent_id: int = -1
+    generation: int = 0
+    last_reproduced_age: int = -1
 
     @property
     def position(self):
@@ -74,6 +77,8 @@ class World:
                 x, y = free.pop()
                 i = len(self.animals)
                 self.animals[i] = Animal(i, species, x, y, layout.randrange(4), s['body']['initial_energy'], s['body']['max_health'])
+        self.next_animal_id = len(self.animals)
+        self.births = defaultdict(int)
         self.events = []
         self.deaths = defaultdict(int)
         self.total_energy_gained = defaultdict(float)
@@ -268,6 +273,7 @@ class World:
             a.last_reward = rewards[i]
         for i in dead:
             del self.animals[i]
+        self._reproduce(events)
         r = self.config['resources']
         for patch in self.resources.values():
             patch.quantity = min(r['capacity_per_patch'], patch.quantity + r['growth_per_step'])
@@ -275,14 +281,56 @@ class World:
         self.events = events
         return StepResult(self.observe_all(), rewards, dead, events)
 
+    def _reproduce(self, events):
+        # Resolve after combat/starvation. Only animals present before this
+        # phase can parent; newborns first act on the next simulation step.
+        parents = list(self.animals.values())
+        eligible = []
+        counts = defaultdict(int)
+        for a in parents:
+            counts[a.species] += 1
+            r = self.config['species'][a.species].get('reproduction')
+            if (r and r['enabled'] and a.health > r['health_threshold']
+                    and a.energy >= r['min_energy'] and a.energy > r['energy_cost']
+                    and a.age >= r['min_age_steps']
+                    and (a.last_reproduced_age < 0 or a.age - a.last_reproduced_age >= r['cooldown_steps'])):
+                eligible.append(a)
+        if not eligible:
+            return  # Preserve RNG sequence for environments without births.
+        self.rng.shuffle(eligible)
+        occupied = {a.position for a in parents}
+        for parent in eligible:
+            spec = self.config['species'][parent.species]
+            r = spec['reproduction']
+            if counts[parent.species] >= r['max_population']:
+                continue
+            free = [(parent.x + dx, parent.y + dy) for dx, dy in DIRECTIONS
+                    if not self.blocked((parent.x + dx, parent.y + dy))
+                    and (parent.x + dx, parent.y + dy) not in occupied]
+            if not free:
+                continue
+            x, y = self.rng.choice(free)
+            child_id = self.next_animal_id
+            self.next_animal_id += 1
+            child = Animal(child_id, parent.species, x, y, self.rng.randrange(4),
+                           spec['body']['initial_energy'], spec['body']['max_health'],
+                           parent_id=parent.id, generation=parent.generation + 1)
+            self.animals[child_id] = child
+            occupied.add(child.position)
+            counts[parent.species] += 1
+            parent.energy -= r['energy_cost']
+            parent.last_reproduced_age = parent.age
+            self.births[parent.species] += 1
+            events.append(Event('born', parent.id, child_id, cause='reproduction'))
+
     def metrics(self):
-        return dict(tick=self.tick, populations={s: sum(a.species == s for a in self.animals.values()) for s in self.config['species']}, food=sum(r.quantity for r in self.resources.values()), deaths=dict(self.deaths), energy_gained=dict(self.total_energy_gained), kills=dict(self.kills))
+        return dict(tick=self.tick, populations={s: sum(a.species == s for a in self.animals.values()) for s in self.config['species']}, food=sum(r.quantity for r in self.resources.values()), deaths=dict(self.deaths), energy_gained=dict(self.total_energy_gained), kills=dict(self.kills), births=dict(self.births))
 
     def snapshot(self):
         return dict(width=self.width, height=self.height, tick=self.tick, resource_capacity=self.config['resources']['capacity_per_patch'], obstacles=sorted(self.obstacles), resources=[vars(r).copy() for r in self.resources.values()], animals=[vars(a).copy() for a in self.animals.values()], events=[vars(e).copy() for e in self.events], metrics=self.metrics())
 
     def checkpoint(self):
-        return dict(config=self.config, seed=self.seed, snapshot=self.snapshot(), rng_state=self.rng.getstate(), lifespans=self.lifespans)
+        return dict(config=self.config, seed=self.seed, snapshot=self.snapshot(), rng_state=self.rng.getstate(), lifespans=self.lifespans, next_animal_id=self.next_animal_id)
 
     @classmethod
     def restore(cls, state):
@@ -300,6 +348,11 @@ class World:
         w.total_energy_gained = defaultdict(float, s['metrics']['energy_gained'])
         w.kills = defaultdict(int, s['metrics']['kills'])
         w.lifespans = copy.deepcopy(state['lifespans'])
+        w.births = defaultdict(int, s['metrics'].get('births', {}))
+        # Legacy worlds have no descendants, so founding IDs remain reserved.
+        founding_count = sum(spec['initial_population'] for spec in w.config['species'].values())
+        highest_id = max(list(w.animals) + [a['id'] for a in w.lifespans], default=-1) + 1
+        w.next_animal_id = state.get('next_animal_id', max(founding_count, highest_id))
         def tuples(v):
             return tuple(tuples(x) for x in v) if isinstance(v, (list, tuple)) else v
         w.rng = random.Random()

@@ -50,6 +50,62 @@ All costs and growth rates are per simulation step. Playback speed changes only 
 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
+## Reproduction
+
+All supplied environments enable single-parent reproduction for both species.
+Edit `species.prey.reproduction` or `species.predator.reproduction` in your JSON:
+
+```json
+"reproduction": {
+  "enabled": true,
+  "health_threshold": 24,
+  "min_age_steps": 300,
+  "cooldown_steps": 225,
+  "min_energy": 30,
+  "energy_cost": 20,
+  "max_population": 96
+}
+```
+
+Health must be **strictly greater** than `health_threshold` (absolute health,
+not a percentage). After combat and starvation, a surviving parent must also
+meet the age and energy requirements, afford the energy cost with some energy
+left, and have waited since its last successful birth. A species' living
+population cannot exceed `max_population`. Each eligible parent produces at
+most one child per step, in a free cardinally adjacent cell. If the cap or space
+blocks a birth, no energy is charged and no cooldown starts. Contention uses the
+world's seeded random generator. Cooldowns measure simulation steps, not playback
+time. The presets use 80% of maximum health as their threshold. Prey first reproduce
+at age 300 and wait 225 steps between births; predators mature at age 100 and
+wait 200 steps. These settings slow prey growth while retaining the same caps.
+
+A child starts at age zero, with the same species' `body.max_health` (also the
+founder's initial health) and `body.initial_energy`. It inherits an independent
+copy of its parent's current policy, critic/target model, optimizer state,
+exploration setting, learned baseline and training counters, after the parent
+receives that step's feedback. Experience buffers and pending decisions start
+empty; random streams are independent. There is no mutation or mating requirement.
+Children first act on the next step and must reach the minimum age themselves.
+Starting health/energy are supplied by the environment; the energy cost is a
+separate parent charge, so this model does not conserve energy across births.
+
+Frames/checkpoints include `parent_id` (-1 for founders), `generation`, and
+`last_reproduced_age`. Birth events identify parent (`actor`) and child (`target`);
+metrics, CSV and summaries count births per species. The viewer emphasizes births with cyan rings that follow newborns, plus signs,
+BORN labels, a parent/child banner, and a highlighted birth counter. Markers
+last briefly across sequential chunk boundaries and reset when switching runs.
+These effects work with existing recordings that contain birth events. IDs are never reused within a run.
+Dead descendants' controllers are released; only founding controllers persist
+when `retain_brains_between_runs` is enabled. Each new run starts with the
+configured initial population. GRPO trial worlds include births with independent
+child random streams and frozen inherited policies.
+
+Set `enabled` to false to disable births. Omitting `reproduction` also disables
+it, keeping older environment files and checkpoints compatible. Changes affect
+new experiments; resuming uses the saved configuration. Reproduction can delay
+extinction but does not guarantee a stable ecosystem: offspring still need food,
+and parents with low health cannot reproduce.
+
 ## Choose a learning algorithm
 
 The `species.<name>.brain` field selects a template in `brains`. Each animal receives its own model, optimizer, random streams and experience storage; referencing a common template never shares live weights between animals. The supplied baseline remains the existing Q-network comparison.

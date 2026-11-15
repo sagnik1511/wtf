@@ -164,3 +164,72 @@ test('Advance returns a ready-to-render snapshot with selected agent diagnostics
   const sought=await p.seek(4,7);
   assert.equal(sought.tick,4);assert.equal(sought.selected.tick,3);
 });
+
+
+test('Newborns survive chunk transitions and seeking with lineage and diagnostics',async()=>{
+  const config={world:{width:8,height:8},resources:{capacity_per_patch:20},species:{prey:{diet:'resource'}}};
+  const metadata={recording_version:1,name:'births',mode:'train',recording:{frames_per_chunk:2},config,runs:[{run:1,obstacles:[],frame_count:4}]};
+  const parent={id:0,x:2,y:2,species:'prey',parent_id:-1,generation:0};
+  const child={id:1,x:2,y:3,species:'prey',parent_id:0,generation:1};
+  const p=new Playback(async path=>{
+    if(path==='/api/recordings/births')return metadata;
+    if(path.endsWith('/metrics'))return [0,1,2,3].map(tick=>({tick,food:10,populations:{prey:tick>=2?2:1}}));
+    const chunk=Number(path.match(/chunks\/(\d+)$/)[1]);
+    return [0,1].map(i=>{
+      const tick=chunk*2+i;
+      return {tick,animals:tick>=2?[parent,child]:[parent],metrics:{tick,food:10,populations:{prey:tick>=2?2:1},births:{prey:tick>=2?1:0}},events:tick===2?[{kind:'born',actor:0,target:1}]:[],diagnostics:tick>=2?{'1':{tick,algorithm:'q_learning'}}:{}};
+    });
+  });
+  await p.open('births');await p.seek(1);
+  assert.equal(p.snapshot(1).animals.length,1);
+  const born=await p.advance(1);
+  assert.deepEqual(born.animals[1],child);
+  assert.equal(born.selected.algorithm,'q_learning');
+  assert.equal(born.metrics.births.prey,1);
+  assert.deepEqual(born.history.map(m=>m.populations.prey),[1,1,2]);
+  assert.equal(born.kill_highlights.length,0);
+  assert.equal(born.natural_death_highlights.length,0);
+  await p.seek(0,1);
+  assert.equal(p.snapshot(1).selected,undefined);
+  assert.equal(p.snapshot(1).animals.length,1);
+});
+
+test('Birth markers use recorded newborn positions and ignore other events',async()=>{
+  const {recentBirths}=await import('../viewer/birth-highlights.mjs');
+  const frames=[{tick:100,animals:[{id:9,species:'prey',x:3,y:4}],events:[{kind:'born',actor:2,target:9},{kind:'kill',actor:2,target:7},{kind:'died',actor:8}]}];
+  assert.deepEqual(recentBirths(frames,20,0),[{actor:2,target:9,species:'prey',tick:100,frame_index:20,position:[3,4],age:0}]);
+  frames[0].animals=[];
+  assert.equal(recentBirths(frames,20,0)[0].position,null);
+  assert.deepEqual(recentBirths([{animals:[]}],0,0),[]);
+});
+test('Birth markers expire, deduplicate, stay bounded and exclude future births',async()=>{
+  const {recentBirths,BIRTH_HOLD_FRAMES}=await import('../viewer/birth-highlights.mjs');
+  const frames=Array.from({length:20},(_,tick)=>({tick,animals:[],events:tick===2?[{kind:'born',actor:1,target:2}]:[]}));
+  assert.equal(recentBirths(frames,0,1).length,0);
+  const born=recentBirths(frames,0,2);
+  assert.equal(recentBirths(frames,0,3,born).length,1);
+  assert.equal(recentBirths(frames,0,3,born)[0].age,1);
+  assert.equal(recentBirths(frames,0,2+BIRTH_HOLD_FRAMES,born).length,0);
+  assert.equal(recentBirths(frames,0,1,born).length,0);
+  const crowded={tick:0,animals:[],events:Array.from({length:100},(_,target)=>({kind:'born',actor:1,target}))};
+  assert.equal(recentBirths([crowded],0,0).length,32);
+});
+test('Birth highlights carry across sequential chunks and reset across runs and seeks',async()=>{
+  const metadata={recording_version:1,name:'birth-markers',mode:'train',recording:{frames_per_chunk:3},config:{world:{width:8,height:8},resources:{capacity_per_patch:20},species:{prey:{diet:'resource'}}},runs:[{run:1,obstacles:[],frame_count:6},{run:2,obstacles:[],frame_count:3}]};
+  const p=new Playback(async path=>{
+    if(path==='/api/recordings/birth-markers')return metadata;
+    if(path.endsWith('/metrics'))return [];
+    const [,run,chunk]=path.match(/runs\/(\d+)\/chunks\/(\d+)$/).map(Number);
+    return Array.from({length:3},(_,i)=>({tick:chunk*3+i,animals:run===1&&chunk*3+i>=2?[{id:8,species:'prey',x:2,y:3}]:[],metrics:{tick:chunk*3+i,populations:{prey:1},food:10},events:run===1&&chunk===0&&i===2?[{kind:'born',actor:1,target:8}]:[]}));
+  });
+  await p.open('birth-markers');await p.seek(2);
+  assert.equal(p.snapshot().birth_highlights.length,1);
+  const next=await p.advance();
+  assert.equal(next.birth_highlights[0].age,1);
+  assert.deepEqual(next.birth_highlights[0].position,[2,3]);
+  assert.equal(p.frames.length,3);
+  await p.seek(1);
+  assert.equal(p.snapshot().birth_highlights.length,0);
+  await p.seek(2);await p.changeRun(2);
+  assert.equal(p.snapshot().birth_highlights.length,0);
+});

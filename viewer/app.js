@@ -80,6 +80,30 @@ function drawDeathHighlights() {
     ctx.restore();
   }
 }
+function drawBirthHighlights() {
+  const canvas=$('world'),ctx=canvas.getContext('2d');
+  const cw=canvas.width/state.width,ch=canvas.height/state.height;
+  for(const birth of state.birth_highlights) {
+    if(!birth.position)continue;
+    const child=state.animals.find(a=>a.id===birth.target);
+    const x=((child?.x??birth.position[0])+.5)*cw,y=((child?.y??birth.position[1])+.5)*ch;
+    const radius=cw*(.52+birth.age*.035);
+    ctx.save();ctx.globalAlpha=Math.max(.25,1-birth.age/14);
+    ctx.strokeStyle='#6edbff';ctx.fillStyle='#6edbff20';ctx.lineWidth=3;
+    ctx.shadowColor='#6edbff';ctx.shadowBlur=14;
+    ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    // A plus sign and a word distinguish births from crossed death markers.
+    const plusX=x+cw*.38,plusY=y-cw*.38,size=cw*.13;
+    ctx.strokeStyle='#d9f6ff';ctx.beginPath();ctx.moveTo(plusX-size,plusY);ctx.lineTo(plusX+size,plusY);ctx.moveTo(plusX,plusY-size);ctx.lineTo(plusX,plusY+size);ctx.stroke();
+    const labelX=Math.max(38,Math.min(canvas.width-38,x));
+    const labelY=y<50?y+radius+19:y-radius-8;
+    ctx.font='bold 15px system-ui';ctx.textAlign='center';
+    ctx.fillStyle='#102632';ctx.fillRect(labelX-35,labelY-16,70,21);
+    ctx.fillStyle='#b6eeff';ctx.fillText('BORN',labelX,labelY);
+    ctx.restore();
+  }
+}
 function drawChart() {
   const c=$('chart'),rect=c.getBoundingClientRect();
   if(!state||!rect.width||!rect.height)return;
@@ -114,6 +138,7 @@ function drawInspector() {
   const box=$('inspector');box.replaceChildren();const a=state.animals.find(a=>a.id===selected),b=state.selected;
   $('agent-label').textContent=a?`${a.species} #${a.id}`:'No selection';$('inspect-hint').hidden=Boolean(a);
   if(!a)return;
+  box.append(text('p',`Generation ${a.generation??0} · ${a.parent_id>=0?`Parent #${a.parent_id}`:'Founding animal'}`,'muted'));
   if(!b){box.append(text('p',`Energy ${a.energy.toFixed(1)} · Health ${a.health.toFixed(1)} · Age ${a.age}`,'muted'));box.append(text('p','Brain diagnostics were not recorded for this frame.','muted'));return;}
   box.append(text('p',`Brain diagnostics recorded at step ${b.tick}; body state is current.`,'muted'));
   const policy=Boolean(b.action_probabilities);
@@ -142,6 +167,16 @@ function render(snapshot = null) {
   $('prey').textContent=prey;$('predator').textContent=predators;$('food').textContent=Math.round(state.metrics.food).toLocaleString();$('updates').textContent=state.total_updates.toLocaleString();
   const killCount=Object.values(state.metrics.kills).reduce((a,b)=>a+b,0);
   $('kills').textContent=killCount.toLocaleString();
+  $('births').textContent=Object.values(state.metrics.births??{}).reduce((a,b)=>a+b,0).toLocaleString();
+  $('births').parentElement.classList.toggle('birth-now',state.birth_highlights.some(b=>b.frame_index===state.frame_index));
+  const latestBirth=state.birth_highlights.at(-1);
+  $('birth-banner').hidden=!latestBirth;
+  if(latestBirth){
+    const count=state.birth_highlights.filter(b=>b.frame_index===latestBirth.frame_index).length;
+    const species=latestBirth.species??'animal';
+    const message=`BORN · ${species} #${latestBirth.target} · Parent #${latestBirth.actor} · Step ${latestBirth.tick}${count>1?` · ${count} births shown`:''}`;
+    if($('birth-banner').textContent!==message)$('birth-banner').textContent=message;
+  }
   $('kills').parentElement.classList.toggle('kill-now',state.kill_highlights.some(k=>k.frame_index===state.frame_index));
   const latestEvent=[...state.natural_death_highlights.map(e=>({...e,natural:true})),...state.kill_highlights].sort((a,b)=>a.frame_index-b.frame_index).at(-1);
   $('kill-banner').hidden=!latestEvent;
@@ -154,12 +189,12 @@ function render(snapshot = null) {
   if($('kill-banner').textContent!==banner)$('kill-banner').textContent=banner;
   $('connection').textContent=`Recorded playback · ${state.mode}`;
   $('empty').hidden=!state.done;$('empty').textContent='End of recording. Seek backward or load another saved experiment.';
-  $('outcomes').textContent=`Starvation: ${state.metrics.deaths.starvation||0} · Predation: ${state.metrics.deaths.predation||0} · Hunts: ${Object.values(state.metrics.kills).reduce((a,b)=>a+b,0)}`;
+  $('outcomes').textContent=`Births: ${Object.values(state.metrics.births??{}).reduce((a,b)=>a+b,0)} · Starvation: ${state.metrics.deaths.starvation||0} · Predation: ${state.metrics.deaths.predation||0} · Hunts: ${Object.values(state.metrics.kills).reduce((a,b)=>a+b,0)}`;
   $('recorded-run').value=state.run;
   $('timeline').max=state.frame_count-1;$('timeline').value=state.frame_index;
   $('frame-label').textContent=`Frame ${state.frame_index+1} / ${state.frame_count}`;
   $('summaries').textContent=`${player.frames.length} frames loaded · one chunk in memory`;
-  drawWorld();drawDeathHighlights();drawChart();drawInspector();if(state.done)pause();
+  drawWorld();drawBirthHighlights();drawDeathHighlights();drawChart();drawInspector();if(state.done)pause();
 }
 async function openRecording() {
   const id=$('recording').value;if(!id)return;

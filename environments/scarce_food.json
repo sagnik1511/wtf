@@ -48,6 +48,15 @@
         "per_damage_taken": -0.2,
         "death": -10,
         "per_damage_dealt": 0.0
+      },
+      "reproduction": {
+        "enabled": true,
+        "health_threshold": 24.0,
+        "min_age_steps": 300,
+        "cooldown_steps": 225,
+        "min_energy": 30,
+        "energy_cost": 20,
+        "max_population": 48
       }
     },
     "predator": {
@@ -78,6 +87,15 @@
         "per_damage_taken": -0.2,
         "death": -10,
         "per_damage_dealt": 0.05
+      },
+      "reproduction": {
+        "enabled": true,
+        "health_threshold": 32.0,
+        "min_age_steps": 100,
+        "cooldown_steps": 200,
+        "min_energy": 40,
+        "energy_cost": 30,
+        "max_population": 12
       }
     }
   },

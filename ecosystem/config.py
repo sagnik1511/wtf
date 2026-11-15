@@ -159,7 +159,7 @@ def validate(c):
     population = 0
     for name, s in c['species'].items():
         p = f'species.{name}'
-        obj(s, p, ('initial_population', 'diet', 'allowed_actions', 'body', 'brain', 'rewards'))
+        obj(s, p, ('initial_population', 'diet', 'allowed_actions', 'body', 'brain', 'rewards'), optional=('reproduction',))
         num(s['initial_population'], p + '.initial_population', 0, 10000, True)
         population += s['initial_population']
         if s['diet'] not in ('resource', 'prey'):
@@ -185,6 +185,18 @@ def validate(c):
         num(s['body']['vision_radius'], p + '.body.vision_radius', 1, 256, True)
         if s['body']['initial_energy'] > s['body']['max_energy']:
             fail(p + '.body.initial_energy', 'exceeds maximum')
+        if 'reproduction' in s:
+            r = s['reproduction']
+            rp = p + '.reproduction'
+            obj(r, rp, ('enabled', 'health_threshold', 'min_age_steps', 'cooldown_steps', 'min_energy', 'energy_cost', 'max_population'))
+            if type(r['enabled']) is not bool:
+                fail(rp + '.enabled', 'must be boolean')
+            num(r['health_threshold'], rp + '.health_threshold', 0, s['body']['max_health'])
+            num(r['min_age_steps'], rp + '.min_age_steps', 1, 10000000, True)
+            num(r['cooldown_steps'], rp + '.cooldown_steps', 1, 10000000, True)
+            num(r['energy_cost'], rp + '.energy_cost', .001, s['body']['max_energy'])
+            num(r['min_energy'], rp + '.min_energy', r['energy_cost'], s['body']['max_energy'])
+            num(r['max_population'], rp + '.max_population', 0, 10000, True)
         obj(s['rewards'], p + '.rewards', ('per_energy_gained', 'per_damage_taken', 'death'), optional=('per_damage_dealt',))
         for k, value in s['rewards'].items():
             num(value, f'{p}.rewards.{k}', 0 if k == 'per_damage_dealt' else -100000, 100000)
@@ -192,7 +204,7 @@ def validate(c):
         fail('species', 'total population must be positive')
     blocked = len(cells) if o['generation'] == 'explicit' else int(w['width'] * w['height'] * o['occupied_fraction'])
     free = w['width'] * w['height'] - blocked
-    if max(population, r['patch_count']) > free:
+    if max(population, c['resources']['patch_count']) > free:
         fail('world', 'insufficient free cells for animals or resources')
     e = c['experiment']
     obj(e, 'experiment', ('runs', 'retain_brains_between_runs', 'world_seed_policy', 'record_metrics_every_steps', 'checkpoint_every_runs'), optional=('grpo_updates_per_step',))
