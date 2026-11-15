@@ -1,8 +1,9 @@
 import { Playback } from './playback.mjs';
+import { behaviorRows } from './behavior-stats.mjs';
 const $ = id => document.getElementById(id);
 let state, selected = null, playing = false, busy = false;
 const colors = ['#7de2bd', '#ff9a77', '#83b9ff', '#ce9ef5', '#f4cf7a'];
-let errorTimer;
+let errorTimer, analysisKey="", analysisRequest=0;
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
 async function api(path) {
   const response = await fetch(path);
@@ -160,6 +161,44 @@ function drawInspector() {
   const features=text('details','','feature-details');features.append(text('summary','Observation features (20)'));
   features.append(text('pre',JSON.stringify(b.features.map(v=>Number(v.toFixed(3))),null,2)));box.append(features);
 }
+async function loadBehavior() {
+  const key=`${player.id}:${state.run}`;
+  if(key===analysisKey)return;
+  analysisKey=key;
+  const request=++analysisRequest,box=$('behavior');
+  box.replaceChildren(text('p','Analyzing saved frames…'));
+  try{
+    const report=await api(`/api/recordings/${encodeURIComponent(player.id)}/runs/${state.run}/analysis`);
+    if(request!==analysisRequest)return;
+    const run=report.runs[0];box.replaceChildren();
+    const coverage=run.coverage.step_fraction;
+    box.append(text('p',`Steps ${run.first_tick}–${run.last_tick} · ${run.complete?'Complete':'Partial'} run · Consecutive-step coverage ${coverage===null?'—':`${(coverage*100).toFixed(1)}%`}`));
+    for(const species of Object.keys(run.species)){
+      const section=text('div','','behavior-species');
+      section.append(text('strong',`${species} · ${run.species[species].learning.algorithm}`));
+      const table=document.createElement('table');table.className='behavior-table';
+      const heading=document.createElement('tr');
+      for(const label of ['Metric','Early','Late'])heading.append(text('th',label));
+      const head=document.createElement('thead');head.append(heading);table.append(head);
+      const body=document.createElement('tbody');
+      for(const row of behaviorRows(run,species)){
+        const tr=document.createElement('tr');
+        for(const value of row)tr.append(text('td',value));
+        body.append(tr);
+      }
+      table.append(body);section.append(table);
+      const stats=run.species[species],learning=stats.learning;
+      section.append(text('p',`Observed optimizer updates: ≥${learning.observed_optimizer_updates} · Mean age at death: ${stats.mean_completed_lifespan===null?'—':stats.mean_completed_lifespan.toFixed(0)} steps · ${stats.survivors} survivors (excluded from lifespan mean).`));
+      const budget=stats.energy_budget;
+      section.append(text('p',`Food supplied ${budget.food_input_share===null?'—':`${(budget.food_input_share*100).toFixed(1)}%`} of recorded energy inputs. Birth grants added ${budget.net_reproduction_energy.toFixed(0)} net energy after parent costs.`));
+      if(learning.algorithm==='grpo'){
+        section.append(text('p',`New trial groups observed: ${learning.observed_grpo_groups} · Equal-return groups: ${learning.grpo_zero_variance_fraction===null?'—':`${(learning.grpo_zero_variance_fraction*100).toFixed(1)}%`} of ${learning.classified_grpo_groups} classified. Equal returns produce no GRPO update.`));
+      }
+      box.append(section);
+    }
+    box.append(text('p',`Early: ${run.windows[0].start_tick}–${run.windows[0].end_tick}; late: ${run.windows.at(-1).start_tick}–${run.windows.at(-1).end_tick}. Policy entropy of 100% means uniform probabilities. Updates exclude inherited counter baselines. Successful actions are reconstructed where possible on death steps. Compare frozen policies on held-out seeds to establish learning.`));
+  }catch(error){if(request===analysisRequest)box.replaceChildren(text('p',`Analysis unavailable: ${error.message}`));}
+}
 function render(snapshot = null) {
   state=snapshot??player.snapshot(selected);
   $('tick').textContent=state.tick.toLocaleString();$('run').textContent=`${state.run} / ${state.total_runs}`;
@@ -194,11 +233,12 @@ function render(snapshot = null) {
   $('timeline').max=state.frame_count-1;$('timeline').value=state.frame_index;
   $('frame-label').textContent=`Frame ${state.frame_index+1} / ${state.frame_count}`;
   $('summaries').textContent=`${player.frames.length} frames loaded · one chunk in memory`;
+  loadBehavior();
   drawWorld();drawBirthHighlights();drawDeathHighlights();drawChart();drawInspector();if(state.done)pause();
 }
 async function openRecording() {
   const id=$('recording').value;if(!id)return;
-  selected=null;await player.open(id);
+  selected=null;analysisKey="";await player.open(id);
   $('recorded-run').replaceChildren(...player.runs.map(run=>{const option=text('option',`Run ${run.run} · Seed ${run.seed} · ${run.frame_count} frames`);option.value=run.run;return option;}));
   $('config').value=JSON.stringify(player.metadata.config,null,2);
   $('play').disabled=false;render();
@@ -213,8 +253,7 @@ async function refreshCatalog() {
 async function loop() {
   if(!playing)return;
   await operation(async()=>{render(await player.advance(selected));});
-  const hold=$('hold-kills').checked && state && [...state.kill_highlights,...state.natural_death_highlights].some(e=>e.frame_index===state.frame_index);
-  if(playing)setTimeout(loop,Math.max(1000/Number($('speed').value),hold?900:0));
+  if(playing)setTimeout(loop,1000/Number($('speed').value));
 }
 $('play').onclick=()=>{if(playing){pause();return;}if(!state||state.done)return;playing=true;$('play').textContent='Pause';loop();};
 $('step').onclick=()=>{pause();if(state)operation(async()=>{render(await player.advance(selected));});};

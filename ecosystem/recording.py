@@ -185,6 +185,12 @@ class RecordingStore:
             raise ValueError("Unsupported recording version")
         return m
 
+    def analysis(self, recording_id, run):
+        if type(run) is not int:
+            raise ValueError("Run must be an integer")
+        from .analyze import analyze_recording
+        return analyze_recording(self._folder(recording_id), run=run)
+
     def metrics(self, recording_id, run, max_points=2048):
         """Bounded, lightweight history independent of decoded world chunks.
 

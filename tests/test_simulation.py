@@ -304,6 +304,18 @@ class ServerTests(unittest.TestCase):
             self.assertEqual([m["tick"] for m in json.load(response)], [0, 1, 2, 3])
         self.assertFalse(hasattr(self.state, "experiment"))
 
+    def test_behavior_analysis_is_read_only_and_matches_recorded_steps(self):
+        with self.request("/api/recordings/recorded_test/runs/1/analysis") as response:
+            report = json.load(response)
+        self.assertEqual(report["analysis_version"], 1)
+        self.assertEqual(report["runs"][0]["frames"], 4)
+        self.assertEqual(report["runs"][0]["coverage"]["step_fraction"], 1)
+        self.assertEqual(set(report["runs"][0]["species"]), {"prey", "predator"})
+        self.assertFalse((self.folder / "analysis.json").exists())
+        with self.assertRaises(HTTPError) as raised:
+            self.request("/api/recordings/recorded_test/runs/99/analysis")
+        self.assertEqual(raised.exception.code, 404)
+
     def test_all_live_simulation_endpoints_removed(self):
         for path in ("/api/step", "/api/load", "/api/restore"):
             with self.subTest(path=path), self.assertRaises(HTTPError) as raised:

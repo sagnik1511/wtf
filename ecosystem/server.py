@@ -50,6 +50,10 @@ def make_handler(state):
                 if len(parts) >= 3 and parts[:2] == ["api", "recordings"]:
                     if len(parts) == 3:
                         return self.send(200, state.recordings.metadata(parts[2]))
+                    if len(parts) == 6 and parts[3] == "runs" and parts[5] == "analysis":
+                        return self.send(
+                            200, state.recordings.analysis(parts[2], int(parts[4]))
+                        )
                     if len(parts) == 6 and parts[3] == "runs" and parts[5] == "metrics":
                         return self.send(
                             200, state.recordings.metrics(parts[2], int(parts[4]))
