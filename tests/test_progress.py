@@ -13,23 +13,29 @@ class ProgressTests(unittest.TestCase):
         progress.start(a)
         while not a.done:
             if a.finished_run:
-                a.next_run(); b.next_run(); progress.start(a)
-            a.step(); b.step(); progress.tick(a)
+                a.next_run()
+                b.next_run()
+                progress.start(a)
+            a.step()
+            b.step()
+            progress.tick(a)
         progress.close()
         self.assertEqual(a.checkpoint(), b.checkpoint())
         output = stream.getvalue()
-        self.assertIn('Train run 1/2', output)
-        self.assertIn('Train run 2/2', output)
-        self.assertIn('20/20', output)
-        self.assertIn('kills=', output)
+        self.assertIn("Train run 1/2", output)
+        self.assertIn("Train run 2/2", output)
+        self.assertIn("20/20", output)
+        self.assertIn("kills=", output)
 
     def test_resume_progress_starts_at_saved_step(self):
         e = Experiment(config())
-        e.step(); e.step()
+        e.step()
+        e.step()
         progress = RunProgress(enabled=True, stream=io.StringIO())
         progress.start(e)
         self.assertEqual(progress.bar.n, 2)
-        e.step(); progress.tick(e)
+        e.step()
+        progress.tick(e)
         self.assertEqual(progress.bar.n, 3)
         progress.close()
 
@@ -43,15 +49,16 @@ class ProgressTests(unittest.TestCase):
         e = Experiment(config())
         for animal in e.world.animals.values():
             animal.energy = 0
-            animal.health = .01
+            animal.health = 0.01
         e.observations = e.world.observe_all()
         stream = io.StringIO()
         progress = RunProgress(enabled=True, stream=stream)
         progress.start(e)
-        e.step(); progress.tick(e)
+        e.step()
+        progress.tick(e)
         self.assertIsNone(progress.bar)
-        self.assertIn('extinct', stream.getvalue())
-        self.assertIn('1/1', stream.getvalue())
+        self.assertIn("extinct", stream.getvalue())
+        self.assertIn("1/1", stream.getvalue())
 
 
 class ProgressCLITests(unittest.TestCase):
@@ -60,9 +67,31 @@ class ProgressCLITests(unittest.TestCase):
         import sys
         import tempfile
         from pathlib import Path
+
         root = Path(__file__).resolve().parents[1]
-        with tempfile.TemporaryDirectory(dir=root / 'work') as folder:
-            for flag, visible in (('--progress', True), ('--no-progress', False)):
-                result = subprocess.run([sys.executable, '-m', 'ecosystem.cli', 'environments/baseline.json', '--runs', '1', '--steps', '2', '--seed', '7', '--no-record', '--output', folder, flag], cwd=root, check=True, capture_output=True, text=True)
-                self.assertEqual('Train run 1/1' in result.stderr, visible)
-                self.assertIn('Results:', result.stdout)
+        with tempfile.TemporaryDirectory(dir=root / "work") as folder:
+            for flag, visible in (("--progress", True), ("--no-progress", False)):
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "ecosystem.cli",
+                        "environments/baseline.json",
+                        "--runs",
+                        "1",
+                        "--steps",
+                        "2",
+                        "--seed",
+                        "7",
+                        "--no-record",
+                        "--output",
+                        folder,
+                        flag,
+                    ],
+                    cwd=root,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual("Train run 1/1" in result.stderr, visible)
+                self.assertIn("Results:", result.stdout)

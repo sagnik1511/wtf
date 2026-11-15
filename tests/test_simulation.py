@@ -18,19 +18,27 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def config():
-    c = load(ROOT / 'environments/baseline.json')
-    for spec in c['species'].values():
-        spec['reproduction']['enabled'] = False
-    c['species']['prey']['initial_population'] = 3
-    c['species']['predator']['initial_population'] = 1
+    c = load(ROOT / "environments/baseline.json")
+    for spec in c["species"].values():
+        spec["reproduction"]["enabled"] = False
+    c["species"]["prey"]["initial_population"] = 3
+    c["species"]["predator"]["initial_population"] = 1
     # Mechanics fixtures intentionally exercise multi-hit combat, independently
     # of the baseline scenario's stronger one-hit predators.
-    c['species']['predator']['body']['attack_damage'] = 10
-    c['resources']['patch_count'] = 8
-    c['world'].update(width=10, height=8, max_steps=20)
-    c['experiment'].update(runs=2, record_metrics_every_steps=2, world_seed_policy='increment')
-    b = c['brains']['small_q']
-    b.update(hidden_layers=[4], batch_size=2, learning_starts_after=2, train_every_steps=1, target_update_every_training_steps=3)
+    c["species"]["predator"]["body"]["attack_damage"] = 10
+    c["resources"]["patch_count"] = 8
+    c["world"].update(width=10, height=8, max_steps=20)
+    c["experiment"].update(
+        runs=2, record_metrics_every_steps=2, world_seed_policy="increment"
+    )
+    b = c["brains"]["small_q"]
+    b.update(
+        hidden_layers=[4],
+        batch_size=2,
+        learning_starts_after=2,
+        train_every_steps=1,
+        target_update_every_training_steps=3,
+    )
     return c
 
 
@@ -42,38 +50,49 @@ def empty_world():
     return w
 
 
-def animal(i, species, x, y, heading=0, energy=20., health=30.):
+def animal(i, species, x, y, heading=0, energy=20.0, health=30.0):
     return Animal(i, species, x, y, heading, energy, health)
 
 
 class ConfigTests(unittest.TestCase):
     def test_all_examples(self):
-        for path in (ROOT / 'environments').glob('*.json'):
+        for path in (ROOT / "environments").glob("*.json"):
             validate(load(path))
 
     def test_invalid_values_and_unknown_fields(self):
-        cases = [(['world', 'width'], True), (['resources', 'growth_per_step'], -1), (['world', 'max_steps'], 0), (['species', 'prey', 'body', 'initial_energy'], 1000), (['brains', 'small_q', 'batch_size'], 999999)]
+        cases = [
+            (["world", "width"], True),
+            (["resources", "growth_per_step"], -1),
+            (["world", "max_steps"], 0),
+            (["species", "prey", "body", "initial_energy"], 1000),
+            (["brains", "small_q", "batch_size"], 999999),
+        ]
         for keys, value in cases:
             c = config()
             target = c
             for key in keys[:-1]:
                 target = target[key]
             target[keys[-1]] = value
-            with self.subTest(keys=keys), self.assertRaisesRegex(ValueError, keys[-1] if keys[-1] != 'batch_size' else 'batch size'):
+            with (
+                self.subTest(keys=keys),
+                self.assertRaisesRegex(
+                    ValueError, keys[-1] if keys[-1] != "batch_size" else "batch size"
+                ),
+            ):
                 validate(c)
         c = config()
-        c['world']['widht'] = 40
-        with self.assertRaisesRegex(ValueError, 'widht: unknown field'):
+        c["world"]["widht"] = 40
+        with self.assertRaisesRegex(ValueError, "widht: unknown field"):
             validate(c)
 
     def test_invalid_capacity_and_diet(self):
         c = config()
-        c['species']['prey']['allowed_actions'].append('attack')
+        c["species"]["prey"]["allowed_actions"].append("attack")
         with self.assertRaises(ValueError):
             validate(c)
         c = config()
-        c['species']['prey']['initial_population'] = 500
-        with self.assertRaisesRegex(ValueError, 'insufficient free'):
+        c["species"]["prey"]["initial_population"] = 500
+        with self.assertRaisesRegex(ValueError, "insufficient free"):
             validate(c)
 
 
@@ -86,68 +105,79 @@ class WorldTests(unittest.TestCase):
 
     def test_contested_movement_never_overlaps(self):
         w = empty_world()
-        w.animals = {0: animal(0, 'prey', 1, 2, 1), 1: animal(1, 'prey', 3, 2, 3)}
-        result = w.step({0: 'move_forward', 1: 'move_forward'})
+        w.animals = {0: animal(0, "prey", 1, 2, 1), 1: animal(1, "prey", 3, 2, 3)}
+        result = w.step({0: "move_forward", 1: "move_forward"})
         self.assertEqual(sum(a.position == (2, 2) for a in w.animals.values()), 1)
-        self.assertEqual(sum(e.kind == 'movement_blocked' for e in result.events), 1)
+        self.assertEqual(sum(e.kind == "movement_blocked" for e in result.events), 1)
 
     def test_obstacle_and_occupied_cells_block(self):
         w = empty_world()
-        w.animals = {0: animal(0, 'prey', 1, 2, 1), 1: animal(1, 'prey', 2, 2, 1)}
+        w.animals = {0: animal(0, "prey", 1, 2, 1), 1: animal(1, "prey", 2, 2, 1)}
         w.obstacles = {(3, 2)}
-        w.step({0: 'move_forward', 1: 'move_forward'})
+        w.step({0: "move_forward", 1: "move_forward"})
         self.assertEqual(w.animals[0].position, (1, 2))
         self.assertEqual(w.animals[1].position, (2, 2))
 
     def test_feeding_rewards_only_actual_energy(self):
         w = empty_world()
-        w.animals = {0: animal(0, 'prey', 2, 2, energy=99.)}
+        w.animals = {0: animal(0, "prey", 2, 2, energy=99.0)}
         w.resources[(2, 2)] = Resource(2, 2, 10)
-        result = w.step({0: 'eat'})
-        self.assertAlmostEqual(result.rewards[0], .1)
+        result = w.step({0: "eat"})
+        self.assertAlmostEqual(result.rewards[0], 0.1)
         self.assertAlmostEqual(w.animals[0].energy, 99.9)
         self.assertAlmostEqual(w.resources[(2, 2)].quantity, 9.6)
 
     def test_simultaneous_attack_single_kill(self):
         w = empty_world()
-        w.animals = {0: animal(0, 'prey', 2, 2, health=15), 1: animal(1, 'predator', 1, 2, 1, energy=20), 2: animal(2, 'predator', 3, 2, 3, energy=20)}
-        result = w.step({0: 'rest', 1: 'attack', 2: 'attack'})
+        w.animals = {
+            0: animal(0, "prey", 2, 2, health=15),
+            1: animal(1, "predator", 1, 2, 1, energy=20),
+            2: animal(2, "predator", 3, 2, 3, energy=20),
+        }
+        result = w.step({0: "rest", 1: "attack", 2: "attack"})
         self.assertEqual(result.dead_ids, {0})
-        self.assertEqual(sum(e.kind == 'kill' for e in result.events), 1)
-        self.assertEqual(sum(e.amount for e in result.events if e.kind == 'energy_gained'), 40)
+        self.assertEqual(sum(e.kind == "kill" for e in result.events), 1)
+        self.assertEqual(
+            sum(e.amount for e in result.events if e.kind == "energy_gained"), 40
+        )
         self.assertAlmostEqual(result.rewards[0], -13)
-        self.assertEqual(w.deaths['predation'], 1)
+        self.assertEqual(w.deaths["predation"], 1)
 
     def test_starvation_and_terminal_reward(self):
         w = empty_world()
-        w.animals = {0: animal(0, 'prey', 1, 1, energy=0., health=.5)}
-        result = w.step({0: 'rest'})
+        w.animals = {0: animal(0, "prey", 1, 1, energy=0.0, health=0.5)}
+        result = w.step({0: "rest"})
         self.assertEqual(result.dead_ids, {0})
         self.assertAlmostEqual(result.rewards[0], -10.1)
         self.assertNotIn(0, result.observations)
 
     def test_visibility_and_observation_shape(self):
         w = empty_world()
-        a = animal(0, 'prey', 1, 1)
+        a = animal(0, "prey", 1, 1)
         w.animals = {0: a}
         w.resources[(3, 1)] = Resource(3, 1, 10)
         self.assertEqual(len(w.observe(a)), INPUTS)
-        self.assertEqual(w.observe(a)[11], 1.)
+        self.assertEqual(w.observe(a)[11], 1.0)
         w.obstacles.add((2, 1))
-        self.assertEqual(w.observe(a)[11], 0.)
+        self.assertEqual(w.observe(a)[11], 0.0)
 
 
 class LearningTests(unittest.TestCase):
     def test_positive_feedback_improves_action_value(self):
-        c = config()['brains']['small_q']
-        c.update(batch_size=1, learning_starts_after=1, learning_rate=.1, discount_factor=0.)
-        b = Brain(c, ['rest', 'eat'], 4, 9)
-        observation = (0.,) * INPUTS
+        c = config()["brains"]["small_q"]
+        c.update(
+            batch_size=1,
+            learning_starts_after=1,
+            learning_rate=0.1,
+            discount_factor=0.0,
+        )
+        b = Brain(c, ["rest", "eat"], 4, 9)
+        observation = (0.0,) * INPUTS
         before = b.forward(observation)[1][1]
         for _ in range(40):
-            b.learn(Experience(observation, 'eat', 1., None, True))
-        self.assertGreater(b.forward(observation)[1][1], before + .5)
-        self.assertEqual(b.choose(observation, explore=False), 'eat')
+            b.learn(Experience(observation, "eat", 1.0, None, True))
+        self.assertGreater(b.forward(observation)[1][1], before + 0.5)
+        self.assertEqual(b.choose(observation, explore=False), "eat")
 
     def test_independent_brains(self):
         e = Experiment(config())
@@ -155,13 +185,13 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(a.weights, b.weights)
         saved = copy.deepcopy(b.checkpoint())
         for _ in range(4):
-            a.learn(Experience((0.,) * INPUTS, 'eat', 1., None, True))
+            a.learn(Experience((0.0,) * INPUTS, "eat", 1.0, None, True))
         self.assertEqual(b.checkpoint(), saved)
         self.assertNotEqual(a.weights, b.weights)
 
     def test_time_limit_is_truncation(self):
         c = config()
-        c['world']['max_steps'] = 1
+        c["world"]["max_steps"] = 1
         e = Experiment(c)
         e.step()
         experience = e.brains[0].replay[-1]
@@ -172,7 +202,7 @@ class LearningTests(unittest.TestCase):
     def test_death_updates_controller(self):
         e = Experiment(config())
         e.world.animals[0].energy = 0
-        e.world.animals[0].health = .1
+        e.world.animals[0].health = 0.1
         e.observations = e.world.observe_all()
         e.step()
         self.assertTrue(e.brains[0].replay[-1].terminated)
@@ -200,8 +230,8 @@ class ExperimentTests(unittest.TestCase):
     def test_reset_preserves_or_resets_individual_brain(self):
         for retain in (True, False):
             c = config()
-            c['experiment']['retain_brains_between_runs'] = retain
-            c['world']['max_steps'] = 3
+            c["experiment"]["retain_brains_between_runs"] = retain
+            c["world"]["max_steps"] = 3
             e = Experiment(c)
             for _ in range(3):
                 e.step()
@@ -212,14 +242,14 @@ class ExperimentTests(unittest.TestCase):
             self.assertEqual(e.world.seed, 43)
 
     def test_evaluation_does_not_change_brains(self):
-        e = Experiment(config(), 'evaluate')
+        e = Experiment(config(), "evaluate")
         before = {i: b.checkpoint() for i, b in e.brains.items()}
         for _ in range(5):
             e.step()
         self.assertEqual(before, {i: b.checkpoint() for i, b in e.brains.items()})
 
     def test_random_mode_does_not_train(self):
-        e = Experiment(config(), 'random')
+        e = Experiment(config(), "random")
         for _ in range(5):
             e.step()
         self.assertTrue(all(b.steps == 0 for b in e.brains.values()))
@@ -229,8 +259,9 @@ class ServerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         from ecosystem.recording import Recorder
+
         cls.directory = tempfile.TemporaryDirectory()
-        cls.folder = Path(cls.directory.name) / 'recorded_test'
+        cls.folder = Path(cls.directory.name) / "recorded_test"
         e = Experiment(config())
         r = Recorder(cls.folder, e.config, e.mode)
         r.begin_run(e)
@@ -239,10 +270,10 @@ class ServerTests(unittest.TestCase):
             r.capture(e)
         r.close(completed=False)
         cls.state = State(cls.directory.name)
-        cls.server = ThreadingHTTPServer(('127.0.0.1', 0), make_handler(cls.state))
+        cls.server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(cls.state))
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
-        cls.url = f'http://127.0.0.1:{cls.server.server_port}'
+        cls.url = f"http://127.0.0.1:{cls.server.server_port}"
 
     @classmethod
     def tearDownClass(cls):
@@ -252,38 +283,45 @@ class ServerTests(unittest.TestCase):
         cls.directory.cleanup()
 
     def request(self, path, data=None):
-        req = Request(self.url + path, data=None if data is None else json.dumps(data).encode(), headers={'Content-Type': 'application/json'})
+        req = Request(
+            self.url + path,
+            data=None if data is None else json.dumps(data).encode(),
+            headers={"Content-Type": "application/json"},
+        )
         return urlopen(req, timeout=10)
 
     def test_viewer_and_recording_api(self):
-        with self.request('/') as response:
-            self.assertIn(b'Wildlife Trial Framework', response.read())
-        with self.request('/api/recordings') as response:
-            self.assertEqual(json.load(response)[0]['id'], 'recorded_test')
-        with self.request('/api/recordings/recorded_test') as response:
-            self.assertEqual(json.load(response)['runs'][0]['frame_count'], 4)
-        with self.request('/api/recordings/recorded_test/runs/1/chunks/0') as response:
+        with self.request("/") as response:
+            self.assertIn(b"Wildlife Trial Framework", response.read())
+        with self.request("/api/recordings") as response:
+            self.assertEqual(json.load(response)[0]["id"], "recorded_test")
+        with self.request("/api/recordings/recorded_test") as response:
+            self.assertEqual(json.load(response)["runs"][0]["frame_count"], 4)
+        with self.request("/api/recordings/recorded_test/runs/1/chunks/0") as response:
             frames = json.load(response)
-            self.assertEqual([f['tick'] for f in frames], [0, 1, 2, 3])
-        with self.request('/api/recordings/recorded_test/runs/1/metrics') as response:
-            self.assertEqual([m['tick'] for m in json.load(response)], [0, 1, 2, 3])
-        self.assertFalse(hasattr(self.state, 'experiment'))
+            self.assertEqual([f["tick"] for f in frames], [0, 1, 2, 3])
+        with self.request("/api/recordings/recorded_test/runs/1/metrics") as response:
+            self.assertEqual([m["tick"] for m in json.load(response)], [0, 1, 2, 3])
+        self.assertFalse(hasattr(self.state, "experiment"))
 
     def test_all_live_simulation_endpoints_removed(self):
-        for path in ('/api/step', '/api/load', '/api/restore'):
+        for path in ("/api/step", "/api/load", "/api/restore"):
             with self.subTest(path=path), self.assertRaises(HTTPError) as raised:
-                self.request(path, {'count': 1})
+                self.request(path, {"count": 1})
             self.assertEqual(raised.exception.code, 405)
         with self.assertRaises(HTTPError) as raised:
-            self.request('/api/checkpoint')
+            self.request("/api/checkpoint")
         self.assertEqual(raised.exception.code, 404)
 
     def test_traversal_and_missing_chunks(self):
-        for path in ('/../ecosystem/config.py', '/api/recordings/recorded_test/runs/1/chunks/9999'):
+        for path in (
+            "/../ecosystem/config.py",
+            "/api/recordings/recorded_test/runs/1/chunks/9999",
+        ):
             with self.subTest(path=path), self.assertRaises(HTTPError) as raised:
                 self.request(path)
             self.assertEqual(raised.exception.code, 404)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
