@@ -85,7 +85,7 @@ class Recorder:
             for i, a in experiment.world.animals.items():
                 b = experiment.brains[i]
                 o = experiment.observations[i]
-                frame['diagnostics'][str(i)] = dict(tick=tick, features=o, action_values=dict(zip(b.actions, b.forward(o)[1])), epsilon=b.epsilon, updates=b.updates, replay_size=len(b.replay))
+                frame['diagnostics'][str(i)] = dict(tick=tick, **b.diagnostics(o))
             self.last_diagnostic_tick = tick
         if self.chunk_frames:
             self.stream.write(',\n')

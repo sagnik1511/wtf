@@ -4,7 +4,8 @@ import json
 from pathlib import Path
 import random
 import secrets
-from .brain import Brain, Experience
+from .brain import Experience
+from .brains import create_brain, restore_brain
 from .config import validate
 from .world import World
 
@@ -47,7 +48,7 @@ class Experiment:
                 base_seed = brain_seed + 1000003 * (species_index + 1)
                 for i, a in self.world.animals.items():
                     if a.species == species:
-                        self.brains[i] = Brain(c['brains'][spec['brain']], spec['allowed_actions'], base_seed, brain_seed + i * 7919 + 13)
+                        self.brains[i] = create_brain(c['brains'][spec['brain']], spec['allowed_actions'], base_seed, brain_seed + i * 7919 + 13)
         self.observations = self.world.observe_all()
         self.finished_run = False
         self.history = [self.world.metrics()]
@@ -63,6 +64,18 @@ class Experiment:
                 return self.snapshot()
             self.run_index += 1
             self._start_run()
+        if self.mode == 'train':
+            grouped = [(i, self.brains[i]) for i in self.world.animals if self.brains[i].config['type'] == 'grpo']
+            if grouped:
+                from .grouped_rollouts import collect_group
+                start = self.world.tick % len(grouped)
+                budget = self.config['experiment'].get('grpo_updates_per_step', 1)
+                for i, brain in grouped[start:] + grouped[:start]:
+                    if brain.needs_group:
+                        brain.update_group(collect_group(self.world, self.brains, i))
+                        budget -= 1
+                        if not budget:
+                            break
         actions = {i: self.brains[i].choose(o, explore=self.mode == 'train', random_baseline=self.mode == 'random') for i, o in self.observations.items()}
         result = self.world.step(actions)
         limit = self.world.tick >= self.config['world']['max_steps']
@@ -94,7 +107,7 @@ class Experiment:
         if selected in self.world.animals:
             brain = self.brains[selected]
             o = self.observations[selected]
-            data['selected'] = dict(id=selected, features=o, action_values=dict(zip(brain.actions, brain.forward(o)[1])), epsilon=brain.epsilon, updates=brain.updates, replay_size=len(brain.replay))
+            data['selected'] = dict(id=selected, **brain.diagnostics(o))
         return data
 
     def checkpoint(self, include_brains=True):
@@ -147,7 +160,7 @@ class Experiment:
             e.seed_rng = random.Random(0)
             e.seed_rng.setstate(tuples(state['seed_rng_state']))
         e.world = World.restore(state['world'])
-        e.brains = {int(i): Brain.restore(b) for i, b in state['brains'].items()}
+        e.brains = {int(i): restore_brain(b) for i, b in state['brains'].items()}
         e.observations = e.world.observe_all()
         e.last_record = None
         return e

@@ -14,7 +14,7 @@ cd /Users/tensored/wtf
 ./run.sh
 ```
 
-Open <http://127.0.0.1:8000>, select a saved experiment, and click **Play recording**. Use the frame slider to seek, select a recorded run, or click an animal to inspect its recorded state and sampled diagnostics. **Refresh list** discovers newly recorded experiments. Kills have red board markers, an attacker highlight, an identity banner, and a dedicated cumulative counter. Natural deaths (currently starvation) use matching amber rings, a DIED marker, and a banner naming the animal and cause. **Hold briefly on deaths** adds a 0.9-second playback hold at kill or natural-death frames; uncheck it for uninterrupted playback. Markers persist briefly across sequential chunk boundaries and clear when switching runs. Existing recordings work without regeneration; events skipped by a reduced recording frequency cannot be highlighted.
+Open <http://127.0.0.1:8000>, select a saved experiment, and click **Play recording**. Use the frame slider to seek, select a recorded run, or click an animal to inspect its recorded state and sampled diagnostics. **Refresh list** discovers newly recorded experiments. Kills have red board markers, an attacker highlight, an identity banner, and a dedicated cumulative counter. Natural deaths (currently starvation) use matching green rings for prey and amber rings for predators, a DIED marker, and a banner naming the animal and cause. **Hold briefly on deaths** adds a 0.9-second playback hold at kill or natural-death frames; uncheck it for uninterrupted playback. Markers persist briefly across sequential chunk boundaries and clear when switching runs. Existing recordings work without regeneration; events skipped by a reduced recording frequency cannot be highlighted.
 
 You can close the simulator before starting playback. The playback server does not import the simulation or learning modules. Existing results created before playback recording was added have metrics/checkpoints only and do not appear in the recording catalog; run another experiment to create a recording.
 
@@ -23,9 +23,10 @@ The launcher uses the project-local `.venv` and stores bytecode caches in `.cach
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install --cache-dir .cache/pip -r requirements.txt
 ```
 
-Python 3.9+ is supported. There are no third-party application dependencies. Future Python packages should be installed inside `.venv`; JavaScript rendering uses native browser APIs and needs no packages or build step.
+Python 3.9+ is supported. Training uses the lightweight `tqdm` dependency for terminal progress. Install it with `.venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt`; the simulation and neural networks use the standard library. Future Python packages should be installed inside `.venv`; JavaScript rendering uses native browser APIs and needs no packages or build step.
 
 ## JSON environments
 
@@ -35,6 +36,11 @@ Each JSON file is a complete experiment definition:
 - `environments/scarce_food.json`: slower regrowth; otherwise the baseline settings.
 - `environments/dense_obstacles.json`: more obstructed cells.
 - `environments/predator_heavy.json`: 14 predators.
+- `environments/ppo.json`: independent PPO brains for both species.
+- `environments/mixed_brains.json`: Q-learning prey and PPO predators.
+- `environments/a2c.json`: independent advantage actor-critic agents.
+- `environments/reinforce.json`: independent episodic Monte Carlo policy-gradient agents.
+- `environments/grpo.json`: Q-learning prey and experimental GRPO predators, with bounded matched-world trials.
 
 Copy a JSON file, edit its name and values, and pass its path to the Python CLI to add a scenario. The playback viewer shows the recorded configuration as read-only text.
 
@@ -44,6 +50,89 @@ All costs and growth rates are per simulation step. Playback speed changes only 
 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
+## Choose a learning algorithm
+
+The `species.<name>.brain` field selects a template in `brains`. Each animal receives its own model, optimizer, random streams and experience storage; referencing a common template never shares live weights between animals. The supplied baseline remains the existing Q-network comparison.
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1
+.venv/bin/python -m ecosystem.cli environments/mixed_brains.json --runs 1
+```
+
+Supported algorithms:
+
+| Template `type` | Model and training |
+| --- | --- |
+| `q_network` | Existing one-hidden-layer action-value network, replay, target network, epsilon-greedy policy and SGD |
+| `ppo` | Categorical policy and scalar critic sharing an MLP, recent on-policy rollouts, GAE, clipped policy loss, entropy bonus and Adam |
+| `a2c` | Independent advantage actor-critic, one gradient update per rollout, GAE and entropy regularization |
+| `reinforce` | Actor-only episodic Monte Carlo policy gradient with a running baseline from previous episodes |
+| `grpo` | Experimental actor-only clipped policy updates using comparable simulator trajectory groups and a frozen reference policy |
+
+A PPO template (placed under `brains.small_ppo`) is:
+
+```json
+{
+  "type": "ppo",
+  "network": {
+    "type": "mlp",
+    "hidden_layers": [
+      16
+    ],
+    "activation": "tanh"
+  },
+  "learning_rate": 0.001,
+  "discount_factor": 0.98,
+  "gae_lambda": 0.95,
+  "clip_ratio": 0.2,
+  "entropy_coefficient": 0.01,
+  "value_coefficient": 0.5,
+  "rollout_steps": 64,
+  "epochs": 4,
+  "batch_size": 16,
+  "max_grad_norm": 0.5,
+  "normalize_advantages": true,
+  "target_kl": 0.03
+}
+```
+
+Set either species' `brain` to `"small_ppo"` to use that template. All policy-based templates (`ppo`, `a2c`, `reinforce`, `grpo`) accept one to four tanh layers in `network.hidden_layers`. Change `[16]` to `[32, 16]`, for example, to experiment with a deeper DNN. The network architecture is separate from the PPO algorithm. The legacy Q-network configuration retains its single-layer format and behavior.
+
+PPO samples actions from its categorical policy in training; greedy evaluation and the random-action baseline do not train. It stores at most `rollout_steps` transitions per animal and consumes them after each update. Buffers also flush when an animal dies or a run reaches its step limit, including short partial rollouts. Death disables value bootstrapping; time-limit truncation bootstraps the final observation but breaks the episode trace. Advantages are normalized only within that individual's rollout when enabled. Critic targets are the GAE lambda returns; critic loss is un-clipped mean squared error with the conventional one-half factor. `epochs` and `batch_size` control repeated minibatch passes. The shared gradient is clipped by `max_grad_norm`. Adam uses beta1 0.9, beta2 0.999 and epsilon 1e-8. A positive `target_kl` stops remaining minibatches if their approximate policy KL exceeds the cap; zero disables that check. Extreme log-ratios are bounded to ±60 for numerical safety.
+
+The implementation follows the clipped PPO objective and GAE structure described in the [PPO paper](https://arxiv.org/abs/1707.06347) and [Spinning Up's PPO reference](https://github.com/openai/spinningup/blob/master/spinup/algos/pytorch/ppo/ppo.py). It is a small independent standard-library implementation, with numerical gradient checks, rather than a wrapper around PyTorch or an established training library.
+
+PPO checkpoints include model and Adam state, partial rollouts with old log probabilities/values, pending action data and random-generator states. Mixed-algorithm experiments and legacy Q checkpoints restore through the same runner. Retaining brains preserves model/optimizer state across runs, while PPO's consumed rollout data is discarded. The viewer shows action probabilities, entropy and critic value for PPO; Q-learning recordings continue to show action values and epsilon. Existing recordings without an algorithm label remain supported.
+
+PPO needs multiple passes over recent data and maintains optimizer moments, so it is not automatically cheaper or better at hunting than Q-learning. Small layers, short rollouts and modest epoch counts keep this implementation suitable for CPU experiments. Test algorithms with held-out seeds and matched physical configurations; an implementation test or a few kills is not evidence of a trained policy outperforming the baseline. The additional algorithms below share the same configuration, checkpoint and playback interfaces.
+
+### A2C and REINFORCE
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/a2c.json --runs 1 --progress
+.venv/bin/python -m ecosystem.cli environments/reinforce.json --runs 1 --progress
+```
+
+A2C uses the same configurable shared policy/value MLP as PPO, with one full-rollout advantage actor-critic update instead of repeated clipped-objective epochs. GAE targets, terminal handling, entropy regularization and gradient clipping are retained. Its structure follows the advantage actor-critic family represented by the [Baselines A2C reference](https://github.com/openai/baselines/blob/master/baselines/a2c/a2c.py), with independent per-animal models rather than shared population weights.
+
+REINFORCE has no critic. It collects one animal's complete finite episode, computes discounted rewards-to-go and the summed discounted log-policy gradient, and applies one Adam update. The scalar baseline is derived only from earlier episodes, then updated using `baseline_decay` after the current update. Optional advantage normalization is disabled in the example. This is an episodic implementation of the [REINFORCE policy-gradient family](https://link.springer.com/article/10.1007/BF00992696), with entropy regularization and gradient clipping. Time limits define finite episodes for this actor-only method; they are not bootstrapped from a value network. To bound memory without silently treating arbitrary fragments as complete episodes, `max_episode_steps` must be at least `world.max_steps`. Increase both when requesting longer REINFORCE runs. A retained brain learns between runs; it does not change its policy midway through a collected episode.
+
+### Experimental GRPO
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/grpo.json --runs 1 --progress
+```
+
+This is a finite-horizon simulator adaptation of the group-relative clipped policy objective in [DeepSeekMath](https://arxiv.org/html/2402.03300v3), rather than the original language-model training setup. Each focal animal samples `group_size` alternative trajectories from the **same current world state**. Environment RNG and other agents' action RNG streams restart from matching states for every trial. Other policies remain frozen during the group, and no real controller's `choose`/`learn` methods are called inside a trial. Only the focal policy uses different trial action samples. Its observations remain local; rewards come from the ordinary environment rules.
+
+Discounted returns are standardized within that group, never across unrelated animals. Every step in a trajectory receives its trajectory's group-relative advantage. The objective is averaged per trajectory and then per group, so shorter trajectories are not accidentally underweighted. Clipped importance ratios use the sampling policy's old log probabilities. Because there are few discrete actions, the reference penalty uses exact categorical KL against a frozen copy of the animal's initial policy. There is no critic. Equal-return groups are filtered out entirely, including regularization, to avoid updates without a relative reward signal; the inspector reports group counts and reward spread. A single real transition advances scheduling; GRPO's learning signal comes from the matched trial outcomes.
+
+The default example uses four trials, four steps per trial, `train_every_steps: 128` per agent, and at most one group per real world step (`experiment.grpo_updates_per_step: 1`). Groups are scheduled in rotating order. Trials run sequentially; only one cloned world, small previous RNG states, and bounded trial observations are retained. No other agent's replay buffer or network is copied for a trial. Larger groups/horizons can substantially increase training time. The theoretical extra world-step budget per real step is at most `grpo_updates_per_step * group_size * rollout_horizon`, with fewer steps when no agents are due or trials terminate early.
+
+Trial worlds do not advance the real simulation or contribute kills, deaths, food, or frame recordings to it. Progress and playback counts describe only the real timeline. Checkpoints preserve the frozen reference policy, group/training RNG states and update scheduling, so a restored run reproduces its future trials. The example keeps prey on Q-learning to limit overhead; either species can reference a GRPO template.
+
+All five algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
+
 ## Run experiments without the viewer
 
 ```sh
@@ -51,6 +140,8 @@ python -m ecosystem.cli environments/baseline.json
 python -m ecosystem.cli environments/scarce_food.json --runs 3 --steps 1000 --seed 42
 python -m ecosystem.cli environments/baseline.json --mode random --runs 3
 ```
+
+Training displays a tqdm bar automatically in a terminal, showing run/step progress, elapsed time, ETA, step rate, populations, kills and food. `--progress` forces display in redirected/IDE output; `--no-progress` disables it. Evaluation/random runs and redirected logs omit the bar by default. Resume starts at the saved step, and early extinction completes the bar at the actual final step. Progress is throttled to avoid rendering overhead.
 
 Each invocation creates a unique folder inside `results/` containing:
 
@@ -125,7 +216,7 @@ Previous configurations without this section use the same defaults. Set `enabled
 
 The recorder encodes one frame at a time into an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
 
-The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, and experience buffers are absent from playback files; recorded diagnostics include only observation features, action values, exploration, and counts. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
+The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
 Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes compact JSON. Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a JSON checkpoint still parses that complete file. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
 
@@ -159,7 +250,7 @@ The observation vector has 20 entries:
 
 Distances use a circular vision radius, with obstacle occlusion by integer line rays. Direction deltas use world axes; there is no field-of-view angle limit. Missing targets have four zero values. The current animal is excluded from animal targets. Resources with negligible quantity are omitted from perception.
 
-Brains use one small tanh hidden layer and linear action-value outputs, independent replay buffers, uniformly sampled mini-batches, Huber-loss gradients, plain SGD, target networks, and epsilon-greedy exploration. There is no Adam state or third-party ML framework. Animals of a species start from copied base weights but have separate policy and learning randomness. Target networks synchronize after the configured number of training updates.
+Q-learning brains use one small tanh hidden layer and linear action-value outputs, independent replay buffers, uniformly sampled mini-batches, Huber-loss gradients, plain SGD, target networks, and epsilon-greedy exploration. PPO uses the separate actor-critic implementation described above, including its own Adam state. A2C, REINFORCE and GRPO share the small-network/optimizer infrastructure described above. No learning algorithm requires a third-party ML framework. Animals of a species start from copied base weights but have separate policy and learning randomness. Target networks synchronize after the configured number of training updates.
 
 The same brain template can be referenced by multiple species without sharing live weights. Learning updates occur at the configured cadence. Time limits are truncations and retain bootstrapped future value; death is terminal. Resetting a body can preserve its learned weights, exploration state and experience buffer, or reinitialize its brain according to configuration. Species base weights are reproducible across resets.
 
@@ -203,6 +294,6 @@ python -m unittest discover -v
 node --test tests/playback.test.mjs
 ```
 
-Tests cover strict configuration validation, resource limits, blocked and contested movement, feeding rewards, simultaneous hunts, starvation, occlusion, independent weights, positive-feedback learning, terminal versus truncated experience, evaluation behavior, deterministic and randomized runs, exact JSON checkpoint continuation including future random seeds, resets, streamed recording correctness, recording transparency, committed-chunk visibility, bounded playback chunk loading, seeking, and read-only HTTP endpoints.
+Tests cover strict configuration validation, resource limits, blocked and contested movement, feeding rewards, simultaneous hunts, starvation, occlusion, independent weights, positive-feedback learning, terminal versus truncated experience, evaluation behavior, deterministic and randomized runs, exact JSON checkpoint continuation including future random seeds and mixed PPO/Q models, PPO finite-difference gradient checks and terminal/truncated rollouts, resets, streamed recording correctness, recording transparency, committed-chunk visibility, bounded playback chunk loading, seeking, and read-only HTTP endpoints.
 
 The server binds only to `127.0.0.1`. Use `--port 8001` if the default port is occupied. Close the terminal process or press Ctrl-C to stop it.

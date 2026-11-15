@@ -10,6 +10,7 @@ from pathlib import Path
 from .config import load
 from .runner import Experiment
 from .recording import Recorder, settings
+from .progress import RunProgress
 
 
 def main():
@@ -22,6 +23,10 @@ def main():
     parser.add_argument('--seed-policy', choices=('random', 'fixed', 'increment'), help='Override the environment seed policy')
     parser.add_argument('--resume', type=Path, help='Resume an exact JSON checkpoint; environment and overrides are ignored')
     parser.add_argument('--no-record', action='store_true', help='Skip playback recording (metrics and checkpoints still saved)')
+    display = parser.add_mutually_exclusive_group()
+    display.add_argument('--progress', dest='progress', action='store_true', help='Force tqdm output, including when stderr is redirected')
+    display.add_argument('--no-progress', dest='progress', action='store_false', help='Disable training progress output')
+    parser.set_defaults(progress=None)
     parser.add_argument('--output', type=Path, default=Path('results'))
     args = parser.parse_args()
     if args.resume:
@@ -52,17 +57,19 @@ def main():
     save('manifest.json', {'mode': experiment.mode, 'python': sys.version, 'platform': platform.platform(), 'resumed_from': str(args.resume) if args.resume else None, 'randomization_seed': experiment.randomization_seed, 'checkpoint_version': 1, 'observation_version': 1, 'playback_recording': not args.no_record and settings(experiment.config)['enabled']})
     save('run_seeds.json', experiment.run_seeds)
     recorder = Recorder(folder, experiment.config, experiment.mode) if not args.no_record and settings(experiment.config)['enabled'] else None
+    progress = RunProgress(experiment.mode, enabled=args.progress)
     completed = False
     try:
-        run_experiment(experiment, folder, save, recorder)
+        run_experiment(experiment, folder, save, recorder, progress)
         completed = True
     finally:
+        progress.close()
         if recorder is not None:
             recorder.close(completed=completed)
     print(f'Results: {folder.resolve()}')
 
 
-def run_experiment(experiment, folder, save, recorder):
+def run_experiment(experiment, folder, save, recorder, progress=None):
     species = list(experiment.config['species'])
     with (folder / 'metrics.csv').open('w', newline='') as handle:
         fields = ['run', 'seed', 'tick', 'food', 'starvation', 'predation'] + [f'{s}_{metric}' for s in species for metric in ('population', 'energy_gained', 'kills')]
@@ -76,6 +83,8 @@ def run_experiment(experiment, folder, save, recorder):
         record(experiment.world.metrics())
         if recorder is not None:
             recorder.begin_run(experiment)
+        if progress is not None:
+            progress.start(experiment)
         while not experiment.done:
             if experiment.finished_run:
                 experiment.next_run()
@@ -83,7 +92,11 @@ def run_experiment(experiment, folder, save, recorder):
                 record(experiment.world.metrics())
                 if recorder is not None:
                     recorder.begin_run(experiment)
+                if progress is not None:
+                    progress.start(experiment)
             experiment.step()
+            if progress is not None:
+                progress.tick(experiment)
             if recorder is not None:
                 recorder.capture(experiment, force=experiment.finished_run)
             if experiment.last_record:

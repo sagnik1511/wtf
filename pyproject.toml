@@ -3,4 +3,4 @@ name = "wtf-wildlife-trial-framework"
 version = "0.1.0"
 description = "WTF — Wildlife Trial Framework: a reinforcement learning ecosystem simulator"
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["tqdm>=4.66,<5"]

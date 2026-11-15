@@ -91,6 +91,9 @@ class Brain:
         if self.updates % c['target_update_every_training_steps'] == 0:
             self.target = {k: v.copy() for k, v in self.weights.items()}
 
+    def diagnostics(self, observation):
+        return dict(algorithm='q_learning', features=observation, action_values=dict(zip(self.actions, self.forward(observation)[1])), epsilon=self.epsilon, updates=self.updates, replay_size=len(self.replay))
+
     def checkpoint(self):
         return dict(config=copy.deepcopy(self.config), actions=self.actions[:], weights={k: v.copy() for k, v in self.weights.items()}, target={k: v.copy() for k, v in self.target.items()}, replay=[dict(observation=tuple(e.observation), action=e.action, reward=e.reward, next_observation=tuple(e.next_observation) if e.next_observation is not None else None, terminated=e.terminated, truncated=e.truncated) for e in self.replay], cursor=self.cursor, steps=self.steps, updates=self.updates, epsilon=self.epsilon, rng_state=self.rng.getstate(), training_rng_state=self.training_rng.getstate())
 

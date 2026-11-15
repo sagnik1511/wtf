@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "name": "grpo",
+  "description": "Independent GRPO agents; experimental matched-world GRPO trials",
+  "seed": 42,
+  "world": {
+    "width": 40,
+    "height": 28,
+    "boundary": "closed",
+    "max_steps": 1500
+  },
+  "obstacles": {
+    "generation": "scattered",
+    "occupied_fraction": 0.08,
+    "explicit_cells": []
+  },
+  "resources": {
+    "patch_count": 80,
+    "capacity_per_patch": 20,
+    "initial_quantity_per_patch": 10,
+    "growth_per_step": 0.1
+  },
+  "species": {
+    "prey": {
+      "initial_population": 48,
+      "diet": "resource",
+      "allowed_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat"
+      ],
+      "body": {
+        "initial_energy": 60,
+        "max_energy": 100,
+        "max_health": 30,
+        "vision_radius": 6,
+        "living_cost": 0.1,
+        "movement_cost": 0.15,
+        "starvation_damage": 1,
+        "bite_size": 4,
+        "energy_per_food_unit": 2
+      },
+      "brain": "small_q",
+      "rewards": {
+        "per_energy_gained": 0.1,
+        "per_damage_taken": -0.2,
+        "death": -10,
+        "per_damage_dealt": 0.0
+      }
+    },
+    "predator": {
+      "initial_population": 12,
+      "diet": "prey",
+      "allowed_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack"
+      ],
+      "body": {
+        "initial_energy": 80,
+        "max_energy": 120,
+        "max_health": 50,
+        "vision_radius": 8,
+        "living_cost": 0.15,
+        "movement_cost": 0.2,
+        "starvation_damage": 1,
+        "attack_damage": 30,
+        "attack_cost": 1,
+        "energy_per_kill": 40
+      },
+      "brain": "small_grpo",
+      "rewards": {
+        "per_energy_gained": 0.1,
+        "per_damage_taken": -0.2,
+        "death": -10,
+        "per_damage_dealt": 0.05
+      }
+    }
+  },
+  "brains": {
+    "small_grpo": {
+      "network": {
+        "type": "mlp",
+        "hidden_layers": [
+          16
+        ],
+        "activation": "tanh"
+      },
+      "learning_rate": 0.001,
+      "discount_factor": 0.98,
+      "entropy_coefficient": 0.01,
+      "max_grad_norm": 0.5,
+      "type": "grpo",
+      "clip_ratio": 0.2,
+      "kl_coefficient": 0.04,
+      "group_size": 4,
+      "rollout_horizon": 4,
+      "train_every_steps": 128,
+      "epochs": 2,
+      "batch_size": 16,
+      "target_kl": 0.03
+    },
+    "small_q": {
+      "type": "q_network",
+      "hidden_layers": [
+        16
+      ],
+      "learning_rate": 0.003,
+      "discount_factor": 0.98,
+      "batch_size": 8,
+      "replay_capacity": 512,
+      "learning_starts_after": 32,
+      "train_every_steps": 8,
+      "target_update_every_training_steps": 50,
+      "exploration": {
+        "initial": 0.35,
+        "minimum": 0.05,
+        "decay_per_decision": 0.999
+      }
+    }
+  },
+  "experiment": {
+    "runs": 5,
+    "retain_brains_between_runs": true,
+    "world_seed_policy": "random",
+    "record_metrics_every_steps": 10,
+    "checkpoint_every_runs": 1,
+    "grpo_updates_per_step": 1
+  },
+  "recording": {
+    "enabled": true,
+    "frame_every_steps": 1,
+    "frames_per_chunk": 64,
+    "diagnostics_every_steps": 10
+  }
+}

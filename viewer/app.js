@@ -116,11 +116,22 @@ function drawInspector() {
   if(!a)return;
   if(!b){box.append(text('p',`Energy ${a.energy.toFixed(1)} · Health ${a.health.toFixed(1)} · Age ${a.age}`,'muted'));box.append(text('p','Brain diagnostics were not recorded for this frame.','muted'));return;}
   box.append(text('p',`Brain diagnostics recorded at step ${b.tick}; body state is current.`,'muted'));
+  const policy=Boolean(b.action_probabilities);
+  const algorithm={ppo:'PPO',a2c:'A2C',reinforce:'REINFORCE',grpo:'GRPO (experimental)'}[b.algorithm]||'Q-learning';
   const details=text('div','','details');
-  for(const [label,value] of [['Energy',a.energy.toFixed(1)],['Health',a.health.toFixed(1)],['Age',a.age],['Last reward',a.last_reward.toFixed(3)],['Exploration',b.epsilon.toFixed(3)],['Training updates',b.updates],['Own experiences',b.replay_size],['Last action',a.last_action]]) {const cell=text('div','');cell.append(text('span',label),text('strong',String(value)));details.append(cell);}box.append(details);
-  box.append(text('p','Predicted future reward per action','muted'));
-  const values=Object.values(b.action_values),best=Math.max(...values);
-  for(const [action,value] of Object.entries(b.action_values)) {const row=text('div','','action'+(value===best?' best':''));row.append(text('span',action.replaceAll('_',' ')),text('span',value.toFixed(3)));box.append(row);}
+  const fields=[['Brain',algorithm],['Energy',a.energy.toFixed(1)],['Health',a.health.toFixed(1)],['Age',a.age],['Last reward',a.last_reward.toFixed(3)],['Training updates',b.updates],['Last action',a.last_action]];
+  if(policy){
+    fields.push(['Policy entropy',b.entropy.toFixed(3)]);
+    if(Number.isFinite(b.state_value))fields.push(['State value',b.state_value.toFixed(3)]);
+    if(Number.isFinite(b.return_baseline))fields.push(['Return baseline',b.return_baseline.toFixed(3)]);
+    if(b.buffer_kind==='group'){fields.push(['Trial groups',b.rollout_updates],['Trials per group',b.group_size],['Trial horizon',b.rollout_horizon]);if(Number.isFinite(b.training_metrics?.return_std))fields.push(['Group reward spread',b.training_metrics.return_std.toFixed(3)]);}
+    else fields.push([b.buffer_kind==='episode'?'Episode buffer':'Rollout buffer',b.buffer_size??b.rollout_size]);
+  }else fields.push(['Exploration',b.epsilon.toFixed(3)],['Own experiences',b.replay_size]);
+  for(const [label,value] of fields){const cell=text('div','');cell.append(text('span',label),text('strong',String(value)));details.append(cell);}box.append(details);
+  box.append(text('p',policy?'Action probabilities':'Predicted future reward per action','muted'));
+  const actionScores=policy?b.action_probabilities:b.action_values;
+  const values=Object.values(actionScores),best=Math.max(...values);
+  for(const [action,value] of Object.entries(actionScores)){const row=text('div','','action'+(value===best?' best':''));row.append(text('span',action.replaceAll('_',' ')),text('span',policy?`${(value*100).toFixed(1)}%`:value.toFixed(3)));box.append(row);}
   const features=text('details','','feature-details');features.append(text('summary','Observation features (20)'));
   features.append(text('pre',JSON.stringify(b.features.map(v=>Number(v.toFixed(3))),null,2)));box.append(features);
 }
