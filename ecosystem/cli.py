@@ -12,7 +12,7 @@ from .config import load
 from .runner import Experiment
 from .recording import Recorder, settings
 from .progress import RunProgress
-from .library import DEFAULT_LIBRARY, export_champions
+from .library import DEFAULT_LIBRARY, export_champions, apply_brain_overrides
 
 
 def main():
@@ -58,15 +58,21 @@ def main():
     )
     parser.set_defaults(progress=None)
     parser.add_argument("--output", type=Path, default=Path("results"))
-    parser.add_argument("--library-dir", type=Path, default=DEFAULT_LIBRARY,
-                        help="Champion archive (default: project brain_library/)")
+    parser.add_argument("--library-dir", type=Path,
+                        help="Optional shared library for selectors and an extra champion copy; run-local brains are always saved")
     parser.add_argument("--no-library", action="store_true",
-                        help="Skip publishing new champion generations")
+                        help="Skip saving new champion models")
+    parser.add_argument("--brains-from", type=Path,
+                        help="Source run name in results/ or experiment path; defaults to its latest archived numbered run")
+    parser.add_argument("--brain-run", type=int, help="Archived run number within --brains-from")
+    parser.add_argument("--brain", action="append", default=[], metavar="SPECIES=MODEL",
+                        help="Repeat per species: criterion from --brains-from, JSON path, best:metric, latest:metric, or fresh")
     args = parser.parse_args()
     if args.resume:
         if any(
-            v is not None for v in (args.runs, args.steps, args.seed, args.seed_policy)
-        ):
+            v is not None for v in (args.runs, args.steps, args.seed, args.seed_policy,
+                                    args.brains_from, args.brain_run)
+        ) or args.brain:
             parser.error("Configuration overrides cannot be used with --resume")
         experiment = Experiment.restore(
             json.loads(args.resume.read_text()), mode=args.mode
@@ -84,7 +90,12 @@ def main():
             config["experiment"]["world_seed_policy"] = args.seed_policy or "increment"
         elif args.seed_policy is not None:
             config["experiment"]["world_seed_policy"] = args.seed_policy
-        experiment = Experiment(config, args.mode or "train", library_root=args.library_dir)
+        try:
+            apply_brain_overrides(config, args.brain, args.brains_from,
+                                  args.brain_run, root=args.library_dir or DEFAULT_LIBRARY)
+            experiment = Experiment(config, args.mode or "train", library_root=args.library_dir or DEFAULT_LIBRARY)
+        except (ValueError, OSError) as error:
+            parser.error(str(error))
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     folder = args.output / f'{experiment.config["name"]}_{stamp}_{uuid.uuid4().hex[:6]}'
     folder.mkdir(parents=True, exist_ok=False)
@@ -101,6 +112,7 @@ def main():
             "python": sys.version,
             "platform": platform.platform(),
             "resumed_from": str(args.resume) if args.resume else None,
+            "initialized_from": {species: value["provenance"] for species, value in experiment.initial_models.items()},
             "randomization_seed": experiment.randomization_seed,
             "checkpoint_version": 1,
             "observation_version": 1,
@@ -118,7 +130,7 @@ def main():
     completed = False
     try:
         run_experiment(experiment, folder, save, recorder, progress,
-                       library_root=None if args.no_library else args.library_dir)
+                       library_root=args.library_dir, save_brains=not args.no_library)
         completed = True
     finally:
         progress.close()
@@ -127,7 +139,7 @@ def main():
     print(f"Results: {folder.resolve()}")
 
 
-def run_experiment(experiment, folder, save, recorder, progress=None, library_root=None):
+def run_experiment(experiment, folder, save, recorder, progress=None, library_root=None, save_brains=True):
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
         fields = ["run", "seed", "tick", "food", "starvation", "predation"] + [
@@ -183,10 +195,13 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                 if recorder is not None:
                     recorder.end_run(experiment)
                 run = experiment.run_index + 1
-                if library_root is not None and experiment.mode == "train":
+                if save_brains and experiment.mode == "train":
                     try:
                         export_champions(experiment, folder / f"champions/run_{run:04d}.json",
-                                         root=library_root, label=folder.name)
+                                         label=folder.name)
+                        if library_root is not None:
+                            export_champions(experiment, folder / f"champions/shared_{run:04d}.json",
+                                             root=library_root, label=folder.name)
                     except (OSError, ValueError):
                         # A library failure must not discard trained controllers.
                         experiment.write_checkpoint(folder / "checkpoints/library_error.json")

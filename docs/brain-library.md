@@ -21,29 +21,78 @@ newborns start those counters at zero. Raw HP is used for health, and age reache
 also includes living survivors rather than treating their age as a completed
 lifespan. The exact tie-breaking ranks are included with each model.
 
-At each completed training run, compact artifacts are published atomically to:
+## Brains belong to their run
+
+Each completed training run saves its own champions. There is no need to track
+which separate model-library generation contains a result:
 
 ```text
-brain_library/gen_<timestamp>_<id>/<species>/health.json
-brain_library/gen_<timestamp>_<id>/<species>/kills.json
-brain_library/gen_<timestamp>_<id>/<species>/lifespan.json
-brain_library/gen_<timestamp>_<id>/<species>/food.json
+results/<run-name>/champions/run_0001.json
+results/<run-name>/champions/run_0001/manifest.json
+results/<run-name>/champions/run_0001/prey/{health,kills,lifespan,food}.json
+results/<run-name>/champions/run_0001/predator/{health,kills,lifespan,food}.json
 ```
 
-Every generation has its own immutable directory and `manifest.json`. A
-run-local index is saved under `results/<experiment>/champions/run_0001.json`.
-Both the library and results are ignored by Git. No model or replay files are
-loaded by the viewer server. In-memory champion storage is bounded by four
-models per species; snapshots omit replay, episode buffers and optimizer state.
-Library publication adds no disk writes inside the simulation step loop.
+The experiment folder is self-contained. Moving it keeps its models usable.
+Experiments with several numbered runs keep separate `run_0002`, `run_0003`, etc.
+By default loading chooses the latest archived numbered run; `--brain-run` pins
+one. Results and optional legacy shared libraries remain ignored by Git.
 
-To list models and their paths:
+List the available champions by run name:
 
 ```sh
-.venv/bin/python -m ecosystem.library
+.venv/bin/python -m ecosystem.library --run PREVIOUS_RUN_NAME
 ```
 
-Configure a species to load the best compatible saved model:
+The model snapshots contain weights and provenance, with no replay or optimizer
+buffers. Tracking retains at most four models per species and performs no disk
+writes inside the simulation-step loop. Models are published atomically when
+the numbered run completes.
+
+## Choose models with CLI arguments
+
+Reuse champions from a specific saved experiment without changing its environment JSON:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+  --brains-from PREVIOUS_PPO_RUN_NAME \
+  --brain prey=food --brain predator=kills
+```
+
+Replace the source name with its experiment folder name under project `results/`.
+An explicit experiment path also works for a custom results directory.
+`--brains-from` defaults to its latest archived run, with food champions for
+resource eaters and kill champions for predators. Add `--brain-run 1` to pin a
+particular run. Each selected model must match the target species and architecture.
+The source artifacts stay unchanged, and the new experiment saves the resolved
+paths in `environment.json` and their provenance in `manifest.json`.
+
+Repeat `--brain SPECIES=MODEL` to select any configured species. `MODEL` accepts:
+
+| Value | Selection |
+| --- | --- |
+| `health`, `kills`, `lifespan`, `food` | That champion from `--brains-from` |
+| `best:food`, `best:kills`, etc. | Best compatible champion across the library |
+| `latest:lifespan`, etc. | Criterion from the latest compatible library generation |
+| Path to an artifact JSON | Exact saved model |
+| `fresh` | Fresh initialization for that species, overriding any JSON warm start |
+
+For example, choose different per-run champions or keep one species fresh:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=health
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=fresh
+```
+
+Unknown species, duplicate selections, missing artifacts and incompatible models
+fail before a new results folder is created. These options cannot be combined
+with `--resume`, which restores the exact saved experiment instead.
+
+## Optional JSON defaults
+
+Explicit JSON paths are still supported. Earlier shared-library selectors also remain available for existing configurations:
 
 ```json
 "initial_brain": {"selection": "best", "metric": "food"}
@@ -56,7 +105,7 @@ experiment starts, and each agent receives an independent copy. To pin a
 specific generation, use the path printed by the library command:
 
 ```json
-"initial_brain": {"path": "brain_library/gen_<timestamp>_<id>/prey/food.json"}
+"initial_brain": {"path": "results/PREVIOUS_RUN_NAME/champions/run_0001/prey/food.json"}
 ```
 
 Relative paths resolve from the project root, regardless of the working
@@ -86,13 +135,32 @@ age; `statistics_since_age` makes that limitation explicit. Past model weights
 that were never saved cannot be reconstructed from a playback recording.
 
 ```sh
-# First produce compatible Q champions, then train their next model generation.
-.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1
-.venv/bin/python -m ecosystem.cli environments/champion_lineage.json --runs 1
+# Train, then use the result folder name printed by the first command.
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=food --brain predator=kills
 ```
 
-The lineage preset uses a prey `food` champion and a predator `kills` champion.
-Omitting `initial_brain` preserves fresh initialization. `--library-dir PATH`
-chooses another archive location for saving and automatic selectors; explicit
-paths remain relative to the project root. `--no-library` skips publishing new
+The older `champion_lineage.json` preset uses shared-library selectors for a prey
+`food` champion and a predator `kills` champion. The default workflow now uses
+`--brains-from RUN_NAME` and per-species `--brain` criteria.
+With no JSON or CLI initialization request, agents start fresh. `--library-dir PATH`
+opts into an additional shared archive and selects the shared search location
+for legacy `best:`/`latest:` selectors. Run-local models are still saved. Explicit
+JSON paths remain relative to the project root. `--no-library` skips publishing new
 generations. Evaluation and random-control runs do not publish champion models.
+
+
+## Older shared archives
+
+Older run indexes that point into `brain_library/` continue to load. To make one
+self-contained, copy its existing models into the run with:
+
+```sh
+.venv/bin/python -m ecosystem.library --run PREVIOUS_RUN_NAME --localize
+```
+
+This preserves model bytes and artifact identities and keeps the original shared
+copies. It can be repeated safely. The four existing archived experiments were
+localized when this workflow was introduced, including
+`ppo_20261115T044556Z_889391`.

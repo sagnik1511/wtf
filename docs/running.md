@@ -32,7 +32,7 @@ Training displays a tqdm bar automatically in a terminal, showing run/step progr
 Each invocation creates a unique folder inside `results/` containing:
 
 - `environment.json`: exact effective configuration, including CLI overrides.
-- `manifest.json`: mode, Python/platform version, checkpoint/observation versions.
+- `manifest.json`: mode, Python/platform version, checkpoint/observation versions and resolved starting-model provenance.
 - `run_seeds.json`: actual world seeds used.
 - `metrics.csv`: per-run population, food, cumulative energy gained, kills, births and deaths.
 - `summary.json`: per-run outcomes, lifespans of dead animals, and ages of survivors. Survivor ages are censored observations, not completed lifespans.
@@ -42,7 +42,7 @@ Each invocation creates a unique folder inside `results/` containing:
 - `playback/recording.json`: versioned recording manifest and static layout per run.
 - `playback/run_0001_chunk_000000.json`, etc.: small arrays of recorded frames.
 
-Pass `--output PATH` to choose another result directory. Trained champion weights are stored separately in the project `brain_library/`; see [saved brains](brain-library.md) for loading them and changing archive settings. Both generated directories are ignored by Git.
+Pass `--output PATH` to choose another result directory. Trained champion weights are stored inside that experiment under `champions/run_0001/`, etc.; see [saved brains](brain-library.md) for loading them and changing archive settings. Generated results and optional shared libraries are ignored by Git.
 
 ## Randomized and reproducible runs
 

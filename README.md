@@ -26,14 +26,15 @@ You can close the simulator before starting playback. Python packages stay in
 ## Keep learned brains
 
 Completed training runs archive health, kills, lifespan and food-gain champions
-for each species in `brain_library/`. Models keep their scores and ancestry.
+for each species inside `results/<run-name>/champions/`. Models keep their scores and ancestry.
 Use a prey foraging champion and predator hunting champion to start a new generation:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/champion_lineage.json --runs 1
+.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1 \
+  --brains-from PREVIOUS_RUN_NAME --brain prey=food --brain predator=kills
 ```
 
-This preset requires compatible Q champions from an earlier run. See the
+Replace `PREVIOUS_RUN_NAME` with a folder name under `results/` containing compatible Q champions. See the
 [saved-brain guide](docs/brain-library.md) to choose another criterion, algorithm
 or exact model generation.
 

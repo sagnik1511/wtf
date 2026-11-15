@@ -7,7 +7,7 @@ import unittest
 
 from ecosystem.brains import load_model_weights, model_snapshot
 from ecosystem.config import validate
-from ecosystem.library import ChampionBook, catalog, export_champions
+from ecosystem.library import ChampionBook, catalog, export_champions, apply_brain_overrides, localize_champions
 from ecosystem.runner import Experiment
 from ecosystem.world import Animal, World
 from tests.test_simulation import config
@@ -192,6 +192,118 @@ class LibraryTests(unittest.TestCase):
             c['brains']['small_q']['hidden_layers']=[5]
             with self.assertRaisesRegex(ValueError,'incompatible'):
                 Experiment(c)
+
+    def test_source_experiment_cli_selection_and_fresh_override(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);e=Experiment(config());e.step()
+            index=root/'previous'/'champions'/'run_0001.json'
+            archive=export_champions(e,index,root=root/'library')
+            c=config()
+            apply_brain_overrides(c,['prey=lifespan','predator=fresh'],root/'previous')
+            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),archive/'prey/lifespan.json')
+            self.assertNotIn('initial_brain',c['species']['predator'])
+            warmed=Experiment(c)
+            self.assertEqual(model_snapshot(warmed.brains[0]),e.champions.entries['prey']['lifespan']['model'])
+            defaults=config();apply_brain_overrides(defaults,source_experiment=root/'previous')
+            self.assertTrue(defaults['species']['prey']['initial_brain']['path'].endswith('food.json'))
+            self.assertTrue(defaults['species']['predator']['initial_brain']['path'].endswith('kills.json'))
+
+    def test_cli_selections_validate_species_duplicates_and_criteria(self):
+        for requests in (['prey'],['unknown=food'],['prey='],['prey=food','prey=kills'],
+                         ['prey=food'],['prey=best:unknown']):
+            with self.subTest(requests=requests),self.assertRaises(ValueError):
+                apply_brain_overrides(config(),requests)
+        with self.assertRaises(ValueError):apply_brain_overrides(config(),source_run=1)
+        c=config();apply_brain_overrides(c,['prey=best:food','predator=latest:lifespan'])
+        self.assertEqual(c['species']['prey']['initial_brain'],{'selection':'best','metric':'food'})
+        self.assertEqual(c['species']['predator']['initial_brain'],{'selection':'latest','metric':'lifespan'})
+
+    def test_cli_applies_source_models_without_editing_environment(self):
+        import subprocess
+        import sys
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);e=Experiment(config())
+            export_champions(e,root/'previous/champions/run_0001.json',root=root/'library')
+            path=root/'environment.json';path.write_text(json.dumps(config()))
+            original=path.read_bytes()
+            output=root/'results'
+            subprocess.run([sys.executable,'-m','ecosystem.cli',str(path),'--runs','1',
+                '--steps','1','--brains-from',str(root/'previous'),
+                '--brain','prey=food','--brain','predator=kills',
+                '--no-library','--no-record','--no-progress','--output',str(output)],
+                check=True,capture_output=True,text=True)
+            folder=next(output.iterdir())
+            metadata=json.loads((folder/'manifest.json').read_text())
+            self.assertEqual(metadata['initialized_from']['prey']['criterion'],'food')
+            self.assertEqual(metadata['initialized_from']['predator']['criterion'],'kills')
+            self.assertEqual(path.read_bytes(),original)
+            failed=subprocess.run([sys.executable,'-m','ecosystem.cli','--resume',
+                str(folder/'checkpoints/final.json'),'--brain','prey=fresh'],
+                capture_output=True,text=True)
+            self.assertEqual(failed.returncode,2)
+            self.assertIn('cannot be used with --resume',failed.stderr)
+
+    def test_cli_can_pin_an_earlier_source_run(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);e=Experiment(config())
+            first=export_champions(e,root/'previous/champions/run_0001.json',root=root/'library')
+            e.step()
+            second=export_champions(e,root/'previous/champions/run_0002.json',root=root/'library')
+            c=config();apply_brain_overrides(c,source_experiment=root/'previous')
+            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),second/'prey/food.json')
+            apply_brain_overrides(c,source_experiment=root/'previous',source_run=1)
+            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),first/'prey/food.json')
+
+    def test_run_local_models_move_with_the_experiment_folder(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);e=Experiment(config())
+            index=root/'original/champions/run_0001.json'
+            export_champions(e,index,label='original')
+            self.assertEqual(json.loads(index.read_text())['model_directory'],'run_0001')
+            shutil.move(str(root/'original'),str(root/'moved'))
+            c=config();apply_brain_overrides(c,source_experiment=root/'moved')
+            loaded=Experiment(c)
+            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['food']['model'])
+            self.assertEqual(model_snapshot(loaded.brains[3]),e.champions.entries['predator']['kills']['model'])
+
+    def test_legacy_models_are_localized_without_changing_artifact_identity(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);e=Experiment(config())
+            index=root/'previous/champions/run_0001.json'
+            archive=export_champions(e,index,root=root/'library')
+            original=(archive/'prey/food.json').read_bytes()
+            local=localize_champions(index)
+            self.assertEqual((local/'prey/food.json').read_bytes(),original)
+            self.assertEqual(localize_champions(index),local)
+            shutil.rmtree(root/'library')
+            c=config();apply_brain_overrides(c,source_experiment=root/'previous')
+            loaded=Experiment(c)
+            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['food']['model'])
+
+    def test_source_run_name_resolves_under_project_results(self):
+        from unittest.mock import patch
+        from ecosystem import library
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);e=Experiment(config())
+            export_champions(e,root/'results/example/champions/run_0001.json')
+            with patch.object(library,'PROJECT',root):
+                c=config();apply_brain_overrides(c,source_experiment='example')
+                loaded=Experiment(c)
+                self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['food']['model'])
+
+    def test_cli_saves_self_contained_models_by_default(self):
+        import subprocess,sys
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);path=root/'environment.json';path.write_text(json.dumps(config()))
+            subprocess.run([sys.executable,'-m','ecosystem.cli',str(path),'--runs','1',
+                '--steps','1','--no-record','--no-progress','--output',str(root/'results')],
+                check=True,capture_output=True,text=True)
+            folder=next((root/'results').iterdir())
+            self.assertEqual(len(list((folder/'champions/run_0001').glob('*/*.json'))),8)
+            c=config();apply_brain_overrides(c,source_experiment=folder)
+            self.assertTrue(all(Path(spec['initial_brain']['path']).is_file() for spec in c['species'].values()))
 
     def test_export_failure_does_not_publish_partial_generation(self):
         with tempfile.TemporaryDirectory() as directory:

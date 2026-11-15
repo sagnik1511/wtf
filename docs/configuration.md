@@ -44,6 +44,8 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 | Randomization and repetitions | `experiment` ([guide](running.md#randomized-and-reproducible-runs)) |
 | Disk recording cadence | `recording` ([guide](recording.md)) |
 
+For per-experiment model choices without editing JSON, use the [CLI model selectors](brain-library.md#choose-models-with-cli-arguments). The resolved choices are saved with the new experiment.
+
 ## Reproduction
 
 All supplied environments enable single-parent reproduction for both species.
