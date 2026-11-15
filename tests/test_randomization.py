@@ -31,7 +31,7 @@ class RandomizationTests(unittest.TestCase):
         self.assertNotEqual(a.brains[0].weights, b.brains[0].weights)
         self.assertEqual(a.brains[0].weights, a.brains[1].weights)
 
-    def test_each_run_has_unique_seed_and_retains_learning(self):
+    def test_each_run_has_unique_seed_and_chains_champions(self):
         e = Experiment(self.random_config())
         brain = e.brains[0]
         initial = []
@@ -40,22 +40,22 @@ class RandomizationTests(unittest.TestCase):
                 e.next_run()
             if e.world.tick == 0:
                 initial.append(e.world.snapshot())
-            self.assertIs(e.brains[0], brain)
             e.step()
         self.assertEqual(len(e.run_seeds), 4)
         self.assertEqual(len(set(e.run_seeds)), 4)
         self.assertEqual(len(initial), 4)
-        self.assertEqual(brain.steps, 8)
+        self.assertEqual(e.brains[0].steps, 2)
+        self.assertIsNot(e.brains[0], brain)
 
     def test_reset_brains_are_fresh_in_randomized_runs(self):
         c = self.random_config()
-        c["experiment"]["retain_brains_between_runs"] = False
+        c["experiment"]["chain_best_brains"] = False
         e = Experiment(c)
         weights = copy.deepcopy(e.brains[0].weights)
         e.step()
         e.step()
         e.next_run()
-        self.assertNotEqual(e.brains[0].weights, weights)
+        self.assertEqual(e.brains[0].weights, weights)
         self.assertEqual(e.brains[0].steps, 0)
         self.assertEqual(e.brains[0].weights, e.brains[1].weights)
 

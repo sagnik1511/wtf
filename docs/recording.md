@@ -12,7 +12,9 @@ experiment and click **Play recording**. The server never loads a learning
 checkpoint or advances the world.
 
 - **Refresh list** discovers new saved experiments.
-- Use the run selector, frame slider, **Back**, and **Next frame** to inspect the timeline.
+- Choose any saved run using the **Run** dropdown in the top toolbar. **Previous run** and **Next run** jump between runs; the frame slider, **Back**, and **Next frame** inspect the current timeline.
+- Playback automatically continues into the next recorded run and stops after the final run.
+- A recording opened during training discovers new committed frames/runs when it reaches the available end. It waits for new data and refreshes metadata at most once every two seconds.
 - Click an animal to see its body, lineage and sampled brain diagnostics.
 - Set **Frames / second** to change playback speed; simulation outcomes stay fixed.
 - Kills have red rings, attacker highlights, KILL labels and a banner.

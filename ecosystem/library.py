@@ -176,7 +176,7 @@ def apply_brain_overrides(config, requests=(), source_experiment=None,
     if source_experiment is not None:
         index_path, source = source_index(source_experiment, source_run)
         for species, spec in config["species"].items():
-            selections.setdefault(species, "food" if spec["diet"] == "resource" else "kills")
+            selections.setdefault(species, "lifespan" if spec["diet"] == "resource" else "kills")
     for species, model in selections.items():
         spec = config["species"][species]
         if model == "fresh":
@@ -245,14 +245,14 @@ def export_champions(experiment, destination, root=None, label=None):
         entries=[])
     try:
         for species, champions in experiment.champions.entries.items():
-            initial = experiment.initial_models.get(species, {}).get('provenance')
+            initial = experiment.run_initial_models.get(species, {}).get('provenance')
             for criterion, entry in champions.items():
                 artifact_id = f'{generation}:{_component(species)}:{criterion}'
                 artifact = dict(brain_artifact_version=1, artifact_id=artifact_id,
                     model_generation=(initial['model_generation'] if initial else 0) + 1,
                     parent_artifact=copy.deepcopy(initial), experiment_id=label,
                     training_config=experiment.config, run_complete=experiment.finished_run,
-                    continued_from_run=experiment.run_index if experiment.run_index and experiment.config['experiment']['retain_brains_between_runs'] else None,
+                    continued_from_run=experiment.run_index if experiment.run_index and (experiment.config['experiment'].get('chain_best_brains', True) if not experiment.legacy_brain_retention else experiment.config['experiment']['retain_brains_between_runs']) else None,
                     **entry)
                 relative = Path(_component(species)) / (criterion + '.json')
                 target = staging / relative
@@ -279,6 +279,13 @@ def export_champions(experiment, destination, root=None, label=None):
     finally:
         if temporary.exists():
             temporary.unlink()
+    if local_models or not experiment.champion_artifacts:
+        experiment.champion_artifacts = {}
+        for entry in manifest['entries']:
+            experiment.champion_artifacts.setdefault(entry['species'], {})[entry['criterion']] = dict(
+                artifact_id=entry['artifact_id'], path=str(final / entry['file']),
+                criterion=entry['criterion'], score=entry['score'],
+                model_generation=entry['model_generation'], source_run=experiment.run_index + 1)
     return final
 
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "champion_lineage",
-  "description": "Start independent Q agents from saved prey foragers and predator hunters; archive the next model generation.",
+  "description": "Start independent Q agents from the longest-lived saved prey and predator kill champion; archive the next model generation.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -60,7 +60,7 @@
       },
       "initial_brain": {
         "selection": "best",
-        "metric": "food"
+        "metric": "lifespan"
       }
     },
     "predator": {
@@ -132,7 +132,8 @@
     "retain_brains_between_runs": true,
     "world_seed_policy": "random",
     "record_metrics_every_steps": 10,
-    "checkpoint_every_runs": 1
+    "checkpoint_every_runs": 1,
+    "chain_best_brains": true
   },
   "recording": {
     "enabled": true,

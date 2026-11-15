@@ -227,17 +227,20 @@ class ExperimentTests(unittest.TestCase):
             b.step()
         self.assertEqual(a.checkpoint(), b.checkpoint())
 
-    def test_reset_preserves_or_resets_individual_brain(self):
-        for retain in (True, False):
+    def test_next_run_uses_champion_or_original_weights(self):
+        from ecosystem.brains import model_snapshot
+        for chain in (True, False):
             c = config()
-            c["experiment"]["retain_brains_between_runs"] = retain
+            c["experiment"]["chain_best_brains"] = chain
             c["world"]["max_steps"] = 3
             e = Experiment(c)
+            original = model_snapshot(e.brains[0])
             for _ in range(3):
                 e.step()
-            updates = e.brains[0].steps
+            expected = e.champions.entries["prey"]["food"]["model"] if chain else original
             e.next_run()
-            self.assertEqual(e.brains[0].steps, updates if retain else 0)
+            self.assertEqual(model_snapshot(e.brains[0]), expected)
+            self.assertEqual(e.brains[0].steps, 0)
             self.assertEqual(e.world.tick, 0)
             self.assertEqual(e.world.seed, 43)
 

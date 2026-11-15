@@ -46,7 +46,7 @@ Pass `--output PATH` to choose another result directory. Trained champion weight
 
 ## Randomized and reproducible runs
 
-Example environments default to `"world_seed_policy": "random"`. Each fresh CLI invocation gets a new random seed stream, and every run in that experiment gets a distinct seed. Positions, resource locations, obstacle layouts and conflict outcomes vary. Newly initialized species base brains and individual exploration streams vary too. Animals still begin from copied species base weights, and `retain_brains_between_runs: true` preserves learned brains across the different worlds.
+Example environments default to `"world_seed_policy": "random"`. Each fresh CLI invocation gets a new random seed stream, and every run in that experiment gets a distinct seed. Positions, resource locations, obstacle layouts and conflict outcomes vary. Newly initialized species base brains and individual exploration streams vary too. Animals receive independent copies of their species' starting weights. `chain_best_brains: true` (the default) promotes the previous run's chosen champions into the next world; `--no-chain-brains` restores the experiment's original starting models each time.
 
 The three policies are:
 
@@ -54,7 +54,7 @@ The three policies are:
 | --- | --- |
 | `random` | New random seed for each run and fresh invocation; JSON `seed` is not used |
 | `increment` | Reproducible seeds `seed`, `seed + 1`, etc. |
-| `fixed` | Same world seed on each run; retained learning can still change behavior |
+| `fixed` | Same world seed on each run; chained champions can still change behavior |
 
 Run normally to randomize:
 

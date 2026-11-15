@@ -253,7 +253,7 @@ class InheritanceTests(unittest.TestCase):
                 ids = list(a.world.animals) + [x["id"] for x in a.world.lifespans]
                 self.assertGreaterEqual(a.world.next_animal_id, max(ids) + 1)
 
-    def test_dead_child_released_ids_not_reused_founders_retained(self):
+    def test_dead_child_released_ids_not_reused_next_run_is_fresh(self):
         e = breeding_experiment()
         e.step()
         child_id = next(i for i, a in e.world.animals.items() if a.parent_id == 0)
@@ -269,7 +269,7 @@ class InheritanceTests(unittest.TestCase):
             e.step()
         e.next_run()
         self.assertEqual(set(e.brains), {0, 1, 2, 3})
-        self.assertIs(e.brains[0], founding_brain)
+        self.assertIsNot(e.brains[0], founding_brain)
         self.assertTrue(all(a.parent_id == -1 for a in e.world.animals.values()))
 
     def test_grpo_trials_handle_multigeneration_births_without_mutation(self):

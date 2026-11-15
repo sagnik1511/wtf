@@ -64,6 +64,7 @@ class Recorder:
             last_tick=world.tick,
             complete=experiment.finished_run,
         )
+        self.run["initialized_from"] = {s: m["provenance"] for s, m in experiment.run_initial_models.items()}
         self.manifest["runs"].append(self.run)
         self.last_tick = self.last_diagnostic_tick = None
         self._publish()

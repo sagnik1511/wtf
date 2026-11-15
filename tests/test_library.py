@@ -205,7 +205,7 @@ class LibraryTests(unittest.TestCase):
             warmed=Experiment(c)
             self.assertEqual(model_snapshot(warmed.brains[0]),e.champions.entries['prey']['lifespan']['model'])
             defaults=config();apply_brain_overrides(defaults,source_experiment=root/'previous')
-            self.assertTrue(defaults['species']['prey']['initial_brain']['path'].endswith('food.json'))
+            self.assertTrue(defaults['species']['prey']['initial_brain']['path'].endswith('lifespan.json'))
             self.assertTrue(defaults['species']['predator']['initial_brain']['path'].endswith('kills.json'))
 
     def test_cli_selections_validate_species_duplicates_and_criteria(self):
@@ -250,9 +250,9 @@ class LibraryTests(unittest.TestCase):
             e.step()
             second=export_champions(e,root/'previous/champions/run_0002.json',root=root/'library')
             c=config();apply_brain_overrides(c,source_experiment=root/'previous')
-            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),second/'prey/food.json')
+            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),second/'prey/lifespan.json')
             apply_brain_overrides(c,source_experiment=root/'previous',source_run=1)
-            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),first/'prey/food.json')
+            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),first/'prey/lifespan.json')
 
     def test_run_local_models_move_with_the_experiment_folder(self):
         import shutil
@@ -264,7 +264,7 @@ class LibraryTests(unittest.TestCase):
             shutil.move(str(root/'original'),str(root/'moved'))
             c=config();apply_brain_overrides(c,source_experiment=root/'moved')
             loaded=Experiment(c)
-            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['food']['model'])
+            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['lifespan']['model'])
             self.assertEqual(model_snapshot(loaded.brains[3]),e.champions.entries['predator']['kills']['model'])
 
     def test_legacy_models_are_localized_without_changing_artifact_identity(self):
@@ -280,7 +280,7 @@ class LibraryTests(unittest.TestCase):
             shutil.rmtree(root/'library')
             c=config();apply_brain_overrides(c,source_experiment=root/'previous')
             loaded=Experiment(c)
-            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['food']['model'])
+            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['lifespan']['model'])
 
     def test_source_run_name_resolves_under_project_results(self):
         from unittest.mock import patch
@@ -291,7 +291,7 @@ class LibraryTests(unittest.TestCase):
             with patch.object(library,'PROJECT',root):
                 c=config();apply_brain_overrides(c,source_experiment='example')
                 loaded=Experiment(c)
-                self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['food']['model'])
+                self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['lifespan']['model'])
 
     def test_cli_saves_self_contained_models_by_default(self):
         import subprocess,sys

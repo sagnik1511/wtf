@@ -233,3 +233,56 @@ test('Birth highlights carry across sequential chunks and reset across runs and 
   await p.seek(2);await p.changeRun(2);
   assert.equal(p.snapshot().birth_highlights.length,0);
 });
+
+test('All ten recorded runs are selectable and advance sequentially to the final run',async()=>{
+  const runs=Array.from({length:10},(_,i)=>({run:i+1,frame_count:2,obstacles:[],seed:i,complete:true}));
+  const metadata={recording_version:1,name:'ten',status:'complete',mode:'train',recording:{frames_per_chunk:2},config:{world:{width:8,height:8},resources:{capacity_per_patch:20},species:{prey:{diet:'resource'}},experiment:{runs:10}},runs};
+  const p=new Playback(async path=>{
+    if(path==='/api/recordings/ten')return metadata;
+    if(path.endsWith('/metrics'))return [];
+    return [0,1].map(tick=>({tick,animals:[],events:[],metrics:{tick,populations:{prey:0},food:0}}));
+  });
+  await p.open('ten');assert.equal(p.runs.length,10);
+  for(let run=1;run<=10;run++){
+    assert.equal(p.run.run,run);
+    await p.advance();assert.equal(p.snapshot().done,run===10);
+    if(run<10)await p.advance();
+    assert.equal(p.frames.length,2);
+  }
+  for(const run of [10,1,7,3]){const state=await p.changeRun(run);assert.equal(state.run,run);assert.equal(state.frame_index,0);}
+});
+
+test('Playback waits for writing recordings, refreshes a stale run list and stops after completion',async()=>{
+  let clock=0,finished=false,metadataCalls=0;
+  const base={recording_version:1,name:'growing',status:'writing',mode:'train',recording:{frames_per_chunk:2},config:{world:{width:8,height:8},resources:{capacity_per_patch:20},species:{prey:{diet:'resource'}},experiment:{runs:2}}};
+  const p=new Playback(async path=>{
+    if(path==='/api/recordings/growing'){
+      metadataCalls++;
+      return {...base,status:finished?'complete':'writing',runs:[{run:1,frame_count:2,obstacles:[],complete:finished},...(finished?[{run:2,frame_count:2,obstacles:[],complete:true}]:[])]};
+    }
+    if(path.endsWith('/metrics'))return [];
+    return [0,1].map(tick=>({tick,animals:[],events:[],metrics:{tick,populations:{prey:0},food:0}}));
+  },()=>clock);
+  await p.open('growing');await p.advance();
+  assert.equal(p.snapshot().done,false);assert.equal(p.snapshot().waiting,true);
+  for(let i=0;i<5;i++)await p.advance();
+  assert.equal(metadataCalls,1); // No per-frame metadata requests while waiting.
+  finished=true;clock=2000;
+  const next=await p.advance();
+  assert.equal(metadataCalls,2);assert.equal(p.runs.length,2);
+  assert.equal(next.run,2);assert.equal(next.frame_index,0);
+  await p.advance();assert.equal(p.snapshot().done,true);
+});
+
+test('Metadata refresh extends a partial chunk and clears waiting after a recording finishes',async()=>{
+  let clock=0,count=1,complete=false;
+  const p=new Playback(async path=>{
+    if(path==='/api/recordings/partial')return {recording_version:1,name:'partial',status:complete?'complete':'writing',mode:'train',recording:{frames_per_chunk:3},config:{world:{width:8,height:8},resources:{capacity_per_patch:20},species:{}},runs:[{run:1,frame_count:count,obstacles:[],complete}]};
+    if(path.endsWith('/metrics'))return [];
+    return Array.from({length:count},(_,tick)=>({tick,animals:[],events:[],metrics:{tick,populations:{},food:0}}));
+  },()=>clock);
+  await p.open('partial');assert.equal(p.snapshot().waiting,true);
+  count=3;complete=true;clock=2000;
+  const next=await p.advance();assert.equal(next.tick,1);assert.equal(p.frames.length,3);
+  await p.advance();assert.equal(p.snapshot().done,true);assert.equal(p.snapshot().waiting,false);
+});

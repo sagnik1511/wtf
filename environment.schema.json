@@ -708,6 +708,7 @@
             "type": "object",
             "properties": {
                 "runs": {"type": "integer", "minimum": 1, "maximum": 1000000},
+                "chain_best_brains": {"type": "boolean", "default": true},
                 "retain_brains_between_runs": {"type": "boolean"},
                 "world_seed_policy": {"enum": ["random", "fixed", "increment"]},
                 "record_metrics_every_steps": {

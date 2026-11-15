@@ -4,8 +4,10 @@ import { recentKills } from './kill-highlights.mjs';
 // File-format reader only: no simulation, model weights, or learning code.
 // One decoded chunk is retained, regardless of total recording duration.
 export class Playback {
-  constructor(loadJSON) {
+  constructor(loadJSON, now = () => Date.now()) {
     this.loadJSON = loadJSON;
+    this.now = now;
+    this.lastMetadataRefresh = -Infinity;
     this.frames = [];
     this.metrics = [];
     this.killCarry = [];
@@ -24,6 +26,7 @@ export class Playback {
     this.id = id;
     this.metadata = metadata;
     this.runs = runs;
+    this.lastMetadataRefresh = this.now();
     return this.changeRun(runs[0].run);
   }
   async changeRun(run, selected = null) {
@@ -73,12 +76,43 @@ export class Playback {
     this.frameIndex = index;
     return this.snapshot(selected);
   }
+  async refreshMetadata(selected = null, force = false) {
+    if (!force && this.now() - this.lastMetadataRefresh < 2000) return;
+    const metadata = await this.loadJSON(`/api/recordings/${encodeURIComponent(this.id)}`);
+    if (metadata.recording_version !== 1) throw new Error('Unsupported recording version');
+    const runs = metadata.runs.filter(run => run.frame_count > 0);
+    const entry = runs.find(run => run.run === this.run.run);
+    if (!entry) throw new Error('Selected run is no longer available');
+    const oldCount = this.run.frame_count;
+    this.metadata = metadata;
+    this.runs = runs;
+    this.run = entry;
+    this.lastMetadataRefresh = this.now();
+    if (entry.frame_count !== oldCount) {
+      const metrics = await this.loadJSON(`/api/recordings/${encodeURIComponent(this.id)}/runs/${entry.run}/metrics`);
+      if (!Array.isArray(metrics) || metrics.length > 2048) throw new Error('Invalid run metrics');
+      this.metrics = metrics;
+      const size = metadata.recording.frames_per_chunk;
+      // Normal committed chunks are immutable. Reload a previously partial
+      // last chunk if an exporter has extended it in place.
+      if (oldCount % size && this.chunkIndex === Math.floor((oldCount - 1) / size)) {
+        this.chunkIndex = -1;
+        await this.seek(this.frameIndex, selected);
+      }
+    }
+  }
   get atEnd() {
-    return this.frameIndex === this.run.frame_count - 1 && this.run === this.runs[this.runs.length - 1];
+    return this.frameIndex === this.run.frame_count - 1 &&
+      this.run.run === this.runs.at(-1).run && this.metadata.status !== 'writing';
   }
   async advance(selected = null) {
     if (this.frameIndex < this.run.frame_count - 1) return this.seek(this.frameIndex + 1, selected);
-    const next = this.runs[this.runs.indexOf(this.run) + 1];
+    let next = this.runs[this.runs.findIndex(run => run.run === this.run.run) + 1];
+    if (!next && this.metadata.status === 'writing') {
+      await this.refreshMetadata(selected);
+      if (this.frameIndex < this.run.frame_count - 1) return this.seek(this.frameIndex + 1, selected);
+      next = this.runs[this.runs.findIndex(run => run.run === this.run.run) + 1];
+    }
     return next ? this.changeRun(next.run, selected) : this.snapshot(selected);
   }
   snapshot(selected = null) {
@@ -108,6 +142,7 @@ export class Playback {
       birth_highlights: recentBirths(this.frames, this.chunkIndex * this.metadata.recording.frames_per_chunk, local, this.birthCarry),
       natural_death_highlights: recentNaturalDeaths(this.frames, this.chunkIndex * this.metadata.recording.frames_per_chunk, local, this.deathCarry, this.previousAgents, this.previousTick),
       kill_highlights: recentKills(this.frames, this.chunkIndex * this.metadata.recording.frames_per_chunk, local, this.killCarry),
+      waiting: this.metadata.status === 'writing' && this.frameIndex === this.run.frame_count - 1 && this.run.run === this.runs.at(-1).run,
       frame_index: this.frameIndex, frame_count: this.run.frame_count
     };
   }

@@ -56,12 +56,12 @@ Reuse champions from a specific saved experiment without changing its environmen
 ```sh
 .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
   --brains-from PREVIOUS_PPO_RUN_NAME \
-  --brain prey=food --brain predator=kills
+  --brain prey=lifespan --brain predator=kills
 ```
 
 Replace the source name with its experiment folder name under project `results/`.
 An explicit experiment path also works for a custom results directory.
-`--brains-from` defaults to its latest archived run, with food champions for
+`--brains-from` defaults to its latest archived run, with lifespan champions for
 resource eaters and kill champions for predators. Add `--brain-run 1` to pin a
 particular run. Each selected model must match the target species and architecture.
 The source artifacts stay unchanged, and the new experiment saves the resolved
@@ -95,7 +95,7 @@ with `--resume`, which restores the exact saved experiment instead.
 Explicit JSON paths are still supported. Earlier shared-library selectors also remain available for existing configurations:
 
 ```json
-"initial_brain": {"selection": "best", "metric": "food"}
+"initial_brain": {"selection": "best", "metric": "lifespan"}
 ```
 
 For predators, use `"metric": "kills"` or `"lifespan"`; `"health"` is available
@@ -119,15 +119,50 @@ buffers, fresh optimizer state and random streams, and the exploration settings
 from its JSON.
 Q target weights and GRPO's frozen reference policy start at the imported model.
 Learning rates and other training settings can be changed without changing the
-architecture. Ordinary `retain_brains_between_runs` still takes precedence for
-later runs in the same experiment. With retention disabled, each run reloads
-copies of the model selected at experiment startup. Exact checkpoints embed the
-selected weights and champion book, so resuming does not need the original
-library files and is unaffected by newer library generations.
+architecture. Exact checkpoints embed the selected weights and champion book,
+so resuming does not need the original files or newer archive versions.
+
+## Automatically chain runs
+
+`experiment.chain_best_brains` defaults to `true`. When `--runs` is greater than
+one, each later training run starts all animals of a species from the previous
+run's selected champion. The criterion stays the same: `--brain prey=lifespan` keeps
+choosing the previous run's prey lifespan champion, and `predator=kills` keeps choosing
+its predator kill champion. Without a saved starting model, these are also the
+default criteria. Models transfer in memory even with `--no-library`.
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 3 \
+  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills
+```
+
+Run 1 starts from the named source; run 2 starts from run 1's champions; run 3
+starts from run 2's champions. Body state, optimizer state, experience buffers
+and controller counters restart each run; learned model weights carry forward.
+Archive parent links and recorded run metadata identify the actual source.
+
+To start every run from the original initialization instead:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 3 \
+  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills \
+  --no-chain-brains
+```
+
+Use `--chain-brains` to explicitly enable chaining. The JSON alternative is
+`"chain_best_brains": false` under `experiment`. With chaining disabled, even
+fresh random starting weights are pinned to the first initialization; world
+and controller random streams can still differ. Evaluation/random controls
+start from the original frozen models rather than promoting training champions.
+
+The older `retain_brains_between_runs` field applies only to legacy checkpoint
+continuation. New experiments use `chain_best_brains` instead. Checkpoints from
+before this flag keep their original individual-controller retention behavior;
+resuming does not silently change an old experiment's training policy.
 
 Artifacts record scores, world seed, run, tick, animal ID, body generation,
 training configuration and source artifact. `model_generation` counts warm-start
-ancestry depth, separately from reproduction generations. Subsequent retained
+ancestry depth, separately from reproduction generations. Subsequent chained
 runs also record their prior run number. Old archive directories stay available
 for comparisons and branching new lineages. Legacy checkpoints that lack
 individual kill/food counters begin counting those statistics at the resumed
@@ -138,11 +173,11 @@ that were never saved cannot be reconstructed from a playback recording.
 # Train, then use the result folder name printed by the first command.
 .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1
 .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
-  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=food --brain predator=kills
+  --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills
 ```
 
 The older `champion_lineage.json` preset uses shared-library selectors for a prey
-`food` champion and a predator `kills` champion. The default workflow now uses
+`lifespan` champion and a predator `kills` champion. The default workflow now uses
 `--brains-from RUN_NAME` and per-species `--brain` criteria.
 With no JSON or CLI initialization request, agents start fresh. `--library-dir PATH`
 opts into an additional shared archive and selects the shared search location

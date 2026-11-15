@@ -3,7 +3,7 @@ import { behaviorRows } from './behavior-stats.mjs';
 const $ = id => document.getElementById(id);
 let state, selected = null, playing = false, busy = false;
 const colors = ['#7de2bd', '#ff9a77', '#83b9ff', '#ce9ef5', '#f4cf7a'];
-let errorTimer, analysisKey="", analysisRequest=0;
+let errorTimer, analysisKey="", analysisRequest=0,runMenuKey="";
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
 async function api(path) {
   const response = await fetch(path);
@@ -16,9 +16,9 @@ function pause() { playing = false; $('play').textContent = 'Play recording'; }
 async function operation(fn) {
   if (busy) return;
   busy = true;
-  for (const id of ['step','back','load','refresh','recorded-run','timeline']) $(id).disabled = true;
+  for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run']) $(id).disabled = true;
   try { await fn(); } catch (e) { pause(); showError(e); }
-  finally { busy = false; for (const id of ['step','back','load','refresh','recorded-run','timeline']) $(id).disabled = false; }
+  finally { busy = false; for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run']) $(id).disabled = false;updateRunButtons(); }
 }
 function speciesColor(name) { return colors[Object.keys(state.species).indexOf(name) % colors.length]; }
 function fitWorld() {
@@ -163,7 +163,7 @@ function drawInspector() {
   features.append(text('pre',JSON.stringify(b.features.map(v=>Number(v.toFixed(3))),null,2)));box.append(features);
 }
 async function loadBehavior() {
-  const key=`${player.id}:${state.run}`;
+  const key=`${player.id}:${state.run}:${player.run.complete}`;
   if(key===analysisKey)return;
   analysisKey=key;
   const request=++analysisRequest,box=$('behavior');
@@ -200,8 +200,36 @@ async function loadBehavior() {
     box.append(text('p',`Early: ${run.windows[0].start_tick}–${run.windows[0].end_tick}; late: ${run.windows.at(-1).start_tick}–${run.windows.at(-1).end_tick}. Policy entropy of 100% means uniform probabilities. Updates exclude inherited counter baselines. Successful actions are reconstructed where possible on death steps. Compare frozen policies on held-out seeds to establish learning.`));
   }catch(error){if(request===analysisRequest)box.replaceChildren(text('p',`Analysis unavailable: ${error.message}`));}
 }
+function updateRunButtons(){
+  const index=state?player.runs.findIndex(run=>run.run===state.run):-1;
+  $('previous-run').disabled=busy||index<=0;
+  $('next-run').disabled=busy||index<0||index>=player.runs.length-1;
+}
+function syncRunMenu(){
+  const key=`${player.id}:${player.runs.map(run=>`${run.run}:${run.frame_count}:${run.complete}`).join(',')}`;
+  if(key!==runMenuKey){
+    runMenuKey=key;
+    $('recorded-run').replaceChildren(...player.runs.map(run=>{
+      const option=text('option',`Run ${run.run} / ${player.metadata.config.experiment?.runs??player.runs.length}${run.complete===false?' · partial':''}`);
+      option.value=run.run;option.title=`Seed ${run.seed} · ${run.frame_count} frames`;return option;
+    }));
+  }
+  $('recorded-run').value=state.run;
+  updateRunButtons();
+}
+async function changeRunBy(offset){
+  pause();
+  await operation(async()=>{
+    const index=player.runs.findIndex(run=>run.run===state?.run),target=player.runs[index+offset];
+    if(!target)return;
+    selected=null;render(await player.changeRun(target.run));
+  });
+}
 function render(snapshot = null) {
+  const previousRun=state?.run;
   state=snapshot??player.snapshot(selected);
+  if(previousRun!==undefined&&previousRun!==state.run){selected=null;state=player.snapshot();}
+  syncRunMenu();
   $('tick').textContent=state.tick.toLocaleString();$('run').textContent=`${state.run} / ${state.total_runs}`;
   let prey=0,predators=0;for(const [name,s] of Object.entries(state.species)) {if(s.diet==='resource')prey+=state.metrics.populations[name];else predators+=state.metrics.populations[name];}
   $('prey').textContent=prey;$('predator').textContent=predators;$('food').textContent=Math.round(state.metrics.food).toLocaleString();$('updates').textContent=state.total_updates.toLocaleString();
@@ -227,7 +255,7 @@ function render(snapshot = null) {
     ?`NATURAL DEATH · ${species} #${latestEvent.actor} · ${latestEvent.cause} · Step ${latestEvent.tick}`
     :`KILL · Predator #${latestEvent.actor} → prey #${latestEvent.target} · Step ${latestEvent.tick}`;
   if($('kill-banner').textContent!==banner)$('kill-banner').textContent=banner;
-  $('connection').textContent=`Recorded playback · ${state.mode}`;
+  $('connection').textContent=state.waiting?'Waiting for more recorded frames or runs':`Recorded playback · ${state.mode}`;
   $('empty').hidden=!state.done;$('empty').textContent='End of recording. Seek backward or load another saved experiment.';
   $('outcomes').textContent=`Births: ${Object.values(state.metrics.births??{}).reduce((a,b)=>a+b,0)} · Starvation: ${state.metrics.deaths.starvation||0} · Predation: ${state.metrics.deaths.predation||0} · Hunts: ${Object.values(state.metrics.kills).reduce((a,b)=>a+b,0)}`;
   $('recorded-run').value=state.run;
@@ -240,7 +268,7 @@ function render(snapshot = null) {
 async function openRecording() {
   const id=$('recording').value;if(!id)return;
   selected=null;analysisKey="";await player.open(id);
-  $('recorded-run').replaceChildren(...player.runs.map(run=>{const option=text('option',`Run ${run.run} · Seed ${run.seed} · ${run.frame_count} frames`);option.value=run.run;return option;}));
+  runMenuKey="";
   $('config').value=JSON.stringify(player.metadata.config,null,2);
   $('play').disabled=false;render();
 }
@@ -261,6 +289,8 @@ $('step').onclick=()=>{pause();if(state)operation(async()=>{render(await player.
 $('back').onclick=()=>{pause();if(state)operation(async()=>{render(await player.seek(Math.max(0,player.frameIndex-1),selected));});};
 $('load').onclick=()=>{pause();operation(openRecording);};
 $('refresh').onclick=()=>{pause();operation(refreshCatalog);};
+$('previous-run').onclick=()=>{if(state)changeRunBy(-1);};
+$('next-run').onclick=()=>{if(state)changeRunBy(1);};
 $('recorded-run').onchange=()=>{pause();if(state)operation(async()=>{selected=null;render(await player.changeRun($('recorded-run').value,selected));});};
 $('timeline').onchange=()=>{pause();if(state)operation(async()=>{render(await player.seek(Number($('timeline').value),selected));});};
 $('speed').oninput=()=>{$('speed-value').textContent=$('speed').value;};

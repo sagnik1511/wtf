@@ -123,7 +123,8 @@
     "retain_brains_between_runs": true,
     "world_seed_policy": "random",
     "record_metrics_every_steps": 10,
-    "checkpoint_every_runs": 1
+    "checkpoint_every_runs": 1,
+    "chain_best_brains": true
   },
   "recording": {
     "enabled": true,

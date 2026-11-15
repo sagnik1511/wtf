@@ -67,11 +67,17 @@ def main():
     parser.add_argument("--brain-run", type=int, help="Archived run number within --brains-from")
     parser.add_argument("--brain", action="append", default=[], metavar="SPECIES=MODEL",
                         help="Repeat per species: criterion from --brains-from, JSON path, best:metric, latest:metric, or fresh")
+    chain = parser.add_mutually_exclusive_group()
+    chain.add_argument("--chain-brains", dest="chain_brains", action="store_true",
+                       help="Initialize later runs from the previous run's champions (default)")
+    chain.add_argument("--no-chain-brains", dest="chain_brains", action="store_false",
+                       help="Reset every run to the original starting models")
+    parser.set_defaults(chain_brains=None)
     args = parser.parse_args()
     if args.resume:
         if any(
             v is not None for v in (args.runs, args.steps, args.seed, args.seed_policy,
-                                    args.brains_from, args.brain_run)
+                                    args.brains_from, args.brain_run, args.chain_brains)
         ) or args.brain:
             parser.error("Configuration overrides cannot be used with --resume")
         experiment = Experiment.restore(
@@ -79,6 +85,10 @@ def main():
         )
     else:
         config = load(args.environment)
+        if args.chain_brains is not None:
+            config["experiment"]["chain_best_brains"] = args.chain_brains
+        else:
+            config["experiment"].setdefault("chain_best_brains", True)
         if args.runs is not None:
             config["experiment"]["runs"] = args.runs
         if args.steps is not None:

@@ -39,6 +39,7 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 | Food supply/regrowth | `resources` |
 | Map size and duration | `world.width`, `world.height`, `world.max_steps` |
 | Model and training algorithm | `species.<name>.brain` and the referenced `brains` template |
+| Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |
 | Reproduction | `species.<name>.reproduction` |
 | Randomization and repetitions | `experiment` ([guide](running.md#randomized-and-reproducible-runs)) |
@@ -91,8 +92,8 @@ metrics, CSV and summaries count births per species. The viewer emphasizes birth
 BORN labels, a parent/child banner, and a highlighted birth counter. Markers
 last briefly across sequential chunk boundaries and reset when switching runs.
 These effects work with existing recordings that contain birth events. IDs are never reused within a run.
-Dead descendants' controllers are released; only founding controllers persist
-when `retain_brains_between_runs` is enabled. Each new run starts with the
+Dead descendants' controllers are released. Later runs initialize from the
+previous run's champions by default; see [run chaining](brain-library.md#automatically-chain-runs). Each new run starts with the
 configured initial population. GRPO trial worlds include births with independent
 child random streams and frozen inherited policies.
 

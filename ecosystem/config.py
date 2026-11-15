@@ -441,12 +441,14 @@ def validate(c):
             "record_metrics_every_steps",
             "checkpoint_every_runs",
         ),
-        optional=("grpo_updates_per_step",),
+        optional=("grpo_updates_per_step", "chain_best_brains"),
     )
     for k in ("runs", "record_metrics_every_steps", "checkpoint_every_runs"):
         num(e[k], f"experiment.{k}", 1, 1000000, True)
     if "grpo_updates_per_step" in e:
         num(e["grpo_updates_per_step"], "experiment.grpo_updates_per_step", 1, 8, True)
+    if "chain_best_brains" in e and type(e["chain_best_brains"]) is not bool:
+        fail("experiment.chain_best_brains", "must be boolean")
     if type(e["retain_brains_between_runs"]) is not bool:
         fail("experiment.retain_brains_between_runs", "must be boolean")
     if e["world_seed_policy"] not in ("random", "fixed", "increment"):

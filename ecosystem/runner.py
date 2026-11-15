@@ -6,7 +6,7 @@ from pathlib import Path
 import random
 import secrets
 from .brain import Experience
-from .brains import create_brain, restore_brain, inherit_brain, offspring_seed, load_model_weights
+from .brains import create_brain, restore_brain, inherit_brain, offspring_seed, load_model_weights, model_snapshot
 from .config import validate
 from .world import World
 from .library import ChampionBook, load_initial_models
@@ -18,7 +18,11 @@ class Experiment:
             raise ValueError("mode must be train, evaluate, or random")
         self.config = copy.deepcopy(validate(config))
         self.mode = mode
+        self.legacy_brain_retention = False
         self.initial_models = load_initial_models(self.config, **({"root": library_root} if library_root is not None else {}))
+        self.run_initial_models = copy.deepcopy(self.initial_models)
+        self.champion_artifacts = {}
+        self.initial_weights = {}
         randomized = self.config["experiment"]["world_seed_policy"] == "random"
         self.randomization_seed = secrets.randbits(64) if randomized else None
         self.seed_rng = random.Random(self.randomization_seed) if randomized else None
@@ -34,6 +38,27 @@ class Experiment:
 
     def _start_run(self):
         c = self.config
+        if self.run_index > 0 and not self.legacy_brain_retention:
+            models = copy.deepcopy(self.initial_models)
+            if c["experiment"].get("chain_best_brains", True) and self.mode == "train":
+                for species, spec in c["species"].items():
+                    metric = self.initial_models.get(species, {}).get("provenance", {}).get(
+                        "criterion", "lifespan" if spec["diet"] == "resource" else "kills")
+                    candidate = self.champions.entries.get(species, {}).get(metric)
+                    if candidate is None:
+                        continue
+                    provenance = self.champion_artifacts.get(species, {}).get(metric)
+                    if provenance is None:
+                        parent = self.run_initial_models.get(species, {}).get("provenance", {})
+                        provenance = dict(artifact_id=f"run:{self.run_index}:{self.world.seed}:{species}:{metric}",
+                            path=None, criterion=metric, score=candidate["score"],
+                            model_generation=parent.get("model_generation", 0) + 1,
+                            source_run=self.run_index)
+                    models[species] = dict(model=copy.deepcopy(candidate["model"]),
+                                           provenance=copy.deepcopy(provenance))
+            self.run_initial_models = models
+            self._retire_brains(list(self.brains))
+        self.champion_artifacts = {}
         policy = c["experiment"]["world_seed_policy"]
         if policy == "random":
             used = set(self.run_seeds)
@@ -62,8 +87,12 @@ class Experiment:
                             base_seed,
                             brain_seed + i * 7919 + 13,
                         )
-                        if species in self.initial_models:
-                            load_model_weights(self.brains[i], self.initial_models[species]["model"])
+                        if species in self.run_initial_models:
+                            load_model_weights(self.brains[i], self.run_initial_models[species]["model"])
+                        elif not self.legacy_brain_retention and species in self.initial_weights:
+                            load_model_weights(self.brains[i], self.initial_weights[species])
+                        if self.run_index == 0 and species not in self.initial_weights:
+                            self.initial_weights[species] = model_snapshot(self.brains[i])
         self.champions = ChampionBook(c)
         if self.mode == "train":
             self.champions.consider(self.world.animals.values(), self.brains, self._champion_source())
@@ -153,6 +182,7 @@ class Experiment:
                 dict(
                     run=self.run_index + 1,
                     seed=self.world.seed,
+                    initialized_from={s: m["provenance"] for s, m in self.run_initial_models.items()},
                     **self.world.metrics(),
                     lifespans=copy.deepcopy(self.world.lifespans),
                     survivors=[
@@ -216,6 +246,10 @@ class Experiment:
         state = dict(
             checkpoint_version=1,
             initial_models=copy.deepcopy(self.initial_models),
+            initial_weights=copy.deepcopy(self.initial_weights),
+            run_initial_models=copy.deepcopy(self.run_initial_models),
+            champion_artifacts=copy.deepcopy(self.champion_artifacts),
+            legacy_brain_retention=self.legacy_brain_retention,
             champions=copy.deepcopy(self.champions.entries),
             retired_updates=self.retired_updates,
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
@@ -272,6 +306,10 @@ class Experiment:
         e = cls.__new__(cls)
         e.config = copy.deepcopy(validate(state["config"]))
         e.initial_models = copy.deepcopy(state.get("initial_models", {}))
+        e.legacy_brain_retention = state.get("legacy_brain_retention", "chain_best_brains" not in e.config["experiment"])
+        e.initial_weights = copy.deepcopy(state.get("initial_weights", {}))
+        e.run_initial_models = copy.deepcopy(state.get("run_initial_models", e.initial_models))
+        e.champion_artifacts = copy.deepcopy(state.get("champion_artifacts", {}))
         e.champions = ChampionBook(e.config, state.get("champions"))
         e.retired_updates = state.get("retired_updates", 0)
         e.inherited_updates = {

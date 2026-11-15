@@ -147,7 +147,8 @@
     "world_seed_policy": "random",
     "record_metrics_every_steps": 10,
     "checkpoint_every_runs": 1,
-    "grpo_updates_per_step": 1
+    "grpo_updates_per_step": 1,
+    "chain_best_brains": true
   },
   "recording": {
     "enabled": true,
