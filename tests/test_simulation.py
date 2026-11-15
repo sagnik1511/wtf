@@ -319,6 +319,30 @@ class ServerTests(unittest.TestCase):
             self.request("/api/recordings/recorded_test/runs/99/analysis")
         self.assertEqual(raised.exception.code, 404)
 
+    def test_replay_gzip_negotiation_and_plain_fallback(self):
+        import gzip
+        path = self.url + "/api/recordings/recorded_test/runs/1/chunks/0"
+        req = Request(path, headers={"Accept-Encoding": "gzip"})
+        with urlopen(req, timeout=10) as response:
+            self.assertEqual(response.headers.get("Content-Encoding"), "gzip")
+            self.assertEqual(set(response.headers.get("Vary").split(", ")), {"Accept-Encoding", "X-WTF-Replay"})
+            frames = json.loads(gzip.decompress(response.read()))
+        self.assertEqual(len(frames), 4)
+        from ecosystem.replay_codec import decode_chunk
+        req = Request(path, headers={"Accept-Encoding": "gzip", "X-WTF-Replay": "delta-v1"})
+        with urlopen(req, timeout=10) as response:
+            payload = json.loads(gzip.decompress(response.read()))
+        self.assertEqual(payload["codec"], "wtf-delta-v1")
+        self.assertEqual(decode_chunk(payload), frames)
+        req = Request(path, headers={"Accept-Encoding": "identity", "X-WTF-Replay": "delta-v1"})
+        with urlopen(req, timeout=10) as response:
+            self.assertIsNone(response.headers.get("Content-Encoding"))
+            self.assertEqual(json.load(response), payload)
+        req = Request(path, headers={"Accept-Encoding": "gzip;q=0"})
+        with urlopen(req, timeout=10) as response:
+            self.assertIsNone(response.headers.get("Content-Encoding"))
+            self.assertEqual(json.load(response), frames)
+
     def test_all_live_simulation_endpoints_removed(self):
         for path in ("/api/step", "/api/load", "/api/restore"):
             with self.subTest(path=path), self.assertRaises(HTTPError) as raised:

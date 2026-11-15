@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from ecosystem.recording import Recorder, RecordingStore
+from ecosystem.replay_io import load_chunk
 from ecosystem.runner import Experiment
 from tests.test_simulation import config
 
@@ -48,9 +49,7 @@ class RecordingTests(unittest.TestCase):
             for entry in manifest["runs"]:
                 frames = []
                 for i in range(entry["chunk_count"]):
-                    chunk = json.loads(
-                        store.chunk("example", entry["run"], i).read_text()
-                    )
+                    chunk = load_chunk(store.chunk("example", entry["run"], i))
                     self.assertLessEqual(len(chunk), 3)
                     frames.extend(chunk)
                 self.assertEqual([f["tick"] for f in frames], list(range(21)))
@@ -60,7 +59,7 @@ class RecordingTests(unittest.TestCase):
                 self.assertIn("diagnostics", frames[0])
                 self.assertNotIn("weights", json.dumps(frames))
                 self.assertNotIn("replay", frames[0]["diagnostics"]["0"])
-            final_frame = json.loads(store.chunk("example", 2, 6).read_text())[-1]
+            final_frame = load_chunk(store.chunk("example", 2, 6))[-1]
             actual = a.world.snapshot()
             self.assertEqual(final_frame["animals"], actual["animals"])
             self.assertEqual(final_frame["resources"], actual["resources"])
@@ -77,7 +76,7 @@ class RecordingTests(unittest.TestCase):
             self.record(Path(directory) / "sample", Experiment(c))
             store = RecordingStore(directory)
             frames = sum(
-                [json.loads(store.chunk("sample", 1, i).read_text()) for i in range(2)],
+                [load_chunk(store.chunk("sample", 1, i)) for i in range(2)],
                 [],
             )
             self.assertEqual([f["tick"] for f in frames], [0, 4, 8, 11])
@@ -212,7 +211,7 @@ class RecordingTests(unittest.TestCase):
                         [r["frame_count"] for r in manifest["runs"]], [4, 4]
                     )
                     summary = json.loads((folder / "summary.json").read_text())
-                    frame = json.loads(store.chunk(folder.name, 2, 0).read_text())[-1]
+                    frame = load_chunk(store.chunk(folder.name, 2, 0))[-1]
                     for key, value in frame["metrics"].items():
                         self.assertEqual(summary[-1][key], value)
                     # A completed learning checkpoint can still be recorded as

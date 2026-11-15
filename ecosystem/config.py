@@ -464,7 +464,14 @@ def validate(c):
                 "frames_per_chunk",
                 "diagnostics_every_steps",
             ),
+            optional=("compression", "compression_level", "encoding"),
         )
+        if r.get("encoding", "delta") not in ("delta", "snapshot"):
+            fail("recording.encoding", "must be delta or snapshot")
+        if r.get("compression", "gzip") not in ("gzip", "none"):
+            fail("recording.compression", "must be gzip or none")
+        if "compression_level" in r:
+            num(r["compression_level"], "recording.compression_level", 1, 9, True)
         if type(r["enabled"]) is not bool:
             fail("recording.enabled", "must be boolean")
         num(r["frame_every_steps"], "recording.frame_every_steps", 1, 1000000, True)

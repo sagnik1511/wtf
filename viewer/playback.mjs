@@ -1,3 +1,4 @@
+import { decodeChunk } from './replay-codec.mjs';
 import { recentNaturalDeaths } from './death-highlights.mjs';
 import { recentBirths } from './birth-highlights.mjs';
 import { recentKills } from './kill-highlights.mjs';
@@ -63,12 +64,12 @@ export class Playback {
       if (!sequential && chunkIndex > 0) {
         // Retain only small position records, not another world chunk. This
         // also locates first-frame deaths after jumping directly to a chunk.
-        const previous = await this.loadJSON(`/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/chunks/${chunkIndex-1}`);
+        const previous = decodeChunk(await this.loadJSON(`/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/chunks/${chunkIndex-1}`));
         if (!Array.isArray(previous) || !previous.length || previous.length > size) throw new Error('Invalid recording chunk');
         this.previousTick = previous.at(-1).tick;
         this.previousAgents = previous.at(-1).animals.map(({id,x,y,heading,species})=>({id,x,y,heading,species}));
       }
-      const frames = await this.loadJSON(`/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/chunks/${chunkIndex}`);
+      const frames = decodeChunk(await this.loadJSON(`/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/chunks/${chunkIndex}`));
       if (!Array.isArray(frames) || frames.length > size || !frames.length) throw new Error('Invalid recording chunk');
       this.frames = frames;
       this.chunkIndex = chunkIndex;

@@ -6,11 +6,15 @@ Only committed chunks are advertised in the atomically replaced manifest.
 
 import copy
 import csv
+import gzip
 import json
 from pathlib import Path
+from .replay_io import chunk_path, load_chunk
+from .replay_codec import DeltaEncoder
 
 DEFAULT_RECORDING = dict(
-    enabled=True, frame_every_steps=1, frames_per_chunk=64, diagnostics_every_steps=10
+    enabled=True, frame_every_steps=1, frames_per_chunk=64, diagnostics_every_steps=10,
+    compression="gzip", compression_level=6, encoding="delta"
 )
 
 
@@ -38,6 +42,8 @@ class Recorder:
             status="writing",
             config=copy.deepcopy(config),
             recording=self.options,
+            storage_compression=self.options["compression"],
+            storage_format=self.options["encoding"],
             runs=[],
         )
         self.stream = None
@@ -72,18 +78,26 @@ class Recorder:
 
     def _open_chunk(self):
         name = f'run_{self.run["run"]:04d}_chunk_{self.run["chunk_count"]:06d}.json'
+        if self.options["compression"] == "gzip":
+            name += ".gz"
         self.chunk_path = self.folder / name
-        self.stream = self.chunk_path.with_suffix(".json.tmp").open("w")
-        self.stream.write("[")
+        self.chunk_temporary = self.chunk_path.with_suffix(self.chunk_path.suffix + ".tmp")
+        self.stream = (gzip.open(self.chunk_temporary, "wt", encoding="utf-8",
+                                compresslevel=self.options["compression_level"])
+                       if self.options["compression"] == "gzip"
+                       else self.chunk_temporary.open("w", encoding="utf-8"))
+        self.encoder = DeltaEncoder() if self.options["encoding"] == "delta" else None
+        self.stream.write(json.dumps(self.encoder.header(),separators=(",",":"))[:-1] + ',"frames":[' if self.encoder else "[")
         self.chunk_frames = 0
 
     def _commit_chunk(self):
         if self.stream is None:
             return
-        self.stream.write("]\n")
+        self.stream.write("]}\n" if self.encoder else "]\n")
         self.stream.close()
         self.stream = None
-        self.chunk_path.with_suffix(".json.tmp").replace(self.chunk_path)
+        self.encoder = None
+        self.chunk_temporary.replace(self.chunk_path)
         self.run["chunk_count"] += 1
         self.run["frame_count"] += self.chunk_frames
         self.run["last_tick"] = self.last_tick
@@ -118,7 +132,7 @@ class Recorder:
         if self.chunk_frames:
             self.stream.write(",\n")
         # Encode a single frame with the C encoder, never an entire run.
-        self.stream.write(json.dumps(frame, separators=(",", ":"), allow_nan=False))
+        self.stream.write(json.dumps(self.encoder.encode(frame) if self.encoder else frame, separators=(",", ":"), allow_nan=False))
         self.chunk_frames += 1
         self.last_tick = tick
         if self.chunk_frames >= self.options["frames_per_chunk"]:
@@ -228,9 +242,7 @@ class RecordingStore:
                             )
             else:
                 for index in range(entry["chunk_count"]):
-                    frames = json.loads(
-                        self.chunk(recording_id, run, index).read_text()
-                    )
+                    frames = load_chunk(self.chunk(recording_id, run, index))
                     for frame in frames:
                         yield frame["metrics"]
                     del frames
@@ -263,7 +275,4 @@ class RecordingStore:
         if entry is None or not 0 <= index < entry["chunk_count"]:
             raise FileNotFoundError("Recorded chunk not found")
         folder = self._folder(recording_id)
-        path = (folder / f"run_{run:04d}_chunk_{index:06d}.json").resolve()
-        if path.parent != folder:
-            raise ValueError("Chunk path outside recording folder")
-        return path
+        return chunk_path(folder, run, index)

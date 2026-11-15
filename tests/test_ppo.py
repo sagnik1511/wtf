@@ -16,6 +16,7 @@ from ecosystem.ppo import (
     loss_and_gradient,
     policy_distribution,
 )
+from ecosystem.replay_io import load_chunk
 from ecosystem.recording import Recorder
 from ecosystem.runner import Experiment
 from tests.test_simulation import config
@@ -287,9 +288,7 @@ class PPOIntegrationTests(unittest.TestCase):
                 writer.capture(a)
             writer.close(completed=False)
             self.assertEqual(a.checkpoint(), control.checkpoint())
-            frames = json.loads(
-                next((Path(folder) / "playback").glob("*chunk*.json")).read_text()
-            )
+            frames = load_chunk(next((Path(folder) / "playback").glob("*chunk*.json*")))
             diagnostics = frames[0]["diagnostics"]
             self.assertEqual(diagnostics["0"]["algorithm"], "q_learning")
             self.assertIn("action_values", diagnostics["0"])

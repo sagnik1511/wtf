@@ -11,6 +11,7 @@ from ecosystem.brains import inherit_brain
 from ecosystem.config import validate
 from ecosystem.grouped_rollouts import collect_group
 from ecosystem.recording import Recorder, RecordingStore
+from ecosystem.replay_io import load_chunk
 from ecosystem.runner import Experiment
 from ecosystem.world import World
 from tests.test_simulation import config, empty_world, animal
@@ -304,7 +305,7 @@ class InheritanceTests(unittest.TestCase):
             recorder.capture(e, force=True)
             recorder.close(completed=False)
             store = RecordingStore(directory)
-            frames = json.loads(store.chunk("births", 1, 0).read_text())
+            frames = load_chunk(store.chunk("births", 1, 0))
             newborn = next(a for a in frames[-1]["animals"] if a["parent_id"] == 0)
             self.assertIn(str(newborn["id"]), frames[-1]["diagnostics"])
             self.assertGreater(frames[-1]["metrics"]["births"]["prey"], 0)

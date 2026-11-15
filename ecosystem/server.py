@@ -1,12 +1,14 @@
 """Read-only playback server. Never imports or instantiates simulation/brains."""
 
 import argparse
+import gzip
 import json
 import mimetypes
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 from .recording import RecordingStore
+from .replay_io import read_chunk_bytes, load_chunk
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -23,7 +25,7 @@ def make_handler(state):
         def log_message(self, fmt, *args):
             pass
 
-        def send(self, status, data, content_type="application/json"):
+        def send(self, status, data, content_type="application/json", content_encoding=None, vary_encoding=False):
             body = (
                 data
                 if isinstance(data, bytes)
@@ -32,6 +34,10 @@ def make_handler(state):
             self.send_response(status)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
+            if content_encoding:
+                self.send_header("Content-Encoding", content_encoding)
+            if vary_encoding:
+                self.send_header("Vary", "Accept-Encoding, X-WTF-Replay")
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header(
@@ -62,7 +68,26 @@ def make_handler(state):
                         chunk = state.recordings.chunk(
                             parts[2], int(parts[4]), int(parts[6])
                         )
-                        return self.send(200, chunk.read_bytes())
+                        accepted = self.headers.get("Accept-Encoding", "")
+                        gzip_ok = False
+                        for encoding in accepted.lower().split(","):
+                            parts = [part.strip() for part in encoding.split(";")]
+                            if parts[0] == "gzip":
+                                quality = next((part[2:] for part in parts[1:] if part.startswith("q=")), "1")
+                                try:
+                                    gzip_ok = float(quality) > 0
+                                except ValueError:
+                                    gzip_ok = False
+                        if self.headers.get("X-WTF-Replay") == "delta-v1":
+                            if chunk.suffix == ".gz" and gzip_ok:
+                                return self.send(200, chunk.read_bytes(), content_encoding="gzip", vary_encoding=True)
+                            return self.send(200, read_chunk_bytes(chunk), vary_encoding=True)
+                        # Older clients keep the full-frame JSON API. Modern
+                        # viewers receive compact stored chunks without expansion.
+                        data = json.dumps(load_chunk(chunk),separators=(",",":"),allow_nan=False).encode()
+                        if gzip_ok:
+                            return self.send(200,gzip.compress(data,compresslevel=1),content_encoding="gzip",vary_encoding=True)
+                        return self.send(200,data,vary_encoding=True)
                     return self.send(404, {"error": "Recording endpoint not found"})
                 target = (
                     ROOT
@@ -80,7 +105,7 @@ def make_handler(state):
                 )
             except FileNotFoundError:
                 return self.send(404, {"error": "Recording or chunk not found"})
-            except (ValueError, OSError, KeyError) as error:
+            except (ValueError, OSError, KeyError, EOFError) as error:
                 return self.send(400, {"error": str(error)})
 
         def do_POST(self):

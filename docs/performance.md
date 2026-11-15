@@ -8,7 +8,7 @@ Historical measurements describe the implementation evaluated at each optimizati
 
 The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. An incremental spatial index groups food and animals into nearby cells, so limited-vision agents skip distant candidates. Small target sets and wide-vision queries use a full scan. Squared-distance filtering preserves visibility and insertion-order ties, including across cells. Each animal keeps a spatial window: movement reuses its overlapping bucket references and updates only entering/leaving strips. Shared buckets receive target moves, births, deaths and food-presence changes once per phase. Stationary observers reuse nearest-target results while the relevant bucket versions stay unchanged. Movement and obstacle edits force visibility to be checked again because occlusion inside the overlap can change. Energy, health, heading and blocked neighbors are always current. Derived caches are rebuilt after checkpoint restoration and released for dead observers; authoritative state is reconciled each phase to detect manual edits too. Small networks use native multiplication iterators with the original summation order. Training computes Q-network weight offsets once per neuron, and MLP backpropagation avoids checking the input-layer case for every weight. Optimizer mathematics and accumulation order remain unchanged. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
 
-Recording buffers only one encoded frame. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values and format version remain compatible with existing files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
+Recording streams one encoded frame and retains one previous frame for computing chunk-local deltas. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values and format version remain compatible with existing files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
 
 Playback reuses the loaded snapshot when rendering and avoids clearing/reallocating the canvas backing store or writing identical layout dimensions every frame. Chunk loading, chart history, selection and death effects remain available.
 
@@ -50,3 +50,15 @@ A local before/after benchmark and repeated measurements are saved under `work/p
 ```
 
 The benchmark fixes seed 42 with the baseline 48 prey/12 predators and checks a digest of the complete world, brain, replay and random-generator state. It measures process peak RSS before constructing the comparison digest; checkpoint-case peak RSS includes both simulation and checkpoint saving. These are local measurements for a small workload, not guarantees for every environment. Large populations still incur independent-brain and perception costs, and the growing collection of completed-run summaries remains in memory for experiment reporting.
+
+
+Replay chunks use a complete keyframe followed by sparse field changes within
+each chunk, then lossless gzip (default level 6). On the same 401-frame PPO data,
+full snapshots used 9,276,835 bytes, gzip snapshots 851,601 bytes, and delta plus
+gzip 722,700 bytes: another 15.1% reduction over gzip alone. Entity identity and
+unchanged food cells are no longer repeated every frame. Every chunk decodes
+independently, preserving random seeking and full recorded precision. The native
+viewer receives compressed stored bytes; legacy API clients receive full frames.
+Decoded viewer memory remains one chunk and live brain memory is unaffected.
+See the [recording guide](recording.md#optimize-older-recordings) for format,
+measurement limits and conversion commands.

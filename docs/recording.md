@@ -37,9 +37,28 @@ Each environment has a recording section:
   "enabled": true,
   "frame_every_steps": 1,
   "frames_per_chunk": 64,
-  "diagnostics_every_steps": 10
+  "diagnostics_every_steps": 10,
+  "encoding": "delta",
+  "compression": "gzip",
+  "compression_level": 6
 }
 ```
+
+Replay storage separates the data layout (`encoding`) from compression:
+
+- `"delta"` (default): each chunk begins with a complete keyframe. Later frames
+  store only changed top-level/metric fields and entity additions, removals and
+  changed fields. Animal IDs and resource coordinates identify entities; small
+  field masks avoid repeating field names. Unchanged food patches are omitted.
+- `"snapshot"`: every frame is complete, useful for debugging and comparison.
+- `"gzip"` compression (default level 6) wraps either layout in `*.json.gz`.
+  Levels 1–9 are accepted; `"none"` writes uncompressed `*.json`.
+
+Both layouts preserve every recorded frame, full-precision number, event and
+sampled diagnostic. Updates store absolute values, avoiding cumulative rounding.
+Every chunk has its own keyframe and field table: seeking reconstructs at most
+one chunk, never the whole run. The recorder streams frames and retains only the
+previous frame for computing changes. No database or new package is required.
 
 Previous configurations without this section use the same defaults. Set `enabled` to `false` or pass `--no-record` for metrics/checkpoints only. Increase `frame_every_steps` to reduce disk usage; initial and final frames are always saved. Intermediate events between sampled frames are omitted, while sampled metrics retain cumulative outcomes. Set `diagnostics_every_steps` to `0` to omit brain diagnostics entirely. When enabled, diagnostics are also sampled at chunk boundaries so chunks can be inspected independently.
 
@@ -60,3 +79,54 @@ Training still needs the live brains and replay buffers. CLI checkpoint writing 
 | `GET /api/recordings/{id}/runs/{run}/analysis` | Behavior and sampled learning statistics |
 
  The previous live simulation POST endpoints return 405. Use `./run.sh --results PATH` to view recordings stored under a custom CLI `--output` directory.
+
+
+## Optimize older recordings
+
+Restart the playback server and refresh the viewer after upgrading. Old full
+snapshot arrays, compact delta chunks, plain JSON and gzip files remain readable,
+including mixtures left by an interrupted conversion.
+
+```sh
+# Upgrade one completed experiment to delta encoding plus gzip:
+.venv/bin/python -m ecosystem.compress_recordings results/EXPERIMENT --delta
+# Upgrade all completed/interrupted experiments:
+.venv/bin/python -m ecosystem.compress_recordings results --all --delta
+# Gzip alone, preserving the existing serialized layout:
+.venv/bin/python -m ecosystem.compress_recordings results --all
+```
+
+Conversion handles one committed chunk at a time and retains the smaller
+representation. Delta conversion verifies SHA-256 of canonical expanded frames;
+gzip-only conversion verifies decompressed bytes. Replacements are atomic,
+originals survive failed verification, batch mode skips active recordings, and
+conversion can be rerun safely. Checkpoints, saved champions, metrics and training
+configuration are untouched. A single active recording is rejected; finish or
+close training first. Metadata may say `mixed` if some original chunks were smaller.
+
+For programmatic access use `ecosystem.replay_io.load_chunk(path)`: it returns
+full frames for either layout/compression. Behavior analysis and fallback
+population history use the same reader. The viewer retains one decoded world
+chunk, so this storage change does not reduce the expanded chunk's memory.
+
+The chunk HTTP endpoint returns a full-frame JSON array by default for existing
+clients. The viewer sends `X-WTF-Replay: delta-v1` to receive the native stored
+layout and decode it locally. Gzip-capable native requests receive stored gzip
+bytes directly. Responses vary on both `Accept-Encoding` and `X-WTF-Replay`.
+No simulation or learning runs during decoding.
+
+A representative 400-step PPO replay (401 frames, seed 11, 64-frame chunks) used:
+
+| Layout | Chunk bytes |
+| --- | ---: |
+| Full JSON snapshots | 9,276,835 |
+| Full snapshots + gzip 6 | 851,601 |
+| Delta JSON | 3,881,570 |
+| Delta + gzip 6 | 722,700 |
+
+Delta plus gzip saved another **15.1% versus gzip alone**, or **92.2% versus full
+JSON**. This is one local workload; savings depend on population, changes and
+diagnostics. Encoding the already generated frames took 0.55 seconds and parsing
+plus delta reconstruction took 0.68 seconds across all 401 frames; these are not
+end-to-end training or browser timings. Reducing recording frequency can save
+more space but omits intermediate events; both layouts above preserve them.

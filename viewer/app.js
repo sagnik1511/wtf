@@ -6,7 +6,7 @@ const colors = ['#7de2bd', '#ff9a77', '#83b9ff', '#ce9ef5', '#f4cf7a'];
 let errorTimer, analysisKey="", analysisRequest=0,runMenuKey="";
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
 async function api(path) {
-  const response = await fetch(path);
+  const response = await fetch(path,path.includes('/chunks/')?{headers:{'X-WTF-Replay':'delta-v1'}}:undefined);
   const value = await response.json();
   if (!response.ok) throw new Error(value.error || `HTTP ${response.status}`);
   return value;

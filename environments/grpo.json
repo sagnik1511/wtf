@@ -154,6 +154,9 @@
     "enabled": true,
     "frame_every_steps": 1,
     "frames_per_chunk": 64,
-    "diagnostics_every_steps": 10
+    "diagnostics_every_steps": 10,
+    "encoding": "delta",
+    "compression": "gzip",
+    "compression_level": 6
   }
 }

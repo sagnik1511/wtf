@@ -40,7 +40,7 @@ Each invocation creates a unique folder inside `results/` containing:
 - `analysis.json`: optional report created by the [analysis command](analysis.md).
 - `checkpoints/`: scheduled intermediate learning checkpoints and a final checkpoint. The final run writes `final.json` once instead of duplicating the same state in a numbered file.
 - `playback/recording.json`: versioned recording manifest and static layout per run.
-- `playback/run_0001_chunk_000000.json`, etc.: small arrays of recorded frames.
+- `playback/run_0001_chunk_000000.json.gz`, etc.: small arrays of recorded frames.
 
 Pass `--output PATH` to choose another result directory. Trained champion weights are stored inside that experiment under `champions/run_0001/`, etc.; see [saved brains](brain-library.md) for loading them and changing archive settings. Generated results and optional shared libraries are ignored by Git.
 

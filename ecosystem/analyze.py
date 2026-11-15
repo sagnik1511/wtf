@@ -4,6 +4,7 @@ from collections import Counter
 import json
 import math
 from pathlib import Path
+from .replay_io import chunk_path, load_chunk
 
 DEFINITIONS = {
     'agent_steps': 'One living animal present at the start of one observed consecutive step.',
@@ -261,11 +262,8 @@ def analyze_recording(folder, run=None, window_steps=250):
         size = max(window_steps, math.ceil((entry['last_tick'] - entry['first_tick']) / 120))
         def frames():
             for index in range(entry['chunk_count']):
-                path = playback / f"run_{entry['run']:04d}_chunk_{index:06d}.json"
-                path = path.resolve()
-                if path.parent != playback:
-                    raise ValueError('Chunk path outside recording folder')
-                chunk = json.loads(path.read_text())
+                path = chunk_path(playback, entry['run'], index)
+                chunk = load_chunk(path)
                 yield from chunk
                 del chunk
         result = analyze_run(manifest['config'], frames(), size)
