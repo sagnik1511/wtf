@@ -110,6 +110,7 @@ class RandomizationTests(unittest.TestCase):
                     sys.executable,
                     "-m",
                     "ecosystem.cli",
+                        "--no-library",
                     "environments/baseline.json",
                     "--runs",
                     "2",

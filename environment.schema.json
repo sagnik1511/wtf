@@ -11,10 +11,10 @@
                 "width": {"type": "integer", "minimum": 3, "maximum": 256},
                 "height": {"type": "integer", "minimum": 3, "maximum": 256},
                 "boundary": {"const": "closed"},
-                "max_steps": {"type": "integer", "minimum": 1, "maximum": 10000000},
+                "max_steps": {"type": "integer", "minimum": 1, "maximum": 10000000}
             },
             "required": ["width", "height", "boundary", "max_steps"],
-            "additionalProperties": false,
+            "additionalProperties": false
         },
         "obstacles": {
             "type": "object",
@@ -28,12 +28,12 @@
                         "type": "array",
                         "minItems": 2,
                         "maxItems": 2,
-                        "items": {"type": "integer", "minimum": 0, "maximum": 255},
-                    },
-                },
+                        "items": {"type": "integer", "minimum": 0, "maximum": 255}
+                    }
+                }
             },
             "required": ["generation", "occupied_fraction", "explicit_cells"],
-            "additionalProperties": false,
+            "additionalProperties": false
         },
         "resources": {
             "type": "object",
@@ -41,15 +41,15 @@
                 "patch_count": {"type": "integer", "minimum": 0, "maximum": 65536},
                 "capacity_per_patch": {"type": "number", "minimum": 0.001},
                 "initial_quantity_per_patch": {"type": "number", "minimum": 0},
-                "growth_per_step": {"type": "number", "minimum": 0},
+                "growth_per_step": {"type": "number", "minimum": 0}
             },
             "required": [
                 "patch_count",
                 "capacity_per_patch",
                 "initial_quantity_per_patch",
-                "growth_per_step",
+                "growth_per_step"
             ],
-            "additionalProperties": false,
+            "additionalProperties": false
         },
         "species": {
             "type": "object",
@@ -57,10 +57,51 @@
             "additionalProperties": {
                 "type": "object",
                 "properties": {
+                    "initial_brain": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "path": {
+                                        "type": "string",
+                                        "minLength": 1
+                                    }
+                                },
+                                "required": [
+                                    "path"
+                                ]
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "selection": {
+                                        "enum": [
+                                            "best",
+                                            "latest"
+                                        ]
+                                    },
+                                    "metric": {
+                                        "enum": [
+                                            "health",
+                                            "kills",
+                                            "lifespan",
+                                            "food"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "selection",
+                                    "metric"
+                                ]
+                            }
+                        ]
+                    },
                     "initial_population": {
                         "type": "integer",
                         "minimum": 0,
-                        "maximum": 10000,
+                        "maximum": 10000
                     },
                     "diet": {"enum": ["resource", "prey"]},
                     "allowed_actions": {
@@ -74,9 +115,9 @@
                                 "turn_right",
                                 "rest",
                                 "eat",
-                                "attack",
+                                "attack"
                             ]
-                        },
+                        }
                     },
                     "body": {
                         "oneOf": [
@@ -86,28 +127,28 @@
                                     "initial_energy": {"type": "number", "minimum": 0},
                                     "max_energy": {
                                         "type": "number",
-                                        "exclusiveMinimum": 0,
+                                        "exclusiveMinimum": 0
                                     },
                                     "max_health": {
                                         "type": "number",
-                                        "exclusiveMinimum": 0,
+                                        "exclusiveMinimum": 0
                                     },
                                     "living_cost": {"type": "number", "minimum": 0},
                                     "movement_cost": {"type": "number", "minimum": 0},
                                     "starvation_damage": {
                                         "type": "number",
-                                        "minimum": 0,
+                                        "minimum": 0
                                     },
                                     "vision_radius": {
                                         "type": "integer",
                                         "minimum": 1,
-                                        "maximum": 256,
+                                        "maximum": 256
                                     },
                                     "bite_size": {"type": "number", "minimum": 0},
                                     "energy_per_food_unit": {
                                         "type": "number",
-                                        "minimum": 0,
-                                    },
+                                        "minimum": 0
+                                    }
                                 },
                                 "required": [
                                     "initial_energy",
@@ -118,9 +159,9 @@
                                     "starvation_damage",
                                     "vision_radius",
                                     "bite_size",
-                                    "energy_per_food_unit",
+                                    "energy_per_food_unit"
                                 ],
-                                "additionalProperties": false,
+                                "additionalProperties": false
                             },
                             {
                                 "type": "object",
@@ -128,26 +169,26 @@
                                     "initial_energy": {"type": "number", "minimum": 0},
                                     "max_energy": {
                                         "type": "number",
-                                        "exclusiveMinimum": 0,
+                                        "exclusiveMinimum": 0
                                     },
                                     "max_health": {
                                         "type": "number",
-                                        "exclusiveMinimum": 0,
+                                        "exclusiveMinimum": 0
                                     },
                                     "living_cost": {"type": "number", "minimum": 0},
                                     "movement_cost": {"type": "number", "minimum": 0},
                                     "starvation_damage": {
                                         "type": "number",
-                                        "minimum": 0,
+                                        "minimum": 0
                                     },
                                     "vision_radius": {
                                         "type": "integer",
                                         "minimum": 1,
-                                        "maximum": 256,
+                                        "maximum": 256
                                     },
                                     "attack_damage": {"type": "number", "minimum": 0},
                                     "attack_cost": {"type": "number", "minimum": 0},
-                                    "energy_per_kill": {"type": "number", "minimum": 0},
+                                    "energy_per_kill": {"type": "number", "minimum": 0}
                                 },
                                 "required": [
                                     "initial_energy",
@@ -159,10 +200,10 @@
                                     "vision_radius",
                                     "attack_damage",
                                     "attack_cost",
-                                    "energy_per_kill",
+                                    "energy_per_kill"
                                 ],
-                                "additionalProperties": false,
-                            },
+                                "additionalProperties": false
+                            }
                         ]
                     },
                     "brain": {"type": "string"},
@@ -172,28 +213,28 @@
                             "per_energy_gained": {
                                 "type": "number",
                                 "minimum": -100000,
-                                "maximum": 100000,
+                                "maximum": 100000
                             },
                             "per_damage_taken": {
                                 "type": "number",
                                 "minimum": -100000,
-                                "maximum": 100000,
+                                "maximum": 100000
                             },
                             "death": {
                                 "type": "number",
                                 "minimum": -100000,
-                                "maximum": 100000,
+                                "maximum": 100000
                             },
                             "per_damage_dealt": {
                                 "type": "number",
                                 "minimum": 0,
                                 "maximum": 100000,
                                 "default": 0,
-                                "description": "Optional reward per actual damage point credited to this attacker; omitted means zero.",
-                            },
+                                "description": "Optional reward per actual damage point credited to this attacker; omitted means zero."
+                            }
                         },
                         "required": ["per_energy_gained", "per_damage_taken", "death"],
-                        "additionalProperties": false,
+                        "additionalProperties": false
                     },
                     "reproduction": {
                         "type": "object",
@@ -204,20 +245,20 @@
                             "min_age_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 10000000,
+                                "maximum": 10000000
                             },
                             "cooldown_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 10000000,
+                                "maximum": 10000000
                             },
                             "min_energy": {"type": "number", "minimum": 0},
                             "energy_cost": {"type": "number", "minimum": 0.001},
                             "max_population": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 10000,
-                            },
+                                "maximum": 10000
+                            }
                         },
                         "required": [
                             "enabled",
@@ -226,9 +267,9 @@
                             "cooldown_steps",
                             "min_energy",
                             "energy_cost",
-                            "max_population",
-                        ],
-                    },
+                            "max_population"
+                        ]
+                    }
                 },
                 "required": [
                     "initial_population",
@@ -236,10 +277,10 @@
                     "allowed_actions",
                     "body",
                     "brain",
-                    "rewards",
+                    "rewards"
                 ],
-                "additionalProperties": false,
-            },
+                "additionalProperties": false
+            }
         },
         "brains": {
             "type": "object",
@@ -257,43 +298,43 @@
                                 "items": {
                                     "type": "integer",
                                     "minimum": 1,
-                                    "maximum": 256,
-                                },
+                                    "maximum": 256
+                                }
                             },
                             "learning_rate": {
                                 "type": "number",
                                 "minimum": 1e-06,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "discount_factor": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "batch_size": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 1000000,
+                                "maximum": 1000000
                             },
                             "replay_capacity": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 1000000,
+                                "maximum": 1000000
                             },
                             "learning_starts_after": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 1000000,
+                                "maximum": 1000000
                             },
                             "train_every_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 1000000,
+                                "maximum": 1000000
                             },
                             "target_update_every_training_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 1000000,
+                                "maximum": 1000000
                             },
                             "exploration": {
                                 "type": "object",
@@ -301,26 +342,26 @@
                                     "initial": {
                                         "type": "number",
                                         "minimum": 0,
-                                        "maximum": 1,
+                                        "maximum": 1
                                     },
                                     "minimum": {
                                         "type": "number",
                                         "minimum": 0,
-                                        "maximum": 1,
+                                        "maximum": 1
                                     },
                                     "decay_per_decision": {
                                         "type": "number",
                                         "minimum": 0,
-                                        "maximum": 1,
-                                    },
+                                        "maximum": 1
+                                    }
                                 },
                                 "required": [
                                     "initial",
                                     "minimum",
-                                    "decay_per_decision",
+                                    "decay_per_decision"
                                 ],
-                                "additionalProperties": false,
-                            },
+                                "additionalProperties": false
+                            }
                         },
                         "required": [
                             "type",
@@ -332,9 +373,9 @@
                             "learning_starts_after",
                             "train_every_steps",
                             "target_update_every_training_steps",
-                            "exploration",
+                            "exploration"
                         ],
-                        "additionalProperties": false,
+                        "additionalProperties": false
                     },
                     {
                         "type": "object",
@@ -354,60 +395,60 @@
                                         "items": {
                                             "type": "integer",
                                             "minimum": 1,
-                                            "maximum": 256,
-                                        },
+                                            "maximum": 256
+                                        }
                                     },
-                                    "activation": {"const": "tanh"},
-                                },
+                                    "activation": {"const": "tanh"}
+                                }
                             },
                             "learning_rate": {
                                 "type": "number",
                                 "minimum": 1e-06,
-                                "maximum": 0.1,
+                                "maximum": 0.1
                             },
                             "discount_factor": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "gae_lambda": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "clip_ratio": {
                                 "type": "number",
                                 "minimum": 0.001,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "entropy_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "value_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 10,
+                                "maximum": 10
                             },
                             "rollout_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 4096,
+                                "maximum": 4096
                             },
                             "epochs": {"type": "integer", "minimum": 1, "maximum": 20},
                             "batch_size": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 4096,
+                                "maximum": 4096
                             },
                             "max_grad_norm": {
                                 "type": "number",
                                 "minimum": 1e-05,
-                                "maximum": 100,
+                                "maximum": 100
                             },
                             "normalize_advantages": {"type": "boolean"},
-                            "target_kl": {"type": "number", "minimum": 0, "maximum": 1},
+                            "target_kl": {"type": "number", "minimum": 0, "maximum": 1}
                         },
                         "required": [
                             "type",
@@ -422,8 +463,8 @@
                             "epochs",
                             "batch_size",
                             "max_grad_norm",
-                            "normalize_advantages",
-                        ],
+                            "normalize_advantages"
+                        ]
                     },
                     {
                         "type": "object",
@@ -443,48 +484,48 @@
                                         "items": {
                                             "type": "integer",
                                             "minimum": 1,
-                                            "maximum": 256,
-                                        },
+                                            "maximum": 256
+                                        }
                                     },
-                                    "activation": {"const": "tanh"},
-                                },
+                                    "activation": {"const": "tanh"}
+                                }
                             },
                             "learning_rate": {
                                 "type": "number",
                                 "minimum": 1e-06,
-                                "maximum": 0.1,
+                                "maximum": 0.1
                             },
                             "discount_factor": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "entropy_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "max_grad_norm": {
                                 "type": "number",
                                 "minimum": 1e-05,
-                                "maximum": 100,
+                                "maximum": 100
                             },
                             "gae_lambda": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "value_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 10,
+                                "maximum": 10
                             },
                             "rollout_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 4096,
+                                "maximum": 4096
                             },
-                            "normalize_advantages": {"type": "boolean"},
+                            "normalize_advantages": {"type": "boolean"}
                         },
                         "required": [
                             "network",
@@ -496,8 +537,8 @@
                             "gae_lambda",
                             "value_coefficient",
                             "rollout_steps",
-                            "normalize_advantages",
-                        ],
+                            "normalize_advantages"
+                        ]
                     },
                     {
                         "type": "object",
@@ -517,43 +558,43 @@
                                         "items": {
                                             "type": "integer",
                                             "minimum": 1,
-                                            "maximum": 256,
-                                        },
+                                            "maximum": 256
+                                        }
                                     },
-                                    "activation": {"const": "tanh"},
-                                },
+                                    "activation": {"const": "tanh"}
+                                }
                             },
                             "learning_rate": {
                                 "type": "number",
                                 "minimum": 1e-06,
-                                "maximum": 0.1,
+                                "maximum": 0.1
                             },
                             "discount_factor": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "entropy_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "max_grad_norm": {
                                 "type": "number",
                                 "minimum": 1e-05,
-                                "maximum": 100,
+                                "maximum": 100
                             },
                             "max_episode_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 10000000,
+                                "maximum": 10000000
                             },
                             "baseline_decay": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
-                            "normalize_advantages": {"type": "boolean"},
+                            "normalize_advantages": {"type": "boolean"}
                         },
                         "required": [
                             "network",
@@ -564,8 +605,8 @@
                             "type",
                             "max_episode_steps",
                             "baseline_decay",
-                            "normalize_advantages",
-                        ],
+                            "normalize_advantages"
+                        ]
                     },
                     {
                         "type": "object",
@@ -585,64 +626,64 @@
                                         "items": {
                                             "type": "integer",
                                             "minimum": 1,
-                                            "maximum": 256,
-                                        },
+                                            "maximum": 256
+                                        }
                                     },
-                                    "activation": {"const": "tanh"},
-                                },
+                                    "activation": {"const": "tanh"}
+                                }
                             },
                             "learning_rate": {
                                 "type": "number",
                                 "minimum": 1e-06,
-                                "maximum": 0.1,
+                                "maximum": 0.1
                             },
                             "discount_factor": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "entropy_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "max_grad_norm": {
                                 "type": "number",
                                 "minimum": 1e-05,
-                                "maximum": 100,
+                                "maximum": 100
                             },
                             "clip_ratio": {
                                 "type": "number",
                                 "minimum": 0.001,
-                                "maximum": 1,
+                                "maximum": 1
                             },
                             "kl_coefficient": {
                                 "type": "number",
                                 "minimum": 0,
-                                "maximum": 10,
+                                "maximum": 10
                             },
                             "group_size": {
                                 "type": "integer",
                                 "minimum": 2,
-                                "maximum": 8,
+                                "maximum": 8
                             },
                             "rollout_horizon": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 16,
+                                "maximum": 16
                             },
                             "train_every_steps": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 1000000,
+                                "maximum": 1000000
                             },
                             "epochs": {"type": "integer", "minimum": 1, "maximum": 20},
                             "batch_size": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 128,
+                                "maximum": 128
                             },
-                            "target_kl": {"type": "number", "minimum": 0, "maximum": 1},
+                            "target_kl": {"type": "number", "minimum": 0, "maximum": 1}
                         },
                         "required": [
                             "network",
@@ -657,11 +698,11 @@
                             "rollout_horizon",
                             "train_every_steps",
                             "epochs",
-                            "batch_size",
-                        ],
-                    },
+                            "batch_size"
+                        ]
+                    }
                 ]
-            },
+            }
         },
         "experiment": {
             "type": "object",
@@ -672,27 +713,27 @@
                 "record_metrics_every_steps": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 1000000,
+                    "maximum": 1000000
                 },
                 "checkpoint_every_runs": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 1000000,
+                    "maximum": 1000000
                 },
                 "grpo_updates_per_step": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 8,
-                },
+                    "maximum": 8
+                }
             },
             "required": [
                 "runs",
                 "retain_brains_between_runs",
                 "world_seed_policy",
                 "record_metrics_every_steps",
-                "checkpoint_every_runs",
+                "checkpoint_every_runs"
             ],
-            "additionalProperties": false,
+            "additionalProperties": false
         },
         "recording": {
             "type": "object",
@@ -701,23 +742,23 @@
                 "enabled",
                 "frame_every_steps",
                 "frames_per_chunk",
-                "diagnostics_every_steps",
+                "diagnostics_every_steps"
             ],
             "properties": {
                 "enabled": {"type": "boolean"},
                 "frame_every_steps": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 1000000,
+                    "maximum": 1000000
                 },
                 "frames_per_chunk": {"type": "integer", "minimum": 1, "maximum": 256},
                 "diagnostics_every_steps": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 1000000,
-                },
-            },
-        },
+                    "maximum": 1000000
+                }
+            }
+        }
     },
     "required": [
         "schema_version",
@@ -729,9 +770,9 @@
         "resources",
         "species",
         "brains",
-        "experiment",
+        "experiment"
     ],
     "additionalProperties": false,
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Ecosystem environment v1",
+    "title": "Ecosystem environment v1"
 }

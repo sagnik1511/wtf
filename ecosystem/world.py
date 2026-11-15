@@ -25,6 +25,9 @@ class Animal:
     parent_id: int = -1
     generation: int = 0
     last_reproduced_age: int = -1
+    kills: int = 0
+    energy_gained: float = 0.0
+    statistics_since_age: int = 0
 
     @property
     def position(self):
@@ -318,6 +321,7 @@ class World:
             if e.kind == "energy_gained":
                 rewards[e.actor] += e.amount * r["per_energy_gained"]
                 self.total_energy_gained[a.species] += e.amount
+                a.energy_gained += e.amount
             elif e.kind == "damage_dealt":
                 rewards[e.actor] += e.amount * r.get("per_damage_dealt", 0.0)
             elif e.kind == "damage_taken":
@@ -326,6 +330,7 @@ class World:
                 rewards[e.actor] += r["death"]
             elif e.kind == "kill":
                 self.kills[a.species] += 1
+                a.kills += 1
         for i, a in self.animals.items():
             a.last_reward = rewards[i]
         for i in dead:
@@ -447,7 +452,12 @@ class World:
         s = state["snapshot"]
         w.width, w.height, w.tick = s["width"], s["height"], s["tick"]
         w.obstacles = set(map(tuple, s["obstacles"]))
-        w.animals = {a["id"]: Animal(**a) for a in s["animals"]}
+        w.animals = {}
+        for original in s["animals"]:
+            animal = dict(original)
+            if "kills" not in animal:
+                animal["statistics_since_age"] = animal["age"]
+            w.animals[animal["id"]] = Animal(**animal)
         w.resources = {(r["x"], r["y"]): Resource(**r) for r in s["resources"]}
         w.events = [Event(**e) for e in s["events"]]
         w.deaths = defaultdict(int, s["metrics"]["deaths"])

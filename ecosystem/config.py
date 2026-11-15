@@ -308,7 +308,7 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction",),
+            optional=("reproduction", "initial_brain"),
         )
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
@@ -329,6 +329,19 @@ def validate(c):
             fail(p + ".allowed_actions", "feeding action incompatible with diet")
         if not isinstance(s["brain"], str) or s["brain"] not in c["brains"]:
             fail(p + ".brain", "unknown brain template")
+        if "initial_brain" in s:
+            initial = s["initial_brain"]
+            ip = p + ".initial_brain"
+            if isinstance(initial, dict) and "path" in initial:
+                obj(initial, ip, ("path",))
+                if not isinstance(initial["path"], str) or not initial["path"].strip():
+                    fail(ip + ".path", "must be a nonempty saved-brain JSON path")
+            else:
+                obj(initial, ip, ("selection", "metric"))
+                if initial["selection"] not in ("best", "latest"):
+                    fail(ip + ".selection", "must be best or latest")
+                if initial["metric"] not in ("health", "kills", "lifespan", "food"):
+                    fail(ip + ".metric", "must be health, kills, lifespan or food")
         template = c["brains"][s["brain"]]
         if (
             template["type"] == "reinforce"

@@ -73,3 +73,49 @@ def inherit_brain(parent, seed):
 def offspring_seed(world, child_id):
     # Stable across checkpoints and matched trials; never consume parent RNGs.
     return (world.seed << 32) ^ (child_id * 7919 + 13)
+
+
+def model_signature(config, actions):
+    """The exact input/action/architecture contract required for warm starts."""
+    from .brain import INPUTS
+    kind = config["type"]
+    return dict(observation_version=1, inputs=INPUTS, algorithm=kind,
+                hidden_layers=list(config["hidden_layers"] if kind == "q_network" else config["network"]["hidden_layers"]),
+                activation="tanh", actions=list(actions), value_head=kind in ("ppo", "a2c"))
+
+
+def model_snapshot(brain):
+    if brain.config["type"] == "q_network":
+        parameters = {key: values.copy() for key, values in brain.weights.items()}
+    else:
+        parameters = brain.network.checkpoint()
+    return dict(signature=model_signature(brain.config, brain.actions), parameters=parameters)
+
+
+def load_model_weights(brain, model):
+    """Load compatible finite weights into a freshly constructed controller.
+
+    Optimizers, exploration settings, lifetime counters and experience storage
+    belong to the new run. Q targets and GRPO references start at loaded weights.
+    """
+    import copy
+    import math
+    if model.get("signature") != model_signature(brain.config, brain.actions):
+        raise ValueError("Saved brain algorithm, architecture, observation version or action order is incompatible")
+    parameters = model.get("parameters")
+    expected = brain.weights if brain.config["type"] == "q_network" else brain.network.layers
+    def valid(actual, template):
+        if isinstance(template, dict):
+            return isinstance(actual, dict) and actual.keys() == template.keys() and all(valid(actual[k], v) for k, v in template.items())
+        if isinstance(template, list):
+            return isinstance(actual, list) and len(actual) == len(template) and all(valid(a, b) for a, b in zip(actual, template))
+        return type(actual) in (int, float) and math.isfinite(actual)
+    if not valid(parameters, expected):
+        raise ValueError("Saved brain has invalid parameter dimensions or non-finite weights")
+    if brain.config["type"] == "q_network":
+        brain.weights = copy.deepcopy(parameters)
+        brain.target = copy.deepcopy(parameters)
+    else:
+        brain.network.layers = copy.deepcopy(parameters)
+        if hasattr(brain, "reference_network"):
+            brain.reference_network.layers = copy.deepcopy(parameters)

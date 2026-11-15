@@ -9,3 +9,6 @@ results/
 work/performance/*
 !work/performance/benchmark.py
 !work/performance/repeat.py
+
+# Learned model generations are local experiment data.
+brain_library/

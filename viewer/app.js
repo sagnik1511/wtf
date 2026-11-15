@@ -146,6 +146,7 @@ function drawInspector() {
   const algorithm={ppo:'PPO',a2c:'A2C',reinforce:'REINFORCE',grpo:'GRPO (experimental)'}[b.algorithm]||'Q-learning';
   const details=text('div','','details');
   const fields=[['Brain',algorithm],['Energy',a.energy.toFixed(1)],['Health',a.health.toFixed(1)],['Age',a.age],['Last reward',a.last_reward.toFixed(3)],['Training updates',b.updates],['Last action',a.last_action]];
+  if(Number.isFinite(a.kills))fields.push(['Lifetime kills',a.kills],['Food energy gained',a.energy_gained.toFixed(1)]);
   if(policy){
     fields.push(['Policy entropy',b.entropy.toFixed(3)]);
     if(Number.isFinite(b.state_value))fields.push(['State value',b.state_value.toFixed(3)]);

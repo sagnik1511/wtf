@@ -6,17 +6,19 @@ from pathlib import Path
 import random
 import secrets
 from .brain import Experience
-from .brains import create_brain, restore_brain, inherit_brain, offspring_seed
+from .brains import create_brain, restore_brain, inherit_brain, offspring_seed, load_model_weights
 from .config import validate
 from .world import World
+from .library import ChampionBook, load_initial_models
 
 
 class Experiment:
-    def __init__(self, config, mode="train"):
+    def __init__(self, config, mode="train", library_root=None):
         if mode not in ("train", "evaluate", "random"):
             raise ValueError("mode must be train, evaluate, or random")
         self.config = copy.deepcopy(validate(config))
         self.mode = mode
+        self.initial_models = load_initial_models(self.config, **({"root": library_root} if library_root is not None else {}))
         randomized = self.config["experiment"]["world_seed_policy"] == "random"
         self.randomization_seed = secrets.randbits(64) if randomized else None
         self.seed_rng = random.Random(self.randomization_seed) if randomized else None
@@ -60,6 +62,11 @@ class Experiment:
                             base_seed,
                             brain_seed + i * 7919 + 13,
                         )
+                        if species in self.initial_models:
+                            load_model_weights(self.brains[i], self.initial_models[species]["model"])
+        self.champions = ChampionBook(c)
+        if self.mode == "train":
+            self.champions.consider(self.world.animals.values(), self.brains, self._champion_source())
         self.observations = self.world.observe_all()
         self.finished_run = False
         self.history = [self.world.metrics()]
@@ -95,6 +102,7 @@ class Experiment:
                         budget -= 1
                         if not budget:
                             break
+        tracked_animals = tuple(self.world.animals.values()) if self.mode == "train" else ()
         actions = {
             i: self.brains[i].choose(
                 o, explore=self.mode == "train", random_baseline=self.mode == "random"
@@ -115,6 +123,10 @@ class Experiment:
                         limit and i not in result.dead_ids,
                     )
                 )
+        if self.mode == "train":
+            # Includes the final action and terminal learning of dead animals,
+            # before deceased descendants' controllers are released.
+            self.champions.consider(tracked_animals, self.brains, self._champion_source())
         # Parents receive the current step's feedback before model inheritance.
         for event in result.events:
             if event.kind == "born":
@@ -150,6 +162,10 @@ class Experiment:
                 )
             )
         return None
+
+    def _champion_source(self):
+        return dict(experiment=self.config["name"], mode=self.mode,
+                    run=self.run_index + 1, seed=self.world.seed, tick=self.world.tick)
 
     def _retire_brains(self, ids):
         # Keep only the bounded founding population for cross-run retention;
@@ -199,6 +215,8 @@ class Experiment:
     def checkpoint(self, include_brains=True):
         state = dict(
             checkpoint_version=1,
+            initial_models=copy.deepcopy(self.initial_models),
+            champions=copy.deepcopy(self.champions.entries),
             retired_updates=self.retired_updates,
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
             randomization_seed=self.randomization_seed,
@@ -253,6 +271,8 @@ class Experiment:
             raise ValueError("Unsupported checkpoint version")
         e = cls.__new__(cls)
         e.config = copy.deepcopy(validate(state["config"]))
+        e.initial_models = copy.deepcopy(state.get("initial_models", {}))
+        e.champions = ChampionBook(e.config, state.get("champions"))
         e.retired_updates = state.get("retired_updates", 0)
         e.inherited_updates = {
             int(i): n for i, n in state.get("inherited_updates", {}).items()
@@ -281,6 +301,8 @@ class Experiment:
             e.seed_rng.setstate(tuples(state["seed_rng_state"]))
         e.world = World.restore(state["world"])
         e.brains = {int(i): restore_brain(b) for i, b in state["brains"].items()}
+        if "champions" not in state and e.mode == "train":
+            e.champions.consider(e.world.animals.values(), e.brains, e._champion_source())
         e.observations = e.world.observe_all()
         e.last_record = None
         return e
