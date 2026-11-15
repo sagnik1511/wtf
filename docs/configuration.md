@@ -38,6 +38,7 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 | Perception radius | `species.<name>.body.vision_radius` |
 | Food supply/regrowth | `resources` |
 | Map size and duration | `world.width`, `world.height`, `world.max_steps` |
+| Learning rate per species | `species.<name>.learning_rate_multiplier` (template rate × multiplier) |
 | Model and training algorithm | `species.<name>.brain` and the referenced `brains` template |
 | Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |
@@ -46,6 +47,37 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 | Disk recording cadence | `recording` ([guide](recording.md)) |
 
 For per-experiment model choices without editing JSON, use the [CLI model selectors](brain-library.md#choose-models-with-cli-arguments). The resolved choices are saved with the new experiment.
+
+## Learning rates per species
+
+All supplied presets use `learning_rate_multiplier: 1.0` for prey and `1.25`
+for predators. Set this optional field inside each species object:
+
+```json
+"learning_rate_multiplier": 1.25
+```
+
+The effective rate is the referenced `brains` template's `learning_rate` times
+this multiplier. For a template rate of `0.001`, prey use `0.001` and predators
+use `0.00125`. Referencing a common template still creates independent models;
+this setting does not modify the template or another species' rate. Set both to
+`1.0` for equal rates; lower values reduce update size. Multipliers must be
+between 0.01 and 10, and the effective rate must remain within the algorithm's
+validated range (0.000001–1 for Q-learning, 0.000001–0.1 for policy algorithms).
+Omitting the field defaults to 1.0, preserving old configurations.
+
+This applies to Q-learning, PPO, A2C, REINFORCE and GRPO. It changes update size,
+not update frequency, rollout length, exploration or reward. REINFORCE still
+updates only when an episode finishes; PPO/GRPO clipping and gradient clipping
+still apply. Policy/value networks that share an optimizer both use the rate.
+Larger updates do not guarantee faster or better learning and can destabilize it;
+the asymmetry is an experimental choice rather than a biological rule. Compare
+matched seeds and evaluation outcomes using the [analysis guide](analysis.md).
+
+Newborns inherit their parent's effective rate. New runs, including champion
+warm starts and chaining, apply the current environment's multiplier once.
+Exact checkpoint resumes retain the stored controller configuration; editing an
+environment does not retune an already saved checkpoint or recording.
 
 ## Reproduction
 

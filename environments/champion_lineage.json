@@ -61,7 +61,8 @@
       "initial_brain": {
         "selection": "best",
         "metric": "lifespan"
-      }
+      },
+      "learning_rate_multiplier": 1.0
     },
     "predator": {
       "initial_population": 12,
@@ -104,7 +105,8 @@
       "initial_brain": {
         "selection": "best",
         "metric": "kills"
-      }
+      },
+      "learning_rate_multiplier": 1.25
     }
   },
   "brains": {

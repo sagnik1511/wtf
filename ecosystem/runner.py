@@ -78,11 +78,15 @@ class Experiment:
         if not self.brains or not c["experiment"]["retain_brains_between_runs"]:
             self.brains = {}
             for species_index, (species, spec) in enumerate(c["species"].items()):
+                brain_config = copy.deepcopy(c["brains"][spec["brain"]])
+                multiplier = spec.get("learning_rate_multiplier", 1.0)
+                if multiplier != 1.0:
+                    brain_config["learning_rate"] *= multiplier
                 base_seed = brain_seed + 1000003 * (species_index + 1)
                 for i, a in self.world.animals.items():
                     if a.species == species:
                         self.brains[i] = create_brain(
-                            c["brains"][spec["brain"]],
+                            brain_config,
                             spec["allowed_actions"],
                             base_seed,
                             brain_seed + i * 7919 + 13,

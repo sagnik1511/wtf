@@ -57,7 +57,8 @@
         "min_energy": 30,
         "energy_cost": 20,
         "max_population": 96
-      }
+      },
+      "learning_rate_multiplier": 1.0
     },
     "predator": {
       "initial_population": 12,
@@ -96,7 +97,8 @@
         "min_energy": 40,
         "energy_cost": 30,
         "max_population": 24
-      }
+      },
+      "learning_rate_multiplier": 1.25
     }
   },
   "brains": {

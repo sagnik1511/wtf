@@ -11,6 +11,10 @@ The `species.<name>.brain` field selects a template in `brains`. Each animal rec
 .venv/bin/python -m ecosystem.cli environments/mixed_brains.json --runs 1
 ```
 
+Per-species `learning_rate_multiplier` scales a template's learning rate without
+changing training frequency. Presets use prey 1.0× and predator 1.25×; see
+[species learning rates](configuration.md#learning-rates-per-species).
+
 Supported algorithms:
 
 | Template `type` | Model and training |

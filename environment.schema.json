@@ -207,6 +207,11 @@
                         ]
                     },
                     "brain": {"type": "string"},
+                    "learning_rate_multiplier": {
+                        "type": "number", "minimum": 0.01, "maximum": 10,
+                        "default": 1.0,
+                        "description": "Multiply the selected template learning rate for this species."
+                    },
                     "rewards": {
                         "type": "object",
                         "properties": {

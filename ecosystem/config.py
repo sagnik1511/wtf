@@ -308,7 +308,7 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain"),
+            optional=("reproduction", "initial_brain", "learning_rate_multiplier"),
         )
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
@@ -343,6 +343,14 @@ def validate(c):
                 if initial["metric"] not in ("health", "kills", "lifespan", "food"):
                     fail(ip + ".metric", "must be health, kills, lifespan or food")
         template = c["brains"][s["brain"]]
+        multiplier = s.get("learning_rate_multiplier", 1.0)
+        num(multiplier, p + ".learning_rate_multiplier", 0.01, 10)
+        num(
+            template["learning_rate"] * multiplier,
+            p + ".effective_learning_rate",
+            0.000001,
+            1 if template["type"] == "q_network" else 0.1,
+        )
         if (
             template["type"] == "reinforce"
             and template["max_episode_steps"] < w["max_steps"]
