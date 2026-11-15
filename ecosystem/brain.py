@@ -104,8 +104,9 @@ class Brain:
                 gw2[a * hidden + j] += delta * h[j]
                 dh = delta * w2[a * hidden + j] * (1 - h[j] ** 2)
                 gb1[j] += dh
+                offset = j * INPUTS
                 for i, x in enumerate(e.observation):
-                    gw1[j * INPUTS + i] += dh * x
+                    gw1[offset + i] += dh * x
         scale = c["learning_rate"] / c["batch_size"]
         for k, gradient in gradients.items():
             for i, value in enumerate(gradient):

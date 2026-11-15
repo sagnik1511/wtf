@@ -127,19 +127,27 @@ class MLP:
             inputs = self.sizes[index]
             weights = self.layers[index]["weights"]
             dw, db = gradients[index]["weights"], gradients[index]["bias"]
-            previous_gradient = [0.0] * inputs if index else None
-            for j, derivative in enumerate(delta):
-                db[j] += derivative
-                offset = j * inputs
-                for i, value in enumerate(previous):
-                    dw[offset + i] += derivative * value
-                    if index:
-                        previous_gradient[i] += derivative * weights[offset + i]
             if index:
+                previous_gradient = [0.0] * inputs
+                for j, derivative in enumerate(delta):
+                    db[j] += derivative
+                    offset = j * inputs
+                    for i, value in enumerate(previous):
+                        parameter = offset + i
+                        dw[parameter] += derivative * value
+                        previous_gradient[i] += derivative * weights[parameter]
                 delta = [
                     g * (1.0 - value * value)
                     for g, value in zip(previous_gradient, previous)
                 ]
+            else:
+                # Input features need no propagated gradient. Keep that branch
+                # outside the loop that visits every input-layer weight.
+                for j, derivative in enumerate(delta):
+                    db[j] += derivative
+                    offset = j * inputs
+                    for i, value in enumerate(previous):
+                        dw[offset + i] += derivative * value
 
     def checkpoint(self):
         return [

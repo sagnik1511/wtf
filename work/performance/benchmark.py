@@ -22,11 +22,12 @@ def main():
     parser.add_argument(
         "--case", choices=["simulate", "record", "checkpoint"], required=True
     )
+    parser.add_argument("--environment", type=Path, default=Path("environments/baseline.json"))
     parser.add_argument("--steps", type=int, default=180)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--profile", type=Path)
     args = parser.parse_args()
-    config = load("environments/baseline.json")
+    config = load(args.environment)
     config["seed"] = 42
     config["experiment"].update(runs=1, world_seed_policy="increment")
     config["world"]["max_steps"] = args.steps
@@ -66,6 +67,7 @@ def main():
         rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         result = dict(
             case=args.case,
+            environment=str(args.environment),
             steps=args.steps,
             python=platform.python_version(),
             platform=platform.system(),

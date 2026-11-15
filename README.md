@@ -288,10 +288,10 @@ The world collects all actions before changing animal state:
 2. Resolve resource feeding with seeded contention order. Prey eat from their current cell, or the cell directly ahead. Eating stops at maximum energy.
 3. Resolve simultaneous attacks against prey in the cell directly ahead. Combined damage is capped at remaining health. Exactly one seeded attacker gets energy for a kill. A prey's chosen feeding action can complete in the same step it is killed.
 4. Charge living and action costs, including failed movement and attack attempts. At zero energy, apply starvation damage. There is no additional affordability restriction on actions.
-5. Record deaths and individual rewards, remove dead bodies, regrow resources up to capacity, and construct the next observations.
-6. Give each learning agent its own experience, including a terminal experience on death.
+5. Record deaths and individual rewards, remove dead bodies, resolve eligible births, regrow resources up to capacity, and construct the next observations.
+6. Give each learning agent its own experience, including a terminal experience on death, then copy parent models into newborn controllers.
 
-Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. The baseline now uses 30 attack damage against 30 prey health, giving `1.5` damage reward for a healthy prey killed by one attack; a kill still earns the existing food reward, up to `4.0` for 40 energy at `0.1` per energy point. Other scenarios can keep weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no reward for approaching targets, simply surviving a step, moving or resting. There is no reproduction, corpse persistence, health recovery, or population replenishment within a run.
+Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. The baseline now uses 30 attack damage against 30 prey health, giving `1.5` damage reward for a healthy prey killed by one attack; a kill still earns the existing food reward, up to `4.0` for 40 energy at `0.1` per energy point. Other scenarios can keep weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no reward for approaching targets, simply surviving a step, moving or resting. Reproduction follows the configured maturity, health, energy, cooldown and population rules described above. There is no corpse persistence or health recovery.
 
 The observation vector has 20 entries:
 
@@ -316,13 +316,13 @@ The standard-library implementation prioritizes inspectability and small populat
 
 ## Performance
 
-The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. Squared-distance filtering reduces distance calculations while preserving target order and visibility. Small networks use native multiplication iterators with the original summation order. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
+The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. An incremental spatial index groups food and animals into nearby cells, so limited-vision agents skip distant candidates. Small target sets and wide-vision queries use a full scan. Squared-distance filtering preserves visibility and insertion-order ties, including across cells. Each animal keeps a spatial window: movement reuses its overlapping bucket references and updates only entering/leaving strips. Shared buckets receive target moves, births, deaths and food-presence changes once per phase. Stationary observers reuse nearest-target results while the relevant bucket versions stay unchanged. Movement and obstacle edits force visibility to be checked again because occlusion inside the overlap can change. Energy, health, heading and blocked neighbors are always current. Derived caches are rebuilt after checkpoint restoration and released for dead observers; authoritative state is reconciled each phase to detect manual edits too. Small networks use native multiplication iterators with the original summation order. Training computes Q-network weight offsets once per neuron, and MLP backpropagation avoids checking the input-layer case for every weight. Optimizer mathematics and accumulation order remain unchanged. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
 
 Recording buffers only one encoded frame. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values and format version remain compatible with existing files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
 
 Playback reuses the loaded snapshot when rendering and avoids clearing/reallocating the canvas backing store or writing identical layout dimensions every frame. Chunk loading, chart history, selection and death effects remain available.
 
-Local results (median of three separate-process measurements, 180 steps, 48 prey + 12 predators, Python 3.9.6):
+Earlier optimization results (median of three separate-process measurements, 180 steps, 48 prey + 12 predators, Python 3.9.6):
 
 | Measurement | Before | After |
 | --- | ---: | ---: |
@@ -333,10 +333,29 @@ Local results (median of three separate-process measurements, 180 steps, 48 prey
 
 Every before/after run produced the same complete-state digest. Ordinary simulation RAM changed only slightly; the large memory reduction is specifically in checkpoint writing.
 
+A subsequent pass with reproduction enabled (400 steps, seed 42, median of three
+separate-process runs) reduced baseline simulation time from **4.62 s to 3.71 s**
+and A2C simulation plus recording from **5.48 s to 4.71 s**. Complete-state
+hashes matched in every comparison; A2C recording output sizes also matched.
+Peak RSS increased from **38.51 to 39.46 MiB** for baseline and **23.69 to
+26.11 MiB** for A2C. This pass improves runtime with a small memory tradeoff;
+spatial lookup data is temporary and bounded by the current observation phase.
+No dependencies, model sizes, learning schedules or ecosystem settings changed.
+
+Incremental-window reuse then reduced baseline time from **3.71 s to 3.33 s**
+(another 10%) and A2C with recording from **4.74 s to 4.53 s** (another 4%),
+using the same 400-step, seed-42, three-run comparison. Complete-state hashes
+and recording output sizes matched. Peak RSS was **37.16 to 36.36 MiB** for
+baseline and **26.31 to 27.13 MiB** for A2C; these measurements show no clear
+memory improvement. Windows and nearest-result caches are bounded by the living
+observers and spatial cells, rather than accumulating one entry per step.
+
+
 A local before/after benchmark and repeated measurements are saved under `work/performance/`. Run the optimized probe with:
 
 ```sh
 .venv/bin/python -m work.performance.benchmark --case record --steps 180 --output work/performance/local-record.json
+.venv/bin/python -m work.performance.benchmark --environment environments/a2c.json --case record --steps 400 --output work/performance/local-a2c.json
 .venv/bin/python -m work.performance.benchmark --case checkpoint --steps 180 --output work/performance/local-checkpoint.json
 ```
 

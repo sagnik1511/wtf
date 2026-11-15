@@ -5,6 +5,7 @@ import math
 import random
 from collections import defaultdict
 from dataclasses import dataclass
+from .perception import SpatialIndex
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 
@@ -145,7 +146,15 @@ class World:
         for position, patch in self.resources.items():
             if patch.quantity > 0.001:
                 food.append(position)
-        return occupied, food, prey, predators
+        if not hasattr(self, "_perception"):
+            self._perception = SpatialIndex(), SpatialIndex(), SpatialIndex()
+            self._observed_obstacles = None
+        obstacles_changed = self._observed_obstacles != self.obstacles
+        if obstacles_changed:
+            self._observed_obstacles = self.obstacles.copy()
+        for index, points in zip(self._perception, ([(None, p) for p in food], prey, predators)):
+            index.sync(points, self.animals.keys(), obstacles_changed)
+        return occupied, *self._perception
 
     def observe(self, a, context=None):
         body = self.body(a)
@@ -162,39 +171,14 @@ class World:
             dx, dy = DIRECTIONS[(a.heading + offset) % 4]
             p = a.x + dx, a.y + dy
             features.append(float(self.blocked(p) or p in occupied))
-        radius_squared = radius * radius
-
-        def nearest(points):
-            best, best_squared = None, float("inf")
-            for p in points:
-                dx, dy = p[0] - a.x, p[1] - a.y
-                squared = dx * dx + dy * dy
-                if (
-                    squared <= radius_squared
-                    and squared < best_squared
-                    and self.visible(a.position, p)
-                ):
-                    best, best_squared = p, squared
-            # Keep hypot and division order identical to the reference model.
-            return (
-                [0.0, 0.0, 0.0, 0.0]
-                if best is None
-                else [
-                    (best[0] - a.x) / radius,
-                    (best[1] - a.y) / radius,
-                    math.hypot(best[0] - a.x, best[1] - a.y) / radius,
-                    1.0,
-                ]
-            )
-
-        features += nearest(food)
-        features += nearest(p for i, p in prey if i != a.id)
-        features += nearest(p for i, p in predators if i != a.id)
+        features += food.nearest(a, radius, self.visible)
+        features += prey.nearest(a, radius, self.visible)
+        features += predators.nearest(a, radius, self.visible)
         return tuple(features)
 
     def observe_all(self):
-        # Shared only within this phase: manual edits and future steps cannot
-        # accidentally reuse stale positions or resource quantities.
+        # Reconcile authoritative state once per phase. Dynamic bucket contents
+        # update cached windows without rebuilding their overlapping interior.
         context = self._observation_context()
         return {i: self.observe(a, context) for i, a in self.animals.items()}
 
