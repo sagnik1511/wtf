@@ -1,8 +1,6 @@
 """Experiment lifecycle, training, evaluation and exact JSON checkpoints."""
 
 import copy
-import json
-from pathlib import Path
 import random
 import secrets
 from .brain import Experience
@@ -273,35 +271,10 @@ class Experiment:
         return state
 
     def write_checkpoint(self, path):
-        """Atomic compact JSON, buffering just one copied brain at a time.
-
-        checkpoint() remains available for detached in-memory snapshots. The
-        CLI avoids materializing every replay buffer plus a giant JSON string.
-        """
-        path = Path(path)
-        temporary = path.with_suffix(path.suffix + ".tmp")
-        try:
-            with temporary.open("w") as handle:
-                metadata = json.dumps(
-                    self.checkpoint(include_brains=False),
-                    separators=(",", ":"),
-                    allow_nan=False,
-                )
-                handle.write(metadata[:-1] + ',"brains":{')
-                for index, (animal_id, brain) in enumerate(self.brains.items()):
-                    if index:
-                        handle.write(",")
-                    handle.write(json.dumps(str(animal_id)) + ":")
-                    handle.write(
-                        json.dumps(
-                            brain.checkpoint(), separators=(",", ":"), allow_nan=False
-                        )
-                    )
-                handle.write("}}\n")
-            temporary.replace(path)
-        finally:
-            if temporary.exists():
-                temporary.unlink()
+        """Atomic streamed checkpoint; .gz selects the compact lossless format."""
+        from .checkpoint_io import write_checkpoint
+        write_checkpoint(path, self.checkpoint(include_brains=False),
+                         ((animal_id,brain.checkpoint()) for animal_id,brain in self.brains.items()))
 
     @classmethod
     def restore(cls, state, mode=None):

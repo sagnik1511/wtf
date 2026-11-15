@@ -8,7 +8,7 @@ Historical measurements describe the implementation evaluated at each optimizati
 
 The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. An incremental spatial index groups food and animals into nearby cells, so limited-vision agents skip distant candidates. Small target sets and wide-vision queries use a full scan. Squared-distance filtering preserves visibility and insertion-order ties, including across cells. Each animal keeps a spatial window: movement reuses its overlapping bucket references and updates only entering/leaving strips. Shared buckets receive target moves, births, deaths and food-presence changes once per phase. Stationary observers reuse nearest-target results while the relevant bucket versions stay unchanged. Movement and obstacle edits force visibility to be checked again because occlusion inside the overlap can change. Energy, health, heading and blocked neighbors are always current. Derived caches are rebuilt after checkpoint restoration and released for dead observers; authoritative state is reconciled each phase to detect manual edits too. Small networks use native multiplication iterators with the original summation order. Training computes Q-network weight offsets once per neuron, and MLP backpropagation avoids checking the input-layer case for every weight. Optimizer mathematics and accumulation order remain unchanged. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
 
-Recording streams one encoded frame and retains one previous frame for computing chunk-local deltas. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values and format version remain compatible with existing files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
+Recording streams one encoded frame and retains one previous frame for computing chunk-local deltas. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values remain exact; the CLI now writes compact version-2 envelopes while the loader still accepts existing version-1 files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
 
 Playback reuses the loaded snapshot when rendering and avoids clearing/reallocating the canvas backing store or writing identical layout dimensions every frame. Chunk loading, chart history, selection and death effects remain available.
 
@@ -62,3 +62,12 @@ viewer receives compressed stored bytes; legacy API clients receive full frames.
 Decoded viewer memory remains one chunk and live brain memory is unaffected.
 See the [recording guide](recording.md#optimize-older-recordings) for format,
 measurement limits and conversion commands.
+
+Checkpoint storage now pools repeated configuration/actions/model metadata and
+encodes large float64/uint32 arrays as portable little-endian binary values in
+base64 before gzip. A measured PPO checkpoint fell from 7.03 MB plain JSON to
+2.56 MB, versus 3.19 MB with gzip alone. Writing took 0.24 seconds in that one
+local sample; this is not a general throughput guarantee. The writer still
+streams one detached brain at a time. Restoring and offline conversion decode
+one complete checkpoint in RAM; no peak-memory reduction is claimed for loading.
+See [checkpoint storage](running.md#optimize-existing-checkpoint-files).

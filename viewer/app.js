@@ -1,3 +1,4 @@
+import { Dashboard } from './dashboard.mjs';
 import { Playback } from './playback.mjs';
 import { behaviorRows } from './behavior-stats.mjs';
 const $ = id => document.getElementById(id);
@@ -12,15 +13,16 @@ async function api(path) {
   return value;
 }
 const player = new Playback(api);
-function pause() { playing = false; $('play').textContent = 'Play recording'; }
+function pause() { playing = false; $('play').textContent = 'Play recording'; $('dashboard-play').textContent='Play recording'; }
 async function operation(fn) {
   if (busy) return;
   busy = true;
-  for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run']) $(id).disabled = true;
+  for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run','dashboard-back','dashboard-next','dashboard-timeline']) $(id).disabled = true;
   try { await fn(); } catch (e) { pause(); showError(e); }
-  finally { busy = false; for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run']) $(id).disabled = false;updateRunButtons(); }
+  finally { busy = false; for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run','dashboard-back','dashboard-next','dashboard-timeline']) $(id).disabled = false;updateRunButtons(); }
 }
 function speciesColor(name) { return colors[Object.keys(state.species).indexOf(name) % colors.length]; }
+const dashboard = new Dashboard(api, speciesColor);
 function fitWorld() {
   const canvas=$('world'),holder=canvas.parentElement;
   if(!holder.clientWidth||!holder.clientHeight)return;
@@ -230,6 +232,7 @@ function render(snapshot = null) {
   state=snapshot??player.snapshot(selected);
   if(previousRun!==undefined&&previousRun!==state.run){selected=null;state=player.snapshot();}
   syncRunMenu();
+  dashboard.update({state,id:player.id,species:state.species,playing});
   $('tick').textContent=state.tick.toLocaleString();$('run').textContent=`${state.run} / ${state.total_runs}`;
   let prey=0,predators=0;for(const [name,s] of Object.entries(state.species)) {if(s.diet==='resource')prey+=state.metrics.populations[name];else predators+=state.metrics.populations[name];}
   $('prey').textContent=prey;$('predator').textContent=predators;$('food').textContent=Math.round(state.metrics.food).toLocaleString();$('updates').textContent=state.total_updates.toLocaleString();
@@ -270,7 +273,7 @@ async function openRecording() {
   selected=null;analysisKey="";await player.open(id);
   runMenuKey="";
   $('config').value=JSON.stringify(player.metadata.config,null,2);
-  $('play').disabled=false;render();
+  $('play').disabled=false;$('metrics-open').disabled=false;render();
 }
 async function refreshCatalog() {
   const records=await api('/api/recordings'),previous=$('recording').value;
@@ -295,4 +298,8 @@ $('recorded-run').onchange=()=>{pause();if(state)operation(async()=>{selected=nu
 $('timeline').onchange=()=>{pause();if(state)operation(async()=>{render(await player.seek(Number($('timeline').value),selected));});};
 $('speed').oninput=()=>{$('speed-value').textContent=$('speed').value;};
 $('world').onclick=event=>{if(busy||!state)return;const rect=$('world').getBoundingClientRect(),x=Math.floor((event.clientX-rect.left)/rect.width*state.width),y=Math.floor((event.clientY-rect.top)/rect.height*state.height);selected=state.animals.find(a=>a.x===x&&a.y===y)?.id??null;render();};
+$('dashboard-play').onclick=()=>{$('play').click();$('dashboard-play').textContent=playing?'Pause':'Play recording';};
+$('dashboard-next').onclick=()=>$('step').click();
+$('dashboard-back').onclick=()=>$('back').click();
+$('dashboard-timeline').onchange=()=>{pause();if(state)operation(async()=>render(await player.seek(Number($('dashboard-timeline').value),selected)));};
 operation(refreshCatalog);

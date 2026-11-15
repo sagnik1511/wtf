@@ -64,6 +64,8 @@ def make_handler(state):
                         return self.send(
                             200, state.recordings.metrics(parts[2], int(parts[4]))
                         )
+                    if len(parts) == 7 and parts[3] == "runs" and parts[5] == "telemetry":
+                        return self.send(200,state.recordings.telemetry(parts[2],int(parts[4]),int(parts[6])))
                     if len(parts) == 7 and parts[3] == "runs" and parts[5] == "chunks":
                         chunk = state.recordings.chunk(
                             parts[2], int(parts[4]), int(parts[6])

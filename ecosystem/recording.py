@@ -206,6 +206,32 @@ class RecordingStore:
         from .analyze import analyze_recording
         return analyze_recording(self._folder(recording_id), run=run)
 
+    def telemetry(self, recording_id, run, page):
+        """At most 128 small per-frame summaries; no persisted or whole-run cache."""
+        from .telemetry import PAGE_SIZE, summarize
+        if type(run) is not int or type(page) is not int or page < 0:
+            raise ValueError("Invalid telemetry run or page")
+        manifest = self.metadata(recording_id)
+        entry = next((r for r in manifest["runs"] if r["run"] == run), None)
+        start = page * PAGE_SIZE
+        if entry is None or start >= entry["frame_count"]:
+            raise FileNotFoundError("Recorded telemetry page not found")
+        end = min(start + PAGE_SIZE, entry["frame_count"])
+        size = manifest["recording"]["frames_per_chunk"]
+        first_chunk = start // size
+        previous = load_chunk(self.chunk(recording_id, run, first_chunk-1))[-1] if first_chunk else None
+        points = []
+        for index in range(first_chunk, (end-1)//size+1):
+            frames = load_chunk(self.chunk(recording_id, run, index))
+            for local, frame in enumerate(frames):
+                position = index*size+local
+                if position >= end:break
+                if position >= start:
+                    points.append(summarize(manifest["config"],frame,previous))
+                previous = frame
+            del frames
+        return dict(page=page,page_size=PAGE_SIZE,start_frame=start,points=points)
+
     def metrics(self, recording_id, run, max_points=2048):
         """Bounded, lightweight history independent of decoded world chunks.
 

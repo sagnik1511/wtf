@@ -28,6 +28,43 @@ You can close the simulator before playing a recording. Older experiments made
 before frame recording was introduced have only metrics/checkpoints and do not
 appear in the playback catalog.
 
+## Per-step species dashboard
+
+Click **Metrics dashboard** in the toolbar. Its charts follow the replay position
+while playing, stepping or scrubbing; no future frames are displayed. The modal
+has its own play, next/back and seek controls, keeping the main board's size
+unchanged. Choose all species or one species and a rolling window of 128, 512 or
+1,024 recorded frames. Each of six charts has an independent metric selector.
+
+Available trends include population, mean health/energy, births and deaths per
+step, predation/starvation deaths, kills, attack/eat attempts, hunting/feeding
+success, starving animals, reward, age, generations and spatial groups. Cards
+show the current step, not episode totals. Hunting success is kills per attack;
+prey feeding success is productive feeds per eat attempt. No attempts gives no
+value. Reward averages surviving animals that acted; deceased actors' rewards
+are omitted. Action coverage exposes missing terminal actions.
+
+Prediction charts distinguish action probabilities from Q values, and also
+include state value, policy entropy and Q exploration. Select an action for
+probability/Q charts. Dots appear only at recorded diagnostic samples; values
+are not filled forward or interpolated. These are averages on the sampled
+agents' changing observations, not prediction accuracy or proof of improvement.
+Health/energy/age averages are missing after extinction. Known event counts
+remain zero when there were no events. If frames skip simulation steps, event
+metrics and success rates are missing across the gap, not reconstructed.
+
+Spatial groups are same-species connected components of animals linked within
+3 Euclidean grid cells, ignoring obstacles. The group count includes components
+of two or more animals; solitary animals are separate. Links are transitive,
+and proximity does not imply cooperative behavior or shared brains.
+
+The server derives telemetry from old or new replays on demand, in pages of at
+most 128 frames, reading bounded chunks. The browser caches at most 12 pages of
+scalar summaries; there are no additional result files, models or simulations.
+Live recording pages refresh when additional frames are committed. The read-only
+API is `GET /api/recordings/{id}/runs/{run}/telemetry/{page}` (zero-based page).
+The **Behavior & learning** panel remains a separate whole-run summary.
+
 ## Recording settings
 
 Each environment has a recording section:
@@ -66,7 +103,7 @@ The recorder encodes one frame at a time into an open chunk file; it never colle
 
 The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
-Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes compact JSON. Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a JSON checkpoint still parses that complete file. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
+Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes a compact compressed checkpoint ([format and migration](running.md#optimize-existing-checkpoint-files)). Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a JSON checkpoint still parses that complete file. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
 
 ## Read-only HTTP API
 

@@ -48,6 +48,13 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 
 For per-experiment model choices without editing JSON, use the [CLI model selectors](brain-library.md#choose-models-with-cli-arguments). The resolved choices are saved with the new experiment.
 
+Predator health in the supplied presets is 55 in the main scenarios and 44 in
+the dense-obstacle, scarce-food and predator-heavy scenarios (a 10% increase).
+Reproduction thresholds remain at 80% of maximum health. With starvation damage
+of 1, the extra health provides roughly 5 or 4 additional starving steps,
+respectively, assuming no other damage or recovery. This is a tuning choice;
+actual survival also depends on energy use and hunting.
+
 ## Learning rates per species
 
 All supplied presets use `learning_rate_multiplier: 1.0` for prey and `1.25`

@@ -1,3 +1,4 @@
+from ecosystem.checkpoint_io import read_checkpoint
 """Run-to-run champion transfer and original-initialization controls."""
 import copy
 import json
@@ -103,7 +104,7 @@ class BrainChainingTests(unittest.TestCase):
                     artifact=json.loads((folder/f'champions/run_{number:04d}/prey/health.json').read_text())
                     self.assertEqual(artifact['parent_artifact']['artifact_id'],parent)
                     if chain:parent=artifact['artifact_id']
-                checkpoint=json.loads((folder/'checkpoints/final.json').read_text())
+                checkpoint=read_checkpoint(folder/'checkpoints/final.json.gz')
                 self.assertEqual(checkpoint['config']['experiment']['chain_best_brains'],chain)
 
     def test_flag_requires_boolean(self):

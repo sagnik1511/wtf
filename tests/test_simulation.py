@@ -343,6 +343,17 @@ class ServerTests(unittest.TestCase):
             self.assertIsNone(response.headers.get("Content-Encoding"))
             self.assertEqual(json.load(response), frames)
 
+    def test_per_step_telemetry_endpoint_and_validation(self):
+        with self.request("/api/recordings/recorded_test/runs/1/telemetry/0") as response:
+            page=json.load(response)
+        self.assertEqual(page["page_size"],128)
+        self.assertEqual([p["tick"] for p in page["points"]],[0,1,2,3])
+        self.assertEqual(set(page["points"][0]["species"]),{"prey","predator"})
+        for path,code in [("/api/recordings/recorded_test/runs/1/telemetry/1",404),
+                          ("/api/recordings/recorded_test/runs/1/telemetry/-1",400)]:
+            with self.assertRaises(HTTPError) as raised:self.request(path)
+            self.assertEqual(raised.exception.code,code)
+
     def test_all_live_simulation_endpoints_removed(self):
         for path in ("/api/step", "/api/load", "/api/restore"):
             with self.subTest(path=path), self.assertRaises(HTTPError) as raised:

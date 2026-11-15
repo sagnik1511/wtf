@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from .config import load
 from .runner import Experiment
+from .checkpoint_io import read_checkpoint
 from .recording import Recorder, settings
 from .progress import RunProgress
 from .library import DEFAULT_LIBRARY, export_champions, apply_brain_overrides
@@ -36,7 +37,7 @@ def main():
     parser.add_argument(
         "--resume",
         type=Path,
-        help="Resume an exact JSON checkpoint; environment and overrides are ignored",
+        help="Resume a compact .json.gz or legacy JSON checkpoint; environment and overrides are ignored",
     )
     parser.add_argument(
         "--no-record",
@@ -60,6 +61,8 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("results"))
     parser.add_argument("--library-dir", type=Path,
                         help="Optional shared library for selectors and an extra champion copy; run-local brains are always saved")
+    parser.add_argument("--checkpoint-format", choices=("compact", "json"), default="compact",
+                        help="Checkpoint output: compact numeric arrays + shared metadata + gzip (default), or legacy JSON")
     parser.add_argument("--no-library", action="store_true",
                         help="Skip saving new champion models")
     parser.add_argument("--brains-from", type=Path,
@@ -81,7 +84,7 @@ def main():
         ) or args.brain:
             parser.error("Configuration overrides cannot be used with --resume")
         experiment = Experiment.restore(
-            json.loads(args.resume.read_text()), mode=args.mode
+            read_checkpoint(args.resume), mode=args.mode
         )
     else:
         config = load(args.environment)
@@ -124,7 +127,8 @@ def main():
             "resumed_from": str(args.resume) if args.resume else None,
             "initialized_from": {species: value["provenance"] for species, value in experiment.initial_models.items()},
             "randomization_seed": experiment.randomization_seed,
-            "checkpoint_version": 1,
+            "checkpoint_version": 1 if args.checkpoint_format=="json" else 2,
+            "checkpoint_format": args.checkpoint_format,
             "observation_version": 1,
             "playback_recording": not args.no_record
             and settings(experiment.config)["enabled"],
@@ -140,7 +144,7 @@ def main():
     completed = False
     try:
         run_experiment(experiment, folder, save, recorder, progress,
-                       library_root=args.library_dir, save_brains=not args.no_library)
+                       library_root=args.library_dir, save_brains=not args.no_library, checkpoint_format=args.checkpoint_format)
         completed = True
     finally:
         progress.close()
@@ -149,7 +153,8 @@ def main():
     print(f"Results: {folder.resolve()}")
 
 
-def run_experiment(experiment, folder, save, recorder, progress=None, library_root=None, save_brains=True):
+def run_experiment(experiment, folder, save, recorder, progress=None, library_root=None, save_brains=True, checkpoint_format="compact"):
+    suffix = ".json.gz" if checkpoint_format=="compact" else ".json"
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
         fields = ["run", "seed", "tick", "food", "starvation", "predation"] + [
@@ -214,7 +219,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                                              root=library_root, label=folder.name)
                     except (OSError, ValueError):
                         # A library failure must not discard trained controllers.
-                        experiment.write_checkpoint(folder / "checkpoints/library_error.json")
+                        experiment.write_checkpoint(folder / ("checkpoints/library_error"+suffix))
                         raise
                 print(
                     f"Run {run} (seed {experiment.world.seed}): {experiment.world.metrics()}",
@@ -226,13 +231,13 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                     == 0
                 ):
                     experiment.write_checkpoint(
-                        folder / f"checkpoints/run_{run:04d}.json"
+                        folder / f"checkpoints/run_{run:04d}{suffix}"
                     )
             if experiment.last_record is not None or experiment.finished_run:
                 handle.flush()
     save("run_seeds.json", experiment.run_seeds)
     save("summary.json", experiment.summaries)
-    experiment.write_checkpoint(folder / "checkpoints/final.json")
+    experiment.write_checkpoint(folder / ("checkpoints/final"+suffix))
 
 
 if __name__ == "__main__":

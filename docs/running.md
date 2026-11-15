@@ -38,7 +38,7 @@ Each invocation creates a unique folder inside `results/` containing:
 - `summary.json`: per-run outcomes, lifespans of dead animals, and ages of survivors. Survivor ages are censored observations, not completed lifespans.
 - `champions/run_0001.json`, etc.: references to the archived models selected during each completed training run.
 - `analysis.json`: optional report created by the [analysis command](analysis.md).
-- `checkpoints/`: scheduled intermediate learning checkpoints and a final checkpoint. The final run writes `final.json` once instead of duplicating the same state in a numbered file.
+- `checkpoints/`: scheduled intermediate learning checkpoints and a final checkpoint. The final run writes `final.json.gz` once instead of duplicating the same state in a numbered file.
 - `playback/recording.json`: versioned recording manifest and static layout per run.
 - `playback/run_0001_chunk_000000.json.gz`, etc.: small arrays of recorded frames.
 
@@ -76,17 +76,51 @@ Actual world seeds are printed, written to `run_seeds.json` as runs start, and s
 Resume a checkpoint:
 
 ```sh
-.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.json
+.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.json.gz
 ```
 
-Checkpoints include the world, counters, private replay buffers, online/target weights, and policy/training/world random-generator states. They are JSON, not executable pickle files. Resume continues remaining runs from the saved experiment; a completed experiment stays completed.
+New CLI checkpoints use `run_0001.json.gz` and `final.json.gz`. Shared settings
+and duplicate champion models are stored once; large homogeneous float64 and
+unsigned integer arrays use little-endian binary values encoded in base64,
+then gzip wraps the JSON envelope. This is lossless (including signed zero),
+with no new dependencies. Atomic writing still copies one brain at a time.
+Use `--checkpoint-format json` for legacy full JSON output instead. Programmatic
+`Experiment.write_checkpoint(path)` selects compact output for `.gz` paths and
+legacy output for `.json` paths.
+
+Old plain JSON and gzip-compressed version-1 checkpoints remain readable.
+`ecosystem.checkpoint_io.read_checkpoint(path)` returns the original state for
+`Experiment.restore(...)`; do not pass a raw compact envelope directly to restore.
+An old `.json` resume path also resolves its `.json.gz` replacement when the
+plain file is absent. Loading still decodes a complete checkpoint in memory.
+
+Checkpoints include the world, counters, private replay buffers, online/target weights, and policy/training/world random-generator states. They use JSON envelopes and numeric array payloads, not executable pickle files. Resume continues remaining runs from the saved experiment; a completed experiment stays completed.
+
+## Optimize existing checkpoint files
+
+```sh
+.venv/bin/python -m ecosystem.optimize_checkpoints results/EXPERIMENT
+.venv/bin/python -m ecosystem.optimize_checkpoints results --all
+```
+
+Conversion handles one checkpoint at a time, verifies SHA-256 of canonical
+expanded state (including integer/float representations), then atomically
+publishes the smaller file before removing its redundant original. Existing
+conflicting copies or failed verification leave originals intact. Batch mode
+skips experiments marked as writing or without a completion marker; finish or
+close training before converting them. Repeat conversion is safe. Replay chunks,
+metrics, summaries and champion artifacts are untouched.
+
+A local PPO checkpoint measured 7,028,427 bytes as plain JSON, 3,193,141 with gzip
+alone, and 2,562,706 with the compact layout plus gzip: about 64% less than plain
+JSON and another 20% less than gzip. Sizes depend on model and buffer contents.
 
 ## Evaluate saved brains
 
 Evaluate saved brains by restoring a checkpoint in evaluation mode:
 
 ```sh
-.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.json --mode evaluate
+.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.json.gz --mode evaluate
 ```
 
 Use an intermediate checkpoint with remaining runs to evaluate future runs. Checkpoint restore is a CLI operation; the playback viewer reads frame recordings only.
