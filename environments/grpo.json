@@ -98,7 +98,12 @@
         "energy_cost": 30,
         "max_population": 24
       },
-      "learning_rate_multiplier": 1.25
+      "learning_rate_multiplier": 1.25,
+      "champion_selection": {
+        "criterion": "balanced",
+        "survival_steps_per_kill": 300,
+        "max_survival_bonus": 2
+      }
     }
   },
   "brains": {

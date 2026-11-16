@@ -13,7 +13,29 @@ from .brains import model_signature, model_snapshot
 
 PROJECT = Path(__file__).resolve().parent.parent
 DEFAULT_LIBRARY = PROJECT / 'brain_library'
-CRITERIA = ('health', 'kills', 'lifespan', 'food')
+CRITERIA = ('health', 'kills', 'lifespan', 'food', 'balanced')
+
+
+def selection_criterion(config, species, fallback=None):
+    spec = config['species'][species]
+    return spec.get('champion_selection', {}).get('criterion',
+                fallback or ('lifespan' if spec['diet']=='resource' else 'kills'))
+
+
+def balanced_policy(config, species):
+    policy = config['species'][species].get('champion_selection', {})
+    return dict(version=1, survival_steps_per_kill=policy.get('survival_steps_per_kill', 300),
+                max_survival_bonus=policy.get('max_survival_bonus', 2))
+
+
+def balanced_rank(age, kills, energy, health, policy):
+    bonus = min(age/policy['survival_steps_per_kill'],policy['max_survival_bonus']) if kills>0 else 0
+    return (kills+bonus,kills,age,energy,health)
+
+
+def source_balanced_rank(source, policy):
+    return balanced_rank(source['age'],source['kills'],source.get('energy_gained',0),source.get('health',0),policy)
+
 
 
 def ranks(animal):
@@ -30,9 +52,15 @@ class ChampionBook:
         self.entries = copy.deepcopy(entries or {})
 
     def consider(self, animals, brains, source):
+        policies = {}
         for animal in animals:
             champions = self.entries.setdefault(animal.species, {})
             scores = ranks(animal)
+            if self.config['species'][animal.species]['diet']=='prey':
+                if animal.species not in policies:
+                    policies[animal.species] = balanced_policy(self.config,animal.species)
+                policy = policies[animal.species]
+                scores['balanced'] = balanced_rank(animal.age,animal.kills,animal.energy_gained,animal.health,policy)
             wins = [key for key, rank in scores.items()
                     if key not in champions or rank > tuple(champions[key]['rank'])]
             if not wins:
@@ -50,6 +78,7 @@ class ChampionBook:
                 rank = scores[key]
                 champions[key] = dict(criterion=key, score=rank[0], rank=list(rank),
                                      source=metadata, model=model)
+                if key=='balanced':champions[key]['selection_policy'] = policy
 
 
 def _component(value):
@@ -114,7 +143,8 @@ def load_initial_models(config, root=DEFAULT_LIBRARY):
                 choices = catalog(root)
             signature = model_signature(config['brains'][spec['brain']], spec['allowed_actions'])
             matches = [entry for entry in choices if entry['species'] == species
-                       and entry['criterion'] == request['metric'] and entry['signature'] == signature]
+                       and entry['criterion'] == request['metric'] and entry['signature'] == signature
+                       and (request['metric']!='balanced' or entry.get('selection_policy')==balanced_policy(config,species))]
             if not matches:
                 raise ValueError(f'No compatible {request["metric"]} champion for {species}; train and archive this brain architecture first')
             key = (lambda entry: (tuple(entry['rank']), entry['created_at'], entry['artifact_id'])) if request['selection'] == 'best' else (lambda entry: (entry['created_at'], entry['artifact_id']))
@@ -128,6 +158,9 @@ def load_initial_models(config, root=DEFAULT_LIBRARY):
             provenance=dict(artifact_id=artifact['artifact_id'], path=str(path.resolve()),
                 criterion=artifact['criterion'], score=artifact['score'],
                 model_generation=artifact['model_generation']))
+        if spec.get('champion_selection',{}).get('criterion')=='balanced':
+            selected[species]['provenance']['chaining_criterion'] = 'balanced'
+            selected[species]['provenance']['balanced_score'] = source_balanced_rank(artifact['source'],balanced_policy(config,species))[0]
     return selected
 
 
@@ -176,7 +209,7 @@ def apply_brain_overrides(config, requests=(), source_experiment=None,
     if source_experiment is not None:
         index_path, source = source_index(source_experiment, source_run)
         for species, spec in config["species"].items():
-            selections.setdefault(species, "lifespan" if spec["diet"] == "resource" else "kills")
+            selections.setdefault(species, selection_criterion(config,species))
     for species, model in selections.items():
         spec = config["species"][species]
         if model == "fresh":
@@ -185,14 +218,24 @@ def apply_brain_overrides(config, requests=(), source_experiment=None,
             selection, metric = model.split(":", 1)
             if metric not in CRITERIA:
                 raise ValueError(f"Unknown champion criterion: {metric}")
+            spec.setdefault('champion_selection',{})['criterion'] = metric
             spec["initial_brain"] = dict(selection=selection, metric=metric)
         elif model in CRITERIA:
             if source is None:
                 raise ValueError("A bare champion criterion needs --brains-from; use best:food for the library")
             entry = next((e for e in source["entries"]
                           if e["species"] == species and e["criterion"] == model), None)
+            if model=='balanced':
+                if spec['diet']!='prey':raise ValueError('Balanced selection requires a predator species')
+                policy = balanced_policy(config,species)
+                # Older runs cannot recreate an unarchived individual's weights.
+                # Rescore only available snapshots, without changing that archive.
+                if entry is None or entry.get('selection_policy')!=policy:
+                    candidates = [e for e in source['entries'] if e['species']==species]
+                    entry = max(candidates,key=lambda e:source_balanced_rank(e['source'],policy),default=None)
             if entry is None:
                 raise ValueError(f"Source run has no {species} {model} champion")
+            spec.setdefault('champion_selection',{})['criterion'] = model
             if "model_directory" in source:
                 directory = (index_path.parent / source["model_directory"]).resolve()
                 if index_path.parent.resolve() not in directory.parents:
@@ -262,6 +305,7 @@ def export_champions(experiment, destination, root=None, label=None):
                     criterion=criterion, score=entry['score'], rank=entry['rank'],
                     signature=entry['model']['signature'], file=relative.as_posix(),
                     source=entry['source'], model_generation=artifact['model_generation']))
+                if criterion=='balanced':manifest['entries'][-1]['selection_policy'] = entry['selection_policy']
         (staging / 'manifest.json').write_text(json.dumps(manifest, indent=2, allow_nan=False) + '\n')
         staging.rename(final)
     finally:

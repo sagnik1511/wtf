@@ -26,6 +26,7 @@ class Brain:
     def __init__(self, config, actions, base_seed, individual_seed):
         self.config = copy.deepcopy(config)
         self.actions = list(actions)
+        self.action_indices = {action: i for i, action in enumerate(self.actions)}
         self.hidden = config["hidden_layers"][0]
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
@@ -47,17 +48,21 @@ class Brain:
         self.cursor = self.steps = self.updates = 0
         self.epsilon = config["exploration"]["initial"]
 
-    def forward(self, observation, weights=None):
-        w = self.weights if weights is None else weights
-        w1, w2, hidden = w["w1"], w["w2"], self.hidden
-        # map(mul) avoids millions of Python generator/index operations while
-        # preserving the exact multiplication and summation order.
-        h = [
+    def _hidden(self, observation, weights):
+        w1 = weights["w1"]
+        hidden = self.hidden
+        return [
             math.tanh(
                 bias + sum(map(mul, observation, w1[j * INPUTS : (j + 1) * INPUTS]))
             )
-            for j, bias in enumerate(w["b1"])
+            for j, bias in enumerate(weights["b1"])
         ]
+
+    def forward(self, observation, weights=None):
+        w = self.weights if weights is None else weights
+        h = self._hidden(observation, w)
+        w2, hidden = w["w2"], self.hidden
+        # Preserve summation order for policies, diagnostics and target values.
         q = [
             bias + sum(map(mul, h, w2[a * hidden : (a + 1) * hidden]))
             for a, bias in enumerate(w["b2"])
@@ -91,14 +96,18 @@ class Brain:
         gw1, gb1, gw2, gb2 = (gradients[k] for k in ("w1", "b1", "w2", "b2"))
         w2, hidden = self.weights["w2"], self.hidden
         for e in self.training_rng.sample(self.replay, c["batch_size"]):
-            h, q = self.forward(e.observation)
-            a = self.actions.index(e.action)
+            h = self._hidden(e.observation, self.weights)
+            a = self.action_indices[e.action]
+            # Only Q(s, action_taken) contributes to this replay loss. Other
+            # output heads are still computed for policy and target inference.
+            offset = a * hidden
+            value = self.weights["b2"][a] + sum(map(mul, h, w2[offset:offset+hidden]))
             expected = e.reward
             if not e.terminated:
                 expected += c["discount_factor"] * max(
                     self.forward(e.next_observation, self.target)[1]
                 )
-            delta = max(-1.0, min(1.0, q[a] - expected))
+            delta = max(-1.0, min(1.0, value - expected))
             gb2[a] += delta
             for j in range(self.hidden):
                 gw2[a * hidden + j] += delta * h[j]
@@ -113,7 +122,8 @@ class Brain:
                 self.weights[k][i] -= scale * value
         self.updates += 1
         if self.updates % c["target_update_every_training_steps"] == 0:
-            self.target = {k: v.copy() for k, v in self.weights.items()}
+            for key, values in self.weights.items():
+                self.target[key][:] = values
 
     def diagnostics(self, observation):
         return dict(

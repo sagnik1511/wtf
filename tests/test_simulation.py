@@ -204,9 +204,11 @@ class LearningTests(unittest.TestCase):
         e.world.animals[0].energy = 0
         e.world.animals[0].health = 0.1
         e.observations = e.world.observe_all()
+        brain = e.brains[0]
         e.step()
-        self.assertTrue(e.brains[0].replay[-1].terminated)
-        self.assertLess(e.brains[0].replay[-1].reward, -10)
+        self.assertTrue(brain.replay[-1].terminated)
+        self.assertLess(brain.replay[-1].reward, -10)
+        self.assertNotIn(0, e.brains)
 
 
 class ExperimentTests(unittest.TestCase):

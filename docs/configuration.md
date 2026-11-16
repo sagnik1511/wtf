@@ -9,6 +9,7 @@ Each JSON file is a complete experiment definition:
 | Preset | Prey | Predators | Prey / predator brain |
 | --- | ---: | ---: | --- |
 | [a2c.json](../environments/a2c.json) | 48 | 12 | a2c / a2c |
+| [dqn.json](../environments/dqn.json) | 48 | 12 | q_network / q_network |
 | [baseline.json](../environments/baseline.json) | 48 | 12 | q_network / q_network |
 | [champion_lineage.json](../environments/champion_lineage.json) | 48 | 12 | q_network / q_network |
 | [dense_obstacles.json](../environments/dense_obstacles.json) | 24 | 6 | q_network / q_network |
@@ -40,6 +41,7 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 | Map size and duration | `world.width`, `world.height`, `world.max_steps` |
 | Learning rate per species | `species.<name>.learning_rate_multiplier` (template rate × multiplier) |
 | Model and training algorithm | `species.<name>.brain` and the referenced `brains` template |
+| Predator survival + kill selection | `species.predator.champion_selection` ([scoring rule](brain-library.md#balance-predator-kills-and-survival)) |
 | Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |
 | Reproduction | `species.<name>.reproduction` |

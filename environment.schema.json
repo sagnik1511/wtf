@@ -87,7 +87,8 @@
                                             "health",
                                             "kills",
                                             "lifespan",
-                                            "food"
+                                            "food",
+                                            "balanced"
                                         ]
                                     }
                                 },
@@ -207,6 +208,15 @@
                         ]
                     },
                     "brain": {"type": "string"},
+                    "champion_selection": {
+                        "type": "object", "additionalProperties": false,
+                        "required": ["criterion"],
+                        "properties": {
+                            "criterion": {"enum": ["health", "kills", "lifespan", "food", "balanced"]},
+                            "survival_steps_per_kill": {"type": "number", "minimum": 1, "maximum": 10000000, "default": 300},
+                            "max_survival_bonus": {"type": "number", "minimum": 0, "maximum": 100, "default": 2}
+                        }
+                    },
                     "learning_rate_multiplier": {
                         "type": "number", "minimum": 0.01, "maximum": 10,
                         "default": 1.0,

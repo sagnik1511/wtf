@@ -71,3 +71,25 @@ local sample; this is not a general throughput guarantee. The writer still
 streams one detached brain at a time. Restoring and offline conversion decode
 one complete checkpoint in RAM; no peak-memory reduction is claimed for loading.
 See [checkpoint storage](running.md#optimize-existing-checkpoint-files).
+
+A subsequent code-review pass reduces training-loop work without changing
+learning settings or arithmetic order:
+
+- DQN replay loss computes only the chosen action's current Q value; policy and
+  bootstrap inference still compute all action values. Action indices are
+  precomputed, and target refreshes update existing arrays in place.
+- Modern experiments release dead founders as well as descendants after terminal
+  learning and champion capture. Their update counts are retained separately.
+  Old modern checkpoints skip rebuilding already-dead controllers when restored.
+  Legacy checkpoints that reuse founder controllers retain their prior behavior.
+- DQN-only steps avoid the per-animal GRPO scan. Mode checks are outside the
+  learning loop; balanced champion settings are constructed once per predator
+  species per candidate pass rather than once per animal.
+
+Validation compares DQN against the former full-output replay update through
+buffer wraparound, target refreshes, terminal/truncated transitions and resume.
+Lifecycle checks verify buffer release, identical living controller/world states,
+champions, update totals and future chained runs. These changes were reviewed and
+checked for correctness without profiling or timing benchmarks; no runtime or
+peak-RAM percentage improvement is claimed. Living agents still own independent
+networks and experience buffers, and completed episode summaries still accumulate.

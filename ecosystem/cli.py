@@ -69,7 +69,7 @@ def main():
                         help="Source run name in results/ or experiment path; defaults to its latest archived numbered run")
     parser.add_argument("--brain-run", type=int, help="Archived run number within --brains-from")
     parser.add_argument("--brain", action="append", default=[], metavar="SPECIES=MODEL",
-                        help="Repeat per species: criterion from --brains-from, JSON path, best:metric, latest:metric, or fresh")
+                        help="Repeat per species: criterion (including balanced) from --brains-from, JSON path, best:metric, latest:metric, or fresh")
     chain = parser.add_mutually_exclusive_group()
     chain.add_argument("--chain-brains", dest="chain_brains", action="store_true",
                        help="Initialize later runs from the previous run's champions (default)")

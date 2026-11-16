@@ -9,7 +9,8 @@ Training automatically tracks four independent champions for every species:
 reached) and `food` (most actual energy gained from food or prey). Prey cannot
 kill under the current rules, so their kill score remains zero; use `food` for
 a useful foraging champion. These are observed records, not validated estimates
-of a model's quality on other worlds.
+of a model's quality on other worlds. Predators also track a `balanced` champion
+that combines kills with capped survival credit; see the scoring rule below.
 
 Champions capture the model at the step the record is set, after that step's
 learning. Dead animals are considered before their controllers are discarded.
@@ -21,6 +22,51 @@ newborns start those counters at zero. Raw HP is used for health, and age reache
 also includes living survivors rather than treating their age as a completed
 lifespan. The exact tie-breaking ranks are included with each model.
 
+## Balance predator kills and survival
+
+The GRPO preset uses this predator setting; other environments can opt in:
+
+```json
+"champion_selection": {
+  "criterion": "balanced",
+  "survival_steps_per_kill": 300,
+  "max_survival_bonus": 2
+}
+```
+
+The score is `kills + min(age / survival_steps_per_kill, max_survival_bonus)`
+after the first kill. With zero kills, the score is zero and no survival bonus
+is awarded. Ties prefer more kills, then greater age, energy gained and health.
+Both living and dead predators are considered. For example, 8 kills at age 600
+scores 10, versus 9 kills at age 100 scoring 9.33. A predator with 10 kills at
+age 100 scores 10.33 and wins. Long survival can contribute at most two points;
+never hunting cannot beat a predator that has killed. This is a configurable
+selection heuristic, not a measured estimate of policy quality.
+
+The selected criterion applies to later runs even when initial weights came
+from an older kill-only champion. `--brain predator=kills` explicitly switches
+back to kill-only selection; `--brain predator=balanced` selects the combined
+criterion. Prey remain on lifespan selection by default. This changes champion
+selection and inheritance, not RL rewards, update frequency or rollout horizon.
+It does not resolve sparse GRPO learning signals by itself.
+
+For a source archive without a compatible `balanced` snapshot, `--brains-from`
+rescores the **available saved candidates** using their recorded age and kills,
+then loads the highest-ranked candidate. The old archive is never rewritten.
+An unarchived individual's weights cannot be reconstructed, so this is the best
+available saved candidate, not a recovered whole-run combined champion. Future
+runs save the true combined champion and its scoring policy in
+`predator/balanced.json`. Different scoring settings also trigger rescoring of
+available source candidates. Shared-library `best:balanced`/`latest:balanced`
+selectors require a matching scoring policy so unlike formulas are not ranked
+together.
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/grpo.json --runs 50 --seed 100 \
+  --brains-from results/grpo_20261115T195632Z_9f2f16 \
+  --brain predator=balanced --progress
+```
+
 ## Brains belong to their run
 
 Each completed training run saves its own champions. There is no need to track
@@ -30,7 +76,7 @@ which separate model-library generation contains a result:
 results/<run-name>/champions/run_0001.json
 results/<run-name>/champions/run_0001/manifest.json
 results/<run-name>/champions/run_0001/prey/{health,kills,lifespan,food}.json
-results/<run-name>/champions/run_0001/predator/{health,kills,lifespan,food}.json
+results/<run-name>/champions/run_0001/predator/{health,kills,lifespan,food,balanced}.json
 ```
 
 The experiment folder is self-contained. Moving it keeps its models usable.
@@ -45,7 +91,7 @@ List the available champions by run name:
 ```
 
 The model snapshots contain weights and provenance, with no replay or optimizer
-buffers. Tracking retains at most four models per species and performs no disk
+buffers. Tracking retains at most four models per resource-eating species and five per predator species and performs no disk
 writes inside the simulation-step loop. Models are published atomically when
 the numbered run completes.
 
@@ -61,8 +107,9 @@ Reuse champions from a specific saved experiment without changing its environmen
 
 Replace the source name with its experiment folder name under project `results/`.
 An explicit experiment path also works for a custom results directory.
-`--brains-from` defaults to its latest archived run, with lifespan champions for
-resource eaters and kill champions for predators. Add `--brain-run 1` to pin a
+`--brains-from` defaults to its latest archived run and the species' configured
+`champion_selection.criterion`, falling back to lifespan for resource eaters and
+kills for predators. The GRPO preset configures predators to use `balanced`. Add `--brain-run 1` to pin a
 particular run. Each selected model must match the target species and architecture.
 The source artifacts stay unchanged, and the new experiment saves the resolved
 paths in `environment.json` and their provenance in `manifest.json`.
@@ -71,7 +118,7 @@ Repeat `--brain SPECIES=MODEL` to select any configured species. `MODEL` accepts
 
 | Value | Selection |
 | --- | --- |
-| `health`, `kills`, `lifespan`, `food` | That champion from `--brains-from` |
+| `health`, `kills`, `lifespan`, `food`, `balanced` | That champion from `--brains-from` |
 | `best:food`, `best:kills`, etc. | Best compatible champion across the library |
 | `latest:lifespan`, etc. | Criterion from the latest compatible library generation |
 | Path to an artifact JSON | Exact saved model |
@@ -129,7 +176,9 @@ one, each later training run starts all animals of a species from the previous
 run's selected champion. The criterion stays the same: `--brain prey=lifespan` keeps
 choosing the previous run's prey lifespan champion, and `predator=kills` keeps choosing
 its predator kill champion. Without a saved starting model, these are also the
-default criteria. Models transfer in memory even with `--no-library`.
+default criteria unless `species.<name>.champion_selection.criterion` selects
+another. Explicit CLI criterion selectors also set that species' chaining
+criterion. Models transfer in memory even with `--no-library`.
 
 ```sh
 .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 3 \
@@ -199,3 +248,8 @@ This preserves model bytes and artifact identities and keeps the original shared
 copies. It can be repeated safely. The four existing archived experiments were
 localized when this workflow was introduced, including
 `ppo_20261115T044556Z_889391`.
+
+For modern champion chaining, dead controllers (including founders) are released
+after their terminal learning and champion snapshot. Their optimizer update
+counts remain in the experiment totals. Exact legacy checkpoint retention still
+keeps founder controllers when they are required for the next run.

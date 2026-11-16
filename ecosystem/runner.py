@@ -7,7 +7,7 @@ from .brain import Experience
 from .brains import create_brain, restore_brain, inherit_brain, offspring_seed, load_model_weights, model_snapshot
 from .config import validate
 from .world import World
-from .library import ChampionBook, load_initial_models
+from .library import ChampionBook, load_initial_models, selection_criterion
 
 
 class Experiment:
@@ -40,8 +40,8 @@ class Experiment:
             models = copy.deepcopy(self.initial_models)
             if c["experiment"].get("chain_best_brains", True) and self.mode == "train":
                 for species, spec in c["species"].items():
-                    metric = self.initial_models.get(species, {}).get("provenance", {}).get(
-                        "criterion", "lifespan" if spec["diet"] == "resource" else "kills")
+                    metric = selection_criterion(c,species,
+                        self.initial_models.get(species,{}).get('provenance',{}).get('criterion'))
                     candidate = self.champions.entries.get(species, {}).get(metric)
                     if candidate is None:
                         continue
@@ -116,7 +116,8 @@ class Experiment:
                 return self.snapshot()
             self.run_index += 1
             self._start_run()
-        if self.mode == "train":
+        training = self.mode == "train"
+        if training and any(b['type']=='grpo' for b in self.config['brains'].values()):
             grouped = [
                 (i, self.brains[i])
                 for i in self.world.animals
@@ -133,17 +134,17 @@ class Experiment:
                         budget -= 1
                         if not budget:
                             break
-        tracked_animals = tuple(self.world.animals.values()) if self.mode == "train" else ()
+        tracked_animals = tuple(self.world.animals.values()) if training else ()
         actions = {
             i: self.brains[i].choose(
-                o, explore=self.mode == "train", random_baseline=self.mode == "random"
+                o, explore=training, random_baseline=self.mode == "random"
             )
             for i, o in self.observations.items()
         }
         result = self.world.step(actions)
         limit = self.world.tick >= self.config["world"]["max_steps"]
-        for i, observation in self.observations.items():
-            if self.mode == "train":
+        if training:
+            for i, observation in self.observations.items():
                 self.brains[i].learn(
                     Experience(
                         observation,
@@ -154,7 +155,7 @@ class Experiment:
                         limit and i not in result.dead_ids,
                     )
                 )
-        if self.mode == "train":
+        if training:
             # Includes the final action and terminal learning of dead animals,
             # before deceased descendants' controllers are released.
             self.champions.consider(tracked_animals, self.brains, self._champion_source())
@@ -165,8 +166,7 @@ class Experiment:
                     self.brains[event.actor], offspring_seed(self.world, event.target)
                 )
                 self.inherited_updates[event.target] = self.brains[event.target].updates
-        founders = sum(s["initial_population"] for s in self.config["species"].values())
-        self._retire_brains(i for i in result.dead_ids if i >= founders)
+        self._release_dead_brains(result.dead_ids)
         self.observations = result.observations
         self.last_record = None
         self.finished_run = limit or not self.world.animals
@@ -199,9 +199,18 @@ class Experiment:
         return dict(experiment=self.config["name"], mode=self.mode,
                     run=self.run_index + 1, seed=self.world.seed, tick=self.world.tick)
 
+    def _release_dead_brains(self, ids):
+        if self.legacy_brain_retention:
+            # Old checkpoints may reuse each founder's exact controller next run.
+            founders = sum(s["initial_population"] for s in self.config["species"].values())
+            self._retire_brains(i for i in ids if i >= founders)
+        else:
+            # Modern chaining retains detached champions, not dead controllers.
+            self._retire_brains(ids)
+
     def _retire_brains(self, ids):
-        # Keep only the bounded founding population for cross-run retention;
-        # deceased descendants must not accumulate models/replay forever.
+        # Preserve cumulative work while dropping the controller, optimizer,
+        # experience buffers and random generators for each retired animal.
         for i in ids:
             self.retired_updates += self.brains.pop(
                 i
@@ -315,7 +324,15 @@ class Experiment:
             e.seed_rng = random.Random(0)
             e.seed_rng.setstate(tuples(state["seed_rng_state"]))
         e.world = World.restore(state["world"])
-        e.brains = {int(i): restore_brain(b) for i, b in state["brains"].items()}
+        e.brains = {}
+        for raw_id, brain_state in state["brains"].items():
+            animal_id = int(raw_id)
+            if not e.legacy_brain_retention and animal_id not in e.world.animals:
+                # Account for old saved dead controllers without rebuilding
+                # their networks, optimizer state and experience buffers.
+                e.retired_updates += brain_state["updates"] - e.inherited_updates.pop(animal_id, 0)
+            else:
+                e.brains[animal_id] = restore_brain(brain_state)
         if "champions" not in state and e.mode == "train":
             e.champions.consider(e.world.animals.values(), e.brains, e._champion_source())
         e.observations = e.world.observe_all()

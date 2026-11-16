@@ -308,7 +308,7 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain", "learning_rate_multiplier"),
+            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection"),
         )
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
@@ -340,8 +340,20 @@ def validate(c):
                 obj(initial, ip, ("selection", "metric"))
                 if initial["selection"] not in ("best", "latest"):
                     fail(ip + ".selection", "must be best or latest")
-                if initial["metric"] not in ("health", "kills", "lifespan", "food"):
-                    fail(ip + ".metric", "must be health, kills, lifespan or food")
+                if initial["metric"] not in ("health", "kills", "lifespan", "food", "balanced"):
+                    fail(ip + ".metric", "must be health, kills, lifespan, food or balanced")
+        if "champion_selection" in s:
+            cp = p + ".champion_selection"
+            policy = s['champion_selection']
+            obj(policy,cp,('criterion',),optional=('survival_steps_per_kill','max_survival_bonus'))
+            if policy['criterion'] not in ('health','kills','lifespan','food','balanced'):
+                fail(cp+'.criterion','unknown champion criterion')
+            if policy['criterion']=='balanced' and s['diet']!='prey':
+                fail(cp+'.criterion','balanced selection requires a predator species')
+            num(policy.get('survival_steps_per_kill',300),cp+'.survival_steps_per_kill',1,10000000)
+            num(policy.get('max_survival_bonus',2),cp+'.max_survival_bonus',0,100)
+        if s.get('initial_brain',{}).get('metric')=='balanced' and s['diet']!='prey':
+            fail(p+'.initial_brain.metric','balanced selection requires a predator species')
         template = c["brains"][s["brain"]]
         multiplier = s.get("learning_rate_multiplier", 1.0)
         num(multiplier, p + ".learning_rate_multiplier", 0.01, 10)
