@@ -93,3 +93,23 @@ champions, update totals and future chained runs. These changes were reviewed an
 checked for correctness without profiling or timing benchmarks; no runtime or
 peak-RAM percentage improvement is claimed. Living agents still own independent
 networks and experience buffers, and completed episode summaries still accumulate.
+
+The shared policy-training paths also avoid unnecessary work:
+
+| Algorithms | Code-review optimization |
+| --- | --- |
+| PPO, A2C, REINFORCE, GRPO | Inference returns outputs without retaining a backpropagation activation tape. Full activations are retained only for actual gradient calculation. |
+| PPO, A2C | Bootstrapping computes the critic output without evaluating unused policy output heads. |
+| PPO, GRPO | Minibatches reuse gradient containers within one update call, resetting values before each minibatch. No scratch arrays are kept on every living brain. |
+| PPO, A2C, REINFORCE | Fresh advantage vectors normalize in place. REINFORCE reuses its return vector after calculating the mean return. |
+| GRPO | Shared trajectory advantages/weights are calculated once per trajectory. Zero-KL settings skip reference inference. Trial clones omit historical lifespan records while preserving the authoritative next-animal ID. |
+| All checkpoint restores | Recorded next-animal IDs avoid rescanning death history; legacy files still reconstruct the bound. |
+
+These preserve rewards, update schedules, sampling order, optimizer arithmetic,
+rollout sizes and diagnostic contents. Correctness checks include exact serialized
+state comparisons with the original implementations over 240 policy transitions,
+including normalization variants, PPO/GRPO KL stopping, unequal trial lengths and
+checkpoint resumes. Regression tests additionally compare inference with full
+forward passes, reused/fresh gradients, and trial histories with/without old death
+records. No profiler or timing/memory benchmark was used in this review, so these
+are reductions in work and allocation rather than measured speedup claims.

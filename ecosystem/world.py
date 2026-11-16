@@ -465,14 +465,13 @@ class World:
         w.kills = defaultdict(int, s["metrics"]["kills"])
         w.lifespans = copy.deepcopy(state["lifespans"])
         w.births = defaultdict(int, s["metrics"].get("births", {}))
-        # Legacy worlds have no descendants, so founding IDs remain reserved.
-        founding_count = sum(
-            spec["initial_population"] for spec in w.config["species"].values()
-        )
-        highest_id = (
-            max(list(w.animals) + [a["id"] for a in w.lifespans], default=-1) + 1
-        )
-        w.next_animal_id = state.get("next_animal_id", max(founding_count, highest_id))
+        if 'next_animal_id' in state:
+            w.next_animal_id = state['next_animal_id']
+        else:
+            # Only legacy checkpoints need to reconstruct the identity bound.
+            founding_count = sum(spec['initial_population'] for spec in w.config['species'].values())
+            highest_id = max(list(w.animals) + [a['id'] for a in w.lifespans], default=-1) + 1
+            w.next_animal_id = max(founding_count, highest_id)
 
         def tuples(v):
             return tuple(tuples(x) for x in v) if isinstance(v, (list, tuple)) else v

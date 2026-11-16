@@ -114,6 +114,34 @@ class MLP:
             )
         return activations[-1], activations
 
+    def _predict(self, observation, value_only=False):
+        """Inference keeps one layer at a time; no backpropagation tape."""
+        previous = tuple(observation)
+        last = len(self.layers) - 1
+        for index, layer in enumerate(self.layers):
+            inputs, weights = self.sizes[index], layer['weights']
+            if value_only and index == last:
+                output = len(layer['bias']) - 1
+                return layer['bias'][output] + sum(map(mul, previous, weights[output*inputs:(output+1)*inputs]))
+            values = [bias + sum(map(mul, previous, weights[j*inputs:(j+1)*inputs]))
+                      for j,bias in enumerate(layer['bias'])]
+            previous = [math.tanh(v) for v in values] if index < last else values
+        return previous
+
+    def predict(self, observation):
+        return self._predict(observation)
+
+    def value(self, observation):
+        """Final output only, used for actor-critic value bootstrapping."""
+        return self._predict(observation, value_only=True)
+
+    @staticmethod
+    def clear_gradients(gradients):
+        # Local to one update call, never a persistent per-animal buffer.
+        for layer in gradients:
+            for values in layer.values():
+                values[:] = [0.0] * len(values)
+
     def zeros(self):
         return [
             {key: [0.0] * len(values) for key, values in layer.items()}
@@ -174,12 +202,12 @@ class PPOBrain(AdamOptimizer):
         self.last_metrics = {}
 
     def action_probabilities(self, observation):
-        return policy_distribution(self.network.forward(observation)[0][:-1])[0]
+        return policy_distribution(self.network.predict(observation)[:-1])[0]
 
     def choose(self, observation, explore=True, random_baseline=False):
         if random_baseline:
             return self.rng.choice(self.actions)
-        outputs, _ = self.network.forward(observation)
+        outputs = self.network.predict(observation)
         probabilities, logs = policy_distribution(outputs[:-1])
         if not explore:
             return self.actions[
@@ -203,7 +231,7 @@ class PPOBrain(AdamOptimizer):
         ):
             _, _, old_logp, value = self.pending
         else:
-            outputs, _ = self.network.forward(experience.observation)
+            outputs = self.network.predict(experience.observation)
             old_logp = policy_distribution(outputs[:-1])[1][action]
             value = outputs[-1]
         self.pending = None
@@ -214,7 +242,7 @@ class PPOBrain(AdamOptimizer):
                 raise ValueError(
                     "PPO requires a next observation for nonterminal experience"
                 )
-            next_value = self.network.forward(experience.next_observation)[0][-1]
+            next_value = self.network.value(experience.next_observation)
         self.rollout.append(
             RolloutStep(
                 tuple(experience.observation),
@@ -245,14 +273,19 @@ class PPOBrain(AdamOptimizer):
             deviation = math.sqrt(
                 sum((v - mean) ** 2 for v in advantages) / len(advantages) + 1e-8
             )
-            advantages = [(v - mean) / deviation for v in advantages]
+            for i, value in enumerate(advantages):
+                advantages[i] = (value - mean) / deviation
         totals, samples, stopped = {}, 0, False
+        gradients = None
         indices = list(range(len(self.rollout)))
         for _ in range(c["epochs"]):
             self.training_rng.shuffle(indices)
             for offset in range(0, len(indices), c["batch_size"]):
                 batch = indices[offset : offset + c["batch_size"]]
-                gradients = self.network.zeros()
+                if gradients is None:
+                    gradients = self.network.zeros()
+                else:
+                    self.network.clear_gradients(gradients)
                 batch_metrics = {}
                 for i in batch:
                     step = self.rollout[i]
@@ -291,7 +324,7 @@ class PPOBrain(AdamOptimizer):
         self.rollout.clear()  # Old-policy samples must never enter another rollout.
 
     def diagnostics(self, observation):
-        outputs, _ = self.network.forward(observation)
+        outputs = self.network.predict(observation)
         probabilities, logs = policy_distribution(outputs[:-1])
         return dict(
             algorithm=self.algorithm,

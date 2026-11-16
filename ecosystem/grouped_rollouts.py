@@ -36,6 +36,9 @@ def collect_group(world, brains, focal_id):
     if focal_id not in world.animals:
         raise ValueError("GRPO focal agent must be alive")
     initial_world = world.checkpoint()
+    # Historic deaths do not affect future physics or focal rewards. Preserve
+    # next_animal_id, which is the authoritative identity counter in trials.
+    initial_world['lifespans'] = []
     states = {i: brains[i].rng.getstate() for i in world.animals}
     horizon = min(
         focal.config["rollout_horizon"], world.config["world"]["max_steps"] - world.tick
@@ -56,7 +59,7 @@ def collect_group(world, brains, focal_id):
         for step in range(horizon):
             observation = observations[focal_id]
             probabilities, logs = policy_distribution(
-                focal.network.forward(observation)[0]
+                focal.network.predict(observation)
             )
             index = sample_index(probabilities, generators[focal_id])
             actions = {

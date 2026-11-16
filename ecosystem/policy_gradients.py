@@ -58,11 +58,16 @@ def actor_loss_gradient(
     )
 
 
-def normalized(values):
+def normalized(values, *, inplace=False):
+    """Normalize advantages; fresh local vectors can reuse their own storage."""
     if len(values) <= 1:
         return values
     mean = sum(values) / len(values)
     scale = math.sqrt(sum((v - mean) ** 2 for v in values) / len(values) + 1e-8)
+    if inplace:
+        for i, value in enumerate(values):
+            values[i] = (value - mean) / scale
+        return values
     return [(v - mean) / scale for v in values]
 
 
@@ -75,7 +80,7 @@ class A2CBrain(PPOBrain):
             self.rollout, c["discount_factor"], c["gae_lambda"]
         )
         if c["normalize_advantages"]:
-            advantages = normalized(advantages)
+            advantages = normalized(advantages, inplace=True)
         gradients = self.network.zeros()
         totals = dict(policy_loss=0.0, value_loss=0.0, entropy=0.0)
         for step, advantage, target in zip(self.rollout, advantages, targets):
@@ -127,12 +132,12 @@ class ActorBrain(AdamOptimizer):
         self.last_metrics = {}
 
     def action_probabilities(self, observation):
-        return policy_distribution(self.network.forward(observation)[0])[0]
+        return policy_distribution(self.network.predict(observation))[0]
 
     def choose(self, observation, explore=True, random_baseline=False):
         if random_baseline:
             return self.rng.choice(self.actions)
-        logits, _ = self.network.forward(observation)
+        logits = self.network.predict(observation)
         probabilities, logs = policy_distribution(logits)
         if not explore:
             return self.actions[
@@ -148,7 +153,7 @@ class ActorBrain(AdamOptimizer):
         return self.actions[action]
 
     def diagnostics(self, observation):
-        probabilities, logs = policy_distribution(self.network.forward(observation)[0])
+        probabilities, logs = policy_distribution(self.network.predict(observation))
         info = dict(
             algorithm=self.algorithm,
             features=observation,
@@ -253,7 +258,7 @@ class ReinforceBrain(ActorBrain):
             old_logp = self.pending[2]
         else:
             old_logp = policy_distribution(
-                self.network.forward(experience.observation)[0]
+                self.network.predict(experience.observation)
             )[1][action]
         self.pending = None
         self.trajectory.append(
@@ -276,12 +281,12 @@ class ReinforceBrain(ActorBrain):
         for i in range(len(self.trajectory) - 1, -1, -1):
             total = self.trajectory[i].reward + c["discount_factor"] * total
             returns[i] = total
-        advantages = [
-            (c["discount_factor"] ** i) * (value - self.baseline)
-            for i, value in enumerate(returns)
-        ]
+        mean_return = sum(returns) / len(returns)
+        advantages = returns
+        for i, value in enumerate(advantages):
+            advantages[i] = (c["discount_factor"] ** i) * (value - self.baseline)
         if c["normalize_advantages"]:
-            advantages = normalized(advantages)
+            advantages = normalized(advantages, inplace=True)
         gradients = self.network.zeros()
         totals = dict(policy_loss=0.0, entropy=0.0)
         for step, advantage in zip(self.trajectory, advantages):
@@ -295,7 +300,6 @@ class ReinforceBrain(ActorBrain):
         count = len(self.trajectory)
         # Episodic REINFORCE uses the summed discounted policy gradient.
         self._adam_step(gradients, 1)
-        mean_return = sum(returns) / count
         self.baseline = (
             c["baseline_decay"] * self.baseline
             + (1.0 - c["baseline_decay"]) * mean_return
@@ -357,25 +361,26 @@ class GRPOBrain(ActorBrain):
         if deviation < 1e-8:
             return
         count = sum(len(t) for t in trajectories)
-        samples = [
-            (
-                step,
-                (r - mean) / (deviation + 1e-8),
-                count / (len(trajectories) * len(trajectory)),
-            )
-            for trajectory, r in zip(trajectories, returns)
-            for step in trajectory
-        ]
+        samples = []
+        for trajectory, result in zip(trajectories, returns):
+            advantage = (result - mean) / (deviation + 1e-8)
+            weight = count / (len(trajectories) * len(trajectory))
+            samples.extend((step, advantage, weight) for step in trajectory)
+        gradients = None
         indices = list(range(count))
         for _ in range(c["epochs"]):
             self.training_rng.shuffle(indices)
             for offset in range(0, count, c["batch_size"]):
                 batch = indices[offset : offset + c["batch_size"]]
-                gradients, approximate_kl = self.network.zeros(), 0.0
+                if gradients is None:
+                    gradients = self.network.zeros()
+                else:
+                    self.network.clear_gradients(gradients)
+                approximate_kl = 0.0
                 for index in batch:
                     step, advantage, weight = samples[index]
                     logits, activations = self.network.forward(step.observation)
-                    reference = self.reference_network.forward(step.observation)[0]
+                    reference = self.reference_network.predict(step.observation) if c['kl_coefficient'] else None
                     _, derivative, info = actor_loss_gradient(
                         logits,
                         step.action,
