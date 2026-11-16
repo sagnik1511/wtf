@@ -51,6 +51,7 @@ next by default; add `--no-chain-brains` to restart from the original models.
 | [Behavior analysis](docs/analysis.md) | Feeding, hunting, energy, lifespan and learning statistics |
 | [Architecture](docs/architecture.md) | Python/JS components, simulation rules, rewards and observations |
 | [Performance](docs/performance.md) | Optimizations, memory tradeoffs and reproducible benchmarks |
+| [Releases and rollouts](docs/releases/README.md) | Versioned commit history, compatibility, validation and release maintenance |
 | [Development](docs/development.md) | Tests and project conventions |
 
 ## Project layout

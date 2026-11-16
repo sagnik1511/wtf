@@ -32,3 +32,13 @@ library tests use temporary directories.
 Tests also cover model compatibility, independent warm-started agents, ancestry,
 pre-death model capture, missing-library checkpoint restores, analyzer coverage,
 energy budgets and inherited learning-counter baselines.
+
+## Release records
+
+Keep [the rollout hub](releases/README.md) and its versioned child documents
+current when preparing implementation changes. Use the [release template](releases/TEMPLATE.md),
+record actual commit hashes only after they exist, and distinguish Pending work
+from Committed history. Include behavior, compatibility/migration, validation
+results and rollback considerations. Documentation-only hash reconciliation stays
+attached to the rollout it records. Do not change the Python package version or
+create Git tags merely to update this documentation index.
