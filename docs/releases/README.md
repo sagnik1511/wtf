@@ -6,8 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed implementation:** [0.0.0.18](0.0.0.18.md), `c3af0d3`.
-**Pending:** [0.0.0.19](0.0.0.19.md), release-history documentation.
+**Latest committed rollout:** [0.0.0.19](0.0.0.19.md), `23df8af`.
+**Latest committed runtime implementation:** [0.0.0.18](0.0.0.18.md), `c3af0d3`.
+**Pending:** [0.0.0.20](0.0.0.20.md), larger predator PPO and lifespan selection.
 
 ## Rollout index
 
@@ -18,7 +19,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.19](0.0.0.19.md) | Pending | Prepared 2026-11-16 | — | Release history and maintenance workflow |
+| [0.0.0.20](0.0.0.20.md) | Pending | Prepared 2026-11-17 | — | Larger predator PPO preset and lifespan champion selection |
+| [0.0.0.19](0.0.0.19.md) | Committed | 2026-11-16 | `23df8af` | Release history and maintenance workflow |
 | [0.0.0.18](0.0.0.18.md) | Committed | 2026-11-16 | `c3af0d3` | Shared policy training efficiency |
 | [0.0.0.17](0.0.0.17.md) | Committed | 2026-11-16 | `a75083c` | Balanced champions and DQN lifecycle efficiency |
 | [0.0.0.16](0.0.0.16.md) | Committed | 2026-11-16 | `70468cb` | Per-step dashboard and compact checkpoints |

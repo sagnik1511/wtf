@@ -16,6 +16,7 @@ Each JSON file is a complete experiment definition:
 | [grpo.json](../environments/grpo.json) | 48 | 12 | q_network / grpo |
 | [mixed_brains.json](../environments/mixed_brains.json) | 48 | 12 | q_network / ppo |
 | [ppo.json](../environments/ppo.json) | 48 | 12 | ppo / ppo |
+| [ppo_large_predator.json](../environments/ppo_large_predator.json) | 48 | 12 | ppo [16] / ppo [64, 32] |
 | [predator_heavy.json](../environments/predator_heavy.json) | 24 | 14 | q_network / q_network |
 | [reinforce.json](../environments/reinforce.json) | 48 | 12 | reinforce / reinforce |
 | [scarce_food.json](../environments/scarce_food.json) | 24 | 6 | q_network / q_network |
@@ -87,6 +88,36 @@ Newborns inherit their parent's effective rate. New runs, including champion
 warm starts and chaining, apply the current environment's multiplier once.
 Exact checkpoint resumes retain the stored controller configuration; editing an
 environment does not retune an already saved checkpoint or recording.
+
+## Larger predator PPO network
+
+`environments/ppo_large_predator.json` keeps the world, rewards, prey network
+(`[16]`) and training settings from `ppo.json`, while using two hidden layers
+(`[64, 32]`, tanh) for the predator. Both species use PPO and explicitly select
+`champion_selection.criterion: "lifespan"` for cross-run inheritance. The original
+`ppo.json` defaults to lifespan for prey and kills for predators, so matching
+those selection criteria is also necessary to isolate network capacity.
+
+Start a fresh experiment from the project root:
+
+```bash
+.venv/bin/python -m ecosystem.cli environments/ppo_large_predator.json \
+  --runs 20 --seed 100 --progress \
+  --brain prey=fresh --brain predator=fresh
+```
+
+`fresh` controls initial weights; it does not select a winner criterion. This
+preset starts with untrained models and later episodes automatically chain the
+previous episode's longest-lived champions for both species. Lifespan means
+individual age in steps, including dead individuals recorded before episode end.
+Add `--no-chain-brains` to restart each episode from fresh weights. The original
+preset remains available as a baseline; align selection criteria as well as
+seeds for a network-size comparison. Old `[16]` predator champions cannot
+initialize the `[64, 32]` network because saved weights require matching
+architectures. This preset increases model and optimizer memory per predator
+and computation per step; more capacity does not guarantee better hunting.
+To tune capacity, edit
+`brains.large_predator_ppo.network.hidden_layers` in the new JSON.
 
 ## Reproduction
 
