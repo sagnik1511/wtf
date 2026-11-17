@@ -184,3 +184,12 @@ diagnostics. Encoding the already generated frames took 0.55 seconds and parsing
 plus delta reconstruction took 0.68 seconds across all 401 frames; these are not
 end-to-end training or browser timings. Reducing recording frequency can save
 more space but omits intermediate events; both layouts above preserve them.
+
+## Mutation information
+
+Training births can include a `mutated` event with parent, child and changed
+weight count. Animal records include scalar mutation lineage fields; the
+inspector displays them even when a brain diagnostic was not sampled that step.
+CSV/summary metrics and per-step telemetry track species mutation counts. No
+model parameter arrays or extra animation delays are added. See
+[rare mutations](mutation.md) for settings and inheritance behavior.

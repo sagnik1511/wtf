@@ -49,7 +49,7 @@ def summarize(config, frame, previous=None):
             actor = prior.get(i)
             if actor is not None:
                 counter = events[actor['species']]
-                if kind in ('born', 'kill', 'died'):counter[kind] += 1
+                if kind in ('born', 'kill', 'died', 'mutated'):counter[kind] += 1
                 if kind == 'died':counter[event.get('cause', 'unknown')] += 1
                 if kind == 'energy_gained' and event.get('cause') == 'resource' and event.get('amount', 0)>0:
                     counter['productive_feeds'] += 1
@@ -82,6 +82,7 @@ def summarize(config, frame, previous=None):
             max_generation=max((a.get('generation', 0) for a in living), default=None),
             starving=sum(a['energy']<=0 for a in living),
             births=event['born'] if consecutive else None,
+            mutations=event['mutated'] if consecutive else None,
             deaths=event['died'] if consecutive else None,
             predation_deaths=event['predation'] if consecutive else None,
             starvation_deaths=event['starvation'] if consecutive else None,

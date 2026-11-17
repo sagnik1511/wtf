@@ -79,6 +79,9 @@ class ChampionBook:
                         body_generation=animal.generation,
                         statistics_since_age=animal.statistics_since_age,
                         optimizer_updates=brain.updates)
+                    if animal.mutation_count:
+                        metadata[animal.id].update(mutated=animal.mutated,mutation_count=animal.mutation_count,
+                                                   mutation_weights=animal.mutation_weights)
                 entry = dict(criterion=key, score=rank[0], rank=list(rank),
                              source=metadata[animal.id], model=snapshots[animal.id])
                 if key=='balanced':entry['selection_policy'] = policies[species]

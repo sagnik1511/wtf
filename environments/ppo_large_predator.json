@@ -63,6 +63,12 @@
       "learning_rate_multiplier": 1.0,
       "champion_selection": {
         "criterion": "lifespan"
+      },
+      "mutation": {
+        "enabled": true,
+        "probability_per_birth": 0.0001,
+        "max_changed_weights": 3,
+        "noise_std": 0.005
       }
     },
     "predator": {
@@ -108,6 +114,12 @@
       "learning_rate_multiplier": 1.25,
       "champion_selection": {
         "criterion": "lifespan"
+      },
+      "mutation": {
+        "enabled": true,
+        "probability_per_birth": 0.0001,
+        "max_changed_weights": 3,
+        "noise_std": 0.005
       }
     }
   },

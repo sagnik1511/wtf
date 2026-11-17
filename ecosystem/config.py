@@ -352,7 +352,7 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection"),
+            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation"),
         )
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
@@ -375,6 +375,13 @@ def validate(c):
             fail(p + ".brain", "unknown brain template")
         if c['brains'][s['brain']]['type'] == 'maskable_ppo' and not set(s['allowed_actions']).intersection(('rest', 'turn_left', 'turn_right')):
             fail(p+'.allowed_actions', 'masked policies require rest or turning as an always-available fallback')
+        if 'mutation' in s:
+            m=s['mutation'];mp=p+'.mutation'
+            obj(m,mp,('enabled','probability_per_birth','max_changed_weights','noise_std'))
+            if type(m['enabled']) is not bool:fail(mp+'.enabled','must be boolean')
+            num(m['probability_per_birth'],mp+'.probability_per_birth',0,1)
+            num(m['max_changed_weights'],mp+'.max_changed_weights',1,1024,True)
+            num(m['noise_std'],mp+'.noise_std',0,1)
         if "initial_brain" in s:
             initial = s["initial_brain"]
             ip = p + ".initial_brain"

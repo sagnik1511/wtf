@@ -30,6 +30,9 @@ class Animal:
     energy_gained: float = 0.0
     statistics_since_age: int = 0
     reproduction_due_age: int = -1
+    mutated: bool = False
+    mutation_count: int = 0
+    mutation_weights: int = 0
 
     @property
     def position(self):
@@ -100,6 +103,7 @@ class World:
                 )
         self.next_animal_id = len(self.animals)
         self.births = defaultdict(int)
+        self.mutations = defaultdict(int)
         self.events = []
         self.deaths = defaultdict(int)
         self.total_energy_gained = defaultdict(float)
@@ -449,6 +453,7 @@ class World:
                 spec["body"]["max_health"],
                 parent_id=parent.id,
                 generation=parent.generation + 1,
+                mutation_count=parent.mutation_count,
             )
             self.animals[child_id] = child
             occupied.add(child.position)
@@ -472,6 +477,7 @@ class World:
             energy_gained=dict(self.total_energy_gained),
             kills=dict(self.kills),
             births=dict(self.births),
+            mutations=dict(self.mutations),
         )
 
     def snapshot(self, include_static=True):
@@ -520,6 +526,7 @@ class World:
         w.kills = defaultdict(int, s["metrics"]["kills"])
         w.lifespans = copy.deepcopy(state["lifespans"])
         w.births = defaultdict(int, s["metrics"].get("births", {}))
+        w.mutations = defaultdict(int, s['metrics'].get('mutations', {}))
         if 'next_animal_id' in state:
             w.next_animal_id = state['next_animal_id']
         else:

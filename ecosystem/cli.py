@@ -160,7 +160,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
         fields = ["run", "seed", "tick", "food", "starvation", "predation"] + [
             f"{s}_{metric}"
             for s in species
-            for metric in ("population", "energy_gained", "kills", "births")
+            for metric in ("population", "energy_gained", "kills", "births", "mutations")
         ]
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -181,6 +181,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                         f"{s}_energy_gained": m["energy_gained"].get(s, 0),
                         f"{s}_kills": m["kills"].get(s, 0),
                         f"{s}_births": m["births"].get(s, 0),
+                        f"{s}_mutations": m.get('mutations',{}).get(s,0),
                     }
                 )
             writer.writerow(row)

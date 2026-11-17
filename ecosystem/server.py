@@ -33,6 +33,7 @@ def make_handler(state):
             )
             self.send_response(status)
             self.send_header("Content-Type", content_type)
+            self.send_header('X-WTF-Replay-Protocol', 'binary-v1')
             self.send_header("Content-Length", str(len(body)))
             if content_encoding:
                 self.send_header("Content-Encoding", content_encoding)

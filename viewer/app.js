@@ -1,4 +1,4 @@
-import { decodeBinaryReplay } from './binary-codec.mjs';
+import { api } from './api.mjs';
 import { Dashboard } from './dashboard.mjs';
 import { Playback } from './playback.mjs';
 import { behaviorRows } from './behavior-stats.mjs';
@@ -7,13 +7,7 @@ let state, selected = null, playing = false, busy = false;
 const colors = ['#7de2bd', '#ff9a77', '#83b9ff', '#ce9ef5', '#f4cf7a'];
 let errorTimer, analysisKey="", analysisRequest=0,runMenuKey="";
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
-async function api(path) {
-  const response = await fetch(path,path.includes('/chunks/')?{headers:{'X-WTF-Replay':'binary-v1'}}:undefined);
-  const value = response.headers.get('content-type')?.includes('application/vnd.wtf.replay-binary')
-    ? decodeBinaryReplay(await response.arrayBuffer()) : await response.json();
-  if (!response.ok) throw new Error(value.error || `HTTP ${response.status}`);
-  return value;
-}
+
 const player = new Playback(api);
 function pause() { playing = false; $('play').textContent = 'Play recording'; $('dashboard-play').textContent='Play recording'; }
 async function operation(fn) {
@@ -144,6 +138,7 @@ function drawInspector() {
   $('agent-label').textContent=a?`${a.species} #${a.id}`:'No selection';$('inspect-hint').hidden=Boolean(a);
   if(!a)return;
   box.append(text('p',`Generation ${a.generation??0} · ${a.parent_id>=0?`Parent #${a.parent_id}`:'Founding animal'}`,'muted'));
+  if(a.mutation_count>0)box.append(text('p',`${a.mutated?`Mutated at birth: ${a.mutation_weights} weights`:'Inherited mutated lineage'} · Lineage mutations ${a.mutation_count}`,'muted'));
   if(!b){box.append(text('p',`Energy ${a.energy.toFixed(1)} · Health ${a.health.toFixed(1)} · Age ${a.age}`,'muted'));box.append(text('p','Brain diagnostics were not recorded for this frame.','muted'));return;}
   box.append(text('p',`Brain diagnostics recorded at step ${b.tick}; body state is current.`,'muted'));
   const policy=Boolean(b.action_probabilities);

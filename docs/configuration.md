@@ -50,6 +50,7 @@ Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` fo
 | Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |
 | Reproduction | `species.<name>.reproduction` |
+| Rare newborn weight mutation | `species.<name>.mutation` ([guide](mutation.md)) |
 | Randomization and repetitions | `experiment` ([guide](running.md#randomized-and-reproducible-runs)) |
 | Disk recording cadence | `recording` ([guide](recording.md)) |
 
@@ -192,12 +193,15 @@ Older saved configurations with `age_deviation_steps` or
 semantics. New presets use percentages. Do not specify both units for the same
 clock; validation rejects that ambiguity.
 
+The [optional mutation rule](mutation.md) can reset training state after a rare
+newborn weight change; ordinary births follow the inheritance behavior below.
+
 A child starts at age zero, with the same species' `body.max_health` (also the
 founder's initial health) and `body.initial_energy`. It inherits an independent
 copy of its parent's current policy, critic/target model, optimizer state,
 exploration setting, learned baseline and training counters, after the parent
 receives that step's feedback. Experience buffers and pending decisions start
-empty; random streams are independent. There is no mutation or mating requirement.
+empty; random streams are independent. Reproduction has no mating requirement; optional newborn mutation is described separately.
 Recurrent PPO children start with zero GRU memory; masks and centralized critic
 context are derived for the child from the current world. Children first act on
 the next step and must reach their own sampled eligible age.
@@ -215,10 +219,21 @@ These effects work with existing recordings that contain birth events. IDs are n
 Dead descendants' controllers are released. Later runs initialize from the
 previous run's champions by default; see [run chaining](brain-library.md#automatically-chain-runs). Each new run starts with the
 configured initial population. GRPO trial worlds include births with independent
-child random streams and frozen inherited policies.
+child random streams and frozen inherited policies, with independent copies for
+rare mutated trial children.
 
 Set `enabled` to false to disable births. Omitting `reproduction` also disables
 it, keeping older environment files and checkpoints compatible. Changes affect
 new experiments; resuming uses the saved configuration. Reproduction can delay
 extinction but does not guarantee a stable ecosystem: offspring still need food,
 and parents with low health cannot reproduce.
+
+## Rare newborn mutations
+
+All supplied presets enable `species.<name>.mutation` with
+`probability_per_birth: 0.0001`, `max_changed_weights: 3` and `noise_std: 0.005`.
+This applies only to training births. A selected child receives small Gaussian
+perturbations on 1–3 matrix weights, fresh optimizer state and synchronized
+algorithm targets/references. The parent is unchanged. Omit the block or disable
+it to retain ordinary inheritance. See the [mutation guide](mutation.md) for
+configuration, probability semantics, lineage tracking and exact resume behavior.

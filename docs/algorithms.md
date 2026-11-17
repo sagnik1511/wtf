@@ -97,3 +97,12 @@ Trial worlds do not advance the real simulation or contribute kills, deaths, foo
 All nine algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
 
 See [saved champions](brain-library.md) for transferring compatible learned weights to a fresh experiment, and [analysis](analysis.md) for checking whether updates lead to useful behavior.
+
+## Rare mutation during reproduction
+
+All algorithms support optional [newborn mutations](mutation.md). They change
+1–3 inherited matrix weights by default on approximately one training birth in
+10,000, then reset that child's optimizer state and synchronize relevant targets
+or reference networks. Parents and evaluation policies remain unchanged. This
+is independent of the algorithm's normal parameter updates and does not change
+model signatures or require additional packages.

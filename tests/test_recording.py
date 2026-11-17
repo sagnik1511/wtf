@@ -57,7 +57,16 @@ class RecordingTests(unittest.TestCase):
                 self.assertTrue(entry["complete"])
                 self.assertNotIn("obstacles", frames[0])
                 self.assertIn("diagnostics", frames[0])
-                self.assertNotIn("weights", json.dumps(frames))
+                pending = [frames]
+                while pending:
+                    value = pending.pop()
+                    if isinstance(value, dict):
+                        self.assertNotIn('weights', value)
+                        self.assertNotIn('moments', value)
+                        self.assertNotIn('variances', value)
+                        pending.extend(value.values())
+                    elif isinstance(value, list):
+                        pending.extend(value)
                 self.assertNotIn("replay", frames[0]["diagnostics"]["0"])
             final_frame = load_chunk(store.chunk("example", 2, 6))[-1]
             actual = a.world.snapshot()

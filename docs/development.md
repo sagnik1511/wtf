@@ -75,3 +75,9 @@ obstacle/implementation invalidation, checkpoint exclusion, current target
 selection, reproduction timing flag reuse, one-pass populations and final-only
 champion model copies against the former ranking path. Cache checks use call
 counts and exact state comparisons rather than wall-clock thresholds.
+
+`tests/test_mutation.py` covers sparse matrix-only changes for all algorithms,
+parent/RNG independence, zero/disabled behavior, optimizer/target/reference
+resets, update accounting, lineage inheritance, frozen evaluation, GRPO trial
+isolation, readable mutation metrics, champion provenance and exact JSON/binary
+resume. Forced events also pass the JavaScript binary replay decoder.

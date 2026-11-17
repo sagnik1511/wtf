@@ -251,6 +251,17 @@
                         "required": ["per_energy_gained", "per_damage_taken", "death"],
                         "additionalProperties": false
                     },
+                    "mutation": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["enabled", "probability_per_birth", "max_changed_weights", "noise_std"],
+                        "properties": {
+                            "enabled": {"type": "boolean"},
+                            "probability_per_birth": {"type": "number", "minimum": 0, "maximum": 1},
+                            "max_changed_weights": {"type": "integer", "minimum": 1, "maximum": 1024},
+                            "noise_std": {"type": "number", "minimum": 0, "maximum": 1}
+                        }
+                    },
                     "reproduction": {
                         "type": "object",
                         "additionalProperties": false,

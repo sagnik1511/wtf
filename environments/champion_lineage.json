@@ -64,7 +64,13 @@
         "selection": "best",
         "metric": "lifespan"
       },
-      "learning_rate_multiplier": 1.0
+      "learning_rate_multiplier": 1.0,
+      "mutation": {
+        "enabled": true,
+        "probability_per_birth": 0.0001,
+        "max_changed_weights": 3,
+        "noise_std": 0.005
+      }
     },
     "predator": {
       "initial_population": 12,
@@ -110,7 +116,13 @@
         "selection": "best",
         "metric": "kills"
       },
-      "learning_rate_multiplier": 1.25
+      "learning_rate_multiplier": 1.25,
+      "mutation": {
+        "enabled": true,
+        "probability_per_birth": 0.0001,
+        "max_changed_weights": 3,
+        "noise_std": 0.005
+      }
     }
   },
   "brains": {

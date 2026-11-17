@@ -41,8 +41,8 @@ def collect_group(world, brains, focal_id):
     """Never call choose()/learn() on real controllers inside trial worlds.
 
     Environment and other-agent RNG streams restart identically per trial.
-    Only the focal agent's sampled actions differ. No replay/model copies and
-    no more than one cloned world are retained at once.
+    Only the focal agent's sampled actions differ. No replay buffers are copied;
+    policies copy only for rare mutated newborns. One cloned world is retained.
     """
     focal = brains[focal_id]
     if focal_id not in world.animals:
@@ -86,16 +86,21 @@ def collect_group(world, brains, focal_id):
                 for i, o in observations.items()
             }
             result = trial.step(actions)
+            mutation_events = []
             for event in result.events:
                 if event.kind == "born":
-                    # Trials never learn: descendants can read the same frozen
-                    # parent policy with their own RNG, avoiding model copies.
-                    policies[event.target] = policies[event.actor]
+                    # Nonmutated descendants share the frozen parent policy.
+                    # Rare mutations allocate their own policy without learning.
+                    from .mutation import mutate_birth
+                    policies[event.target], mutation_event = mutate_birth(
+                        trial,event,policies[event.actor])
+                    if mutation_event is not None:mutation_events.append(mutation_event)
                     if policies[event.target].config["type"] == "recurrent_ppo":
                         memories[event.target] = [0.0] * policies[event.target].config["recurrent_size"]
                     generators[event.target] = random.Random(
                         offspring_seed(trial, event.target)
                     )
+            result.events.extend(mutation_events)
             for animal_id in result.dead_ids:
                 policies.pop(animal_id, None)
                 generators.pop(animal_id, None)

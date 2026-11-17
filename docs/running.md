@@ -151,3 +151,10 @@ run training. Use `./run.sh --port 8001` if the port is occupied, or
 `./run.sh --results PATH` for a custom results directory. Restart the server after
 Python server changes and refresh the page after viewer changes. See
 [playback and recordings](recording.md) for controls and event highlights.
+
+If saved results appear but playback says **Recording or chunk not found**, restart
+an older playback server before retrying. A running Python server retains its
+imported replay readers even when the viewer JavaScript has been updated. Current
+viewers check the server's binary replay capability and explain when a restart
+is needed. Stop the server with Ctrl+C, run `./run.sh` again and refresh the page.
+This does not require regenerating or converting results.

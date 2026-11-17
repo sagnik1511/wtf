@@ -89,6 +89,9 @@ class Statistics:
             c['energy_demand'] += cost
             c['reproduction_energy'] += cost
             c['offspring_energy'] += spec['body']['initial_energy']
+        elif kind == 'mutated':
+            c['mutations'] += 1
+            c['mutated_weights'] += amount
         elif kind == 'died':
             c['completed_lives'] += 1
             c['death_age_sum'] += animal['age'] + 1
@@ -134,6 +137,7 @@ class Statistics:
             movement_success=ratio(c['moves'], a['move_forward']),
             reward_per_agent_step=ratio(c['reward'], c['agent_steps']),
             births=c['births'], kills=c['kills'], deaths=dict(self.deaths),
+            mutations=c['mutations'], mutated_weights=c['mutated_weights'],
             births_per_1000_agent_steps=ratio(c['births'] * 1000, c['agent_steps']),
             deaths_per_1000_agent_steps=ratio(c['completed_lives'] * 1000, c['agent_steps']),
             completed_lives=c['completed_lives'],

@@ -191,12 +191,19 @@ class Experiment:
             # before deceased descendants' controllers are released.
             self.champions.consider(tracked_animals, self.brains, self._champion_source())
         # Parents receive the current step's feedback before model inheritance.
+        mutation_events = []
         for event in result.events:
             if event.kind == "born":
                 self.brains[event.target] = inherit_brain(
                     self.brains[event.actor], offspring_seed(self.world, event.target)
                 )
+                if training:
+                    from .mutation import mutate_birth
+                    self.brains[event.target], mutation_event = mutate_birth(
+                        self.world,event,self.brains[event.actor],self.brains[event.target])
+                    if mutation_event is not None:mutation_events.append(mutation_event)
                 self.inherited_updates[event.target] = self.brains[event.target].updates
+        result.events.extend(mutation_events)
         self._release_dead_brains(result.dead_ids)
         self.observations = result.observations
         self._refresh_context(contexts)

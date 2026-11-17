@@ -265,3 +265,12 @@ mask/context versions where applicable. Ordinary PPO weights cannot initialize
 these variants. Recurrent champions omit episodic hidden state; newborns and
 warm starts begin with zero memory. Exact checkpoints retain it. See
 [advanced algorithms](advanced-algorithms.md) for details.
+
+## Mutated biological lineages
+
+Rare [newborn mutations](mutation.md) change inherited weights during training.
+Selected champions from these lineages include `mutated`, `mutation_count` and
+`mutation_weights` in source metadata. Their model signatures and loading commands
+are unchanged. A new run starts a new biological family tree while retaining
+model ancestry through its source artifact. Replays contain scalar lineage/event
+information rather than the actual parameter arrays.

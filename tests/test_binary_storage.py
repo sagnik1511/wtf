@@ -244,6 +244,7 @@ class BinaryLifecycleTests(unittest.TestCase):
             try:
                 with urlopen(Request(url,headers={'X-WTF-Replay':'binary-v1'})) as r:
                     self.assertIn('application/vnd.wtf.replay-binary',r.headers['Content-Type'])
+                    self.assertEqual(r.headers.get('X-WTF-Replay-Protocol'),'binary-v1')
                     data=r.read();decoded=decode_chunk(replay_payload(data))
                 for headers in ({},{'X-WTF-Replay':'delta-v1'}):
                     with urlopen(Request(url,headers=headers)) as r:self.assertEqual(json.loads(r.read()),decoded)
