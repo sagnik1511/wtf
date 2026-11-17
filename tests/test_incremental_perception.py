@@ -62,10 +62,13 @@ class IncrementalPerceptionTests(unittest.TestCase):
             self.assertEqual(visible.call_count, 0)
             self.assertNotEqual(first[0], second[0])  # Energy is always current.
             self.assertEqual(first[8:], second[8:])
-            # Removing the cached nearest food must force a fresh search.
+            # Removing the nearest food must refresh target selection; cached
+            # obstacle-only rays may still satisfy the new search without tracing.
+            previous_key = w._perception[0].results[a.id][0]
             w.resources[(9, 7)].quantity = 0
             current = w.observe_all()[a.id]
-            self.assertGreater(visible.call_count, 0)
+            self.assertNotEqual(w._perception[0].results[a.id][0], previous_key)
+            self.assertNotEqual(second[8:12], current[8:12])
         self.assertEqual(current, reference_observation(w, a))
 
     def test_overlap_updates_birth_death_food_obstacles_and_vision(self):

@@ -52,33 +52,37 @@ class ChampionBook:
         self.entries = copy.deepcopy(entries or {})
 
     def consider(self, animals, brains, source):
-        policies = {}
+        # Resolve all ranking comparisons first: intermediate record breakers
+        # need no model copies if another animal wins before this pass ends.
+        policies, winners = {}, {}
         for animal in animals:
             champions = self.entries.setdefault(animal.species, {})
+            selected = winners.setdefault(animal.species, {})
             scores = ranks(animal)
             if self.config['species'][animal.species]['diet']=='prey':
                 if animal.species not in policies:
                     policies[animal.species] = balanced_policy(self.config,animal.species)
-                policy = policies[animal.species]
-                scores['balanced'] = balanced_rank(animal.age,animal.kills,animal.energy_gained,animal.health,policy)
-            wins = [key for key, rank in scores.items()
-                    if key not in champions or rank > tuple(champions[key]['rank'])]
-            if not wins:
-                continue
-            brain = brains[animal.id]
-            # A single detached model copy can serve multiple winning criteria.
-            model = model_snapshot(brain)
-            metadata = dict(source, animal_id=animal.id, species=animal.species,
-                health=animal.health, alive=animal.health > 0, age=animal.age, kills=animal.kills,
-                energy_gained=animal.energy_gained, parent_id=animal.parent_id,
-                body_generation=animal.generation,
-                statistics_since_age=animal.statistics_since_age,
-                optimizer_updates=brain.updates)
-            for key in wins:
-                rank = scores[key]
-                champions[key] = dict(criterion=key, score=rank[0], rank=list(rank),
-                                     source=metadata, model=model)
-                if key=='balanced':champions[key]['selection_policy'] = policy
+                scores['balanced'] = balanced_rank(animal.age,animal.kills,animal.energy_gained,animal.health,policies[animal.species])
+            for key, rank in scores.items():
+                previous = selected[key][0] if key in selected else tuple(champions[key]['rank']) if key in champions else None
+                if previous is None or rank > previous:
+                    selected[key] = rank, animal
+        for species, selected in winners.items():
+            snapshots, metadata = {}, {}
+            for key, (rank, animal) in selected.items():
+                if animal.id not in snapshots:
+                    brain = brains[animal.id]
+                    snapshots[animal.id] = model_snapshot(brain)
+                    metadata[animal.id] = dict(source, animal_id=animal.id, species=animal.species,
+                        health=animal.health, alive=animal.health > 0, age=animal.age, kills=animal.kills,
+                        energy_gained=animal.energy_gained, parent_id=animal.parent_id,
+                        body_generation=animal.generation,
+                        statistics_since_age=animal.statistics_since_age,
+                        optimizer_updates=brain.updates)
+                entry = dict(criterion=key, score=rank[0], rank=list(rank),
+                             source=metadata[animal.id], model=snapshots[animal.id])
+                if key=='balanced':entry['selection_policy'] = policies[species]
+                self.entries[species][key] = entry
 
 
 def _component(value):

@@ -69,3 +69,9 @@ signed zero and large seeds, corruption rejection, playback seeking, binary
 checkpoint continuation for all algorithms, recording transparency, atomic
 verified conversion, legacy HTTP fallback and bounded/invalidation-safe telemetry
 caching. [Binary storage](binary-storage.md) documents formats and migration.
+
+`tests/test_simulation_caches.py` verifies the bounded per-world visibility LRU,
+obstacle/implementation invalidation, checkpoint exclusion, current target
+selection, reproduction timing flag reuse, one-pass populations and final-only
+champion model copies against the former ranking path. Cache checks use call
+counts and exact state comparisons rather than wall-clock thresholds.

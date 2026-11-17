@@ -3,11 +3,12 @@
 import copy
 import math
 import random
-from collections import defaultdict
+from collections import Counter, OrderedDict, defaultdict
 from dataclasses import dataclass
 from .perception import SpatialIndex
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
+VISIBILITY_CACHE_LIMIT = 2048
 
 
 @dataclass
@@ -138,6 +139,20 @@ class World:
                 return False
         return True
 
+    def _perception_visible(self, start, end):
+        # Only used after _observation_context has reconciled obstacle changes.
+        # Keep ordered endpoints: Bresenham tie behavior is not assumed symmetric.
+        key = start, end
+        cache = self._visibility_cache
+        if key in cache:
+            cache.move_to_end(key)
+            return cache[key]
+        result = self.visible(start, end)
+        cache[key] = result
+        if len(cache) > VISIBILITY_CACHE_LIMIT:
+            cache.popitem(last=False)
+        return result
+
     def _observation_context(self):
         occupied, food, prey, predators = set(), [], [], []
         species = self.config["species"]
@@ -153,11 +168,19 @@ class World:
         if not hasattr(self, "_perception"):
             self._perception = SpatialIndex(), SpatialIndex(), SpatialIndex()
             self._observed_obstacles = None
+            self._visibility_cache = OrderedDict()
+            self._visibility_impl = None
+        visibility_impl = getattr(self.visible, '__func__', self.visible)
+        visibility_changed = visibility_impl is not self._visibility_impl
+        if visibility_changed:
+            self._visibility_cache.clear()
+            self._visibility_impl = visibility_impl
         obstacles_changed = self._observed_obstacles != self.obstacles
         if obstacles_changed:
             self._observed_obstacles = self.obstacles.copy()
+            self._visibility_cache.clear()
         for index, points in zip(self._perception, ([(None, p) for p in food], prey, predators)):
-            index.sync(points, self.animals.keys(), obstacles_changed)
+            index.sync(points, self.animals.keys(), obstacles_changed or visibility_changed)
         return occupied, *self._perception
 
     def observe(self, a, context=None):
@@ -175,9 +198,9 @@ class World:
             dx, dy = DIRECTIONS[(a.heading + offset) % 4]
             p = a.x + dx, a.y + dy
             features.append(float(self.blocked(p) or p in occupied))
-        features += food.nearest(a, radius, self.visible)
-        features += prey.nearest(a, radius, self.visible)
-        features += predators.nearest(a, radius, self.visible)
+        features += food.nearest(a, radius, self._perception_visible)
+        features += prey.nearest(a, radius, self._perception_visible)
+        features += predators.nearest(a, radius, self._perception_visible)
         return tuple(features)
 
     def observe_all(self):
@@ -362,8 +385,10 @@ class World:
                              rules.get(prefix + '_deviation_steps', 0))
                    for prefix in ('age', 'cooldown'))
 
-    def _reproduction_ready(self, animal, rules):
-        if not self._has_reproduction_window(rules):
+    def _reproduction_ready(self, animal, rules, has_window=None):
+        if has_window is None:
+            has_window = self._has_reproduction_window(rules)
+        if not has_window:
             # Preserve the original gates and RNG consumption for old environments.
             return (animal.age >= rules['min_age_steps'] and
                     (animal.last_reproduced_age < 0 or
@@ -378,12 +403,15 @@ class World:
         # Resolve after combat/starvation. Only animals present before this
         # phase can parent; newborns first act on the next simulation step.
         parents = list(self.animals.values())
+        rules = {name: spec.get('reproduction') for name, spec in self.config['species'].items()}
+        windowed = {name: self._has_reproduction_window(r) if r and r['enabled'] else False
+                    for name, r in rules.items()}
         eligible = []
         counts = defaultdict(int)
         for a in parents:
             counts[a.species] += 1
-            r = self.config["species"][a.species].get("reproduction")
-            ready = self._reproduction_ready(a, r) if r and r['enabled'] else False
+            r = rules[a.species]
+            ready = self._reproduction_ready(a, r, windowed[a.species]) if r and r['enabled'] else False
             if (
                 ready
                 and a.health > r["health_threshold"]
@@ -427,17 +455,17 @@ class World:
             counts[parent.species] += 1
             parent.energy -= r["energy_cost"]
             parent.last_reproduced_age = parent.age
-            if self._has_reproduction_window(r):
+            if windowed[parent.species]:
                 parent.reproduction_due_age = parent.age + self._reproduction_interval(r)
             self.births[parent.species] += 1
             events.append(Event("born", parent.id, child_id, cause="reproduction"))
 
     def metrics(self):
+        populations = Counter(a.species for a in self.animals.values())
         return dict(
             tick=self.tick,
             populations={
-                s: sum(a.species == s for a in self.animals.values())
-                for s in self.config["species"]
+                s: populations[s] for s in self.config["species"]
             },
             food=sum(r.quantity for r in self.resources.values()),
             deaths=dict(self.deaths),

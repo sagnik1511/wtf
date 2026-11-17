@@ -180,3 +180,37 @@ telemetry request and caches at most four derived 128-frame pages, protected by
 a lock and invalidated using manifest/chunk stat fingerprints. Cached results
 are detached from callers. No simulation-state or learned-prediction cache is
 introduced, and no complete world-chunk cache is retained on the server.
+
+
+## Simulation caches and champion selection
+
+The simulation uses simple in-memory dictionaries rather than a broad memoization
+layer. An obstacle-only visibility LRU (`OrderedDict`) retains at most 2,048
+ordered start/end ray results per world. Observation setup already reconciles
+obstacle edits; changed obstacles or visibility implementations clear this cache
+and invalidate nearest-target results. Changing animal positions or food does
+not invalidate a geometric ray, but target selection still uses the current
+spatial-index revisions. Direct `World.visible` calls remain uncached and current.
+Restored worlds rebuild the cache; it is absent from checkpoints and replay data.
+There is no shared global cache holding retired worlds or model controllers.
+
+Champion selection resolves all final winning ranks before copying model
+parameters. A transient dictionary copies each actual winning animal once per
+consideration pass, sharing that detached snapshot across its winning criteria.
+Temporary record breakers no longer trigger discarded copies. Snapshots are not
+reused between steps because weights can change independently of observed rank
+changes or optimizer counters.
+
+Population metrics count animals in one pass instead of one scan per configured
+species. Reproduction resolves species-wide timing-window flags once per phase
+instead of once per animal and successful parent. Both remain derived from current
+state on each call, so manual edits and lifecycle changes are visible immediately.
+
+Verification passed 279 exact serialized-state comparisons with the previous
+simulation/champion paths across all nine algorithms: two 15-step episodes per
+case plus a completed-lifecycle check, with reproduction, forced mortality,
+obstacle edits, checkpoint restoration and chained champions. Regression tests
+cover cache hits/eviction, geometry invalidation, transient final-winner copies,
+former ranking behavior and current population counts. The full suite passes
+274 Python tests. No profiler or timing benchmark was run, so fewer calculations
+and copies are verified without claiming a measured overall speedup or RAM drop.
