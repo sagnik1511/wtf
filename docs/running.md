@@ -10,7 +10,7 @@ Python 3.9+ and a project-local virtual environment are used for the backend.
 JavaScript rendering uses browser APIs and has no package installation or build step.
 
 ```sh
-cd /Users/tensored/wtf
+cd /path/to/wtf
 python3 -m venv .venv
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
 ```

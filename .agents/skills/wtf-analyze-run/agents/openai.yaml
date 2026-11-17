@@ -1,0 +1,4 @@
+interface:
+  display_name: "WTF Run Analysis"
+  short_description: "Analyze saved runs and species behavior"
+  default_prompt: "Use $wtf-analyze-run to analyze the saved experiment I provide."

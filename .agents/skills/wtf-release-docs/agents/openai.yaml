@@ -1,0 +1,4 @@
+interface:
+  display_name: "WTF Release Docs"
+  short_description: "Maintain versioned rollout documentation"
+  default_prompt: "Use $wtf-release-docs to document the current rollout and update its hub."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "WTF Optimization"
+  short_description: "Review training, cache and storage efficiency"
+  default_prompt: "Use $wtf-optimize to review the requested simulation or storage path."

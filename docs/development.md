@@ -4,6 +4,13 @@
 
 Commands in this guide run from the project root.
 
+For a new coding session, start with [AGENTS.md](../AGENTS.md) and the maintained
+[project context](project-context.md). Repo-local workflows live under
+[`.agents/skills/`](../.agents/skills/); their entrypoints are linked in AGENTS.md.
+Read the matching skill for saved-run analysis, optimization or release work.
+These files are tracked so future sessions can recover project decisions without
+relying on chat history. They add no runtime dependencies.
+
 ```sh
 .venv/bin/python -m unittest discover -v
 # Optional JS playback-engine checks (requires Node.js 20+):

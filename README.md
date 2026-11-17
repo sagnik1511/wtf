@@ -17,7 +17,7 @@ for population, energy, births and hunting trends.
 Requires Python 3.9+. Run from the project directory:
 
 ```sh
-cd /Users/tensored/wtf
+cd /path/to/wtf
 python3 -m venv .venv
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
 .venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1
@@ -57,6 +57,7 @@ next by default; add `--no-chain-brains` to restart from the original models.
 | [Architecture](docs/architecture.md) | Python/JS components, simulation rules, rewards and observations |
 | [Performance](docs/performance.md) | Optimizations, memory tradeoffs and reproducible benchmarks |
 | [Releases and rollouts](docs/releases/README.md) | Versioned commit history, compatibility, validation and release maintenance |
+| [Project context](docs/project-context.md) | Design decisions, code navigation, agent instructions and reusable workflows |
 | [Development](docs/development.md) | Tests and project conventions |
 
 ## Project layout

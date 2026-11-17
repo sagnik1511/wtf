@@ -6,9 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.27](0.0.0.27.md), `e16300e`.
+**Latest committed rollout:** [0.0.0.28](0.0.0.28.md), `6ee3f91`.
 **Latest committed runtime implementation:** [0.0.0.27](0.0.0.27.md), `e16300e`.
-**Pending:** [0.0.0.28](0.0.0.28.md), short playback and dashboard documentation GIFs.
+**Pending:** [0.0.0.29](0.0.0.29.md), repository context and reusable agent workflows.
 
 ## Rollout index
 
@@ -19,7 +19,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.28](0.0.0.28.md) | Pending | Prepared 2026-11-17 | — | Compact simulation and metrics GIFs in documentation |
+| [0.0.0.29](0.0.0.29.md) | Pending | Prepared 2026-11-17 | — | Repository context, agent conventions and three reusable workflows |
+| [0.0.0.28](0.0.0.28.md) | Committed | 2026-11-17 | `6ee3f91` | Compact simulation and metrics GIFs in documentation |
 | [0.0.0.27](0.0.0.27.md) | Committed | 2026-11-17 | `e16300e` | Binary replay server capability check and restart guidance |
 | [0.0.0.26](0.0.0.26.md) | Committed | 2026-11-17 | `e16300e` | Rare newborn mutations, lineage tracking and optimizer resets |
 | [0.0.0.25](0.0.0.25.md) | Committed | 2026-11-17 | `e5d8fcf` | Visibility LRU, final champion snapshots and per-species work reuse |
