@@ -33,12 +33,12 @@
         "reproduce"
       ],
       "body": {
-        "initial_energy": 60,
+        "initial_energy": 75,
         "max_energy": 100,
         "max_health": 30,
         "vision_radius": 6,
-        "living_cost": 0.1,
-        "movement_cost": 0.15,
+        "living_cost": 0.07,
+        "movement_cost": 0.1,
         "starvation_damage": 1,
         "bite_size": 4,
         "energy_per_food_unit": 2
@@ -93,15 +93,15 @@
         "reproduce"
       ],
       "body": {
-        "initial_energy": 80,
+        "initial_energy": 100,
         "max_energy": 120,
         "max_health": 55,
         "vision_radius": 8,
-        "living_cost": 0.15,
-        "movement_cost": 0.2,
+        "living_cost": 0.1,
+        "movement_cost": 0.14,
         "starvation_damage": 1,
         "attack_damage": 30,
-        "attack_cost": 1,
+        "attack_cost": 0.35,
         "energy_per_kill": 40
       },
       "brain": "small_q",

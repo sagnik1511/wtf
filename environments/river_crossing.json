@@ -38,11 +38,12 @@
         "max_energy": 100,
         "max_health": 30,
         "vision_radius": 6,
-        "living_cost": 0.1,
-        "movement_cost": 0.15,
+        "living_cost": 0.05,
+        "movement_cost": 0.1,
         "starvation_damage": 1,
         "bite_size": 4,
-        "energy_per_food_unit": 2
+        "energy_per_food_unit": 2,
+        "water_vision_bonus": 3
       },
       "brain": "small_q",
       "rewards": {
@@ -99,12 +100,13 @@
         "max_energy": 120,
         "max_health": 55,
         "vision_radius": 8,
-        "living_cost": 0.15,
-        "movement_cost": 0.2,
+        "living_cost": 0.075,
+        "movement_cost": 0.14,
         "starvation_damage": 1,
         "attack_damage": 30,
-        "attack_cost": 1,
-        "energy_per_kill": 40
+        "attack_cost": 0.25,
+        "energy_per_kill": 40,
+        "water_vision_bonus": 3
       },
       "brain": "small_q",
       "rewards": {

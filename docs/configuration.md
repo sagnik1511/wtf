@@ -71,7 +71,9 @@ the model signature, so start fresh or load matching saved weights.
 | Species colors | `species.<name>.display.color`, `.display.male_color` |
 | Body health/energy | `species.<name>.body` |
 | Perception radius | `species.<name>.body.vision_radius` |
+| Sight extension across water | `species.<name>.body.water_vision_bonus` ([directional sight](geography.md#directional-sight-across-water)) |
 | Food supply/regrowth | `resources` |
+| Founder zones and boundary food | `placement` ([layout guide](geography.md#enclosed-valley-starting-layout)) |
 | Terrain map | `terrain.map_file`, resolved into embedded rows and legend |
 | Swim/climb abilities | `species.<name>.locomotion` and `allowed_actions` |
 | Map size and duration | `world.width`, `world.height`, `world.max_steps` |
@@ -160,6 +162,9 @@ quantile regression, immediate action masking and centralized critics. All four
 new presets select lifespan champions for both species.
 
 ## Reproduction
+
+For energy budgets, eligibility bottlenecks and a comparison preset, see
+[survival/reproduction calibration](calibration.md).
 
 All supplied environments enable paired male/female reproduction for both species.
 Edit `species.prey.reproduction` or `species.predator.reproduction` in your JSON:

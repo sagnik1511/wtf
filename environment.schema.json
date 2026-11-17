@@ -1,1458 +1,1942 @@
 {
-    "$defs": {
-        "terrainMap": {
+  "$defs": {
+    "terrainMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map_version",
+        "name",
+        "width",
+        "height",
+        "rows",
+        "legend"
+      ],
+      "properties": {
+        "map_version": {
+          "const": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 256
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 256
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 256,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 256
+          }
+        },
+        "legend": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[ -~]$"
+          },
+          "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-                "map_version",
-                "name",
-                "width",
-                "height",
-                "rows",
-                "legend"
-            ],
             "properties": {
-                "map_version": {
-                    "const": 1
-                },
-                "name": {
+              "elevation": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "blocked": {
+                "type": "boolean"
+              },
+              "water_depth": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "flow": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": -4,
+                  "maximum": 4
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "initialBrain": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "selection",
+            "metric"
+          ],
+          "properties": {
+            "selection": {
+              "enum": [
+                "best",
+                "latest"
+              ]
+            },
+            "metric": {
+              "enum": [
+                "health",
+                "kills",
+                "lifespan",
+                "food",
+                "balanced"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "terrain": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/terrainMap"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "map_file"
+          ],
+          "properties": {
+            "map_file": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 4294967295
+    },
+    "world": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 256
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 256
+        },
+        "boundary": {
+          "const": "closed"
+        },
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "boundary",
+        "max_steps"
+      ],
+      "additionalProperties": false
+    },
+    "obstacles": {
+      "type": "object",
+      "properties": {
+        "generation": {
+          "enum": [
+            "scattered",
+            "explicit"
+          ]
+        },
+        "occupied_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.8
+        },
+        "explicit_cells": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        }
+      },
+      "required": [
+        "generation",
+        "occupied_fraction",
+        "explicit_cells"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "patch_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        },
+        "capacity_per_patch": {
+          "type": "number",
+          "minimum": 0.001
+        },
+        "initial_quantity_per_patch": {
+          "type": "number",
+          "minimum": 0
+        },
+        "growth_per_step": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "patch_count",
+        "capacity_per_patch",
+        "initial_quantity_per_patch",
+        "growth_per_step"
+      ],
+      "additionalProperties": false
+    },
+    "species": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "locomotion": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "swim_min_health": {
+                "type": "number",
+                "minimum": 0
+              },
+              "swim_energy_cost": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "water_energy_cost": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "drowning_damage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "uphill_energy_cost": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "max_climb": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "male_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "initial_brains": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "female": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/initialBrain"
+                  }
+                ]
+              },
+              "male": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/initialBrain"
+                  }
+                ]
+              }
+            }
+          },
+          "champion_selection_by_sex": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "female": {
+                "enum": [
+                  "health",
+                  "kills",
+                  "lifespan",
+                  "food",
+                  "balanced"
+                ]
+              },
+              "male": {
+                "enum": [
+                  "health",
+                  "kills",
+                  "lifespan",
+                  "food",
+                  "balanced"
+                ]
+              }
+            }
+          },
+          "initial_brain": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
                     "type": "string",
                     "minLength": 1
-                },
-                "width": {
-                    "type": "integer",
-                    "minimum": 3,
-                    "maximum": 256
-                },
-                "height": {
-                    "type": "integer",
-                    "minimum": 3,
-                    "maximum": 256
-                },
-                "rows": {
-                    "type": "array",
-                    "minItems": 3,
-                    "maxItems": 256,
-                    "items": {
-                        "type": "string",
-                        "minLength": 3,
-                        "maxLength": 256
-                    }
-                },
-                "legend": {
-                    "type": "object",
-                    "minProperties": 1,
-                    "propertyNames": {
-                        "pattern": "^[ -~]$"
-                    },
-                    "additionalProperties": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "elevation": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 100
-                            },
-                            "blocked": {
-                                "type": "boolean"
-                            },
-                            "water_depth": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "flow": {
-                                "type": "array",
-                                "minItems": 2,
-                                "maxItems": 2,
-                                "items": {
-                                    "type": "number",
-                                    "minimum": -4,
-                                    "maximum": 4
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "initialBrain": {
-            "oneOf": [
-                {"type": "object", "additionalProperties": false, "required": ["path"], "properties": {"path": {"type": "string", "minLength": 1}}},
-                {"type": "object", "additionalProperties": false, "required": ["selection", "metric"], "properties": {
-                    "selection": {"enum": ["best", "latest"]},
-                    "metric": {"enum": ["health", "kills", "lifespan", "food", "balanced"]}
-                }}
-            ]
-        }
-    },
-    "type": "object",
-    "properties": {
-        "terrain": {
-            "oneOf": [
-                {
-                    "$ref": "#/$defs/terrainMap"
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": [
-                        "map_file"
-                    ],
-                    "properties": {
-                        "map_file": {
-                            "type": "string",
-                            "minLength": 1
-                        }
-                    }
-                }
-            ]
-        },
-        "schema_version": {"const": 1},
-        "name": {"type": "string", "pattern": "^[a-zA-Z0-9_-]+$"},
-        "description": {"type": "string"},
-        "seed": {"type": "integer", "minimum": 100, "maximum": 4294967295},
-        "world": {
-            "type": "object",
-            "properties": {
-                "width": {"type": "integer", "minimum": 3, "maximum": 256},
-                "height": {"type": "integer", "minimum": 3, "maximum": 256},
-                "boundary": {"const": "closed"},
-                "max_steps": {"type": "integer", "minimum": 1, "maximum": 10000000}
-            },
-            "required": ["width", "height", "boundary", "max_steps"],
-            "additionalProperties": false
-        },
-        "obstacles": {
-            "type": "object",
-            "properties": {
-                "generation": {"enum": ["scattered", "explicit"]},
-                "occupied_fraction": {"type": "number", "minimum": 0, "maximum": 0.8},
-                "explicit_cells": {
-                    "type": "array",
-                    "uniqueItems": true,
-                    "items": {
-                        "type": "array",
-                        "minItems": 2,
-                        "maxItems": 2,
-                        "items": {"type": "integer", "minimum": 0, "maximum": 255}
-                    }
-                }
-            },
-            "required": ["generation", "occupied_fraction", "explicit_cells"],
-            "additionalProperties": false
-        },
-        "resources": {
-            "type": "object",
-            "properties": {
-                "patch_count": {"type": "integer", "minimum": 0, "maximum": 65536},
-                "capacity_per_patch": {"type": "number", "minimum": 0.001},
-                "initial_quantity_per_patch": {"type": "number", "minimum": 0},
-                "growth_per_step": {"type": "number", "minimum": 0}
-            },
-            "required": [
-                "patch_count",
-                "capacity_per_patch",
-                "initial_quantity_per_patch",
-                "growth_per_step"
-            ],
-            "additionalProperties": false
-        },
-        "species": {
-            "type": "object",
-            "minProperties": 1,
-            "additionalProperties": {
-                "type": "object",
-                "properties": {
-                    "locomotion": {
-                        "type": "object", "additionalProperties": false,
-                        "properties": {
-                            "swim_min_health": {"type": "number", "minimum": 0},
-                            "swim_energy_cost": {"type": "number", "minimum": 0, "maximum": 100},
-                            "water_energy_cost": {"type": "number", "minimum": 0, "maximum": 100},
-                            "drowning_damage": {"type": "number", "minimum": 0, "maximum": 100},
-                            "uphill_energy_cost": {"type": "number", "minimum": 0, "maximum": 100},
-                            "max_climb": {"type": "number", "minimum": 0, "maximum": 100}
-                        }
-                    },
-                    "display": {
-                        "type": "object", "additionalProperties": false,
-                        "properties": {
-                            "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
-                            "male_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
-                        }
-                    },
-                    "initial_brains": {
-                        "type": "object", "additionalProperties": false,
-                        "properties": {
-                            "female": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/initialBrain"}]},
-                            "male": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/initialBrain"}]}
-                        }
-                    },
-                    "champion_selection_by_sex": {
-                        "type": "object", "additionalProperties": false,
-                        "properties": {
-                            "female": {"enum": ["health", "kills", "lifespan", "food", "balanced"]},
-                            "male": {"enum": ["health", "kills", "lifespan", "food", "balanced"]}
-                        }
-                    },
-                    "initial_brain": {
-                        "oneOf": [
-                            {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "path": {
-                                        "type": "string",
-                                        "minLength": 1
-                                    }
-                                },
-                                "required": [
-                                    "path"
-                                ]
-                            },
-                            {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "selection": {
-                                        "enum": [
-                                            "best",
-                                            "latest"
-                                        ]
-                                    },
-                                    "metric": {
-                                        "enum": [
-                                            "health",
-                                            "kills",
-                                            "lifespan",
-                                            "food",
-                                            "balanced"
-                                        ]
-                                    }
-                                },
-                                "required": [
-                                    "selection",
-                                    "metric"
-                                ]
-                            }
-                        ]
-                    },
-                    "initial_population": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 10000
-                    },
-                    "diet": {"enum": ["resource", "prey"]},
-                    "allowed_actions": {
-                        "type": "array",
-                        "minItems": 1,
-                        "uniqueItems": true,
-                        "items": {
-                            "enum": [
-                                "move_forward",
-                                "turn_left",
-                                "turn_right",
-                                "rest",
-                                "eat",
-                                "attack",
-                                "swim",
-                                "reproduce"
-                            ]
-                        }
-                    },
-                    "body": {
-                        "oneOf": [
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "initial_energy": {"type": "number", "minimum": 0},
-                                    "max_energy": {
-                                        "type": "number",
-                                        "exclusiveMinimum": 0
-                                    },
-                                    "max_health": {
-                                        "type": "number",
-                                        "exclusiveMinimum": 0
-                                    },
-                                    "living_cost": {"type": "number", "minimum": 0},
-                                    "movement_cost": {"type": "number", "minimum": 0},
-                                    "starvation_damage": {
-                                        "type": "number",
-                                        "minimum": 0
-                                    },
-                                    "vision_radius": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "maximum": 256
-                                    },
-                                    "bite_size": {"type": "number", "minimum": 0},
-                                    "energy_per_food_unit": {
-                                        "type": "number",
-                                        "minimum": 0
-                                    }
-                                },
-                                "required": [
-                                    "initial_energy",
-                                    "max_energy",
-                                    "max_health",
-                                    "living_cost",
-                                    "movement_cost",
-                                    "starvation_damage",
-                                    "vision_radius",
-                                    "bite_size",
-                                    "energy_per_food_unit"
-                                ],
-                                "additionalProperties": false
-                            },
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "initial_energy": {"type": "number", "minimum": 0},
-                                    "max_energy": {
-                                        "type": "number",
-                                        "exclusiveMinimum": 0
-                                    },
-                                    "max_health": {
-                                        "type": "number",
-                                        "exclusiveMinimum": 0
-                                    },
-                                    "living_cost": {"type": "number", "minimum": 0},
-                                    "movement_cost": {"type": "number", "minimum": 0},
-                                    "starvation_damage": {
-                                        "type": "number",
-                                        "minimum": 0
-                                    },
-                                    "vision_radius": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "maximum": 256
-                                    },
-                                    "attack_damage": {"type": "number", "minimum": 0},
-                                    "attack_cost": {"type": "number", "minimum": 0},
-                                    "energy_per_kill": {"type": "number", "minimum": 0}
-                                },
-                                "required": [
-                                    "initial_energy",
-                                    "max_energy",
-                                    "max_health",
-                                    "living_cost",
-                                    "movement_cost",
-                                    "starvation_damage",
-                                    "vision_radius",
-                                    "attack_damage",
-                                    "attack_cost",
-                                    "energy_per_kill"
-                                ],
-                                "additionalProperties": false
-                            }
-                        ]
-                    },
-                    "brain": {"type": "string"},
-                    "champion_selection": {
-                        "type": "object", "additionalProperties": false,
-                        "required": ["criterion"],
-                        "properties": {
-                            "criterion": {"enum": ["health", "kills", "lifespan", "food", "balanced"]},
-                            "survival_steps_per_kill": {"type": "number", "minimum": 1, "maximum": 10000000, "default": 300},
-                            "max_survival_bonus": {"type": "number", "minimum": 0, "maximum": 100, "default": 2}
-                        }
-                    },
-                    "learning_rate_multiplier": {
-                        "type": "number", "minimum": 0.01, "maximum": 10,
-                        "default": 1.0,
-                        "description": "Multiply the selected template learning rate for this species."
-                    },
-                    "rewards": {
-                        "type": "object",
-                        "properties": {
-                            "per_energy_gained": {
-                                "type": "number",
-                                "minimum": -100000,
-                                "maximum": 100000
-                            },
-                            "per_energy_cost": {"type": "number", "minimum": -100000, "maximum": 0, "default": 0},
-                            "failed_action": {"type": "number", "minimum": -100000, "maximum": 0, "default": 0},
-                            "per_offspring": {"type": "number", "minimum": 0, "maximum": 100000, "default": 0},
-                            "per_damage_taken": {
-                                "type": "number",
-                                "minimum": -100000,
-                                "maximum": 100000
-                            },
-                            "death": {
-                                "type": "number",
-                                "minimum": -100000,
-                                "maximum": 100000
-                            },
-                            "per_damage_dealt": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 100000,
-                                "default": 0,
-                                "description": "Optional reward per actual damage point credited to this attacker; omitted means zero."
-                            }
-                        },
-                        "required": ["per_energy_gained", "per_damage_taken", "death"],
-                        "additionalProperties": false
-                    },
-                    "mutation": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": ["enabled", "probability_per_birth", "max_changed_weights", "noise_std"],
-                        "properties": {
-                            "enabled": {"type": "boolean"},
-                            "probability_per_birth": {"type": "number", "minimum": 0, "maximum": 1},
-                            "max_changed_weights": {"type": "integer", "minimum": 1, "maximum": 1024},
-                            "noise_std": {"type": "number", "minimum": 0, "maximum": 1}
-                        }
-                    },
-                    "reproduction": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "enabled": {"type": "boolean"},
-                            "mate_radius": {"type": "integer", "minimum": 1, "maximum": 10},
-                            "health_threshold": {"type": "number", "minimum": 0},
-                            "min_age_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 10000000
-                            },
-                            "cooldown_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 10000000
-                            },
-                            "age_deviation_pct": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 100
-                            },
-                            "age_deviation_steps": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 10000000,
-                                "deprecated": true
-                            },
-                            "cooldown_deviation_pct": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 100
-                            },
-                            "cooldown_deviation_steps": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 10000000,
-                                "deprecated": true
-                            },
-                            "min_energy": {"type": "number", "minimum": 0},
-                            "energy_cost": {"type": "number", "minimum": 0.001},
-                            "max_population": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 10000
-                            }
-                        },
-                        "required": [
-                            "enabled",
-                            "health_threshold",
-                            "min_age_steps",
-                            "cooldown_steps",
-                            "min_energy",
-                            "energy_cost",
-                            "max_population"
-                        ]
-                    }
+                  }
                 },
                 "required": [
-                    "initial_population",
-                    "diet",
-                    "allowed_actions",
-                    "body",
-                    "brain",
-                    "rewards"
+                  "path"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "selection": {
+                    "enum": [
+                      "best",
+                      "latest"
+                    ]
+                  },
+                  "metric": {
+                    "enum": [
+                      "health",
+                      "kills",
+                      "lifespan",
+                      "food",
+                      "balanced"
+                    ]
+                  }
+                },
+                "required": [
+                  "selection",
+                  "metric"
+                ]
+              }
+            ]
+          },
+          "initial_population": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "diet": {
+            "enum": [
+              "resource",
+              "prey"
+            ]
+          },
+          "allowed_actions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "move_forward",
+                "turn_left",
+                "turn_right",
+                "rest",
+                "eat",
+                "attack",
+                "swim",
+                "reproduce"
+              ]
+            }
+          },
+          "body": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "initial_energy": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "max_energy": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "max_health": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "living_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "movement_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "starvation_damage": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "vision_radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 256
+                  },
+                  "bite_size": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "energy_per_food_unit": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "water_vision_bonus": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 32
+                  }
+                },
+                "required": [
+                  "initial_energy",
+                  "max_energy",
+                  "max_health",
+                  "living_cost",
+                  "movement_cost",
+                  "starvation_damage",
+                  "vision_radius",
+                  "bite_size",
+                  "energy_per_food_unit"
                 ],
                 "additionalProperties": false
-            }
-        },
-        "brains": {
-            "type": "object",
-            "minProperties": 1,
-            "additionalProperties": {
-                "oneOf": [
-                    {
-                        "type": "object",
-                        "properties": {
-                            "type": {"const": "q_network"},
-                            "observation_version": {"enum": [1, 2]},
-                            "hidden_layers": {
-                                "type": "array",
-                                "minItems": 1,
-                                "maxItems": 1,
-                                "items": {
-                                    "type": "integer",
-                                    "minimum": 1,
-                                    "maximum": 256
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "replay_capacity": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "learning_starts_after": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "train_every_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "target_update_every_training_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "exploration": {
-                                "type": "object",
-                                "properties": {
-                                    "initial": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1
-                                    },
-                                    "minimum": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1
-                                    },
-                                    "decay_per_decision": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1
-                                    }
-                                },
-                                "required": [
-                                    "initial",
-                                    "minimum",
-                                    "decay_per_decision"
-                                ],
-                                "additionalProperties": false
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "hidden_layers",
-                            "learning_rate",
-                            "discount_factor",
-                            "batch_size",
-                            "replay_capacity",
-                            "learning_starts_after",
-                            "train_every_steps",
-                            "target_update_every_training_steps",
-                            "exploration"
-                        ],
-                        "additionalProperties": false
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {"const": "ppo"},
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": ["type", "hidden_layers"],
-                                "properties": {
-                                    "type": {"const": "mlp"},
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {"const": "tanh"}
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "gae_lambda": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "clip_ratio": {
-                                "type": "number",
-                                "minimum": 0.001,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "value_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "rollout_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "epochs": {"type": "integer", "minimum": 1, "maximum": 20},
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "normalize_advantages": {"type": "boolean"},
-                            "target_kl": {"type": "number", "minimum": 0, "maximum": 1}
-                        },
-                        "required": [
-                            "type",
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "gae_lambda",
-                            "clip_ratio",
-                            "entropy_coefficient",
-                            "value_coefficient",
-                            "rollout_steps",
-                            "epochs",
-                            "batch_size",
-                            "max_grad_norm",
-                            "normalize_advantages"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {"const": "a2c"},
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": ["type", "hidden_layers"],
-                                "properties": {
-                                    "type": {"const": "mlp"},
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {"const": "tanh"}
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "gae_lambda": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "value_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "rollout_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "normalize_advantages": {"type": "boolean"}
-                        },
-                        "required": [
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "entropy_coefficient",
-                            "max_grad_norm",
-                            "type",
-                            "gae_lambda",
-                            "value_coefficient",
-                            "rollout_steps",
-                            "normalize_advantages"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {"const": "reinforce"},
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": ["type", "hidden_layers"],
-                                "properties": {
-                                    "type": {"const": "mlp"},
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {"const": "tanh"}
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "max_episode_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 10000000
-                            },
-                            "baseline_decay": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "normalize_advantages": {"type": "boolean"}
-                        },
-                        "required": [
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "entropy_coefficient",
-                            "max_grad_norm",
-                            "type",
-                            "max_episode_steps",
-                            "baseline_decay",
-                            "normalize_advantages"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {"const": "grpo"},
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": ["type", "hidden_layers"],
-                                "properties": {
-                                    "type": {"const": "mlp"},
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {"const": "tanh"}
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "clip_ratio": {
-                                "type": "number",
-                                "minimum": 0.001,
-                                "maximum": 1
-                            },
-                            "kl_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "group_size": {
-                                "type": "integer",
-                                "minimum": 2,
-                                "maximum": 8
-                            },
-                            "rollout_horizon": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 16
-                            },
-                            "train_every_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "epochs": {"type": "integer", "minimum": 1, "maximum": 20},
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 128
-                            },
-                            "target_kl": {"type": "number", "minimum": 0, "maximum": 1}
-                        },
-                        "required": [
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "entropy_coefficient",
-                            "max_grad_norm",
-                            "type",
-                            "clip_ratio",
-                            "kl_coefficient",
-                            "group_size",
-                            "rollout_horizon",
-                            "train_every_steps",
-                            "epochs",
-                            "batch_size"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {
-                                "const": "recurrent_ppo"
-                            },
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": [
-                                    "type",
-                                    "hidden_layers"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "const": "mlp"
-                                    },
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {
-                                        "const": "tanh"
-                                    }
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "gae_lambda": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "clip_ratio": {
-                                "type": "number",
-                                "minimum": 0.001,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "value_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "rollout_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "epochs": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 20
-                            },
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "normalize_advantages": {
-                                "type": "boolean"
-                            },
-                            "target_kl": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "recurrent_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 128
-                            },
-                            "sequence_length": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 128
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "gae_lambda",
-                            "clip_ratio",
-                            "entropy_coefficient",
-                            "value_coefficient",
-                            "rollout_steps",
-                            "epochs",
-                            "batch_size",
-                            "max_grad_norm",
-                            "normalize_advantages",
-                            "recurrent_size",
-                            "sequence_length"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {
-                                "const": "maskable_ppo"
-                            },
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": [
-                                    "type",
-                                    "hidden_layers"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "const": "mlp"
-                                    },
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {
-                                        "const": "tanh"
-                                    }
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "gae_lambda": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "clip_ratio": {
-                                "type": "number",
-                                "minimum": 0.001,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "value_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "rollout_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "epochs": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 20
-                            },
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "normalize_advantages": {
-                                "type": "boolean"
-                            },
-                            "target_kl": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "gae_lambda",
-                            "clip_ratio",
-                            "entropy_coefficient",
-                            "value_coefficient",
-                            "rollout_steps",
-                            "epochs",
-                            "batch_size",
-                            "max_grad_norm",
-                            "normalize_advantages"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "type": {
-                                "const": "mappo"
-                            },
-                            "observation_version": {"enum": [1, 2]},
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": [
-                                    "type",
-                                    "hidden_layers"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "const": "mlp"
-                                    },
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {
-                                        "const": "tanh"
-                                    }
-                                }
-                            },
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "gae_lambda": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "clip_ratio": {
-                                "type": "number",
-                                "minimum": 0.001,
-                                "maximum": 1
-                            },
-                            "entropy_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "value_coefficient": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 10
-                            },
-                            "rollout_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "epochs": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 20
-                            },
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 4096
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "normalize_advantages": {
-                                "type": "boolean"
-                            },
-                            "target_kl": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "critic_hidden_layers": {
-                                "type": "array",
-                                "minItems": 1,
-                                "maxItems": 4,
-                                "items": {
-                                    "type": "integer",
-                                    "minimum": 1,
-                                    "maximum": 256
-                                }
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "network",
-                            "learning_rate",
-                            "discount_factor",
-                            "gae_lambda",
-                            "clip_ratio",
-                            "entropy_coefficient",
-                            "value_coefficient",
-                            "rollout_steps",
-                            "epochs",
-                            "batch_size",
-                            "max_grad_norm",
-                            "normalize_advantages",
-                            "critic_hidden_layers"
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "type": {
-                                "const": "qrdqn"
-                            },
-                            "observation_version": {"enum": [1, 2]},
-                            "learning_rate": {
-                                "type": "number",
-                                "minimum": 1e-06,
-                                "maximum": 0.1
-                            },
-                            "discount_factor": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 1
-                            },
-                            "batch_size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "replay_capacity": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "learning_starts_after": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "train_every_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "target_update_every_training_steps": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 1000000
-                            },
-                            "exploration": {
-                                "type": "object",
-                                "properties": {
-                                    "initial": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1
-                                    },
-                                    "minimum": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1
-                                    },
-                                    "decay_per_decision": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1
-                                    }
-                                },
-                                "required": [
-                                    "initial",
-                                    "minimum",
-                                    "decay_per_decision"
-                                ],
-                                "additionalProperties": false
-                            },
-                            "network": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": [
-                                    "type",
-                                    "hidden_layers"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "const": "mlp"
-                                    },
-                                    "hidden_layers": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 4,
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 1,
-                                            "maximum": 256
-                                        }
-                                    },
-                                    "activation": {
-                                        "const": "tanh"
-                                    }
-                                }
-                            },
-                            "num_quantiles": {
-                                "type": "integer",
-                                "minimum": 2,
-                                "maximum": 128
-                            },
-                            "huber_threshold": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            },
-                            "max_grad_norm": {
-                                "type": "number",
-                                "minimum": 1e-05,
-                                "maximum": 100
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "learning_rate",
-                            "discount_factor",
-                            "batch_size",
-                            "replay_capacity",
-                            "learning_starts_after",
-                            "train_every_steps",
-                            "target_update_every_training_steps",
-                            "exploration",
-                            "network",
-                            "num_quantiles",
-                            "huber_threshold",
-                            "max_grad_norm"
-                        ],
-                        "additionalProperties": false
-                    }
-                ]
-            }
-        },
-        "experiment": {
-            "type": "object",
-            "properties": {
-                "runs": {"type": "integer", "minimum": 1, "maximum": 1000000},
-                "chain_best_brains": {"type": "boolean", "default": true},
-                "retain_brains_between_runs": {"type": "boolean"},
-                "world_seed_policy": {"enum": ["random", "fixed", "increment"]},
-                "record_metrics_every_steps": {
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "initial_energy": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "max_energy": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "max_health": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "living_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "movement_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "starvation_damage": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "vision_radius": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 1000000
+                    "maximum": 256
+                  },
+                  "attack_damage": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "attack_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "energy_per_kill": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "water_vision_bonus": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 32
+                  }
                 },
-                "checkpoint_every_runs": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 1000000
-                },
-                "grpo_updates_per_step": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 8
-                }
-            },
-            "required": [
-                "runs",
-                "retain_brains_between_runs",
-                "world_seed_policy",
-                "record_metrics_every_steps",
-                "checkpoint_every_runs"
-            ],
-            "additionalProperties": false
-        },
-        "recording": {
+                "required": [
+                  "initial_energy",
+                  "max_energy",
+                  "max_health",
+                  "living_cost",
+                  "movement_cost",
+                  "starvation_damage",
+                  "vision_radius",
+                  "attack_damage",
+                  "attack_cost",
+                  "energy_per_kill"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "brain": {
+            "type": "string"
+          },
+          "champion_selection": {
             "type": "object",
             "additionalProperties": false,
             "required": [
-                "enabled",
-                "frame_every_steps",
-                "frames_per_chunk",
-                "diagnostics_every_steps"
+              "criterion"
             ],
             "properties": {
-                "enabled": {"type": "boolean"},
-                "frame_every_steps": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 1000000
-                },
-                "frames_per_chunk": {"type": "integer", "minimum": 1, "maximum": 256},
-                "encoding": {"enum": ["binary", "delta", "snapshot"], "default": "binary"},
-                "compression": {"enum": ["gzip", "xz", "none"], "default": "xz"},
-                "compression_level": {"type": "integer", "minimum": 1, "maximum": 9, "default": 6},
-                "diagnostics_every_steps": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1000000
-                }
+              "criterion": {
+                "enum": [
+                  "health",
+                  "kills",
+                  "lifespan",
+                  "food",
+                  "balanced"
+                ]
+              },
+              "survival_steps_per_kill": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 10000000,
+                "default": 300
+              },
+              "max_survival_bonus": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 2
+              }
             }
-        }
+          },
+          "learning_rate_multiplier": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 10,
+            "default": 1.0,
+            "description": "Multiply the selected template learning rate for this species."
+          },
+          "rewards": {
+            "type": "object",
+            "properties": {
+              "per_energy_gained": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "per_energy_cost": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 0,
+                "default": 0
+              },
+              "failed_action": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 0,
+                "default": 0
+              },
+              "per_offspring": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000,
+                "default": 0
+              },
+              "per_damage_taken": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "death": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "per_damage_dealt": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000,
+                "default": 0,
+                "description": "Optional reward per actual damage point credited to this attacker; omitted means zero."
+              }
+            },
+            "required": [
+              "per_energy_gained",
+              "per_damage_taken",
+              "death"
+            ],
+            "additionalProperties": false
+          },
+          "mutation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "enabled",
+              "probability_per_birth",
+              "max_changed_weights",
+              "noise_std"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "probability_per_birth": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "max_changed_weights": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1024
+              },
+              "noise_std": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "reproduction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "mate_radius": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "health_threshold": {
+                "type": "number",
+                "minimum": 0
+              },
+              "min_age_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000
+              },
+              "cooldown_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000
+              },
+              "age_deviation_pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "age_deviation_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000,
+                "deprecated": true
+              },
+              "cooldown_deviation_pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "cooldown_deviation_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000,
+                "deprecated": true
+              },
+              "min_energy": {
+                "type": "number",
+                "minimum": 0
+              },
+              "energy_cost": {
+                "type": "number",
+                "minimum": 0.001
+              },
+              "max_population": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              }
+            },
+            "required": [
+              "enabled",
+              "health_threshold",
+              "min_age_steps",
+              "cooldown_steps",
+              "min_energy",
+              "energy_cost",
+              "max_population"
+            ]
+          }
+        },
+        "required": [
+          "initial_population",
+          "diet",
+          "allowed_actions",
+          "body",
+          "brain",
+          "rewards"
+        ],
+        "additionalProperties": false
+      }
     },
-    "required": [
-        "schema_version",
-        "name",
-        "description",
-        "seed",
-        "world",
-        "obstacles",
-        "resources",
+    "brains": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "q_network"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "hidden_layers": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1,
+                "items": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 256
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "replay_capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "learning_starts_after": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "train_every_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "target_update_every_training_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "exploration": {
+                "type": "object",
+                "properties": {
+                  "initial": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minimum": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "decay_per_decision": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "initial",
+                  "minimum",
+                  "decay_per_decision"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "type",
+              "hidden_layers",
+              "learning_rate",
+              "discount_factor",
+              "batch_size",
+              "replay_capacity",
+              "learning_starts_after",
+              "train_every_steps",
+              "target_update_every_training_steps",
+              "exploration"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "ppo"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "clip_ratio": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "normalize_advantages": {
+                "type": "boolean"
+              },
+              "target_kl": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "gae_lambda",
+              "clip_ratio",
+              "entropy_coefficient",
+              "value_coefficient",
+              "rollout_steps",
+              "epochs",
+              "batch_size",
+              "max_grad_norm",
+              "normalize_advantages"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "a2c"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "normalize_advantages": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "entropy_coefficient",
+              "max_grad_norm",
+              "type",
+              "gae_lambda",
+              "value_coefficient",
+              "rollout_steps",
+              "normalize_advantages"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "reinforce"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "max_episode_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000
+              },
+              "baseline_decay": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "normalize_advantages": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "entropy_coefficient",
+              "max_grad_norm",
+              "type",
+              "max_episode_steps",
+              "baseline_decay",
+              "normalize_advantages"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "grpo"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "clip_ratio": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 1
+              },
+              "kl_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "group_size": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 8
+              },
+              "rollout_horizon": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16
+              },
+              "train_every_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128
+              },
+              "target_kl": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "entropy_coefficient",
+              "max_grad_norm",
+              "type",
+              "clip_ratio",
+              "kl_coefficient",
+              "group_size",
+              "rollout_horizon",
+              "train_every_steps",
+              "epochs",
+              "batch_size"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "recurrent_ppo"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "clip_ratio": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "normalize_advantages": {
+                "type": "boolean"
+              },
+              "target_kl": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "recurrent_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128
+              },
+              "sequence_length": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "gae_lambda",
+              "clip_ratio",
+              "entropy_coefficient",
+              "value_coefficient",
+              "rollout_steps",
+              "epochs",
+              "batch_size",
+              "max_grad_norm",
+              "normalize_advantages",
+              "recurrent_size",
+              "sequence_length"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "maskable_ppo"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "clip_ratio": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "normalize_advantages": {
+                "type": "boolean"
+              },
+              "target_kl": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "gae_lambda",
+              "clip_ratio",
+              "entropy_coefficient",
+              "value_coefficient",
+              "rollout_steps",
+              "epochs",
+              "batch_size",
+              "max_grad_norm",
+              "normalize_advantages"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "mappo"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "clip_ratio": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 1
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "normalize_advantages": {
+                "type": "boolean"
+              },
+              "target_kl": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "critic_hidden_layers": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 4,
+                "items": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 256
+                }
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "gae_lambda",
+              "clip_ratio",
+              "entropy_coefficient",
+              "value_coefficient",
+              "rollout_steps",
+              "epochs",
+              "batch_size",
+              "max_grad_norm",
+              "normalize_advantages",
+              "critic_hidden_layers"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "qrdqn"
+              },
+              "observation_version": {
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-06,
+                "maximum": 0.1
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "replay_capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "learning_starts_after": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "train_every_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "target_update_every_training_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "exploration": {
+                "type": "object",
+                "properties": {
+                  "initial": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minimum": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "decay_per_decision": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "initial",
+                  "minimum",
+                  "decay_per_decision"
+                ],
+                "additionalProperties": false
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mlp"
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    }
+                  },
+                  "activation": {
+                    "const": "tanh"
+                  }
+                }
+              },
+              "num_quantiles": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 128
+              },
+              "huber_threshold": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-05,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "type",
+              "learning_rate",
+              "discount_factor",
+              "batch_size",
+              "replay_capacity",
+              "learning_starts_after",
+              "train_every_steps",
+              "target_update_every_training_steps",
+              "exploration",
+              "network",
+              "num_quantiles",
+              "huber_threshold",
+              "max_grad_norm"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "experiment": {
+      "type": "object",
+      "properties": {
+        "runs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "chain_best_brains": {
+          "type": "boolean",
+          "default": true
+        },
+        "retain_brains_between_runs": {
+          "type": "boolean"
+        },
+        "world_seed_policy": {
+          "enum": [
+            "random",
+            "fixed",
+            "increment"
+          ]
+        },
+        "record_metrics_every_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "checkpoint_every_runs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "grpo_updates_per_step": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        }
+      },
+      "required": [
+        "runs",
+        "retain_brains_between_runs",
+        "world_seed_policy",
+        "record_metrics_every_steps",
+        "checkpoint_every_runs"
+      ],
+      "additionalProperties": false
+    },
+    "recording": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "frame_every_steps",
+        "frames_per_chunk",
+        "diagnostics_every_steps"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "frame_every_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "frames_per_chunk": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "encoding": {
+          "enum": [
+            "binary",
+            "delta",
+            "snapshot"
+          ],
+          "default": "binary"
+        },
+        "compression": {
+          "enum": [
+            "gzip",
+            "xz",
+            "none"
+          ],
+          "default": "xz"
+        },
+        "compression_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9,
+          "default": 6
+        },
+        "diagnostics_every_steps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enclosure_bounds",
         "species",
-        "brains",
-        "experiment"
-    ],
-    "additionalProperties": false,
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Ecosystem environment v1"
+        "resources"
+      ],
+      "properties": {
+        "enclosure_bounds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "species": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "inside",
+              "outside"
+            ]
+          }
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "boundary_fraction",
+            "boundary_width",
+            "inside_fraction"
+          ],
+          "properties": {
+            "boundary_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "inside_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "boundary_width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "name",
+    "description",
+    "seed",
+    "world",
+    "obstacles",
+    "resources",
+    "species",
+    "brains",
+    "experiment"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ecosystem environment v1"
 }

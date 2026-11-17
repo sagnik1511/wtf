@@ -1,0 +1,80 @@
+[
+  {
+    "asset": "river-crossing.gif",
+    "source_file": "Screen Recording 2026-11-17 at 17.38.51.mov",
+    "source_sha256": "4f95b581799dba28926c3d3e2828095a81b43a26645cf219ed60356d9c111e15",
+    "source_interval_seconds": [
+      10.0,
+      13.5
+    ],
+    "recording": "river_crossing_20261117T120742Z_bb0e94",
+    "run": 1,
+    "source_dimensions": [
+      3400,
+      1906
+    ],
+    "dimensions": [
+      1280,
+      718
+    ],
+    "fps": 12,
+    "frames": 42,
+    "duration_seconds": 3.5,
+    "palette_colors": 128,
+    "loop": true,
+    "crop": null,
+    "bytes": 614429
+  },
+  {
+    "asset": "highlands.gif",
+    "source_file": "Screen Recording 2026-11-17 at 17.40.05.mov",
+    "source_sha256": "a5e262bc0dd8213c78b90a91d832c300d85709e66e3636cc518853aecac3d630",
+    "source_interval_seconds": [
+      18.0,
+      21.5
+    ],
+    "recording": "highlands_20261117T120742Z_a3668d",
+    "run": 1,
+    "source_dimensions": [
+      3400,
+      1906
+    ],
+    "dimensions": [
+      1280,
+      718
+    ],
+    "fps": 12,
+    "frames": 42,
+    "duration_seconds": 3.5,
+    "palette_colors": 128,
+    "loop": true,
+    "crop": null,
+    "bytes": 637676
+  },
+  {
+    "asset": "enclosed-valleys.gif",
+    "source_file": "Screen Recording 2026-11-17 at 17.41.08.mov",
+    "source_sha256": "a80debfce498119aeb19159139cde562a07005cd5e233769ec055f2a931e42c2",
+    "source_interval_seconds": [
+      10.0,
+      13.5
+    ],
+    "recording": "enclosed_valleys_20261117T120742Z_1cfefe",
+    "run": 1,
+    "source_dimensions": [
+      3400,
+      1906
+    ],
+    "dimensions": [
+      1280,
+      718
+    ],
+    "fps": 12,
+    "frames": 42,
+    "duration_seconds": 3.5,
+    "palette_colors": 128,
+    "loop": true,
+    "crop": null,
+    "bytes": 686696
+  }
+]

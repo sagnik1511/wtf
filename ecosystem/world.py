@@ -93,18 +93,28 @@ class World:
         if self.geography:self.obstacles |= self.geography.obstacles
         free = [p for p in cells if p not in self.obstacles and not (self.geography and self.geography.depth(p))]
         r = config["resources"]
-        resource_cells = layout.sample(free, r["patch_count"])
+        placement = config.get('placement')
+        if placement:
+            from .placement import resource_pools, resource_counts, zone
+            pools = resource_pools(free, placement)
+            resource_cells = [p for side,count in resource_counts(r['patch_count'], placement['resources']).items()
+                              for p in layout.sample(pools[side], count)]
+        else:
+            resource_cells = layout.sample(free, r["patch_count"])
         self.resources = {
             p: Resource(*p, r["initial_quantity_per_patch"]) for p in resource_cells
         }
         layout.shuffle(free)
+        if placement:
+            spawn_pools = {side: [p for p in free if zone(p, placement['enclosure_bounds']) == side]
+                           for side in ('inside', 'outside')}
         self.animals = {}
         for species_index, (species, s) in enumerate(config["species"].items()):
             # Balanced founders, shuffled independently of layout/actions/learning.
             sexes = ['female' if n % 2 == 0 else 'male' for n in range(s['initial_population'])]
             random.Random(config["seed"] ^ 0x534558 ^ (species_index * 7919)).shuffle(sexes)
             for sex in sexes:
-                x, y = free.pop()
+                x, y = (spawn_pools[placement["species"][species]] if placement else free).pop()
                 i = len(self.animals)
                 self.animals[i] = Animal(
                     i,
@@ -242,6 +252,28 @@ class World:
             cache.popitem(last=False)
         return result
 
+    def _water_sight_cells(self, start, end):
+        # Static map data only; ordered endpoints match the visibility ray.
+        key = start, end
+        cache = self._water_sight_cache
+        if key in cache:
+            cache.move_to_end(key)
+            return cache[key]
+        x,y = start; tx,ty = end
+        dx,dy = abs(tx-x),-abs(ty-y)
+        sx,sy = (1 if x<tx else -1),(1 if y<ty else -1)
+        error = dx+dy; count = 0
+        while (x,y)!=(tx,ty):
+            e2 = 2*error
+            if e2>=dy: error+=dy; x+=sx
+            if e2<=dx: error+=dx; y+=sy
+            if (x,y)!=(tx,ty) and self.geography.depth((x,y)):
+                count+=1
+        cache[key] = count
+        if len(cache)>VISIBILITY_CACHE_LIMIT:
+            cache.popitem(last=False)
+        return count
+
     def _observation_context(self):
         occupied, food, prey, predators = set(), [], [], []
         species = self.config["species"]
@@ -258,6 +290,7 @@ class World:
             self._perception = SpatialIndex(), SpatialIndex(), SpatialIndex()
             self._observed_obstacles = None
             self._visibility_cache = OrderedDict()
+            self._water_sight_cache = OrderedDict()
             self._visibility_impl = None
         visibility_impl = getattr(self.visible, '__func__', self.visible)
         visibility_changed = visibility_impl is not self._visibility_impl
@@ -287,9 +320,19 @@ class World:
             dx, dy = DIRECTIONS[(a.heading + offset) % 4]
             p = a.x + dx, a.y + dy
             features.append(float(bool(self.movement_block_reason(a,p,'move_forward',occupied))) if self.geography else float(self.blocked(p) or p in occupied))
-        features += food.nearest(a, radius, self._perception_visible)
-        features += prey.nearest(a, radius, self._perception_visible)
-        features += predators.nearest(a, radius, self._perception_visible)
+        bonus = body.get('water_vision_bonus',0) if self.geography and self.geography.water else 0
+        if bonus:
+            def in_range(start,end,squared):
+                if squared<=radius*radius:
+                    return True
+                allowed = radius + min(bonus,self._water_sight_cells(start,end))
+                return squared<=allowed*allowed
+            for index in (food,prey,predators):
+                features += index.nearest(a,radius+bonus,self._perception_visible,in_range,(radius,bonus))
+        else:
+            features += food.nearest(a, radius, self._perception_visible)
+            features += prey.nearest(a, radius, self._perception_visible)
+            features += predators.nearest(a, radius, self._perception_visible)
         version=self.config['brains'][self.config['species'][a.species]['brain']].get('observation_version',1)
         if version==2:
             features+=self.geography.features(a,DIRECTIONS) if self.geography else [0.0]*12

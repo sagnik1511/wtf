@@ -2,6 +2,8 @@
 
 [Configuration](configuration.md) · [Species](species.md) · [Playback](recording.md)
 
+For diagrams and the interactive explorer, see [Physics illustrated](physics.md).
+
 Terrain is optional. Existing environments remain flat unless they select a map.
 Four optional presets cover three maps, keeping one prey species and one predator species:
 
@@ -10,7 +12,7 @@ Four optional presets cover three maps, keeping one prey species and one predato
 | [river_crossing.json](../environments/river_crossing.json) | A river bisects the world, with a fast deep channel and a slower shallow ford |
 | [river_crossing_ppo.json](../environments/river_crossing_ppo.json) | The same river map with PPO for both species |
 | [highlands.json](../environments/highlands.json) | Terraced highlands, a steep central plateau, a climbable north ramp and obstacle approaches |
-| [enclosed_valleys.json](../environments/enclosed_valleys.json) | Walled valleys, narrow gates, a river crossing and a completely secluded pocket |
+| [enclosed_valleys.json](../environments/enclosed_valleys.json) | One elevated enclosure, two three-cell-wide gates, an exterior river and boundary-biased food |
 
 ```sh
 .venv/bin/python -m ecosystem.cli environments/river_crossing.json --runs 10 --progress
@@ -18,13 +20,37 @@ Four optional presets cover three maps, keeping one prey species and one predato
 ./run.sh
 ```
 
-The original three terrain presets use Q brains; `river_crossing_ppo.json` uses
-PPO for both prey and predators. All nine algorithms support
-terrain: when copying another algorithm's complete template, retain
-`observation_version: 2` and the appropriate species' action list. The river and enclosed-valley Q presets share model signatures/actions.
-Dry highlands omits `swim`, so its action signature differs. Transfer requires
-matching action lists in the same order. The PPO preset needs compatible terrain PPO weights rather than Q weights. Older 20-input brains cannot directly initialize the 32-input terrain
-models; their shapes and observation contracts differ.
+`enclosed_valleys.json` uses **DQN for prey and PPO for predators**. The
+`river_crossing_ppo.json` preset uses PPO for both; `river_crossing.json` and
+`highlands.json` use Q networks. All nine algorithms support terrain; retain
+`observation_version: 2` and the species action list when switching templates.
+Enclosed-valley prey can load matching terrain Q/DQN weights; predators need
+matching terrain PPO weights. The river presets provide corresponding compatible
+signatures. Dry highlands omits `swim` and has a different action signature.
+Older 20-input flat brains cannot initialize these 32-input terrain models.
+
+## Recorded terrain previews
+
+These **3.5-second full-viewer recordings** retain the controls, counters, board
+and sidebar. They show saved run playback, not a live backend simulation.
+[Source recordings, intervals and regeneration](assets/terrains/README.md) are
+recorded alongside the GIFs. The separate [physics diagrams](physics.md) explain
+the rules; these clips show the actual viewer UI.
+
+### River crossing
+
+![Full viewer playback of river crossing, including controls, statistics and event highlights](assets/terrains/river-crossing.gif)
+
+### Highlands
+
+![Full viewer playback of highlands, showing elevation shading, terrain and statistics](assets/terrains/highlands.gif)
+
+### Enclosed valleys
+
+![Full viewer playback of enclosed valleys, showing the wall, gates, river, animals and statistics](assets/terrains/enclosed-valleys.gif)
+
+Animals may pass through the gates during playback; the inside/outside placement
+rule applies to founders, not permanent confinement.
 
 ## Use PPO on the river map
 
@@ -201,3 +227,93 @@ penalties, alongside existing drowning, damage and death penalties. A blocked
 climb or swim receives a failed-action penalty; normal attempt costs still apply.
 Current drift is forced motion and cannot make a blocked voluntary action count
 as successful.
+
+For the selected constants now applied to the original river, highlands and
+enclosed-valley presets, and the
+matched short comparisons used to select their constants with radius two, see
+[survival/reproduction calibration](calibration.md).
+
+## Enclosed-valley starting layout
+
+`environments/enclosed_valleys.json` now has one main rectangular enclosure. Its
+outer wall spans x=8..31 and y=4..23 (inclusive), with three-cell-wide gates at x=8, y=12..14 and x=31, y=13..15.
+Guard obstacles sit beyond the approach lanes so all three entrance cells remain accessible.
+The elevated interior is accessible by one-unit climbs. The river is outside the
+left wall, with a shallow ford. Small obstacles guard the gate approaches.
+
+All 48 founding prey start strictly inside the wall; all 12 founding predators
+start strictly outside. Initial food is split into exactly 30 inner-boundary
+patches, 30 outer-boundary patches and 20 farther-away patches. Boundary food
+is within two grid cells of the rectangle; diagonal exterior distance uses the
+maximum x/y offset. All founder and food positions are distinct within their own
+group, dry and unblocked. Food can share a cell with an animal, as before.
+
+Edit the optional top-level placement object to change these choices:
+
+```json
+"placement": {
+  "enclosure_bounds": [8, 4, 31, 23],
+  "species": {"prey": "inside", "predator": "outside"},
+  "resources": {
+    "boundary_fraction": 0.75,
+    "boundary_width": 2,
+    "inside_fraction": 0.5
+  }
+}
+```
+
+Bounds describe the outer perimeter and do not create walls; paint matching
+geometry in the map. `inside` and `outside` exclude the perimeter, including
+gates, when choosing founders. List each configured species by its exact name.
+Multiple species can share a side without overlapping their starting positions.
+
+`boundary_fraction` is the share of all patches placed near the wall.
+`inside_fraction` is the share of those near-wall patches placed inside. Counts
+round to nearest integer, half upward; remaining patches are sampled farther
+away on either side. Allocation is exact; insufficient dry zone/band capacity
+raises a configuration error rather than silently moving animals or food.
+Placement requires explicit obstacles, so capacity can be checked before a run.
+
+These are initial conditions. Animals can use the gates and normal movement,
+and newborns use the existing local birth rules. Resources regrow at their
+chosen positions. No permanent species barrier or automatic reproduction was
+added. Configurations without `placement` retain their original seeded spawning.
+Saved checkpoints/recordings embed the geometry and placement configuration;
+resuming never redraws or relocates bodies. New invocations use the edited map.
+The earlier calibration study used the previous two-valley geometry, so its
+counts are historical rather than predictions for this layout.
+
+## Directional sight across water
+
+The river and enclosed-valley presets set `species.<name>.body.water_vision_bonus`
+to **3** for both species. This is an optional integer from 0 to 32; omission
+or zero preserves the original sight rule. Dry maps receive no extension.
+
+For each target, the existing line-of-sight ray counts water cells strictly
+between observer and target. Its effective radius is:
+
+```text
+vision_radius + min(water_vision_bonus, intervening_water_cells)
+```
+
+Thus a one-cell river adds one cell of sight; three water cells can add three.
+Prey retain normal radius 6 on dry rays and can reach at most 9 across water.
+Predators retain radius 8 and can reach at most 11. This applies to food and
+animal targets in any direction, not just where the animal faces. Walls still
+occlude targets, including across water; start/end water tiles alone grant no
+extension. Swimming ability and physical movement costs are separate.
+
+The spatial query searches only out to the maximum possible radius, then filters
+individual targets with their actual water allowance. Nearest accepted targets
+still win. When enabled on a wet map, nearest-target offsets and distances are
+normalized by `vision_radius + water_vision_bonus`, keeping existing feature
+ranges. This changes input values but adds no inputs: flat/terrain observations
+remain 20/32 features. Model shapes stay compatible; existing weights may behave
+differently with the changed sight range and normalization. Saved configs without
+the field retain old behavior during exact resume.
+
+Each world caches ordered static water-ray counts in a bounded 2,048-entry LRU.
+Dynamic target positions, deaths and resource depletion still invalidate spatial
+results. Sight result keys include base radius and bonus, even if their sum is
+unchanged. These caches are transient and reconstructed after checkpoint restore;
+no per-frame water data or new replay fields are stored.

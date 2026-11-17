@@ -4,6 +4,9 @@
 
 Commands in this guide run from the project root.
 
+See the [recorded terrain previews](geography.md#recorded-terrain-previews) for
+short full-screen clips of this viewer on all three maps.
+
 ## Playback controls
 
 The Python simulator and JavaScript viewer are independent. Run training first,

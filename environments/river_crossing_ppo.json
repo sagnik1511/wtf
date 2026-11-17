@@ -42,7 +42,8 @@
         "movement_cost": 0.15,
         "starvation_damage": 1,
         "bite_size": 4,
-        "energy_per_food_unit": 2
+        "energy_per_food_unit": 2,
+        "water_vision_bonus": 3
       },
       "brain": "small_ppo",
       "rewards": {
@@ -104,7 +105,8 @@
         "starvation_damage": 1,
         "attack_damage": 30,
         "attack_cost": 1,
-        "energy_per_kill": 40
+        "energy_per_kill": 40,
+        "water_vision_bonus": 3
       },
       "brain": "small_ppo",
       "rewards": {

@@ -116,3 +116,11 @@ training and exact JSON/binary resume, mutations, GRPO static-map isolation,
 embedded map restoration, CSV/CLI output and Python/JS binary replay parity.
 `tests/terrain.test.mjs` covers static map rendering, metadata across seeks/runs,
 new dashboard fields and final death/kill positions after drift.
+
+## Terrain calibration experiments
+
+[Calibration](calibration.md) documents optional, explicitly requested training
+comparisons. `python -m work.calibrate_terrain` uses tqdm and writes only scalar
+results/configurations under ignored results. It is an experiment utility, not
+a default verification step. Its defaults run 45 short episodes; select fewer
+seeds/maps/variants when a small smoke check is sufficient.

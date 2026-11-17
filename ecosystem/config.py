@@ -53,7 +53,7 @@ def validate(c):
             "brains",
             "experiment",
         ),
-        optional=("recording", "terrain"),
+        optional=("recording", "terrain", "placement"),
     )
     if 'terrain' in c:
         from .geography import resolve_map
@@ -477,12 +477,14 @@ def validate(c):
             if s["diet"] == "resource"
             else ["attack_damage", "attack_cost", "energy_per_kill"]
         )
-        obj(s["body"], p + ".body", fields)
+        obj(s["body"], p + ".body", fields, optional=("water_vision_bonus",))
         for k in fields:
             num(s["body"][k], f"{p}.body.{k}")
         for k in ("max_energy", "max_health"):
             num(s["body"][k], f"{p}.body.{k}", 0.001)
         num(s["body"]["vision_radius"], p + ".body.vision_radius", 1, 256, True)
+        if "water_vision_bonus" in s["body"]:
+            num(s["body"]["water_vision_bonus"], p+".body.water_vision_bonus", 0, 32, True)
         if s["body"]["initial_energy"] > s["body"]["max_energy"]:
             fail(p + ".body.initial_energy", "exceeds maximum")
         if 'locomotion' in s:
@@ -559,6 +561,10 @@ def validate(c):
     free = w["width"] * w["height"] - blocked
     if max(population, c["resources"]["patch_count"]) > free:
         fail("world", "insufficient free cells for animals or resources")
+    if "placement" in c:
+        from .placement import validate_placement
+        unavailable = set(cells) | (geography.obstacles | geography.water.keys() if geography else set())
+        validate_placement(c, unavailable)
     e = c["experiment"]
     obj(
         e,

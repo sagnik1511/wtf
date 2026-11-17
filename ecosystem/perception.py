@@ -113,7 +113,7 @@ class SpatialIndex:
         self.windows[animal_id] = bounds, cells
         return cells.values()
 
-    def nearest(self, animal, radius, visible):
+    def nearest(self, animal, radius, visible, range_check=None, range_key=None):
         ax, ay, animal_id = animal.x, animal.y, animal.id
         buckets = self._window(animal_id, ax, ay, radius)
         if buckets is None:
@@ -123,6 +123,8 @@ class SpatialIndex:
             revision = tuple(bucket.version for bucket in buckets)
             points = chain.from_iterable(bucket.points.values() for bucket in buckets)
         key = ax, ay, radius, revision
+        if range_check is not None:
+            key += (range_key,)
         previous = self.results.get(animal_id)
         if previous is not None and previous[0] == key:
             return previous[1]
@@ -135,7 +137,8 @@ class SpatialIndex:
             squared = dx * dx + dy * dy
             if (squared <= radius_squared
                     and (squared < best_squared or (squared == best_squared and order < best_order))
-                    and visible(start, (x, y))):
+                    and visible(start, (x, y))
+                    and (range_check is None or range_check(start, (x,y), squared))):
                 best, best_squared, best_order = (x, y), squared, order
         features = ([0.0, 0.0, 0.0, 0.0] if best is None else [
             (best[0] - ax) / radius, (best[1] - ay) / radius,

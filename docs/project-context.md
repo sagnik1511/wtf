@@ -73,6 +73,21 @@ supporting data. Do not decompress a whole experiment at startup. Legacy replay
 and checkpoint readers remain necessary. Dynamic observation caches must account
 for moved/dead/newborn animals and changed food, even when the observer stays put.
 
+Optional `placement` selects founder inside/outside zones and exact boundary-food
+quotas; it never confines later movement or resamples checkpoint bodies. See the
+[layout guide](geography.md#enclosed-valley-starting-layout) and
+`ecosystem/placement.py`. Existing configs without it preserve seeded layouts.
+
+Optional `body.water_vision_bonus` extends only rays crossing water, with wall
+occlusion intact. Cache static ray counts per world and key dynamic results by
+both base radius and bonus; restore caches cold. See
+[directional sight](geography.md#directional-sight-across-water).
+
+[Physics illustrated](physics.md) links the tracked SVG cases and portable
+interactive explorer under `docs/assets/physics/`. Refresh their controlled
+physics snapshots with `python -m work.build_physics_docs`; they are not run
+replays or evidence of learning.
+
 ## Local operations and common pitfalls
 
 Commands run from the repository root. Use repo-relative paths in maintained docs;

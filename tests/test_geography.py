@@ -281,7 +281,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
                 header=(folder/'metrics.csv').read_text().splitlines()[0]
                 self.assertIn('drowning',header)
             self.assertNotEqual(signatures['river_crossing'],signatures['highlands'])
-            self.assertEqual(signatures['river_crossing'],signatures['enclosed_valleys'])
+            self.assertNotEqual(signatures['river_crossing'],signatures['enclosed_valleys'])
 
     def test_terrain_presets_and_invalid_geography_are_validated(self):
         for name in ('river_crossing','highlands','enclosed_valleys'):

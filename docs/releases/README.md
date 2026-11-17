@@ -6,10 +6,13 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.32](0.0.0.32.md), `6480da8`.
-**Latest committed runtime implementation:** [0.0.0.32](0.0.0.32.md), `6480da8`.
-**Pending:** [0.0.0.33](0.0.0.33.md), terrain maps, swimming/current physics and elevation;
-[0.0.0.34](0.0.0.34.md), mutual reproduction decisions and configurable action feedback.
+**Latest committed rollout:** [0.0.0.34](0.0.0.34.md), `68855f3`.
+**Latest committed runtime implementation:** [0.0.0.34](0.0.0.34.md), `68855f3`.
+**Pending:** [0.0.0.35](0.0.0.35.md), terrain survival/reproduction calibration;
+[0.0.0.36](0.0.0.36.md), enclosure founder zones and boundary food;
+[0.0.0.37](0.0.0.37.md), directional water sight;
+[0.0.0.38](0.0.0.38.md), portable physics diagrams and explorer;
+[0.0.0.39](0.0.0.39.md), recorded full-viewer terrain GIFs.
 
 ## Rollout index
 
@@ -20,8 +23,13 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.34](0.0.0.34.md) | Pending | Prepared 2026-11-17 | — | Mutual reproduction choices, energy/failure/birth rewards and decision metrics |
-| [0.0.0.33](0.0.0.33.md) | Pending | Prepared 2026-11-17 | — | Optional map geography, health-gated swimming, fractional currents and climb costs |
+| [0.0.0.39](0.0.0.39.md) | Pending | Prepared 2026-11-17 | — | Three full-viewer terrain GIFs with capture provenance and export helper |
+| [0.0.0.38](0.0.0.38.md) | Pending | Prepared 2026-11-17 | — | Ten SVG physics cases, standalone explorer, illustrated guide and regeneration tools |
+| [0.0.0.37](0.0.0.37.md) | Pending | Prepared 2026-11-17 | — | Water-directed sight extension with wall occlusion and bounded static caching |
+| [0.0.0.36](0.0.0.36.md) | Pending | Prepared 2026-11-17 | — | One enclosed valley, prey/predator founder zones and exact boundary-food allocation |
+| [0.0.0.35](0.0.0.35.md) | Pending | Prepared 2026-11-17 | — | Proximal terrain calibrations, matched short trials and scalar-only harness |
+| [0.0.0.34](0.0.0.34.md) | Committed | 2026-11-17 | `68855f3` | Mutual reproduction choices, energy/failure/birth rewards and decision metrics |
+| [0.0.0.33](0.0.0.33.md) | Committed | 2026-11-17 | `68855f3` | Optional map geography, health-gated swimming, fractional currents and climb costs |
 | [0.0.0.32](0.0.0.32.md) | Committed | 2026-11-17 | `6480da8` | Arbitrary species names, dynamic legends/colors and multi-species coverage |
 | [0.0.0.31](0.0.0.31.md) | Committed | 2026-11-17 | `a7a4e70` | Species/sex champion pools, matching loading/chaining and distinct viewer colors |
 | [0.0.0.30](0.0.0.30.md) | Committed | 2026-11-17 | `a7a4e70` | Physical male/female pairing, crossed newborn brains and rare mutation |
