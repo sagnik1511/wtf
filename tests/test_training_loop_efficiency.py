@@ -89,7 +89,7 @@ class TrainingLoopEfficiencyTests(unittest.TestCase):
         a=Experiment(breeding_config());b=RetainedFounderExperiment(breeding_config())
         for e in (a,b):
             e.world.animals[3].energy=0;e.world.animals[3].health=.1;e.observations=e.world.observe_all()
-        with patch.object(Brain,'choose',lambda self,*args,**kwargs:'rest'):
+        with patch.object(Brain,'choose',lambda self,*args,**kwargs:'reproduce'):
             steps=0
             while not a.done:
                 a.step();b.step();steps+=1

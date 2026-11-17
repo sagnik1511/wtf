@@ -1,6 +1,7 @@
 """Quantile-regression Double DQN with bounded per-animal replay and Adam."""
 
 import copy
+from .brain import observation_inputs
 import random
 from .brain import Experience
 from .optimization import AdamOptimizer
@@ -33,7 +34,7 @@ class QRDQNBrain(AdamOptimizer):
         self.action_indices = {a: i for i, a in enumerate(actions)}
         self.quantiles = config['num_quantiles']
         self.network = MLP(config['network']['hidden_layers'], len(actions) * self.quantiles,
-                           base_seed, value_head=False)
+                           base_seed, value_head=False, inputs=observation_inputs(config))
         self.target_network = copy.deepcopy(self.network)
         self.moments, self.variances = self.network.zeros(), self.network.zeros()
         self.rng = random.Random(individual_seed)

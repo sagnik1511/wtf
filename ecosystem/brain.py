@@ -11,6 +11,11 @@ from operator import mul
 from typing import NamedTuple, Optional
 
 INPUTS = 20
+TERRAIN_INPUTS = 32
+
+
+def observation_inputs(config):
+    return TERRAIN_INPUTS if config.get('observation_version',1)==2 else INPUTS
 
 
 class Experience(NamedTuple):
@@ -28,13 +33,14 @@ class Brain:
         self.actions = list(actions)
         self.action_indices = {action: i for i, action in enumerate(self.actions)}
         self.hidden = config["hidden_layers"][0]
+        self.inputs = observation_inputs(config)
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
         init = random.Random(base_seed)
         self.weights = {
             "w1": [
-                init.uniform(-1, 1) * math.sqrt(6 / (INPUTS + self.hidden))
-                for _ in range(INPUTS * self.hidden)
+                init.uniform(-1, 1) * math.sqrt(6 / (self.inputs + self.hidden))
+                for _ in range(self.inputs * self.hidden)
             ],
             "b1": [0.0] * self.hidden,
             "w2": [
@@ -53,7 +59,7 @@ class Brain:
         hidden = self.hidden
         return [
             math.tanh(
-                bias + sum(map(mul, observation, w1[j * INPUTS : (j + 1) * INPUTS]))
+                bias + sum(map(mul, observation, w1[j * self.inputs : (j + 1) * self.inputs]))
             )
             for j, bias in enumerate(weights["b1"])
         ]
@@ -113,7 +119,7 @@ class Brain:
                 gw2[a * hidden + j] += delta * h[j]
                 dh = delta * w2[a * hidden + j] * (1 - h[j] ** 2)
                 gb1[j] += dh
-                offset = j * INPUTS
+                offset = j * self.inputs
                 for i, x in enumerate(e.observation):
                     gw1[offset + i] += dh * x
         scale = c["learning_rate"] / c["batch_size"]

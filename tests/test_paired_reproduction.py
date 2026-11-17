@@ -9,6 +9,7 @@ from ecosystem.brains import mix_parent_brains, model_snapshot
 from ecosystem.checkpoint_io import read_checkpoint
 from ecosystem.config import load
 from ecosystem.runner import Experiment
+from tests.reproduction_support import force_reproduction
 from ecosystem.world import World
 from tests.test_mutation import KINDS, environment
 from tests.test_reproduction import breeding_world
@@ -29,7 +30,7 @@ def parameters(brain):
 class PairedGeneticsTests(unittest.TestCase):
     def test_crossover_every_algorithm_mixes_parameters_without_parent_or_rng_changes(self):
         for kind in KINDS:
-            e=Experiment(environment(kind,0));mother=e.brains[0];father=e.brains[1]
+            e=force_reproduction(Experiment(environment(kind,0)));mother=e.brains[0];father=e.brains[1]
             for brain, value in ((mother,1.0),(father,-1.0)):
                 for values in arrays(parameters(brain)):values[:]=[value]*len(values)
                 brain.steps=13;brain.updates=7
@@ -58,7 +59,7 @@ class PairedGeneticsTests(unittest.TestCase):
 
     def test_founders_have_two_independent_templates_with_balanced_sexes(self):
         for kind in KINDS:
-            e=Experiment(environment(kind,0));groups={}
+            e=force_reproduction(Experiment(environment(kind,0)));groups={}
             for i,a in e.world.animals.items():
                 if a.species=='prey':groups.setdefault(a.sex,[]).append(i)
             self.assertEqual(set(groups),{'male','female'})
@@ -72,7 +73,7 @@ class PairedGeneticsTests(unittest.TestCase):
 
     def test_newborn_sex_and_both_parents_survive_json_binary_resume(self):
         for kind in KINDS:
-            a=Experiment(environment(kind));a.step()
+            a=force_reproduction(Experiment(environment(kind)));a.step()
             children=[x for x in a.world.animals.values() if x.parent_id>=0]
             self.assertTrue(children,kind)
             for c in children:
@@ -93,7 +94,7 @@ class PairedGeneticsTests(unittest.TestCase):
             a=copy.copy(w.animals[0]);a.id=i;a.x=x;a.sex=sex;w.animals[i]=a
         w.next_animal_id=4
         w.config['species']['prey']['reproduction']['max_population']=5
-        w.step({i:'rest' for i in w.animals})
+        w.step({i:'reproduce' for i in w.animals})
         self.assertEqual(w.births['prey'],1)
         self.assertEqual(len(w.animals),5)
         self.assertEqual(len({a.position for a in w.animals.values()}),5)
@@ -107,7 +108,7 @@ class PairedGeneticsTests(unittest.TestCase):
         self.assertEqual(w.animals[0].energy,60)
 
     def test_legacy_founder_templates_restore_into_sex_banks(self):
-        e=Experiment(environment('ppo',0));state=json.loads(json.dumps(e.checkpoint()))
+        e=force_reproduction(Experiment(environment('ppo',0)));state=json.loads(json.dumps(e.checkpoint()))
         state['initial_weights']={name:weights['female'] for name,weights in state['initial_weights'].items()}
         for a in state['world']['snapshot']['animals']:
             a.pop('sex');a.pop('second_parent_id')
@@ -118,7 +119,7 @@ class PairedGeneticsTests(unittest.TestCase):
 
     def test_analysis_counts_both_parents_cost_but_keeps_old_recording_semantics(self):
         from ecosystem.analyze import Statistics
-        w=breeding_world();r=w.step({i:'rest' for i in w.animals})
+        w=breeding_world();r=w.step({i:'reproduce' for i in w.animals})
         event=vars(next(x for x in r.events if x.kind=='born'))
         current=Statistics(w.config);current.event(event,vars(w.animals[0]))
         self.assertEqual(current.counts['reproduction_energy'],10)
@@ -128,8 +129,8 @@ class PairedGeneticsTests(unittest.TestCase):
         self.assertEqual(old.counts['reproduction_energy'],5)
 
     def test_incompatible_parents_are_rejected(self):
-        mother=Experiment(environment('ppo')).brains[0]
-        father=Experiment(environment('a2c')).brains[1]
+        mother=force_reproduction(Experiment(environment('ppo'))).brains[0]
+        father=force_reproduction(Experiment(environment('a2c'))).brains[1]
         with self.assertRaisesRegex(ValueError,'compatible'):mix_parent_brains(mother,father,1)
 
     def test_presets_expose_mate_radius(self):

@@ -12,7 +12,7 @@ DEFINITIONS = {
     'feeding_success': 'Positive resource-energy events / observed eat attempts.',
     'hunt_success': 'Kills / observed attack attempts; partial hits are reported separately.',
     'movement_success': 'Successful moves / observed move attempts, including blocked attempts.',
-    'energy_coverage': 'Food/prey energy gained / living + known action + reproduction energy demand. Initial and newborn energy are excluded from intake.',
+    'energy_coverage': 'Food/prey energy gained / living + known action + terrain + reproduction energy demand. Initial and newborn energy are excluded from intake.',
     'occupied_grid_fraction': 'Distinct recorded occupied cells / all grid cells, including obstacles in the denominator.',
     'starving_fraction': 'Animal-steps starting at zero energy / observed animal-steps.',
     'mean_completed_lifespan': 'Mean age at death only; survivors are censored and listed separately.',
@@ -54,15 +54,19 @@ class Statistics:
         c['energy_fraction_sum'] += animal['energy'] / body['max_energy']
         c['starving_steps'] += animal['energy'] <= 0
         c['energy_demand'] += body['living_cost']
+        c['reward'] += body['living_cost']*self.config['species'][animal['species']]['rewards'].get('per_energy_cost',0)
         self.position(animal)
 
     def action(self, animal, action):
         self.actions[action] += 1
-        body = self.config['species'][animal['species']]['body']
-        if action == 'move_forward':
-            self.counts['energy_demand'] += body['movement_cost']
-        elif action == 'attack':
-            self.counts['energy_demand'] += body['attack_cost']
+        spec=self.config['species'][animal['species']];body=spec['body']
+        cost=body['movement_cost'] if action in ('move_forward','swim') else body['attack_cost'] if action=='attack' else 0
+        self.counts['energy_demand'] += cost
+        self.counts['reward'] += cost*spec['rewards'].get('per_energy_cost',0)
+
+    def failed(self, animal):
+        self.counts['failed_actions'] += 1
+        self.counts['reward'] += self.config['species'][animal['species']]['rewards'].get('failed_action',0)
 
     def event(self, event, animal):
         c = self.counts
@@ -82,13 +86,21 @@ class Statistics:
         elif kind == 'kill':
             c['kills'] += 1
         elif kind == 'moved':
-            c['moves'] += 1
+            c['swim_moves' if event.get('cause')=='swim' else 'moves'] += 1
+        elif kind == 'drifted':
+            c['drift_moves'] += 1
+        elif kind == 'energy_spent':
+            c['energy_demand'] += amount
+            c['terrain_energy'] += amount
+            c['reward'] += amount*rewards.get('per_energy_cost',0)
         elif kind == 'born':
             c['births'] += 1
             cost = spec.get('reproduction', {}).get('energy_cost', 0) * (2 if event.get('mate', -1) >= 0 else 1)
             c['energy_demand'] += cost
             c['reproduction_energy'] += cost
             c['offspring_energy'] += spec['body']['initial_energy']
+            c['reward'] += cost*rewards.get('per_energy_cost',0)
+            c['reward'] += (2 if event.get('mate',-1)>=0 else 1)*rewards.get('per_offspring',0)
         elif kind == 'mutated':
             c['mutations'] += 1
             c['mutated_weights'] += amount
@@ -135,6 +147,10 @@ class Statistics:
             hunt_success=ratio(c['kills'], a['attack']),
             hit_success=ratio(c['hits'], a['attack']),
             movement_success=ratio(c['moves'], a['move_forward']),
+            swim_success=ratio(c['swim_moves'],a['swim']), swim_attempts=a['swim'],
+            failed_actions=c['failed_actions'],
+            reproduction_attempts=a['reproduce'], reproduction_success=ratio(2*c['births'],a['reproduce']),
+            drift_moves=c['drift_moves'], terrain_energy=c['terrain_energy'],
             reward_per_agent_step=ratio(c['reward'], c['agent_steps']),
             births=c['births'], kills=c['kills'], deaths=dict(self.deaths),
             mutations=c['mutations'], mutated_weights=c['mutated_weights'],
@@ -197,15 +213,25 @@ def analyze_run(config, frames, window_steps=250):
             for event in frame.get('events', []):
                 i, kind = event['actor'], event['kind']
                 if i in prior and i not in actions:
-                    if kind in ('moved', 'movement_blocked'):
-                        actions[i] = 'move_forward'
+                    if kind=='action_failed':actions[i]=event['cause']
+                    elif kind in ('moved', 'movement_blocked'):
+                        actions[i] = 'swim' if event.get('cause','').startswith('swim') else 'move_forward'
                     elif kind == 'damage_dealt':
                         actions[i] = 'attack'
                     elif kind == 'energy_gained' and event.get('cause') == 'resource':
                         actions[i] = 'eat'
+            successful=set()
+            for event in frame.get('events',[]):
+                kind=event['kind']
+                if (kind=='moved' or kind=='damage_dealt' and event.get('amount',0)>0
+                    or kind=='energy_gained' and event.get('cause')=='resource' and event.get('amount',0)>0):
+                    successful.add(event['actor'])
+                if kind=='born':successful.update((event['actor'],event.get('mate',-1)))
             for i, action in actions.items():
                 for stat in destinations(prior[i]['species']):
                     stat.action(prior[i], action)
+                    if action in ('move_forward','swim','attack','eat','reproduce') and i not in successful:
+                        stat.failed(prior[i])
             for event in frame.get('events', []):
                 animal = prior.get(event['actor'])
                 if animal is not None:

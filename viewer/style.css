@@ -112,3 +112,5 @@
 @media(max-width:650px){#metrics-dialog{padding:12px}#trend-grid{grid-template-columns:1fr}.dashboard-controls label{flex:1}.dashboard-controls select{width:100%}}
 
 .species-legend{display:contents}
+
+.terrain-legend{color:#8dceef}.terrain-legend[hidden]{display:none}

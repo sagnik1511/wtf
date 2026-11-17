@@ -38,22 +38,31 @@ def summarize(config, frame, previous=None):
     prior = {a['id']: a for a in previous['animals']} if previous else {}
     consecutive = previous is not None and frame['tick'] == previous['tick'] + 1
     actions, events = defaultdict(Counter), defaultdict(Counter)
+    successful=set()
     if consecutive:
         observed = {i:a['last_action'] for i,a in animals.items() if i in prior}
         for event in frame.get('events', []):
             i, kind = event['actor'], event['kind']
             if i in prior and i not in observed:
-                if kind in ('moved', 'movement_blocked'):observed[i] = 'move_forward'
+                if kind=='action_failed':observed[i]=event['cause']
+                elif kind in ('moved', 'movement_blocked'):observed[i] = 'swim' if event.get('cause','').startswith('swim') else 'move_forward'
                 elif kind == 'damage_dealt':observed[i] = 'attack'
                 elif kind == 'energy_gained' and event.get('cause') == 'resource':observed[i] = 'eat'
+            if (kind=='moved' or kind=='damage_dealt' and event.get('amount',0)>0
+                or kind=='energy_gained' and event.get('cause')=='resource' and event.get('amount',0)>0):successful.add(i)
+            if kind=='born':successful.update((i,event.get('mate',-1)))
             actor = prior.get(i)
             if actor is not None:
                 counter = events[actor['species']]
-                if kind in ('born', 'kill', 'died', 'mutated'):counter[kind] += 1
+                if kind in ('born', 'kill', 'died', 'mutated','drifted'):counter[kind] += 1
+                if kind=='energy_spent':counter['terrain_energy'] += event.get('amount',0)
                 if kind == 'died':counter[event.get('cause', 'unknown')] += 1
                 if kind == 'energy_gained' and event.get('cause') == 'resource' and event.get('amount', 0)>0:
                     counter['productive_feeds'] += 1
-        for i, action in observed.items():actions[prior[i]['species']][action] += 1
+        for i, action in observed.items():
+            actions[prior[i]['species']][action] += 1
+            if action in ('move_forward','swim','attack','eat','reproduce') and i not in successful:
+                events[prior[i]['species']]['failed_actions'] += 1
     species = {}
     for name, spec in config['species'].items():
         living = [a for a in animals.values() if a['species'] == name]
@@ -86,6 +95,13 @@ def summarize(config, frame, previous=None):
             deaths=event['died'] if consecutive else None,
             predation_deaths=event['predation'] if consecutive else None,
             starvation_deaths=event['starvation'] if consecutive else None,
+            drowning_deaths=event['drowning'] if consecutive else None,
+            swim_attempts=action['swim'] if consecutive else None,
+            reproduction_attempts=action['reproduce'] if consecutive else None,
+            failed_actions=event['failed_actions'] if consecutive else None,
+            reproduction_success=2*event['born']/action['reproduce'] if consecutive and action['reproduce'] else None,
+            drift_moves=event['drifted'] if consecutive else None,
+            terrain_energy=event['terrain_energy'] if consecutive else None,
             kills=event['kill'] if consecutive else None,
             attempts=attempts if consecutive else None,
             successes=success if consecutive else None,

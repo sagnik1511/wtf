@@ -3,9 +3,10 @@ import { Dashboard } from './dashboard.mjs';
 import { Playback } from './playback.mjs';
 import { behaviorRows } from './behavior-stats.mjs';
 import { speciesStyles } from './species-style.mjs';
+import { terrainView, drawTerrain } from './terrain.mjs';
 const $ = id => document.getElementById(id);
 let state, selected = null, playing = false, busy = false;
-let styledSpecies=null, styles=new Map();
+let styledSpecies=null, styles=new Map(), terrainDefinition=null, terrain=null;
 let errorTimer, analysisKey="", analysisRequest=0,runMenuKey="";
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
 
@@ -39,6 +40,12 @@ function syncSpeciesLegend() {
   }
   $('species-legend').replaceChildren(...nodes);
 }
+function syncTerrain() {
+  if(terrainDefinition===(state.terrain??null))return;
+  terrainDefinition=state.terrain??null;terrain=terrainView(terrainDefinition);
+  const legend=$('terrain-legend');legend.hidden=!terrain;
+  legend.textContent=terrain?`${terrain.name}${terrain.hasWater?' · ≈ River → current':''}${terrain.hasElevation?' · ▧ Elevation':''}`:'';
+}
 const dashboard = new Dashboard(api, speciesColor);
 function fitWorld() {
   const canvas=$('world'),holder=canvas.parentElement;
@@ -59,6 +66,7 @@ function drawWorld() {
   else if(!canvas.style.width)fitWorld();
   const cw = canvas.width / state.width, ch = canvas.height / state.height;
   ctx.fillStyle = '#101a22'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawTerrain(ctx,terrain,cw,ch);
   ctx.strokeStyle = '#172630'; ctx.lineWidth = .6;
   for (let x=0; x<=state.width; x++) { ctx.beginPath();ctx.moveTo(x*cw,0);ctx.lineTo(x*cw,canvas.height);ctx.stroke(); }
   for (let y=0; y<=state.height; y++) { ctx.beginPath();ctx.moveTo(0,y*ch);ctx.lineTo(canvas.width,y*ch);ctx.stroke(); }
@@ -162,7 +170,8 @@ function drawInspector() {
   if(!a)return;
   box.append(text('p',`${a.sex??'Sex not recorded'} · Generation ${a.generation??0} · ${a.parent_id>=0?`Parents #${a.parent_id}${a.second_parent_id>=0?` + #${a.second_parent_id}`:''}`:'Founding animal'}`,'muted'));
   if(a.mutation_count>0)box.append(text('p',`${a.mutated?`Mutated at birth: ${a.mutation_weights} weights`:'Inherited mutated lineage'} · Lineage mutations ${a.mutation_count}`,'muted'));
-  if(!b){box.append(text('p',`Energy ${a.energy.toFixed(1)} · Health ${a.health.toFixed(1)} · Age ${a.age}`,'muted'));box.append(text('p','Brain diagnostics were not recorded for this frame.','muted'));return;}
+  if(terrain){const t=terrain.cells.get(a.y*terrain.width+a.x);box.append(text('p',`Elevation ${t?.elevation??0}${t?.depth?` · Water depth ${t.depth} · Flow (${t.flow.join(', ')}) cells/step`:''}`,'muted'));}
+  if(!b){box.append(text('p',`Energy ${a.energy.toFixed(1)} · Health ${a.health.toFixed(1)} · Age ${a.age} · Action ${a.last_action} · Reward ${a.last_reward.toFixed(3)}`,'muted'));box.append(text('p','Brain diagnostics were not recorded for this frame.','muted'));return;}
   box.append(text('p',`Brain diagnostics recorded at step ${b.tick}; body state is current.`,'muted'));
   const policy=Boolean(b.action_probabilities);
   const algorithm={ppo:'PPO',a2c:'A2C',reinforce:'REINFORCE',grpo:'GRPO (experimental)',recurrent_ppo:'Recurrent PPO (GRU)',qrdqn:'QR-DQN',maskable_ppo:'Maskable PPO',mappo:'MAPPO (experimental)'}[b.algorithm]||'Q-learning';
@@ -184,7 +193,7 @@ function drawInspector() {
   const actionScores=policy?b.action_probabilities:b.action_values;
   const values=Object.values(actionScores),best=Math.max(...values);
   for(const [action,value] of Object.entries(actionScores)){const row=text('div','','action'+(value===best?' best':''));row.append(text('span',action.replaceAll('_',' ')+(b.action_mask?.[action]===false?' (masked)':'')),text('span',policy?`${(value*100).toFixed(1)}%`:value.toFixed(3)));box.append(row);}
-  const features=text('details','','feature-details');features.append(text('summary','Observation features (20)'));
+  const features=text('details','','feature-details');features.append(text('summary',`Observation features (${b.features.length})`));
   features.append(text('pre',JSON.stringify(b.features.map(v=>Number(v.toFixed(3))),null,2)));box.append(features);
 }
 async function loadBehavior() {
@@ -256,6 +265,7 @@ function render(snapshot = null) {
   if(previousRun!==undefined&&previousRun!==state.run){selected=null;state=player.snapshot();}
   syncRunMenu();
   syncSpeciesLegend();
+  syncTerrain();
   dashboard.update({state,id:player.id,species:state.species,playing});
   $('tick').textContent=state.tick.toLocaleString();$('run').textContent=`${state.run} / ${state.total_runs}`;
   let prey=0,predators=0;for(const [name,s] of Object.entries(state.species)) {if(s.diet==='resource')prey+=state.metrics.populations[name];else predators+=state.metrics.populations[name];}
@@ -288,7 +298,7 @@ function render(snapshot = null) {
   if($('kill-banner').textContent!==banner)$('kill-banner').textContent=banner;
   $('connection').textContent=state.waiting?'Waiting for more recorded frames or runs':`Recorded playback · ${state.mode}`;
   $('empty').hidden=!state.done;$('empty').textContent='End of recording. Seek backward or load another saved experiment.';
-  $('outcomes').textContent=`Births: ${Object.values(state.metrics.births??{}).reduce((a,b)=>a+b,0)} · Starvation: ${state.metrics.deaths.starvation||0} · Predation: ${state.metrics.deaths.predation||0} · Hunts: ${Object.values(state.metrics.kills).reduce((a,b)=>a+b,0)}`;
+  $('outcomes').textContent=`Births: ${Object.values(state.metrics.births??{}).reduce((a,b)=>a+b,0)} · Starvation: ${state.metrics.deaths.starvation||0} · Predation: ${state.metrics.deaths.predation||0}${state.terrain?` · Drowning: ${state.metrics.deaths.drowning??0}`:''} · Hunts: ${Object.values(state.metrics.kills).reduce((a,b)=>a+b,0)}`;
   $('recorded-run').value=state.run;
   $('timeline').max=state.frame_count-1;$('timeline').value=state.frame_index;
   $('frame-label').textContent=`Frame ${state.frame_index+1} / ${state.frame_count}`;

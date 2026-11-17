@@ -10,10 +10,15 @@ Local results and running processes change independently of Git.
 
 WTF — Wildlife Trial Framework — explores independently learning prey and
 predators in a grid world with food, obstacles, energy, health, death and
-paired male/female reproduction. It is an experimental ecosystem, not a calibrated biological model.
+paired male/female reproduction. Both parents must choose `reproduce` in the same
+step and satisfy physical eligibility. [Reward accounting](rewards.md) covers
+energy-demand penalties, failed choices and successful-parent feedback. It is an experimental ecosystem, not a calibrated biological model.
 The priorities established during development are:
 
 - Configurable experiments as JSON, with Python simulation and JavaScript rendering.
+- Optional editable geography maps add swim-only rivers, fractional currents
+  and elevation costs. Flat brains use 20 features; terrain version 2 uses 32.
+  [Geography guide](geography.md) covers physics and saved-model compatibility.
 - Arbitrary named species grouped into resource/prey diets; presets keep one
   species of each. [Species guide](species.md) covers adding more and display colors.
 - Record first, play later: training can finish and exit before opening the viewer.

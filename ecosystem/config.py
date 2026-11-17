@@ -5,7 +5,7 @@ import math
 import re
 from pathlib import Path
 
-ACTIONS = ("move_forward", "turn_left", "turn_right", "rest", "eat", "attack")
+ACTIONS = ("move_forward", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce")
 
 
 def fail(path, message):
@@ -53,8 +53,13 @@ def validate(c):
             "brains",
             "experiment",
         ),
-        optional=("recording",),
+        optional=("recording", "terrain"),
     )
+    if 'terrain' in c:
+        from .geography import resolve_map
+        resolved=resolve_map(c['terrain'])
+        if resolved is not c['terrain']:
+            c=dict(c,terrain=resolved)
     if type(c["schema_version"]) is not int or c["schema_version"] != 1:
         fail("schema_version", "only version 1 is supported")
     if not isinstance(c["name"], str) or not re.fullmatch(r"[a-zA-Z0-9_-]+", c["name"]):
@@ -69,6 +74,10 @@ def validate(c):
     num(w["max_steps"], "world.max_steps", 1, 10000000, True)
     if w["boundary"] != "closed":
         fail("world.boundary", "must be closed")
+    geography=None
+    if 'terrain' in c:
+        from .geography import Geography
+        geography=Geography(c['terrain'],w['width'],w['height'])
     o = c["obstacles"]
     obj(o, "obstacles", ("generation", "occupied_fraction", "explicit_cells"))
     if o["generation"] not in ("scattered", "explicit"):
@@ -113,6 +122,9 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
+        if 'observation_version' in b:
+            num(b['observation_version'],p+'.observation_version',1,2,True)
+            b={k:v for k,v in b.items() if k!='observation_version'}
         if b["type"] == "q_network":
             obj(
                 b,
@@ -354,7 +366,7 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation", "initial_brains", "champion_selection_by_sex", "display"),
+            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation", "initial_brains", "champion_selection_by_sex", "display", "locomotion"),
         )
         if 'display' in s:
             obj(s['display'], p+'.display', (), optional=('color','male_color'))
@@ -447,6 +459,10 @@ def validate(c):
                 p + ".brain",
                 "REINFORCE max_episode_steps must cover world.max_steps to retain complete episodes",
             )
+        if geography is not None and template.get('observation_version',1)!=2:
+            fail(p+'.brain','terrain maps require observation_version 2 on referenced brain templates')
+        if 'swim' in s['allowed_actions'] and geography is None:
+            fail(p+'.allowed_actions','swim requires a terrain map')
         fields = [
             "initial_energy",
             "max_energy",
@@ -469,6 +485,11 @@ def validate(c):
         num(s["body"]["vision_radius"], p + ".body.vision_radius", 1, 256, True)
         if s["body"]["initial_energy"] > s["body"]["max_energy"]:
             fail(p + ".body.initial_energy", "exceeds maximum")
+        if 'locomotion' in s:
+            fields_m=('swim_min_health','swim_energy_cost','water_energy_cost','drowning_damage','uphill_energy_cost','max_climb')
+            obj(s['locomotion'],p+'.locomotion',(),optional=fields_m)
+            for k,value in s['locomotion'].items():
+                num(value,p+'.locomotion.'+k,0,s['body']['max_health'] if k=='swim_min_health' else 100)
         if "reproduction" in s:
             r = s["reproduction"]
             rp = p + ".reproduction"
@@ -516,14 +537,14 @@ def validate(c):
             s["rewards"],
             p + ".rewards",
             ("per_energy_gained", "per_damage_taken", "death"),
-            optional=("per_damage_dealt",),
+            optional=("per_damage_dealt", "per_energy_cost", "failed_action", "per_offspring"),
         )
         for k, value in s["rewards"].items():
             num(
                 value,
                 f"{p}.rewards.{k}",
-                0 if k == "per_damage_dealt" else -100000,
-                100000,
+                0 if k in ("per_damage_dealt","per_offspring") else -100000,
+                0 if k in ("per_energy_cost","failed_action") else 100000,
             )
     if not population:
         fail("species", "total population must be positive")
@@ -532,6 +553,9 @@ def validate(c):
         if o["generation"] == "explicit"
         else int(w["width"] * w["height"] * o["occupied_fraction"])
     )
+    if geography is not None:
+        unavailable=geography.obstacles | geography.water.keys()
+        blocked=(len(unavailable | cells) if o['generation']=='explicit' else min(w['width']*w['height'],len(unavailable)+blocked))
     free = w["width"] * w["height"] - blocked
     if max(population, c["resources"]["patch_count"]) > free:
         fail("world", "insufficient free cells for animals or resources")

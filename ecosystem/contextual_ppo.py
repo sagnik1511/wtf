@@ -1,13 +1,13 @@
 """PPO variants with local action masks or a centralized training critic."""
 
 import math
-from .brain import INPUTS
+from .brain import INPUTS, observation_inputs
 from .ppo import MLP, PPOBrain, loss_and_gradient, policy_distribution
 
 CENTRAL_INPUTS = 16
 
 
-def action_mask(world, animal, actions, occupied=None):
+def action_mask(world, animal, actions, occupied=None, populations=None):
     """Immediate conditions only, before simultaneous movement/combat resolution.
 
     Turning/rest remain possible. An approaching target can still move into an
@@ -21,7 +21,11 @@ def action_mask(world, animal, actions, occupied=None):
     for action in actions:
         valid = True
         if action == 'move_forward':
-            valid = not world.blocked(front) and front not in occupied
+            valid = not world.movement_block_reason(animal, front, 'move_forward', occupied)
+        elif action == 'reproduce':
+            valid = world.reproduction_available(animal,occupied,populations)
+        elif action == 'swim':
+            valid = not world.movement_block_reason(animal, front, 'swim', occupied)
         elif action == 'eat':
             valid = (animal.energy < body['max_energy'] and body['bite_size'] > 0
                      and body['energy_per_food_unit'] > 0 and any(
@@ -68,10 +72,10 @@ def central_contexts(world):
 class LocalMLP(MLP):
     """Masks accompany stored samples but are never neural input features."""
     def forward(self, observation):
-        return super().forward(observation[:INPUTS])
+        return super().forward(observation[:self.sizes[0]])
 
     def _predict(self, observation, value_only=False, output_range=None):
-        return super()._predict(observation[:INPUTS], value_only, output_range)
+        return super()._predict(observation[:self.sizes[0]], value_only, output_range)
 
 
 class MaskablePPOBrain(PPOBrain):
@@ -82,13 +86,13 @@ class MaskablePPOBrain(PPOBrain):
         self.mask = (True,) * len(actions)
 
     def _new_network(self, config, actions, seed):
-        return LocalMLP(config['network']['hidden_layers'], actions, seed)
+        return LocalMLP(config['network']['hidden_layers'], actions, seed, inputs=observation_inputs(config))
 
     def _pack(self, observation):
-        return tuple(observation[:INPUTS]) + tuple(self.mask)
+        return tuple(observation[:self.network.sizes[0]]) + tuple(self.mask)
 
     def distribution(self, outputs, observation):
-        mask = observation[INPUTS:]
+        mask = observation[self.network.sizes[0]:]
         if len(mask) != len(self.actions) or not any(mask):
             raise ValueError('Missing or empty action mask')
         return policy_distribution([v if valid else -1e30 for v, valid in zip(outputs[:-1], mask)])
@@ -107,7 +111,7 @@ class MaskablePPOBrain(PPOBrain):
             next_observation=None if experience.next_observation is None else self._pack(experience.next_observation)))
 
     def objective(self, outputs, step, advantage, target):
-        mask = step.observation[INPUTS:]
+        mask = step.observation[self.network.sizes[0]:]
         masked = [v if valid else -1e30 for v, valid in zip(outputs[:-1], mask)] + [outputs[-1]]
         loss, gradient, info = loss_and_gradient(masked, step.action, step.log_probability, advantage, target, self.config)
         for i, valid in enumerate(mask):
@@ -135,9 +139,10 @@ class MaskablePPOBrain(PPOBrain):
 class CentralNetwork:
     """Independent actor and critic; actor receives only the local 20 features."""
     def __init__(self, config, actions, seed):
-        self.actor = MLP(config['network']['hidden_layers'], actions, seed, value_head=False)
+        self.inputs = observation_inputs(config)
+        self.actor = MLP(config['network']['hidden_layers'], actions, seed, value_head=False, inputs=self.inputs)
         self.critic = MLP(config['critic_hidden_layers'], 1, seed ^ 0xC0171C,
-                          value_head=False, inputs=INPUTS + CENTRAL_INPUTS)
+                          value_head=False, inputs=self.inputs + CENTRAL_INPUTS)
 
     @property
     def layers(self):
@@ -154,13 +159,13 @@ class CentralNetwork:
     clear_gradients = staticmethod(MLP.clear_gradients)
 
     def predict(self, observation):
-        return self.actor.predict(observation[:INPUTS]) + [self.value(observation)]
+        return self.actor.predict(observation[:self.inputs]) + [self.value(observation)]
 
     def value(self, observation):
         return self.critic.predict(observation)[0]
 
     def forward(self, observation):
-        a, at = self.actor.forward(observation[:INPUTS])
+        a, at = self.actor.forward(observation[:self.inputs])
         v, vt = self.critic.forward(observation)
         return a + v, (at, vt)
 

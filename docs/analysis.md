@@ -58,3 +58,23 @@ survivor selection. Optimizer activity proves that updates ran; it does not
 prove useful learning. To establish improvement, freeze policies and compare
 trained, fresh and random controls across matched held-out seeds, reporting
 results separately for each species.
+
+## Terrain measurements
+
+Terrain records add swim attempts/success, current-driven cell moves and terrain
+energy demand. Walking success excludes swim strokes and forced drift. Demand
+includes successful swim/climb charges and water maintenance; drowning damage
+uses the existing damage-taken reward accounting. Drowning deaths are separate
+from predation/starvation, and terrain CSV files include their total. A nonlethal
+attack followed by drowning is not a predator kill. See [geography](geography.md).
+
+## Reproduction decisions and failed actions
+
+Per-step dashboard selectors include failed action attempts, reproduction attempts
+and successful reproducing parents per attempt. A successful paired birth counts
+as two successful parent choices and one child. The ratio is missing when no
+attempt occurs. Older telemetry without these fields displays missing values.
+Analysis reconstructs [reward accounting](rewards.md), including energy demand,
+failed attempts and each parent’s birth reward. Terminal failed choices carry a
+small event so death does not hide their action or penalty. Legacy recordings
+without that information retain their existing action-coverage limitations.

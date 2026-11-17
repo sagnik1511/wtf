@@ -1,6 +1,7 @@
 """Matched GRPO trials: sequential world clones, read-only other policies."""
 
 import random
+from collections import Counter
 from .policy_gradients import PolicyStep
 from .ppo import policy_distribution
 from .world import World
@@ -16,7 +17,7 @@ def sample_index(probabilities, rng):
     return len(probabilities) - 1
 
 
-def other_action(brain, observation, rng, world=None, animal_id=None, memories=None, occupied=None):
+def other_action(brain, observation, rng, world=None, animal_id=None, memories=None, occupied=None, populations=None):
     kind = brain.config['type']
     if kind == 'recurrent_ppo':
         from .ppo import policy_distribution
@@ -25,7 +26,7 @@ def other_action(brain, observation, rng, world=None, animal_id=None, memories=N
         return brain.actions[sample_index(policy_distribution(outputs[:-1])[0], rng)]
     if kind == 'maskable_ppo':
         from .contextual_ppo import action_mask
-        mask = action_mask(world, world.animals[animal_id], brain.actions, occupied)
+        mask = action_mask(world, world.animals[animal_id], brain.actions, occupied, populations)
         outputs = brain.network.predict(observation)
         probabilities = brain.distribution(outputs, tuple(observation) + mask)[0]
         return brain.actions[sample_index(probabilities, rng)]
@@ -60,7 +61,8 @@ def collect_group(world, brains, focal_id):
     group = []
     has_masks = any(brains[i].config['type']=='maskable_ppo' for i in world.animals)
     for _ in range(focal.config["group_size"]):
-        trial = World.restore(initial_world)
+        trial = (World.restore(initial_world, static_geography=world.geography)
+                 if world.geography else World.restore(initial_world))
         generators = {}
         for i, state in states.items():
             generators[i] = random.Random(0)
@@ -77,11 +79,12 @@ def collect_group(world, brains, focal_id):
             )
             index = sample_index(probabilities, generators[focal_id])
             occupied = {a.position: a for a in trial.animals.values()} if has_masks else None
+            populations = Counter(a.species for a in trial.animals.values()) if has_masks else None
             actions = {
                 i: (
                     focal.actions[index]
                     if i == focal_id
-                    else other_action(policies[i], o, generators[i], trial, i, memories, occupied)
+                    else other_action(policies[i], o, generators[i], trial, i, memories, occupied, populations)
                 )
                 for i, o in observations.items()
             }

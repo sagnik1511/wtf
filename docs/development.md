@@ -108,3 +108,11 @@ groups, generic CLI/CSV output and binary replay/telemetry/analysis. Tests use
 local fixtures; shipped presets keep exactly one species per role.
 `tests/species-style.test.mjs` checks generated and explicitly configured colors
 without fixed-name or fixed-palette assumptions.
+
+`tests/test_geography.py` covers swim/health/energy/depth gates, fractional and
+negative river vectors, intermediate-cell collision/corner handling, slope costs,
+drowning attribution, terrain mating isolation, all-nine-algorithm 32-input
+training and exact JSON/binary resume, mutations, GRPO static-map isolation,
+embedded map restoration, CSV/CLI output and Python/JS binary replay parity.
+`tests/terrain.test.mjs` covers static map rendering, metadata across seeks/runs,
+new dashboard fields and final death/kill positions after drift.

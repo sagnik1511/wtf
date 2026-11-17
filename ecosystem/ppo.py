@@ -9,7 +9,7 @@ import math
 import random
 from operator import mul
 from typing import NamedTuple
-from .brain import INPUTS
+from .brain import INPUTS, observation_inputs
 from .optimization import AdamOptimizer
 
 
@@ -214,7 +214,7 @@ class PPOBrain(AdamOptimizer):
         self.last_metrics = {}
 
     def _new_network(self, config, actions, seed):
-        return MLP(config['network']['hidden_layers'], actions, seed)
+        return MLP(config['network']['hidden_layers'], actions, seed, inputs=observation_inputs(config))
 
     def distribution(self, outputs, observation):
         return policy_distribution(outputs[:-1])

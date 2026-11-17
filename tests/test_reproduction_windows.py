@@ -40,13 +40,13 @@ class ReproductionWindowTests(unittest.TestCase):
     def test_draw_once_not_every_step_and_stay_due_when_blocked(self):
         w=window_world();w.config['species']['prey']['reproduction']['max_population']=1
         with patch.object(w.rng,'randint',return_value=7) as draw:
-            for _ in range(16):w.step({i:'rest' for i in w.animals})
+            for _ in range(16):w.step({i:'reproduce' for i in w.animals})
             draw.assert_called_once_with(7,13)
         self.assertEqual(w.animals[0].last_reproduced_age,-1)
         self.assertEqual(w.animals[0].energy,60)
         self.assertEqual(w.animals[0].reproduction_due_age,7)
         w.config['species']['prey']['reproduction']['max_population']=3
-        w.step({i:'rest' for i in w.animals})
+        w.step({i:'reproduce' for i in w.animals})
         self.assertEqual(w.births['prey'],1)
         self.assertEqual(w.animals[0].last_reproduced_age,17)
 
@@ -54,7 +54,7 @@ class ReproductionWindowTests(unittest.TestCase):
         for cooldown in (6,10):
             w=window_world();parent=w.animals[0];parent.age=6
             with patch.object(w.rng,'randint',side_effect=[7,cooldown,cooldown]) as draw:
-                w.step({i:'rest' for i in w.animals})
+                w.step({i:'reproduce' for i in w.animals})
                 self.assertEqual(draw.call_args_list[1].args,(6,10))
             self.assertEqual(parent.last_reproduced_age,7)
             self.assertEqual(parent.reproduction_due_age,7+cooldown)
@@ -63,7 +63,7 @@ class ReproductionWindowTests(unittest.TestCase):
             # Block further births, then check the newborn draws its own first clock.
             w.config['species']['prey']['reproduction']['max_population']=3
             with patch.object(w.rng,'randint',return_value=13) as draw:
-                w.step({i:'rest' for i in w.animals})
+                w.step({i:'reproduce' for i in w.animals})
                 draw.assert_called_once_with(7,13)
             self.assertEqual(child.reproduction_due_age,13)
             self.assertEqual(parent.reproduction_due_age,7+cooldown)
@@ -75,11 +75,11 @@ class ReproductionWindowTests(unittest.TestCase):
             elif block=='energy':parent.energy=1
             else:w.obstacles={(2,1),(3,2),(2,3),(1,2)}
             with patch.object(w.rng,'randint',return_value=7):
-                for _ in range(14):w.step({i:'rest' for i in w.animals})
+                for _ in range(14):w.step({i:'reproduce' for i in w.animals})
             self.assertEqual(len(w.animals),2,block)
             self.assertEqual(parent.reproduction_due_age,7)
             parent.health=30;parent.energy=60;w.obstacles.clear()
-            w.step({i:'rest' for i in w.animals})
+            w.step({i:'reproduce' for i in w.animals})
             self.assertEqual(w.births['prey'],1,block)
             self.assertEqual(parent.last_reproduced_age,15)
             self.assertTrue(21<=parent.reproduction_due_age<=25)
@@ -101,12 +101,12 @@ class ReproductionWindowTests(unittest.TestCase):
         a=breeding_world();b=World.restore(json.loads(json.dumps(a.checkpoint())))
         b.config['species']['prey']['reproduction'].update(age_deviation_pct=0,cooldown_deviation_pct=0)
         for _ in range(7):
-            a.step({i:'rest' for i in a.animals});b.step({i:'rest' for i in b.animals})
+            a.step({i:'reproduce' for i in a.animals});b.step({i:'reproduce' for i in b.animals})
             self.assertEqual(a.snapshot(),b.snapshot())
             self.assertEqual(a.rng.getstate(),b.rng.getstate())
         w=window_world();w.config['species']['prey']['reproduction']['enabled']=False
         with patch.object(w.rng,'randint',side_effect=AssertionError('unexpected timing draw')):
-            w.step({i:'rest' for i in w.animals})
+            w.step({i:'reproduce' for i in w.animals})
         self.assertEqual(w.animals[0].reproduction_due_age,-1)
 
     def test_one_zero_deviation_only_randomizes_requested_clock(self):
@@ -123,7 +123,7 @@ class ReproductionWindowTests(unittest.TestCase):
         for a in state['snapshot']['animals']:a.pop('reproduction_due_age')
         restored=World.restore(state)
         self.assertEqual(restored.animals[0].reproduction_due_age,-1)
-        w.step({i:'rest' for i in w.animals});restored.step({i:'rest' for i in restored.animals})
+        w.step({i:'reproduce' for i in w.animals});restored.step({i:'reproduce' for i in restored.animals})
         self.assertEqual(w.checkpoint(),restored.checkpoint())
 
     def test_json_compact_resume_and_delta_preserve_pending_clocks(self):

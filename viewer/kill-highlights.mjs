@@ -14,7 +14,8 @@ export function recentKills(frames, chunkStart, localIndex, carried = []) {
       // In existing recordings, killed prey have already been removed. An
       // attacker must face its adjacent victim and cannot move while attacking.
       const direction = hunter ? DIRECTIONS[hunter.heading] : null;
-      const position = victim ? [victim.x, victim.y] : direction ? [hunter.x + direction[0], hunter.y + direction[1]] : null;
+      const recorded=Array.isArray(event.position)&&event.position.length===2&&event.position.every(Number.isFinite)?event.position:null;
+      const position = recorded??(victim ? [victim.x, victim.y] : direction ? [hunter.x + direction[0], hunter.y + direction[1]] : null);
       markers.push({actor: event.actor, ...(hunter?.species?{attacker_species:hunter.species}:{}), target: event.target, tick: frame.tick, frame_index: chunkStart + i, position});
     }
   }

@@ -5,7 +5,7 @@ import math
 import random
 from operator import mul
 from typing import NamedTuple
-from .brain import INPUTS
+from .brain import observation_inputs
 from .ppo import MLP, PPOBrain, advantages_and_returns, policy_distribution
 
 
@@ -29,9 +29,10 @@ def sigmoid(value):
 class GRUNetwork:
     def __init__(self, config, actions, seed):
         self.hidden_size = h = config['recurrent_size']
+        self.inputs = observation_inputs(config)
         rng = random.Random(seed ^ 0x6A09E667)
         self.cell = dict(
-            input_weights=[rng.uniform(-1, 1) * math.sqrt(6 / (INPUTS + h)) for _ in range(3*h*INPUTS)],
+            input_weights=[rng.uniform(-1, 1) * math.sqrt(6 / (self.inputs + h)) for _ in range(3*h*self.inputs)],
             recurrent_weights=[rng.uniform(-1, 1) * math.sqrt(3 / h) for _ in range(3*h*h)],
             bias=[0.0] * (3*h))
         self.head = MLP(config['network']['hidden_layers'], actions, seed, inputs=h)
@@ -54,7 +55,7 @@ class GRUNetwork:
         wx, wh, bias = (self.cell[k] for k in ('input_weights', 'recurrent_weights', 'bias'))
         def gate(offset, previous, activation):
             return [activation(bias[offset+j]
-                    + sum(map(mul, observation, wx[(offset+j)*INPUTS:(offset+j+1)*INPUTS]))
+                    + sum(map(mul, observation, wx[(offset+j)*self.inputs:(offset+j+1)*self.inputs]))
                     + sum(map(mul, previous, wh[(offset+j)*h:(offset+j+1)*h]))) for j in range(h)]
         z, r = gate(0, hidden, sigmoid), gate(h, hidden, sigmoid)
         rh = [a*b for a, b in zip(r, hidden)]
@@ -84,7 +85,7 @@ class GRUNetwork:
                 row = offset+j
                 gradient['bias'][row] += d
                 for i, v in enumerate(x):
-                    gradient['input_weights'][row*INPUTS+i] += d*v
+                    gradient['input_weights'][row*self.inputs+i] += d*v
                 for i, v in enumerate(previous):
                     gradient['recurrent_weights'][row*h+i] += d*v
         return previous_gradient

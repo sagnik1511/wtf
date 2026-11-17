@@ -8,6 +8,7 @@ Commands in this guide run from the project root.
 
 | Location | Responsibility |
 | --- | --- |
+| `ecosystem/geography.py` | Map validation, sparse immutable terrain and local terrain features |
 | `ecosystem/world.py` | Bodies, resources, movement, combat, rewards and reproduction |
 | `ecosystem/perception.py` | Incremental spatial windows and cache invalidation |
 | `ecosystem/brain.py`, `ppo.py`, `policy_gradients.py` | Independent learned models |
@@ -35,16 +36,18 @@ See [adding species](species.md) for behavior and configuration details.
 
 The world collects all actions before changing animal state:
 
-1. Resolve turns and movement. Walls and initial animal occupancy block moves. Swaps and following into cells vacated during the same step are disallowed. Competing claims to an empty cell use seeded random selection.
+1. Resolve turns and voluntary movement (including terrain-enabled swimming), then apply river currents through intermediate cells. Charge successful swim/climb costs. On flat maps, resolve turns and movement as before. Walls and initial animal occupancy block moves. Swaps and following into cells vacated during the same step are disallowed. Competing claims to an empty cell use seeded random selection.
 2. Resolve resource feeding with seeded contention order. Prey eat from their current cell, or the cell directly ahead. Eating stops at maximum energy.
 3. Resolve simultaneous attacks against prey in the cell directly ahead. Combined damage is capped at remaining health. Exactly one seeded attacker gets energy for a kill. A prey's chosen feeding action can complete in the same step it is killed.
-4. Charge living and action costs, including failed movement and attack attempts. At zero energy, apply starvation damage. There is no additional affordability restriction on actions.
+4. Charge living and action costs, including failed movement and attack attempts. On terrain maps, charge water maintenance and apply drowning damage when appropriate. At zero energy, apply starvation damage. There is no additional affordability restriction on actions.
 5. Record deaths and individual rewards, remove dead bodies, resolve eligible births, regrow resources up to capacity, and construct the next observations.
 6. Give each learning agent its own experience, including a terminal experience on death, then mix both parents’ model parameters into independent newborn controllers.
 
-Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. The baseline now uses 30 attack damage against 30 prey health, giving `1.5` damage reward for a healthy prey killed by one attack; a kill still earns the existing food reward, up to `4.0` for 40 energy at `0.1` per energy point. Other scenarios can keep weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no reward for approaching targets, simply surviving a step, moving or resting. Reproduction follows the configured maturity, health, energy, cooldown and population rules in the [configuration guide](configuration.md#reproduction). There is no corpse persistence or health recovery.
+Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. The baseline now uses 30 attack damage against 30 prey health, giving `1.5` damage reward for a healthy prey killed by one attack; a kill still earns the existing food reward, up to `4.0` for 40 energy at `0.1` per energy point. Other scenarios can keep weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no proximity or survival bonus. Presets penalize energy demand and failed actions and reward each successful parent; see [reward accounting](rewards.md). Reproduction requires both parents to choose `reproduce` simultaneously and follows the configured distance, maturity, health, energy, cooldown and population rules in the [configuration guide](configuration.md#reproduction). There is no corpse persistence or health recovery.
 
-The observation vector has 20 entries:
+Flat observation version 1 has 20 entries. Terrain version 2 appends 12 local
+water/flow/elevation features; [geography](geography.md#terrain-observations-and-model-compatibility)
+documents all 32 and the optional swim action. The base entries are:
 
 | Indices | Meaning |
 | --- | --- |

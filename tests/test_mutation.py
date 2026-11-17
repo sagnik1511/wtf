@@ -18,6 +18,7 @@ from ecosystem.mutation import mutation_trial,mutate_weights,mutate_birth
 from ecosystem.recording import Recorder
 from ecosystem.replay_io import chunk_path,load_chunk,read_chunk_bytes
 from ecosystem.runner import Experiment
+from tests.reproduction_support import force_reproduction
 from ecosystem.telemetry import summarize
 from ecosystem.analyze import analyze_recording
 from ecosystem.library import export_champions
@@ -56,7 +57,7 @@ def biases(brain):
 class MutationMathTests(unittest.TestCase):
     def test_sparse_distinct_matrix_changes_and_parent_independence_for_all_algorithms(self):
         for kind in KINDS:
-            e=Experiment(environment(kind));parent=e.brains[0]
+            e=force_reproduction(Experiment(environment(kind)));parent=e.brains[0]
             parent.updates=7
             if hasattr(parent,'moments'):
                 for layer in parent.moments:
@@ -86,7 +87,7 @@ class MutationMathTests(unittest.TestCase):
         self.assertIsNone(mutation_trial(None,2))
 
     def test_deterministic_seed_and_independent_streams(self):
-        e=Experiment(environment('ppo'));parent=e.brains[0]
+        e=force_reproduction(Experiment(environment('ppo')));parent=e.brains[0]
         original=parent.checkpoint();world_rng=e.world.rng.getstate()
         a,b=inherit_brain(parent,4),inherit_brain(parent,4)
         mutate_weights(a,SETTINGS,mutation_trial(SETTINGS,4));mutate_weights(b,SETTINGS,mutation_trial(SETTINGS,4))
@@ -96,7 +97,7 @@ class MutationMathTests(unittest.TestCase):
         self.assertNotEqual(model_snapshot(a),model_snapshot(other))
 
     def test_zero_effect_draw_does_not_reset_optimizer(self):
-        e=Experiment(environment('ppo'));b=e.brains[0];b.updates=7
+        e=force_reproduction(Experiment(environment('ppo')));b=e.brains[0];b.updates=7
         rng=random.Random(1)
         with patch.object(rng,'gauss',return_value=0):
             self.assertEqual(mutate_weights(b,SETTINGS,rng),0)
@@ -105,7 +106,7 @@ class MutationMathTests(unittest.TestCase):
     def test_nontrigger_does_not_traverse_weights(self):
         settings=dict(SETTINGS,probability_per_birth=0.0001)
         with patch('ecosystem.mutation.mutate_weights',side_effect=AssertionError('model traversal')):
-            e=Experiment(environment('ppo',probability=0))
+            e=force_reproduction(Experiment(environment('ppo',probability=0)))
             e.step()
             self.assertEqual(dict(e.world.mutations),{})
 
@@ -113,7 +114,7 @@ class MutationMathTests(unittest.TestCase):
 class MutationLifecycleTests(unittest.TestCase):
     def test_birth_metadata_and_update_accounting(self):
         for kind in KINDS:
-            e=Experiment(environment(kind))
+            e=force_reproduction(Experiment(environment(kind)))
             for b in e.brains.values():b.updates=7
             e.step();children=[a for a in e.world.animals.values() if a.parent_id>=0]
             self.assertTrue(children,kind)
@@ -129,7 +130,7 @@ class MutationLifecycleTests(unittest.TestCase):
                 e.step();self.assertGreaterEqual(e.total_updates,previous,kind);previous=e.total_updates
 
     def test_mutation_lineage_persists_for_unmutated_grandchild(self):
-        e=Experiment(environment('ppo'));e.step()
+        e=force_reproduction(Experiment(environment('ppo')));e.step()
         parent=next(a for a in e.world.animals.values() if a.parent_id>=0)
         e.config['species'][parent.species]['mutation']['probability_per_birth']=0
         e.world.config['species'][parent.species]['mutation']['probability_per_birth']=0
@@ -140,14 +141,15 @@ class MutationLifecycleTests(unittest.TestCase):
         for other in e.world.animals.values():
             if other.id not in (parent.id,mate.id):other.last_reproduced_age=other.age
         e.observations=e.world.observe_all()
-        with patch.object(type(e.brains[parent.id]),'choose',return_value='rest'):e.step()
+        with patch.object(type(e.brains[parent.id]),'choose',return_value='reproduce'):e.step()
         descendants=[a for a in e.world.animals.values() if a.parent_id==parent.id]
         self.assertTrue(descendants)
         self.assertTrue(all(not a.mutated and a.mutation_count==1 and a.mutation_weights==0 for a in descendants))
 
     def test_evaluation_and_random_baselines_keep_newborn_weights_frozen(self):
         for mode in ('evaluate','random'):
-            e=Experiment(environment('ppo'),mode=mode);e.step()
+            e=force_reproduction(Experiment(environment('ppo'),mode=mode))
+            with patch.object(type(e.brains[0]),'choose',return_value='reproduce'):e.step()
             self.assertTrue(any(a.parent_id>=0 for a in e.world.animals.values()))
             self.assertEqual(dict(e.world.mutations),{})
             for child in e.world.animals.values():
@@ -159,7 +161,7 @@ class MutationLifecycleTests(unittest.TestCase):
 
     def test_json_and_binary_resume_preserve_future_mutations_for_every_algorithm(self):
         for kind in KINDS:
-            a=Experiment(environment(kind));a.step();a.step()
+            a=force_reproduction(Experiment(environment(kind)));a.step();a.step()
             b=Experiment.restore(json.loads(json.dumps(a.checkpoint())))
             with tempfile.TemporaryDirectory() as d:
                 p=Path(d)/'checkpoint.bin.xz';a.write_checkpoint(p);c=Experiment.restore(read_checkpoint(p))
@@ -169,9 +171,9 @@ class MutationLifecycleTests(unittest.TestCase):
             self.assertEqual(a.checkpoint(),c.checkpoint(),kind)
 
     def test_zero_probability_matches_missing_config_and_physical_rng(self):
-        a=Experiment(environment('ppo',0));cfg=environment('ppo',0)
+        a=force_reproduction(Experiment(environment('ppo',0)));cfg=environment('ppo',0)
         for s in cfg['species'].values():s.pop('mutation')
-        b=Experiment(cfg)
+        b=force_reproduction(Experiment(cfg))
         while not a.done:
             a.step();b.step()
             self.assertEqual(a.world.snapshot(),b.world.snapshot())
@@ -180,7 +182,7 @@ class MutationLifecycleTests(unittest.TestCase):
 
     def test_trial_birth_mutations_do_not_change_real_world_or_other_policies(self):
         from ecosystem.grouped_rollouts import collect_group
-        e=Experiment(environment('grpo'));focal=next(i for i,a in e.world.animals.items() if a.species=='predator')
+        e=force_reproduction(Experiment(environment('grpo')));focal=next(i for i,a in e.world.animals.items() if a.species=='predator')
         before=e.world.checkpoint();other={i:b.checkpoint() for i,b in e.brains.items() if i!=focal}
         observed=[]
         def capture(world,birth,parent,child_brain=None):
@@ -194,7 +196,7 @@ class MutationLifecycleTests(unittest.TestCase):
         self.assertEqual(other,{i:b.checkpoint() for i,b in e.brains.items() if i!=focal})
 
     def test_binary_replay_analysis_telemetry_and_champion_provenance(self):
-        e=Experiment(environment('ppo'));e.config['recording'].update(encoding='binary',compression='xz',frames_per_chunk=4)
+        e=force_reproduction(Experiment(environment('ppo')));e.config['recording'].update(encoding='binary',compression='xz',frames_per_chunk=4)
         with tempfile.TemporaryDirectory() as d:
             rec=Recorder(d,e.config,'train');rec.begin_run(e);e.step();rec.capture(e);rec.end_run(e);rec.close(False)
             f=load_chunk(chunk_path(Path(d)/'playback',1,0))
@@ -223,7 +225,9 @@ class MutationLifecycleTests(unittest.TestCase):
     def test_cli_stores_mutation_counts_in_readable_metrics_and_summary(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);path=root/'environment.json';path.write_text(json.dumps(environment('ppo')))
-            result=subprocess.run([sys.executable,'-m','ecosystem.cli',str(path),'--runs','1','--no-progress','--output',str(root/'results')],capture_output=True,text=True)
+            seed=force_reproduction(Experiment(environment('ppo')))
+            export_champions(seed,root/'source/champions/run_0001.json')
+            result=subprocess.run([sys.executable,'-m','ecosystem.cli',str(path),'--runs','1','--brains-from',str(root/'source'),'--no-progress','--output',str(root/'results')],capture_output=True,text=True)
             self.assertEqual(result.returncode,0,result.stderr)
             output=next((root/'results').iterdir())
             with (output/'metrics.csv').open() as stream:rows=list(csv.DictReader(stream))
@@ -233,7 +237,7 @@ class MutationLifecycleTests(unittest.TestCase):
             self.assertEqual(sum(json.loads((output/'summary.json').read_text())[0]['mutations'].values()),total)
 
     def test_legacy_checkpoint_missing_mutation_fields_restores(self):
-        e=Experiment(environment('ppo',0));state=json.loads(json.dumps(e.checkpoint()))
+        e=force_reproduction(Experiment(environment('ppo',0)));state=json.loads(json.dumps(e.checkpoint()))
         for spec in state['config']['species'].values():spec.pop('mutation',None)
         for spec in state['world']['config']['species'].values():spec.pop('mutation',None)
         state['world']['snapshot']['metrics'].pop('mutations')

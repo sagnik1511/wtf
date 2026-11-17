@@ -36,7 +36,7 @@ def configuration(kind='q_network'):
 
 
 def body(i,species,x,y,sex='female',heading=0):
-    return Animal(i,species,x,y,heading,40,30,sex=sex)
+    return Animal(i,species,x,y,heading,40,30,sex=sex,last_action='reproduce')
 
 
 class MultipleSpeciesTests(unittest.TestCase):

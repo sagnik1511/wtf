@@ -29,7 +29,8 @@
         "turn_left",
         "turn_right",
         "rest",
-        "eat"
+        "eat",
+        "reproduce"
       ],
       "body": {
         "initial_energy": 60,
@@ -47,7 +48,10 @@
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
         "death": -10,
-        "per_damage_dealt": 0.0
+        "per_damage_dealt": 0.0,
+        "per_energy_cost": -0.01,
+        "failed_action": -0.05,
+        "per_offspring": 1.0
       },
       "reproduction": {
         "enabled": true,
@@ -80,7 +84,8 @@
         "turn_left",
         "turn_right",
         "rest",
-        "attack"
+        "attack",
+        "reproduce"
       ],
       "body": {
         "initial_energy": 80,
@@ -99,7 +104,10 @@
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
         "death": -10,
-        "per_damage_dealt": 0.05
+        "per_damage_dealt": 0.05,
+        "per_energy_cost": -0.01,
+        "failed_action": -0.05,
+        "per_offspring": 1.0
       },
       "reproduction": {
         "enabled": true,

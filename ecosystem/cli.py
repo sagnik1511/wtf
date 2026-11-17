@@ -129,7 +129,7 @@ def main():
             "randomization_seed": experiment.randomization_seed,
             "checkpoint_version": {"json":1,"compact":2,"binary":3}[args.checkpoint_format],
             "checkpoint_format": args.checkpoint_format,
-            "observation_version": 1,
+            "observation_version": max(experiment.config["brains"][spec["brain"]].get("observation_version",1) for spec in experiment.config["species"].values()),
             "playback_recording": not args.no_record
             and settings(experiment.config)["enabled"],
         },
@@ -157,7 +157,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
     suffix = {"binary":".bin.xz", "compact":".json.gz", "json":".json"}[checkpoint_format]
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
-        fields = ["run", "seed", "tick", "food", "starvation", "predation"] + [
+        fields = ["run", "seed", "tick", "food", "starvation", "predation"] + (["drowning"] if "terrain" in experiment.config else []) + [
             f"{s}_{metric}"
             for s in species
             for metric in ("population", "energy_gained", "kills", "births", "mutations")
@@ -174,6 +174,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                 starvation=m["deaths"].get("starvation", 0),
                 predation=m["deaths"].get("predation", 0),
             )
+            if "terrain" in experiment.config:row["drowning"]=m["deaths"].get("drowning",0)
             for s in species:
                 row.update(
                     {

@@ -3,9 +3,10 @@
 import copy
 import math
 import random
-from collections import Counter, OrderedDict, defaultdict
+from collections import Counter, OrderedDict, defaultdict, deque
 from dataclasses import dataclass
 from .perception import SpatialIndex
+from .geography import Geography, resolve_map
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 VISIBILITY_CACHE_LIMIT = 2048
@@ -35,6 +36,8 @@ class Animal:
     mutation_weights: int = 0
     sex: str = "female"
     second_parent_id: int = -1
+    drift_x: float = 0.0
+    drift_y: float = 0.0
 
     @property
     def position(self):
@@ -56,6 +59,7 @@ class Event:
     amount: float = 0.0
     cause: str = ""
     mate: int = -1
+    position: list = None
 
 
 @dataclass
@@ -69,6 +73,8 @@ class StepResult:
 class World:
     def __init__(self, config, seed):
         self.config = copy.deepcopy(config)
+        if 'terrain' in self.config:self.config['terrain']=resolve_map(self.config['terrain'])
+        config=self.config
         self.seed = seed
         self.tick = 0
         self.rng = random.Random(seed ^ 0x12345678)
@@ -83,7 +89,9 @@ class World:
             if o["generation"] == "explicit"
             else set(cells[: int(len(cells) * o["occupied_fraction"])])
         )
-        free = [p for p in cells if p not in self.obstacles]
+        self.geography=Geography(config['terrain'],self.width,self.height) if 'terrain' in config else None
+        if self.geography:self.obstacles |= self.geography.obstacles
+        free = [p for p in cells if p not in self.obstacles and not (self.geography and self.geography.depth(p))]
         r = config["resources"]
         resource_cells = layout.sample(free, r["patch_count"])
         self.resources = {
@@ -130,6 +138,76 @@ class World:
     def blocked(self, p):
         x, y = p
         return not (0 <= x < self.width and 0 <= y < self.height) or p in self.obstacles
+
+    def terrain_move_cost(self, animal, destination, action):
+        if not self.geography:return 0.0
+        rules=self.config['species'][animal.species].get('locomotion',{})
+        gain=max(0.0,self.geography.elevation(destination)-self.geography.elevation(animal.position))
+        cost=gain*rules.get('uphill_energy_cost',1.0)
+        if action=='swim':
+            depth=max(self.geography.depth(animal.position),self.geography.depth(destination))
+            cost+=depth*rules.get('swim_energy_cost',1.5)
+        return cost
+
+    def movement_block_reason(self, animal, destination, action, occupied=None):
+        if self.blocked(destination):return 'obstacle'
+        if occupied is not None and destination in occupied:return 'occupied'
+        if not self.geography:return 'not_near_water' if action=='swim' else ''
+        rules=self.config['species'][animal.species].get('locomotion',{})
+        source_depth=self.geography.depth(animal.position);target_depth=self.geography.depth(destination)
+        if action=='move_forward' and (source_depth or target_depth):return 'requires_swim'
+        if action=='swim':
+            depth=max(source_depth,target_depth)
+            if not depth:return 'not_near_water'
+            minimum=rules.get('swim_min_health',self.body(animal)['max_health']*0.5)*depth
+            if animal.health<minimum:return 'health'
+        gain=self.geography.elevation(destination)-self.geography.elevation(animal.position)
+        if gain>rules.get('max_climb',1.0):return 'slope'
+        cost=self.terrain_move_cost(animal,destination,action)
+        if cost and animal.energy<=cost:return 'energy'
+        return ''
+
+    def _terrain_charge(self, animal, amount, events, cause):
+        if amount:
+            animal.energy=max(0.0,animal.energy-amount)
+            events.append(Event('energy_spent',animal.id,amount=amount,cause=cause))
+
+    def _river_drift(self, events):
+        if not self.geography:return
+        paths={}
+        for i,a in self.animals.items():
+            water=self.geography.water.get(a.position)
+            if not water:
+                a.drift_x=a.drift_y=0.0
+                continue
+            tx,ty=a.drift_x+water[1],a.drift_y+water[2]
+            def whole(v):return math.floor(v+1e-12) if v>=0 else math.ceil(v-1e-12)
+            nx,ny=whole(tx),whole(ty)
+            a.drift_x=0.0 if abs(tx-nx)<1e-12 else tx-nx
+            a.drift_y=0.0 if abs(ty-ny)<1e-12 else ty-ny
+            n=max(abs(nx),abs(ny))
+            if n:
+                paths[i]=[(round(k*nx/n)-round((k-1)*nx/n),round(k*ny/n)-round((k-1)*ny/n)) for k in range(1,n+1)]
+        for substep in range(max(map(len,paths.values()),default=0)):
+            occupied={a.position for a in self.animals.values()};claims=defaultdict(list)
+            for i,path in list(paths.items()):
+                if substep>=len(path):continue
+                a=self.animals[i]
+                if not self.geography.depth(a.position):
+                    a.drift_x=a.drift_y=0.0;del paths[i];continue
+                dx,dy=path[substep];destination=a.x+dx,a.y+dy
+                corner=dx and dy and (self.blocked((a.x+dx,a.y)) or self.blocked((a.x,a.y+dy)))
+                if corner or self.movement_block_reason(a,destination,'drift',occupied):
+                    events.append(Event('drift_blocked',i));del paths[i];continue
+                claims[destination].append(i)
+            for destination,ids in claims.items():
+                winner=self.rng.choice(ids);a=self.animals[winner]
+                self._terrain_charge(a,self.terrain_move_cost(a,destination,'drift'),events,'uphill')
+                a.x,a.y=destination;events.append(Event('drifted',winner,cause='current'))
+                if not self.geography.depth(destination):a.drift_x=a.drift_y=0.0
+                for i in ids:
+                    if i!=winner:
+                        events.append(Event('drift_blocked',i,cause='competing_claim'));paths.pop(i,None)
 
     def visible(self, start, end):
         # Integer Bresenham ray. The start cell does not occlude itself.
@@ -208,10 +286,13 @@ class World:
         for offset in range(4):
             dx, dy = DIRECTIONS[(a.heading + offset) % 4]
             p = a.x + dx, a.y + dy
-            features.append(float(self.blocked(p) or p in occupied))
+            features.append(float(bool(self.movement_block_reason(a,p,'move_forward',occupied))) if self.geography else float(self.blocked(p) or p in occupied))
         features += food.nearest(a, radius, self._perception_visible)
         features += prey.nearest(a, radius, self._perception_visible)
         features += predators.nearest(a, radius, self._perception_visible)
+        version=self.config['brains'][self.config['species'][a.species]['brain']].get('observation_version',1)
+        if version==2:
+            features+=self.geography.features(a,DIRECTIONS) if self.geography else [0.0]*12
         return tuple(features)
 
     def observe_all(self):
@@ -243,22 +324,26 @@ class World:
                 a.heading = (a.heading - 1) % 4
             elif action == "turn_right":
                 a.heading = (a.heading + 1) % 4
-            elif action == "move_forward":
+            elif action in ('move_forward','swim'):
                 destination = self.front(a)
-                if self.blocked(destination) or destination in occupied:
-                    events.append(Event("movement_blocked", i))
+                reason=self.movement_block_reason(a,destination,action,occupied)
+                if reason:
+                    cause=('swim:'+reason) if action=='swim' else reason if self.geography else ''
+                    events.append(Event('movement_blocked',i,cause=cause))
                 else:
                     claims[destination].append(i)
         for destination, ids in claims.items():
             winner = self.rng.choice(ids)
             a = self.animals[winner]
+            if self.geography:self._terrain_charge(a,self.terrain_move_cost(a,destination,actions[winner]),events,'swim' if actions[winner]=='swim' else 'uphill')
             a.x, a.y = destination
-            events.append(Event("moved", winner))
+            events.append(Event('moved',winner,cause='swim' if actions[winner]=='swim' else ''))
             events.extend(
-                Event("movement_blocked", i, cause="competing_claim")
+                Event("movement_blocked", i, cause="swim:competing_claim" if actions[i]=="swim" else "competing_claim")
                 for i in ids
                 if i != winner
             )
+        self._river_drift(events)
         # Feeding uses seeded contention order; resources may share animal cells.
         eaters = [i for i in self.animals if actions[i] == "eat"]
         self.rng.shuffle(eaters)
@@ -320,19 +405,34 @@ class World:
                 b = self.body(killer)
                 gained = min(b["energy_per_kill"], b["max_energy"] - killer.energy)
                 killer.energy += gained
-                events.append(Event("kill", killer.id, target_id))
+                events.append(Event("kill", killer.id, target_id, position=list(target.position) if self.geography else None))
                 events.append(
                     Event("energy_gained", killer.id, target_id, gained, "prey")
                 )
+        attack_deaths={i for i in attacks if self.animals[i].health<=0}
+        drowned=set()
+        rewards = {i: 0.0 for i in self.animals}
         for i, a in self.animals.items():
             b = self.body(a)
             cost = b["living_cost"]
-            if actions[i] == "move_forward":
+            if actions[i] in ("move_forward","swim"):
                 cost += b["movement_cost"]
             if actions[i] == "attack":
                 cost += b["attack_cost"]
             a.energy = max(0.0, a.energy - cost)
+            rewards[i] += cost*self.config["species"][a.species]["rewards"].get("per_energy_cost",0)
             a.age += 1
+            if self.geography and a.health>0:
+                depth=self.geography.depth(a.position)
+                if depth:
+                    spec=self.config['species'][a.species];rules=spec.get('locomotion',{})
+                    self._terrain_charge(a,depth*rules.get('water_energy_cost',0.25),events,'water')
+                    minimum=rules.get('swim_min_health',b['max_health']*0.5)*depth
+                    if 'swim' not in spec['allowed_actions'] or a.health<minimum or a.energy<=0:
+                        damage=min(a.health,depth*rules.get('drowning_damage',2.0))
+                        a.health-=damage
+                        if damage:events.append(Event('damage_taken',i,amount=damage,cause='drowning'))
+                        if a.health<=0:drowned.add(i)
             if a.energy <= 0 and a.health > 0:
                 damage = min(a.health, b["starvation_damage"])
                 a.health -= damage
@@ -340,20 +440,24 @@ class World:
                     Event("damage_taken", i, amount=damage, cause="starvation")
                 )
         dead = {i for i, a in self.animals.items() if a.health <= 0}
-        attack_deaths = set(attacks) & dead
         for i in sorted(dead):
             a = self.animals[i]
-            cause = "predation" if i in attack_deaths else "starvation"
-            events.append(Event("died", i, cause=cause))
+            cause = "predation" if i in attack_deaths else "drowning" if i in drowned else "starvation"
+            events.append(Event("died", i, cause=cause, position=list(a.position) if self.geography else None))
             self.deaths[cause] += 1
             self.lifespans.append(
                 {"id": i, "species": a.species, "age": a.age, "cause": cause}
             )
-        rewards = {i: 0.0 for i in self.animals}
+        successful=set()
         for e in events:
             a = self.animals[e.actor]
             r = self.config["species"][a.species]["rewards"]
-            if e.kind == "energy_gained":
+            if (e.kind=='moved' or e.kind=='damage_dealt' and e.amount>0
+                or e.kind=='energy_gained' and e.cause=='resource' and e.amount>0):
+                successful.add(e.actor)
+            if e.kind == 'energy_spent':
+                rewards[e.actor] += e.amount*r.get('per_energy_cost',0)
+            elif e.kind == "energy_gained":
                 rewards[e.actor] += e.amount * r["per_energy_gained"]
                 self.total_energy_gained[a.species] += e.amount
                 a.energy_gained += e.amount
@@ -366,11 +470,26 @@ class World:
             elif e.kind == "kill":
                 self.kills[a.species] += 1
                 a.kills += 1
-        for i, a in self.animals.items():
-            a.last_reward = rewards[i]
-        for i in dead:
-            del self.animals[i]
+        dead_animals={i:self.animals.pop(i) for i in dead}
+        before_birth=len(events)
         self._reproduce(events)
+        for birth in events[before_birth:]:
+            if birth.kind!='born':continue
+            for parent_id in (birth.actor,birth.mate):
+                parent=self.animals[parent_id];spec=self.config['species'][parent.species]
+                successful.add(parent_id)
+                rewards[parent_id] += spec['rewards'].get('per_offspring',0)
+                rewards[parent_id] += spec['reproduction']['energy_cost']*spec['rewards'].get('per_energy_cost',0)
+        for i,action in actions.items():
+            a=self.animals.get(i) or dead_animals[i]
+            rules=self.config['species'][a.species]['rewards']
+            if action in ('move_forward','swim','attack','eat','reproduce') and i not in successful:
+                penalty=rules.get('failed_action',0)
+                rewards[i] += penalty
+                # Living bodies already record their action/reward. Only terminal
+                # failed choices need an extra event for exact offline feedback.
+                if i in dead and penalty:events.append(Event('action_failed',i,amount=penalty,cause=action))
+            a.last_reward=rewards[i]
         r = self.config["resources"]
         for patch in self.resources.values():
             patch.quantity = min(
@@ -410,6 +529,68 @@ class World:
             animal.reproduction_due_age = origin + self._reproduction_interval(rules, first)
         return animal.age >= animal.reproduction_due_age
 
+    def _mating_land_route(self, first, second, radius):
+        if not self.geography:return True
+        if self.geography.depth(first.position) or self.geography.depth(second.position):return False
+        limit=min(self.config['species'][a.species].get('locomotion',{}).get('max_climb',1.0) for a in (first,second))
+        queue=deque([(first.position,0)]);seen={first.position}
+        while queue:
+            p,hops=queue.popleft()
+            if p==second.position:return True
+            if hops>=2*radius:continue
+            for dx,dy in DIRECTIONS:
+                q=p[0]+dx,p[1]+dy
+                if q in seen or self.blocked(q) or self.geography.depth(q):continue
+                if abs(self.geography.elevation(q)-self.geography.elevation(p))>limit:continue
+                seen.add(q);queue.append((q,hops+1))
+        return False
+
+    def _birth_cells(self, mother, father, occupied):
+        spec=self.config['species'][mother.species]
+        return list(dict.fromkeys(
+            (parent.x+dx,parent.y+dy)
+            for parent in (mother,father) for dx,dy in DIRECTIONS
+            if not self.blocked((parent.x+dx,parent.y+dy))
+            and not (self.geography and (self.geography.depth((parent.x+dx,parent.y+dy))
+                or abs(self.geography.elevation((parent.x+dx,parent.y+dy))-self.geography.elevation(parent.position))>spec.get('locomotion',{}).get('max_climb',1.0)))
+            and (parent.x+dx,parent.y+dy) not in occupied))
+
+    def reproduction_available(self, animal, occupied=None, populations=None):
+        """Decision-time mask, without RNG/clock mutation or assuming consent.
+
+        Current masks cannot predict combat or the other animal's next choice;
+        final physical gates and mutual choices are checked again after actions.
+        """
+        spec=self.config['species'][animal.species];rules=spec.get('reproduction')
+        if not rules or not rules['enabled'] or 'reproduce' not in spec['allowed_actions']:return False
+        def eligible(a):
+            age=a.age+1  # Birth resolves after this step ages survivors.
+            if a.reproduction_due_age>=0:due=a.reproduction_due_age
+            else:
+                first=a.last_reproduced_age<0
+                center=rules['min_age_steps' if first else 'cooldown_steps']
+                prefix='age' if first else 'cooldown'
+                pct=rules.get(prefix+'_deviation_pct')
+                deviation=int(center*pct/100+.5) if pct is not None else rules.get(prefix+'_deviation_steps',0)
+                due=(0 if first else a.last_reproduced_age)+max(1,center-deviation)
+            return (age>=due and a.health>rules['health_threshold'] and a.energy>=rules['min_energy']
+                and a.energy>rules['energy_cost'] and not(self.geography and self.geography.depth(a.position)))
+        if not eligible(animal):return False
+        if populations is None:populations=Counter(a.species for a in self.animals.values())
+        if populations.get(animal.species,0)>=rules['max_population']:return False
+        if occupied is None:occupied={a.position:a for a in self.animals.values()}
+        radius=rules.get('mate_radius',2)
+        for dy in range(-radius,radius+1):
+            for dx in range(-radius,radius+1):
+                if dx*dx+dy*dy>radius*radius:continue
+                mate=occupied.get((animal.x+dx,animal.y+dy))
+                if (mate is None or mate.id==animal.id or mate.species!=animal.species
+                    or mate.sex==animal.sex or not eligible(mate)):continue
+                if (self.visible(animal.position,mate.position) and self._mating_land_route(animal,mate,radius)
+                    and self._birth_cells(animal,mate,occupied)):
+                    return True
+        return False
+
     def _reproduce(self, events):
         # Resolve after combat/starvation. Only animals present before this
         # phase can parent; newborns first act on the next simulation step.
@@ -425,6 +606,8 @@ class World:
             ready = self._reproduction_ready(a, r, windowed[a.species]) if r and r['enabled'] else False
             if (
                 ready
+                and a.last_action == "reproduce"
+                and not (self.geography and self.geography.depth(a.position))
                 and a.health > r["health_threshold"]
                 and a.energy >= r["min_energy"]
                 and a.energy > r["energy_cost"]
@@ -450,18 +633,14 @@ class World:
                     if dx*dx + dy*dy > radius*radius:
                         continue
                     mate = males.get((mother.species, mother.x+dx, mother.y+dy))
-                    if mate is not None and mate.id not in used and self.visible(mother.position, mate.position):
+                    if mate is not None and mate.id not in used and self.visible(mother.position, mate.position) and self._mating_land_route(mother,mate,radius):
                         candidates.append(mate)
             if not candidates:
                 continue
             # Find placeable pairs before committing either parent's resources.
             self.rng.shuffle(candidates)
             for father in candidates:
-                free = list(dict.fromkeys(
-                    (parent.x+dx, parent.y+dy)
-                    for parent in (mother, father) for dx, dy in DIRECTIONS
-                    if not self.blocked((parent.x+dx, parent.y+dy))
-                    and (parent.x+dx, parent.y+dy) not in occupied))
+                free = self._birth_cells(mother,father,occupied)
                 if free:
                     break
             else:
@@ -528,7 +707,7 @@ class World:
         )
 
     @classmethod
-    def restore(cls, state):
+    def restore(cls, state, static_geography=None):
         # Construct directly: restoration must not depend on a new layout draw.
         w = cls.__new__(cls)
         w.config = copy.deepcopy(state["config"])
@@ -536,6 +715,12 @@ class World:
         s = state["snapshot"]
         w.width, w.height, w.tick = s["width"], s["height"], s["tick"]
         w.obstacles = set(map(tuple, s["obstacles"]))
+        if static_geography is not None:
+            if static_geography.definition!=w.config.get('terrain'):
+                raise ValueError('Shared geography does not match restored map')
+            w.geography=static_geography
+        else:
+            w.geography=Geography(w.config['terrain'],w.width,w.height) if 'terrain' in w.config else None
         w.animals = {}
         for original in s["animals"]:
             animal = dict(original)

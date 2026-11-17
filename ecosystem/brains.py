@@ -91,9 +91,9 @@ def offspring_seed(world, child_id):
 
 def model_signature(config, actions):
     """The exact input/action/architecture contract required for warm starts."""
-    from .brain import INPUTS
+    from .brain import observation_inputs
     kind = config["type"]
-    signature = dict(observation_version=1, inputs=INPUTS, algorithm=kind,
+    signature = dict(observation_version=config.get("observation_version",1), inputs=observation_inputs(config), algorithm=kind,
                 hidden_layers=list(config["hidden_layers"] if kind == "q_network" else config["network"]["hidden_layers"]),
                 activation="tanh", actions=list(actions), value_head=kind in ("ppo", "a2c", "recurrent_ppo", "maskable_ppo", "mappo"))
     if kind == 'recurrent_ppo':

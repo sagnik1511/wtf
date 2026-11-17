@@ -187,3 +187,11 @@ survival. No training-speed benchmark is claimed for these additions.
 - [Distributional RL with quantile regression](https://arxiv.org/abs/1710.10044)
 - [Invalid action masking in policy gradients](https://arxiv.org/abs/2006.14171)
 - [PPO in cooperative multi-agent games](https://arxiv.org/abs/2103.01955)
+
+## Terrain-enabled variants
+
+Set `observation_version: 2` on a complete algorithm template used by a terrain
+environment. Local networks/GRUs then use 32 features, action masks also gate
+swimming/climbing, and MAPPO uses 32 actor inputs plus its existing 16 critic-only
+context inputs. GRPO trial worlds share only read-only static map lookups. See
+[geography](geography.md); the 20-input descriptions above apply to flat version 1.

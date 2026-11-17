@@ -1,6 +1,7 @@
 """Independent A2C, episodic REINFORCE, and experimental branched GRPO."""
 
 import copy
+from .brain import observation_inputs
 import math
 import random
 from typing import NamedTuple
@@ -121,7 +122,7 @@ class ActorBrain(AdamOptimizer):
             config["network"]["hidden_layers"],
             len(actions),
             base_seed,
-            value_head=False,
+            value_head=False, inputs=observation_inputs(config),
         )
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
@@ -321,7 +322,7 @@ class GRPOBrain(ActorBrain):
             config["network"]["hidden_layers"],
             len(actions),
             base_seed,
-            value_head=False,
+            value_head=False, inputs=observation_inputs(config),
         )
         self.group_rng = random.Random(individual_seed ^ 0x0BADC0DE)
         self.last_group_step = 0

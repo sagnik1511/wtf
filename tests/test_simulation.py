@@ -22,6 +22,7 @@ def config():
     c["recording"].update(encoding="delta", compression="gzip")
     for spec in c["species"].values():
         spec.pop('mutation',None)
+        for key in ('per_energy_cost','failed_action','per_offspring'):spec['rewards'].pop(key,None)
         spec["reproduction"].update(enabled=False, age_deviation_pct=0, cooldown_deviation_pct=0)
     c["species"]["prey"]["initial_population"] = 3
     c["species"]["predator"]["initial_population"] = 1

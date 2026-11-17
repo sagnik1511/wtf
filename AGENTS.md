@@ -15,11 +15,16 @@ rather than loading every document or result into context.
   behavior and exact species identity for mating, metrics and champions; avoid
   hardcoded `prey`/`predator` names in generic paths.
 - Animals learn independently. Birth requires an eligible same-species male/female
-  pair and mixes their parameters into an independent child with fresh training
+  pair choosing `reproduce` in the same step and mixes their parameters into an independent child with fresh training
   state. Rare birth mutation changes only that child. Preserve RNG isolation
   and exact checkpoint continuation when changing these paths. Champion pools,
   model loading and run-to-run chaining are species/sex-specific; never substitute
   a known opposite-sex winner for an unavailable group.
+- Terrain is opt-in. Preserve flat observation version 1 (20 inputs); terrain
+  version 2 has 32 inputs and a distinct model contract. Keep map geometry in
+  metadata, not repeated frames. GRPO may share read-only geography, while bodies,
+  obstacles, RNGs and transient observation caches remain independent. Record
+  final death positions after drift rather than inferring one-cell movement.
 - Optimize disk, RAM and repeated computation while preserving recorded values,
   playback controls, chart history, random seeking and legacy readers. Caches of
   dynamic observations must invalidate when relevant animals/resources change.

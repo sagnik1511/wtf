@@ -136,6 +136,7 @@ export class Playback {
     return {
       ...frame, selected: diagnostic, width: c.world.width, height: c.world.height,
       resource_capacity: c.resources.capacity_per_patch, obstacles: this.run.obstacles,
+      ...(c.terrain?{terrain:c.terrain}:{}),
       species: c.species, name: this.metadata.name, mode: this.metadata.mode,
       run: this.run.run, total_runs: c.experiment?.runs ?? this.runs.length, done: this.atEnd,
       // Full-run lightweight metrics survive chunk changes; no future points.

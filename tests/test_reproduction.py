@@ -15,6 +15,7 @@ from ecosystem.replay_io import load_chunk
 from ecosystem.runner import Experiment
 from ecosystem.world import World
 from tests.test_simulation import config, empty_world, animal
+from tests.reproduction_support import force_reproduction
 from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment
 
@@ -63,12 +64,12 @@ def breeding_experiment(kind="q_network"):
         a.x, a.y = i+1, 2
         if a.species == 'prey':a.sex = 'female' if i == 0 else 'male'
     e.observations = e.world.observe_all()
-    return e
+    return force_reproduction(e)
 
 
 class BirthMechanicsTests(unittest.TestCase):
     def step(self, w):
-        return w.step({i: 'rest' for i in w.animals})
+        return w.step({i: 'reproduce' for i in w.animals})
 
     def test_birth_state_two_parents_cost_and_transition(self):
         w = breeding_world();r = self.step(w)

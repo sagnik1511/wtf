@@ -50,6 +50,7 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 | Guide | Contents |
 | --- | --- |
 | [Setup and runs](docs/running.md) | Installation, CLI flags, seeds, progress and exact checkpoint resume |
+| [Geography and terrain](docs/geography.md) | River currents, swimming, elevation costs and optional map presets |
 | [Adding species](docs/species.md) | Named prey/predator species, diets, colors and species/sex champions |
 | [Configuration](docs/configuration.md) | Presets, populations, food, obstacles and reproduction |
 | [Learning algorithms](docs/algorithms.md) | Q-learning, PPO, A2C, REINFORCE, experimental GRPO and network settings |
@@ -68,6 +69,7 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 ecosystem/     Python simulation, learning, archives and analysis
 viewer/        JavaScript playback engine
 environments/  JSON experiment presets
+maps/          Editable river, highland and valley layouts
 docs/          Detailed guides
 tests/         Python and JavaScript checks
 ```

@@ -6,9 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.31](0.0.0.31.md), `a7a4e70`.
-**Latest committed runtime implementation:** [0.0.0.31](0.0.0.31.md), `a7a4e70`.
-**Pending:** [0.0.0.32](0.0.0.32.md), configurable named species and dynamic viewer styles.
+**Latest committed rollout:** [0.0.0.32](0.0.0.32.md), `6480da8`.
+**Latest committed runtime implementation:** [0.0.0.32](0.0.0.32.md), `6480da8`.
+**Pending:** [0.0.0.33](0.0.0.33.md), terrain maps, swimming/current physics and elevation;
+[0.0.0.34](0.0.0.34.md), mutual reproduction decisions and configurable action feedback.
 
 ## Rollout index
 
@@ -19,7 +20,9 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.32](0.0.0.32.md) | Pending | Prepared 2026-11-17 | — | Arbitrary species names, dynamic legends/colors and multi-species coverage |
+| [0.0.0.34](0.0.0.34.md) | Pending | Prepared 2026-11-17 | — | Mutual reproduction choices, energy/failure/birth rewards and decision metrics |
+| [0.0.0.33](0.0.0.33.md) | Pending | Prepared 2026-11-17 | — | Optional map geography, health-gated swimming, fractional currents and climb costs |
+| [0.0.0.32](0.0.0.32.md) | Committed | 2026-11-17 | `6480da8` | Arbitrary species names, dynamic legends/colors and multi-species coverage |
 | [0.0.0.31](0.0.0.31.md) | Committed | 2026-11-17 | `a7a4e70` | Species/sex champion pools, matching loading/chaining and distinct viewer colors |
 | [0.0.0.30](0.0.0.30.md) | Committed | 2026-11-17 | `a7a4e70` | Physical male/female pairing, crossed newborn brains and rare mutation |
 | [0.0.0.29](0.0.0.29.md) | Committed | 2026-11-17 | `5df2562` | Repository context, agent conventions and three reusable workflows |

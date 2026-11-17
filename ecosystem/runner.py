@@ -1,6 +1,7 @@
 """Experiment lifecycle, training, evaluation and exact JSON checkpoints."""
 
 import copy
+from collections import Counter
 import random
 import secrets
 from .brain import Experience
@@ -114,12 +115,13 @@ class Experiment:
             contexts = central_contexts(self.world) if any(self.brains[i].config['type']=='mappo' for i in contextual) else {}
         has_masks = any(self.brains[i].config['type']=='maskable_ppo' for i in contextual)
         occupied = {a.position: a for a in self.world.animals.values()} if has_masks else None
+        populations = Counter(a.species for a in self.world.animals.values()) if has_masks else None
         for i in contextual:
             brain, animal = self.brains[i], self.world.animals[i]
             if brain.config['type'] == 'mappo':
                 brain.context = brain.next_context = contexts[animal.species]
             else:
-                brain.mask = action_mask(self.world, animal, brain.actions, occupied)
+                brain.mask = action_mask(self.world, animal, brain.actions, occupied, populations)
 
     @property
     def done(self):

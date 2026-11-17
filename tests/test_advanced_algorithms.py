@@ -300,7 +300,8 @@ class AdvancedLifecycleTests(unittest.TestCase):
                 spec['reproduction']=reproduction()
                 spec['body'].update(living_cost=0,movement_cost=0)
                 if spec['diet']=='prey':spec['body'].update(attack_damage=0,attack_cost=0)
-            a=Experiment(c);a.step()
+            from tests.reproduction_support import force_reproduction
+            a=force_reproduction(Experiment(c));a.step()
             children=[x for x in a.world.animals.values() if x.parent_id>=0]
             self.assertTrue(children,kind)
             if kind=='recurrent_ppo':

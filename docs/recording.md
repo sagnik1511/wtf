@@ -71,6 +71,15 @@ Live recording pages refresh when additional frames are committed. The read-only
 API is `GET /api/recordings/{id}/runs/{run}/telemetry/{page}` (zero-based page).
 The **Behavior & learning** panel remains a separate whole-run summary.
 
+## Optional terrain playback
+
+[Terrain recordings](geography.md) embed the selected map in configuration once.
+The board shades elevation and water, with arrows showing current direction;
+the inspector shows depth, elevation and flow. Swim/climb costs, current moves
+and drowning have dashboard selectors. Final death positions are recorded so
+river drift does not misplace animation markers. Existing flat recordings still
+work and chunks remain independently seekable.
+
 ## Recording settings
 
 Each environment has a recording section:

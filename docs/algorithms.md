@@ -106,3 +106,10 @@ All algorithms support optional [newborn mutations](mutation.md). They change
 or reference networks. Parents and evaluation policies remain unchanged. This
 is independent of the algorithm's normal parameter updates and does not change
 model signatures or require additional packages.
+
+## Optional terrain observations
+
+All nine algorithms also support observation version 2, with 32 inputs and the
+optional swim action. Flat presets retain version 1 and 20 inputs. Models must
+match input version and action order when warm-started. See
+[terrain observations](geography.md#terrain-observations-and-model-compatibility).

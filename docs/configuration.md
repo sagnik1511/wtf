@@ -35,6 +35,16 @@ All costs and growth rates are per simulation step. Playback speed changes only 
 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
+## Geography and maps
+
+Flat maps remain the default. Optional `river_crossing.json`, `highlands.json`
+and `enclosed_valleys.json` environments select editable map files under `maps/`.
+`river_crossing_ppo.json` uses the same river with PPO for both species.
+Rivers require swimming, currents carry animals, and elevation adds climbing
+costs and limits. Terrain-enabled brains use observation version 2 (32 features).
+See [geography](geography.md) for map syntax, locomotion settings and model
+compatibility. These presets still contain one prey species and one predator.
+
 ## Adding species
 
 The default `prey` and `predator` keys are species names, not a fixed list.
@@ -42,6 +52,16 @@ Add complete entries under new names to create additional prey or predator
 species. The `diet` field determines feeding behavior, and mating/champion
 selection remain species-specific. See [adding species](species.md) for a
 copyable configuration recipe, optional colors and observation semantics.
+
+## Environment-specific actions
+
+Each species’ `allowed_actions` defines its brain outputs for that environment.
+Dry presets omit `swim`; river and enclosed-valley presets include it. For example,
+a dry prey can use `["move_forward", "turn_left", "turn_right", "rest", "eat", "reproduce"]`.
+Use `attack` instead of `eat` for predators. Include `swim` for a species that
+should cross water; omitting it can intentionally keep that species on land.
+The action list stays fixed during a run. Changing its contents or order changes
+the model signature, so start fresh or load matching saved weights.
 
 ## Common changes
 
@@ -52,6 +72,8 @@ copyable configuration recipe, optional colors and observation semantics.
 | Body health/energy | `species.<name>.body` |
 | Perception radius | `species.<name>.body.vision_radius` |
 | Food supply/regrowth | `resources` |
+| Terrain map | `terrain.map_file`, resolved into embedded rows and legend |
+| Swim/climb abilities | `species.<name>.locomotion` and `allowed_actions` |
 | Map size and duration | `world.width`, `world.height`, `world.max_steps` |
 | Learning rate per species | `species.<name>.learning_rate_multiplier` (template rate × multiplier) |
 | Model and training algorithm | `species.<name>.brain` and the referenced `brains` template |
@@ -162,13 +184,17 @@ not a percentage). Both parents must be alive after combat/starvation, the same
 species and opposite sexes, and meet their own age, energy and cooldown gates.
 Each must afford `energy_cost` with energy left over. They must be within
 `mate_radius` Euclidean grid cells (integer 1–10, default 2), with an unobstructed
-line of sight. There is no mating action, reward or neural-weight similarity gate.
+line of sight. Both must choose `reproduce` in the same step; proximity alone
+never triggers a birth. Include `reproduce` in each species’ `allowed_actions`.
+There is no neural-weight similarity gate. See [learning feedback](rewards.md)
+for configurable successful-birth rewards and failed-attempt penalties.
 
 Pairs are selected with seeded contention. Each parent can participate in at most
 one birth per step. A child needs a free cardinal neighbor of either parent and
 cannot push population over `max_population`. Successful births charge the full
 configured energy cost to **each** parent and start both cooldowns; failed pairing,
-space or capacity checks charge neither. Newborns cannot mate in their birth step.
+space or capacity checks charge neither and start no cooldown. Normal living
+costs and the configured negative failed-action reward still apply. Newborns cannot mate in their birth step.
 Reproduction spends energy, with no direct health deduction. Presets charge each
 prey parent 10 energy (minimum breeding energy 30, leaving at least 20), and each
 predator parent 15 (minimum 40, leaving at least 25). These reserves are measured
