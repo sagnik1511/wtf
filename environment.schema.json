@@ -267,6 +267,28 @@
                                 "minimum": 1,
                                 "maximum": 10000000
                             },
+                            "age_deviation_pct": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "age_deviation_steps": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 10000000,
+                                "deprecated": true
+                            },
+                            "cooldown_deviation_pct": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "cooldown_deviation_steps": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 10000000,
+                                "deprecated": true
+                            },
                             "min_energy": {"type": "number", "minimum": 0},
                             "energy_cost": {"type": "number", "minimum": 0.001},
                             "max_population": {

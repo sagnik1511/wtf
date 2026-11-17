@@ -156,6 +156,7 @@ function drawInspector() {
     if(b.buffer_kind==='group'){fields.push(['Trial groups',b.rollout_updates],['Trials per group',b.group_size],['Trial horizon',b.rollout_horizon]);if(Number.isFinite(b.training_metrics?.return_std))fields.push(['Group reward spread',b.training_metrics.return_std.toFixed(3)]);}
     else fields.push([b.buffer_kind==='episode'?'Episode buffer':b.buffer_kind==='sequence'?'Sequence buffer':'Rollout buffer',b.buffer_size??b.rollout_size]);
   }else fields.push(['Exploration',b.epsilon.toFixed(3)],['Own experiences',b.replay_size]);
+  if(Number.isFinite(a.reproduction_due_age)&&a.reproduction_due_age>=0)fields.push(['Reproduction eligible at age',a.reproduction_due_age]);
   if(Number.isFinite(b.memory_norm))fields.push(['Memory norm',b.memory_norm.toFixed(3)]);
   if(b.reward_scope)fields.push(['Reward scope',b.reward_scope.replaceAll('_',' ')]);
   for(const [label,value] of fields){const cell=text('div','');cell.append(text('span',label),text('strong',String(value)));details.append(cell);}box.append(details);

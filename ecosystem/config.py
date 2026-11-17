@@ -454,6 +454,7 @@ def validate(c):
                     "energy_cost",
                     "max_population",
                 ),
+                optional=("age_deviation_pct", "cooldown_deviation_pct", "age_deviation_steps", "cooldown_deviation_steps"),
             )
             if type(r["enabled"]) is not bool:
                 fail(rp + ".enabled", "must be boolean")
@@ -465,6 +466,13 @@ def validate(c):
             )
             num(r["min_age_steps"], rp + ".min_age_steps", 1, 10000000, True)
             num(r["cooldown_steps"], rp + ".cooldown_steps", 1, 10000000, True)
+            for key in ('age_deviation_steps', 'cooldown_deviation_steps'):
+                num(r.get(key, 0), f'{rp}.{key}', 0, 10000000, True)
+            for prefix in ('age', 'cooldown'):
+                key = prefix + '_deviation_pct'
+                num(r.get(key, 0), f'{rp}.{key}', 0, 100)
+                if key in r and prefix + '_deviation_steps' in r:
+                    fail(f'{rp}.{key}', 'cannot combine percentage and legacy step deviations for the same clock')
             num(r["energy_cost"], rp + ".energy_cost", 0.001, s["body"]["max_energy"])
             num(
                 r["min_energy"],

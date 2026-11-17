@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def config():
     c = load(ROOT / "environments/baseline.json")
     for spec in c["species"].values():
-        spec["reproduction"]["enabled"] = False
+        spec["reproduction"].update(enabled=False, age_deviation_pct=0, cooldown_deviation_pct=0)
     c["species"]["prey"]["initial_population"] = 3
     c["species"]["predator"]["initial_population"] = 1
     # Mechanics fixtures intentionally exercise multi-hit combat, independently

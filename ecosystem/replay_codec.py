@@ -5,7 +5,7 @@ import math
 CODEC = 'wtf-delta-v1'
 ANIMAL_FIELDS = ['id','species','x','y','heading','energy','health','age','last_action',
                  'last_reward','parent_id','generation','last_reproduced_age','kills',
-                 'energy_gained','statistics_since_age']
+                 'energy_gained','statistics_since_age','reproduction_due_age']
 RESOURCE_FIELDS = ['x','y','quantity']
 
 

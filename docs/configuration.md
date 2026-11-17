@@ -137,7 +137,9 @@ Edit `species.prey.reproduction` or `species.predator.reproduction` in your JSON
   "enabled": true,
   "health_threshold": 24,
   "min_age_steps": 300,
+  "age_deviation_pct": 10,
   "cooldown_steps": 225,
+  "cooldown_deviation_pct": 10,
   "min_energy": 30,
   "energy_cost": 20,
   "max_population": 96
@@ -152,9 +154,43 @@ population cannot exceed `max_population`. Each eligible parent produces at
 most one child per step, in a free cardinally adjacent cell. If the cap or space
 blocks a birth, no energy is charged and no cooldown starts. Contention uses the
 world's seeded random generator. Cooldowns measure simulation steps, not playback
-time. The presets use 80% of maximum health as their threshold. Prey first reproduce
-at age 300 and wait 225 steps between births; predators mature at age 100 and
-wait 200 steps. These settings slow prey growth while retaining the same caps.
+time. The presets use 80% of maximum health as their threshold and randomize
+reproduction timing with approximately 10% deviation:
+
+| Species | First eligible age | Cooldown after an actual birth |
+| --- | --- | --- |
+| Prey | `300 ± 30` = 270–330 steps | `225 ± 23` = 202–248 steps |
+| Predator | `100 ± 10` = 90–110 steps | `200 ± 20` = 180–220 steps |
+
+Each animal draws one uniformly distributed integer from the inclusive first-age
+window on its first reproduction check. After a successful birth it draws one
+cooldown interval, measured from that actual birth age. Newborns have their own
+first-age draw; they do not inherit their parent's clock. These are per-animal
+age windows, not global simulation ticks, and timing is independent of the brain
+algorithm. The example `min_age_steps` is the center of the first-age window,
+so a nonzero deviation permits maturity before that center.
+
+Timing is never redrawn just because a step passes or health, energy, capacity
+or space prevents birth. Once the sampled age is reached, eligibility persists
+until the birth succeeds, even beyond the window's upper edge; the health and
+energy gates still apply. The window randomizes when eligibility begins, rather
+than defining a short fertility period or a per-step birth probability.
+
+Both deviation fields are optional percentages from 0 to 100, defaulting to
+zero. `10` means ±10%; fractional percentages such as `2.5` are supported.
+The step deviation is `floor(center * percentage / 100 + 0.5)` (half steps
+round up). For example, a 225-step cooldown with 10% deviation rounds to ±23
+steps. Editing the center automatically scales its window.
+Zero restores the original fixed minimum-age and cooldown rules and consumes no
+extra timing randomness. Windows extending below one step are clipped to one.
+The world seed controls timing draws, and checkpoints retain pending clocks and
+random-generator state for exact continuation. Editing a preset affects new
+experiments; an exact resume uses its saved rules and clock.
+
+Older saved configurations with `age_deviation_steps` or
+`cooldown_deviation_steps` remain readable with their original absolute-step
+semantics. New presets use percentages. Do not specify both units for the same
+clock; validation rejects that ambiguity.
 
 A child starts at age zero, with the same species' `body.max_health` (also the
 founder's initial health) and `body.initial_energy`. It inherits an independent
@@ -164,12 +200,14 @@ receives that step's feedback. Experience buffers and pending decisions start
 empty; random streams are independent. There is no mutation or mating requirement.
 Recurrent PPO children start with zero GRU memory; masks and centralized critic
 context are derived for the child from the current world. Children first act on
-the next step and must reach the minimum age themselves.
+the next step and must reach their own sampled eligible age.
 Starting health/energy are supplied by the environment; the energy cost is a
 separate parent charge, so this model does not conserve energy across births.
 
-Frames/checkpoints include `parent_id` (-1 for founders), `generation`, and
-`last_reproduced_age`. Birth events identify parent (`actor`) and child (`target`);
+Frames/checkpoints include `parent_id` (-1 for founders), `generation`,
+`last_reproduced_age` and `reproduction_due_age`. The latter is an absolute
+individual age, initially -1 until a randomized clock is scheduled. It stays -1
+with fixed timing. The inspector displays a scheduled eligible age when present. Birth events identify parent (`actor`) and child (`target`);
 metrics, CSV and summaries count births per species. The viewer emphasizes births with cyan rings that follow newborns, plus signs,
 BORN labels, a parent/child banner, and a highlighted birth counter. Markers
 last briefly across sequential chunk boundaries and reset when switching runs.

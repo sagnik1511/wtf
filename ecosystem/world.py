@@ -28,6 +28,7 @@ class Animal:
     kills: int = 0
     energy_gained: float = 0.0
     statistics_since_age: int = 0
+    reproduction_due_age: int = -1
 
     @property
     def position(self):
@@ -345,6 +346,34 @@ class World:
         self.events = events
         return StepResult(self.observe_all(), rewards, dead, events)
 
+    def _reproduction_interval(self, rules, first=False):
+        center = rules['min_age_steps' if first else 'cooldown_steps']
+        prefix = 'age' if first else 'cooldown'
+        pct = rules.get(prefix + '_deviation_pct')
+        # Half steps round up; preserve old saved configurations expressed in steps.
+        deviation = (int(center * pct / 100 + 0.5) if pct is not None
+                     else rules.get(prefix + '_deviation_steps', 0))
+        # A zero-width interval must not consume RNG: legacy trajectories stay exact.
+        return center if not deviation else self.rng.randint(max(1, center-deviation), center+deviation)
+
+    @staticmethod
+    def _has_reproduction_window(rules):
+        return any(rules.get(prefix + '_deviation_pct',
+                             rules.get(prefix + '_deviation_steps', 0))
+                   for prefix in ('age', 'cooldown'))
+
+    def _reproduction_ready(self, animal, rules):
+        if not self._has_reproduction_window(rules):
+            # Preserve the original gates and RNG consumption for old environments.
+            return (animal.age >= rules['min_age_steps'] and
+                    (animal.last_reproduced_age < 0 or
+                     animal.age-animal.last_reproduced_age >= rules['cooldown_steps']))
+        if animal.reproduction_due_age < 0:
+            first = animal.last_reproduced_age < 0
+            origin = 0 if first else animal.last_reproduced_age
+            animal.reproduction_due_age = origin + self._reproduction_interval(rules, first)
+        return animal.age >= animal.reproduction_due_age
+
     def _reproduce(self, events):
         # Resolve after combat/starvation. Only animals present before this
         # phase can parent; newborns first act on the next simulation step.
@@ -354,21 +383,16 @@ class World:
         for a in parents:
             counts[a.species] += 1
             r = self.config["species"][a.species].get("reproduction")
+            ready = self._reproduction_ready(a, r) if r and r['enabled'] else False
             if (
-                r
-                and r["enabled"]
+                ready
                 and a.health > r["health_threshold"]
                 and a.energy >= r["min_energy"]
                 and a.energy > r["energy_cost"]
-                and a.age >= r["min_age_steps"]
-                and (
-                    a.last_reproduced_age < 0
-                    or a.age - a.last_reproduced_age >= r["cooldown_steps"]
-                )
             ):
                 eligible.append(a)
         if not eligible:
-            return  # Preserve RNG sequence for environments without births.
+            return  # No contention or placement draws until a parent is ready.
         self.rng.shuffle(eligible)
         occupied = {a.position for a in parents}
         for parent in eligible:
@@ -403,6 +427,8 @@ class World:
             counts[parent.species] += 1
             parent.energy -= r["energy_cost"]
             parent.last_reproduced_age = parent.age
+            if self._has_reproduction_window(r):
+                parent.reproduction_due_age = parent.age + self._reproduction_interval(r)
             self.births[parent.species] += 1
             events.append(Event("born", parent.id, child_id, cause="reproduction"))
 

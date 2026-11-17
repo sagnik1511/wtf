@@ -52,3 +52,8 @@ mask preservation, bounded replay, mixed policies, GRPO trial isolation,
 recording transparency, frozen evaluation weights, exact JSON/compact resume,
 and CLI progress/archive/warm-start workflows. See the
 [advanced algorithms guide](advanced-algorithms.md) for the experiment semantics.
+
+Reproduction-window tests additionally cover inclusive bounds, per-animal spread,
+positive-step clipping, one draw per clock, all delayed-birth gates, cooldowns
+measured from actual births, legacy zero-deviation RNG behavior and pending-clock
+preservation across JSON/compact checkpoints and delta replays.

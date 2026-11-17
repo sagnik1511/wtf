@@ -56,7 +56,9 @@
         "cooldown_steps": 225,
         "min_energy": 30,
         "energy_cost": 20,
-        "max_population": 96
+        "max_population": 96,
+        "age_deviation_pct": 10,
+        "cooldown_deviation_pct": 10
       },
       "initial_brain": {
         "selection": "best",
@@ -100,7 +102,9 @@
         "cooldown_steps": 200,
         "min_energy": 40,
         "energy_cost": 30,
-        "max_population": 24
+        "max_population": 24,
+        "age_deviation_pct": 10,
+        "cooldown_deviation_pct": 10
       },
       "initial_brain": {
         "selection": "best",
