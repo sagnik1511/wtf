@@ -84,8 +84,8 @@ def loss_and_gradient(outputs, action, old_log_probability, advantage, target, c
 
 
 class MLP:
-    def __init__(self, hidden_layers, actions, seed, value_head=True):
-        self.sizes = [INPUTS, *hidden_layers, actions + int(value_head)]
+    def __init__(self, hidden_layers, actions, seed, value_head=True, inputs=INPUTS):
+        self.sizes = [inputs, *hidden_layers, actions + int(value_head)]
         rng = random.Random(seed)
         self.layers = []
         for index, (inputs, outputs) in enumerate(zip(self.sizes, self.sizes[1:])):
@@ -201,14 +201,21 @@ class PPOBrain(AdamOptimizer):
         self.steps = self.updates = self.rollout_updates = 0
         self.last_metrics = {}
 
+    def distribution(self, outputs, observation):
+        return policy_distribution(outputs[:-1])
+
+    def objective(self, outputs, step, advantage, target):
+        return loss_and_gradient(outputs, step.action, step.log_probability,
+                                 advantage, target, self.config)
+
     def action_probabilities(self, observation):
-        return policy_distribution(self.network.predict(observation)[:-1])[0]
+        return self.distribution(self.network.predict(observation), observation)[0]
 
     def choose(self, observation, explore=True, random_baseline=False):
         if random_baseline:
             return self.rng.choice(self.actions)
         outputs = self.network.predict(observation)
-        probabilities, logs = policy_distribution(outputs[:-1])
+        probabilities, logs = self.distribution(outputs, observation)
         if not explore:
             return self.actions[
                 max(range(len(probabilities)), key=probabilities.__getitem__)
@@ -232,7 +239,7 @@ class PPOBrain(AdamOptimizer):
             _, _, old_logp, value = self.pending
         else:
             outputs = self.network.predict(experience.observation)
-            old_logp = policy_distribution(outputs[:-1])[1][action]
+            old_logp = self.distribution(outputs, experience.observation)[1][action]
             value = outputs[-1]
         self.pending = None
         if experience.terminated:
@@ -290,13 +297,8 @@ class PPOBrain(AdamOptimizer):
                 for i in batch:
                     step = self.rollout[i]
                     outputs, activations = self.network.forward(step.observation)
-                    _, derivative, info = loss_and_gradient(
-                        outputs,
-                        step.action,
-                        step.log_probability,
-                        advantages[i],
-                        targets[i],
-                        c,
+                    _, derivative, info = self.objective(
+                        outputs, step, advantages[i], targets[i]
                     )
                     self.network.accumulate_gradient(activations, derivative, gradients)
                     for key, value in info.items():
@@ -325,7 +327,7 @@ class PPOBrain(AdamOptimizer):
 
     def diagnostics(self, observation):
         outputs = self.network.predict(observation)
-        probabilities, logs = policy_distribution(outputs[:-1])
+        probabilities, logs = self.distribution(outputs, observation)
         return dict(
             algorithm=self.algorithm,
             buffer_kind="rollout",

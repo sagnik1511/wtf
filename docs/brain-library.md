@@ -253,3 +253,15 @@ For modern champion chaining, dead controllers (including founders) are released
 after their terminal learning and champion snapshot. Their optimizer update
 counts remain in the experiment totals. Exact legacy checkpoint retention still
 keeps founder controllers when they are required for the next run.
+
+## Compatibility of the additional algorithms
+
+Recurrent PPO, QR-DQN, Maskable PPO and the experimental MAPPO variant use the
+same run-local archive and CLI selection workflow. All four supplied presets
+select `lifespan` for both species. `fresh` resets initialization; it does not
+change that criterion. In addition to algorithm and action order, compatible
+models require matching GRU size, quantile count, actor/critic layers and
+mask/context versions where applicable. Ordinary PPO weights cannot initialize
+these variants. Recurrent champions omit episodic hidden state; newborns and
+warm starts begin with zero memory. Exact checkpoints retain it. See
+[advanced algorithms](advanced-algorithms.md) for details.

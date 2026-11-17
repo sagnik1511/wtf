@@ -715,6 +715,479 @@
                             "epochs",
                             "batch_size"
                         ]
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "const": "recurrent_ppo"
+                            },
+                            "network": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "hidden_layers"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "const": "mlp"
+                                    },
+                                    "hidden_layers": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 4,
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 1,
+                                            "maximum": 256
+                                        }
+                                    },
+                                    "activation": {
+                                        "const": "tanh"
+                                    }
+                                }
+                            },
+                            "learning_rate": {
+                                "type": "number",
+                                "minimum": 1e-06,
+                                "maximum": 0.1
+                            },
+                            "discount_factor": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "gae_lambda": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "clip_ratio": {
+                                "type": "number",
+                                "minimum": 0.001,
+                                "maximum": 1
+                            },
+                            "entropy_coefficient": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "value_coefficient": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 10
+                            },
+                            "rollout_steps": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 4096
+                            },
+                            "epochs": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 20
+                            },
+                            "batch_size": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 4096
+                            },
+                            "max_grad_norm": {
+                                "type": "number",
+                                "minimum": 1e-05,
+                                "maximum": 100
+                            },
+                            "normalize_advantages": {
+                                "type": "boolean"
+                            },
+                            "target_kl": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "recurrent_size": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 128
+                            },
+                            "sequence_length": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 128
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "network",
+                            "learning_rate",
+                            "discount_factor",
+                            "gae_lambda",
+                            "clip_ratio",
+                            "entropy_coefficient",
+                            "value_coefficient",
+                            "rollout_steps",
+                            "epochs",
+                            "batch_size",
+                            "max_grad_norm",
+                            "normalize_advantages",
+                            "recurrent_size",
+                            "sequence_length"
+                        ]
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "const": "maskable_ppo"
+                            },
+                            "network": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "hidden_layers"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "const": "mlp"
+                                    },
+                                    "hidden_layers": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 4,
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 1,
+                                            "maximum": 256
+                                        }
+                                    },
+                                    "activation": {
+                                        "const": "tanh"
+                                    }
+                                }
+                            },
+                            "learning_rate": {
+                                "type": "number",
+                                "minimum": 1e-06,
+                                "maximum": 0.1
+                            },
+                            "discount_factor": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "gae_lambda": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "clip_ratio": {
+                                "type": "number",
+                                "minimum": 0.001,
+                                "maximum": 1
+                            },
+                            "entropy_coefficient": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "value_coefficient": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 10
+                            },
+                            "rollout_steps": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 4096
+                            },
+                            "epochs": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 20
+                            },
+                            "batch_size": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 4096
+                            },
+                            "max_grad_norm": {
+                                "type": "number",
+                                "minimum": 1e-05,
+                                "maximum": 100
+                            },
+                            "normalize_advantages": {
+                                "type": "boolean"
+                            },
+                            "target_kl": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "network",
+                            "learning_rate",
+                            "discount_factor",
+                            "gae_lambda",
+                            "clip_ratio",
+                            "entropy_coefficient",
+                            "value_coefficient",
+                            "rollout_steps",
+                            "epochs",
+                            "batch_size",
+                            "max_grad_norm",
+                            "normalize_advantages"
+                        ]
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "const": "mappo"
+                            },
+                            "network": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "hidden_layers"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "const": "mlp"
+                                    },
+                                    "hidden_layers": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 4,
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 1,
+                                            "maximum": 256
+                                        }
+                                    },
+                                    "activation": {
+                                        "const": "tanh"
+                                    }
+                                }
+                            },
+                            "learning_rate": {
+                                "type": "number",
+                                "minimum": 1e-06,
+                                "maximum": 0.1
+                            },
+                            "discount_factor": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "gae_lambda": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "clip_ratio": {
+                                "type": "number",
+                                "minimum": 0.001,
+                                "maximum": 1
+                            },
+                            "entropy_coefficient": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "value_coefficient": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 10
+                            },
+                            "rollout_steps": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 4096
+                            },
+                            "epochs": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 20
+                            },
+                            "batch_size": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 4096
+                            },
+                            "max_grad_norm": {
+                                "type": "number",
+                                "minimum": 1e-05,
+                                "maximum": 100
+                            },
+                            "normalize_advantages": {
+                                "type": "boolean"
+                            },
+                            "target_kl": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "critic_hidden_layers": {
+                                "type": "array",
+                                "minItems": 1,
+                                "maxItems": 4,
+                                "items": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 256
+                                }
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "network",
+                            "learning_rate",
+                            "discount_factor",
+                            "gae_lambda",
+                            "clip_ratio",
+                            "entropy_coefficient",
+                            "value_coefficient",
+                            "rollout_steps",
+                            "epochs",
+                            "batch_size",
+                            "max_grad_norm",
+                            "normalize_advantages",
+                            "critic_hidden_layers"
+                        ]
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "qrdqn"
+                            },
+                            "learning_rate": {
+                                "type": "number",
+                                "minimum": 1e-06,
+                                "maximum": 0.1
+                            },
+                            "discount_factor": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "batch_size": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 1000000
+                            },
+                            "replay_capacity": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 1000000
+                            },
+                            "learning_starts_after": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 1000000
+                            },
+                            "train_every_steps": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 1000000
+                            },
+                            "target_update_every_training_steps": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 1000000
+                            },
+                            "exploration": {
+                                "type": "object",
+                                "properties": {
+                                    "initial": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                    },
+                                    "minimum": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                    },
+                                    "decay_per_decision": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                    }
+                                },
+                                "required": [
+                                    "initial",
+                                    "minimum",
+                                    "decay_per_decision"
+                                ],
+                                "additionalProperties": false
+                            },
+                            "network": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "hidden_layers"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "const": "mlp"
+                                    },
+                                    "hidden_layers": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 4,
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 1,
+                                            "maximum": 256
+                                        }
+                                    },
+                                    "activation": {
+                                        "const": "tanh"
+                                    }
+                                }
+                            },
+                            "num_quantiles": {
+                                "type": "integer",
+                                "minimum": 2,
+                                "maximum": 128
+                            },
+                            "huber_threshold": {
+                                "type": "number",
+                                "minimum": 1e-05,
+                                "maximum": 100
+                            },
+                            "max_grad_norm": {
+                                "type": "number",
+                                "minimum": 1e-05,
+                                "maximum": 100
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "learning_rate",
+                            "discount_factor",
+                            "batch_size",
+                            "replay_capacity",
+                            "learning_starts_after",
+                            "train_every_steps",
+                            "target_update_every_training_steps",
+                            "exploration",
+                            "network",
+                            "num_quantiles",
+                            "huber_threshold",
+                            "max_grad_norm"
+                        ],
+                        "additionalProperties": false
                     }
                 ]
             }

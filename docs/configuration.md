@@ -17,6 +17,10 @@ Each JSON file is a complete experiment definition:
 | [mixed_brains.json](../environments/mixed_brains.json) | 48 | 12 | q_network / ppo |
 | [ppo.json](../environments/ppo.json) | 48 | 12 | ppo / ppo |
 | [ppo_large_predator.json](../environments/ppo_large_predator.json) | 48 | 12 | ppo [16] / ppo [64, 32] |
+| [recurrent_ppo.json](../environments/recurrent_ppo.json) | 48 | 12 | recurrent_ppo / recurrent_ppo |
+| [qrdqn.json](../environments/qrdqn.json) | 48 | 12 | qrdqn / qrdqn |
+| [maskable_ppo.json](../environments/maskable_ppo.json) | 48 | 12 | maskable_ppo / maskable_ppo |
+| [mappo.json](../environments/mappo.json) | 48 | 12 | mappo / mappo |
 | [predator_heavy.json](../environments/predator_heavy.json) | 24 | 14 | q_network / q_network |
 | [reinforce.json](../environments/reinforce.json) | 48 | 12 | reinforce / reinforce |
 | [scarce_food.json](../environments/scarce_food.json) | 24 | 6 | q_network / q_network |
@@ -76,7 +80,7 @@ between 0.01 and 10, and the effective rate must remain within the algorithm's
 validated range (0.000001–1 for Q-learning, 0.000001–0.1 for policy algorithms).
 Omitting the field defaults to 1.0, preserving old configurations.
 
-This applies to Q-learning, PPO, A2C, REINFORCE and GRPO. It changes update size,
+This applies to every supported algorithm, including QR-DQN and the PPO variants. It changes update size,
 not update frequency, rollout length, exploration or reward. REINFORCE still
 updates only when an episode finishes; PPO/GRPO clipping and gradient clipping
 still apply. Policy/value networks that share an optimizer both use the rate.
@@ -119,6 +123,10 @@ and computation per step; more capacity does not guarantee better hunting.
 To tune capacity, edit
 `brains.large_predator_ppo.network.hidden_layers` in the new JSON.
 
+The [advanced algorithms guide](advanced-algorithms.md) covers GRU memory,
+quantile regression, immediate action masking and centralized critics. All four
+new presets select lifespan champions for both species.
+
 ## Reproduction
 
 All supplied environments enable single-parent reproduction for both species.
@@ -154,7 +162,9 @@ copy of its parent's current policy, critic/target model, optimizer state,
 exploration setting, learned baseline and training counters, after the parent
 receives that step's feedback. Experience buffers and pending decisions start
 empty; random streams are independent. There is no mutation or mating requirement.
-Children first act on the next step and must reach the minimum age themselves.
+Recurrent PPO children start with zero GRU memory; masks and centralized critic
+context are derived for the child from the current world. Children first act on
+the next step and must reach the minimum age themselves.
 Starting health/energy are supplied by the environment; the energy cost is a
 separate parent charge, so this model does not conserve energy across births.
 

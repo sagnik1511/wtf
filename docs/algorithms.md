@@ -24,6 +24,13 @@ Supported algorithms:
 | `a2c` | Independent advantage actor-critic, one gradient update per rollout, GAE and entropy regularization |
 | `reinforce` | Actor-only episodic Monte Carlo policy gradient with a running baseline from previous episodes |
 | `grpo` | Experimental actor-only clipped policy updates using comparable simulator trajectory groups and a frozen reference policy |
+| `recurrent_ppo` | GRU memory with PPO and chronological truncated backpropagation through time |
+| `qrdqn` | Quantile-regression Double DQN, bounded replay, target network and Adam |
+| `maskable_ppo` | PPO with stored per-decision immediate local action masks |
+| `mappo` | Experimental centralized-critic PPO with independent local actors and species-mean training rewards |
+
+See the [advanced algorithms guide](advanced-algorithms.md) for presets, commands,
+configuration, memory behavior and the changed action/reward rules of these variants.
 
 A PPO template (placed under `brains.small_ppo`) is:
 
@@ -87,6 +94,6 @@ The default example uses four trials, four steps per trial, `train_every_steps: 
 
 Trial worlds do not advance the real simulation or contribute kills, deaths, food, or frame recordings to it. Progress and playback counts describe only the real timeline. Checkpoints preserve the frozen reference policy, group/training RNG states and update scheduling, so a restored run reproduces its future trials. The example keeps prey on Q-learning to limit overhead; either species can reference a GRPO template.
 
-All five algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
+All nine algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
 
 See [saved champions](brain-library.md) for transferring compatible learned weights to a fresh experiment, and [analysis](analysis.md) for checking whether updates lead to useful behavior.

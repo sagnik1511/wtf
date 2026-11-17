@@ -6,9 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.19](0.0.0.19.md), `23df8af`.
+**Latest committed rollout:** [0.0.0.20](0.0.0.20.md), `0740c67`.
 **Latest committed runtime implementation:** [0.0.0.18](0.0.0.18.md), `c3af0d3`.
-**Pending:** [0.0.0.20](0.0.0.20.md), larger predator PPO and lifespan selection.
+**Pending:** [0.0.0.21](0.0.0.21.md), recurrent, distributional, masked and centralized-critic algorithms.
 
 ## Rollout index
 
@@ -19,7 +19,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.20](0.0.0.20.md) | Pending | Prepared 2026-11-17 | — | Larger predator PPO preset and lifespan champion selection |
+| [0.0.0.21](0.0.0.21.md) | Pending | Prepared 2026-11-17 | — | Recurrent PPO, QR-DQN, Maskable PPO and experimental MAPPO |
+| [0.0.0.20](0.0.0.20.md) | Committed | 2026-11-17 | `0740c67` | Larger predator PPO preset and lifespan champion selection |
 | [0.0.0.19](0.0.0.19.md) | Committed | 2026-11-16 | `23df8af` | Release history and maintenance workflow |
 | [0.0.0.18](0.0.0.18.md) | Committed | 2026-11-16 | `c3af0d3` | Shared policy training efficiency |
 | [0.0.0.17](0.0.0.17.md) | Committed | 2026-11-16 | `a75083c` | Balanced champions and DQN lifecycle efficiency |

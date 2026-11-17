@@ -16,11 +16,23 @@ def sample_index(probabilities, rng):
     return len(probabilities) - 1
 
 
-def other_action(brain, observation, rng):
-    if brain.config["type"] == "q_network":
+def other_action(brain, observation, rng, world=None, animal_id=None, memories=None):
+    kind = brain.config['type']
+    if kind == 'recurrent_ppo':
+        from .ppo import policy_distribution
+        hidden = memories[animal_id]
+        outputs, memories[animal_id] = brain.network.step(observation, hidden)
+        return brain.actions[sample_index(policy_distribution(outputs[:-1])[0], rng)]
+    if kind == 'maskable_ppo':
+        from .contextual_ppo import action_mask
+        import copy
+        proxy = copy.copy(brain)
+        proxy.mask = action_mask(world, world.animals[animal_id], brain.actions)
+        return brain.actions[sample_index(proxy.action_probabilities(observation), rng)]
+    if kind in ('q_network', 'qrdqn'):
         if rng.random() < brain.epsilon:
             return rng.choice(brain.actions)
-        values = brain.forward(observation)[1]
+        values = brain.forward(observation)[1] if kind == "q_network" else brain.values(observation)
         return brain.actions[max(range(len(values)), key=values.__getitem__)]
     return brain.actions[sample_index(brain.action_probabilities(observation), rng)]
 
@@ -54,6 +66,7 @@ def collect_group(world, brains, focal_id):
             generators[i].setstate(state)
         generators[focal_id] = random.Random(focal.group_rng.getrandbits(64))
         policies = {i: brains[i] for i in trial.animals}
+        memories = {i: b.hidden[:] for i, b in policies.items() if b.config['type']=='recurrent_ppo'}
         observations = trial.observe_all()
         trajectory = []
         for step in range(horizon):
@@ -66,7 +79,7 @@ def collect_group(world, brains, focal_id):
                 i: (
                     focal.actions[index]
                     if i == focal_id
-                    else other_action(policies[i], o, generators[i])
+                    else other_action(policies[i], o, generators[i], trial, i, memories)
                 )
                 for i, o in observations.items()
             }
@@ -76,12 +89,15 @@ def collect_group(world, brains, focal_id):
                     # Trials never learn: descendants can read the same frozen
                     # parent policy with their own RNG, avoiding model copies.
                     policies[event.target] = policies[event.actor]
+                    if policies[event.target].config["type"] == "recurrent_ppo":
+                        memories[event.target] = [0.0] * policies[event.target].config["recurrent_size"]
                     generators[event.target] = random.Random(
                         offspring_seed(trial, event.target)
                     )
             for animal_id in result.dead_ids:
                 policies.pop(animal_id, None)
                 generators.pop(animal_id, None)
+                memories.pop(animal_id, None)
             died = focal_id in result.dead_ids
             trajectory.append(
                 PolicyStep(
@@ -97,5 +113,5 @@ def collect_group(world, brains, focal_id):
                 break
             observations = result.observations
         group.append(trajectory)
-        del trial, observations, result, generators, policies
+        del trial, observations, result, generators, policies, memories
     return group

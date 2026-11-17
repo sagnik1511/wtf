@@ -154,7 +154,7 @@ def validate(c):
                 num(e[k], f"{p}.exploration.{k}", 0, 1)
             if e["minimum"] > e["initial"]:
                 fail(p + ".exploration.minimum", "must not exceed initial")
-        elif b["type"] == "ppo":
+        elif b["type"] in ("ppo", "recurrent_ppo", "maskable_ppo", "mappo"):
             obj(
                 b,
                 p,
@@ -173,7 +173,8 @@ def validate(c):
                     "max_grad_norm",
                     "normalize_advantages",
                 ),
-                optional=("target_kl",),
+                optional=("target_kl",) + {"recurrent_ppo": ("recurrent_size", "sequence_length"),
+                                           "mappo": ("critic_hidden_layers",)}.get(b["type"], ()),
             )
             network = b["network"]
             obj(
@@ -204,6 +205,49 @@ def validate(c):
                 fail(p + ".normalize_advantages", "must be boolean")
             if "target_kl" in b:
                 num(b["target_kl"], p + ".target_kl", 0, 1)
+            if b["type"] == "recurrent_ppo":
+                for key in ('recurrent_size', 'sequence_length'):
+                    if key not in b:
+                        fail(f'{p}.{key}', 'required field')
+                num(b['recurrent_size'], p+'.recurrent_size', 1, 128, True)
+                num(b['sequence_length'], p+'.sequence_length', 1, min(128, b['rollout_steps']), True)
+                if b['batch_size'] < b['sequence_length']:
+                    fail(p+'.batch_size', 'must cover at least one recurrent sequence')
+            elif b['type'] == 'mappo':
+                layers = b.get('critic_hidden_layers')
+                if not isinstance(layers, list) or not 1 <= len(layers) <= 4:
+                    fail(p+'.critic_hidden_layers', 'one to four critic hidden layers required')
+                for i, size in enumerate(layers):
+                    num(size, f'{p}.critic_hidden_layers.{i}', 1, 256, True)
+        elif b['type'] == 'qrdqn':
+            obj(b, p, ('type', 'network', 'learning_rate', 'discount_factor', 'batch_size',
+                       'replay_capacity', 'learning_starts_after', 'train_every_steps',
+                       'target_update_every_training_steps', 'exploration', 'num_quantiles',
+                       'huber_threshold', 'max_grad_norm'))
+            network = b['network']
+            obj(network, p+'.network', ('type', 'hidden_layers'), optional=('activation',))
+            if network['type'] != 'mlp' or network.get('activation', 'tanh') != 'tanh':
+                fail(p+'.network', 'must use an mlp with tanh activation')
+            layers = network['hidden_layers']
+            if not isinstance(layers, list) or not 1 <= len(layers) <= 4:
+                fail(p+'.network.hidden_layers', 'one to four hidden layers required')
+            for i, size in enumerate(layers):
+                num(size, f'{p}.network.hidden_layers.{i}', 1, 256, True)
+            num(b['learning_rate'], p+'.learning_rate', 0.000001, 0.1)
+            num(b['discount_factor'], p+'.discount_factor', 0, 1)
+            for key in ('batch_size', 'replay_capacity', 'learning_starts_after', 'train_every_steps', 'target_update_every_training_steps'):
+                num(b[key], f'{p}.{key}', 1, 1000000, True)
+            if max(b['batch_size'], b['learning_starts_after']) > b['replay_capacity']:
+                fail(p, 'batch size and learning start must not exceed replay capacity')
+            num(b['num_quantiles'], p+'.num_quantiles', 2, 128, True)
+            num(b['huber_threshold'], p+'.huber_threshold', 0.00001, 100)
+            num(b['max_grad_norm'], p+'.max_grad_norm', 0.00001, 100)
+            e = b['exploration']
+            obj(e, p+'.exploration', ('initial', 'minimum', 'decay_per_decision'))
+            for key in e:
+                num(e[key], f'{p}.exploration.{key}', 0, 1)
+            if e['minimum'] > e['initial']:
+                fail(p+'.exploration.minimum', 'must not exceed initial')
         elif b["type"] in ("a2c", "reinforce", "grpo"):
             common = (
                 "type",
@@ -290,7 +334,7 @@ def validate(c):
         else:
             fail(
                 p + ".type",
-                "supported types are q_network, ppo, a2c, reinforce and grpo",
+                "supported types are q_network, ppo, a2c, reinforce, grpo, recurrent_ppo, qrdqn, maskable_ppo and mappo",
             )
     if not isinstance(c["species"], dict) or not c["species"]:
         fail("species", "at least one species required")
@@ -329,6 +373,8 @@ def validate(c):
             fail(p + ".allowed_actions", "feeding action incompatible with diet")
         if not isinstance(s["brain"], str) or s["brain"] not in c["brains"]:
             fail(p + ".brain", "unknown brain template")
+        if c['brains'][s['brain']]['type'] == 'maskable_ppo' and not set(s['allowed_actions']).intersection(('rest', 'turn_left', 'turn_right')):
+            fail(p+'.allowed_actions', 'masked policies require rest or turning as an always-available fallback')
         if "initial_brain" in s:
             initial = s["initial_brain"]
             ip = p + ".initial_brain"

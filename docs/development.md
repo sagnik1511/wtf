@@ -42,3 +42,13 @@ from Committed history. Include behavior, compatibility/migration, validation
 results and rollback considerations. Documentation-only hash reconciliation stays
 attached to the rollout it records. Do not change the Python package version or
 create Git tags merely to update this documentation index.
+
+## Advanced algorithm checks
+
+`tests/test_advanced_algorithms.py` checks GRU gradients through two timesteps,
+quantile Huber and masked-policy derivatives, actor/critic information separation,
+current/next critic contexts, terminal/truncated bootstrap, newborn memory,
+mask preservation, bounded replay, mixed policies, GRPO trial isolation,
+recording transparency, frozen evaluation weights, exact JSON/compact resume,
+and CLI progress/archive/warm-start workflows. See the
+[advanced algorithms guide](advanced-algorithms.md) for the experiment semantics.

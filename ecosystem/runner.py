@@ -99,9 +99,25 @@ class Experiment:
         if self.mode == "train":
             self.champions.consider(self.world.animals.values(), self.brains, self._champion_source())
         self.observations = self.world.observe_all()
+        self._refresh_context()
         self.finished_run = False
         self.history = [self.world.metrics()]
         self.last_record = None
+
+    def _refresh_context(self):
+        contextual = [i for i in self.world.animals
+                      if self.brains[i].config['type'] in ('mappo', 'maskable_ppo')]
+        if not contextual:
+            return
+        from .contextual_ppo import action_mask, central_contexts
+        contexts = central_contexts(self.world) if any(self.brains[i].config['type']=='mappo' for i in contextual) else {}
+        occupied = {a.position: a for a in self.world.animals.values()}
+        for i in contextual:
+            brain, animal = self.brains[i], self.world.animals[i]
+            if brain.config['type'] == 'mappo':
+                brain.context = brain.next_context = contexts[animal.species]
+            else:
+                brain.mask = action_mask(self.world, animal, brain.actions, occupied)
 
     @property
     def done(self):
@@ -144,12 +160,24 @@ class Experiment:
         result = self.world.step(actions)
         limit = self.world.tick >= self.config["world"]["max_steps"]
         if training:
+            team_rewards = {}
+            if any(self.brains[i].config['type']=='mappo' for i in self.observations):
+                from .contextual_ppo import central_contexts
+                contexts = central_contexts(self.world)
+                teams = {}
+                for animal in tracked_animals:
+                    teams.setdefault(animal.species, []).append(result.rewards[animal.id])
+                team_rewards = {s: sum(values)/len(values) for s, values in teams.items()}
+                for animal in tracked_animals:
+                    if self.brains[animal.id].config['type']=='mappo':
+                        self.brains[animal.id].next_context = contexts[animal.species]
+            prior_species = {a.id: a.species for a in tracked_animals} if team_rewards else {}
             for i, observation in self.observations.items():
                 self.brains[i].learn(
                     Experience(
                         observation,
                         actions[i],
-                        result.rewards[i],
+                        team_rewards[prior_species[i]] if self.brains[i].config['type']=='mappo' else result.rewards[i],
                         result.observations.get(i),
                         i in result.dead_ids,
                         limit and i not in result.dead_ids,
@@ -168,6 +196,7 @@ class Experiment:
                 self.inherited_updates[event.target] = self.brains[event.target].updates
         self._release_dead_brains(result.dead_ids)
         self.observations = result.observations
+        self._refresh_context()
         self.last_record = None
         self.finished_run = limit or not self.world.animals
         if (
@@ -336,5 +365,6 @@ class Experiment:
         if "champions" not in state and e.mode == "train":
             e.champions.consider(e.world.animals.values(), e.brains, e._champion_source())
         e.observations = e.world.observe_all()
+        e._refresh_context()
         e.last_record = None
         return e
