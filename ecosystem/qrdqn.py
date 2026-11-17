@@ -45,6 +45,9 @@ class QRDQNBrain(AdamOptimizer):
 
     def values(self, observation, network=None):
         values = (network or self.network).predict(observation)
+        return self._mean_values(values)
+
+    def _mean_values(self, values):
         n = self.quantiles
         return [sum(values[i:i+n]) / n for i in range(0, len(values), n)]
 
@@ -76,7 +79,7 @@ class QRDQNBrain(AdamOptimizer):
                     raise ValueError('QR-DQN needs a next observation unless terminated')
                 q = self.values(e.next_observation)
                 best = max(range(len(q)), key=q.__getitem__)
-                bootstrap = self.target_network.predict(e.next_observation)[best*n:(best+1)*n]
+                bootstrap = self.target_network.predict_range(e.next_observation, best*n, (best+1)*n)
                 targets = [e.reward + c['discount_factor'] * v for v in bootstrap]
             loss, derivative = quantile_huber(outputs[start:start+n], targets, c['huber_threshold'])
             total_loss += loss
@@ -93,7 +96,7 @@ class QRDQNBrain(AdamOptimizer):
     def diagnostics(self, observation):
         outputs, n = self.network.predict(observation), self.quantiles
         return dict(algorithm=self.algorithm, features=observation,
-                    action_values=dict(zip(self.actions, self.values(observation))),
+                    action_values=dict(zip(self.actions, self._mean_values(outputs))),
                     return_quantiles={a: outputs[i*n:(i+1)*n] for i, a in enumerate(self.actions)},
                     epsilon=self.epsilon, updates=self.updates, replay_size=len(self.replay),
                     training_metrics=self.last_metrics.copy())

@@ -104,14 +104,16 @@ class Experiment:
         self.history = [self.world.metrics()]
         self.last_record = None
 
-    def _refresh_context(self):
+    def _refresh_context(self, contexts=None):
         contextual = [i for i in self.world.animals
                       if self.brains[i].config['type'] in ('mappo', 'maskable_ppo')]
         if not contextual:
             return
         from .contextual_ppo import action_mask, central_contexts
-        contexts = central_contexts(self.world) if any(self.brains[i].config['type']=='mappo' for i in contextual) else {}
-        occupied = {a.position: a for a in self.world.animals.values()}
+        if contexts is None:
+            contexts = central_contexts(self.world) if any(self.brains[i].config['type']=='mappo' for i in contextual) else {}
+        has_masks = any(self.brains[i].config['type']=='maskable_ppo' for i in contextual)
+        occupied = {a.position: a for a in self.world.animals.values()} if has_masks else None
         for i in contextual:
             brain, animal = self.brains[i], self.world.animals[i]
             if brain.config['type'] == 'mappo':
@@ -159,6 +161,7 @@ class Experiment:
         }
         result = self.world.step(actions)
         limit = self.world.tick >= self.config["world"]["max_steps"]
+        contexts = None
         if training:
             team_rewards = {}
             if any(self.brains[i].config['type']=='mappo' for i in self.observations):
@@ -196,7 +199,7 @@ class Experiment:
                 self.inherited_updates[event.target] = self.brains[event.target].updates
         self._release_dead_brains(result.dead_ids)
         self.observations = result.observations
-        self._refresh_context()
+        self._refresh_context(contexts)
         self.last_record = None
         self.finished_run = limit or not self.world.animals
         if (

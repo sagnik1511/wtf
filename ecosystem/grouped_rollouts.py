@@ -16,7 +16,7 @@ def sample_index(probabilities, rng):
     return len(probabilities) - 1
 
 
-def other_action(brain, observation, rng, world=None, animal_id=None, memories=None):
+def other_action(brain, observation, rng, world=None, animal_id=None, memories=None, occupied=None):
     kind = brain.config['type']
     if kind == 'recurrent_ppo':
         from .ppo import policy_distribution
@@ -25,10 +25,10 @@ def other_action(brain, observation, rng, world=None, animal_id=None, memories=N
         return brain.actions[sample_index(policy_distribution(outputs[:-1])[0], rng)]
     if kind == 'maskable_ppo':
         from .contextual_ppo import action_mask
-        import copy
-        proxy = copy.copy(brain)
-        proxy.mask = action_mask(world, world.animals[animal_id], brain.actions)
-        return brain.actions[sample_index(proxy.action_probabilities(observation), rng)]
+        mask = action_mask(world, world.animals[animal_id], brain.actions, occupied)
+        outputs = brain.network.predict(observation)
+        probabilities = brain.distribution(outputs, tuple(observation) + mask)[0]
+        return brain.actions[sample_index(probabilities, rng)]
     if kind in ('q_network', 'qrdqn'):
         if rng.random() < brain.epsilon:
             return rng.choice(brain.actions)
@@ -58,6 +58,7 @@ def collect_group(world, brains, focal_id):
     if horizon < 1:
         raise ValueError("No simulation steps remain for a GRPO trial")
     group = []
+    has_masks = any(brains[i].config['type']=='maskable_ppo' for i in world.animals)
     for _ in range(focal.config["group_size"]):
         trial = World.restore(initial_world)
         generators = {}
@@ -75,11 +76,12 @@ def collect_group(world, brains, focal_id):
                 focal.network.predict(observation)
             )
             index = sample_index(probabilities, generators[focal_id])
+            occupied = {a.position: a for a in trial.animals.values()} if has_masks else None
             actions = {
                 i: (
                     focal.actions[index]
                     if i == focal_id
-                    else other_action(policies[i], o, generators[i], trial, i, memories)
+                    else other_action(policies[i], o, generators[i], trial, i, memories, occupied)
                 )
                 for i, o in observations.items()
             }

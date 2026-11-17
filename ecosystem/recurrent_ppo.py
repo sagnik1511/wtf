@@ -3,6 +3,7 @@
 import copy
 import math
 import random
+from operator import mul
 from typing import NamedTuple
 from .brain import INPUTS
 from .ppo import MLP, PPOBrain, advantages_and_returns, policy_distribution
@@ -23,16 +24,6 @@ class RecurrentStep(NamedTuple):
 def sigmoid(value):
     return 1.0 / (1.0 + math.exp(-value)) if value >= 0 else math.exp(value) / (1.0 + math.exp(value))
 
-
-def input_gradient(network, tape, gradient):
-    """Derivative w.r.t. an MLP's inputs, without adding parameter gradients."""
-    delta = list(gradient)
-    for index in range(len(network.layers) - 1, -1, -1):
-        inputs = network.sizes[index]
-        weights = network.layers[index]['weights']
-        prior = [sum(d * weights[j * inputs + i] for j, d in enumerate(delta)) for i in range(inputs)]
-        delta = [g * (1.0 - v*v) for g, v in zip(prior, tape[index])] if index else prior
-    return delta
 
 
 class GRUNetwork:
@@ -58,13 +49,13 @@ class GRUNetwork:
 
     clear_gradients = staticmethod(MLP.clear_gradients)
 
-    def step(self, observation, hidden, tape=False):
+    def step(self, observation, hidden, tape=False, value_only=False):
         h = self.hidden_size
         wx, wh, bias = (self.cell[k] for k in ('input_weights', 'recurrent_weights', 'bias'))
         def gate(offset, previous, activation):
             return [activation(bias[offset+j]
-                    + sum(x*w for x, w in zip(observation, wx[(offset+j)*INPUTS:(offset+j+1)*INPUTS]))
-                    + sum(x*w for x, w in zip(previous, wh[(offset+j)*h:(offset+j+1)*h]))) for j in range(h)]
+                    + sum(map(mul, observation, wx[(offset+j)*INPUTS:(offset+j+1)*INPUTS]))
+                    + sum(map(mul, previous, wh[(offset+j)*h:(offset+j+1)*h]))) for j in range(h)]
         z, r = gate(0, hidden, sigmoid), gate(h, hidden, sigmoid)
         rh = [a*b for a, b in zip(r, hidden)]
         candidate = gate(2*h, rh, math.tanh)
@@ -72,13 +63,13 @@ class GRUNetwork:
         if tape:
             outputs, ht = self.head.forward(current)
             return outputs, current, (tuple(observation), tuple(hidden), z, r, candidate, rh, ht)
-        return self.head.predict(current), current
+        return (self.head.value(current) if value_only else self.head.predict(current)), current
 
     def backward(self, tape, output_gradient, future_gradient, gradients):
         x, old, z, r, candidate, rh, ht = tape
         h = self.hidden_size
-        derivative = input_gradient(self.head, ht, output_gradient)
-        self.head.accumulate_gradient(ht, output_gradient, gradients[1:])
+        derivative = self.head.accumulate_gradient(
+            ht, output_gradient, gradients[1:], return_input_gradient=True)
         dh = [a+b for a, b in zip(derivative, future_gradient)]
         dz = [d*(v-n)*a*(1-a) for d, v, n, a in zip(dh, old, candidate, z)]
         dn = [d*(1-a)*(1-n*n) for d, a, n in zip(dh, z, candidate)]
@@ -107,9 +98,10 @@ class RecurrentPPOBrain(PPOBrain):
 
     def __init__(self, config, actions, base_seed, individual_seed):
         super().__init__(config, actions, base_seed, individual_seed)
-        self.network = GRUNetwork(config, len(actions), base_seed)
-        self.moments, self.variances = self.network.zeros(), self.network.zeros()
         self.hidden = [0.0] * config['recurrent_size']
+
+    def _new_network(self, config, actions, seed):
+        return GRUNetwork(config, actions, seed)
 
     def reset_memory(self):
         self.hidden = [0.0] * self.config['recurrent_size']
@@ -146,7 +138,7 @@ class RecurrentPPOBrain(PPOBrain):
         if not experience.terminated:
             if experience.next_observation is None:
                 raise ValueError('Recurrent PPO requires a nonterminal next observation')
-            next_value = self.network.step(experience.next_observation, self.hidden)[0][-1]
+            next_value = self.network.step(experience.next_observation, self.hidden, value_only=True)[0]
         self.rollout.append(RecurrentStep(obs, action, experience.reward, logp, value, next_value,
                                           experience.terminated, experience.truncated, hidden))
         self.steps += 1

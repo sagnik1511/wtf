@@ -6,9 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.21](0.0.0.21.md), `406487d`.
-**Latest committed runtime implementation:** [0.0.0.21](0.0.0.21.md), `406487d`.
-**Pending:** [0.0.0.22](0.0.0.22.md), randomized reproduction timing windows.
+**Latest committed rollout:** [0.0.0.22](0.0.0.22.md), `0ae8df0`.
+**Latest committed runtime implementation:** [0.0.0.22](0.0.0.22.md), `0ae8df0`.
+**Pending:** [0.0.0.23](0.0.0.23.md), reductions in repeated RL training work.
 
 ## Rollout index
 
@@ -19,7 +19,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.22](0.0.0.22.md) | Pending | Prepared 2026-11-17 | — | Per-animal reproduction timing windows |
+| [0.0.0.23](0.0.0.23.md) | Pending | Prepared 2026-11-17 | — | Recurrent, distributional and multi-agent training efficiency |
+| [0.0.0.22](0.0.0.22.md) | Committed | 2026-11-17 | `0ae8df0` | Per-animal reproduction timing windows |
 | [0.0.0.21](0.0.0.21.md) | Committed | 2026-11-17 | `406487d` | Recurrent PPO, QR-DQN, Maskable PPO and experimental MAPPO |
 | [0.0.0.20](0.0.0.20.md) | Committed | 2026-11-17 | `0740c67` | Larger predator PPO preset and lifespan champion selection |
 | [0.0.0.19](0.0.0.19.md) | Committed | 2026-11-16 | `23df8af` | Release history and maintenance workflow |

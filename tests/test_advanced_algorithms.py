@@ -206,7 +206,7 @@ class MaskAndMemoryTests(unittest.TestCase):
             captured=[]
             def capture(predictions,targets,kappa):
                 captured.append(targets);return 0.0,[0.0]*len(predictions)
-            with patch.object(b,'values',return_value=[2,1]),patch.object(b.target_network,'predict',return_value=[3,4,5,99,99,99]),patch('ecosystem.qrdqn.quantile_huber',side_effect=capture):
+            with patch.object(b,'values',return_value=[2,1]),patch.object(b.target_network,'predict_range',return_value=[3,4,5]),patch('ecosystem.qrdqn.quantile_huber',side_effect=capture):
                 b.learn(Experience((0.0,)*20,'rest',2,None if terminal else (0.1,)*20,terminal,not terminal))
             self.assertEqual(captured[0],[2]*3 if terminal else [2+c['discount_factor']*v for v in (3,4,5)])
 

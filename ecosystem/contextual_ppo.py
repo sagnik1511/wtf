@@ -70,8 +70,8 @@ class LocalMLP(MLP):
     def forward(self, observation):
         return super().forward(observation[:INPUTS])
 
-    def _predict(self, observation, value_only=False):
-        return super()._predict(observation[:INPUTS], value_only)
+    def _predict(self, observation, value_only=False, output_range=None):
+        return super()._predict(observation[:INPUTS], value_only, output_range)
 
 
 class MaskablePPOBrain(PPOBrain):
@@ -79,8 +79,10 @@ class MaskablePPOBrain(PPOBrain):
 
     def __init__(self, config, actions, base_seed, individual_seed):
         super().__init__(config, actions, base_seed, individual_seed)
-        self.network = LocalMLP(config['network']['hidden_layers'], len(actions), base_seed)
         self.mask = (True,) * len(actions)
+
+    def _new_network(self, config, actions, seed):
+        return LocalMLP(config['network']['hidden_layers'], actions, seed)
 
     def _pack(self, observation):
         return tuple(observation[:INPUTS]) + tuple(self.mask)
@@ -177,11 +179,15 @@ class MAPPOBrain(PPOBrain):
 
     def __init__(self, config, actions, base_seed, individual_seed):
         super().__init__(config, actions, base_seed, individual_seed)
-        self.network = CentralNetwork(config, len(actions), base_seed)
-        self.moments, self.variances = self.network.zeros(), self.network.zeros()
         self.context = self.next_context = (0.0,) * CENTRAL_INPUTS
 
+    def _new_network(self, config, actions, seed):
+        return CentralNetwork(config, actions, seed)
+
     def choose(self, observation, explore=True, random_baseline=False):
+        if not explore and not random_baseline:
+            probabilities = self.action_probabilities(observation)
+            return self.actions[max(range(len(probabilities)), key=probabilities.__getitem__)]
         return super().choose(tuple(observation) + self.context, explore, random_baseline)
 
     def action_probabilities(self, observation):

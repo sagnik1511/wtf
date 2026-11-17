@@ -114,7 +114,7 @@ class MLP:
             )
         return activations[-1], activations
 
-    def _predict(self, observation, value_only=False):
+    def _predict(self, observation, value_only=False, output_range=None):
         """Inference keeps one layer at a time; no backpropagation tape."""
         previous = tuple(observation)
         last = len(self.layers) - 1
@@ -123,6 +123,10 @@ class MLP:
             if value_only and index == last:
                 output = len(layer['bias']) - 1
                 return layer['bias'][output] + sum(map(mul, previous, weights[output*inputs:(output+1)*inputs]))
+            if output_range is not None and index == last:
+                start, stop = output_range
+                return [layer['bias'][j] + sum(map(mul, previous, weights[j*inputs:(j+1)*inputs]))
+                        for j in range(start, stop)]
             values = [bias + sum(map(mul, previous, weights[j*inputs:(j+1)*inputs]))
                       for j,bias in enumerate(layer['bias'])]
             previous = [math.tanh(v) for v in values] if index < last else values
@@ -134,6 +138,12 @@ class MLP:
     def value(self, observation):
         """Final output only, used for actor-critic value bootstrapping."""
         return self._predict(observation, value_only=True)
+
+    def predict_range(self, observation, start, stop):
+        """Evaluate only the requested final-layer heads, preserving their arithmetic."""
+        if not 0 <= start <= stop <= self.sizes[-1]:
+            raise ValueError('Invalid output range')
+        return self._predict(observation, output_range=(start, stop))
 
     @staticmethod
     def clear_gradients(gradients):
@@ -148,14 +158,14 @@ class MLP:
             for layer in self.layers
         ]
 
-    def accumulate_gradient(self, activations, output_gradient, gradients):
+    def accumulate_gradient(self, activations, output_gradient, gradients, return_input_gradient=False):
         delta = output_gradient
         for index in range(len(self.layers) - 1, -1, -1):
             previous = activations[index]
             inputs = self.sizes[index]
             weights = self.layers[index]["weights"]
             dw, db = gradients[index]["weights"], gradients[index]["bias"]
-            if index:
+            if index or return_input_gradient:
                 previous_gradient = [0.0] * inputs
                 for j, derivative in enumerate(delta):
                     db[j] += derivative
@@ -164,6 +174,8 @@ class MLP:
                         parameter = offset + i
                         dw[parameter] += derivative * value
                         previous_gradient[i] += derivative * weights[parameter]
+                if not index:
+                    return previous_gradient
                 delta = [
                     g * (1.0 - value * value)
                     for g, value in zip(previous_gradient, previous)
@@ -191,7 +203,7 @@ class PPOBrain(AdamOptimizer):
         self.config = copy.deepcopy(config)
         self.actions = list(actions)
         self.action_indices = {name: i for i, name in enumerate(actions)}
-        self.network = MLP(config["network"]["hidden_layers"], len(actions), base_seed)
+        self.network = self._new_network(config, len(actions), base_seed)
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
         self.moments = self.network.zeros()
@@ -200,6 +212,9 @@ class PPOBrain(AdamOptimizer):
         self.pending = None
         self.steps = self.updates = self.rollout_updates = 0
         self.last_metrics = {}
+
+    def _new_network(self, config, actions, seed):
+        return MLP(config['network']['hidden_layers'], actions, seed)
 
     def distribution(self, outputs, observation):
         return policy_distribution(outputs[:-1])

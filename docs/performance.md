@@ -113,3 +113,36 @@ checkpoint resumes. Regression tests additionally compare inference with full
 forward passes, reused/fresh gradients, and trial histories with/without old death
 records. No profiler or timing/memory benchmark was used in this review, so these
 are reductions in work and allocation rather than measured speedup claims.
+
+
+## Additional algorithm review
+
+The GRU, distributional and centralized-critic paths reduce repeated computation
+without adding persistent per-animal caches:
+
+| Path | Reduction in work or temporary allocations |
+| --- | --- |
+| Recurrent PPO backpropagation | The output MLP returns its input derivative while accumulating parameter gradients, replacing a separate second traversal through the same head. |
+| Recurrent PPO bootstrapping | Evaluates only the scalar value head after the GRU/hidden layers; unused policy outputs are skipped. Gate dot products use native multiplication iterators with the same summation order. |
+| QR-DQN diagnostics | One network prediction supplies both mean action values and return quantiles. |
+| QR-DQN targets | Computes only the chosen action's target quantiles at the final layer. Online action selection still evaluates all actions. |
+| MAPPO training | Reuses the post-physics global context for bootstrapping and the next decision. A pure MAPPO phase does not build an unused mask-occupancy map. |
+| MAPPO greedy evaluation | Uses only the local actor; the critic remains available for recorded diagnostics. |
+| PPO variant construction/restore | Constructs the actual network once. GRU and MAPPO also avoid discarded default optimizer arrays; Maskable PPO avoids its discarded default MLP. |
+| GRPO with masked opponents | Shares one occupancy map per trial step across masked agents and evaluates frozen policies without copying controller objects. |
+
+Correctness verification compared exact serialized world, brain, replay/rollout,
+optimizer, RNG and champion state with revision `0ae8df0`: 207 checkpoint
+comparisons across all nine algorithms and 23 further comparisons for mixed
+GRPO/Maskable PPO. The workload uses two 11-step episodes per case, small
+networks, reproduction windows, chained champions, a forced death in the
+nine-algorithm comparison and checkpoint restoration in the mixed case. The
+23rd comparison in each case also checks the already-completed lifecycle.
+
+Regression tests check numerical input derivatives, selected-head equivalence,
+forward-pass and context-build counts, direct network construction, value-only
+GRU bootstrap and shared trial occupancy. Learning schedules, rewards, network
+sizes, buffers, random draws and checkpoint formats are unchanged. No profiler,
+time benchmark or peak-memory measurement was run, so no percentage speedup or
+RAM reduction is claimed. The main dense arithmetic remains standard-library
+Python and independent-agent costs still grow with population and model size.

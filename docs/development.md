@@ -57,3 +57,9 @@ Reproduction-window tests additionally cover inclusive bounds, per-animal spread
 positive-step clipping, one draw per clock, all delayed-birth gates, cooldowns
 measured from actual births, legacy zero-deviation RNG behavior and pending-clock
 preservation across JSON/compact checkpoints and delta replays.
+
+`tests/test_advanced_efficiency.py` guards against duplicate GRU head passes,
+unused bootstrap/target outputs, repeated QR-DQN diagnostic inference, duplicate
+MAPPO contexts, critic inference during greedy MAPPO execution, discarded default
+networks and per-agent trial occupancy/controller copies. These checks count
+operations and validate numerical results, without timing thresholds or profiling.
