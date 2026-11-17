@@ -7,6 +7,11 @@ a JavaScript canvas viewer replays saved runs.
 The simulator records first and the viewer plays later, keeping training and
 rendering independent. Replay chunks use structured binary deltas and lossless XZ compression to reduce disk usage.
 
+![Saved ecosystem playback with prey, predators, obstacles and event highlights](docs/assets/simulation-playback.gif)
+
+A short replay of a saved experiment. See the [live species charts](docs/recording.md#per-step-species-dashboard)
+for population, energy, births and hunting trends.
+
 ## Quick start
 
 Requires Python 3.9+. Run from the project directory:

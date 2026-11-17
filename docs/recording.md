@@ -30,6 +30,11 @@ appear in the playback catalog.
 
 ## Per-step species dashboard
 
+![Species dashboard charts updating as the saved replay advances](assets/species-metrics.gif)
+
+A 3.5-second excerpt showing species trends during playback. The dashboard
+scrolls to reveal additional charts while the recorded timeline advances.
+
 Click **Metrics dashboard** in the toolbar. Its charts follow the replay position
 while playing, stepping or scrubbing; no future frames are displayed. The modal
 has its own play, next/back and seek controls, keeping the main board's size
