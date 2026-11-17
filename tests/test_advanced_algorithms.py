@@ -339,7 +339,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
                 manifest=json.loads((source/'playback/recording.json').read_text())
                 self.assertEqual(manifest['status'],'complete')
                 self.assertEqual(len(manifest['runs']),2)
-                self.assertEqual(manifest['runs'][1]['initialized_from']['predator']['criterion'],'lifespan')
+                self.assertEqual(manifest['runs'][1]['initialized_from']['predator']['female']['criterion'],'lifespan')
                 command=[sys.executable,'-m','ecosystem.cli',str(config_path),'--output',str(root/'warm'),
                          '--runs','1','--steps','3','--brains-from',str(source),'--brain','predator=lifespan','--no-progress']
                 result=subprocess.run(command,cwd=ROOT,capture_output=True,text=True)

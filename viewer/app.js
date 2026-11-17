@@ -5,6 +5,8 @@ import { behaviorRows } from './behavior-stats.mjs';
 const $ = id => document.getElementById(id);
 let state, selected = null, playing = false, busy = false;
 const colors = ['#7de2bd', '#ff9a77', '#83b9ff', '#ce9ef5', '#f4cf7a'];
+// Distinct sex hues plus male outlines; legacy bodies keep base species colors.
+const sexColors = {female: colors, male: ['#60a5fa', '#f6d365', '#b197fc', '#f783ac', '#a9e34b']};
 let errorTimer, analysisKey="", analysisRequest=0,runMenuKey="";
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
 
@@ -18,6 +20,10 @@ async function operation(fn) {
   finally { busy = false; for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run','dashboard-back','dashboard-next','dashboard-timeline']) $(id).disabled = false;updateRunButtons(); }
 }
 function speciesColor(name) { return colors[Object.keys(state.species).indexOf(name) % colors.length]; }
+function animalColor(animal) {
+  const palette=sexColors[animal.sex]??colors;
+  return palette[Object.keys(state.species).indexOf(animal.species)%colors.length];
+}
 const dashboard = new Dashboard(api, speciesColor);
 function fitWorld() {
   const canvas=$('world'),holder=canvas.parentElement;
@@ -46,11 +52,13 @@ function drawWorld() {
   for (const r of state.resources) { ctx.fillStyle=`rgba(99,171,111,${.12+.66*r.quantity/capacity})`;const size=.2+.6*Math.sqrt(r.quantity/capacity);ctx.fillRect((r.x+.5-size/2)*cw,(r.y+.5-size/2)*ch,cw*size,ch*size); }
   for (const a of state.animals) {
     const x=(a.x+.5)*cw,y=(a.y+.5)*ch,r=cw*.31;
-    ctx.save();ctx.translate(x,y);ctx.rotate(a.heading*Math.PI/2);ctx.fillStyle=speciesColor(a.species);
+    ctx.save();ctx.translate(x,y);ctx.rotate(a.heading*Math.PI/2);ctx.fillStyle=animalColor(a);
     ctx.beginPath();
     if(state.species[a.species].diet==='prey') { ctx.moveTo(0,-r*1.2);ctx.lineTo(r,r);ctx.lineTo(-r,r);ctx.closePath(); }
     else ctx.arc(0,0,r,0,Math.PI*2);
-    ctx.fill();ctx.fillStyle='#13212a';ctx.beginPath();ctx.arc(0,-r*.55,1.8,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fill();
+    if(a.sex==='male'){ctx.strokeStyle='#edf5ff';ctx.lineWidth=1.4;ctx.stroke();}
+    ctx.fillStyle='#13212a';ctx.beginPath();ctx.arc(0,-r*.55,1.8,0,Math.PI*2);ctx.fill();ctx.restore();
     if(a.id===selected) { ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r+5,0,Math.PI*2);ctx.stroke(); }
   }
 }
@@ -137,7 +145,7 @@ function drawInspector() {
   const box=$('inspector');box.replaceChildren();const a=state.animals.find(a=>a.id===selected),b=state.selected;
   $('agent-label').textContent=a?`${a.species} #${a.id}`:'No selection';$('inspect-hint').hidden=Boolean(a);
   if(!a)return;
-  box.append(text('p',`Generation ${a.generation??0} · ${a.parent_id>=0?`Parent #${a.parent_id}`:'Founding animal'}`,'muted'));
+  box.append(text('p',`${a.sex??'Sex not recorded'} · Generation ${a.generation??0} · ${a.parent_id>=0?`Parents #${a.parent_id}${a.second_parent_id>=0?` + #${a.second_parent_id}`:''}`:'Founding animal'}`,'muted'));
   if(a.mutation_count>0)box.append(text('p',`${a.mutated?`Mutated at birth: ${a.mutation_weights} weights`:'Inherited mutated lineage'} · Lineage mutations ${a.mutation_count}`,'muted'));
   if(!b){box.append(text('p',`Energy ${a.energy.toFixed(1)} · Health ${a.health.toFixed(1)} · Age ${a.age}`,'muted'));box.append(text('p','Brain diagnostics were not recorded for this frame.','muted'));return;}
   box.append(text('p',`Brain diagnostics recorded at step ${b.tick}; body state is current.`,'muted'));
@@ -245,7 +253,7 @@ function render(snapshot = null) {
   if(latestBirth){
     const count=state.birth_highlights.filter(b=>b.frame_index===latestBirth.frame_index).length;
     const species=latestBirth.species??'animal';
-    const message=`BORN · ${species} #${latestBirth.target} · Parent #${latestBirth.actor} · Step ${latestBirth.tick}${count>1?` · ${count} births shown`:''}`;
+    const message=`BORN · ${species} #${latestBirth.target} · Parents #${latestBirth.actor}${latestBirth.mate>=0?` + #${latestBirth.mate}`:''} · Step ${latestBirth.tick}${count>1?` · ${count} births shown`:''}`;
     if($('birth-banner').textContent!==message)$('birth-banner').textContent=message;
   }
   $('kills').parentElement.classList.toggle('kill-now',state.kill_highlights.some(k=>k.frame_index===state.frame_index));

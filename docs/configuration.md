@@ -130,7 +130,7 @@ new presets select lifespan champions for both species.
 
 ## Reproduction
 
-All supplied environments enable single-parent reproduction for both species.
+All supplied environments enable paired male/female reproduction for both species.
 Edit `species.prey.reproduction` or `species.predator.reproduction` in your JSON:
 
 ```json
@@ -142,20 +142,32 @@ Edit `species.prey.reproduction` or `species.predator.reproduction` in your JSON
   "cooldown_steps": 225,
   "cooldown_deviation_pct": 10,
   "min_energy": 30,
-  "energy_cost": 20,
+  "energy_cost": 10,
+  "mate_radius": 2,
   "max_population": 96
 }
 ```
 
 Health must be **strictly greater** than `health_threshold` (absolute health,
-not a percentage). After combat and starvation, a surviving parent must also
-meet the age and energy requirements, afford the energy cost with some energy
-left, and have waited since its last successful birth. A species' living
-population cannot exceed `max_population`. Each eligible parent produces at
-most one child per step, in a free cardinally adjacent cell. If the cap or space
-blocks a birth, no energy is charged and no cooldown starts. Contention uses the
-world's seeded random generator. Cooldowns measure simulation steps, not playback
-time. The presets use 80% of maximum health as their threshold and randomize
+not a percentage). Both parents must be alive after combat/starvation, the same
+species and opposite sexes, and meet their own age, energy and cooldown gates.
+Each must afford `energy_cost` with energy left over. They must be within
+`mate_radius` Euclidean grid cells (integer 1–10, default 2), with an unobstructed
+line of sight. There is no mating action, reward or neural-weight similarity gate.
+
+Pairs are selected with seeded contention. Each parent can participate in at most
+one birth per step. A child needs a free cardinal neighbor of either parent and
+cannot push population over `max_population`. Successful births charge the full
+configured energy cost to **each** parent and start both cooldowns; failed pairing,
+space or capacity checks charge neither. Newborns cannot mate in their birth step.
+Reproduction spends energy, with no direct health deduction. Presets charge each
+prey parent 10 energy (minimum breeding energy 30, leaving at least 20), and each
+predator parent 15 (minimum 40, leaving at least 25). These reserves are measured
+immediately after reproduction; later living/action costs still apply. This is a
+50% reduction from the former 20/30 costs. Edit `energy_cost` to tune the tradeoff.
+
+There is no single-parent/asexual fallback. Cooldowns use simulation steps, not
+playback time. Existing preset health and age settings are retained, with
 reproduction timing with approximately 10% deviation:
 
 | Species | First eligible age | Cooldown after an actual birth |
@@ -193,38 +205,50 @@ Older saved configurations with `age_deviation_steps` or
 semantics. New presets use percentages. Do not specify both units for the same
 clock; validation rejects that ambiguity.
 
-The [optional mutation rule](mutation.md) can reset training state after a rare
-newborn weight change; ordinary births follow the inheritance behavior below.
+Founders are balanced between female and male (an odd population has one extra
+female), shuffled with a separate seed derived from the configured seed. Sex
+assignments remain stable across runs of that config. Fresh founder weights use
+a distinct initialization seed per sex; animals of the same sex start from copies
+of their template and all controllers train independently. Sex currently changes
+mating eligibility and founder weight initialization, not body attributes or
+observations. Saved champions and chaining are separate by species and sex:
+females load female champions and males load male champions. Use `initial_brains`
+for per-sex paths and `champion_selection_by_sex` for per-sex criteria, or CLI
+selectors such as `--brain predator:male=kills`. See the
+[saved-brain guide](brain-library.md#species-and-sex-selection) for legacy archives
+without sex metadata and missing-group behavior. Controllers remain independent.
 
-A child starts at age zero, with the same species' `body.max_health` (also the
-founder's initial health) and `body.initial_energy`. It inherits an independent
-copy of its parent's current policy, critic/target model, optimizer state,
-exploration setting, learned baseline and training counters, after the parent
-receives that step's feedback. Experience buffers and pending decisions start
-empty; random streams are independent. Reproduction has no mating requirement; optional newborn mutation is described separately.
-Recurrent PPO children start with zero GRU memory; masks and centralized critic
-context are derived for the child from the current world. Children first act on
-the next step and must reach their own sampled eligible age.
-Starting health/energy are supplied by the environment; the energy cost is a
-separate parent charge, so this model does not conserve energy across births.
+A child starts at age zero with `body.max_health` and `body.initial_energy`.
+After both parents receive current-step feedback, uniform crossover selects each
+policy/value matrix weight and bias independently from either parent with 50%
+probability. This creates an independent child model, not shared parameter arrays.
+The inherited generation is one plus the older parental generation. Its sex is
+sampled with equal probability, independently of parameter crossover.
 
-Frames/checkpoints include `parent_id` (-1 for founders), `generation`,
-`last_reproduced_age` and `reproduction_due_age`. The latter is an absolute
-individual age, initially -1 until a randomized clock is scheduled. It stays -1
-with fixed timing. The inspector displays a scheduled eligible age when present. Birth events identify parent (`actor`) and child (`target`);
-metrics, CSV and summaries count births per species. The viewer emphasizes births with cyan rings that follow newborns, plus signs,
-BORN labels, a parent/child banner, and a highlighted birth counter. Markers
-last briefly across sequential chunk boundaries and reset when switching runs.
-These effects work with existing recordings that contain birth events. IDs are never reused within a run.
-Dead descendants' controllers are released. Later runs initialize from the
-previous run's champions by default; see [run chaining](brain-library.md#automatically-chain-runs). Each new run starts with the
-configured initial population. GRPO trial worlds include births with independent
-child random streams and frozen inherited policies, with independent copies for
-rare mutated trial children.
+Optimizer moments, counters, baselines, replay/rollout buffers, pending decisions
+and GRU memory start fresh after crossover; target/reference networks synchronize
+to the mixed weights. Hyperparameters and exploration settings come from the
+mother, with new child RNG streams. Masks and centralized contexts are derived
+from the current world. The [rare mutation rule](mutation.md) then optionally
+perturbs a few mixed matrix weights during training. Evaluation and random modes
+still perform crossover but skip mutation and learning. Crossover can disrupt
+learned features; it is an experimental inheritance rule.
+
+Replay bodies expose `sex`, maternal `parent_id` and paternal `second_parent_id`.
+Birth events use the mother as `actor`, the father as `mate` and child as `target`.
+The viewer inspector and cyan birth banner show both parents. Children first act
+on the next step and must reach their own maturity windows. GRPO trial children
+also get independent mixed policies, with optional rare mutations, without
+changing real controllers or physical RNG streams outside the trial.
 
 Set `enabled` to false to disable births. Omitting `reproduction` also disables
 it, keeping older environment files and checkpoints compatible. Changes affect
-new experiments; resuming uses the saved configuration. Reproduction can delay
+new experiments; resuming uses the saved configuration. Old replay files remain
+viewable. Older checkpoints without sex fields receive deterministic ID-based
+sexes, and their saved single-template founder weights migrate to both sex banks.
+Resumed births use the new paired rules: old asexual numerical trajectories are
+not preserved. New checkpoints resume exactly under the new implementation.
+Reproduction can delay
 extinction but does not guarantee a stable ecosystem: offspring still need food,
 and parents with low health cannot reproduce.
 

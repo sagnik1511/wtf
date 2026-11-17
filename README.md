@@ -1,7 +1,7 @@
 # WTF — Wildlife Trial Framework
 
 A Python reinforcement-learning ecosystem with independently learning prey and
-predators, growing resources, obstacles and reproduction. Environments are JSON;
+predators, growing resources, obstacles and paired male/female reproduction. Environments are JSON;
 a JavaScript canvas viewer replays saved runs.
 
 The simulator records first and the viewer plays later, keeping training and
@@ -31,8 +31,8 @@ You can close the simulator before starting playback. Python packages stay in
 ## Keep learned brains
 
 Completed training runs archive health, kills, lifespan and food-gain champions
-for each species inside `results/<run-name>/champions/`. Models keep their scores and ancestry.
-Use the longest-lived prey champion and predator hunting champion to start a new generation:
+for each species/sex group inside `results/<run-name>/champions/`. Models keep their scores and ancestry.
+Use the longest-lived prey champions and predator hunting champions to start a new generation:
 
 ```sh
 .venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1 \
@@ -41,8 +41,8 @@ Use the longest-lived prey champion and predator hunting champion to start a new
 
 Replace `PREVIOUS_RUN_NAME` with a folder name under `results/` containing compatible Q champions. See the
 [saved-brain guide](docs/brain-library.md) to choose another criterion, algorithm
-or exact model generation. With multiple runs, champions from each run seed the
-next by default; add `--no-chain-brains` to restart from the original models.
+or exact model generation. Species-wide selectors resolve matching female and male champions separately.
+With multiple runs, each group’s champion seeds the next run by default; add `--no-chain-brains` to restart from the original models.
 
 ## Documentation
 

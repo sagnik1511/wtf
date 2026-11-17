@@ -1,10 +1,9 @@
 """Rare sparse newborn mutations, independent of physical/action RNG streams."""
 import bisect
-import copy
 import math
 import random
 
-from .brains import inherit_brain, offspring_seed
+from .brains import inherit_brain, offspring_seed, reset_birth_training
 from .world import Event
 
 MUTATION_SEED_SALT = 0x4D55544154494F4E
@@ -45,28 +44,12 @@ def mutate_weights(brain, settings, rng):
         if after!=before:changes.append((arrays[layer],offset,after))
     if not changes:return 0
     for values,index,value in changes:values[index]=value
-    # Momentum and temporal training state belong to the pre-mutation model.
-    for key in ('replay','rollout','trajectory'):
-        if hasattr(brain,key):getattr(brain,key).clear()
-    for key in ('steps','updates','rollout_updates','cursor','last_group_step'):
-        if hasattr(brain,key):setattr(brain,key,0)
-    if hasattr(brain,'pending'):brain.pending=None
-    if hasattr(brain,'last_metrics'):brain.last_metrics={}
-    if hasattr(brain,'baseline'):brain.baseline=0.0
-    if hasattr(brain,'moments'):
-        brain.moments=brain.network.zeros();brain.variances=brain.network.zeros()
-    if hasattr(brain,'reset_memory'):brain.reset_memory()
-    if hasattr(brain,'target'):
-        brain.target={k:v.copy() for k,v in brain.weights.items()}
-    if hasattr(brain,'target_network'):
-        brain.target_network.layers=copy.deepcopy(brain.network.layers)
-    if hasattr(brain,'reference_network'):
-        brain.reference_network.layers=copy.deepcopy(brain.network.layers)
+    reset_birth_training(brain)
     return len(changes)
 
 
 def mutate_birth(world, birth, parent_brain, child_brain=None):
-    """Return a newborn policy/event. Frozen GRPO policies copy only on mutation."""
+    """Return a newborn policy/event; callers provide the crossed child policy."""
     child=world.animals[birth.target]
     settings=world.config['species'][child.species].get('mutation')
     seed=offspring_seed(world,birth.target)

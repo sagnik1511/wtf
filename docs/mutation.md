@@ -3,7 +3,7 @@
 [Configuration](configuration.md) · [Algorithms](algorithms.md) · [Saved brains](brain-library.md) · [Playback](recording.md)
 
 During training, a newborn can receive a small sparse change after inheriting its
-parent's learned brain. The parent is unchanged. Founders and existing adults
+parents' mixed learned weights. Both parents are unchanged by crossover/mutation. Founders and existing adults
 are not mutated. All nine algorithms support this optional mechanism.
 
 ## Configuration
@@ -40,7 +40,8 @@ not necessarily change the next action probability immediately.
 If floating-point rounding leaves every selected value unchanged, the birth is
 not counted as mutated and its training state is preserved. Non-finite mutated
 weights are rejected. No reward, health or energy bonus is attached to mutation.
-The child continues its normal learning algorithm afterward.
+The child continues its normal learning algorithm afterward. Mating eligibility
+is physical only; mutation does not determine whether a pair can reproduce.
 
 ## Randomness and training state
 
@@ -53,14 +54,13 @@ Changing policies can still change which births occur and later world outcomes.
 A mutated child receives fresh optimizer moments, training counters and baseline,
 with empty experience buffers and pending decisions. Q-learning/QR-DQN target
 weights and GRPO reference weights synchronize to its new online weights.
-Recurrent memory starts at zero. The inherited learning rate and Q exploration
-level remain unchanged. Unmutated children retain the previous inheritance rules,
-including copied optimizer state and empty experience buffers.
+Recurrent memory starts at zero. The learning rate and Q exploration level inherited from the mother remain
+unchanged. All children already start with fresh temporal training state after
+[paired crossover](configuration.md#reproduction), even if no mutation occurs.
 
 Evaluation and random-action runs keep inherited weights frozen and do not apply
-mutations. During training, GRPO trial worlds apply the same birth rule: ordinary
-trial descendants share frozen parent policies; rare mutated trial descendants
-receive independent policies. These hypothetical mutations cannot alter real
+mutations. During training, GRPO trial worlds apply the same birth rule: all
+trial descendants receive independent mixed policies, optionally mutated. These hypothetical mutations cannot alter real
 controllers, real counters or real-world events and are not trained in trials.
 
 ## Tracking and compatibility
@@ -96,3 +96,7 @@ existing browser decoder without changing recording cadence or chunk loading.
 Mutation introduces exploration across descendants; it does not guarantee
 improvement. Compare frozen descendants against suitable parent/baseline models
 on matched held-out worlds to assess effects beyond a single unusual trajectory.
+
+`mutation_count` follows the maximum parental lineage count plus one if this
+child mutates. It is a lineage-depth measure, not a count of unique mutation
+events across both family trees, which can have shared ancestors.

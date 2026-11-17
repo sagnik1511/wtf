@@ -4,7 +4,7 @@
 
 Commands in this guide run from the project root.
 
-Training automatically tracks four independent champions for every species:
+Training automatically tracks four independent champions for each sex within every species:
 `health` (highest HP), `kills` (most individual kills), `lifespan` (oldest age
 reached) and `food` (most actual energy gained from food or prey). Prey cannot
 kill under the current rules, so their kill score remains zero; use `food` for
@@ -56,7 +56,7 @@ then loads the highest-ranked candidate. The old archive is never rewritten.
 An unarchived individual's weights cannot be reconstructed, so this is the best
 available saved candidate, not a recovered whole-run combined champion. Future
 runs save the true combined champion and its scoring policy in
-`predator/balanced.json`. Different scoring settings also trigger rescoring of
+`predator/{female,male}/balanced.json`. Different scoring settings also trigger rescoring of
 available source candidates. Shared-library `best:balanced`/`latest:balanced`
 selectors require a matching scoring policy so unlike formulas are not ranked
 together.
@@ -75,8 +75,8 @@ which separate model-library generation contains a result:
 ```text
 results/<run-name>/champions/run_0001.json
 results/<run-name>/champions/run_0001/manifest.json
-results/<run-name>/champions/run_0001/prey/{health,kills,lifespan,food}.json
-results/<run-name>/champions/run_0001/predator/{health,kills,lifespan,food,balanced}.json
+results/<run-name>/champions/run_0001/prey/{female,male}/{health,kills,lifespan,food}.json
+results/<run-name>/champions/run_0001/predator/{female,male}/{health,kills,lifespan,food,balanced}.json
 ```
 
 The experiment folder is self-contained. Moving it keeps its models usable.
@@ -91,7 +91,7 @@ List the available champions by run name:
 ```
 
 The model snapshots contain weights and provenance, with no replay or optimizer
-buffers. Tracking retains at most four models per resource-eating species and five per predator species and performs no disk
+buffers. Tracking retains at most four models per resource-eating species/sex group and five per predator species/sex group and performs no disk
 writes inside the simulation-step loop. Models are published atomically when
 the numbered run completes.
 
@@ -110,11 +110,11 @@ An explicit experiment path also works for a custom results directory.
 `--brains-from` defaults to its latest archived run and the species' configured
 `champion_selection.criterion`, falling back to lifespan for resource eaters and
 kills for predators. The GRPO preset configures predators to use `balanced`. Add `--brain-run 1` to pin a
-particular run. Each selected model must match the target species and architecture.
+particular run. Each selected model must match the target species, recorded sex and architecture.
 The source artifacts stay unchanged, and the new experiment saves the resolved
 paths in `environment.json` and their provenance in `manifest.json`.
 
-Repeat `--brain SPECIES=MODEL` to select any configured species. `MODEL` accepts:
+Repeat `--brain SPECIES[:SEX]=MODEL` to select a species or a particular sex. `MODEL` accepts:
 
 | Value | Selection |
 | --- | --- |
@@ -122,7 +122,7 @@ Repeat `--brain SPECIES=MODEL` to select any configured species. `MODEL` accepts
 | `best:food`, `best:kills`, etc. | Best compatible champion across the library |
 | `latest:lifespan`, etc. | Criterion from the latest compatible library generation |
 | Path to an artifact JSON | Exact saved model |
-| `fresh` | Fresh initialization for that species, overriding any JSON warm start |
+| `fresh` | Fresh initialization for that species or species/sex, overriding any JSON warm start |
 
 For example, choose different per-run champions or keep one species fresh:
 
@@ -136,6 +136,37 @@ For example, choose different per-run champions or keep one species fresh:
 Unknown species, duplicate selections, missing artifacts and incompatible models
 fail before a new results folder is created. These options cannot be combined
 with `--resume`, which restores the exact saved experiment instead.
+
+## Species and sex selection
+
+Best brains are separate for `prey:female`, `prey:male`, `predator:female` and
+`predator:male`. All health/kills/lifespan/food records, predator balanced records,
+archive ancestry and run-to-run transfers stay within their matching group.
+Species-wide flags such as `--brain prey=lifespan` choose the female lifespan
+champion for females and the male lifespan champion for males. They do not pick
+one winner across both sexes.
+
+Choose different criteria or reset just one group:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 10 \
+  --brains-from PREVIOUS_PPO_RUN_NAME \
+  --brain prey=lifespan --brain predator=fresh --brain predator:male=kills
+```
+
+A sex-specific flag takes precedence over a species-wide flag regardless of
+argument order. Duplicate requests for the same exact group are rejected.
+`--brain prey:male=best:lifespan` filters shared-library records by male sex;
+`latest:` works the same way. Explicit sex-specific selections fail if missing
+or mismatched. Automatic `--brains-from` loading leaves an unavailable sex fresh,
+rather than copying the opposite-sex winner. Such groups are absent from the
+recorded `initialized_from` map. Inspect saved manifest provenance per species/sex.
+
+A path to a known-sex artifact supplied as `prey=PATH` initializes only that sex.
+Supplying it as `prey:male=PATH` rejects a female artifact. Legacy version-1
+artifacts without any sex metadata can seed both sexes as a shared starting
+model; they are not evidence of separately selected historical sex champions.
+A version-1 artifact that does record sex still initializes only that sex.
 
 ## Optional JSON defaults
 
@@ -152,14 +183,15 @@ experiment starts, and each agent receives an independent copy. To pin a
 specific generation, use the path printed by the library command:
 
 ```json
-"initial_brain": {"path": "results/PREVIOUS_RUN_NAME/champions/run_0001/prey/food.json"}
+"initial_brain": {"path": "results/PREVIOUS_RUN_NAME/champions/run_0001/prey/female/food.json"}
 ```
 
 Relative paths resolve from the project root, regardless of the working
-directory. Files must match species, algorithm, network shape, observation
+directory. Files must match species, recorded sex, algorithm, network shape, observation
 version and action order. A Q model cannot initialize a PPO or GRPO controller.
 Malformed or non-finite weights are rejected. A selector with no compatible
-model fails clearly; it never silently substitutes a fresh brain.
+model fails clearly when explicitly selected for a sex. Broad selections may
+leave an unavailable sex fresh, as described above.
 
 Each newly initialized controller gets fresh body state, empty experience
 buffers, fresh optimizer state and random streams, and the exploration settings
@@ -172,10 +204,10 @@ so resuming does not need the original files or newer archive versions.
 ## Automatically chain runs
 
 `experiment.chain_best_brains` defaults to `true`. When `--runs` is greater than
-one, each later training run starts all animals of a species from the previous
+one, each later training run starts each species/sex group from its own previous
 run's selected champion. The criterion stays the same: `--brain prey=lifespan` keeps
-choosing the previous run's prey lifespan champion, and `predator=kills` keeps choosing
-its predator kill champion. Without a saved starting model, these are also the
+choosing the previous run's female and male prey lifespan champions separately,
+and `predator=kills` does the same for predator kill champions. Without a saved starting model, these are also the
 default criteria unless `species.<name>.champion_selection.criterion` selects
 another. Explicit CLI criterion selectors also set that species' chaining
 criterion. Models transfer in memory even with `--no-library`.
@@ -274,3 +306,37 @@ Selected champions from these lineages include `mutated`, `mutation_count` and
 are unchanged. A new run starts a new biological family tree while retaining
 model ancestry through its source artifact. Replays contain scalar lineage/event
 information rather than the actual parameter arrays.
+
+Paired births record both biological parent IDs and sex in champion source
+metadata. A child mixes the two current brains, then optionally mutates. The
+archive's run-to-run source artifact chain is species/sex-specific and is distinct
+from the within-run biological two-parent family tree. A newborn's random sex
+determines which champion pool it competes in, after inheriting from both parents.
+
+## Per-sex JSON overrides and archive versions
+
+Inside a species, `initial_brains` overrides the common `initial_brain` request
+for a particular sex; `null` means explicitly fresh. Criteria for subsequent
+chaining can also differ:
+
+```json
+"initial_brains": {
+  "female": {"path": "results/PREVIOUS_RUN_NAME/champions/run_0001/prey/female/lifespan.json"},
+  "male": null
+},
+"champion_selection_by_sex": {"female": "lifespan", "male": "food"}
+```
+
+An omitted sex inherits the common initialization request, if present. An omitted
+sex-specific criterion uses `champion_selection.criterion` or the existing
+species default. Balanced scoring parameters remain species-wide, but candidate
+ranking is independent for male and female predators.
+
+New manifests/indexes use `library_version: 2` and artifacts use
+`brain_artifact_version: 2`. Readers accept versions 1 and 2. No old archive is
+rewritten. Older checkpoints with a species-only champion book retain historical
+winners only when their sex was recorded, and seed missing groups from currently
+living controllers. Unsaved historical winners cannot be reconstructed. Old
+species-wide source initialization is preserved on checkpoint migration; new
+selection/chaining is sex-specific. Current checkpoints preserve both pools
+and provenance, including when source files are unavailable.

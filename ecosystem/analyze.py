@@ -85,7 +85,7 @@ class Statistics:
             c['moves'] += 1
         elif kind == 'born':
             c['births'] += 1
-            cost = spec.get('reproduction', {}).get('energy_cost', 0)
+            cost = spec.get('reproduction', {}).get('energy_cost', 0) * (2 if event.get('mate', -1) >= 0 else 1)
             c['energy_demand'] += cost
             c['reproduction_energy'] += cost
             c['offspring_energy'] += spec['body']['initial_energy']

@@ -144,3 +144,48 @@ def load_model_weights(brain, model):
             brain.target_network.layers = copy.deepcopy(parameters)
         if hasattr(brain, "reference_network"):
             brain.reference_network.layers = copy.deepcopy(parameters)
+
+
+def reset_birth_training(brain):
+    """New inherited parameters cannot reuse either parent's temporal state."""
+    import copy
+    for key in ('replay', 'rollout', 'trajectory'):
+        if hasattr(brain, key):getattr(brain, key).clear()
+    for key in ('steps', 'updates', 'rollout_updates', 'cursor', 'last_group_step'):
+        if hasattr(brain, key):setattr(brain, key, 0)
+    if hasattr(brain, 'pending'):brain.pending = None
+    if hasattr(brain, 'last_metrics'):brain.last_metrics = {}
+    if hasattr(brain, 'baseline'):brain.baseline = 0.0
+    if hasattr(brain, 'moments'):
+        brain.moments = brain.network.zeros();brain.variances = brain.network.zeros()
+    if hasattr(brain, 'reset_memory'):brain.reset_memory()
+    if hasattr(brain, 'target'):brain.target = copy.deepcopy(brain.weights)
+    if hasattr(brain, 'target_network'):brain.target_network.layers = copy.deepcopy(brain.network.layers)
+    if hasattr(brain, 'reference_network'):brain.reference_network.layers = copy.deepcopy(brain.network.layers)
+
+
+def mix_parent_brains(mother, father, seed):
+    """Uniform parameter crossover; independent child, RNGs and learning state.
+
+    Copies both matrix weights and biases, choosing each scalar from one parent.
+    Neurons in independently learned networks need not align; crossover is an
+    experimental inheritance rule, not a guarantee of preserving performance.
+    """
+    import random
+    if model_signature(mother.config, mother.actions) != model_signature(father.config, father.actions):
+        raise ValueError('Parents must have compatible brain architectures and actions')
+    child = inherit_brain(mother, seed)
+    left = child.weights if child.config['type'] == 'q_network' else child.network.layers
+    right = father.weights if father.config['type'] == 'q_network' else father.network.layers
+    rng = random.Random(seed ^ 0x43524F53534F564552)
+    def cross(a, b):
+        if isinstance(a, dict):
+            for key in a:cross(a[key], b[key])
+        elif a and isinstance(a[0], dict):
+            for x, y in zip(a, b):cross(x, y)
+        else:
+            for index in range(len(a)):
+                if rng.getrandbits(1):a[index] = b[index]
+    cross(left, right)
+    reset_birth_training(child)
+    return child

@@ -38,9 +38,9 @@ class BalancedChampionsTests(unittest.TestCase):
         a.kills,a.age=8,600;b.kills,b.age=9,100
         brains={3:e.brains[3],99:e.brains[3]}
         book.consider([a,b],brains,{'tick':600})
-        self.assertEqual(book.entries['predator']['balanced']['source']['animal_id'],3)
-        self.assertEqual(book.entries['predator']['kills']['source']['animal_id'],99)
-        candidate=book.entries['predator']['balanced'];self.assertEqual(candidate['score'],10)
+        self.assertEqual(book.entries['predator']['female']['balanced']['source']['animal_id'],3)
+        self.assertEqual(book.entries['predator']['female']['kills']['source']['animal_id'],99)
+        candidate=book.entries['predator']['female']['balanced'];self.assertEqual(candidate['score'],10)
         self.assertEqual(candidate['selection_policy']['max_survival_bonus'],2)
         saved=copy.deepcopy(candidate);e.brains[3].weights['b2'][0]+=10
         self.assertEqual(candidate,saved)
@@ -52,24 +52,24 @@ class BalancedChampionsTests(unittest.TestCase):
                 c=settings(kind);c['species']['predator']['champion_selection']={'criterion':'balanced'}
                 e=Experiment(c)
                 while not e.finished_run:e.step()
-                expected=copy.deepcopy(e.champions.entries['predator']['balanced']['model'])
+                expected=copy.deepcopy(e.champions.entries['predator']['female']['balanced']['model'])
                 e.next_run()
                 for i,a in e.world.animals.items():
                     if a.species=='predator':self.assertEqual(model_snapshot(e.brains[i]),expected)
-                self.assertEqual(e.run_initial_models['predator']['provenance']['criterion'],'balanced')
+                self.assertEqual(e.run_initial_models['predator']['female']['provenance']['criterion'],'balanced')
 
     def test_old_archives_rescore_available_models_without_rewriting_source(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);e=Experiment(config())
             while not e.finished_run:e.step()
             # Simulate an archive created before combined scoring existed.
-            e.champions.entries['predator'].pop('balanced');export_champions(e,root/'source/champions/run_0001.json')
+            e.champions.entries['predator']['female'].pop('balanced');export_champions(e,root/'source/champions/run_0001.json')
             files={p:p.read_bytes() for p in (root/'source').rglob('*') if p.is_file()}
             c=balanced_config();apply_brain_overrides(c,source_experiment=root/'source')
             a=Experiment(c)
-            self.assertEqual(a.initial_models['predator']['provenance']['chaining_criterion'],'balanced')
+            self.assertEqual(a.initial_models['predator']['female']['provenance']['chaining_criterion'],'balanced')
             while not a.finished_run:a.step()
-            expected=copy.deepcopy(a.champions.entries['predator']['balanced']['model']);a.next_run()
+            expected=copy.deepcopy(a.champions.entries['predator']['female']['balanced']['model']);a.next_run()
             for i,animal in a.world.animals.items():
                 if animal.species=='predator':self.assertEqual(model_snapshot(a.brains[i]),expected)
             for p,data in files.items():self.assertEqual(p.read_bytes(),data)
@@ -78,13 +78,13 @@ class BalancedChampionsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);e=Experiment(balanced_config())
             export_champions(e,root/'source/champions/run_0001.json')
-            artifact=json.loads((root/'source/champions/run_0001/predator/balanced.json').read_text())
+            artifact=json.loads((root/'source/champions/run_0001/predator/female/balanced.json').read_text())
             self.assertEqual(artifact['selection_policy'],balanced_policy(e.config,'predator'))
             for metric in ('balanced','kills'):
                 c=balanced_config();apply_brain_overrides(c,[f'predator={metric}'],root/'source')
                 a=Experiment(c)
-                self.assertEqual(a.initial_models['predator']['provenance']['criterion'],metric)
-                self.assertEqual(c['species']['predator']['champion_selection']['criterion'],metric)
+                self.assertEqual(a.initial_models['predator']['female']['provenance']['criterion'],metric)
+                self.assertEqual(c['species']['predator']['champion_selection_by_sex']['female'],metric)
 
     def test_balanced_library_selection_requires_compatible_scoring_policy(self):
         with tempfile.TemporaryDirectory() as directory:

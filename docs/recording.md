@@ -15,11 +15,12 @@ checkpoint or advances the world.
 - Choose any saved run using the **Run** dropdown in the top toolbar. **Previous run** and **Next run** jump between runs; the frame slider, **Back**, and **Next frame** inspect the current timeline.
 - Playback automatically continues into the next recorded run and stops after the final run.
 - A recording opened during training discovers new committed frames/runs when it reaches the available end. It waits for new data and refreshes metadata at most once every two seconds.
-- Click an animal to see its body, lineage and sampled brain diagnostics.
+- Click an animal to see its body, sex, both biological parents, lineage and sampled brain diagnostics.
+- Female/male prey are green/blue circles; female/male predators are orange/gold triangles. Males also have a light outline. The board legend uses matching ♀/♂ keys. Species chart colors remain green/orange. Older recordings without sex data retain their base species colors.
 - Set **Frames / second** to change playback speed; simulation outcomes stay fixed.
 - Kills have red rings, attacker highlights, KILL labels and a banner.
 - Natural deaths use green rings for prey and amber rings for predators, with DIED labels.
-- Births use cyan rings and plus signs, BORN labels, a parent/child banner and a counter.
+- Births use cyan rings and plus signs, BORN labels, a two-parent/child banner for paired births and a counter.
 - Playback continues through events at the chosen rate. Event animations remain visible.
 - Event markers continue across sequential chunk boundaries and reset across runs.
 - **Behavior & learning** analyzes the entire saved run, including later frames; see [metric definitions](analysis.md).

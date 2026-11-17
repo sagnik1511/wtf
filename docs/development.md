@@ -88,3 +88,15 @@ parent/RNG independence, zero/disabled behavior, optimizer/target/reference
 resets, update accounting, lineage inheritance, frozen evaluation, GRPO trial
 isolation, readable mutation metrics, champion provenance and exact JSON/binary
 resume. Forced events also pass the JavaScript binary replay decoder.
+
+`tests/test_paired_reproduction.py` covers sex-specific founder templates,
+independent uniform crossover and fresh child training state for all nine
+algorithms, both-parent lineage through JSON/binary checkpoints, pair population
+caps, single-survivor infertility, legacy migration and dual-parent energy
+accounting. Reproduction/window fixtures now require eligible pairs; JavaScript
+birth-marker checks retain both parents across chunk transitions.
+
+`tests/test_sex_champions.py` covers four independent champion groups, sex-specific
+archive paths/ancestry, all-nine-algorithm warm starts and chaining, broad/narrow
+CLI precedence, fresh/missing-sex behavior, incompatible sex rejection, shared
+library filtering, version-1 migration and source-independent checkpoint resume.

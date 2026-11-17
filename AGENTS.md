@@ -11,9 +11,12 @@ rather than loading every document or result into context.
 - Environments belong in `environments/*.json`, validated by `ecosystem/config.py`
   and `environment.schema.json`. Prefer CLI selectors for run-specific brain
   initialization; avoid hardcoding a result path into Python.
-- Animals learn independently. Birth copies a parent's brain into a separate
-  controller. Rare birth mutation changes only that child. Preserve RNG isolation
-  and exact checkpoint continuation when changing these paths.
+- Animals learn independently. Birth requires an eligible same-species male/female
+  pair and mixes their parameters into an independent child with fresh training
+  state. Rare birth mutation changes only that child. Preserve RNG isolation
+  and exact checkpoint continuation when changing these paths. Champion pools,
+  model loading and run-to-run chaining are species/sex-specific; never substitute
+  a known opposite-sex winner for an unavailable group.
 - Optimize disk, RAM and repeated computation while preserving recorded values,
   playback controls, chart history, random seeking and legacy readers. Caches of
   dynamic observations must invalidate when relevant animals/resources change.

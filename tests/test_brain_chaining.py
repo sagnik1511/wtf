@@ -24,12 +24,12 @@ class BrainChainingTests(unittest.TestCase):
             with self.subTest(kind=kind):
                 c=settings(kind);c['experiment'].pop('chain_best_brains',None)
                 e=Experiment(c);self.finish(e)
-                expected={s:copy.deepcopy(e.champions.entries[s][metric]['model'])
-                          for s,metric in [('prey','lifespan'),('predator','kills')]}
+                expected={(s,sex):copy.deepcopy(groups[metric]['model'])
+                          for s,metric in [('prey','lifespan'),('predator','kills')] for sex,groups in e.champions.entries[s].items()}
                 count=e.total_updates
                 e.next_run()
                 for i,a in e.world.animals.items():
-                    self.assertEqual(model_snapshot(e.brains[i]),expected[a.species])
+                    self.assertEqual(model_snapshot(e.brains[i]),expected[a.species,a.sex])
                     self.assertEqual(e.brains[i].steps,0)
                     self.assertEqual(e.brains[i].updates,0)
                 self.assertEqual(e.total_updates,count)
@@ -48,19 +48,19 @@ class BrainChainingTests(unittest.TestCase):
             archive=export_champions(e,root/'source/champions/run_0001.json')
             for chain in (True,False):
                 c=config();c['experiment']['chain_best_brains']=chain
-                c['species']['prey']['initial_brain']={'path':str(archive/'prey/health.json')}
-                a=Experiment(c);original=copy.deepcopy(a.initial_models['prey']['model'])
+                c['species']['prey']['initial_brain']={'path':str(archive/'prey/female/health.json')}
+                a=Experiment(c);original=copy.deepcopy(a.initial_models['prey']['female']['model'])
                 self.finish(a)
                 saved=export_champions(a,root/f'new_{chain}/champions/run_0001.json')
-                prior=json.loads((saved/'prey/health.json').read_text())
-                expected=copy.deepcopy(a.champions.entries['prey']['health']['model']) if chain else original
+                prior=json.loads((saved/'prey/female/health.json').read_text())
+                expected=copy.deepcopy(a.champions.entries['prey']['female']['health']['model']) if chain else original
                 a.next_run()
                 self.assertEqual(model_snapshot(a.brains[0]),expected)
                 if chain:
-                    self.assertEqual(a.run_initial_models['prey']['provenance']['artifact_id'],prior['artifact_id'])
+                    self.assertEqual(a.run_initial_models['prey']['female']['provenance']['artifact_id'],prior['artifact_id'])
                     self.finish(a)
                     next_archive=export_champions(a,root/'next/champions/run_0002.json')
-                    exported=json.loads((next_archive/'prey/health.json').read_text())
+                    exported=json.loads((next_archive/'prey/female/health.json').read_text())
                     self.assertEqual(exported['parent_artifact']['artifact_id'],prior['artifact_id'])
                     self.assertEqual(exported['model_generation'],prior['model_generation']+1)
 
@@ -89,7 +89,7 @@ class BrainChainingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);source=Experiment(config())
             archive=export_champions(source,root/'source/champions/run_0001.json')
-            original=json.loads((archive/'prey/health.json').read_text())
+            original=json.loads((archive/'prey/female/health.json').read_text())
             environment=root/'environment.json';environment.write_text(json.dumps(config()))
             for chain in (True,False):
                 output=root/f'output_{chain}'
@@ -101,7 +101,7 @@ class BrainChainingTests(unittest.TestCase):
                 subprocess.run(command,check=True,capture_output=True,text=True)
                 folder=next(output.iterdir());parent=original['artifact_id']
                 for number in (1,2,3):
-                    artifact=json.loads((folder/f'champions/run_{number:04d}/prey/health.json').read_text())
+                    artifact=json.loads((folder/f'champions/run_{number:04d}/prey/female/health.json').read_text())
                     self.assertEqual(artifact['parent_artifact']['artifact_id'],parent)
                     if chain:parent=artifact['artifact_id']
                 checkpoint=read_checkpoint(folder/'checkpoints/final.json.gz')

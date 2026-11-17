@@ -68,8 +68,8 @@ def main():
     parser.add_argument("--brains-from", type=Path,
                         help="Source run name in results/ or experiment path; defaults to its latest archived numbered run")
     parser.add_argument("--brain-run", type=int, help="Archived run number within --brains-from")
-    parser.add_argument("--brain", action="append", default=[], metavar="SPECIES=MODEL",
-                        help="Repeat per species: criterion (including balanced) from --brains-from, JSON path, best:metric, latest:metric, or fresh")
+    parser.add_argument("--brain", action="append", default=[], metavar="SPECIES[:SEX]=MODEL",
+                        help="Repeat per species/sex (prey:male=lifespan): criterion (including balanced) from --brains-from, JSON path, best:metric, latest:metric, or fresh")
     chain = parser.add_mutually_exclusive_group()
     chain.add_argument("--chain-brains", dest="chain_brains", action="store_true",
                        help="Initialize later runs from the previous run's champions (default)")
@@ -125,7 +125,7 @@ def main():
             "python": sys.version,
             "platform": platform.platform(),
             "resumed_from": str(args.resume) if args.resume else None,
-            "initialized_from": {species: value["provenance"] for species, value in experiment.initial_models.items()},
+            "initialized_from": {species: {sex: value["provenance"] for sex, value in groups.items()} for species, groups in experiment.initial_models.items()},
             "randomization_seed": experiment.randomization_seed,
             "checkpoint_version": {"json":1,"compact":2,"binary":3}[args.checkpoint_format],
             "checkpoint_format": args.checkpoint_format,

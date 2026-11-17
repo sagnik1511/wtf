@@ -183,7 +183,8 @@ class LearningTests(unittest.TestCase):
 
     def test_independent_brains(self):
         e = Experiment(config())
-        a, b = e.brains[0], e.brains[1]
+        ids = [i for i,a in e.world.animals.items() if a.species=='prey' and a.sex=='female']
+        a, b = [e.brains[i] for i in ids]
         self.assertEqual(a.weights, b.weights)
         saved = copy.deepcopy(b.checkpoint())
         for _ in range(4):
@@ -241,7 +242,7 @@ class ExperimentTests(unittest.TestCase):
             original = model_snapshot(e.brains[0])
             for _ in range(3):
                 e.step()
-            expected = e.champions.entries["prey"]["food"]["model"] if chain else original
+            expected = e.champions.entries["prey"]['female']["food"]["model"] if chain else original
             e.next_run()
             self.assertEqual(model_snapshot(e.brains[0]), expected)
             self.assertEqual(e.brains[0].steps, 0)

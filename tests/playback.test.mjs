@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Playback } from '../viewer/playback.mjs';
+import { recentBirths } from '../viewer/birth-highlights.mjs';
 
 function setup() {
   const manifest = {recording_version:1,name:'test',mode:'train',recording:{frames_per_chunk:3},config:{world:{width:8,height:8},resources:{capacity_per_patch:20},species:{prey:{diet:'resource'}}},runs:[{run:1,obstacles:[],frame_count:8},{run:2,obstacles:[[1,1]],frame_count:2}]};
@@ -285,4 +286,13 @@ test('Metadata refresh extends a partial chunk and clears waiting after a record
   count=3;complete=true;clock=2000;
   const next=await p.advance();assert.equal(next.tick,1);assert.equal(p.frames.length,3);
   await p.advance();assert.equal(p.snapshot().done,true);assert.equal(p.snapshot().waiting,false);
+});
+
+test('Paired birth highlights retain both parents through chunk carry and legacy events still work', () => {
+  const frames=[{tick:5,animals:[{id:12,species:'prey',x:3,y:4}],events:[{kind:'born',actor:2,mate:7,target:12}]}];
+  const markers=recentBirths(frames,0,0);
+  assert.equal(markers[0].actor,2);
+  assert.equal(markers[0].mate,7);
+  const carried=recentBirths([{tick:6,animals:[],events:[]}],1,0,markers);
+  assert.equal(carried[0].mate,7);
 });

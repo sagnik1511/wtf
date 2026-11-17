@@ -33,6 +33,8 @@ class Animal:
     mutated: bool = False
     mutation_count: int = 0
     mutation_weights: int = 0
+    sex: str = "female"
+    second_parent_id: int = -1
 
     @property
     def position(self):
@@ -53,6 +55,7 @@ class Event:
     target: int = -1
     amount: float = 0.0
     cause: str = ""
+    mate: int = -1
 
 
 @dataclass
@@ -88,8 +91,11 @@ class World:
         }
         layout.shuffle(free)
         self.animals = {}
-        for species, s in config["species"].items():
-            for _ in range(s["initial_population"]):
+        for species_index, (species, s) in enumerate(config["species"].items()):
+            # Balanced founders, shuffled independently of layout/actions/learning.
+            sexes = ['female' if n % 2 == 0 else 'male' for n in range(s['initial_population'])]
+            random.Random(config["seed"] ^ 0x534558 ^ (species_index * 7919)).shuffle(sexes)
+            for sex in sexes:
                 x, y = free.pop()
                 i = len(self.animals)
                 self.animals[i] = Animal(
@@ -100,6 +106,7 @@ class World:
                     layout.randrange(4),
                     s["body"]["initial_energy"],
                     s["body"]["max_health"],
+                    sex=sex,
                 )
         self.next_animal_id = len(self.animals)
         self.births = defaultdict(int)
@@ -424,46 +431,62 @@ class World:
             ):
                 eligible.append(a)
         if not eligible:
-            return  # No contention or placement draws until a parent is ready.
+            return
         self.rng.shuffle(eligible)
         occupied = {a.position for a in parents}
-        for parent in eligible:
-            spec = self.config["species"][parent.species]
-            r = spec["reproduction"]
-            if counts[parent.species] >= r["max_population"]:
+        males = {(a.species, a.x, a.y): a for a in eligible if a.sex == 'male'}
+        used = set()
+        for mother in eligible:
+            if mother.sex != 'female':
                 continue
-            free = [
-                (parent.x + dx, parent.y + dy)
-                for dx, dy in DIRECTIONS
-                if not self.blocked((parent.x + dx, parent.y + dy))
-                and (parent.x + dx, parent.y + dy) not in occupied
-            ]
-            if not free:
+            spec = self.config['species'][mother.species]
+            r = spec['reproduction']
+            if counts[mother.species] >= r['max_population']:
+                continue
+            radius = r.get('mate_radius', 2)
+            candidates = []
+            for dy in range(-radius, radius + 1):
+                for dx in range(-radius, radius + 1):
+                    if dx*dx + dy*dy > radius*radius:
+                        continue
+                    mate = males.get((mother.species, mother.x+dx, mother.y+dy))
+                    if mate is not None and mate.id not in used and self.visible(mother.position, mate.position):
+                        candidates.append(mate)
+            if not candidates:
+                continue
+            # Find placeable pairs before committing either parent's resources.
+            self.rng.shuffle(candidates)
+            for father in candidates:
+                free = list(dict.fromkeys(
+                    (parent.x+dx, parent.y+dy)
+                    for parent in (mother, father) for dx, dy in DIRECTIONS
+                    if not self.blocked((parent.x+dx, parent.y+dy))
+                    and (parent.x+dx, parent.y+dy) not in occupied))
+                if free:
+                    break
+            else:
                 continue
             x, y = self.rng.choice(free)
             child_id = self.next_animal_id
             self.next_animal_id += 1
             child = Animal(
-                child_id,
-                parent.species,
-                x,
-                y,
-                self.rng.randrange(4),
-                spec["body"]["initial_energy"],
-                spec["body"]["max_health"],
-                parent_id=parent.id,
-                generation=parent.generation + 1,
-                mutation_count=parent.mutation_count,
-            )
+                child_id, mother.species, x, y, self.rng.randrange(4),
+                spec['body']['initial_energy'], spec['body']['max_health'],
+                parent_id=mother.id, second_parent_id=father.id,
+                sex=self.rng.choice(('female', 'male')),
+                generation=max(mother.generation, father.generation)+1,
+                mutation_count=max(mother.mutation_count, father.mutation_count))
             self.animals[child_id] = child
             occupied.add(child.position)
-            counts[parent.species] += 1
-            parent.energy -= r["energy_cost"]
-            parent.last_reproduced_age = parent.age
-            if windowed[parent.species]:
-                parent.reproduction_due_age = parent.age + self._reproduction_interval(r)
-            self.births[parent.species] += 1
-            events.append(Event("born", parent.id, child_id, cause="reproduction"))
+            counts[mother.species] += 1
+            for parent in (mother, father):
+                used.add(parent.id)
+                parent.energy -= r['energy_cost']
+                parent.last_reproduced_age = parent.age
+                if windowed[parent.species]:
+                    parent.reproduction_due_age = parent.age + self._reproduction_interval(r)
+            self.births[mother.species] += 1
+            events.append(Event('born', mother.id, child_id, cause='paired_reproduction', mate=father.id))
 
     def metrics(self):
         populations = Counter(a.species for a in self.animals.values())
@@ -518,6 +541,7 @@ class World:
             animal = dict(original)
             if "kills" not in animal:
                 animal["statistics_since_age"] = animal["age"]
+            animal.setdefault('sex', 'female' if animal['id'] % 2 == 0 else 'male')
             w.animals[animal["id"]] = Animal(**animal)
         w.resources = {(r["x"], r["y"]): Resource(**r) for r in s["resources"]}
         w.events = [Event(**e) for e in s["events"]]

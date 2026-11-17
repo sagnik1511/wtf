@@ -10,13 +10,13 @@ Local results and running processes change independently of Git.
 
 WTF — Wildlife Trial Framework — explores independently learning prey and
 predators in a grid world with food, obstacles, energy, health, death and
-reproduction. It is an experimental ecosystem, not a calibrated biological model.
+paired male/female reproduction. It is an experimental ecosystem, not a calibrated biological model.
 The priorities established during development are:
 
 - Configurable experiments as JSON, with Python simulation and JavaScript rendering.
 - Record first, play later: training can finish and exit before opening the viewer.
-- Private animal brains, inherited learned weights, run-local champion archives and
-  optional champion chaining between runs.
+- Private animal brains, inherited learned weights, run-local species/sex champion archives and
+  optional matching-sex champion chaining between runs.
 - Small disk footprints and bounded replay memory, preserving viewer features and
   numerical information. Binary replay data need not be human-readable; metrics do.
 - Charts that follow the current replay step, with distinct whole-run analysis.
@@ -45,18 +45,19 @@ World actions resolve together; death terminates an animal's experience, while
 an episode time limit is a truncation. Different algorithms have different
 bootstrap rules. Evaluation freezes learning and newborn mutation. GRPO trial
 worlds must not change real-world controllers, RNGs or event counts. Mutated
-newborns get independent weights and reset training state as described in the
-mutation guide. None of these features imply a shared species policy.
+newborns get independent mixed weights. All newborn training state resets after
+paired crossover; the mutation guide describes the additional rare changes.
+None of these features imply a shared species policy.
 
 A fresh invocation, a warm start and exact resume are different operations:
 
 - A fresh start initializes controllers using the selected config/CLI. To ensure
   no saved weights are used, inspect `initial_brain` and use species `fresh`
   selectors as appropriate.
-- `--brains-from RUN_NAME` selects archived brains; `--brain SPECIES=CRITERION`
-  chooses the metric and `--brain-run N` chooses a numbered archived run.
+- `--brains-from RUN_NAME` selects archived brains; `--brain SPECIES[:SEX]=CRITERION`
+  chooses the group/metric and `--brain-run N` chooses a numbered archived run.
 - `--no-chain-brains` returns each run to its original initialization. Chaining
-  normally uses the previous run's champions; verify config/CLI overrides.
+  normally uses the previous run's matching species/sex champions; verify config/CLI overrides.
 - `--resume CHECKPOINT` restores full saved state, unlike loading champion weights.
 
 Binary chunks use independent keyframes plus deltas and compression. The server

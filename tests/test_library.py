@@ -28,9 +28,9 @@ class ChampionTests(unittest.TestCase):
                  Animal(1,'prey',2,1,0,60,25,age=10,energy_gained=20),
                  Animal(2,'prey',3,1,0,60,30,age=8,energy_gained=1)]
         book.consider(animals,e.brains,dict(tick=10))
-        self.assertEqual(book.entries['prey']['health']['source']['animal_id'],2)
-        self.assertEqual(book.entries['prey']['lifespan']['source']['animal_id'],1)
-        self.assertEqual(book.entries['prey']['food']['source']['animal_id'],1)
+        self.assertEqual(book.entries['prey']['female']['health']['source']['animal_id'],2)
+        self.assertEqual(book.entries['prey']['female']['lifespan']['source']['animal_id'],1)
+        self.assertEqual(book.entries['prey']['female']['food']['source']['animal_id'],1)
         saved=copy.deepcopy(book.entries)
         e.brains[1].weights['b2'][0]+=100
         animals[1].health=0
@@ -45,12 +45,12 @@ class ChampionTests(unittest.TestCase):
         brain=e.brains[child.id]
         e.observations=e.world.observe_all();e.step()
         self.assertNotIn(child.id,e.brains)
-        candidate=e.champions.entries['prey']['lifespan']
+        candidate=e.champions.entries['prey'][child.sex]['lifespan']
         self.assertEqual(candidate['source']['animal_id'],child.id)
         self.assertEqual(candidate['score'],101)
         self.assertFalse(candidate['source']['alive'])
         self.assertEqual(candidate['model'],model_snapshot(brain))
-        self.assertEqual(e.champions.entries['prey']['kills']['score'],7)
+        self.assertEqual(e.champions.entries['prey'][child.sex]['kills']['score'],7)
 
     def test_lifetime_kills_and_energy_are_individual_and_children_start_at_zero(self):
         e=breeding_experiment()
@@ -85,11 +85,11 @@ class LibraryTests(unittest.TestCase):
                 root=Path(directory);c=settings(kind);e=Experiment(c)
                 for _ in range(4):e.step()
                 archive=self.export(e,root)
-                c['species']['prey']['initial_brain']={'path':str(archive/'prey'/'lifespan.json')}
+                c['species']['prey']['initial_brain']={'path':str(archive/'prey'/'female'/'lifespan.json')}
                 e2=Experiment(c,library_root=root/'library')
-                expected=e.champions.entries['prey']['lifespan']['model']
+                expected=e.champions.entries['prey']['female']['lifespan']['model']
                 for i,a in e2.world.animals.items():
-                    if a.species!='prey':continue
+                    if a.species!='prey' or a.sex!='female':continue
                     brain=e2.brains[i]
                     self.assertEqual(model_snapshot(brain),expected)
                     self.assertEqual((brain.steps,brain.updates),(0,0))
@@ -117,24 +117,24 @@ class LibraryTests(unittest.TestCase):
             first=self.export(e,root)
             e=Experiment(config());e.step();second=self.export(e,root)
             self.assertNotEqual(first,second)
-            self.assertTrue((first/'prey/lifespan.json').is_file())
+            self.assertTrue((first/'prey/female/lifespan.json').is_file())
             c=config();c['species']['prey']['initial_brain']={'selection':'best','metric':'lifespan'}
             best=Experiment(c,library_root=root/'library')
-            self.assertEqual(best.initial_models['prey']['provenance']['score'],100)
+            self.assertEqual(best.initial_models['prey']['female']['provenance']['score'],100)
             c['species']['prey']['initial_brain']['selection']='latest'
             latest=Experiment(c,library_root=root/'library')
-            self.assertEqual(latest.initial_models['prey']['provenance']['score'],1)
-            self.assertEqual(len(catalog(root/'library')),18)
+            self.assertEqual(latest.initial_models['prey']['female']['provenance']['score'],1)
+            self.assertEqual(len(catalog(root/'library')),26)
             third=self.export(latest,root)
-            artifact=json.loads((third/'prey/lifespan.json').read_text())
+            artifact=json.loads((third/'prey/female/lifespan.json').read_text())
             self.assertEqual(artifact['model_generation'],2)
-            self.assertEqual(artifact['parent_artifact']['artifact_id'],latest.initial_models['prey']['provenance']['artifact_id'])
+            self.assertEqual(artifact['parent_artifact']['artifact_id'],latest.initial_models['prey']['female']['provenance']['artifact_id'])
 
     def test_checkpoint_embeds_initial_models_and_resumes_without_library(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);seed=Experiment(config());seed.step();archive=self.export(seed,root)
             c=config();c['experiment']['retain_brains_between_runs']=False
-            c['species']['prey']['initial_brain']={'path':str(archive/'prey/lifespan.json')}
+            c['species']['prey']['initial_brain']={'path':str(archive/'prey/female/lifespan.json')}
             a=Experiment(c);a.step()
             state=json.loads(json.dumps(a.checkpoint()))
             import shutil
@@ -162,10 +162,10 @@ class LibraryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);e=Experiment(config());e.step();archive=self.export(e,root)
             c=config();c['brains']['small_q']['learning_rate']=.02
-            c['species']['prey']['initial_brain']={'path':str(archive/'prey/lifespan.json')}
+            c['species']['prey']['initial_brain']={'path':str(archive/'prey/female/lifespan.json')}
             warmed=Experiment(c)
             self.assertEqual(warmed.brains[0].config['learning_rate'],.02)
-            self.assertEqual(model_snapshot(warmed.brains[0]),e.champions.entries['prey']['lifespan']['model'])
+            self.assertEqual(model_snapshot(warmed.brains[0]),e.champions.entries['prey']['female']['lifespan']['model'])
 
     def test_initialization_schema_is_valid_json(self):
         schema=json.loads((Path(__file__).resolve().parents[1]/'environment.schema.json').read_text())
@@ -185,10 +185,10 @@ class LibraryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'No compatible'):
                 Experiment(c,library_root=root/'library')
             e=Experiment(config());archive=self.export(e,root)
-            c['species']['prey']['initial_brain']={'path':str(archive/'predator/lifespan.json')}
+            c['species']['prey']['initial_brain']={'path':str(archive/'predator/female/lifespan.json')}
             with self.assertRaisesRegex(ValueError,'species'):
                 Experiment(c)
-            c['species']['prey']['initial_brain']={'path':str(archive/'prey/lifespan.json')}
+            c['species']['prey']['initial_brain']={'path':str(archive/'prey/female/lifespan.json')}
             c['brains']['small_q']['hidden_layers']=[5]
             with self.assertRaisesRegex(ValueError,'incompatible'):
                 Experiment(c)
@@ -200,13 +200,13 @@ class LibraryTests(unittest.TestCase):
             archive=export_champions(e,index,root=root/'library')
             c=config()
             apply_brain_overrides(c,['prey=lifespan','predator=fresh'],root/'previous')
-            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),archive/'prey/lifespan.json')
+            self.assertEqual(Path(c['species']['prey']['initial_brains']['female']['path']),archive/'prey/female/lifespan.json')
             self.assertNotIn('initial_brain',c['species']['predator'])
             warmed=Experiment(c)
-            self.assertEqual(model_snapshot(warmed.brains[0]),e.champions.entries['prey']['lifespan']['model'])
+            self.assertEqual(model_snapshot(warmed.brains[0]),e.champions.entries['prey']['female']['lifespan']['model'])
             defaults=config();apply_brain_overrides(defaults,source_experiment=root/'previous')
-            self.assertTrue(defaults['species']['prey']['initial_brain']['path'].endswith('lifespan.json'))
-            self.assertTrue(defaults['species']['predator']['initial_brain']['path'].endswith('kills.json'))
+            self.assertTrue(defaults['species']['prey']['initial_brains']['female']['path'].endswith('lifespan.json'))
+            self.assertTrue(defaults['species']['predator']['initial_brains']['female']['path'].endswith('kills.json'))
 
     def test_cli_selections_validate_species_duplicates_and_criteria(self):
         for requests in (['prey'],['unknown=food'],['prey='],['prey=food','prey=kills'],
@@ -234,8 +234,8 @@ class LibraryTests(unittest.TestCase):
                 check=True,capture_output=True,text=True)
             folder=next(output.iterdir())
             metadata=json.loads((folder/'manifest.json').read_text())
-            self.assertEqual(metadata['initialized_from']['prey']['criterion'],'food')
-            self.assertEqual(metadata['initialized_from']['predator']['criterion'],'kills')
+            self.assertEqual(metadata['initialized_from']['prey']['female']['criterion'],'food')
+            self.assertEqual(metadata['initialized_from']['predator']['female']['criterion'],'kills')
             self.assertEqual(path.read_bytes(),original)
             failed=subprocess.run([sys.executable,'-m','ecosystem.cli','--resume',
                 str(folder/'checkpoints/final.json'),'--brain','prey=fresh'],
@@ -250,9 +250,9 @@ class LibraryTests(unittest.TestCase):
             e.step()
             second=export_champions(e,root/'previous/champions/run_0002.json',root=root/'library')
             c=config();apply_brain_overrides(c,source_experiment=root/'previous')
-            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),second/'prey/lifespan.json')
+            self.assertEqual(Path(c['species']['prey']['initial_brains']['female']['path']),second/'prey/female/lifespan.json')
             apply_brain_overrides(c,source_experiment=root/'previous',source_run=1)
-            self.assertEqual(Path(c['species']['prey']['initial_brain']['path']),first/'prey/lifespan.json')
+            self.assertEqual(Path(c['species']['prey']['initial_brains']['female']['path']),first/'prey/female/lifespan.json')
 
     def test_run_local_models_move_with_the_experiment_folder(self):
         import shutil
@@ -264,8 +264,8 @@ class LibraryTests(unittest.TestCase):
             shutil.move(str(root/'original'),str(root/'moved'))
             c=config();apply_brain_overrides(c,source_experiment=root/'moved')
             loaded=Experiment(c)
-            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['lifespan']['model'])
-            self.assertEqual(model_snapshot(loaded.brains[3]),e.champions.entries['predator']['kills']['model'])
+            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['female']['lifespan']['model'])
+            self.assertEqual(model_snapshot(loaded.brains[3]),e.champions.entries['predator']['female']['kills']['model'])
 
     def test_legacy_models_are_localized_without_changing_artifact_identity(self):
         import shutil
@@ -273,14 +273,14 @@ class LibraryTests(unittest.TestCase):
             root=Path(directory);e=Experiment(config())
             index=root/'previous/champions/run_0001.json'
             archive=export_champions(e,index,root=root/'library')
-            original=(archive/'prey/food.json').read_bytes()
+            original=(archive/'prey/female/food.json').read_bytes()
             local=localize_champions(index)
-            self.assertEqual((local/'prey/food.json').read_bytes(),original)
+            self.assertEqual((local/'prey/female/food.json').read_bytes(),original)
             self.assertEqual(localize_champions(index),local)
             shutil.rmtree(root/'library')
             c=config();apply_brain_overrides(c,source_experiment=root/'previous')
             loaded=Experiment(c)
-            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['lifespan']['model'])
+            self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['female']['lifespan']['model'])
 
     def test_source_run_name_resolves_under_project_results(self):
         from unittest.mock import patch
@@ -291,7 +291,7 @@ class LibraryTests(unittest.TestCase):
             with patch.object(library,'PROJECT',root):
                 c=config();apply_brain_overrides(c,source_experiment='example')
                 loaded=Experiment(c)
-                self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['lifespan']['model'])
+                self.assertEqual(model_snapshot(loaded.brains[0]),e.champions.entries['prey']['female']['lifespan']['model'])
 
     def test_cli_saves_self_contained_models_by_default(self):
         import subprocess,sys
@@ -301,14 +301,14 @@ class LibraryTests(unittest.TestCase):
                 '--steps','1','--no-record','--no-progress','--output',str(root/'results')],
                 check=True,capture_output=True,text=True)
             folder=next((root/'results').iterdir())
-            self.assertEqual(len(list((folder/'champions/run_0001').glob('*/*.json'))),9)
+            self.assertEqual(len(list((folder/'champions/run_0001').glob('*/*/*.json'))),13)
             c=config();apply_brain_overrides(c,source_experiment=folder)
-            self.assertTrue(all(Path(spec['initial_brain']['path']).is_file() for spec in c['species'].values()))
+            self.assertTrue(all(Path(request['path']).is_file() for spec in c['species'].values() for request in spec['initial_brains'].values() if request))
 
     def test_export_failure_does_not_publish_partial_generation(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);e=Experiment(config())
-            e.champions.entries['prey']['health']['model']['parameters']['w1'][0]=float('nan')
+            e.champions.entries['prey']['female']['health']['model']['parameters']['w1'][0]=float('nan')
             with self.assertRaises(ValueError):self.export(e,root)
             self.assertEqual(catalog(root/'library'),[])
             self.assertEqual(list((root/'library').iterdir()),[])

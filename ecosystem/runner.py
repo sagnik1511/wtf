@@ -4,10 +4,10 @@ import copy
 import random
 import secrets
 from .brain import Experience
-from .brains import create_brain, restore_brain, inherit_brain, offspring_seed, load_model_weights, model_snapshot
+from .brains import create_brain, restore_brain, mix_parent_brains, offspring_seed, load_model_weights, model_snapshot
 from .config import validate
 from .world import World
-from .library import ChampionBook, load_initial_models, selection_criterion
+from .library import ChampionBook, load_initial_models, selection_criterion, sex_models, SEXES
 
 
 class Experiment:
@@ -39,21 +39,19 @@ class Experiment:
         if self.run_index > 0 and not self.legacy_brain_retention:
             models = copy.deepcopy(self.initial_models)
             if c["experiment"].get("chain_best_brains", True) and self.mode == "train":
-                for species, spec in c["species"].items():
-                    metric = selection_criterion(c,species,
-                        self.initial_models.get(species,{}).get('provenance',{}).get('criterion'))
-                    candidate = self.champions.entries.get(species, {}).get(metric)
-                    if candidate is None:
-                        continue
-                    provenance = self.champion_artifacts.get(species, {}).get(metric)
-                    if provenance is None:
-                        parent = self.run_initial_models.get(species, {}).get("provenance", {})
-                        provenance = dict(artifact_id=f"run:{self.run_index}:{self.world.seed}:{species}:{metric}",
-                            path=None, criterion=metric, score=candidate["score"],
-                            model_generation=parent.get("model_generation", 0) + 1,
-                            source_run=self.run_index)
-                    models[species] = dict(model=copy.deepcopy(candidate["model"]),
-                                           provenance=copy.deepcopy(provenance))
+                for species, spec in c['species'].items():
+                    for sex in SEXES:
+                        original = self.initial_models.get(species, {}).get(sex, {})
+                        metric = selection_criterion(c, species, original.get('provenance', {}).get('criterion'), sex)
+                        candidate = self.champions.entries.get(species, {}).get(sex, {}).get(metric)
+                        if candidate is None:continue
+                        provenance = self.champion_artifacts.get(species, {}).get(sex, {}).get(metric)
+                        if provenance is None:
+                            parent = self.run_initial_models.get(species, {}).get(sex, {}).get('provenance', {})
+                            provenance = dict(artifact_id=f'run:{self.run_index}:{self.world.seed}:{species}:{sex}:{metric}',
+                                path=None, criterion=metric, score=candidate['score'], sex=sex,
+                                model_generation=parent.get('model_generation', 0)+1, source_run=self.run_index)
+                        models.setdefault(species, {})[sex] = dict(model=copy.deepcopy(candidate['model']), provenance=copy.deepcopy(provenance))
             self.run_initial_models = models
             self._retire_brains(list(self.brains))
         self.champion_artifacts = {}
@@ -86,15 +84,17 @@ class Experiment:
                         self.brains[i] = create_brain(
                             brain_config,
                             spec["allowed_actions"],
-                            base_seed,
+                            base_seed ^ (0x4D414C45 if a.sex == "male" else 0),
                             brain_seed + i * 7919 + 13,
                         )
-                        if species in self.run_initial_models:
-                            load_model_weights(self.brains[i], self.run_initial_models[species]["model"])
-                        elif not self.legacy_brain_retention and species in self.initial_weights:
-                            load_model_weights(self.brains[i], self.initial_weights[species])
-                        if self.run_index == 0 and species not in self.initial_weights:
-                            self.initial_weights[species] = model_snapshot(self.brains[i])
+                        if a.sex in self.run_initial_models.get(species, {}):
+                            load_model_weights(self.brains[i], self.run_initial_models[species][a.sex]["model"])
+                        elif not self.legacy_brain_retention and a.sex in self.initial_weights.get(species, {}):
+                            load_model_weights(self.brains[i], self.initial_weights[species][a.sex])
+                        if self.run_index == 0:
+                            self.initial_weights.setdefault(species, {})
+                            if a.sex not in self.initial_weights[species]:
+                                self.initial_weights[species][a.sex] = model_snapshot(self.brains[i])
         self.champions = ChampionBook(c)
         if self.mode == "train":
             self.champions.consider(self.world.animals.values(), self.brains, self._champion_source())
@@ -194,8 +194,8 @@ class Experiment:
         mutation_events = []
         for event in result.events:
             if event.kind == "born":
-                self.brains[event.target] = inherit_brain(
-                    self.brains[event.actor], offspring_seed(self.world, event.target)
+                self.brains[event.target] = mix_parent_brains(
+                    self.brains[event.actor], self.brains[event.mate], offspring_seed(self.world, event.target)
                 )
                 if training:
                     from .mutation import mutate_birth
@@ -223,7 +223,7 @@ class Experiment:
                 dict(
                     run=self.run_index + 1,
                     seed=self.world.seed,
-                    initialized_from={s: m["provenance"] for s, m in self.run_initial_models.items()},
+                    initialized_from={s: {sex: m["provenance"] for sex, m in groups.items()} for s, groups in self.run_initial_models.items()},
                     **self.world.metrics(),
                     lifespans=copy.deepcopy(self.world.lifespans),
                     survivors=[
@@ -330,11 +330,17 @@ class Experiment:
             raise ValueError("Unsupported checkpoint version")
         e = cls.__new__(cls)
         e.config = copy.deepcopy(validate(state["config"]))
-        e.initial_models = copy.deepcopy(state.get("initial_models", {}))
+        e.initial_models = sex_models(state.get("initial_models", {}))
         e.legacy_brain_retention = state.get("legacy_brain_retention", "chain_best_brains" not in e.config["experiment"])
         e.initial_weights = copy.deepcopy(state.get("initial_weights", {}))
-        e.run_initial_models = copy.deepcopy(state.get("run_initial_models", e.initial_models))
+        for species, weights in e.initial_weights.items():
+            if 'signature' in weights:
+                e.initial_weights[species] = {sex: copy.deepcopy(weights) for sex in ('female', 'male')}
+        e.run_initial_models = sex_models(state.get("run_initial_models", e.initial_models))
         e.champion_artifacts = copy.deepcopy(state.get("champion_artifacts", {}))
+        for species, groups in list(e.champion_artifacts.items()):
+            if any(metric in groups for metric in ('health','kills','food','lifespan','balanced')):
+                e.champion_artifacts[species] = {}
         e.champions = ChampionBook(e.config, state.get("champions"))
         e.retired_updates = state.get("retired_updates", 0)
         e.inherited_updates = {
@@ -372,7 +378,9 @@ class Experiment:
                 e.retired_updates += brain_state["updates"] - e.inherited_updates.pop(animal_id, 0)
             else:
                 e.brains[animal_id] = restore_brain(brain_state)
-        if "champions" not in state and e.mode == "train":
+        legacy_champions = any(any(k in groups for k in ('health','kills','food','lifespan','balanced'))
+                               for groups in state.get('champions', {}).values())
+        if ("champions" not in state or legacy_champions) and e.mode == "train":
             e.champions.consider(e.world.animals.values(), e.brains, e._champion_source())
         e.observations = e.world.observe_all()
         e._refresh_context()

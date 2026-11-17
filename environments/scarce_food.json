@@ -55,10 +55,11 @@
         "min_age_steps": 300,
         "cooldown_steps": 225,
         "min_energy": 30,
-        "energy_cost": 20,
+        "energy_cost": 10,
         "max_population": 48,
         "age_deviation_pct": 10,
-        "cooldown_deviation_pct": 10
+        "cooldown_deviation_pct": 10,
+        "mate_radius": 2
       },
       "learning_rate_multiplier": 1.0,
       "mutation": {
@@ -103,10 +104,11 @@
         "min_age_steps": 100,
         "cooldown_steps": 200,
         "min_energy": 40,
-        "energy_cost": 30,
+        "energy_cost": 15,
         "max_population": 12,
         "age_deviation_pct": 10,
-        "cooldown_deviation_pct": 10
+        "cooldown_deviation_pct": 10,
+        "mate_radius": 2
       },
       "learning_rate_multiplier": 1.25,
       "mutation": {

@@ -8,7 +8,7 @@ export function recentBirths(frames, chunkStart, localIndex, carried = []) {
     for (const event of frame.events ?? []) {
       if (event.kind !== 'born') continue;
       const child = frame.animals.find(a => a.id === event.target);
-      markers.push({actor: event.actor, target: event.target, species: child?.species,
+      markers.push({actor: event.actor, ...(event.mate>=0?{mate:event.mate}:{}), target: event.target, species: child?.species,
         tick: frame.tick, frame_index: chunkStart + i,
         position: child ? [child.x, child.y] : null});
     }

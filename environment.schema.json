@@ -1,4 +1,15 @@
 {
+    "$defs": {
+        "initialBrain": {
+            "oneOf": [
+                {"type": "object", "additionalProperties": false, "required": ["path"], "properties": {"path": {"type": "string", "minLength": 1}}},
+                {"type": "object", "additionalProperties": false, "required": ["selection", "metric"], "properties": {
+                    "selection": {"enum": ["best", "latest"]},
+                    "metric": {"enum": ["health", "kills", "lifespan", "food", "balanced"]}
+                }}
+            ]
+        }
+    },
     "type": "object",
     "properties": {
         "schema_version": {"const": 1},
@@ -57,6 +68,20 @@
             "additionalProperties": {
                 "type": "object",
                 "properties": {
+                    "initial_brains": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": {
+                            "female": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/initialBrain"}]},
+                            "male": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/initialBrain"}]}
+                        }
+                    },
+                    "champion_selection_by_sex": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": {
+                            "female": {"enum": ["health", "kills", "lifespan", "food", "balanced"]},
+                            "male": {"enum": ["health", "kills", "lifespan", "food", "balanced"]}
+                        }
+                    },
                     "initial_brain": {
                         "oneOf": [
                             {
@@ -267,6 +292,7 @@
                         "additionalProperties": false,
                         "properties": {
                             "enabled": {"type": "boolean"},
+                            "mate_radius": {"type": "integer", "minimum": 1, "maximum": 10},
                             "health_threshold": {"type": "number", "minimum": 0},
                             "min_age_steps": {
                                 "type": "integer",

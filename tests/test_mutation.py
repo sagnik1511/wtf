@@ -33,7 +33,7 @@ SETTINGS=dict(enabled=True,probability_per_birth=1.0,max_changed_weights=3,noise
 
 def environment(kind,probability=1.0):
     c=config() if kind=='q_network' else ppo_environment() if kind=='ppo' else policy_environment(kind) if kind in ('a2c','reinforce','grpo') else advanced_environment(kind)
-    c['world']['max_steps']=7;c['experiment']['runs']=2
+    c['world'].update(width=5,height=5,max_steps=7);c['experiment']['runs']=2
     c['obstacles'].update(generation='explicit',explicit_cells=[])
     for spec in c['species'].values():
         spec['reproduction']=reproduction(health_threshold=0,max_population=7)
@@ -133,7 +133,14 @@ class MutationLifecycleTests(unittest.TestCase):
         parent=next(a for a in e.world.animals.values() if a.parent_id>=0)
         e.config['species'][parent.species]['mutation']['probability_per_birth']=0
         e.world.config['species'][parent.species]['mutation']['probability_per_birth']=0
-        for _ in range(2):e.step()
+        parent.sex='female';parent.age=10;parent.last_reproduced_age=-1
+        parent.x,parent.y=1,1
+        mate=e.world.animals[parent.second_parent_id];mate.sex='male';mate.age=10
+        mate.last_reproduced_age=-1;mate.x,mate.y=2,1
+        for other in e.world.animals.values():
+            if other.id not in (parent.id,mate.id):other.last_reproduced_age=other.age
+        e.observations=e.world.observe_all()
+        with patch.object(type(e.brains[parent.id]),'choose',return_value='rest'):e.step()
         descendants=[a for a in e.world.animals.values() if a.parent_id==parent.id]
         self.assertTrue(descendants)
         self.assertTrue(all(not a.mutated and a.mutation_count==1 and a.mutation_weights==0 for a in descendants))
@@ -146,7 +153,9 @@ class MutationLifecycleTests(unittest.TestCase):
             for child in e.world.animals.values():
                 if child.parent_id>=0:
                     self.assertFalse(child.mutated)
-                    self.assertEqual(model_snapshot(e.brains[child.id]),model_snapshot(e.brains[child.parent_id]))
+                    from ecosystem.brains import mix_parent_brains,offspring_seed
+                    expected=mix_parent_brains(e.brains[child.parent_id],e.brains[child.second_parent_id],offspring_seed(e.world,child.id))
+                    self.assertEqual(model_snapshot(e.brains[child.id]),model_snapshot(expected))
 
     def test_json_and_binary_resume_preserve_future_mutations_for_every_algorithm(self):
         for kind in KINDS:
@@ -208,7 +217,7 @@ class MutationLifecycleTests(unittest.TestCase):
             child=next(a for a in e.world.animals.values() if a.mutated);child.age=100
             e.champions.consider([child],e.brains,e._champion_source())
             archive=export_champions(e,Path(d)/'champions/run_0001.json')
-            saved=json.loads((archive/child.species/'lifespan.json').read_text())
+            saved=json.loads((archive/child.species/child.sex/'lifespan.json').read_text())
             self.assertTrue(saved['source']['mutated']);self.assertEqual(saved['source']['mutation_count'],1)
 
     def test_cli_stores_mutation_counts_in_readable_metrics_and_summary(self):

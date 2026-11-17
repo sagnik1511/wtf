@@ -4,7 +4,7 @@ import random
 from .policy_gradients import PolicyStep
 from .ppo import policy_distribution
 from .world import World
-from .brains import offspring_seed
+from .brains import offspring_seed, mix_parent_brains
 
 
 def sample_index(probabilities, rng):
@@ -89,11 +89,12 @@ def collect_group(world, brains, focal_id):
             mutation_events = []
             for event in result.events:
                 if event.kind == "born":
-                    # Nonmutated descendants share the frozen parent policy.
-                    # Rare mutations allocate their own policy without learning.
+                    # Crossover creates an independent frozen trial policy.
+                    child_policy = mix_parent_brains(policies[event.actor], policies[event.mate],
+                                                     offspring_seed(trial, event.target))
                     from .mutation import mutate_birth
                     policies[event.target], mutation_event = mutate_birth(
-                        trial,event,policies[event.actor])
+                        trial,event,policies[event.actor],child_policy)
                     if mutation_event is not None:mutation_events.append(mutation_event)
                     if policies[event.target].config["type"] == "recurrent_ppo":
                         memories[event.target] = [0.0] * policies[event.target].config["recurrent_size"]

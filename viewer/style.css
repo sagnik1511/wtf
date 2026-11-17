@@ -110,3 +110,5 @@
 .trend-card select{width:100%;font-size:12px;padding:6px 8px}.trend-card canvas{display:block;width:100%;height:150px;margin-top:8px;font:12px system-ui,-apple-system,sans-serif}.trend-current{min-height:32px;margin:4px 0 0}.dashboard-notes{margin:14px 0 0}
 .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 @media(max-width:650px){#metrics-dialog{padding:12px}#trend-grid{grid-template-columns:1fr}.dashboard-controls label{flex:1}.dashboard-controls select{width:100%}}
+
+.legend .prey.male{color:#60a5fa}.legend .predator.male{color:#f6d365}

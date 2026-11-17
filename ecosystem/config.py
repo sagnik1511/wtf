@@ -352,7 +352,7 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation"),
+            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation", "initial_brains", "champion_selection_by_sex"),
         )
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
@@ -382,9 +382,7 @@ def validate(c):
             num(m['probability_per_birth'],mp+'.probability_per_birth',0,1)
             num(m['max_changed_weights'],mp+'.max_changed_weights',1,1024,True)
             num(m['noise_std'],mp+'.noise_std',0,1)
-        if "initial_brain" in s:
-            initial = s["initial_brain"]
-            ip = p + ".initial_brain"
+        def validate_initial(initial, ip):
             if isinstance(initial, dict) and "path" in initial:
                 obj(initial, ip, ("path",))
                 if not isinstance(initial["path"], str) or not initial["path"].strip():
@@ -395,6 +393,21 @@ def validate(c):
                     fail(ip + ".selection", "must be best or latest")
                 if initial["metric"] not in ("health", "kills", "lifespan", "food", "balanced"):
                     fail(ip + ".metric", "must be health, kills, lifespan, food or balanced")
+        if 'initial_brain' in s:
+            validate_initial(s['initial_brain'], p+'.initial_brain')
+        if 'initial_brains' in s:
+            requests = s['initial_brains']
+            obj(requests, p+'.initial_brains', (), optional=('female','male'))
+            for sex, request in requests.items():
+                if request is not None:validate_initial(request, p+'.initial_brains.'+sex)
+        if 'champion_selection_by_sex' in s:
+            choices = s['champion_selection_by_sex']
+            obj(choices, p+'.champion_selection_by_sex', (), optional=('female','male'))
+            for sex, metric in choices.items():
+                if metric not in ('health','kills','food','lifespan','balanced'):
+                    fail(p+'.champion_selection_by_sex.'+sex, 'unknown champion criterion')
+                if metric=='balanced' and s['diet']!='prey':
+                    fail(p+'.champion_selection_by_sex.'+sex, 'balanced selection requires a predator species')
         if "champion_selection" in s:
             cp = p + ".champion_selection"
             policy = s['champion_selection']
@@ -407,6 +420,9 @@ def validate(c):
             num(policy.get('max_survival_bonus',2),cp+'.max_survival_bonus',0,100)
         if s.get('initial_brain',{}).get('metric')=='balanced' and s['diet']!='prey':
             fail(p+'.initial_brain.metric','balanced selection requires a predator species')
+        for request in s.get('initial_brains', {}).values():
+            if request and request.get('metric')=='balanced' and s['diet']!='prey':
+                fail(p+'.initial_brains', 'balanced selection requires a predator species')
         template = c["brains"][s["brain"]]
         multiplier = s.get("learning_rate_multiplier", 1.0)
         num(multiplier, p + ".learning_rate_multiplier", 0.01, 10)
@@ -461,7 +477,7 @@ def validate(c):
                     "energy_cost",
                     "max_population",
                 ),
-                optional=("age_deviation_pct", "cooldown_deviation_pct", "age_deviation_steps", "cooldown_deviation_steps"),
+                optional=("age_deviation_pct", "cooldown_deviation_pct", "age_deviation_steps", "cooldown_deviation_steps", "mate_radius"),
             )
             if type(r["enabled"]) is not bool:
                 fail(rp + ".enabled", "must be boolean")
@@ -471,6 +487,7 @@ def validate(c):
                 0,
                 s["body"]["max_health"],
             )
+            num(r.get("mate_radius", 2), rp + ".mate_radius", 1, 10, True)
             num(r["min_age_steps"], rp + ".min_age_steps", 1, 10000000, True)
             num(r["cooldown_steps"], rp + ".cooldown_steps", 1, 10000000, True)
             for key in ('age_deviation_steps', 'cooldown_deviation_steps'):

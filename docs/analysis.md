@@ -37,7 +37,7 @@ The read-only API is `/api/recordings/{id}/runs/{run}/analysis`.
 | Optimizer updates | Positive per-animal diagnostic counter changes after its first sample; inherited counters are excluded |
 | GRPO signal | Fraction of sampled new groups with identical returns, plus groups with a positive return |
 | Policy entropy | Entropy divided by log(action count); 100% means uniform probabilities on sampled states |
-| Reproduction energy | Newborn energy grants minus parent reproduction costs; these grants can sustain populations without better feeding |
+| Reproduction energy | Newborn energy grants minus both parents’ reproduction costs for paired births (one parent for legacy birth events); these grants can sustain populations without better feeding |
 
 The energy-input budget separates opening stored energy, energy gained through
 feeding/hunting, and newborn grants. An energy-coverage ratio below one means

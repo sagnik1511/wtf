@@ -62,9 +62,8 @@ There is no burn-in reconstruction of hidden states after optimizer updates.
 
 Memory persists across decisions and rollout updates, including during
 evaluation. Diagnostics read memory without advancing it. Death and time-limit
-truncation reset memory after bootstrap calculation. A newborn receives its
-parent's learned parameters and optimizer state but starts with zero memory and
-an empty rollout. Champions contain no episodic memory. Exact checkpoints retain
+truncation reset memory after bootstrap calculation. A newborn mixes both parents' learned parameters and starts with fresh optimizer
+state, zero memory and an empty rollout. Champions contain no episodic memory. Exact checkpoints retain
 hidden state, sequence boundaries, partial rollouts and pending decisions.
 
 The inspector displays memory norm and sequence-buffer size. Recurrent inference

@@ -81,7 +81,7 @@ class TrainingLoopEfficiencyTests(unittest.TestCase):
         with patch.object(Brain,'choose',lambda self,*args,**kwargs:'rest'):e.step()
         self.assertNotIn(3,e.world.animals);self.assertNotIn(3,e.brains);self.assertIsNone(reference())
         self.assertEqual(e.retired_updates,1)
-        entry=e.champions.entries['predator']['lifespan']
+        entry=e.champions.entries['predator']['female']['lifespan']
         self.assertEqual(entry['source']['optimizer_updates'],1)
         self.assertFalse(entry['source']['alive'])
 

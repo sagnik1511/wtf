@@ -17,7 +17,7 @@ from tests.test_advanced_algorithms import environment
 def old_consider(book,animals,brains,source):
     policies={}
     for a in animals:
-        champions=book.entries.setdefault(a.species,{})
+        champions=book.entries.setdefault(a.species,{}).setdefault(a.sex,{})
         scores=ranks(a)
         if book.config['species'][a.species]['diet']=='prey':
             if a.species not in policies:policies[a.species]=balanced_policy(book.config,a.species)
@@ -27,7 +27,7 @@ def old_consider(book,animals,brains,source):
         brain=brains[a.id];model=model_snapshot(brain)
         source_data=dict(source,animal_id=a.id,species=a.species,health=a.health,alive=a.health>0,
             age=a.age,kills=a.kills,energy_gained=a.energy_gained,parent_id=a.parent_id,
-            body_generation=a.generation,statistics_since_age=a.statistics_since_age,optimizer_updates=brain.updates)
+            body_generation=a.generation,sex=a.sex,second_parent_id=a.second_parent_id,statistics_since_age=a.statistics_since_age,optimizer_updates=brain.updates)
         for key in wins:
             rank=scores[key]
             champions[key]=dict(criterion=key,score=rank[0],rank=list(rank),source=source_data,model=model)
@@ -106,7 +106,8 @@ class SimulationCacheTests(unittest.TestCase):
         with patch('ecosystem.library.model_snapshot',wraps=model_snapshot) as snapshot:
             book.consider(animals,brains,{'tick':40})
             snapshot.assert_called_once_with(brains[39])
-        for entry in book.entries['prey'].values():self.assertEqual(entry['source']['animal_id'],39)
+        for group in book.entries['prey'].values():
+            for entry in group.values():self.assertEqual(entry['source']['animal_id'],39)
         before=copy.deepcopy(book.entries)
         brains[39].weights['b1'][0]+=1
         self.assertEqual(before,book.entries)
