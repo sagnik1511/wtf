@@ -100,3 +100,11 @@ birth-marker checks retain both parents across chunk transitions.
 archive paths/ancestry, all-nine-algorithm warm starts and chaining, broad/narrow
 CLI precedence, fresh/missing-sex behavior, incompatible sex rejection, shared
 library filtering, version-1 migration and source-independent checkpoint resume.
+
+`tests/test_multiple_species.py` checks arbitrary species names with two prey
+and two predator species, independent controllers, all-algorithm checkpoint
+resume, diet-based perception/masks/combat, same-species pairing, eight champion
+groups, generic CLI/CSV output and binary replay/telemetry/analysis. Tests use
+local fixtures; shipped presets keep exactly one species per role.
+`tests/species-style.test.mjs` checks generated and explicitly configured colors
+without fixed-name or fixed-palette assumptions.

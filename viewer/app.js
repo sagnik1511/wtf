@@ -2,11 +2,10 @@ import { api } from './api.mjs';
 import { Dashboard } from './dashboard.mjs';
 import { Playback } from './playback.mjs';
 import { behaviorRows } from './behavior-stats.mjs';
+import { speciesStyles } from './species-style.mjs';
 const $ = id => document.getElementById(id);
 let state, selected = null, playing = false, busy = false;
-const colors = ['#7de2bd', '#ff9a77', '#83b9ff', '#ce9ef5', '#f4cf7a'];
-// Distinct sex hues plus male outlines; legacy bodies keep base species colors.
-const sexColors = {female: colors, male: ['#60a5fa', '#f6d365', '#b197fc', '#f783ac', '#a9e34b']};
+let styledSpecies=null, styles=new Map();
 let errorTimer, analysisKey="", analysisRequest=0,runMenuKey="";
 function showError(error) { $('error').textContent = error.message; $('error').hidden = false; clearTimeout(errorTimer); errorTimer = setTimeout(() => $('error').hidden = true, 12000); }
 
@@ -19,10 +18,26 @@ async function operation(fn) {
   try { await fn(); } catch (e) { pause(); showError(e); }
   finally { busy = false; for (const id of ['step','back','load','refresh','recorded-run','timeline','previous-run','next-run','dashboard-back','dashboard-next','dashboard-timeline']) $(id).disabled = false;updateRunButtons(); }
 }
-function speciesColor(name) { return colors[Object.keys(state.species).indexOf(name) % colors.length]; }
+function speciesColor(name) { return styles.get(name)?.color??'#c6d3df'; }
 function animalColor(animal) {
-  const palette=sexColors[animal.sex]??colors;
-  return palette[Object.keys(state.species).indexOf(animal.species)%colors.length];
+  const style=styles.get(animal.species);
+  return style?.[animal.sex]??style?.color??'#c6d3df';
+}
+function syncSpeciesLegend() {
+  if(styledSpecies===state.species)return;
+  styledSpecies=state.species;
+  styles=speciesStyles(state.species);
+  const nodes=[];
+  for(const [name,style] of styles){
+    for(const [sex,symbol] of [['female','♀'],['male','♂']]){
+      const item=text('span',`${style.symbol} ${name} ${symbol}`);
+      item.style.color=style[sex];
+      item.title=`${name} · ${sex}${sex==='male'?' · light outline':''}`;
+      item.setAttribute('aria-label',`${name} ${sex}`);
+      nodes.push(item);
+    }
+  }
+  $('species-legend').replaceChildren(...nodes);
 }
 const dashboard = new Dashboard(api, speciesColor);
 function fitWorld() {
@@ -240,10 +255,15 @@ function render(snapshot = null) {
   state=snapshot??player.snapshot(selected);
   if(previousRun!==undefined&&previousRun!==state.run){selected=null;state=player.snapshot();}
   syncRunMenu();
+  syncSpeciesLegend();
   dashboard.update({state,id:player.id,species:state.species,playing});
   $('tick').textContent=state.tick.toLocaleString();$('run').textContent=`${state.run} / ${state.total_runs}`;
   let prey=0,predators=0;for(const [name,s] of Object.entries(state.species)) {if(s.diet==='resource')prey+=state.metrics.populations[name];else predators+=state.metrics.populations[name];}
-  $('prey').textContent=prey;$('predator').textContent=predators;$('food').textContent=Math.round(state.metrics.food).toLocaleString();$('updates').textContent=state.total_updates.toLocaleString();
+  $('prey').textContent=prey;$('predator').textContent=predators;
+  for(const [id,diet] of [['prey','resource'],['predator','prey']]){
+    $(id).title=Object.entries(state.species).filter(([,spec])=>spec.diet===diet).map(([name])=>`${name}: ${state.metrics.populations[name]??0}`).join(' · ');
+  }
+  $('food').textContent=Math.round(state.metrics.food).toLocaleString();$('updates').textContent=state.total_updates.toLocaleString();
   const killCount=Object.values(state.metrics.kills).reduce((a,b)=>a+b,0);
   $('kills').textContent=killCount.toLocaleString();
   $('births').textContent=Object.values(state.metrics.births??{}).reduce((a,b)=>a+b,0).toLocaleString();
@@ -264,7 +284,7 @@ function render(snapshot = null) {
   const species=latestEvent?.species?`${latestEvent.species[0].toUpperCase()}${latestEvent.species.slice(1)}`:'Animal';
   const banner=!latestEvent?'':latestEvent.natural
     ?`NATURAL DEATH · ${species} #${latestEvent.actor} · ${latestEvent.cause} · Step ${latestEvent.tick}`
-    :`KILL · Predator #${latestEvent.actor} → prey #${latestEvent.target} · Step ${latestEvent.tick}`;
+    :`KILL · ${latestEvent.attacker_species??'Predator'} #${latestEvent.actor} → prey #${latestEvent.target} · Step ${latestEvent.tick}`;
   if($('kill-banner').textContent!==banner)$('kill-banner').textContent=banner;
   $('connection').textContent=state.waiting?'Waiting for more recorded frames or runs':`Recorded playback · ${state.mode}`;
   $('empty').hidden=!state.done;$('empty').textContent='End of recording. Seek backward or load another saved experiment.';

@@ -20,6 +20,15 @@ Commands in this guide run from the project root.
 | `viewer/` | JavaScript canvas playback and inspection |
 | `environments/` | JSON experiment presets |
 
+## Species identities
+
+Species are arbitrary nonempty keys under the JSON `species` object. Diet values
+`resource` and `prey` define prey/predator feeding roles. Multiple species may
+share a role and a brain template while keeping independent controllers,
+reproduction pairs, species/sex champion pools and metrics. Observation target
+indexes combine animals by diet; they do not add a feature block per species.
+See [adding species](species.md) for behavior and configuration details.
+
 ## Simulation steps and observations
 
 `world.py` owns physical state and emits events. `brain.py` owns individual learning. `runner.py` connects observations, actions, consequences and experiences. `recording.py` writes playback files; `server.py` only serves those files; `viewer/` renders saved data and controls playback.

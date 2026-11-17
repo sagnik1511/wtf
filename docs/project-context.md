@@ -14,6 +14,8 @@ paired male/female reproduction. It is an experimental ecosystem, not a calibrat
 The priorities established during development are:
 
 - Configurable experiments as JSON, with Python simulation and JavaScript rendering.
+- Arbitrary named species grouped into resource/prey diets; presets keep one
+  species of each. [Species guide](species.md) covers adding more and display colors.
 - Record first, play later: training can finish and exit before opening the viewer.
 - Private animal brains, inherited learned weights, run-local species/sex champion archives and
   optional matching-sex champion chaining between runs.

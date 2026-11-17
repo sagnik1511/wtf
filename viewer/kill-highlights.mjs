@@ -15,7 +15,7 @@ export function recentKills(frames, chunkStart, localIndex, carried = []) {
       // attacker must face its adjacent victim and cannot move while attacking.
       const direction = hunter ? DIRECTIONS[hunter.heading] : null;
       const position = victim ? [victim.x, victim.y] : direction ? [hunter.x + direction[0], hunter.y + direction[1]] : null;
-      markers.push({actor: event.actor, target: event.target, tick: frame.tick, frame_index: chunkStart + i, position});
+      markers.push({actor: event.actor, ...(hunter?.species?{attacker_species:hunter.species}:{}), target: event.target, tick: frame.tick, frame_index: chunkStart + i, position});
     }
   }
   const unique = new Map();

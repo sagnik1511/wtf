@@ -2,7 +2,8 @@
 
 A Python reinforcement-learning ecosystem with independently learning prey and
 predators, growing resources, obstacles and paired male/female reproduction. Environments are JSON;
-a JavaScript canvas viewer replays saved runs.
+a JavaScript canvas viewer replays saved runs. Add named prey/predator species
+through JSON; the presets start with one of each.
 
 The simulator records first and the viewer plays later, keeping training and
 rendering independent. Replay chunks use structured binary deltas and lossless XZ compression to reduce disk usage.
@@ -49,6 +50,7 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 | Guide | Contents |
 | --- | --- |
 | [Setup and runs](docs/running.md) | Installation, CLI flags, seeds, progress and exact checkpoint resume |
+| [Adding species](docs/species.md) | Named prey/predator species, diets, colors and species/sex champions |
 | [Configuration](docs/configuration.md) | Presets, populations, food, obstacles and reproduction |
 | [Learning algorithms](docs/algorithms.md) | Q-learning, PPO, A2C, REINFORCE, experimental GRPO and network settings |
 | [Saved brains](docs/brain-library.md) | Champions, warm starts, compatibility and model generations |

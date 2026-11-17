@@ -68,6 +68,13 @@
             "additionalProperties": {
                 "type": "object",
                 "properties": {
+                    "display": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": {
+                            "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+                            "male_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
+                        }
+                    },
                     "initial_brains": {
                         "type": "object", "additionalProperties": false,
                         "properties": {

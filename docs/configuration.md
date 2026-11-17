@@ -35,11 +35,20 @@ All costs and growth rates are per simulation step. Playback speed changes only 
 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
+## Adding species
+
+The default `prey` and `predator` keys are species names, not a fixed list.
+Add complete entries under new names to create additional prey or predator
+species. The `diet` field determines feeding behavior, and mating/champion
+selection remain species-specific. See [adding species](species.md) for a
+copyable configuration recipe, optional colors and observation semantics.
+
 ## Common changes
 
 | Change | JSON field |
 | --- | --- |
-| Starting populations | `species.prey.initial_population`, `species.predator.initial_population` |
+| Starting populations | `species.<name>.initial_population` |
+| Species colors | `species.<name>.display.color`, `.display.male_color` |
 | Body health/energy | `species.<name>.body` |
 | Perception radius | `species.<name>.body.vision_radius` |
 | Food supply/regrowth | `resources` |

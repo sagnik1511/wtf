@@ -11,6 +11,9 @@ rather than loading every document or result into context.
 - Environments belong in `environments/*.json`, validated by `ecosystem/config.py`
   and `environment.schema.json`. Prefer CLI selectors for run-specific brain
   initialization; avoid hardcoding a result path into Python.
+- Species names are arbitrary configuration keys. Use diet for prey/predator
+  behavior and exact species identity for mating, metrics and champions; avoid
+  hardcoded `prey`/`predator` names in generic paths.
 - Animals learn independently. Birth requires an eligible same-species male/female
   pair and mixes their parameters into an independent child with fresh training
   state. Rare birth mutation changes only that child. Preserve RNG isolation

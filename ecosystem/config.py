@@ -341,6 +341,8 @@ def validate(c):
     population = 0
     for name, s in c["species"].items():
         p = f"species.{name}"
+        if not isinstance(name, str) or not name.strip():
+            fail('species', 'species names must be nonempty strings')
         obj(
             s,
             p,
@@ -352,8 +354,13 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation", "initial_brains", "champion_selection_by_sex"),
+            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation", "initial_brains", "champion_selection_by_sex", "display"),
         )
+        if 'display' in s:
+            obj(s['display'], p+'.display', (), optional=('color','male_color'))
+            for key, color in s['display'].items():
+                if not isinstance(color, str) or not re.fullmatch(r'#[0-9A-Fa-f]{6}', color):
+                    fail(p+'.display.'+key, 'must be a six-digit hex color such as #7de2bd')
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
         if s["diet"] not in ("resource", "prey"):
