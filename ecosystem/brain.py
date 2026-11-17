@@ -1,8 +1,12 @@
 """Small independent Q network, replay, target network and clipped loss.
 
-Lists and standard-library math keep installation self-contained. Networks are
-small deliberately; immutable replay tuples and native map operations reduce overhead.
+Packed float32 parameters and standard-library math keep installation self-contained.
+Networks are small deliberately; immutable replay tuples reduce overhead.
 """
+from . import kernels
+from .kernels import gradient_zeros
+from .numeric import Float32, packed, plain, precision_of, restore_numeric
+
 
 import copy
 import math
@@ -49,6 +53,7 @@ class Brain:
             ],
             "b2": [0.0] * len(actions),
         }
+        self.weights = packed(self.weights)
         self.target = {k: v.copy() for k, v in self.weights.items()}
         self.replay = []
         self.cursor = self.steps = self.updates = 0
@@ -57,6 +62,8 @@ class Brain:
     def _hidden(self, observation, weights):
         w1 = weights["w1"]
         hidden = self.hidden
+        if kernels.native is not None and isinstance(w1, Float32):
+            return kernels.native.affine(observation, w1, weights['b1'], True, 0, hidden)
         return [
             math.tanh(
                 bias + sum(map(mul, observation, w1[j * self.inputs : (j + 1) * self.inputs]))
@@ -68,6 +75,8 @@ class Brain:
         w = self.weights if weights is None else weights
         h = self._hidden(observation, w)
         w2, hidden = w["w2"], self.hidden
+        if kernels.native is not None and isinstance(w2, Float32):
+            return h, kernels.native.affine(h, w2, w['b2'], False, 0, len(self.actions))
         # Preserve summation order for policies, diagnostics and target values.
         q = [
             bias + sum(map(mul, h, w2[a * hidden : (a + 1) * hidden]))
@@ -98,7 +107,7 @@ class Brain:
             or self.steps % c["train_every_steps"]
         ):
             return
-        gradients = {k: [0.0] * len(v) for k, v in self.weights.items()}
+        gradients = {k: gradient_zeros(v) for k, v in self.weights.items()}
         gw1, gb1, gw2, gb2 = (gradients[k] for k in ("w1", "b1", "w2", "b2"))
         w2, hidden = self.weights["w2"], self.hidden
         for e in self.training_rng.sample(self.replay, c["batch_size"]):
@@ -107,23 +116,31 @@ class Brain:
             # Only Q(s, action_taken) contributes to this replay loss. Other
             # output heads are still computed for policy and target inference.
             offset = a * hidden
-            value = self.weights["b2"][a] + sum(map(mul, h, w2[offset:offset+hidden]))
+            value = (kernels.native.affine(h, w2, self.weights['b2'], False, a, a+1)[0]
+                     if kernels.native is not None and isinstance(w2, Float32) else
+                     self.weights['b2'][a] + sum(map(mul, h, w2[offset:offset+hidden])))
             expected = e.reward
             if not e.terminated:
                 expected += c["discount_factor"] * max(
                     self.forward(e.next_observation, self.target)[1]
                 )
             delta = max(-1.0, min(1.0, value - expected))
-            gb2[a] += delta
-            for j in range(self.hidden):
-                gw2[a * hidden + j] += delta * h[j]
-                dh = delta * w2[a * hidden + j] * (1 - h[j] ** 2)
-                gb1[j] += dh
-                offset = j * self.inputs
-                for i, x in enumerate(e.observation):
-                    gw1[offset + i] += dh * x
+            if kernels.native is not None and isinstance(w2, Float32):
+                kernels.native.q_backward(e.observation, h, w2, a, gw1, gb1, gw2, gb2, delta)
+            else:
+                gb2[a] += delta
+                for j in range(self.hidden):
+                    gw2[a * hidden + j] += delta * h[j]
+                    dh = delta * w2[a * hidden + j] * (1 - h[j] ** 2)
+                    gb1[j] += dh
+                    offset = j * self.inputs
+                    for i, x in enumerate(e.observation):
+                        gw1[offset + i] += dh * x
         scale = c["learning_rate"] / c["batch_size"]
         for k, gradient in gradients.items():
+            if kernels.native is not None and isinstance(self.weights[k], Float32):
+                kernels.native.sgd(self.weights[k], gradient, scale)
+                continue
             for i, value in enumerate(gradient):
                 self.weights[k][i] -= scale * value
         self.updates += 1
@@ -143,10 +160,11 @@ class Brain:
 
     def checkpoint(self):
         return dict(
+            precision=precision_of(self),
             config=copy.deepcopy(self.config),
             actions=self.actions[:],
-            weights={k: v.copy() for k, v in self.weights.items()},
-            target={k: v.copy() for k, v in self.target.items()},
+            weights=plain(self.weights),
+            target=plain(self.target),
             replay=[
                 dict(
                     observation=tuple(e.observation),
@@ -173,8 +191,9 @@ class Brain:
     @classmethod
     def restore(cls, state):
         b = cls(state["config"], state["actions"], 0, 0)
-        for k in ("weights", "target", "cursor", "steps", "updates", "epsilon"):
+        for k in ("cursor", "steps", "updates", "epsilon"):
             setattr(b, k, copy.deepcopy(state[k]))
+        restore_numeric(b, state)
         b.replay = [
             Experience(
                 tuple(e["observation"]),

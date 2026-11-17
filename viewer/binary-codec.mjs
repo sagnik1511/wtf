@@ -23,9 +23,9 @@ export function decodeBinaryReplay(buffer){
     if(tag===7){const n=length(),a=[];for(let i=0;i<n;i++)a.push(get(depth+1));return a;}
     if(tag===8){const n=length(),o={};for(let i=0;i<n;i++){const k=get(depth+1);if(typeof k!=='string'||Object.hasOwn(o,k))throw new Error('Invalid binary map key');put(o,k,get(depth+1));}return o;}
     if(tag===9){const n=length(),a=[];for(let i=0;i<n;i++)a.push(integer());return a;}
-    if(tag===10){const n=length(),a=[],start=take(n*8);for(let i=0;i<n;i++){const v=view.getFloat64(start+i*8,true);if(!Number.isFinite(v))throw new Error('Non-finite binary array');a.push(v);}return a;}
+    if(tag===10||tag===15){const width=tag===10?8:4,n=length(),a=[],start=take(n*width);for(let i=0;i<n;i++){const v=tag===10?view.getFloat64(start+i*width,true):view.getFloat32(start+i*width,true);if(!Number.isFinite(v))throw new Error('Non-finite binary array');a.push(v);}return a;}
     if(tag===14){const n=length();if(!n||n>128)throw new Error('Binary integer too large');const start=take(n);let value=0n;for(let i=n-1;i>=0;i--)value=value*256n+BigInt(bytes[start+i]);if(bytes[start+n-1]&128)value-=1n<<BigInt(n*8);return value;}
-    if(tag===12){const n=length(),a=[],start=take(n*4);for(let i=0;i<n;i++)a.push(view.getUint32(start+i*4,true));return a;}
+    if(tag===12||tag===16||tag===17){const width=tag===16?1:tag===17?2:4,n=length(),a=[],start=take(n*width);for(let i=0;i<n;i++)a.push(width===1?view.getUint8(start+i):width===2?view.getUint16(start+i*2,true):view.getUint32(start+i*4,true));return a;}
     if(tag===11){const n=length(),fields=get(depth+1);if(!Array.isArray(fields)||!fields.length||fields.some(k=>typeof k!=='string')||new Set(fields).size!==fields.length||n>limit)throw new Error('Invalid binary column fields');const columns=fields.map(()=>get(depth+1));if(columns.some(c=>!Array.isArray(c)||c.length!==n))throw new Error('Invalid binary column length');return Array.from({length:n},(_,i)=>{const o={};fields.forEach((k,j)=>put(o,k,columns[j][i]));return o;});}
     throw new Error('Unknown binary tag');
   };

@@ -46,6 +46,7 @@ preset and metadata captured with the experiment.
 | Current observations/caches | `ecosystem/perception.py`, visibility helpers in `world.py` | [Performance](performance.md) |
 | Experiments and configuration | `ecosystem/cli.py`, `config.py`, `runner.py`, `environments/`, schema | [Running](running.md), [configuration](configuration.md) |
 | Learning | `brains.py`, `brain.py`, `ppo.py`, `policy_gradients.py`, `grouped_rollouts.py`, `recurrent_ppo.py`, `qrdqn.py`, `contextual_ppo.py` | [Algorithms](algorithms.md), [advanced variants](advanced-algorithms.md) |
+| Optional native compute | `ecosystem/_kernels.c`, `kernels.py`, `work/build_native.py` | [CPU kernels](native-kernels.md) |
 | Brain inheritance/archive | `ecosystem/library.py`, `runner.py` | [Saved brains](brain-library.md) |
 | Replay/checkpoint formats | `recording.py`, `replay_codec.py`, `replay_io.py`, `binary_io.py`, `checkpoint_io.py` in `ecosystem/` | [Binary storage](binary-storage.md), [recordings](recording.md) |
 | Read-only playback | `ecosystem/server.py`, `viewer/api.mjs`, `playback.mjs`, `binary-codec.mjs`, `app.js` | [Recordings](recording.md) |
@@ -92,6 +93,16 @@ both base radius and bonus; restore caches cold. See
 interactive explorer under `docs/assets/physics/`. Refresh their controlled
 physics snapshots with `python -m work.build_physics_docs`; they are not run
 replays or evidence of learning.
+
+New experiments use packed float32 model/optimizer storage with double arithmetic
+and unchanged world precision. Optional [CPU kernels](native-kernels.md) accelerate
+dense math/DQN gradients/SGD/Adam, with a selectable Python fallback and no format
+change. They do not compile GRU cells, quantile loss or environment logic. Checkpoints without precision metadata retain
+float64 continuation, including future births/episodes. New warm starts convert
+compatible saved weights to the new run's precision. See
+[numeric precision](running.md#numeric-precision). Binary codecs narrow numeric
+arrays only losslessly and preserve arbitrary counters/seeds; update Python and
+JS readers together when opening new binary array tags.
 
 ## Local operations and common pitfalls
 

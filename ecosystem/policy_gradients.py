@@ -1,4 +1,6 @@
 """Independent A2C, episodic REINFORCE, and experimental branched GRPO."""
+from .numeric import packed, plain, precision_of, restore_numeric
+
 
 import copy
 from .brain import observation_inputs
@@ -126,7 +128,7 @@ class ActorBrain(AdamOptimizer):
         )
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
-        self.moments, self.variances = self.network.zeros(), self.network.zeros()
+        self.moments, self.variances = packed(self.network.zeros()), packed(self.network.zeros())
         self.trajectory, self.pending = [], None
         self.steps = self.updates = self.rollout_updates = 0
         self.baseline = 0.0
@@ -178,11 +180,12 @@ class ActorBrain(AdamOptimizer):
     def checkpoint(self):
         state = dict(
             algorithm=self.algorithm,
+            precision=precision_of(self),
             config=copy.deepcopy(self.config),
             actions=self.actions[:],
             network=self.network.checkpoint(),
-            moments=copy.deepcopy(self.moments),
-            variances=copy.deepcopy(self.variances),
+            moments=plain(self.moments),
+            variances=plain(self.variances),
             trajectory=[s._asdict() for s in self.trajectory],
             pending=self.pending,
             steps=self.steps,
@@ -204,10 +207,7 @@ class ActorBrain(AdamOptimizer):
     @classmethod
     def restore(cls, state):
         b = cls(state["config"], state["actions"], 0, 0)
-        b.network.layers = copy.deepcopy(state["network"])
         for key in (
-            "moments",
-            "variances",
             "steps",
             "updates",
             "rollout_updates",
@@ -215,6 +215,7 @@ class ActorBrain(AdamOptimizer):
             "last_metrics",
         ):
             setattr(b, key, copy.deepcopy(state[key]))
+        restore_numeric(b, state)
         b.trajectory = [
             PolicyStep(
                 tuple(s["observation"]),
@@ -239,7 +240,6 @@ class ActorBrain(AdamOptimizer):
         b.rng.setstate(tuples(state["rng_state"]))
         b.training_rng.setstate(tuples(state["training_rng_state"]))
         if b.algorithm == "grpo":
-            b.reference_network.layers = copy.deepcopy(state["reference_network"])
             b.group_rng.setstate(tuples(state["group_rng_state"]))
             b.last_group_step = state["last_group_step"]
         return b

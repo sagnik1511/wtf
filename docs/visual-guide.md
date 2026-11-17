@@ -29,6 +29,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | How do physical costs reach an optimizer? | [Reward feedback](rewards.md#physical-costs-and-learning-feedback) |
 | Why does seeking not load every run? | [Playback and chart data](recording.md#seeking-and-charts-use-separate-data) |
 | What is compressed and what is restored? | [Replay and checkpoint payloads](binary-storage.md#two-payloads-one-bounded-file-at-a-time) |
+| Where would compiled kernels and smaller dtypes help? | [Native performance review](native-performance-review.md) (priority and dtype tables) |
 | When is an observation cache invalidated? | [Cache dependencies](performance.md#observation-cache-dependencies) |
 | Can a behavior report prove learning? | [Evidence path](analysis.md#from-recorded-behavior-to-an-assessment) |
 | How were the calibration comparisons organized? | [Historical experiment flow](calibration.md#historical-calibration-study-flow) |

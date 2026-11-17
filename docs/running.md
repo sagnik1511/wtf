@@ -26,6 +26,32 @@ Install future Python packages into `.venv`. The only current runtime dependency
 is `tqdm`; simulation and neural-network implementations use the standard library.
 The launcher creates `.venv` if absent but does not install training dependencies.
 
+## Numeric precision
+
+New runs use packed float32 weights, biases, Q/QR-DQN targets, GRPO references
+and Adam state for every algorithm. No additional dependency, build command or
+CLI flag is needed. Scalar math and temporary activations/gradients/returns stay
+in Python float64; health, energy, resource growth and terrain physics also keep
+their original precision. This is float32 **model storage**, not pure float32
+arithmetic. An optional [compiled CPU backend](native-kernels.md) independently
+accelerates network and optimizer loops; build it once to enable automatic use.
+
+Checkpoints record per-brain `precision` and experiment `brain_precision`;
+recording run metadata also records `brain_precision`. Exact resume reconstructs
+the recorded storage. Legacy checkpoints without these fields use float64,
+including future episodes and children. Saved champions can still initialize a
+new float32 run if their architecture/actions match; that warm start rounds
+parameters to float32 and resets training state as usual. Champion snapshots
+record precision without changing their architecture signature.
+
+New runs may follow different trajectories than earlier float64 runs with the
+same seed. Existing results are not converted. The binary reader/viewer supports
+both old numeric tags and the smaller lossless encodings described in
+[binary storage](binary-storage.md). Restart any running playback server and
+refresh the viewer before opening newly written binary files with these tags.
+Older source revisions cannot decode the new tags; keep the updated readers
+when reverting learning code.
+
 ## Train and save a recording
 
 ```sh

@@ -3,6 +3,10 @@
 A small standard-library implementation for inspectable CPU experiments.
 Each animal owns all network, optimizer, rollout, and random-generator state.
 """
+from . import kernels
+from .kernels import gradient_zeros
+from .numeric import Float32, packed, plain, precision_of, restore_numeric
+
 
 import copy
 import math
@@ -95,7 +99,7 @@ class MLP:
                 # Near-uniform initial policy; the last output is the critic.
                 for i in range(inputs * actions):
                     weights[i] *= 0.01
-            self.layers.append(dict(weights=weights, bias=[0.0] * outputs))
+            self.layers.append(packed(dict(weights=weights, bias=[0.0] * outputs)))
 
     def forward(self, observation):
         activations = [tuple(observation)]
@@ -103,6 +107,11 @@ class MLP:
             previous = activations[-1]
             inputs = self.sizes[index]
             weights = layer["weights"]
+            if kernels.native is not None and isinstance(weights, Float32):
+                values = kernels.native.affine(previous, weights, layer['bias'],
+                                               index < len(self.layers)-1, 0, len(layer['bias']))
+                activations.append(values)
+                continue
             values = [
                 bias + sum(map(mul, previous, weights[j * inputs : (j + 1) * inputs]))
                 for j, bias in enumerate(layer["bias"])
@@ -120,6 +129,12 @@ class MLP:
         last = len(self.layers) - 1
         for index, layer in enumerate(self.layers):
             inputs, weights = self.sizes[index], layer['weights']
+            if kernels.native is not None and isinstance(weights, Float32):
+                start, stop = (len(layer['bias'])-1, len(layer['bias'])) if value_only and index == last else (
+                    output_range if output_range is not None and index == last else (0, len(layer['bias'])))
+                previous = kernels.native.affine(previous, weights, layer['bias'], index < last, start, stop)
+                if value_only and index == last:return previous[0]
+                continue
             if value_only and index == last:
                 output = len(layer['bias']) - 1
                 return layer['bias'][output] + sum(map(mul, previous, weights[output*inputs:(output+1)*inputs]))
@@ -150,11 +165,11 @@ class MLP:
         # Local to one update call, never a persistent per-animal buffer.
         for layer in gradients:
             for values in layer.values():
-                values[:] = [0.0] * len(values)
+                values[:] = gradient_zeros(values)
 
     def zeros(self):
         return [
-            {key: [0.0] * len(values) for key, values in layer.items()}
+            {key: gradient_zeros(values) for key, values in layer.items()}
             for layer in self.layers
         ]
 
@@ -165,6 +180,12 @@ class MLP:
             inputs = self.sizes[index]
             weights = self.layers[index]["weights"]
             dw, db = gradients[index]["weights"], gradients[index]["bias"]
+            if kernels.native is not None and isinstance(weights, Float32) and not isinstance(dw, list):
+                previous_gradient = kernels.native.backward(previous, delta, weights, dw, db,
+                                                              bool(index or return_input_gradient))
+                if not index:return previous_gradient
+                delta = [g * (1.0-value*value) for g, value in zip(previous_gradient, previous)]
+                continue
             if index or return_input_gradient:
                 previous_gradient = [0.0] * inputs
                 for j, derivative in enumerate(delta):
@@ -191,7 +212,7 @@ class MLP:
 
     def checkpoint(self):
         return [
-            {key: values.copy() for key, values in layer.items()}
+            {key: list(values) for key, values in layer.items()}
             for layer in self.layers
         ]
 
@@ -206,8 +227,8 @@ class PPOBrain(AdamOptimizer):
         self.network = self._new_network(config, len(actions), base_seed)
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
-        self.moments = self.network.zeros()
-        self.variances = self.network.zeros()
+        self.moments = packed(self.network.zeros())
+        self.variances = packed(self.network.zeros())
         self.rollout = []
         self.pending = None
         self.steps = self.updates = self.rollout_updates = 0
@@ -360,11 +381,12 @@ class PPOBrain(AdamOptimizer):
     def checkpoint(self):
         return dict(
             algorithm=self.algorithm,
+            precision=precision_of(self),
             config=copy.deepcopy(self.config),
             actions=self.actions[:],
             network=self.network.checkpoint(),
-            moments=copy.deepcopy(self.moments),
-            variances=copy.deepcopy(self.variances),
+            moments=plain(self.moments),
+            variances=plain(self.variances),
             rollout=[step._asdict() for step in self.rollout],
             pending=self.pending,
             steps=self.steps,
@@ -378,16 +400,14 @@ class PPOBrain(AdamOptimizer):
     @classmethod
     def restore(cls, state):
         b = cls(state["config"], state["actions"], 0, 0)
-        b.network.layers = copy.deepcopy(state["network"])
         for key in (
-            "moments",
-            "variances",
             "steps",
             "updates",
             "rollout_updates",
             "last_metrics",
         ):
             setattr(b, key, copy.deepcopy(state[key]))
+        restore_numeric(b, state)
         b.rollout = [
             RolloutStep(
                 tuple(s["observation"]),

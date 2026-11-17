@@ -1,4 +1,7 @@
 """GRU PPO with chronological truncated backpropagation through time."""
+from .kernels import gradient_zeros
+from .numeric import packed
+
 
 import copy
 import math
@@ -35,6 +38,7 @@ class GRUNetwork:
             input_weights=[rng.uniform(-1, 1) * math.sqrt(6 / (self.inputs + h)) for _ in range(3*h*self.inputs)],
             recurrent_weights=[rng.uniform(-1, 1) * math.sqrt(3 / h) for _ in range(3*h*h)],
             bias=[0.0] * (3*h))
+        self.cell = packed(self.cell)
         self.head = MLP(config['network']['hidden_layers'], actions, seed, inputs=h)
 
     @property
@@ -46,7 +50,7 @@ class GRUNetwork:
         self.cell, self.head.layers = values[0], values[1:]
 
     def zeros(self):
-        return [{k: [0.0] * len(v) for k, v in layer.items()} for layer in self.layers]
+        return [{k: gradient_zeros(v) for k, v in layer.items()} for layer in self.layers]
 
     clear_gradients = staticmethod(MLP.clear_gradients)
 
@@ -91,7 +95,7 @@ class GRUNetwork:
         return previous_gradient
 
     def checkpoint(self):
-        return [{k: v.copy() for k, v in layer.items()} for layer in self.layers]
+        return [{k: list(v) for k, v in layer.items()} for layer in self.layers]
 
 
 class RecurrentPPOBrain(PPOBrain):

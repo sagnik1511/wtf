@@ -111,17 +111,19 @@ class PPOMathTests(unittest.TestCase):
                 for index in range(len(values)):
                     original = values[index]
                     values[index] = original + 1e-6
+                    upper = values[index]
                     plus = loss_and_gradient(
                         network.forward(observation)[0], 1, old, -0.6, 0.8, c
                     )[0]
                     values[index] = original - 1e-6
+                    lower = values[index]
                     minus = loss_and_gradient(
                         network.forward(observation)[0], 1, old, -0.6, 0.8, c
                     )[0]
                     values[index] = original
                     self.assertAlmostEqual(
                         gradients[layer_index][key][index],
-                        (plus - minus) / 2e-6,
+                        (plus - minus) / (upper - lower),
                         places=5,
                     )
 

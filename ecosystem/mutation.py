@@ -2,6 +2,7 @@
 import bisect
 import math
 import random
+from .numeric import Float32
 
 from .brains import inherit_brain, offspring_seed, reset_birth_training
 from .world import Event
@@ -40,6 +41,7 @@ def mutate_weights(brain, settings, rng):
         offset=index-(ends[layer-1] if layer else 0)
         before=arrays[layer][offset]
         after=before+rng.gauss(0.0,settings['noise_std'])
+        if isinstance(arrays[layer], Float32):after = Float32([after])[0]
         if not math.isfinite(after):raise ValueError('Mutation produced a non-finite weight')
         if after!=before:changes.append((arrays[layer],offset,after))
     if not changes:return 0

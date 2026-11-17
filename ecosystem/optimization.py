@@ -1,10 +1,20 @@
 """Shared gradient clipping and per-agent Adam optimizer state."""
 
 import math
+from . import kernels
+from .numeric import Float32
 
 
 class AdamOptimizer:
     def _adam_step(self, gradients, count):
+        if kernels.native is not None:
+            rows = [(parameters, self.moments[j][key], self.variances[j][key], gradients[j][key])
+                    for j, layer in enumerate(self.network.layers) for key, parameters in layer.items()]
+            if all(isinstance(p, Float32) and not isinstance(g, list) for p, m, v, g in rows):
+                kernels.native.adam(rows, count, self.config['max_grad_norm'],
+                                    self.config['learning_rate'], self.updates+1)
+                self.updates += 1
+                return
         norm = math.sqrt(
             sum(
                 (value / count) ** 2

@@ -66,6 +66,7 @@ class Recorder:
         self.run = dict(
             run=experiment.run_index + 1,
             seed=world.seed,
+            brain_precision=experiment.brain_precision,
             obstacles=sorted(world.obstacles),
             chunk_count=0,
             frame_count=0,

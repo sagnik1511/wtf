@@ -3,6 +3,7 @@
 No pickle, JSON payloads, optional packages, or whole-file buffering. One record
 (frame or controller) is buffered at a time. A symbol table resets per file.
 """
+from array import array
 import io
 import math
 import struct
@@ -57,14 +58,26 @@ class Encoder:
                 n=len(v)
                 if n>=4 and all(type(item) is float for item in v):
                     if not all(math.isfinite(item) for item in v):raise ValueError('Non-finite binary array')
-                    output.append(10);output.extend(varint(n));output.extend(struct.pack('<'+str(n)+'d',*v))
-                elif n>=16 and all(type(item) is int and 0<=item<2**32 for item in v) and sum(max(1, ((item*2).bit_length()+6)//7) for item in v)>4*n:
-                    output.append(12);output.extend(varint(n));output.extend(struct.pack('<'+str(n)+'I',*v))
+                    # Narrow only when every float is exactly representable;
+                    # no replay/legacy-checkpoint quantization is allowed.
+                    try:
+                        narrowed = array('f', v)
+                        exact = narrowed.itemsize == 4 and all(a == b for a, b in zip(narrowed, v))
+                    except OverflowError:
+                        exact = False
+                    code, tag = ('f', 15) if exact else ('d', 10)
+                    output.append(tag);output.extend(varint(n));output.extend(struct.pack('<'+str(n)+code,*v))
                 elif n>=4 and all(type(item) is int and abs(item)<=MAX_SAFE_INTEGER for item in v):
-                    output.append(9);output.extend(varint(n))
-                    for item in v:
-                        if abs(item)>MAX_SAFE_INTEGER:raise ValueError('Binary integer outside exact JavaScript range')
-                        output.extend(varint(item*2 if item>=0 else -item*2-1))
+                    varbytes = sum(max(1, ((item*2 if item>=0 else -item*2-1).bit_length()+6)//7) for item in v)
+                    minimum, maximum = min(v), max(v)
+                    width = 1 if maximum < 256 else 2 if maximum < 65536 else 4
+                    if minimum >= 0 and maximum < 2**32 and width*n < varbytes:
+                        tag, code = {1:(16,'B'), 2:(17,'H'), 4:(12,'I')}[width]
+                        output.append(tag);output.extend(varint(n));output.extend(struct.pack('<'+str(n)+code,*v))
+                    else:
+                        output.append(9);output.extend(varint(n))
+                        for item in v:
+                            output.extend(varint(item*2 if item>=0 else -item*2-1))
                 elif n>=2 and isinstance(v[0],dict) and v[0] and all(isinstance(row,dict) and list(row)==list(v[0]) for row in v):
                     # Known-shaped entity/event records become columns, with one
                     # field table instead of a dictionary per entity.
@@ -132,16 +145,18 @@ class Decoder:
                 for _ in range(length()):
                     n=uint();result.append(n//2 if n%2==0 else -(n//2)-1)
                 return result
-            if tag==10:
-                n=length();values=list(struct.unpack('<'+str(n)+'d',take(n*8)))
+            if tag in (10,15):
+                width,code = (8,'d') if tag==10 else (4,'f')
+                n=length();values=list(struct.unpack('<'+str(n)+code,take(n*width)))
                 if not all(math.isfinite(v) for v in values):raise ValueError('Non-finite binary array')
                 return values
             if tag==14:
                 n=length()
                 if not 0<n<=128:raise ValueError('Binary integer too large')
                 return int.from_bytes(take(n),'little',signed=True)
-            if tag==12:
-                n=length();return list(struct.unpack('<'+str(n)+'I',take(n*4)))
+            if tag in (12,16,17):
+                width,code = {12:(4,'I'),16:(1,'B'),17:(2,'H')}[tag]
+                n=length();return list(struct.unpack('<'+str(n)+code,take(n*width)))
             if tag==11:
                 n=length();fields=get(depth+1)
                 if not isinstance(fields,list) or not fields or any(not isinstance(k,str) for k in fields) or len(set(fields))!=len(fields):raise ValueError('Invalid binary column fields')

@@ -61,7 +61,7 @@ class MutationMathTests(unittest.TestCase):
             parent.updates=7
             if hasattr(parent,'moments'):
                 for layer in parent.moments:
-                    for values in layer.values():values[:]=[0.5]*len(values)
+                    for values in layer.values():values[:]=type(values)([0.5]*len(values))
             before=copy.deepcopy(parent.checkpoint());child=inherit_brain(parent,11)
             old=copy.deepcopy(matrices(child));old_bias=copy.deepcopy(biases(child))
             count=mutate_weights(child,SETTINGS,mutation_trial(SETTINGS,11))

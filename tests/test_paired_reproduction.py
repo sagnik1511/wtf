@@ -32,7 +32,7 @@ class PairedGeneticsTests(unittest.TestCase):
         for kind in KINDS:
             e=force_reproduction(Experiment(environment(kind,0)));mother=e.brains[0];father=e.brains[1]
             for brain, value in ((mother,1.0),(father,-1.0)):
-                for values in arrays(parameters(brain)):values[:]=[value]*len(values)
+                for values in arrays(parameters(brain)):values[:]=type(values)([value]*len(values))
                 brain.steps=13;brain.updates=7
             before=[copy.deepcopy(b.checkpoint()) for b in (mother,father)]
             world_rng=e.world.rng.getstate()

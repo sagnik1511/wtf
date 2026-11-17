@@ -89,11 +89,13 @@ class AdvancedMathTests(unittest.TestCase):
                 for i in range(len(values)):
                     old = values[i]
                     values[i] = old+1e-6
+                    upper = values[i]
                     plus = objective()
                     values[i] = old-1e-6
+                    lower = values[i]
                     minus = objective()
                     values[i] = old
-                    self.assertAlmostEqual(gradients[li][key][i], (plus-minus)/2e-6, places=7,
+                    self.assertAlmostEqual(gradients[li][key][i], (plus-minus)/(upper-lower), places=7,
                                            msg=f'{li}.{key}.{i}')
 
     def test_masked_objective_and_entropy_gradient(self):

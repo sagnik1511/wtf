@@ -32,9 +32,11 @@ numbers are rejected.
 
 The layout uses:
 
-- Raw little-endian float64 arrays, without decimal strings or base64.
-- Packed uint32 arrays for dense unsigned data such as RNG words; compact
-  signed varints for small integer values and integer arrays.
+- Raw little-endian float32 arrays when every source value is exactly
+  representable, otherwise float64; no decimal strings or base64.
+- Packed uint8, uint16 or uint32 arrays when the actual values fit and their
+  payload is smaller than signed varints. Small values retain varints when
+  equally small or smaller; RNG words usually use uint32.
 - Dictionary-coded strings, including field names, species and actions.
 - Column-packed tables for lists of records with the same fields, including
   animals, resources and events. Repeated keys are stored as a field table.
@@ -44,8 +46,23 @@ The layout uses:
   ordinary replay IDs and counters remain normal safe-integer Numbers.
 
 Numbers retain their original integer/float representation in Python, including
-signed floating zero. Floats are not quantized to float32/float16. Exact resume
-and analysis therefore retain their original values.
+signed floating zero. The binary encoder never quantizes source values: a
+float64 value uses float32 encoding only when decoding recovers it exactly.
+New model training already stores parameters in float32; physics and legacy
+models keep their source values. Scalar floats remain float64 on disk.
+
+WTFB version 1 has additive array tags: `15` for float32, `16` for uint8 and `17`
+for uint16, alongside existing float64 (`10`), uint32 (`12`) and signed varints
+(`9`). Python and JavaScript readers accept both forms and return the same
+ordinary floats/integers/Numbers to the application. Older readers do not know
+the new tags: update/restart the playback server and refresh the viewer together.
+Each chunk is still independently decoded and seeking/memory bounds are unchanged.
+
+Live IDs, ages, generations, counters and seeds remain Python integers. Their
+lifetimes/configuration do not justify a universal uint8/uint16 bound; blindly
+narrowing them could overflow. Live action indices/headings mostly reference
+small shared Python integers already, so changing individual scalar objects to
+boxed NumPy integers would not provide a packed-array saving.
 
 Replay records wrap the existing keyframe-and-field-delta layout. Each chunk
 has an independent header, a full first frame, subsequent delta packets and a
@@ -153,6 +170,5 @@ binary layout above directly handles those records with native browser APIs.
 
 [PyTorch serialization](https://docs.pytorch.org/docs/stable/notes/serialization)
 uses an uncompressed ZIP64 archive by default; installing it would not by itself
-shrink these files. This project currently trains standard-library list-based
-networks. Adopting tensor libraries for faster training is a separate design
+shrink these files. This project currently trains standard-library networks with packed numeric model buffers. Adopting tensor libraries for faster training is a separate design
 change, not necessary for storing their numeric parameters in compressed binary.

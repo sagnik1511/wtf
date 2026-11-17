@@ -4,6 +4,7 @@ import copy
 from collections import Counter
 import random
 import secrets
+from .numeric import precision_scope
 from .brain import Experience
 from .brains import create_brain, restore_brain, mix_parent_brains, offspring_seed, load_model_weights, model_snapshot
 from .config import validate
@@ -17,6 +18,7 @@ class Experiment:
             raise ValueError("mode must be train, evaluate, or random")
         self.config = copy.deepcopy(validate(config))
         self.mode = mode
+        self.brain_precision = "float32"
         self.legacy_brain_retention = False
         self.initial_models = load_initial_models(self.config, **({"root": library_root} if library_root is not None else {}))
         self.run_initial_models = copy.deepcopy(self.initial_models)
@@ -82,12 +84,13 @@ class Experiment:
                 base_seed = brain_seed + 1000003 * (species_index + 1)
                 for i, a in self.world.animals.items():
                     if a.species == species:
-                        self.brains[i] = create_brain(
-                            brain_config,
-                            spec["allowed_actions"],
-                            base_seed ^ (0x4D414C45 if a.sex == "male" else 0),
-                            brain_seed + i * 7919 + 13,
-                        )
+                        with precision_scope(self.brain_precision):
+                            self.brains[i] = create_brain(
+                                brain_config,
+                                spec["allowed_actions"],
+                                base_seed ^ (0x4D414C45 if a.sex == "male" else 0),
+                                brain_seed + i * 7919 + 13,
+                            )
                         if a.sex in self.run_initial_models.get(species, {}):
                             load_model_weights(self.brains[i], self.run_initial_models[species][a.sex]["model"])
                         elif not self.legacy_brain_retention and a.sex in self.initial_weights.get(species, {}):
@@ -297,6 +300,7 @@ class Experiment:
     def checkpoint(self, include_brains=True):
         state = dict(
             checkpoint_version=1,
+            brain_precision=self.brain_precision,
             initial_models=copy.deepcopy(self.initial_models),
             initial_weights=copy.deepcopy(self.initial_weights),
             run_initial_models=copy.deepcopy(self.run_initial_models),
@@ -331,6 +335,9 @@ class Experiment:
         if state.get("checkpoint_version") != 1:
             raise ValueError("Unsupported checkpoint version")
         e = cls.__new__(cls)
+        e.brain_precision = state.get("brain_precision", "float64")
+        with precision_scope(e.brain_precision):
+            pass  # Validate before constructing any controllers.
         e.config = copy.deepcopy(validate(state["config"]))
         e.initial_models = sex_models(state.get("initial_models", {}))
         e.legacy_brain_retention = state.get("legacy_brain_retention", "chain_best_brains" not in e.config["experiment"])

@@ -1,4 +1,6 @@
 """Algorithm dispatch; neural architecture belongs to each brain template."""
+from .numeric import Float32, packed, plain, precision_of
+
 
 from .brain import Brain
 
@@ -109,10 +111,10 @@ def model_signature(config, actions):
 
 def model_snapshot(brain):
     if brain.config["type"] == "q_network":
-        parameters = {key: values.copy() for key, values in brain.weights.items()}
+        parameters = plain(brain.weights)
     else:
         parameters = brain.network.checkpoint()
-    return dict(signature=model_signature(brain.config, brain.actions), parameters=parameters)
+    return dict(signature=model_signature(brain.config, brain.actions), precision=precision_of(brain), parameters=parameters)
 
 
 def load_model_weights(brain, model):
@@ -121,7 +123,6 @@ def load_model_weights(brain, model):
     Optimizers, exploration settings, lifetime counters and experience storage
     belong to the new run. Q targets and GRPO references start at loaded weights.
     """
-    import copy
     import math
     if model.get("signature") != model_signature(brain.config, brain.actions):
         raise ValueError("Saved brain algorithm, architecture, observation version or action order is incompatible")
@@ -130,20 +131,20 @@ def load_model_weights(brain, model):
     def valid(actual, template):
         if isinstance(template, dict):
             return isinstance(actual, dict) and actual.keys() == template.keys() and all(valid(actual[k], v) for k, v in template.items())
-        if isinstance(template, list):
+        if isinstance(template, (list, Float32)):
             return isinstance(actual, list) and len(actual) == len(template) and all(valid(a, b) for a, b in zip(actual, template))
         return type(actual) in (int, float) and math.isfinite(actual)
     if not valid(parameters, expected):
         raise ValueError("Saved brain has invalid parameter dimensions or non-finite weights")
     if brain.config["type"] == "q_network":
-        brain.weights = copy.deepcopy(parameters)
-        brain.target = copy.deepcopy(parameters)
+        brain.weights = packed(parameters, precision_of(brain))
+        brain.target = packed(parameters, precision_of(brain))
     else:
-        brain.network.layers = copy.deepcopy(parameters)
+        brain.network.layers = packed(parameters, precision_of(brain))
         if hasattr(brain, "target_network"):
-            brain.target_network.layers = copy.deepcopy(parameters)
+            brain.target_network.layers = packed(parameters, precision_of(brain))
         if hasattr(brain, "reference_network"):
-            brain.reference_network.layers = copy.deepcopy(parameters)
+            brain.reference_network.layers = packed(parameters, precision_of(brain))
 
 
 def reset_birth_training(brain):
@@ -157,7 +158,7 @@ def reset_birth_training(brain):
     if hasattr(brain, 'last_metrics'):brain.last_metrics = {}
     if hasattr(brain, 'baseline'):brain.baseline = 0.0
     if hasattr(brain, 'moments'):
-        brain.moments = brain.network.zeros();brain.variances = brain.network.zeros()
+        brain.moments = packed(brain.network.zeros(), precision_of(brain));brain.variances = packed(brain.network.zeros(), precision_of(brain))
     if hasattr(brain, 'reset_memory'):brain.reset_memory()
     if hasattr(brain, 'target'):brain.target = copy.deepcopy(brain.weights)
     if hasattr(brain, 'target_network'):brain.target_network.layers = copy.deepcopy(brain.network.layers)

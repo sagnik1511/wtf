@@ -6,9 +6,11 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.39](0.0.0.39.md), `2d2e036`.
+**Latest committed rollout:** [0.0.0.40](0.0.0.40.md), `35f17db`.
 **Latest committed runtime implementation:** [0.0.0.37](0.0.0.37.md), `2d2e036`.
-**Pending:** [0.0.0.40](0.0.0.40.md), visual explanations throughout the documentation.
+**Pending:** [0.0.0.43](0.0.0.43.md), optional compiled CPU learning kernels;
+[0.0.0.42](0.0.0.42.md), float32 model storage and lossless narrow arrays;
+[0.0.0.41](0.0.0.41.md), preceding native/dtype assessment.
 
 ## Rollout index
 
@@ -19,7 +21,10 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.40](0.0.0.40.md) | Pending | Prepared 2026-11-18 | — | Documentation-wide learning, inheritance, storage and workflow diagrams |
+| [0.0.0.43](0.0.0.43.md) | Pending | Prepared 2026-11-18 | — | Optional dense/backprop, DQN/SGD and Adam kernels with matched benchmarks |
+| [0.0.0.42](0.0.0.42.md) | Pending | Prepared 2026-11-18 | — | Float32 model/optimizer buffers, precision-aware resume and lossless narrow binary arrays |
+| [0.0.0.41](0.0.0.41.md) | Pending | Prepared 2026-11-18 | — | Code-inspection assessment of native kernels, packed runtime data and precision boundaries |
+| [0.0.0.40](0.0.0.40.md) | Committed | 2026-11-18 | `35f17db` | Documentation-wide learning, inheritance, storage and workflow diagrams |
 | [0.0.0.39](0.0.0.39.md) | Committed | 2026-11-17 | `2d2e036` | Three full-viewer terrain GIFs with capture provenance and export helper |
 | [0.0.0.38](0.0.0.38.md) | Committed | 2026-11-17 | `2d2e036` | Ten SVG physics cases, standalone explorer, illustrated guide and regeneration tools |
 | [0.0.0.37](0.0.0.37.md) | Committed | 2026-11-17 | `2d2e036` | Water-directed sight extension with wall occlusion and bounded static caching |

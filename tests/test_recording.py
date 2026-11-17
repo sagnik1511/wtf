@@ -47,6 +47,7 @@ class RecordingTests(unittest.TestCase):
             self.assertEqual(manifest["status"], "complete")
             self.assertEqual([r["frame_count"] for r in manifest["runs"]], [21, 21])
             for entry in manifest["runs"]:
+                self.assertEqual(entry["brain_precision"], "float32")
                 frames = []
                 for i in range(entry["chunk_count"]):
                     chunk = load_chunk(store.chunk("example", entry["run"], i))

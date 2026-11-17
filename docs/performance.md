@@ -4,9 +4,35 @@
 
 Commands in this guide run from the project root.
 
+For implemented CPU acceleration, build/backend controls and numerical boundaries,
+see [optional CPU kernels](native-kernels.md). The preceding
+[native performance review](native-performance-review.md) records the original
+assessment; its remaining GRU/quantile/visibility proposals are not implemented.
+
+New experiments now keep network parameters, target/reference networks and Adam
+moments/variances in packed **float32** buffers across all nine algorithms.
+Python arithmetic, gradient accumulation, activations, losses, returns and world
+physics retain float64 precision. That storage change reduces retained model
+memory. The optional C kernels independently accelerate numerical loops. Parameter rounding
+can change learned policies and ecosystem trajectories, even with the same seed.
+
+Checkpoint precision is explicit. Older checkpoints without it keep float64
+models, including later births and episode initialization; warm-starting their
+champions into a new experiment converts those weights to float32. Exact resume
+is distinct from a warm start. See [precision handling](running.md#numeric-precision)
+and [rollout 42](releases/0.0.0.42.md).
+
+The [native-kernel benchmark results](native-kernels.md#benchmark-results) compare
+three-process medians against the preceding FP32 code on 11 matched 180-step
+presets. Complete-state hashes match. Measured training-loop speedups range from
+1.53× (recurrent PPO) to 12.97× (MAPPO); the valley with binary/XZ recording gains
+2.41×. Peak RSS is not consistently lower; QR-DQN rose from 26.3 to 30.6 MiB in
+these samples. See the linked report for settings, all timings, limitations and
+build instructions. Native kernels are optional and do not change replay formats.
+
 Historical measurements describe the implementation evaluated at each optimization stage. Rerun the probe for the current revision and your workload.
 
-The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. An incremental spatial index groups food and animals into nearby cells, so limited-vision agents skip distant candidates. Small target sets and wide-vision queries use a full scan. Squared-distance filtering preserves visibility and insertion-order ties, including across cells. Each animal keeps a spatial window: movement reuses its overlapping bucket references and updates only entering/leaving strips. Shared buckets receive target moves, births, deaths and food-presence changes once per phase. Stationary observers reuse nearest-target results while the relevant bucket versions stay unchanged. Movement and obstacle edits force visibility to be checked again because occlusion inside the overlap can change. Energy, health, heading and blocked neighbors are always current. Derived caches are rebuilt after checkpoint restoration and released for dead observers; authoritative state is reconciled each phase to detect manual edits too. Small networks use native multiplication iterators with the original summation order. Training computes Q-network weight offsets once per neuron, and MLP backpropagation avoids checking the input-layer case for every weight. Optimizer mathematics and accumulation order remain unchanged. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
+The engine shares a per-observation-phase list of positions and resources instead of rebuilding it for each animal. An incremental spatial index groups food and animals into nearby cells, so limited-vision agents skip distant candidates. Small target sets and wide-vision queries use a full scan. Squared-distance filtering preserves visibility and insertion-order ties, including across cells. Each animal keeps a spatial window: movement reuses its overlapping bucket references and updates only entering/leaving strips. Shared buckets receive target moves, births, deaths and food-presence changes once per phase. Stationary observers reuse nearest-target results while the relevant bucket versions stay unchanged. Movement and obstacle edits force visibility to be checked again because occlusion inside the overlap can change. Energy, health, heading and blocked neighbors are always current. Derived caches are rebuilt after checkpoint restoration and released for dead observers; authoritative state is reconciled each phase to detect manual edits too. The Python fallback uses native multiplication iterators with the original summation order. Training computes Q-network weight offsets once per neuron, and MLP backpropagation avoids checking the input-layer case for every weight. Optimizer mathematics and accumulation order remain unchanged. Replay experiences use compact immutable tuples. Snapshot creation copies primitive entity fields without recursive dataclass conversion.
 
 Recording streams one encoded frame and retains one previous frame for computing chunk-local deltas. CLI checkpoint files are written atomically in compact JSON with one copied brain at a time. This avoids simultaneously holding every copied replay buffer and a large formatted JSON string. Checkpoint values remain exact; the CLI now writes compact version-2 envelopes while the loader still accepts existing version-1 files. Scheduled intermediate checkpoints are preserved; the final checkpoint is written once. Population sizes, model dimensions, training cadence, recording frequency and diagnostics remain unchanged by these optimizations.
 

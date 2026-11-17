@@ -15,3 +15,10 @@ brain_library/
 
 # Local diagram authoring sources; publish SVG exports instead.
 *.mmd
+
+# Optional compiled CPU kernels and their build outputs.
+*.so
+*.pyd
+build/
+*.egg-info/
+!work/performance/benchmark_kernels.py

@@ -1,4 +1,6 @@
 """Quantile-regression Double DQN with bounded per-animal replay and Adam."""
+from .numeric import packed, plain, precision_of, restore_numeric
+
 
 import copy
 from .brain import observation_inputs
@@ -36,7 +38,7 @@ class QRDQNBrain(AdamOptimizer):
         self.network = MLP(config['network']['hidden_layers'], len(actions) * self.quantiles,
                            base_seed, value_head=False, inputs=observation_inputs(config))
         self.target_network = copy.deepcopy(self.network)
-        self.moments, self.variances = self.network.zeros(), self.network.zeros()
+        self.moments, self.variances = packed(self.network.zeros()), packed(self.network.zeros())
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
         self.replay = []
@@ -103,9 +105,9 @@ class QRDQNBrain(AdamOptimizer):
                     training_metrics=self.last_metrics.copy())
 
     def checkpoint(self):
-        return dict(algorithm=self.algorithm, config=copy.deepcopy(self.config), actions=self.actions[:],
+        return dict(algorithm=self.algorithm, precision=precision_of(self), config=copy.deepcopy(self.config), actions=self.actions[:],
                     network=self.network.checkpoint(), target_network=self.target_network.checkpoint(),
-                    moments=copy.deepcopy(self.moments), variances=copy.deepcopy(self.variances),
+                    moments=plain(self.moments), variances=plain(self.variances),
                     replay=[e._asdict() for e in self.replay], cursor=self.cursor,
                     steps=self.steps, updates=self.updates, epsilon=self.epsilon,
                     last_metrics=self.last_metrics.copy(), rng_state=self.rng.getstate(),
@@ -114,10 +116,9 @@ class QRDQNBrain(AdamOptimizer):
     @classmethod
     def restore(cls, state):
         b = cls(state['config'], state['actions'], 0, 0)
-        b.network.layers = copy.deepcopy(state['network'])
-        b.target_network.layers = copy.deepcopy(state['target_network'])
-        for key in ('moments', 'variances', 'cursor', 'steps', 'updates', 'epsilon', 'last_metrics'):
+        for key in ('cursor', 'steps', 'updates', 'epsilon', 'last_metrics'):
             setattr(b, key, copy.deepcopy(state[key]))
+        restore_numeric(b, state)
         b.replay = [Experience(tuple(e['observation']), e['action'], e['reward'],
                               None if e['next_observation'] is None else tuple(e['next_observation']),
                               e['terminated'], e['truncated']) for e in state['replay']]

@@ -31,7 +31,7 @@ class Encoder:
 
     def encode(self, value, key=None):
         if isinstance(value, (dict, list, tuple)) and (
-            key in SHARED or isinstance(value, dict) and set(value)=={'signature', 'parameters'}
+            key in SHARED or isinstance(value, dict) and {'signature', 'parameters'} <= set(value) <= {'signature', 'parameters', 'precision'}
         ):
             fingerprint = hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).digest()
             if fingerprint not in self.indices:

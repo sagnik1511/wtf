@@ -131,3 +131,14 @@ comparisons. `python -m work.calibrate_terrain` uses tqdm and writes only scalar
 results/configurations under ignored results. It is an experiment utility, not
 a default verification step. Its defaults run 45 short episodes; select fewer
 seeds/maps/variants when a small smoke check is sufficient.
+
+
+## Optional native kernels
+
+Build with `.venv/bin/python -m work.build_native` on a supported interpreter.
+`tests/test_native_kernels.py` checks strict dense/output-range/backprop agreement,
+all-nine-algorithm checkpoint/backend switching, nonzero Adam momentum/clipping,
+legacy fallback, malformed buffers/dimensions and missing-extension behavior.
+Run the full suite with both `WTF_KERNELS=native` and `WTF_KERNELS=python` after
+changes. Native-specific checks skip when no supported extension is built. See
+[CPU kernels](native-kernels.md) for build requirements and reproducible benchmarks.

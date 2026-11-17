@@ -8,13 +8,13 @@ def force_action(b,action):
     if hasattr(b,'epsilon'):
         b.epsilon=0.0;b.config['exploration']['minimum']=0.0
     if b.config['type']=='q_network':
-        b.weights['b2'][:]=[0.0]*len(b.actions);b.weights['b2'][index]=60.0
+        b.weights['b2'][:]=type(b.weights['b2'])([0.0]*len(b.actions));b.weights['b2'][index]=60.0
         b.target=copy.deepcopy(b.weights)
     else:
         network=b.network.actor if b.config['type']=='mappo' else b.network
         bias=network.layers[-1]['bias']
         count=len(b.actions)*b.quantiles if b.config['type']=='qrdqn' else len(b.actions)
-        bias[:count]=[0.0]*count
+        bias[:count]=type(bias)([0.0]*count)
         if b.config['type']=='qrdqn':
             for i in range(index*b.quantiles,(index+1)*b.quantiles):bias[i]=60.0
         else:bias[index]=60.0

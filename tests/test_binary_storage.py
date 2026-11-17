@@ -71,7 +71,9 @@ class BinaryCodecTests(unittest.TestCase):
 
     def test_javascript_decodes_python_columns_and_exact_safe_integers(self):
         original=frames()
-        original[0]['extension']={'__proto__':'safe','big':2**53-1,'negative':-(2**53-1),'array':[2**32-1]*20}
+        original[0]['extension']={'__proto__':'safe','big':2**53-1,'negative':-(2**53-1),'array':[2**32-1]*20,
+            'u8':[64,127,128,255],'u16':[256,32767,32768,65535],
+            'f32':[.5,-0.0,1.0,-2.0],'f64':[.1,.2,.3,.4]}
         script="""import assert from 'node:assert/strict';
         import {decodeBinaryReplay} from './viewer/binary-codec.mjs';
         import {decodeChunk} from './viewer/replay-codec.mjs';
@@ -80,6 +82,7 @@ class BinaryCodecTests(unittest.TestCase):
         const result=decodeChunk(decodeBinaryReplay(Buffer.from(bytes,'base64')));
         assert.deepStrictEqual(result,expected);
         assert(Object.is(result[1].animals[0].health,-0));
+        assert(Object.is(result[0].extension.f32[1],-0));
         """
         payload=dict(bytes=base64.b64encode(binary(original)).decode(),expected=original)
         p=subprocess.run(['node','--input-type=module','-e',script],input=json.dumps(payload),text=True,capture_output=True,cwd=ROOT)

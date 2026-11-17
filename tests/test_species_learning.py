@@ -70,7 +70,7 @@ class SpeciesLearningTests(unittest.TestCase):
         self.assertGreater(a.updates,0)
         for key in original:
             for before,low,high in zip(original[key],a.weights[key],b.weights[key]):
-                self.assertAlmostEqual(before-high,1.25*(before-low),places=12)
+                self.assertAlmostEqual(before-high,1.25*(before-low),delta=3e-7*max(abs(before),abs(low),abs(high),1e-6))
 
     def test_policy_optimizer_uses_scaled_rate_without_more_updates(self):
         for kind in ('ppo','a2c','reinforce','grpo'):
@@ -85,7 +85,7 @@ class SpeciesLearningTests(unittest.TestCase):
                 for before,low,high in zip(original,a.network.layers,b.network.layers):
                     for key in before:
                         for x,y,z in zip(before[key],low[key],high[key]):
-                            self.assertAlmostEqual(x-z,1.25*(x-y),places=12)
+                            self.assertAlmostEqual(x-z,1.25*(x-y),delta=3e-7*max(abs(x),abs(y),abs(z),1e-6))
 
     def test_exact_resume_preserves_effective_rates_and_future_learning(self):
         for kind in ('q_network','ppo','a2c','reinforce','grpo'):
