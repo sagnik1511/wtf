@@ -40,8 +40,8 @@ Exact checkpoints retain the full training state instead.
 ## Recurrent PPO
 
 Template type: `recurrent_ppo`. This combines a single GRU cell, a tanh MLP,
-categorical PPO policy and scalar value output. The GRU processes the same
-20 local observation features as the existing policies. This is a GRU
+categorical PPO policy and scalar value output. The GRU processes the configured local observation: 20 flat features or 32
+terrain features. This is a GRU
 implementation, not an LSTM or an adapter to a third-party trainer.
 
 Additional fields:
@@ -70,6 +70,13 @@ The inspector displays memory norm and sequence-buffer size. Recurrent inference
 and backpropagation add computation and memory per animal; the sequence limit
 bounds the backpropagation tape, not the animal's lifetime memory influence.
 
+
+## Recurrent decision state
+
+The memory is private to one animal and survives ordinary steps. Checkpoint restore preserves it; a newborn starts at zero.
+
+![Recurrent decision state](assets/diagrams/recurrent-decision-state.svg)
+
 ## QR-DQN
 
 Template type: `qrdqn`. The network predicts `num_quantiles` return values per
@@ -94,6 +101,13 @@ to 2–128; pairwise loss computation grows quadratically with that count, and
 output weights grow linearly. Replay is bounded per animal, so total memory
 still grows with population.
 
+
+## Distributional action values
+
+QR-DQN predicts several return quantiles for each action. Action selection uses their mean; replay training fits the quantiles.
+
+![Distributional action values](assets/diagrams/distributional-action-values.svg)
+
 ## Maskable PPO
 
 Template type: `maskable_ppo`. This retains PPO's MLP and value head while
@@ -102,7 +116,9 @@ come from immediate conditions before simultaneous action resolution:
 
 | Action | Available when |
 | --- | --- |
-| Move forward | The destination is inside the world, clear of obstacles and unoccupied |
+| Move forward | The destination is clear/unoccupied and passes terrain movement rules |
+| Swim, when configured | Near/in water, clear destination, sufficient health/energy and an allowed climb |
+| Reproduce, when configured | A physically eligible nearby mate and child cell are available; partner consent is not predicted |
 | Eat | A positive resource patch is underfoot or in front, energy is below maximum, and bite/conversion values are positive |
 | Attack | A resource-eating animal is directly in front and attack damage is positive |
 | Turn or rest | Always |
@@ -111,7 +127,7 @@ A species must allow rest or turning so its mask can never become empty. Masks
 apply to training, greedy evaluation and random-mode decisions for this
 algorithm. They are recorded with each rollout sample and reused when computing
 PPO ratios and entropy; old masks are never replaced with current ones.
-The network and critic receive the original 20 local features, not mask bits.
+The network and critic receive the configured 20/32 local features, not mask bits.
 
 This is action availability under an explicit immediate-neighborhood rule,
 including conditions not fully represented by the nearest-target feature vector.
@@ -124,15 +140,22 @@ unmasked experiments therefore need separate interpretation.
 The inspector labels unavailable actions and shows zero probability for them.
 Masks are derived again after births, deaths and checkpoint restore.
 
+
+## Masked decisions
+
+The decision-time mask is stored with the sample. It describes immediate availability, not guaranteed success after simultaneous actions.
+
+![Masked decisions](assets/diagrams/masked-decisions.svg)
+
 ## Experimental MAPPO variant
 
 Template type: `mappo`. This implements centralized training and decentralized
 execution for a changing population. Each animal retains an independent local
 actor, critic and optimizer. There is no shared live policy across a species and
-no reproduction-time parameter sharing. This is a project-specific MAPPO
+no shared live parameter references after reproduction; paired crossover creates an independent child. This is a project-specific MAPPO
 variant, not a reproduction of the original benchmark implementation.
 
-The actor consumes only its 20 local features. The separate critic consumes
+The actor consumes only its configured 20/32 local features. The separate critic consumes
 those features plus a fixed 16-feature, team-relative global summary:
 
 - Four global features: normalized time, available resource fraction, animal
@@ -164,6 +187,13 @@ exact MAPPO training return.
 The inspector labels MAPPO as experimental and shows reward scope. Recorded
 brain diagnostics also include critic context. More critics and a changed reward
 objective are relevant when comparing this variant with independent PPO.
+
+
+## MAPPO information boundaries
+
+Global context goes only to the private critic. The actor remains local, while training rewards are averaged within the acting animal’s species.
+
+![MAPPO information boundaries](assets/diagrams/mappo-information-boundaries.svg)
 
 ## Evaluation and compatibility
 

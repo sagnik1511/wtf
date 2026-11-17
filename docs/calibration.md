@@ -322,6 +322,13 @@ The nine screening controls are the `energy` variant on seeds 100–102 from the
 first matrix; reproduce them separately with the same harness if needed. Outputs
 are only readable metrics/configurations, not neural weights or replay frames.
 
+
+## Historical calibration study flow
+
+This diagram summarizes the recorded Q-network study, not a new experiment. The current valley layout, mixed brains and water-sight rule changed afterward.
+
+![Historical calibration study flow](assets/diagrams/historical-calibration-study-flow.svg)
+
 ## Remaining policy constraint
 
 The current 20/32-feature observations have no explicit sex, maturity/cooldown or

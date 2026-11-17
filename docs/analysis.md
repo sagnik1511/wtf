@@ -59,6 +59,13 @@ prove useful learning. To establish improvement, freeze policies and compare
 trained, fresh and random controls across matched held-out seeds, reporting
 results separately for each species.
 
+
+## From recorded behavior to an assessment
+
+The report can show behavior changes and optimizer activity. A separate matched evaluation is needed to test whether learned policies perform better.
+
+![From recorded behavior to an assessment](assets/diagrams/from-recorded-behavior-to-an-assessment.svg)
+
 ## Terrain measurements
 
 Terrain records add swim attempts/success, current-driven cell moves and terrain

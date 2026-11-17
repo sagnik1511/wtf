@@ -19,6 +19,13 @@ node --test tests/*.test.mjs
 
 Tests cover strict configuration validation, resource limits, blocked and contested movement, feeding rewards, simultaneous hunts, starvation, occlusion, independent weights, positive-feedback learning, terminal versus truncated experience, evaluation behavior, deterministic and randomized runs, exact JSON checkpoint continuation including future random seeds and mixed PPO/Q models, PPO finite-difference gradient checks and terminal/truncated rollouts, resets, streamed recording correctness, recording transparency, committed-chunk visibility, bounded playback chunk loading, seeking, and read-only HTTP endpoints.
 
+
+## Choose checks for the change
+
+Use the focused checks described below. Documentation/media work does not require a new ecology training experiment.
+
+![Choose checks for the change](assets/diagrams/choose-checks-for-the-change.svg)
+
 ## Local server
 
 The server binds only to `127.0.0.1`. Use `--port 8001` if the default port is occupied. Close the terminal process or press Ctrl-C to stop it.

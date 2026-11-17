@@ -12,3 +12,6 @@ work/performance/*
 
 # Learned model generations are local experiment data.
 brain_library/
+
+# Local diagram authoring sources; publish SVG exports instead.
+*.mmd

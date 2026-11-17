@@ -1,0 +1,209 @@
+[
+  {
+    "title": "Runtime boundaries",
+    "document": "docs/architecture.md",
+    "anchor": "runtime-boundaries",
+    "source": "runtime-boundaries.mmd",
+    "asset": "runtime-boundaries.svg",
+    "nodes": 10,
+    "edges": 10
+  },
+  {
+    "title": "One simulation step",
+    "document": "docs/architecture.md",
+    "anchor": "one-simulation-step",
+    "source": "one-simulation-step.mmd",
+    "asset": "one-simulation-step.svg",
+    "nodes": 6,
+    "edges": 6
+  },
+  {
+    "title": "Private learning loop",
+    "document": "docs/algorithms.md",
+    "anchor": "private-learning-loop",
+    "source": "private-learning-loop.mmd",
+    "asset": "private-learning-loop.svg",
+    "nodes": 7,
+    "edges": 8
+  },
+  {
+    "title": "GRPO trial isolation",
+    "document": "docs/algorithms.md",
+    "anchor": "grpo-trial-isolation",
+    "source": "grpo-trial-isolation.mmd",
+    "asset": "grpo-trial-isolation.svg",
+    "nodes": 8,
+    "edges": 9
+  },
+  {
+    "title": "Recurrent decision state",
+    "document": "docs/advanced-algorithms.md",
+    "anchor": "recurrent-decision-state",
+    "source": "recurrent-decision-state.mmd",
+    "asset": "recurrent-decision-state.svg",
+    "nodes": 6,
+    "edges": 6
+  },
+  {
+    "title": "Distributional action values",
+    "document": "docs/advanced-algorithms.md",
+    "anchor": "distributional-action-values",
+    "source": "distributional-action-values.mmd",
+    "asset": "distributional-action-values.svg",
+    "nodes": 7,
+    "edges": 6
+  },
+  {
+    "title": "Masked decisions",
+    "document": "docs/advanced-algorithms.md",
+    "anchor": "masked-decisions",
+    "source": "masked-decisions.mmd",
+    "asset": "masked-decisions.svg",
+    "nodes": 8,
+    "edges": 7
+  },
+  {
+    "title": "MAPPO information boundaries",
+    "document": "docs/advanced-algorithms.md",
+    "anchor": "mappo-information-boundaries",
+    "source": "mappo-information-boundaries.mmd",
+    "asset": "mappo-information-boundaries.svg",
+    "nodes": 9,
+    "edges": 8
+  },
+  {
+    "title": "Run, continue, or view",
+    "document": "docs/running.md",
+    "anchor": "run-continue-or-view",
+    "source": "run-continue-or-view.mmd",
+    "asset": "run-continue-or-view.svg",
+    "nodes": 7,
+    "edges": 6
+  },
+  {
+    "title": "From configuration to experiment",
+    "document": "docs/configuration.md",
+    "anchor": "from-configuration-to-experiment",
+    "source": "from-configuration-to-experiment.mmd",
+    "asset": "from-configuration-to-experiment.svg",
+    "nodes": 6,
+    "edges": 5
+  },
+  {
+    "title": "Reproduction gates",
+    "document": "docs/configuration.md",
+    "anchor": "reproduction-gates",
+    "source": "reproduction-gates.mmd",
+    "asset": "reproduction-gates.svg",
+    "nodes": 6,
+    "edges": 8
+  },
+  {
+    "title": "Names, roles and private brains",
+    "document": "docs/species.md",
+    "anchor": "names-roles-and-private-brains",
+    "source": "names-roles-and-private-brains.mmd",
+    "asset": "names-roles-and-private-brains.svg",
+    "nodes": 10,
+    "edges": 11
+  },
+  {
+    "title": "Weights versus exact state",
+    "document": "docs/brain-library.md",
+    "anchor": "weights-versus-exact-state",
+    "source": "weights-versus-exact-state.mmd",
+    "asset": "weights-versus-exact-state.svg",
+    "nodes": 7,
+    "edges": 7
+  },
+  {
+    "title": "Champion chaining between runs",
+    "document": "docs/brain-library.md",
+    "anchor": "champion-chaining-between-runs",
+    "source": "champion-chaining-between-runs.mmd",
+    "asset": "champion-chaining-between-runs.svg",
+    "nodes": 7,
+    "edges": 6
+  },
+  {
+    "title": "Child-only mutation path",
+    "document": "docs/mutation.md",
+    "anchor": "child-only-mutation-path",
+    "source": "child-only-mutation-path.mmd",
+    "asset": "child-only-mutation-path.svg",
+    "nodes": 6,
+    "edges": 6
+  },
+  {
+    "title": "Physical costs and learning feedback",
+    "document": "docs/rewards.md",
+    "anchor": "physical-costs-and-learning-feedback",
+    "source": "physical-costs-and-learning-feedback.mmd",
+    "asset": "physical-costs-and-learning-feedback.svg",
+    "nodes": 8,
+    "edges": 8
+  },
+  {
+    "title": "Seeking and charts use separate data",
+    "document": "docs/recording.md",
+    "anchor": "seeking-and-charts-use-separate-data",
+    "source": "seeking-and-charts-use-separate-data.mmd",
+    "asset": "seeking-and-charts-use-separate-data.svg",
+    "nodes": 8,
+    "edges": 8
+  },
+  {
+    "title": "Two payloads, one bounded file at a time",
+    "document": "docs/binary-storage.md",
+    "anchor": "two-payloads-one-bounded-file-at-a-time",
+    "source": "two-payloads-one-bounded-file-at-a-time.mmd",
+    "asset": "two-payloads-one-bounded-file-at-a-time.svg",
+    "nodes": 10,
+    "edges": 8
+  },
+  {
+    "title": "Observation cache dependencies",
+    "document": "docs/performance.md",
+    "anchor": "observation-cache-dependencies",
+    "source": "observation-cache-dependencies.mmd",
+    "asset": "observation-cache-dependencies.svg",
+    "nodes": 10,
+    "edges": 9
+  },
+  {
+    "title": "From recorded behavior to an assessment",
+    "document": "docs/analysis.md",
+    "anchor": "from-recorded-behavior-to-an-assessment",
+    "source": "from-recorded-behavior-to-an-assessment.mmd",
+    "asset": "from-recorded-behavior-to-an-assessment.svg",
+    "nodes": 7,
+    "edges": 7
+  },
+  {
+    "title": "Historical calibration study flow",
+    "document": "docs/calibration.md",
+    "anchor": "historical-calibration-study-flow",
+    "source": "historical-calibration-study-flow.mmd",
+    "asset": "historical-calibration-study-flow.svg",
+    "nodes": 8,
+    "edges": 7
+  },
+  {
+    "title": "Choose checks for the change",
+    "document": "docs/development.md",
+    "anchor": "choose-checks-for-the-change",
+    "source": "choose-checks-for-the-change.mmd",
+    "asset": "choose-checks-for-the-change.svg",
+    "nodes": 5,
+    "edges": 6
+  },
+  {
+    "title": "Rollout record lifecycle",
+    "document": "docs/releases/README.md",
+    "anchor": "rollout-record-lifecycle",
+    "source": "rollout-record-lifecycle.mmd",
+    "asset": "rollout-record-lifecycle.svg",
+    "nodes": 6,
+    "edges": 5
+  }
+]

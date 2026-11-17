@@ -6,13 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.34](0.0.0.34.md), `68855f3`.
-**Latest committed runtime implementation:** [0.0.0.34](0.0.0.34.md), `68855f3`.
-**Pending:** [0.0.0.35](0.0.0.35.md), terrain survival/reproduction calibration;
-[0.0.0.36](0.0.0.36.md), enclosure founder zones and boundary food;
-[0.0.0.37](0.0.0.37.md), directional water sight;
-[0.0.0.38](0.0.0.38.md), portable physics diagrams and explorer;
-[0.0.0.39](0.0.0.39.md), recorded full-viewer terrain GIFs.
+**Latest committed rollout:** [0.0.0.39](0.0.0.39.md), `2d2e036`.
+**Latest committed runtime implementation:** [0.0.0.37](0.0.0.37.md), `2d2e036`.
+**Pending:** [0.0.0.40](0.0.0.40.md), visual explanations throughout the documentation.
 
 ## Rollout index
 
@@ -23,11 +19,12 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.0.39](0.0.0.39.md) | Pending | Prepared 2026-11-17 | — | Three full-viewer terrain GIFs with capture provenance and export helper |
-| [0.0.0.38](0.0.0.38.md) | Pending | Prepared 2026-11-17 | — | Ten SVG physics cases, standalone explorer, illustrated guide and regeneration tools |
-| [0.0.0.37](0.0.0.37.md) | Pending | Prepared 2026-11-17 | — | Water-directed sight extension with wall occlusion and bounded static caching |
-| [0.0.0.36](0.0.0.36.md) | Pending | Prepared 2026-11-17 | — | One enclosed valley, prey/predator founder zones and exact boundary-food allocation |
-| [0.0.0.35](0.0.0.35.md) | Pending | Prepared 2026-11-17 | — | Proximal terrain calibrations, matched short trials and scalar-only harness |
+| [0.0.0.40](0.0.0.40.md) | Pending | Prepared 2026-11-18 | — | Documentation-wide learning, inheritance, storage and workflow diagrams |
+| [0.0.0.39](0.0.0.39.md) | Committed | 2026-11-17 | `2d2e036` | Three full-viewer terrain GIFs with capture provenance and export helper |
+| [0.0.0.38](0.0.0.38.md) | Committed | 2026-11-17 | `2d2e036` | Ten SVG physics cases, standalone explorer, illustrated guide and regeneration tools |
+| [0.0.0.37](0.0.0.37.md) | Committed | 2026-11-17 | `2d2e036` | Water-directed sight extension with wall occlusion and bounded static caching |
+| [0.0.0.36](0.0.0.36.md) | Committed | 2026-11-17 | `2d2e036` | One enclosed valley, prey/predator founder zones and exact boundary-food allocation |
+| [0.0.0.35](0.0.0.35.md) | Committed | 2026-11-17 | `2d2e036` | Proximal terrain calibrations, matched short trials and scalar-only harness |
 | [0.0.0.34](0.0.0.34.md) | Committed | 2026-11-17 | `68855f3` | Mutual reproduction choices, energy/failure/birth rewards and decision metrics |
 | [0.0.0.33](0.0.0.33.md) | Committed | 2026-11-17 | `68855f3` | Optional map geography, health-gated swimming, fractional currents and climb costs |
 | [0.0.0.32](0.0.0.32.md) | Committed | 2026-11-17 | `6480da8` | Arbitrary species names, dynamic legends/colors and multi-species coverage |
@@ -63,6 +60,13 @@ dates, or explicitly labeled preparation dates for pending work.
 | [0.0.0.2](0.0.0.2.md) | Committed | 2026-11-15 | `a9190e4` | Streamed saves and simulation efficiency |
 | [0.0.0.1](0.0.0.1.md) | Committed | 2026-11-15 | `5cd6937` | Randomized experiments and playback outcomes |
 | [0.0.0.0](0.0.0.0.md) | Committed | 2026-11-14 | `ada088a` | Initial simulation and recorded playback |
+
+
+## Rollout record lifecycle
+
+Preparing a record does not create an implementation commit or publish a release. Only verified Git history changes its status to Committed.
+
+![Rollout record lifecycle](../assets/diagrams/rollout-record-lifecycle.svg)
 
 ## Four part version numbers
 

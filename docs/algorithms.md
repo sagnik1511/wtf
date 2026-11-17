@@ -15,6 +15,13 @@ Per-species `learning_rate_multiplier` scales a template's learning rate without
 changing training frequency. Presets use prey 1.0× and predator 1.25×; see
 [species learning rates](configuration.md#learning-rates-per-species).
 
+
+## Private learning loop
+
+Each animal owns this loop. A template supplies initial settings and weights, not a shared live species policy.
+
+![Private learning loop](assets/diagrams/private-learning-loop.svg)
+
 Supported algorithms:
 
 | Template `type` | Model and training |
@@ -97,6 +104,13 @@ Trial worlds do not advance the real simulation or contribute kills, deaths, foo
 All nine algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
 
 See [saved champions](brain-library.md) for transferring compatible learned weights to a fresh experiment, and [analysis](analysis.md) for checking whether updates lead to useful behavior.
+
+
+## GRPO trial isolation
+
+A group compares alternatives from one state. Hypothetical trial events never enter the real replay or counters.
+
+![GRPO trial isolation](assets/diagrams/grpo-trial-isolation.svg)
 
 ## Rare mutation during reproduction
 

@@ -21,6 +21,9 @@ For full recordings of the actual viewer, see the
 [terrain GIF gallery](geography.md#recorded-terrain-previews). The diagrams below
 are controlled physics illustrations, not screen recordings.
 
+For the training, archive, storage and cache diagrams, see the
+[documentation visual guide](visual-guide.md).
+
 ## Actual valley layout
 
 ![Actual valley founder positions, three-cell gates and food allocation](assets/physics/valley-layout.svg)

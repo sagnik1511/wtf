@@ -182,6 +182,13 @@ are detached from callers. No simulation-state or learned-prediction cache is
 introduced, and no complete world-chunk cache is retained on the server.
 
 
+
+## Observation cache dependencies
+
+Dynamic targets and static geometry have different invalidation rules. An observer staying still is not enough to reuse a target result.
+
+![Observation cache dependencies](assets/diagrams/observation-cache-dependencies.svg)
+
 ## Simulation caches and champion selection
 
 The simulation uses simple in-memory dictionaries rather than a broad memoization

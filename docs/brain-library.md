@@ -22,6 +22,13 @@ newborns start those counters at zero. Raw HP is used for health, and age reache
 also includes living survivors rather than treating their age as a completed
 lifespan. The exact tie-breaking ranks are included with each model.
 
+
+## Weights versus exact state
+
+Champion loading transfers compatible learned parameters. It does not restore an animal’s body, optimizer, memory or pending experience.
+
+![Weights versus exact state](assets/diagrams/weights-versus-exact-state.svg)
+
 ## Balance predator kills and survival
 
 The GRPO preset uses this predator setting; other environments can opt in:
@@ -266,6 +273,13 @@ for legacy `best:`/`latest:` selectors. Run-local models are still saved. Explic
 JSON paths remain relative to the project root. `--no-library` skips publishing new
 generations. Evaluation and random-control runs do not publish champion models.
 
+
+
+## Champion chaining between runs
+
+Repeat this independently for each species/sex group. No opposite-sex or different-species champion is silently substituted.
+
+![Champion chaining between runs](assets/diagrams/champion-chaining-between-runs.svg)
 
 ## Older shared archives
 

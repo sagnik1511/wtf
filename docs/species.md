@@ -21,6 +21,13 @@ Predators do not hunt other predators. Prey species compete for the same food,
 and all animals share the grid and obstacles. Selective food webs and
 predator-on-predator hunting are not currently modeled.
 
+
+## Names, roles and private brains
+
+A common template can initialize several species without connecting their live weights. Mating and champion archives use exact species identity, not just diet. Each controller node is one example animal.
+
+![Names, roles and private brains](assets/diagrams/names-roles-and-private-brains.svg)
+
 ## Add entries to a JSON environment
 
 Copy the complete existing prey or predator object under a new key, then edit

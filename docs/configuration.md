@@ -35,6 +35,13 @@ All costs and growth rates are per simulation step. Playback speed changes only 
 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
+
+## From configuration to experiment
+
+The effective configuration is captured with results. Later edits affect a new invocation, not an existing replay or checkpoint.
+
+![From configuration to experiment](assets/diagrams/from-configuration-to-experiment.svg)
+
 ## Geography and maps
 
 Flat maps remain the default. Optional `river_crossing.json`, `highlands.json`
@@ -291,6 +298,13 @@ not preserved. New checkpoints resume exactly under the new implementation.
 Reproduction can delay
 extinction but does not guarantee a stable ecosystem: offspring still need food,
 and parents with low health cannot reproduce.
+
+
+## Reproduction gates
+
+Failure at any gate prevents a birth. Only a successful pair pays birth energy and starts its cooldown.
+
+![Reproduction gates](assets/diagrams/reproduction-gates.svg)
 
 ## Rare newborn mutations
 

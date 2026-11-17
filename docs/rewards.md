@@ -8,6 +8,13 @@ own losses. The environment does not directly assign a neural-network loss.
 MAPPO retains its existing species-mean training reward aggregation. Evaluation
 and random mode record feedback but do not update weights.
 
+
+## Physical costs and learning feedback
+
+Reward accounting describes the consequence without spending the body’s energy a second time. Only training mode updates controllers.
+
+![Physical costs and learning feedback](assets/diagrams/physical-costs-and-learning-feedback.svg)
+
 ## Configuring feedback
 
 Edit each `species.<name>.rewards` object. Supplied presets add these coefficients:

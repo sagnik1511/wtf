@@ -4,6 +4,13 @@
 
 Commands in this guide run from the project root.
 
+
+## Runtime boundaries
+
+Python owns simulation and learning. Playback reads saved artifacts; it does not call a live world or load controllers.
+
+![Runtime boundaries](assets/diagrams/runtime-boundaries.svg)
+
 ## Components
 
 | Location | Responsibility |
@@ -34,12 +41,19 @@ See [adding species](species.md) for behavior and configuration details.
 
 `world.py` owns physical state and emits events. `brain.py` owns individual learning. `runner.py` connects observations, actions, consequences and experiences. `recording.py` writes playback files; `server.py` only serves those files; `viewer/` renders saved data and controls playback.
 
+
+## One simulation step
+
+Body births resolve inside the world step. Child controllers inherit only after the parents receive that step’s learning update.
+
+![One simulation step](assets/diagrams/one-simulation-step.svg)
+
 The world collects all actions before changing animal state:
 
 1. Resolve turns and voluntary movement (including terrain-enabled swimming), then apply river currents through intermediate cells. Charge successful swim/climb costs. On flat maps, resolve turns and movement as before. Walls and initial animal occupancy block moves. Swaps and following into cells vacated during the same step are disallowed. Competing claims to an empty cell use seeded random selection.
 2. Resolve resource feeding with seeded contention order. Prey eat from their current cell, or the cell directly ahead. Eating stops at maximum energy.
 3. Resolve simultaneous attacks against prey in the cell directly ahead. Combined damage is capped at remaining health. Exactly one seeded attacker gets energy for a kill. A prey's chosen feeding action can complete in the same step it is killed.
-4. Charge living and action costs, including failed movement and attack attempts. On terrain maps, charge water maintenance and apply drowning damage when appropriate. At zero energy, apply starvation damage. There is no additional affordability restriction on actions.
+4. Charge living and action costs, including failed movement and attack attempts. On terrain maps, charge water maintenance and apply drowning damage when appropriate. At zero energy, apply starvation damage. Swim/uphill movement separately enforces terrain affordability; ordinary living and attempt costs clamp energy at zero.
 5. Record deaths and individual rewards, remove dead bodies, resolve eligible births, regrow resources up to capacity, and construct the next observations.
 6. Give each learning agent its own experience, including a terminal experience on death, then mix both parents’ model parameters into independent newborn controllers.
 
@@ -58,7 +72,7 @@ documents all 32 and the optional swim action. The base entries are:
 | 12–15 | Nearest visible prey: same four features |
 | 16–19 | Nearest visible predator: same four features |
 
-Distances use a circular vision radius, with obstacle occlusion by integer line rays. Direction deltas use world axes; there is no field-of-view angle limit. Missing targets have four zero values. The current animal is excluded from animal targets. Resources with negligible quantity are omitted from perception.
+Distances use a circular base radius, with optional directional water credit and obstacle occlusion by integer line rays; see [water sight](geography.md#directional-sight-across-water). Direction deltas use world axes; there is no field-of-view angle limit. Missing targets have four zero values. The current animal is excluded from animal targets. Resources with negligible quantity are omitted from perception.
 
 Q-learning brains use one small tanh hidden layer and linear action-value outputs, independent replay buffers, uniformly sampled mini-batches, Huber-loss gradients, plain SGD, target networks, and epsilon-greedy exploration. PPO uses the [actor-critic implementation](algorithms.md), including its own Adam state. A2C, REINFORCE and GRPO share the small-network/optimizer infrastructure described in the [algorithm guide](algorithms.md). No learning algorithm requires a third-party ML framework. Fresh founders start from sex-specific copied base weights but have separate policy and learning randomness. Target networks synchronize after the configured number of training updates.
 

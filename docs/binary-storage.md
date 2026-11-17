@@ -60,6 +60,13 @@ it in base64 inside JSON. The public loader returns the same version-1 state
 shape expected by `Experiment.restore`; no pickle or executable object loader is
 involved. Restore still materializes the full checkpoint in RAM.
 
+
+## Two payloads, one bounded file at a time
+
+Binary layout and compression are separate layers. Playback chunks are independently decodable; an exact checkpoint still restores the whole learning state.
+
+![Two payloads, one bounded file at a time](assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg)
+
 ## Compression choices
 
 New presets use:

@@ -32,3 +32,11 @@ controlled physics snapshots and no training results or model weights.
 [geography gallery](../geography.md#recorded-terrain-previews) embeds them, and
 [the manifest](terrains/manifest.json) records source timestamps, hashes and sizes.
 Unlike the original board/metrics crops above, these have no spatial crop.
+
+## Software and learning flows
+
+[Flow diagram sources and SVGs](diagrams/README.md) cover simulation, private
+learning, inheritance, saved state, storage, analysis and maintenance. The
+[visual guide](../visual-guide.md) maps questions to these diagrams. All exports
+are tracked vector assets; editable flowchart sources are local-only and ignored.
+No new GIFs or recordings were needed for these conceptual explanations.

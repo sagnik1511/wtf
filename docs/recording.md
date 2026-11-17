@@ -83,6 +83,13 @@ and drowning have dashboard selectors. Final death positions are recorded so
 river drift does not misplace animation markers. Existing flat recordings still
 work and chunks remain independently seekable.
 
+
+## Seeking and charts use separate data
+
+On a cache miss, moving the playhead loads the selected world chunk. Chart history and scalar telemetry are separate requests; none advances the simulator.
+
+![Seeking and charts use separate data](assets/diagrams/seeking-and-charts-use-separate-data.svg)
+
 ## Recording settings
 
 Each environment has a recording section:
