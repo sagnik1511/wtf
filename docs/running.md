@@ -76,27 +76,38 @@ Actual world seeds are printed, written to `run_seeds.json` as runs start, and s
 Resume a checkpoint:
 
 ```sh
-.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.json.gz
+.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.bin.xz
 ```
 
-New CLI checkpoints use `run_0001.json.gz` and `final.json.gz`. Shared settings
-and duplicate champion models are stored once; large homogeneous float64 and
-unsigned integer arrays use little-endian binary values encoded in base64,
-then gzip wraps the JSON envelope. This is lossless (including signed zero),
-with no new dependencies. Atomic writing still copies one brain at a time.
-Use `--checkpoint-format json` for legacy full JSON output instead. Programmatic
-`Experiment.write_checkpoint(path)` selects compact output for `.gz` paths and
-legacy output for `.json` paths.
+New CLI checkpoints use `run_0001.bin.xz` and `final.bin.xz`. The binary
+version-3 format stores raw float64/uint32 numeric arrays and shared metadata,
+without base64 or JSON payloads, then applies bounded-dictionary XZ compression.
+It is lossless, including signed zero and 64-bit randomization seeds, and the
+writer still copies one brain at a time. See [binary storage](binary-storage.md).
 
-Old plain JSON and gzip-compressed version-1 checkpoints remain readable.
+Use `--checkpoint-format compact` for the previous `.json.gz` format, or
+`--checkpoint-format json` for legacy full JSON. Programmatic
+`Experiment.write_checkpoint(path)` selects binary for `.bin`, `.bin.gz` and
+`.bin.xz`, compact JSON for `.json.gz`, and legacy output for `.json`.
+
+Older plain/compact JSON checkpoints remain readable.
 `ecosystem.checkpoint_io.read_checkpoint(path)` returns the original state for
-`Experiment.restore(...)`; do not pass a raw compact envelope directly to restore.
-An old `.json` resume path also resolves its `.json.gz` replacement when the
-plain file is absent. Loading still decodes a complete checkpoint in memory.
+`Experiment.restore(...)`; do not pass a serialized envelope directly to restore.
+Old `.json` and `.json.gz` paths also resolve a converted binary counterpart
+when the original is absent. Loading still decodes a complete state in memory.
 
-Checkpoints include the world, counters, private replay buffers, online/target weights, and policy/training/world random-generator states. They use JSON envelopes and numeric array payloads, not executable pickle files. Resume continues remaining runs from the saved experiment; a completed experiment stays completed.
+Checkpoints include the world, counters, private replay buffers, online/target weights, and policy/training/world random-generator states. They use versioned typed records (or legacy JSON), not executable pickle files. Resume continues remaining runs from the saved experiment; a completed experiment stays completed.
 
 ## Optimize existing checkpoint files
+
+For the smallest lossless binary format:
+
+```sh
+.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT --only checkpoints
+.venv/bin/python -m ecosystem.optimize_storage results --all
+```
+
+The older compact-JSON conversion remains available:
 
 ```sh
 .venv/bin/python -m ecosystem.optimize_checkpoints results/EXPERIMENT
@@ -120,7 +131,7 @@ JSON and another 20% less than gzip. Sizes depend on model and buffer contents.
 Evaluate saved brains by restoring a checkpoint in evaluation mode:
 
 ```sh
-.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.json.gz --mode evaluate
+.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.bin.xz --mode evaluate
 ```
 
 Use an intermediate checkpoint with remaining runs to evaluate future runs. Checkpoint restore is a CLI operation; the playback viewer reads frame recordings only.

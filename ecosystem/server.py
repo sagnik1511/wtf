@@ -80,10 +80,13 @@ def make_handler(state):
                                     gzip_ok = float(quality) > 0
                                 except ValueError:
                                     gzip_ok = False
-                        if self.headers.get("X-WTF-Replay") == "delta-v1":
-                            if chunk.suffix == ".gz" and gzip_ok:
-                                return self.send(200, chunk.read_bytes(), content_encoding="gzip", vary_encoding=True)
-                            return self.send(200, read_chunk_bytes(chunk), vary_encoding=True)
+                        binary = '.bin' in chunk.suffixes
+                        requested = self.headers.get('X-WTF-Replay')
+                        if requested == 'binary-v1' or requested == 'delta-v1' and not binary:
+                            content_type = 'application/vnd.wtf.replay-binary' if binary else 'application/json'
+                            if chunk.suffix == '.gz' and gzip_ok:
+                                return self.send(200, chunk.read_bytes(), content_type, content_encoding='gzip', vary_encoding=True)
+                            return self.send(200, read_chunk_bytes(chunk), content_type, vary_encoding=True)
                         # Older clients keep the full-frame JSON API. Modern
                         # viewers receive compact stored chunks without expansion.
                         data = json.dumps(load_chunk(chunk),separators=(",",":"),allow_nan=False).encode()

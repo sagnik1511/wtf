@@ -5,7 +5,7 @@ predators, growing resources, obstacles and reproduction. Environments are JSON;
 a JavaScript canvas viewer replays saved runs.
 
 The simulator records first and the viewer plays later, keeping training and
-rendering independent. Replay chunks are losslessly compressed to reduce disk usage.
+rendering independent. Replay chunks use structured binary deltas and lossless XZ compression to reduce disk usage.
 
 ## Quick start
 

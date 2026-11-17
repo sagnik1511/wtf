@@ -35,6 +35,12 @@ def compress_recording(folder, level=6, delta=False):
         raise ValueError('Unsupported recording version')
     if manifest.get('status') == 'writing':
         raise ValueError('Recording is still being written; finish or close training before compression')
+    if any('.bin' in chunk_path(playback,run['run'],i).suffixes
+           for run in manifest['runs'] for i in range(run['chunk_count'])):
+        from .optimize_storage import optimize_experiment
+        result=optimize_experiment(playback.parent,replays=True,checkpoints=False)
+        return dict(folder=result['folder'],before_bytes=result['before_bytes'],after_bytes=result['after_bytes'],
+                    saved_bytes=result['saved_bytes'],chunks_converted=result['files_reduced'])
     if delta:
         return optimize_chunks(playback, manifest_path, manifest, level)
     before = after = converted = 0

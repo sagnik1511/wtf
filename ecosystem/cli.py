@@ -61,8 +61,8 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("results"))
     parser.add_argument("--library-dir", type=Path,
                         help="Optional shared library for selectors and an extra champion copy; run-local brains are always saved")
-    parser.add_argument("--checkpoint-format", choices=("compact", "json"), default="compact",
-                        help="Checkpoint output: compact numeric arrays + shared metadata + gzip (default), or legacy JSON")
+    parser.add_argument("--checkpoint-format", choices=("binary", "compact", "json"), default="binary",
+                        help="Checkpoint output: binary arrays + XZ (default), compact JSON, or legacy JSON")
     parser.add_argument("--no-library", action="store_true",
                         help="Skip saving new champion models")
     parser.add_argument("--brains-from", type=Path,
@@ -127,7 +127,7 @@ def main():
             "resumed_from": str(args.resume) if args.resume else None,
             "initialized_from": {species: value["provenance"] for species, value in experiment.initial_models.items()},
             "randomization_seed": experiment.randomization_seed,
-            "checkpoint_version": 1 if args.checkpoint_format=="json" else 2,
+            "checkpoint_version": {"json":1,"compact":2,"binary":3}[args.checkpoint_format],
             "checkpoint_format": args.checkpoint_format,
             "observation_version": 1,
             "playback_recording": not args.no_record
@@ -154,7 +154,7 @@ def main():
 
 
 def run_experiment(experiment, folder, save, recorder, progress=None, library_root=None, save_brains=True, checkpoint_format="compact"):
-    suffix = ".json.gz" if checkpoint_format=="compact" else ".json"
+    suffix = {"binary":".bin.xz", "compact":".json.gz", "json":".json"}[checkpoint_format]
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
         fields = ["run", "seed", "tick", "food", "starvation", "predation"] + [

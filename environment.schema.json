@@ -1263,8 +1263,8 @@
                     "maximum": 1000000
                 },
                 "frames_per_chunk": {"type": "integer", "minimum": 1, "maximum": 256},
-                "encoding": {"enum": ["delta", "snapshot"], "default": "delta"},
-                "compression": {"enum": ["gzip", "none"], "default": "gzip"},
+                "encoding": {"enum": ["binary", "delta", "snapshot"], "default": "binary"},
+                "compression": {"enum": ["gzip", "xz", "none"], "default": "xz"},
                 "compression_level": {"type": "integer", "minimum": 1, "maximum": 9, "default": 6},
                 "diagnostics_every_steps": {
                     "type": "integer",

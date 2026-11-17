@@ -540,10 +540,10 @@ def validate(c):
             ),
             optional=("compression", "compression_level", "encoding"),
         )
-        if r.get("encoding", "delta") not in ("delta", "snapshot"):
-            fail("recording.encoding", "must be delta or snapshot")
-        if r.get("compression", "gzip") not in ("gzip", "none"):
-            fail("recording.compression", "must be gzip or none")
+        if r.get("encoding", "delta") not in ("binary", "delta", "snapshot"):
+            fail("recording.encoding", "must be binary, delta or snapshot")
+        if r.get("compression", "gzip") not in ("gzip", "none", "xz"):
+            fail("recording.compression", "must be gzip, xz or none")
         if "compression_level" in r:
             num(r["compression_level"], "recording.compression_level", 1, 9, True)
         if type(r["enabled"]) is not bool:

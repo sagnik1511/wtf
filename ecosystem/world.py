@@ -446,18 +446,19 @@ class World:
             births=dict(self.births),
         )
 
-    def snapshot(self):
-        return dict(
-            width=self.width,
-            height=self.height,
+    def snapshot(self, include_static=True):
+        data = dict(
             tick=self.tick,
-            resource_capacity=self.config["resources"]["capacity_per_patch"],
-            obstacles=sorted(self.obstacles),
             resources=[vars(r).copy() for r in self.resources.values()],
             animals=[vars(a).copy() for a in self.animals.values()],
             events=[vars(e).copy() for e in self.events],
             metrics=self.metrics(),
         )
+        if include_static:
+            return dict(width=self.width, height=self.height,
+                        resource_capacity=self.config['resources']['capacity_per_patch'],
+                        obstacles=sorted(self.obstacles), **data)
+        return data
 
     def checkpoint(self):
         return dict(

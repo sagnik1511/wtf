@@ -146,3 +146,37 @@ sizes, buffers, random draws and checkpoint formats are unchanged. No profiler,
 time benchmark or peak-memory measurement was run, so no percentage speedup or
 RAM reduction is claimed. The main dense arithmetic remains standard-library
 Python and independent-agent costs still grow with population and model size.
+
+
+## Binary storage and bounded replay caches
+
+New presets store typed binary replay chunks with XZ compression. The records
+retain full float64 precision and wrap the existing field deltas; homogeneous
+entity/event records become columns, numeric arrays are raw bytes and repeated
+strings use file-local dictionary entries. Binary version-3 checkpoints replace
+the previous base64/JSON wrapper while retaining shared metadata/models and
+one-controller-at-a-time writing. Readable metrics and champion archives retain
+their existing formats. See [binary storage](binary-storage.md).
+
+A verified conversion of the completed 20-episode experiment
+`a2c_20261117T044059Z_e2b39a` measured these actual file sizes (decimal MB):
+
+| Data | Before | After | Reduction |
+| --- | ---: | ---: | ---: |
+| 480 replay chunks | 69.98 MB | 44.84 MB | 35.9% |
+| 20 exact checkpoints | 32.68 MB | 29.43 MB | 9.9% |
+| Whole experiment, including unchanged readable files | 106.18 MB | 77.80 MB | 26.7% |
+
+All 500 replaced files passed expanded-frame/state verification, with smaller
+replacements only. Actual converted first/last replay chunks also matched the
+JavaScript decoder, and the converted final checkpoint restored all 20 completed
+episodes. The measurement is disk size, not a timing or peak-memory benchmark.
+LZMA2 uses a 1 MiB dictionary but has additional encoder memory and CPU costs.
+Use gzip for a faster compression option; no throughput improvement is claimed.
+
+Recording avoids sorting/copying static obstacles and dimensions into every
+frame before discarding them. The playback server reads metadata once per
+telemetry request and caches at most four derived 128-frame pages, protected by
+a lock and invalidated using manifest/chunk stat fingerprints. Cached results
+are detached from callers. No simulation-state or learned-prediction cache is
+introduced, and no complete world-chunk cache is retained on the server.

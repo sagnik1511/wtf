@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def config():
     c = load(ROOT / "environments/baseline.json")
+    c["recording"].update(encoding="delta", compression="gzip")
     for spec in c["species"].values():
         spec["reproduction"].update(enabled=False, age_deviation_pct=0, cooldown_deviation_pct=0)
     c["species"]["prey"]["initial_population"] = 3

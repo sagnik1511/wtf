@@ -63,3 +63,9 @@ unused bootstrap/target outputs, repeated QR-DQN diagnostic inference, duplicate
 MAPPO contexts, critic inference during greedy MAPPO execution, discarded default
 networks and per-agent trial occupancy/controller copies. These checks count
 operations and validate numerical results, without timing thresholds or profiling.
+
+`tests/test_binary_storage.py` verifies typed-column Python/JavaScript parity,
+signed zero and large seeds, corruption rejection, playback seeking, binary
+checkpoint continuation for all algorithms, recording transparency, atomic
+verified conversion, legacy HTTP fallback and bounded/invalidation-safe telemetry
+caching. [Binary storage](binary-storage.md) documents formats and migration.

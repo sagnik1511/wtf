@@ -5,16 +5,19 @@ Only committed chunks are advertised in the atomically replaced manifest.
 """
 
 import copy
+from collections import OrderedDict
+from threading import RLock
 import csv
 import gzip
 import json
+import lzma
 from pathlib import Path
 from .replay_io import chunk_path, load_chunk
 from .replay_codec import DeltaEncoder
 
 DEFAULT_RECORDING = dict(
     enabled=True, frame_every_steps=1, frames_per_chunk=64, diagnostics_every_steps=10,
-    compression="gzip", compression_level=6, encoding="delta"
+    compression="xz", compression_level=6, encoding="binary"
 )
 
 
@@ -77,12 +80,31 @@ class Recorder:
         self.capture(experiment, force=True)
 
     def _open_chunk(self):
-        name = f'run_{self.run["run"]:04d}_chunk_{self.run["chunk_count"]:06d}.json'
-        if self.options["compression"] == "gzip":
-            name += ".gz"
+        binary = self.options['encoding'] == 'binary'
+        name = f'run_{self.run["run"]:04d}_chunk_{self.run["chunk_count"]:06d}' + ('.bin' if binary else '.json')
+        if self.options['compression'] in ('gzip','xz'):
+            name += '.gz' if self.options['compression']=='gzip' else '.xz'
         self.chunk_path = self.folder / name
         self.chunk_temporary = self.chunk_path.with_suffix(self.chunk_path.suffix + ".tmp")
-        self.stream = (gzip.open(self.chunk_temporary, "wt", encoding="utf-8",
+        if binary:
+            from .binary_io import RecordWriter
+            if self.options['compression']=='xz':
+                self.stream = lzma.open(self.chunk_temporary, 'wb', filters=[dict(
+                    id=lzma.FILTER_LZMA2, preset=self.options['compression_level'], dict_size=1<<20)])
+            else:
+                self.stream = (gzip.open(self.chunk_temporary, 'wb', compresslevel=self.options['compression_level'])
+                               if self.options['compression']=='gzip' else self.chunk_temporary.open('wb'))
+            self.encoder = DeltaEncoder()
+            self.binary_writer = RecordWriter(self.stream)
+            self.binary_writer.write(dict(kind='replay', delta=self.encoder.header()))
+            self.chunk_frames = 0
+            return
+        self.binary_writer = None
+        if self.options['compression']=='xz':
+            self.stream = lzma.open(self.chunk_temporary, 'wt', encoding='utf-8', filters=[dict(
+                id=lzma.FILTER_LZMA2, preset=self.options['compression_level'], dict_size=1<<20)])
+        else:
+            self.stream = (gzip.open(self.chunk_temporary, "wt", encoding="utf-8",
                                 compresslevel=self.options["compression_level"])
                        if self.options["compression"] == "gzip"
                        else self.chunk_temporary.open("w", encoding="utf-8"))
@@ -93,10 +115,14 @@ class Recorder:
     def _commit_chunk(self):
         if self.stream is None:
             return
-        self.stream.write("]}\n" if self.encoder else "]\n")
+        if self.binary_writer is None:
+            self.stream.write("]}\n" if self.encoder else "]\n")
+        else:
+            self.binary_writer.write(dict(kind='replay_end',frames=self.chunk_frames))
         self.stream.close()
         self.stream = None
         self.encoder = None
+        self.binary_writer = None
         self.chunk_temporary.replace(self.chunk_path)
         self.run["chunk_count"] += 1
         self.run["frame_count"] += self.chunk_frames
@@ -111,9 +137,7 @@ class Recorder:
             return False
         if self.stream is None:
             self._open_chunk()
-        frame = experiment.world.snapshot()
-        for key in ("obstacles", "width", "height", "resource_capacity"):
-            frame.pop(key)
+        frame = experiment.world.snapshot(include_static=False)
         frame["total_updates"] = experiment.total_updates
         frame["finished_run"] = experiment.finished_run
         diagnostic_interval = self.options["diagnostics_every_steps"]
@@ -129,10 +153,13 @@ class Recorder:
                 o = experiment.observations[i]
                 frame["diagnostics"][str(i)] = dict(tick=tick, **b.diagnostics(o))
             self.last_diagnostic_tick = tick
-        if self.chunk_frames:
-            self.stream.write(",\n")
-        # Encode a single frame with the C encoder, never an entire run.
-        self.stream.write(json.dumps(self.encoder.encode(frame) if self.encoder else frame, separators=(",", ":"), allow_nan=False))
+        packet = self.encoder.encode(frame) if self.encoder else frame
+        if self.binary_writer is not None:
+            self.binary_writer.write(packet)
+        else:
+            if self.chunk_frames:
+                self.stream.write(",\n")
+            self.stream.write(json.dumps(packet, separators=(",", ":"), allow_nan=False))
         self.chunk_frames += 1
         self.last_tick = tick
         if self.chunk_frames >= self.options["frames_per_chunk"]:
@@ -160,6 +187,8 @@ class RecordingStore:
 
     def __init__(self, results):
         self.results = Path(results).resolve()
+        self.telemetry_cache = OrderedDict()
+        self._cache_lock = RLock()
 
     def _folder(self, recording_id):
         if (
@@ -207,7 +236,7 @@ class RecordingStore:
         return analyze_recording(self._folder(recording_id), run=run)
 
     def telemetry(self, recording_id, run, page):
-        """At most 128 small per-frame summaries; no persisted or whole-run cache."""
+        """At most 128 summaries, with four stat-validated cached pages."""
         from .telemetry import PAGE_SIZE, summarize
         if type(run) is not int or type(page) is not int or page < 0:
             raise ValueError("Invalid telemetry run or page")
@@ -219,10 +248,18 @@ class RecordingStore:
         end = min(start + PAGE_SIZE, entry["frame_count"])
         size = manifest["recording"]["frames_per_chunk"]
         first_chunk = start // size
-        previous = load_chunk(self.chunk(recording_id, run, first_chunk-1))[-1] if first_chunk else None
+        folder=self._folder(recording_id)
+        paths={i:chunk_path(folder,run,i) for i in range(max(0,first_chunk-1),(end-1)//size+1)}
+        key=(recording_id,run,page,end,(folder/'recording.json').stat().st_mtime_ns,
+             tuple((str(p),p.stat().st_mtime_ns,p.stat().st_size) for p in paths.values()))
+        with self._cache_lock:
+            if key in self.telemetry_cache:
+                self.telemetry_cache.move_to_end(key)
+                return copy.deepcopy(self.telemetry_cache[key])
+        previous = load_chunk(paths[first_chunk-1])[-1] if first_chunk else None
         points = []
         for index in range(first_chunk, (end-1)//size+1):
-            frames = load_chunk(self.chunk(recording_id, run, index))
+            frames = load_chunk(paths[index])
             for local, frame in enumerate(frames):
                 position = index*size+local
                 if position >= end:break
@@ -230,7 +267,11 @@ class RecordingStore:
                     points.append(summarize(manifest["config"],frame,previous))
                 previous = frame
             del frames
-        return dict(page=page,page_size=PAGE_SIZE,start_frame=start,points=points)
+        result=dict(page=page,page_size=PAGE_SIZE,start_frame=start,points=points)
+        with self._cache_lock:
+            self.telemetry_cache[key]=copy.deepcopy(result)
+            while len(self.telemetry_cache)>4:self.telemetry_cache.popitem(last=False)
+        return result
 
     def metrics(self, recording_id, run, max_points=2048):
         """Bounded, lightweight history independent of decoded world chunks.

@@ -75,23 +75,28 @@ Each environment has a recording section:
   "frame_every_steps": 1,
   "frames_per_chunk": 64,
   "diagnostics_every_steps": 10,
-  "encoding": "delta",
-  "compression": "gzip",
+  "encoding": "binary",
+  "compression": "xz",
   "compression_level": 6
 }
 ```
 
 Replay storage separates the data layout (`encoding`) from compression:
 
-- `"delta"` (default): each chunk begins with a complete keyframe. Later frames
+- `"binary"` (default): typed numeric arrays, dictionary strings and column-packed
+  entity records wrap the keyframe/delta layout. No JSON or base64 is stored
+  inside these replay chunks. See [binary storage](binary-storage.md).
+- `"delta"`: each chunk begins with a complete keyframe. Later frames
   store only changed top-level/metric fields and entity additions, removals and
   changed fields. Animal IDs and resource coordinates identify entities; small
   field masks avoid repeating field names. Unchanged food patches are omitted.
 - `"snapshot"`: every frame is complete, useful for debugging and comparison.
-- `"gzip"` compression (default level 6) wraps either layout in `*.json.gz`.
-  Levels 1–9 are accepted; `"none"` writes uncompressed `*.json`.
+- `"xz"` compression (default level 6, 1 MiB dictionary) prioritizes disk size;
+  binary chunks use `*.bin.xz`. `"gzip"` uses `*.bin.gz`; `"none"` uses `*.bin`.
+  Levels 1–9 are accepted. JSON layouts retain `.json` before their compression
+  suffix. XZ costs more compression work than gzip.
 
-Both layouts preserve every recorded frame, full-precision number, event and
+All layouts preserve every recorded frame, full-precision number, event and
 sampled diagnostic. Updates store absolute values, avoiding cumulative rounding.
 Every chunk has its own keyframe and field table: seeking reconstructs at most
 one chunk, never the whole run. The recorder streams frames and retains only the
@@ -101,9 +106,10 @@ Previous configurations without this section use the same defaults. Set `enabled
 
 The recorder encodes one frame at a time into an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
 
-The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads one requested chunk per response and has no recording cache. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
+The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads bounded requested chunks and caches at most four stat-validated
+derived telemetry pages, without caching an entire recording. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
-Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes a compact compressed checkpoint ([format and migration](running.md#optimize-existing-checkpoint-files)). Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a JSON checkpoint still parses that complete file. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
+Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes a compact compressed checkpoint ([format and migration](running.md#optimize-existing-checkpoint-files)). Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a checkpoint still materializes that complete state. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
 
 ## Read-only HTTP API
 
@@ -123,6 +129,16 @@ Training still needs the live brains and replay buffers. CLI checkpoint writing 
 Restart the playback server and refresh the viewer after upgrading. Old full
 snapshot arrays, compact delta chunks, plain JSON and gzip files remain readable,
 including mixtures left by an interrupted conversion.
+
+The disk-focused [binary converter](binary-storage.md#convert-existing-completed-results)
+handles replay chunks and exact checkpoints together:
+
+```sh
+.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT
+.venv/bin/python -m ecosystem.optimize_storage results --all
+```
+
+The older conversion commands remain available for JSON recordings:
 
 ```sh
 # Upgrade one completed experiment to delta encoding plus gzip:
@@ -147,9 +163,10 @@ population history use the same reader. The viewer retains one decoded world
 chunk, so this storage change does not reduce the expanded chunk's memory.
 
 The chunk HTTP endpoint returns a full-frame JSON array by default for existing
-clients. The viewer sends `X-WTF-Replay: delta-v1` to receive the native stored
-layout and decode it locally. Gzip-capable native requests receive stored gzip
-bytes directly. Responses vary on both `Accept-Encoding` and `X-WTF-Replay`.
+clients. The viewer sends `X-WTF-Replay: binary-v1` to receive the native stored
+layout and decode it locally. Binary responses use an ArrayBuffer; legacy JSON
+chunks use JSON parsing. The server decompresses XZ chunks, while gzip-capable
+native requests receive stored gzip bytes directly. Responses vary on both `Accept-Encoding` and `X-WTF-Replay`.
 No simulation or learning runs during decoding.
 
 A representative 400-step PPO replay (401 frames, seed 11, 64-frame chunks) used:

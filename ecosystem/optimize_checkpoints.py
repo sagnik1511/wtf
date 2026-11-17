@@ -33,8 +33,13 @@ def optimize_experiment(folder):
     checkpoints = (folder/'checkpoints').resolve()
     if checkpoints.parent!=folder:raise ValueError('Checkpoint directory outside experiment')
     if not checkpoints.is_dir():raise FileNotFoundError('No checkpoint directory')
-    if not playback.is_file() and not any((checkpoints/name).is_file() for name in ('final.json','final.json.gz')):
+    if not playback.is_file() and not any((checkpoints/name).is_file() for name in ('final.json','final.json.gz','final.bin.gz','final.bin.xz')):
         raise ValueError('No completion marker; experiment may still be writing')
+    if any('.bin' in p.suffixes for p in checkpoints.iterdir()):
+        from .optimize_storage import optimize_experiment as optimize_binary
+        result=optimize_binary(folder,replays=False,checkpoints=True)
+        return dict(folder=result['folder'],before_bytes=result['before_bytes'],after_bytes=result['after_bytes'],
+                    saved_bytes=result['saved_bytes'],checkpoints_converted=result['files_reduced'])
     stems = sorted({p.name[:-3] if p.name.endswith('.gz') else p.name
                     for p in checkpoints.iterdir() if p.name.endswith(('.json','.json.gz'))})
     before = after = converted = 0

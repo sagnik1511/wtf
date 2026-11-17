@@ -9,6 +9,7 @@ import copy
 import gzip
 import hashlib
 import json
+import lzma
 import math
 from pathlib import Path
 import sys
@@ -23,7 +24,8 @@ def dumps(value):
 
 
 class Encoder:
-    def __init__(self):
+    def __init__(self, binary=False):
+        self.binary = binary
         self.shared = []
         self.indices = {}
 
@@ -53,6 +55,8 @@ class Encoder:
                 code, tag = 'd', '$f64'
             elif len(value)>=16 and all(type(v) is int and 0<=v<2**32 for v in value):
                 code, tag = 'I', '$u32'
+            if code and self.binary:
+                return value if isinstance(value,list) else list(value)
             if code:
                 packed = array(code,value)
                 if packed.itemsize != (8 if code=='d' else 4):
@@ -108,26 +112,60 @@ def decode_checkpoint(payload):
 
 
 def read_checkpoint(path):
+    from .binary_io import MAGIC, records
     path = Path(path)
-    # Inspect the magic bytes, allowing older scripts to keep using .json paths
-    # after conversion and supporting compressed legacy version-1 checkpoints.
-    if not path.is_file() and path.suffix=='.json' and path.with_suffix('.json.gz').is_file():
-        path = path.with_suffix('.json.gz')
+    if not path.is_file():
+        stem = path.name
+        for suffix in ('.json.gz','.json','.bin.xz','.bin.gz','.bin'):
+            if stem.endswith(suffix):
+                stem=stem[:-len(suffix)];break
+        for suffix in ('.bin.xz','.bin.gz','.json.gz','.json','.bin'):
+            candidate=path.with_name(stem+suffix)
+            if candidate.is_file():path=candidate;break
     with path.open('rb') as source:
-        compressed = source.read(2)==b'\x1f\x8b'
-    opener = gzip.open if compressed else open
-    with opener(path,'rt',encoding='utf-8') as handle:payload = json.load(handle)
-    return decode_checkpoint(payload)
+        magic=source.read(6)
+        compressed = magic.startswith(b'\x1f\x8b')
+    opener = lzma.open if magic==b'\xfd7zXZ\x00' else gzip.open if compressed else open
+    with opener(path,'rb') as handle:
+        magic=handle.read(len(MAGIC));handle.seek(0)
+        if magic==MAGIC:
+            values=records(handle);header=next(values,None)
+            if not isinstance(header,dict) or header.get('kind')!='checkpoint' or header.get('version')!=3:
+                raise ValueError('Unsupported binary checkpoint')
+            brains={};shared=None
+            for record in values:
+                if record.get('kind')=='brain' and shared is None:
+                    key=record['id']
+                    if key in brains:raise ValueError('Duplicate binary brain')
+                    brains[key]=record['state']
+                elif record.get('kind')=='shared' and shared is None:shared=record['values']
+                else:raise ValueError('Invalid binary checkpoint record')
+            if shared is None:raise ValueError('Missing binary checkpoint shared table')
+            return decode_checkpoint(dict(checkpoint_version=2,checkpoint_encoding=ENCODING,
+                                          metadata=header['metadata'],brains=brains,shared=shared))
+        return decode_checkpoint(json.load(handle))
 
 
 def write_checkpoint(path, metadata, brains):
     """Write metadata and an iterable of (id, detached brain state) atomically."""
     path = Path(path)
     temporary = path.with_suffix(path.suffix+'.tmp')
-    compact = path.suffix=='.gz'
-    encoder = Encoder() if compact else None
+    binary = '.bin' in path.suffixes
+    compact = path.suffix in ('.gz','.xz')
+    encoder = Encoder(binary=binary) if compact or binary else None
     try:
-        opener = gzip.open if compact else open
+        opener = lzma.open if path.suffix=='.xz' else gzip.open if compact else open
+        if binary:
+            from .binary_io import RecordWriter
+            with opener(temporary,'wb',**(dict(filters=[dict(id=lzma.FILTER_LZMA2,preset=6,dict_size=1<<20)]) if path.suffix=='.xz' else {'compresslevel':6} if compact else {})) as handle:
+                writer=RecordWriter(handle)
+                writer.write(dict(kind='checkpoint',version=3,metadata=encoder.encode(metadata)))
+                for animal_id,state in brains:
+                    writer.write(dict(kind='brain',id=str(animal_id),state=encoder.encode(state)))
+                    del state
+                writer.write(dict(kind='shared',values=encoder.shared))
+            temporary.replace(path)
+            return
         with opener(temporary,'wt',encoding='utf-8',**({'compresslevel':6} if compact else {})) as handle:
             if compact:
                 handle.write('{"checkpoint_version":2,"checkpoint_encoding":'+dumps(ENCODING)+',"metadata":')
