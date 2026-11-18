@@ -6,9 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.0.43](0.0.0.43.md), `baa5101`.
-**Latest committed runtime implementation:** [0.0.0.43](0.0.0.43.md), `baa5101`.
-**Pending:** [0.0.1.0](0.0.1.0.md), second native-kernel rollout with exact replay verification.
+**Latest committed rollout:** [0.0.1.0](0.0.1.0.md), `abd310d`.
+**Latest committed runtime implementation:** [0.0.1.0](0.0.1.0.md), `abd310d`.
+**Pending:** [0.0.1.1](0.0.1.1.md), four landscape geography presets and static map previews.
 
 ## Rollout index
 
@@ -19,7 +19,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.0](0.0.1.0.md) | Pending | Prepared 2026-11-18 | — | Fused PPO/GRU/quantile math, spatial/world/replay/dashboard kernels and native-to-native benchmarks |
+| [0.0.1.1](0.0.1.1.md) | Pending | Prepared 2026-11-18 | — | Meandering river with A2C/GRPO, three further PPO landscapes and map diagrams |
+| [0.0.1.0](0.0.1.0.md) | Committed | 2026-11-18 | `abd310d` | Fused PPO/GRU/quantile math, spatial/world/replay/dashboard kernels and native-to-native benchmarks |
 | [0.0.0.43](0.0.0.43.md) | Committed | 2026-11-18 | `baa5101` | Optional dense/backprop, DQN/SGD and Adam kernels with matched benchmarks |
 | [0.0.0.42](0.0.0.42.md) | Committed | 2026-11-18 | `baa5101` | Float32 model/optimizer buffers, precision-aware resume and lossless narrow binary arrays |
 | [0.0.0.41](0.0.0.41.md) | Committed | 2026-11-18 | `baa5101` | Code-inspection assessment of native kernels, packed runtime data and precision boundaries |

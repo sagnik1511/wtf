@@ -27,6 +27,10 @@ controlled physics snapshots and no training results or model weights.
 
 ## Full-viewer terrain recordings
 
+[Landscape map diagrams](geography/README.md) show four additional maps directly
+from their JSON: a meandering river, delta, alpine passes and lake islands. These
+small vector diagrams have a separate provenance from the recorded GIFs below.
+
 [Recorded terrain previews](terrains/README.md) documents the three new
 3.5-second GIFs, preserving the entire captured viewer screen. The
 [geography gallery](../geography.md#recorded-terrain-previews) embeds them, and

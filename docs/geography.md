@@ -5,7 +5,7 @@
 For diagrams and the interactive explorer, see [Physics illustrated](physics.md).
 
 Terrain is optional. Existing environments remain flat unless they select a map.
-Four optional presets cover three maps, keeping one prey species and one predator species:
+Eight optional presets cover seven maps, keeping one prey species and one predator species:
 
 | Environment | Map |
 | --- | --- |
@@ -13,6 +13,10 @@ Four optional presets cover three maps, keeping one prey species and one predato
 | [river_crossing_ppo.json](../environments/river_crossing_ppo.json) | The same river map with PPO for both species |
 | [highlands.json](../environments/highlands.json) | Terraced highlands, a steep central plateau, a climbable north ramp and obstacle approaches |
 | [enclosed_valleys.json](../environments/enclosed_valleys.json) | One elevated enclosure, two three-cell-wide gates, an exterior river and boundary-biased food |
+| [meandering_river.json](../environments/meandering_river.json) | A2C prey / GRPO predators on a floodplain with river bends, two shallow fords, slow margins and low knolls |
+| [river_delta.json](../environments/river_delta.json) | PPO branching delta, three distributaries and dry land between channels |
+| [alpine_pass.json](../environments/alpine_pass.json) | PPO rocky ridge, stepped slopes and two broad low passes; no swim action |
+| [lake_islands.json](../environments/lake_islands.json) | PPO still-water lake, shallow shores, deeper basin and three dry islands |
 
 ```sh
 .venv/bin/python -m ecosystem.cli environments/river_crossing.json --runs 10 --progress
@@ -28,6 +32,80 @@ Enclosed-valley prey can load matching terrain Q/DQN weights; predators need
 matching terrain PPO weights. The river presets provide corresponding compatible
 signatures. Dry highlands omits `swim` and has a different action signature.
 Older 20-input flat brains cannot initialize these 32-input terrain models.
+
+## Landscape-inspired maps
+
+The meandering-river preset uses **A2C prey and GRPO predators**. The other three
+new presets use **PPO for both species**. Population, health, food and
+reproduction settings match `river_crossing_ppo.json`. Meandering-river learning
+templates come from `a2c.json` and `grpo.json`, with terrain observation version 2
+and a budget of one predator GRPO group update per world step.
+Each map is 40 × 28 cells. These are stylized landscapes using the existing
+swimming, current, elevation and obstacle rules, rather than geographic surveys
+or new climate/hydrology models. Terrain is static: there are no tides, seasonal
+flooding, erosion, snow, temperature or vegetation-specific effects.
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/meandering_river.json --runs 1 --seed 100 --progress
+# Other presets: river_delta.json, alpine_pass.json, lake_islands.json
+./run.sh
+```
+
+No saved weights are requested by these presets. Multiple runs use the existing
+matching species/sex champion chaining unless disabled with `--no-chain-brains`.
+The three wet presets keep the river action lists and 32-input contract.
+Loading saved weights also requires a matching algorithm and model signature:
+meandering-river prey need terrain A2C weights and predators need terrain GRPO
+weights. A different landscape can need new learning. Alpine omits `swim` and
+water sight bonuses and has a different action signature.
+
+### Meandering floodplain
+
+![Static diagram of a winding river with two shallow fords and low knolls](assets/geography/meandering_river.svg)
+
+[Map JSON](../maps/meandering_river.json). The continuous channel bends across
+the floodplain. Two two-row shallow reaches cross its full width, offering lower
+health requirements and slower drift than the main channel. Margins are also
+shallower and slower than the center. Current vectors follow the configured
+downstream direction at each bend; banks stop drift under the existing rules.
+Even a shallow ford requires choosing `swim`.
+
+### Branching river delta
+
+![Static diagram of three river distributaries and intervening dry land](assets/geography/river_delta.svg)
+
+[Map JSON](../maps/river_delta.json). One upstream channel fans into three
+distributaries, with outward downstream flow in the side branches. Dry regions
+between them offer separate feeding areas, reachable by crossing shallow
+margins and deeper channel centers. Vectors are authored gameplay currents;
+water volume and tidal behavior are not simulated.
+
+### Alpine ridge and passes
+
+![Static diagram of a stepped rocky ridge with two low mountain passes](assets/geography/alpine_pass.svg)
+
+[Map JSON](../maps/alpine_pass.json). Elevation rises from zero to four, with
+impassable rock along parts of the crest. Two broad low saddles provide routes
+across the ridge. Every unblocked cell belongs to one walking-connected region
+with the configured one-unit climb limit. Uphill routes cost additional energy;
+the passes offer flatter alternatives. There is no water or swimming action.
+
+### Lake and islands
+
+![Static diagram of a lake with shallow shores, deeper water and three dry islands](assets/geography/lake_islands.svg)
+
+[Map JSON](../maps/lake_islands.json). A shallow shoreline surrounds a deeper
+basin and three slightly elevated islands. All lake currents are zero: swimming
+is required for travel, with no passive drift helping a crossing. Founders and
+food spawn on dry cells, including islands; their placement is randomized, so
+each island is not guaranteed food, mates or both species in every run.
+
+These are **static map diagrams**, not screenshots, viewer recordings or evidence
+of learned behavior. [Preview provenance and regeneration](assets/geography/README.md)
+describe how they are generated directly from the map JSON. The existing
+full-viewer GIFs below remain actual recorded playback. The new layouts have
+been checked for loading, navigation structure and recording compatibility;
+long-term population balance and reproduction have not been calibrated.
 
 ## Recorded terrain previews
 
