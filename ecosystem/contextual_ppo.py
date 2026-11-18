@@ -184,7 +184,7 @@ class MaskablePPOBrain(PPOBrain):
 
 
 class CentralNetwork:
-    """Independent actor and critic; actor receives only the local 20 features."""
+    """Independent actor and critic; actor receives only its versioned local inputs."""
 
     def __init__(self, config, actions, seed):
         self.inputs = observation_inputs(config)

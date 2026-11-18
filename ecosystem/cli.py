@@ -196,6 +196,7 @@ def main():
                 experiment.config["brains"][spec["brain"]].get("observation_version", 1)
                 for spec in experiment.config["species"].values()
             ),
+            "guard_lineage_chaining": experiment.guard_lineage_chaining,
             "playback_recording": not args.no_record
             and settings(experiment.config)["enabled"],
         },

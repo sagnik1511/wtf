@@ -134,7 +134,7 @@ def validate(c):
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
         if "observation_version" in b:
-            num(b["observation_version"], p + ".observation_version", 1, 2, True)
+            num(b["observation_version"], p + ".observation_version", 1, 3, True)
             b = {k: v for k, v in b.items() if k != "observation_version"}
         if b["type"] == "q_network":
             obj(
@@ -612,10 +612,13 @@ def validate(c):
                 p + ".brain",
                 "REINFORCE max_episode_steps must cover world.max_steps to retain complete episodes",
             )
-        if geography is not None and template.get("observation_version", 1) != 2:
+        if geography is not None and template.get("observation_version", 1) not in (
+            2,
+            3,
+        ):
             fail(
                 p + ".brain",
-                "terrain maps require observation_version 2 on referenced brain templates",
+                "terrain maps require observation_version 2 or 3 on referenced brain templates",
             )
         if "swim" in s["allowed_actions"] and geography is None:
             fail(p + ".allowed_actions", "swim requires a terrain map")
@@ -771,12 +774,18 @@ def validate(c):
             "record_metrics_every_steps",
             "checkpoint_every_runs",
         ),
-        optional=("grpo_updates_per_step", "chain_best_brains"),
+        optional=(
+            "grpo_updates_per_step",
+            "chain_best_brains",
+            "guard_lineage_chaining",
+        ),
     )
     for k in ("runs", "record_metrics_every_steps", "checkpoint_every_runs"):
         num(e[k], f"experiment.{k}", 1, 1000000, True)
     if "grpo_updates_per_step" in e:
         num(e["grpo_updates_per_step"], "experiment.grpo_updates_per_step", 1, 8, True)
+    if "guard_lineage_chaining" in e and type(e["guard_lineage_chaining"]) is not bool:
+        fail("experiment.guard_lineage_chaining", "must be boolean")
     if "chain_best_brains" in e and type(e["chain_best_brains"]) is not bool:
         fail("experiment.chain_best_brains", "must be boolean")
     if type(e["retain_brains_between_runs"]) is not bool:

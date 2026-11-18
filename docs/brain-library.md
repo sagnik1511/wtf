@@ -89,7 +89,9 @@ Use `--champion` to choose later-run winners without loading starting weights:
 
 This preset starts fresh with A2C prey and GRPO predators. Run 1 starts with its
 configured initialization; subsequent runs use the previous run's matching
-species/sex lineage winners. `--runs 1` still archives those winners for later
+species/sex lineage winners, retaining a previous qualified brain when a new
+winner is unqualified. See [guarded promotion](mating-observations.md#guard-provisional-lineage-winners).
+`--runs 1` still archives those winners for later
 use. `--no-chain-brains` disables promotion while preserving the archives.
 `--champion prey:male=food` selects a different male criterion; sex-specific
 choices override broad choices regardless of argument order. `--champion`

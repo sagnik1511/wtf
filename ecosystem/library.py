@@ -315,6 +315,10 @@ def load_initial_models(config, root=DEFAULT_LIBRARY):
                     model_generation=artifact["model_generation"],
                 ),
             )
+            if artifact["criterion"] == "lineage":
+                entry["provenance"]["lineage_qualified"] = artifact.get(
+                    "lineage", {}
+                ).get("qualified", False)
             if selection_criterion(config, species, sex=sex) == "balanced":
                 entry["provenance"]["chaining_criterion"] = "balanced"
                 entry["provenance"]["balanced_score"] = source_balanced_rank(

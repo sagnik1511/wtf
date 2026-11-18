@@ -89,6 +89,7 @@ the model signature, so start fresh or load matching saved weights.
 | Predator survival + kill selection | `species.predator.champion_selection` ([scoring rule](brain-library.md#balance-predator-kills-and-survival)) |
 | Family success and biological generations | `species.<name>.champion_selection.criterion: "lineage"`, optional `lineage_min_age_steps`, or `--champion SPECIES[:SEX]=lineage` ([scoring rule](brain-library.md#select-successful-biological-lineages)) |
 | Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
+| Reject provisional lineage replacements | `experiment.guard_lineage_chaining` (default `true` for fresh experiments; [details](mating-observations.md#guard-provisional-lineage-winners)) |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |
 | Reproduction | `species.<name>.reproduction` |
 | Rare newborn weight mutation | `species.<name>.mutation` ([guide](mutation.md)) |

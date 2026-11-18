@@ -2,6 +2,10 @@
 
 [Reward rules](rewards.md) · [Algorithms](algorithms.md) · [Geography](geography.md) · [Configuration](configuration.md)
 
+Subsequent improvement: [version-3 mating inputs and guarded promotion](mating-observations.md)
+address the observation and fallback limitations identified here without changing
+the reward formula. This review describes the earlier 20/32-input baseline.
+
 Reviewed on 2026-11-18 against all 24 environment presets, the shared world
 transition, native flat-world metabolism, algorithm delivery, GRPO trial worlds
 and offline feedback accounting. No missing or double-applied reward was found

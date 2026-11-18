@@ -27,7 +27,7 @@ Eight optional presets cover seven maps, keeping one prey species and one predat
 `enclosed_valleys.json` uses **DQN for prey and PPO for predators**. The
 `river_crossing_ppo.json` preset uses PPO for both; `river_crossing.json` and
 `highlands.json` use Q networks. All nine algorithms support terrain; retain
-`observation_version: 2` and the species action list when switching templates.
+`observation_version: 2` (or version 3 with mating inputs) and the species action list when switching templates.
 Enclosed-valley prey can load matching terrain Q/DQN weights; predators need
 matching terrain PPO weights. The river presets provide corresponding compatible
 signatures. Dry highlands omits `swim` and has a different action signature.
@@ -38,8 +38,9 @@ Older 20-input flat brains cannot initialize these 32-input terrain models.
 The meandering-river preset uses **A2C prey and GRPO predators**. The other three
 new presets use **PPO for both species**. Population, health, food and
 reproduction settings match `river_crossing_ppo.json`. Meandering-river learning
-templates come from `a2c.json` and `grpo.json`, with terrain observation version 2
-and a budget of one predator GRPO group update per world step.
+templates come from `a2c.json` and `grpo.json`. It now uses
+[version 3](mating-observations.md) (42 inputs), a 16-step predator trial horizon
+and a 32-step training interval, keeping one GRPO group update per world step.
 Each map is 40 × 28 cells. These are stylized landscapes using the existing
 swimming, current, elevation and obstacle rules, rather than geographic surveys
 or new climate/hydrology models. Terrain is static: there are no tides, seasonal
@@ -53,10 +54,12 @@ flooding, erosion, snow, temperature or vegetation-specific effects.
 
 No saved weights are requested by these presets. Multiple runs use the existing
 matching species/sex champion chaining unless disabled with `--no-chain-brains`.
-The three wet presets keep the river action lists and 32-input contract.
+The three wet presets keep the river action lists. Meandering river uses 42
+inputs; river delta and lake islands retain the 32-input contract.
 Loading saved weights also requires a matching algorithm and model signature:
-meandering-river prey need terrain A2C weights and predators need terrain GRPO
-weights. A different landscape can need new learning. Alpine omits `swim` and
+meandering-river prey need version-3 A2C weights and predators need version-3 GRPO
+weights. Previous 32-input models cannot initialize the updated preset.
+A different landscape can need new learning. Alpine omits `swim` and
 water sight bonuses and has a different action signature.
 
 ### Meandering floodplain
@@ -267,8 +270,8 @@ Flat observation version 1 retains its 20 features. Version 2 appends 12 values:
 
 Neighbor directions are relative to facing; flow components use world axes.
 Scales are fixed across maps. The original neighbor-blocked features additionally
-reflect normal walking's terrain restrictions in version 2. Terrain maps require
-version 2 on referenced templates; a version-2 controller on a flat world receives
+reflect normal walking's terrain restrictions in versions 2 and 3. Terrain maps require
+version 2 or 3 on referenced templates; a version-2 controller on a flat world receives
 zero terrain features. Fractional current carry is checkpointed body state, not
 an additional observation feature.
 

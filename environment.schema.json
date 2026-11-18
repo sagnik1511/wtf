@@ -784,8 +784,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "hidden_layers": {
                 "type": "array",
@@ -883,8 +885,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -997,8 +1001,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -1088,8 +1094,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -1173,8 +1181,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -1289,8 +1299,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -1415,8 +1427,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -1529,8 +1543,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "network": {
                 "type": "object",
@@ -1653,8 +1669,10 @@
               "observation_version": {
                 "enum": [
                   1,
-                  2
-                ]
+                  2,
+                  3
+                ],
+                "maximum": 3
               },
               "learning_rate": {
                 "type": "number",
@@ -1815,6 +1833,11 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 8
+        },
+        "guard_lineage_chaining": {
+          "type": "boolean",
+          "default": true,
+          "description": "Retain the previous qualified matching-sex lineage brain when a new episode only provides an unqualified fallback."
         }
       },
       "required": [

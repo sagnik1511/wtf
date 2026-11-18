@@ -23,6 +23,9 @@ The priorities established during development are:
 - Configurable experiments as JSON, with Python simulation and JavaScript rendering.
 - Optional editable geography maps add swim-only rivers, fractional currents
   and elevation costs. Flat brains use 20 features; terrain version 2 uses 32.
+  Optional version 3 uses 42 inputs including local mating readiness; the
+  meandering-river preset opts in. [Mating observations](mating-observations.md)
+  describes compatibility and guarded lineage promotion.
   [Geography guide](geography.md) covers physics and saved-model compatibility.
   Landscape presets include meandering rivers, a branching delta, alpine passes
   and lake islands, with editable map JSON and generated static diagrams.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "meandering_river",
-  "description": "A2C prey and GRPO predators on a winding floodplain river with two shallow fords, slower margins and low dry knolls",
+  "description": "A2C prey and GRPO predators with mating-readiness observations on a winding floodplain river",
   "seed": 42,
   "world": {
     "width": 40,
@@ -165,7 +165,7 @@
       "value_coefficient": 0.5,
       "rollout_steps": 32,
       "normalize_advantages": true,
-      "observation_version": 2
+      "observation_version": 3
     },
     "small_grpo": {
       "network": {
@@ -183,12 +183,12 @@
       "clip_ratio": 0.2,
       "kl_coefficient": 0.04,
       "group_size": 4,
-      "rollout_horizon": 4,
-      "train_every_steps": 128,
+      "rollout_horizon": 16,
+      "train_every_steps": 32,
       "epochs": 2,
       "batch_size": 16,
       "target_kl": 0.03,
-      "observation_version": 2
+      "observation_version": 3
     }
   },
   "experiment": {
@@ -198,7 +198,8 @@
     "record_metrics_every_steps": 10,
     "checkpoint_every_runs": 1,
     "chain_best_brains": true,
-    "grpo_updates_per_step": 1
+    "grpo_updates_per_step": 1,
+    "guard_lineage_chaining": true
   },
   "recording": {
     "enabled": true,

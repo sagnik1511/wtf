@@ -448,7 +448,108 @@ class World:
             index.sync(
                 points, self.animals.keys(), obstacles_changed or visibility_changed
             )
+        if any(
+            b.get("observation_version", 1) == 3 for b in self.config["brains"].values()
+        ):
+            self._prepare_mating_context()
         return occupied, *self._perception
+
+    def _prepare_mating_context(self):
+        occupied = {a.position: a for a in self.animals.values()}
+        populations, buckets, status = Counter(), defaultdict(list), {}
+        for a in self.animals.values():
+            populations[a.species] += 1
+            buckets[a.species, a.sex, a.x // 8, a.y // 8].append(a)
+            spec = self.config["species"][a.species]
+            rules = spec.get("reproduction")
+            if (
+                not rules
+                or not rules["enabled"]
+                or "reproduce" not in spec["allowed_actions"]
+            ):
+                status[a.id] = (0.0, 0.0, 0.0)
+                continue
+            due = self._reproduction_due(a, rules)
+            maturity = due if a.last_reproduced_age < 0 else rules["min_age_steps"]
+            progress = (
+                1.0
+                if a.last_reproduced_age >= 0
+                else min(1.0, a.age / max(1, maturity))
+            )
+            cooldown = (
+                min(
+                    1.0, max(0, due - (a.age + 1)) / max(1, due - a.last_reproduced_age)
+                )
+                if a.last_reproduced_age >= 0
+                else 0.0
+            )
+            status[a.id] = (
+                progress,
+                cooldown,
+                float(self._reproduction_eligible(a, rules)),
+            )
+        self._mate_context = occupied, populations, buckets, status
+
+    def _mating_features(self, a):
+        occupied, populations, buckets, status = self._mate_context
+        spec = self.config["species"][a.species]
+        rules = spec.get("reproduction", {})
+        body = self.body(a)
+        radius = body["vision_radius"]
+        bonus = (
+            body.get("water_vision_bonus", 0)
+            if self.geography and self.geography.water
+            else 0
+        )
+        limit = radius + bonus
+        scale = max(1, limit)
+        opposite = "male" if a.sex == "female" else "female"
+        best, pair = None, False
+        for by in range((a.y - limit) // 8, (a.y + limit) // 8 + 1):
+            for bx in range((a.x - limit) // 8, (a.x + limit) // 8 + 1):
+                for mate in buckets.get((a.species, opposite, bx, by), ()):
+                    dx, dy = mate.x - a.x, mate.y - a.y
+                    squared = dx * dx + dy * dy
+                    if squared > limit * limit:
+                        continue
+                    allowed = (
+                        radius
+                        + min(bonus, self._water_sight_cells(a.position, mate.position))
+                        if bonus
+                        else radius
+                    )
+                    if squared > allowed * allowed or not self._perception_visible(
+                        a.position, mate.position
+                    ):
+                        continue
+                    key = squared, mate.id
+                    if best is None or key < best[0]:
+                        best = key, mate
+                    if (
+                        not pair
+                        and status[a.id][2]
+                        and status[mate.id][2]
+                        and populations[a.species] < rules["max_population"]
+                        and squared <= rules.get("mate_radius", 2) ** 2
+                        and self._mating_land_route(
+                            a, mate, rules.get("mate_radius", 2)
+                        )
+                        and self._birth_cells(a, mate, occupied)
+                    ):
+                        pair = True
+        features = [1.0 if a.sex == "male" else -1.0, *status[a.id]]
+        if best is None:
+            features += [0.0] * 5
+        else:
+            mate = best[1]
+            features += [
+                (mate.x - a.x) / scale,
+                (mate.y - a.y) / scale,
+                math.sqrt(best[0][0]) / scale,
+                1.0,
+                status[mate.id][2],
+            ]
+        return features + [float(pair)]
 
     def observe(self, a, context=None):
         body = self.body(a)
@@ -498,10 +599,12 @@ class World:
         version = self.config["brains"][self.config["species"][a.species]["brain"]].get(
             "observation_version", 1
         )
-        if version == 2:
+        if version >= 2:
             features += (
                 self.geography.features(a, DIRECTIONS) if self.geography else [0.0] * 12
             )
+        if version == 3:
+            features += self._mating_features(a)
         return tuple(features)
 
     def observe_all(self):
@@ -912,6 +1015,33 @@ class World:
             )
         )
 
+    def _reproduction_due(self, a, rules):
+        if a.reproduction_due_age >= 0:
+            due = a.reproduction_due_age
+        else:
+            first = a.last_reproduced_age < 0
+            center = rules["min_age_steps" if first else "cooldown_steps"]
+            prefix = "age" if first else "cooldown"
+            pct = rules.get(prefix + "_deviation_pct")
+            deviation = (
+                int(center * pct / 100 + 0.5)
+                if pct is not None
+                else rules.get(prefix + "_deviation_steps", 0)
+            )
+            due = (0 if first else a.last_reproduced_age) + max(1, center - deviation)
+        return due
+
+    def _reproduction_eligible(self, a, rules):
+        age = a.age + 1
+        due = self._reproduction_due(a, rules)
+        return (
+            age >= due
+            and a.health > rules["health_threshold"]
+            and a.energy >= rules["min_energy"]
+            and a.energy > rules["energy_cost"]
+            and not (self.geography and self.geography.depth(a.position))
+        )
+
     def reproduction_available(self, animal, occupied=None, populations=None):
         """Decision-time mask, without RNG/clock mutation or assuming consent.
 
@@ -927,30 +1057,7 @@ class World:
         ):
             return False
 
-        def eligible(a):
-            age = a.age + 1  # Birth resolves after this step ages survivors.
-            if a.reproduction_due_age >= 0:
-                due = a.reproduction_due_age
-            else:
-                first = a.last_reproduced_age < 0
-                center = rules["min_age_steps" if first else "cooldown_steps"]
-                prefix = "age" if first else "cooldown"
-                pct = rules.get(prefix + "_deviation_pct")
-                deviation = (
-                    int(center * pct / 100 + 0.5)
-                    if pct is not None
-                    else rules.get(prefix + "_deviation_steps", 0)
-                )
-                due = (0 if first else a.last_reproduced_age) + max(
-                    1, center - deviation
-                )
-            return (
-                age >= due
-                and a.health > rules["health_threshold"]
-                and a.energy >= rules["min_energy"]
-                and a.energy > rules["energy_cost"]
-                and not (self.geography and self.geography.depth(a.position))
-            )
+        eligible = lambda a: self._reproduction_eligible(a, rules)
 
         if not eligible(animal):
             return False

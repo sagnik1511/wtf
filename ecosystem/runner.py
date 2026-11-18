@@ -31,6 +31,9 @@ class Experiment:
         if mode not in ("train", "evaluate", "random"):
             raise ValueError("mode must be train, evaluate, or random")
         self.config = copy.deepcopy(validate(config))
+        self.guard_lineage_chaining = self.config["experiment"].get(
+            "guard_lineage_chaining", True
+        )
         self.mode = mode
         self.brain_precision = "float32"
         self.legacy_brain_retention = False
@@ -74,6 +77,21 @@ class Experiment:
                         )
                         if candidate is None:
                             continue
+                        previous = self.run_initial_models.get(species, {}).get(sex)
+                        if (
+                            metric == "lineage"
+                            and self.guard_lineage_chaining
+                            and not candidate.get("lineage", {}).get("qualified", False)
+                            and previous
+                            and previous["provenance"].get("lineage_qualified", False)
+                        ):
+                            retained = copy.deepcopy(previous)
+                            retained["provenance"].update(
+                                retained_after_run=self.run_index,
+                                retention_reason="unqualified_lineage_candidate",
+                            )
+                            models.setdefault(species, {})[sex] = retained
+                            continue
                         provenance = (
                             self.champion_artifacts.get(species, {})
                             .get(sex, {})
@@ -98,6 +116,10 @@ class Experiment:
                             model=copy.deepcopy(candidate["model"]),
                             provenance=copy.deepcopy(provenance),
                         )
+                        if metric == "lineage":
+                            models[species][sex]["provenance"]["lineage_qualified"] = (
+                                candidate.get("lineage", {}).get("qualified", False)
+                            )
             self.run_initial_models = models
             self._retire_brains(list(self.brains))
         self.champion_artifacts = {}
@@ -421,6 +443,7 @@ class Experiment:
             legacy_brain_retention=self.legacy_brain_retention,
             champions=copy.deepcopy(self.champions.entries),
             lineage=self.champions.lineage.checkpoint(),
+            guard_lineage_chaining=self.guard_lineage_chaining,
             retired_updates=self.retired_updates,
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
             randomization_seed=self.randomization_seed,
@@ -460,6 +483,11 @@ class Experiment:
         with precision_scope(e.brain_precision):
             pass  # Validate before constructing any controllers.
         e.config = copy.deepcopy(validate(state["config"]))
+        # Old checkpoints retain their original unguarded promotion behavior.
+        e.guard_lineage_chaining = state.get(
+            "guard_lineage_chaining",
+            e.config["experiment"].get("guard_lineage_chaining", False),
+        )
         e.initial_models = sex_models(state.get("initial_models", {}))
         e.legacy_brain_retention = state.get(
             "legacy_brain_retention", "chain_best_brains" not in e.config["experiment"]

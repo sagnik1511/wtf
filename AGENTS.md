@@ -21,7 +21,10 @@ rather than loading every document or result into context.
   model loading and run-to-run chaining are species/sex-specific; never substitute
   a known opposite-sex winner for an unavailable group.
 - Terrain is opt-in. Preserve flat observation version 1 (20 inputs); terrain
-  version 2 has 32 inputs and a distinct model contract. Keep map geometry in
+  version 2 has 32 inputs and a distinct model contract. Optional version 3 adds
+  mating readiness for 42 inputs, with terrain padding on flat maps. Preserve
+  RNG-free observation/mask eligibility and reject incompatible saved weights.
+  Keep map geometry in
   metadata, not repeated frames. GRPO may share read-only geography, while bodies,
   obstacles, RNGs and transient observation caches remain independent. Record
   final death positions after drift rather than inferring one-cell movement.
