@@ -1,4 +1,5 @@
 """Offline behavior statistics from bounded playback chunks; no learning imports."""
+
 import argparse
 from collections import Counter
 import json
@@ -7,27 +8,27 @@ from pathlib import Path
 from .replay_io import chunk_path, load_chunk
 
 DEFINITIONS = {
-    'agent_steps': 'One living animal present at the start of one observed consecutive step.',
-    'energy_budget': 'Opening snapshot energy + realized food energy + configured newborn grants. Net reproduction energy is newborn grants minus parent reproduction costs; energy_coverage excludes grants.',
-    'feeding_success': 'Positive resource-energy events / observed eat attempts.',
-    'hunt_success': 'Kills / observed attack attempts; partial hits are reported separately.',
-    'movement_success': 'Successful moves / observed move attempts, including blocked attempts.',
-    'energy_coverage': 'Food/prey energy gained / living + known action + terrain + reproduction energy demand. Initial and newborn energy are excluded from intake.',
-    'occupied_grid_fraction': 'Distinct recorded occupied cells / all grid cells, including obstacles in the denominator.',
-    'starving_fraction': 'Animal-steps starting at zero energy / observed animal-steps.',
-    'mean_completed_lifespan': 'Mean age at death only; survivors are censored and listed separately.',
-    'reward_per_agent_step': 'Event-derived reward including terminal penalties / observed animal-steps.',
-    'births_per_1000_agent_steps': 'Observed births * 1000 / observed animal-steps.',
-    'grpo_zero_variance_fraction': 'Sampled new GRPO groups with equal returns / classified new groups. Inherited counters are excluded.',
-    'normalized_entropy': 'Sampled policy entropy / log(number of actions); 1 is uniform.',
-    'observed_optimizer_updates': 'Positive diagnostic counter changes within each animal; the first sample establishes an inheritance baseline. A lower bound when samples miss updates before death.',
+    "agent_steps": "One living animal present at the start of one observed consecutive step.",
+    "energy_budget": "Opening snapshot energy + realized food energy + configured newborn grants. Net reproduction energy is newborn grants minus parent reproduction costs; energy_coverage excludes grants.",
+    "feeding_success": "Positive resource-energy events / observed eat attempts.",
+    "hunt_success": "Kills / observed attack attempts; partial hits are reported separately.",
+    "movement_success": "Successful moves / observed move attempts, including blocked attempts.",
+    "energy_coverage": "Food/prey energy gained / living + known action + terrain + reproduction energy demand. Initial and newborn energy are excluded from intake.",
+    "occupied_grid_fraction": "Distinct recorded occupied cells / all grid cells, including obstacles in the denominator.",
+    "starving_fraction": "Animal-steps starting at zero energy / observed animal-steps.",
+    "mean_completed_lifespan": "Mean age at death only; survivors are censored and listed separately.",
+    "reward_per_agent_step": "Event-derived reward including terminal penalties / observed animal-steps.",
+    "births_per_1000_agent_steps": "Observed births * 1000 / observed animal-steps.",
+    "grpo_zero_variance_fraction": "Sampled new GRPO groups with equal returns / classified new groups. Inherited counters are excluded.",
+    "normalized_entropy": "Sampled policy entropy / log(number of actions); 1 is uniform.",
+    "observed_optimizer_updates": "Positive diagnostic counter changes within each animal; the first sample establishes an inheritance baseline. A lower bound when samples miss updates before death.",
 }
 LIMITATIONS = [
-    'Behavior changes in one training run do not establish policy improvement. Compare frozen trained and fresh/random policies on matched held-out world seeds.',
-    'Population, age, inheritance and survivor selection affect early/late comparisons.',
-    'Per-step behavior uses adjacent recorded frames only. Sampled recordings omit events; missing steps are not interpolated.',
-    'Actions of animals dying that step are inferred only when an event identifies the action. Action coverage quantifies the remaining missing actions.',
-    'Learning diagnostics are sampled; updates and group observations are lower bounds. Policy entropy is measured on changing observed states, not a fixed probe set.',
+    "Behavior changes in one training run do not establish policy improvement. Compare frozen trained and fresh/random policies on matched held-out world seeds.",
+    "Population, age, inheritance and survivor selection affect early/late comparisons.",
+    "Per-step behavior uses adjacent recorded frames only. Sampled recordings omit events; missing steps are not interpolated.",
+    "Actions of animals dying that step are inferred only when an event identifies the action. Action coverage quantifies the remaining missing actions.",
+    "Learning diagnostics are sampled; updates and group observations are lower bounds. Policy entropy is measured on changing observed states, not a fixed probe set.",
 ]
 
 
@@ -44,139 +45,181 @@ class Statistics:
         self.visited = 0
 
     def position(self, animal):
-        index = animal['y'] * self.config['world']['width'] + animal['x']
+        index = animal["y"] * self.config["world"]["width"] + animal["x"]
         self.visited |= 1 << index
 
     def expose(self, animal):
-        body = self.config['species'][animal['species']]['body']
+        body = self.config["species"][animal["species"]]["body"]
         c = self.counts
-        c['agent_steps'] += 1
-        c['energy_fraction_sum'] += animal['energy'] / body['max_energy']
-        c['starving_steps'] += animal['energy'] <= 0
-        c['energy_demand'] += body['living_cost']
-        c['reward'] += body['living_cost']*self.config['species'][animal['species']]['rewards'].get('per_energy_cost',0)
+        c["agent_steps"] += 1
+        c["energy_fraction_sum"] += animal["energy"] / body["max_energy"]
+        c["starving_steps"] += animal["energy"] <= 0
+        c["energy_demand"] += body["living_cost"]
+        c["reward"] += body["living_cost"] * self.config["species"][animal["species"]][
+            "rewards"
+        ].get("per_energy_cost", 0)
         self.position(animal)
 
     def action(self, animal, action):
         self.actions[action] += 1
-        spec=self.config['species'][animal['species']];body=spec['body']
-        cost=body['movement_cost'] if action in ('move_forward','swim') else body['attack_cost'] if action=='attack' else 0
-        self.counts['energy_demand'] += cost
-        self.counts['reward'] += cost*spec['rewards'].get('per_energy_cost',0)
+        spec = self.config["species"][animal["species"]]
+        body = spec["body"]
+        cost = (
+            body["movement_cost"]
+            if action in ("move_forward", "swim")
+            else body["attack_cost"] if action == "attack" else 0
+        )
+        self.counts["energy_demand"] += cost
+        self.counts["reward"] += cost * spec["rewards"].get("per_energy_cost", 0)
 
     def failed(self, animal):
-        self.counts['failed_actions'] += 1
-        self.counts['reward'] += self.config['species'][animal['species']]['rewards'].get('failed_action',0)
+        self.counts["failed_actions"] += 1
+        self.counts["reward"] += self.config["species"][animal["species"]][
+            "rewards"
+        ].get("failed_action", 0)
 
     def event(self, event, animal):
         c = self.counts
-        spec = self.config['species'][animal['species']]
-        rewards = spec['rewards']
-        kind, amount = event['kind'], event.get('amount', 0)
-        if kind == 'energy_gained':
-            c['energy_gained'] += amount
-            c['reward'] += amount * rewards['per_energy_gained']
-            if event.get('cause') == 'resource' and amount > 0:
-                c['productive_feeds'] += 1
-        elif kind == 'damage_dealt':
-            c['hits'] += amount > 0
-            c['reward'] += amount * rewards.get('per_damage_dealt', 0)
-        elif kind == 'damage_taken':
-            c['reward'] += amount * rewards['per_damage_taken']
-        elif kind == 'kill':
-            c['kills'] += 1
-        elif kind == 'moved':
-            c['swim_moves' if event.get('cause')=='swim' else 'moves'] += 1
-        elif kind == 'drifted':
-            c['drift_moves'] += 1
-        elif kind == 'energy_spent':
-            c['energy_demand'] += amount
-            c['terrain_energy'] += amount
-            c['reward'] += amount*rewards.get('per_energy_cost',0)
-        elif kind == 'born':
-            c['births'] += 1
-            cost = spec.get('reproduction', {}).get('energy_cost', 0) * (2 if event.get('mate', -1) >= 0 else 1)
-            c['energy_demand'] += cost
-            c['reproduction_energy'] += cost
-            c['offspring_energy'] += spec['body']['initial_energy']
-            c['reward'] += cost*rewards.get('per_energy_cost',0)
-            c['reward'] += (2 if event.get('mate',-1)>=0 else 1)*rewards.get('per_offspring',0)
-        elif kind == 'mutated':
-            c['mutations'] += 1
-            c['mutated_weights'] += amount
-        elif kind == 'died':
-            c['completed_lives'] += 1
-            c['death_age_sum'] += animal['age'] + 1
-            c['reward'] += rewards['death']
-            self.deaths[event.get('cause', 'unknown')] += 1
+        spec = self.config["species"][animal["species"]]
+        rewards = spec["rewards"]
+        kind, amount = event["kind"], event.get("amount", 0)
+        if kind == "energy_gained":
+            c["energy_gained"] += amount
+            c["reward"] += amount * rewards["per_energy_gained"]
+            if event.get("cause") == "resource" and amount > 0:
+                c["productive_feeds"] += 1
+        elif kind == "damage_dealt":
+            c["hits"] += amount > 0
+            c["reward"] += amount * rewards.get("per_damage_dealt", 0)
+        elif kind == "damage_taken":
+            c["reward"] += amount * rewards["per_damage_taken"]
+        elif kind == "kill":
+            c["kills"] += 1
+        elif kind == "moved":
+            c["swim_moves" if event.get("cause") == "swim" else "moves"] += 1
+        elif kind == "drifted":
+            c["drift_moves"] += 1
+        elif kind == "energy_spent":
+            c["energy_demand"] += amount
+            c["terrain_energy"] += amount
+            c["reward"] += amount * rewards.get("per_energy_cost", 0)
+        elif kind == "born":
+            c["births"] += 1
+            cost = spec.get("reproduction", {}).get("energy_cost", 0) * (
+                2 if event.get("mate", -1) >= 0 else 1
+            )
+            c["energy_demand"] += cost
+            c["reproduction_energy"] += cost
+            c["offspring_energy"] += spec["body"]["initial_energy"]
+            c["reward"] += cost * rewards.get("per_energy_cost", 0)
+            c["reward"] += (2 if event.get("mate", -1) >= 0 else 1) * rewards.get(
+                "per_offspring", 0
+            )
+        elif kind == "mutated":
+            c["mutations"] += 1
+            c["mutated_weights"] += amount
+        elif kind == "died":
+            c["completed_lives"] += 1
+            c["death_age_sum"] += animal["age"] + 1
+            c["reward"] += rewards["death"]
+            self.deaths[event.get("cause", "unknown")] += 1
 
     def diagnostic(self, diagnostic, previous):
         c = self.counts
-        c['diagnostic_samples'] += 1
-        if 'entropy' in diagnostic and len(diagnostic.get('action_probabilities', {})) > 1:
-            c['policy_samples'] += 1
-            c['entropy_sum'] += diagnostic['entropy'] / math.log(len(diagnostic['action_probabilities']))
-            c['peak_probability_sum'] += max(diagnostic['action_probabilities'].values())
+        c["diagnostic_samples"] += 1
+        if (
+            "entropy" in diagnostic
+            and len(diagnostic.get("action_probabilities", {})) > 1
+        ):
+            c["policy_samples"] += 1
+            c["entropy_sum"] += diagnostic["entropy"] / math.log(
+                len(diagnostic["action_probabilities"])
+            )
+            c["peak_probability_sum"] += max(
+                diagnostic["action_probabilities"].values()
+            )
         if previous is None:
             return
-        c['optimizer_updates'] += max(0, diagnostic['updates'] - previous['updates'])
-        if diagnostic.get('algorithm') == 'grpo':
-            delta = diagnostic['rollout_updates'] - previous['rollout_updates']
-            c['grpo_groups'] += max(0, delta)
-            metrics = diagnostic.get('training_metrics', {})
-            if delta > 0 and 'zero_variance' in metrics:
-                c['classified_groups'] += 1
-                c['zero_variance_groups'] += bool(metrics['zero_variance'])
-                c['positive_return_groups'] += any(r > 0 for r in metrics.get('group_returns', []))
+        c["optimizer_updates"] += max(0, diagnostic["updates"] - previous["updates"])
+        if diagnostic.get("algorithm") == "grpo":
+            delta = diagnostic["rollout_updates"] - previous["rollout_updates"]
+            c["grpo_groups"] += max(0, delta)
+            metrics = diagnostic.get("training_metrics", {})
+            if delta > 0 and "zero_variance" in metrics:
+                c["classified_groups"] += 1
+                c["zero_variance_groups"] += bool(metrics["zero_variance"])
+                c["positive_return_groups"] += any(
+                    r > 0 for r in metrics.get("group_returns", [])
+                )
 
     def report(self, species):
         c, a = self.counts, self.actions
         actions = sum(a.values())
-        capacity = self.config['world']['width'] * self.config['world']['height']
+        capacity = self.config["world"]["width"] * self.config["world"]["height"]
         return dict(
-            diet=self.config['species'][species]['diet'],
-            agent_steps=c['agent_steps'], observed_actions=actions,
-            action_coverage=ratio(actions, c['agent_steps']),
-            actions=dict(a), action_fractions={k: ratio(v, actions) for k, v in a.items()},
-            mean_energy_fraction=ratio(c['energy_fraction_sum'], c['agent_steps']),
-            starving_fraction=ratio(c['starving_steps'], c['agent_steps']),
-            energy_coverage=ratio(c['energy_gained'], c['energy_demand']),
-            energy_gained=c['energy_gained'], energy_demand=c['energy_demand'],
-            offspring_energy=c['offspring_energy'], reproduction_energy_cost=c['reproduction_energy'],
-            feeding_success=ratio(c['productive_feeds'], a['eat']),
-            hunt_success=ratio(c['kills'], a['attack']),
-            hit_success=ratio(c['hits'], a['attack']),
-            movement_success=ratio(c['moves'], a['move_forward']),
-            swim_success=ratio(c['swim_moves'],a['swim']), swim_attempts=a['swim'],
-            failed_actions=c['failed_actions'],
-            reproduction_attempts=a['reproduce'], reproduction_success=ratio(2*c['births'],a['reproduce']),
-            drift_moves=c['drift_moves'], terrain_energy=c['terrain_energy'],
-            reward_per_agent_step=ratio(c['reward'], c['agent_steps']),
-            births=c['births'], kills=c['kills'], deaths=dict(self.deaths),
-            mutations=c['mutations'], mutated_weights=c['mutated_weights'],
-            births_per_1000_agent_steps=ratio(c['births'] * 1000, c['agent_steps']),
-            deaths_per_1000_agent_steps=ratio(c['completed_lives'] * 1000, c['agent_steps']),
-            completed_lives=c['completed_lives'],
-            mean_completed_lifespan=ratio(c['death_age_sum'], c['completed_lives']),
-            occupied_cells=bin(self.visited).count('1'),
-            occupied_grid_fraction=ratio(bin(self.visited).count('1'), capacity),
-            learning=dict(algorithm=self.config['brains'][self.config['species'][species]['brain']]['type'],
-                diagnostic_samples=c['diagnostic_samples'],
-                observed_optimizer_updates=c['optimizer_updates'],
-                normalized_entropy=ratio(c['entropy_sum'], c['policy_samples']),
-                mean_peak_action_probability=ratio(c['peak_probability_sum'], c['policy_samples']),
-                observed_grpo_groups=c['grpo_groups'],
-                classified_grpo_groups=c['classified_groups'],
-                grpo_zero_variance_fraction=ratio(c['zero_variance_groups'], c['classified_groups']),
-                grpo_positive_return_groups=c['positive_return_groups']),
+            diet=self.config["species"][species]["diet"],
+            agent_steps=c["agent_steps"],
+            observed_actions=actions,
+            action_coverage=ratio(actions, c["agent_steps"]),
+            actions=dict(a),
+            action_fractions={k: ratio(v, actions) for k, v in a.items()},
+            mean_energy_fraction=ratio(c["energy_fraction_sum"], c["agent_steps"]),
+            starving_fraction=ratio(c["starving_steps"], c["agent_steps"]),
+            energy_coverage=ratio(c["energy_gained"], c["energy_demand"]),
+            energy_gained=c["energy_gained"],
+            energy_demand=c["energy_demand"],
+            offspring_energy=c["offspring_energy"],
+            reproduction_energy_cost=c["reproduction_energy"],
+            feeding_success=ratio(c["productive_feeds"], a["eat"]),
+            hunt_success=ratio(c["kills"], a["attack"]),
+            hit_success=ratio(c["hits"], a["attack"]),
+            movement_success=ratio(c["moves"], a["move_forward"]),
+            swim_success=ratio(c["swim_moves"], a["swim"]),
+            swim_attempts=a["swim"],
+            failed_actions=c["failed_actions"],
+            reproduction_attempts=a["reproduce"],
+            reproduction_success=ratio(2 * c["births"], a["reproduce"]),
+            drift_moves=c["drift_moves"],
+            terrain_energy=c["terrain_energy"],
+            reward_per_agent_step=ratio(c["reward"], c["agent_steps"]),
+            births=c["births"],
+            kills=c["kills"],
+            deaths=dict(self.deaths),
+            mutations=c["mutations"],
+            mutated_weights=c["mutated_weights"],
+            births_per_1000_agent_steps=ratio(c["births"] * 1000, c["agent_steps"]),
+            deaths_per_1000_agent_steps=ratio(
+                c["completed_lives"] * 1000, c["agent_steps"]
+            ),
+            completed_lives=c["completed_lives"],
+            mean_completed_lifespan=ratio(c["death_age_sum"], c["completed_lives"]),
+            occupied_cells=bin(self.visited).count("1"),
+            occupied_grid_fraction=ratio(bin(self.visited).count("1"), capacity),
+            learning=dict(
+                algorithm=self.config["brains"][
+                    self.config["species"][species]["brain"]
+                ]["type"],
+                diagnostic_samples=c["diagnostic_samples"],
+                observed_optimizer_updates=c["optimizer_updates"],
+                normalized_entropy=ratio(c["entropy_sum"], c["policy_samples"]),
+                mean_peak_action_probability=ratio(
+                    c["peak_probability_sum"], c["policy_samples"]
+                ),
+                observed_grpo_groups=c["grpo_groups"],
+                classified_grpo_groups=c["classified_groups"],
+                grpo_zero_variance_fraction=ratio(
+                    c["zero_variance_groups"], c["classified_groups"]
+                ),
+                grpo_positive_return_groups=c["positive_return_groups"],
+            ),
         )
 
 
 def analyze_run(config, frames, window_steps=250):
     """Consume ordered frames once, retaining only the prior frame and summaries."""
     if type(window_steps) is not int or window_steps < 1:
-        raise ValueError('window_steps must be a positive integer')
-    overall = {s: Statistics(config) for s in config['species']}
+        raise ValueError("window_steps must be a positive integer")
+    overall = {s: Statistics(config) for s in config["species"]}
     windows, diagnostics = {}, {}
     previous = None
     first_tick = last_tick = 0
@@ -184,140 +227,209 @@ def analyze_run(config, frames, window_steps=250):
     initial_populations, opening_energy = {}, {}
     final_metrics = {}
     for frame in frames:
-        tick = frame['tick']
+        tick = frame["tick"]
         if previous is not None and tick <= last_tick:
-            raise ValueError('Recorded frame ticks must increase')
+            raise ValueError("Recorded frame ticks must increase")
         if previous is None:
             first_tick = tick
-            initial_populations = {s: sum(a['species'] == s for a in frame['animals']) for s in overall}
-            opening_energy = {s: sum(a['energy'] for a in frame['animals'] if a['species'] == s) for s in overall}
+            initial_populations = {
+                s: sum(a["species"] == s for a in frame["animals"]) for s in overall
+            }
+            opening_energy = {
+                s: sum(a["energy"] for a in frame["animals"] if a["species"] == s)
+                for s in overall
+            }
         last_tick, frame_count = tick, frame_count + 1
-        final_metrics = frame['metrics']
-        animals = {a['id']: a for a in frame['animals']}
+        final_metrics = frame["metrics"]
+        animals = {a["id"]: a for a in frame["animals"]}
         # At most 120 time windows for the recording; analyze_recording chooses
         # window_steps from the advertised duration before consuming chunks.
         window_id = max(0, (tick - first_tick - 1) // window_steps)
         if window_id not in windows:
             windows[window_id] = {s: Statistics(config) for s in overall}
         window = windows[window_id]
+
         def destinations(species):
             return overall[species], window[species]
-        if previous is not None and tick == previous['tick'] + 1:
+
+        if previous is not None and tick == previous["tick"] + 1:
             adjacent += 1
-            prior = {a['id']: a for a in previous['animals']}
+            prior = {a["id"]: a for a in previous["animals"]}
             for animal in prior.values():
-                for stat in destinations(animal['species']):
+                for stat in destinations(animal["species"]):
                     stat.expose(animal)
-            actions = {i: a['last_action'] for i, a in animals.items() if i in prior}
+            actions = {i: a["last_action"] for i, a in animals.items() if i in prior}
             # Successful terminal actions are recoverable from recorded events.
-            for event in frame.get('events', []):
-                i, kind = event['actor'], event['kind']
+            for event in frame.get("events", []):
+                i, kind = event["actor"], event["kind"]
                 if i in prior and i not in actions:
-                    if kind=='action_failed':actions[i]=event['cause']
-                    elif kind in ('moved', 'movement_blocked'):
-                        actions[i] = 'swim' if event.get('cause','').startswith('swim') else 'move_forward'
-                    elif kind == 'damage_dealt':
-                        actions[i] = 'attack'
-                    elif kind == 'energy_gained' and event.get('cause') == 'resource':
-                        actions[i] = 'eat'
-            successful=set()
-            for event in frame.get('events',[]):
-                kind=event['kind']
-                if (kind=='moved' or kind=='damage_dealt' and event.get('amount',0)>0
-                    or kind=='energy_gained' and event.get('cause')=='resource' and event.get('amount',0)>0):
-                    successful.add(event['actor'])
-                if kind=='born':successful.update((event['actor'],event.get('mate',-1)))
+                    if kind == "action_failed":
+                        actions[i] = event["cause"]
+                    elif kind in ("moved", "movement_blocked"):
+                        actions[i] = (
+                            "swim"
+                            if event.get("cause", "").startswith("swim")
+                            else "move_forward"
+                        )
+                    elif kind == "damage_dealt":
+                        actions[i] = "attack"
+                    elif kind == "energy_gained" and event.get("cause") == "resource":
+                        actions[i] = "eat"
+            successful = set()
+            for event in frame.get("events", []):
+                kind = event["kind"]
+                if (
+                    kind == "moved"
+                    or kind == "damage_dealt"
+                    and event.get("amount", 0) > 0
+                    or kind == "energy_gained"
+                    and event.get("cause") == "resource"
+                    and event.get("amount", 0) > 0
+                ):
+                    successful.add(event["actor"])
+                if kind == "born":
+                    successful.update((event["actor"], event.get("mate", -1)))
             for i, action in actions.items():
-                for stat in destinations(prior[i]['species']):
+                for stat in destinations(prior[i]["species"]):
                     stat.action(prior[i], action)
-                    if action in ('move_forward','swim','attack','eat','reproduce') and i not in successful:
+                    if (
+                        action in ("move_forward", "swim", "attack", "eat", "reproduce")
+                        and i not in successful
+                    ):
                         stat.failed(prior[i])
-            for event in frame.get('events', []):
-                animal = prior.get(event['actor'])
+            for event in frame.get("events", []):
+                animal = prior.get(event["actor"])
                 if animal is not None:
-                    for stat in destinations(animal['species']):
+                    for stat in destinations(animal["species"]):
                         stat.event(event, animal)
         for animal in animals.values():
-            for stat in destinations(animal['species']):
+            for stat in destinations(animal["species"]):
                 stat.position(animal)
-        for raw_id, diagnostic in frame.get('diagnostics', {}).items():
+        for raw_id, diagnostic in frame.get("diagnostics", {}).items():
             animal_id = int(raw_id)
             if animal_id not in animals:
                 continue
-            for stat in destinations(animals[animal_id]['species']):
+            for stat in destinations(animals[animal_id]["species"]):
                 stat.diagnostic(diagnostic, diagnostics.get(animal_id))
             # Store counters only, not duplicate feature vectors or group data.
-            diagnostics[animal_id] = {key: diagnostic.get(key, 0) for key in ('updates', 'rollout_updates')}
+            diagnostics[animal_id] = {
+                key: diagnostic.get(key, 0) for key in ("updates", "rollout_updates")
+            }
         for animal_id in diagnostics.keys() - animals.keys():
             del diagnostics[animal_id]
         previous = frame
-    result = dict(first_tick=first_tick, last_tick=last_tick, frames=frame_count,
+    result = dict(
+        first_tick=first_tick,
+        last_tick=last_tick,
+        frames=frame_count,
         window_steps=window_steps,
-        coverage=dict(adjacent_steps=adjacent, total_steps=last_tick - first_tick,
-            step_fraction=ratio(adjacent, last_tick - first_tick)),
-        initial_populations=initial_populations, final_metrics=final_metrics,
-        species={s: stat.report(s) for s, stat in overall.items()}, windows=[])
-    for s, stat in result['species'].items():
-        survivors = [a for a in (previous or {}).get('animals', []) if a['species'] == s]
-        stat['energy_budget'] = dict(opening_energy=opening_energy.get(s, 0), food_energy=stat['energy_gained'],
-            offspring_energy=stat['offspring_energy'], reproduction_energy_cost=stat['reproduction_energy_cost'],
-            net_reproduction_energy=stat['offspring_energy'] - stat['reproduction_energy_cost'],
-            food_input_share=ratio(stat['energy_gained'], opening_energy.get(s, 0) + stat['offspring_energy'] + stat['energy_gained']))
-        stat['survivors'] = len(survivors)
-        stat['mean_survivor_age'] = ratio(sum(a['age'] for a in survivors), len(survivors))
+        coverage=dict(
+            adjacent_steps=adjacent,
+            total_steps=last_tick - first_tick,
+            step_fraction=ratio(adjacent, last_tick - first_tick),
+        ),
+        initial_populations=initial_populations,
+        final_metrics=final_metrics,
+        species={s: stat.report(s) for s, stat in overall.items()},
+        windows=[],
+    )
+    for s, stat in result["species"].items():
+        survivors = [
+            a for a in (previous or {}).get("animals", []) if a["species"] == s
+        ]
+        stat["energy_budget"] = dict(
+            opening_energy=opening_energy.get(s, 0),
+            food_energy=stat["energy_gained"],
+            offspring_energy=stat["offspring_energy"],
+            reproduction_energy_cost=stat["reproduction_energy_cost"],
+            net_reproduction_energy=stat["offspring_energy"]
+            - stat["reproduction_energy_cost"],
+            food_input_share=ratio(
+                stat["energy_gained"],
+                opening_energy.get(s, 0)
+                + stat["offspring_energy"]
+                + stat["energy_gained"],
+            ),
+        )
+        stat["survivors"] = len(survivors)
+        stat["mean_survivor_age"] = ratio(
+            sum(a["age"] for a in survivors), len(survivors)
+        )
     for i, window in sorted(windows.items()):
-        result['windows'].append(dict(start_tick=first_tick if i == 0 else first_tick + i * window_steps + 1,
-            end_tick=min(last_tick, first_tick + (i + 1) * window_steps),
-            species={s: stat.report(s) for s, stat in window.items()}))
+        result["windows"].append(
+            dict(
+                start_tick=first_tick if i == 0 else first_tick + i * window_steps + 1,
+                end_tick=min(last_tick, first_tick + (i + 1) * window_steps),
+                species={s: stat.report(s) for s, stat in window.items()},
+            )
+        )
     return result
 
 
 def analyze_recording(folder, run=None, window_steps=250):
     folder = Path(folder)
-    playback = folder if (folder / 'recording.json').is_file() else folder / 'playback'
+    playback = folder if (folder / "recording.json").is_file() else folder / "playback"
     playback = playback.resolve()
-    manifest = json.loads((playback / 'recording.json').read_text())
-    if manifest.get('recording_version') != 1:
-        raise ValueError('Unsupported recording version')
+    manifest = json.loads((playback / "recording.json").read_text())
+    if manifest.get("recording_version") != 1:
+        raise ValueError("Unsupported recording version")
     if type(window_steps) is not int or window_steps < 1:
-        raise ValueError('window_steps must be a positive integer')
-    selected = [entry for entry in manifest['runs'] if run is None or entry['run'] == run]
-    if not selected or not any(entry['chunk_count'] for entry in selected):
-        raise FileNotFoundError('Recorded run not found')
-    report = dict(analysis_version=1, recording=manifest['name'], mode=manifest['mode'],
-        definitions=DEFINITIONS, limitations=LIMITATIONS, runs=[])
+        raise ValueError("window_steps must be a positive integer")
+    selected = [
+        entry for entry in manifest["runs"] if run is None or entry["run"] == run
+    ]
+    if not selected or not any(entry["chunk_count"] for entry in selected):
+        raise FileNotFoundError("Recorded run not found")
+    report = dict(
+        analysis_version=1,
+        recording=manifest["name"],
+        mode=manifest["mode"],
+        definitions=DEFINITIONS,
+        limitations=LIMITATIONS,
+        runs=[],
+    )
     for entry in selected:
-        if not entry['chunk_count']:
+        if not entry["chunk_count"]:
             continue
-        size = max(window_steps, math.ceil((entry['last_tick'] - entry['first_tick']) / 120))
+        size = max(
+            window_steps, math.ceil((entry["last_tick"] - entry["first_tick"]) / 120)
+        )
+
         def frames():
-            for index in range(entry['chunk_count']):
-                path = chunk_path(playback, entry['run'], index)
+            for index in range(entry["chunk_count"]):
+                path = chunk_path(playback, entry["run"], index)
                 chunk = load_chunk(path)
                 yield from chunk
                 del chunk
-        result = analyze_run(manifest['config'], frames(), size)
-        result.update(run=entry['run'], seed=entry['seed'], complete=entry['complete'])
-        report['runs'].append(result)
+
+        result = analyze_run(manifest["config"], frames(), size)
+        result.update(run=entry["run"], seed=entry["seed"], complete=entry["complete"])
+        report["runs"].append(result)
     return report
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Analyze saved WTF behavior without loading brains or simulating')
-    parser.add_argument('recording', type=Path, help='Experiment folder under results/')
-    parser.add_argument('--run', type=int)
-    parser.add_argument('--window-steps', type=int, default=250)
-    parser.add_argument('--output', type=Path, help='Default: <recording>/analysis.json')
+    parser = argparse.ArgumentParser(
+        description="Analyze saved WTF behavior without loading brains or simulating"
+    )
+    parser.add_argument("recording", type=Path, help="Experiment folder under results/")
+    parser.add_argument("--run", type=int)
+    parser.add_argument("--window-steps", type=int, default=250)
+    parser.add_argument(
+        "--output", type=Path, help="Default: <recording>/analysis.json"
+    )
     args = parser.parse_args()
     report = analyze_recording(args.recording, args.run, args.window_steps)
-    output = args.output or args.recording / 'analysis.json'
-    output.write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
-    for run in report['runs']:
-        print(f"Run {run['run']} · steps {run['first_tick']}–{run['last_tick']} · observed coverage {run['coverage']['step_fraction']}")
-        for species, stats in run['species'].items():
+    output = args.output or args.recording / "analysis.json"
+    output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
+    for run in report["runs"]:
+        print(
+            f"Run {run['run']} · steps {run['first_tick']}–{run['last_tick']} · observed coverage {run['coverage']['step_fraction']}"
+        )
+        for species, stats in run["species"].items():
             print(species, json.dumps(stats, allow_nan=False))
-    print(f'Analysis: {output.resolve()}')
+    print(f"Analysis: {output.resolve()}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

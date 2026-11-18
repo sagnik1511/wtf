@@ -1,4 +1,5 @@
 """Independent A2C, episodic REINFORCE, and experimental branched GRPO."""
+
 from .numeric import packed, plain, precision_of, restore_numeric
 
 
@@ -124,11 +125,14 @@ class ActorBrain(AdamOptimizer):
             config["network"]["hidden_layers"],
             len(actions),
             base_seed,
-            value_head=False, inputs=observation_inputs(config),
+            value_head=False,
+            inputs=observation_inputs(config),
         )
         self.rng = random.Random(individual_seed)
         self.training_rng = random.Random(individual_seed ^ 0x5F3759DF)
-        self.moments, self.variances = packed(self.network.zeros()), packed(self.network.zeros())
+        self.moments, self.variances = packed(self.network.zeros()), packed(
+            self.network.zeros()
+        )
         self.trajectory, self.pending = [], None
         self.steps = self.updates = self.rollout_updates = 0
         self.baseline = 0.0
@@ -322,7 +326,8 @@ class GRPOBrain(ActorBrain):
             config["network"]["hidden_layers"],
             len(actions),
             base_seed,
-            value_head=False, inputs=observation_inputs(config),
+            value_head=False,
+            inputs=observation_inputs(config),
         )
         self.group_rng = random.Random(individual_seed ^ 0x0BADC0DE)
         self.last_group_step = 0
@@ -381,7 +386,11 @@ class GRPOBrain(ActorBrain):
                 for index in batch:
                     step, advantage, weight = samples[index]
                     logits, activations = self.network.forward(step.observation)
-                    reference = self.reference_network.predict(step.observation) if c['kl_coefficient'] else None
+                    reference = (
+                        self.reference_network.predict(step.observation)
+                        if c["kl_coefficient"]
+                        else None
+                    )
                     _, derivative, info = actor_loss_gradient(
                         logits,
                         step.action,

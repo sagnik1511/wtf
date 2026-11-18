@@ -1,11 +1,12 @@
 """Incremental spatial windows; all state is derived and checkpoint independent."""
+
 from . import kernels
 import math
 from itertools import chain
 
 
 class _Bucket:
-    __slots__ = ('points', 'version')
+    __slots__ = ("points", "version")
 
     def __init__(self):
         self.points = {}
@@ -88,11 +89,16 @@ class SpatialIndex:
 
     def _window(self, animal_id, x, y, radius):
         size = self.CELL_SIZE
-        bounds = ((x - radius) // size, (x + radius) // size,
-                  (y - radius) // size, (y + radius) // size)
+        bounds = (
+            (x - radius) // size,
+            (x + radius) // size,
+            (y - radius) // size,
+            (y + radius) // size,
+        )
         left, right, top, bottom = bounds
-        if (len(self.points) < 32 or
-                (right - left + 1) * (bottom - top + 1) >= len(self.active_cells)):
+        if len(self.points) < 32 or (right - left + 1) * (bottom - top + 1) >= len(
+            self.active_cells
+        ):
             return None  # A direct scan is cheaper for sparse/wide views.
         previous = self.windows.get(animal_id)
         if previous is None:
@@ -129,35 +135,69 @@ class SpatialIndex:
         previous = self.results.get(animal_id)
         if previous is not None and previous[0] == key:
             return previous[1]
-        owner = getattr(visible, '__self__', None)
-        maps = getattr(owner, '_native_sight', None)
-        native_range = getattr(range_check, '_native_sight_range', None)
-        if (maps is not None and kernels.available('nearest') and
-                getattr(visible, '__func__', None) is getattr(owner, '_native_sight_callback', None) and
-                (range_check is None or native_range is not None)):
-            base, bonus = native_range if native_range is not None else (radius,0)
-            point = kernels.native.nearest(points, ax, ay, animal_id, radius,
-                                               *maps, owner.width, owner.height, base, bonus)
+        owner = getattr(visible, "__self__", None)
+        maps = getattr(owner, "_native_sight", None)
+        native_range = getattr(range_check, "_native_sight_range", None)
+        if (
+            maps is not None
+            and kernels.available("nearest")
+            and getattr(visible, "__func__", None)
+            is getattr(owner, "_native_sight_callback", None)
+            and (range_check is None or native_range is not None)
+        ):
+            base, bonus = native_range if native_range is not None else (radius, 0)
+            point = kernels.native.nearest(
+                points,
+                ax,
+                ay,
+                animal_id,
+                radius,
+                *maps,
+                owner.width,
+                owner.height,
+                base,
+                bonus,
+            )
             # CPython 3.9's compensated hypot differs from libm hypot for some
             # integer pairs. Keep the original final feature calculation.
-            features = ([0.0,0.0,0.0,0.0] if point is None else
-                        [point[0]/radius,point[1]/radius,math.hypot(*point)/radius,1.0])
+            features = (
+                [0.0, 0.0, 0.0, 0.0]
+                if point is None
+                else [
+                    point[0] / radius,
+                    point[1] / radius,
+                    math.hypot(*point) / radius,
+                    1.0,
+                ]
+            )
             self.results[animal_id] = key, features
             return features
-        best, best_squared, best_order = None, float('inf'), float('inf')
+        best, best_squared, best_order = None, float("inf"), float("inf")
         start, radius_squared = (ax, ay), radius * radius
         for order, other_id, x, y in points:
             if other_id == animal_id:
                 continue
             dx, dy = x - ax, y - ay
             squared = dx * dx + dy * dy
-            if (squared <= radius_squared
-                    and (squared < best_squared or (squared == best_squared and order < best_order))
-                    and visible(start, (x, y))
-                    and (range_check is None or range_check(start, (x,y), squared))):
+            if (
+                squared <= radius_squared
+                and (
+                    squared < best_squared
+                    or (squared == best_squared and order < best_order)
+                )
+                and visible(start, (x, y))
+                and (range_check is None or range_check(start, (x, y), squared))
+            ):
                 best, best_squared, best_order = (x, y), squared, order
-        features = ([0.0, 0.0, 0.0, 0.0] if best is None else [
-            (best[0] - ax) / radius, (best[1] - ay) / radius,
-            math.hypot(best[0] - ax, best[1] - ay) / radius, 1.0])
+        features = (
+            [0.0, 0.0, 0.0, 0.0]
+            if best is None
+            else [
+                (best[0] - ax) / radius,
+                (best[1] - ay) / radius,
+                math.hypot(best[0] - ax, best[1] - ay) / radius,
+                1.0,
+            ]
+        )
         self.results[animal_id] = key, features
         return features

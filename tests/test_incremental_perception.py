@@ -1,4 +1,5 @@
 """Incremental observations must match a fresh scan of the current world."""
+
 import random
 import unittest
 from unittest.mock import patch
@@ -12,19 +13,23 @@ from tests.test_simulation import config
 
 def world():
     c = config()
-    c['world'].update(width=64, height=48)
-    c['resources']['patch_count'] = 120
-    c['species']['prey']['initial_population'] = 48
-    c['species']['predator']['initial_population'] = 12
+    c["world"].update(width=64, height=48)
+    c["resources"]["patch_count"] = 120
+    c["species"]["prey"]["initial_population"] = 48
+    c["species"]["predator"]["initial_population"] = 12
     return World(c, 42)
 
 
 class IncrementalPerceptionTests(unittest.TestCase):
     def test_shifting_window_visits_only_entering_and_leaving_strips(self):
         index = SpatialIndex()
-        points = [(i, (x, y)) for i, (x, y) in enumerate(
-            (x, y) for x in range(0, 64, 8) for y in range(0, 64, 8))]
-        observer = Animal(999, 'prey', 1, 16, 0, 60, 30)
+        points = [
+            (i, (x, y))
+            for i, (x, y) in enumerate(
+                (x, y) for x in range(0, 64, 8) for y in range(0, 64, 8)
+            )
+        ]
+        observer = Animal(999, "prey", 1, 16, 0, 60, 30)
         index.sync(points, {observer.id})
         index.nearest(observer, 6, lambda a, b: True)
         old_bounds, old_cells = index.windows[observer.id]
@@ -32,11 +37,13 @@ class IncrementalPerceptionTests(unittest.TestCase):
         observer.x += 1
         visited = []
         original = perception._cells
+
         def track(bounds):
             for cell in original(bounds):
                 visited.append(cell)
                 yield cell
-        with patch.object(perception, '_cells', track):
+
+        with patch.object(perception, "_cells", track):
             index.nearest(observer, 6, lambda a, b: True)
         bounds, cells = index.windows[observer.id]
         self.assertIs(cells, old_cells)
@@ -52,12 +59,12 @@ class IncrementalPerceptionTests(unittest.TestCase):
         w.animals = {a.id: a}
         w.obstacles.clear()
         w.resources[(9, 7)] = Resource(9, 7, 10)
-        w.config['resources']['growth_per_step'] = 0
-        with patch.object(w, 'visible', wraps=w.visible) as visible:
+        w.config["resources"]["growth_per_step"] = 0
+        with patch.object(w, "visible", wraps=w.visible) as visible:
             first = w.observe_all()[a.id]
             self.assertGreater(visible.call_count, 0)
             visible.reset_mock()
-            w.step({a.id: 'rest'})
+            w.step({a.id: "rest"})
             second = w.observe_all()[a.id]
             self.assertEqual(visible.call_count, 0)
             self.assertNotEqual(first[0], second[0])  # Energy is always current.
@@ -74,14 +81,20 @@ class IncrementalPerceptionTests(unittest.TestCase):
     def test_overlap_updates_birth_death_food_obstacles_and_vision(self):
         w = world()
         rng = random.Random(72)
-        for spec in w.config['species'].values():
-            spec['reproduction'].update(enabled=True, min_age_steps=3,
-                cooldown_steps=4, min_energy=10, energy_cost=5, max_population=80)
+        for spec in w.config["species"].values():
+            spec["reproduction"].update(
+                enabled=True,
+                min_age_steps=3,
+                cooldown_steps=4,
+                min_energy=10,
+                energy_cost=5,
+                max_population=80,
+            )
         for tick in range(30):
             if tick == 6:
                 for patch in w.resources.values():
                     patch.quantity = 0
-                w.config['resources']['growth_per_step'] = 0
+                w.config["resources"]["growth_per_step"] = 0
             if tick == 9:
                 for patch in w.resources.values():
                     patch.quantity = 10
@@ -90,27 +103,34 @@ class IncrementalPerceptionTests(unittest.TestCase):
             if tick == 15:
                 w = World.restore(w.checkpoint())  # Caches are derived, not saved.
             if tick == 18:
-                for spec in w.config['species'].values():
-                    spec['body']['vision_radius'] = 1
+                for spec in w.config["species"].values():
+                    spec["body"]["vision_radius"] = 1
             if tick == 21:
-                for spec in w.config['species'].values():
-                    spec['body']['vision_radius'] = 64
+                for spec in w.config["species"].values():
+                    spec["body"]["vision_radius"] = 64
             if tick == 24:
-                for spec in w.config['species'].values():
-                    spec['body']['vision_radius'] = 6
+                for spec in w.config["species"].values():
+                    spec["body"]["vision_radius"] = 6
             observed = w.observe_all()
-            self.assertEqual(observed, {i: reference_observation(w, a)
-                                       for i, a in w.animals.items()})
-            actions = {i: rng.choice(w.config['species'][a.species]['allowed_actions'])
-                       for i, a in w.animals.items()}
+            self.assertEqual(
+                observed, {i: reference_observation(w, a) for i, a in w.animals.items()}
+            )
+            actions = {
+                i: rng.choice(w.config["species"][a.species]["allowed_actions"])
+                for i, a in w.animals.items()
+            }
             w.step(actions)
         self.assertGreater(sum(w.births.values()), 0)
 
     def test_bucket_changes_in_overlap_invalidate_stationary_result(self):
         index = SpatialIndex()
-        points = [(i, (x, y)) for i, (x, y) in enumerate(
-            (x, y) for x in range(0, 64, 8) for y in range(0, 64, 8))]
-        observer = Animal(999, 'prey', 7, 7, 0, 60, 30)
+        points = [
+            (i, (x, y))
+            for i, (x, y) in enumerate(
+                (x, y) for x in range(0, 64, 8) for y in range(0, 64, 8)
+            )
+        ]
+        observer = Animal(999, "prey", 7, 7, 0, 60, 30)
         points += [(1000, (8, 7))]
         index.sync(points, {observer.id})
         first = index.nearest(observer, 6, lambda a, b: True)
@@ -129,14 +149,20 @@ class IncrementalPerceptionTests(unittest.TestCase):
 
     def test_distant_changes_preserve_stationary_nearest_result(self):
         index = SpatialIndex()
-        points = [(i, (x, y)) for i, (x, y) in enumerate(
-            (x, y) for x in range(0, 64, 8) for y in range(0, 64, 8))]
-        observer = Animal(999, 'prey', 7, 7, 0, 60, 30)
+        points = [
+            (i, (x, y))
+            for i, (x, y) in enumerate(
+                (x, y) for x in range(0, 64, 8) for y in range(0, 64, 8)
+            )
+        ]
+        observer = Animal(999, "prey", 7, 7, 0, 60, 30)
         index.sync(points, {observer.id})
         calls = []
+
         def visible(start, end):
             calls.append(end)
             return True
+
         first = index.nearest(observer, 6, visible)
         self.assertGreater(len(calls), 0)
         calls.clear()
@@ -154,8 +180,8 @@ class IncrementalPerceptionTests(unittest.TestCase):
         for index in w._perception:
             self.assertNotIn(animal_id, index.windows)
             self.assertNotIn(animal_id, index.results)
-        self.assertNotIn('_perception', w.checkpoint())
+        self.assertNotIn("_perception", w.checkpoint())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -3,6 +3,7 @@
 Float32 rounds on storage, not on every arithmetic operation. Legacy checkpoints
 without precision metadata retain their list-based float64 training behavior.
 """
+
 from array import array
 import copy
 import math
@@ -27,9 +28,9 @@ class Float32(array):
     __slots__ = ()
 
     def __new__(cls, values=()):
-        result = super().__new__(cls, 'f', values)
+        result = super().__new__(cls, "f", values)
         if result.itemsize != 4:
-            raise RuntimeError('A four-byte float representation is required')
+            raise RuntimeError("A four-byte float representation is required")
         if not all(math.isfinite(value) for value in result):
             raise ValueError("Non-finite float32 model value")
         return result
@@ -43,18 +44,17 @@ class Float32(array):
         return result
 
 
-
 def packed(value, precision=None):
     """Copy a tree of parameter/optimizer lists into independent packed arrays."""
     precision = _DEFAULT_PRECISION.get() if precision is None else precision
-    if precision not in ('float32', 'float64'):
-        raise ValueError('Unsupported brain precision: ' + str(precision))
+    if precision not in ("float32", "float64"):
+        raise ValueError("Unsupported brain precision: " + str(precision))
     if isinstance(value, dict):
         return {key: packed(values, precision) for key, values in value.items()}
     if isinstance(value, (list, tuple, array)):
         if value and isinstance(value[0], dict):
             return [packed(layer, precision) for layer in value]
-        return Float32(value) if precision == 'float32' else list(value)
+        return Float32(value) if precision == "float32" else list(value)
     return copy.deepcopy(value)
 
 
@@ -70,18 +70,25 @@ def plain(value):
 
 
 def precision_of(brain):
-    values = brain.weights if hasattr(brain, 'weights') else brain.network.layers
-    leaf = next(iter(values.values())) if isinstance(values, dict) else next(iter(values[0].values()))
-    return 'float32' if isinstance(leaf, Float32) else 'float64'
+    values = brain.weights if hasattr(brain, "weights") else brain.network.layers
+    leaf = (
+        next(iter(values.values()))
+        if isinstance(values, dict)
+        else next(iter(values[0].values()))
+    )
+    return "float32" if isinstance(leaf, Float32) else "float64"
 
 
 def restore_numeric(brain, state):
     """Restore numeric trees with recorded precision (old checkpoints are f64)."""
-    precision = state.get('precision', 'float64')
-    for key in ('weights', 'target', 'moments', 'variances'):
+    precision = state.get("precision", "float64")
+    for key in ("weights", "target", "moments", "variances"):
         if key in state:
             setattr(brain, key, packed(state[key], precision))
-    for key, attribute in (('network', 'network'), ('target_network', 'target_network'),
-                           ('reference_network', 'reference_network')):
+    for key, attribute in (
+        ("network", "network"),
+        ("target_network", "target_network"),
+        ("reference_network", "reference_network"),
+    ):
         if key in state:
             getattr(brain, attribute).layers = packed(state[key], precision)

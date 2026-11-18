@@ -59,33 +59,68 @@ def main():
     )
     parser.set_defaults(progress=None)
     parser.add_argument("--output", type=Path, default=Path("results"))
-    parser.add_argument("--library-dir", type=Path,
-                        help="Optional shared library for selectors and an extra champion copy; run-local brains are always saved")
-    parser.add_argument("--checkpoint-format", choices=("binary", "compact", "json"), default="binary",
-                        help="Checkpoint output: binary arrays + XZ (default), compact JSON, or legacy JSON")
-    parser.add_argument("--no-library", action="store_true",
-                        help="Skip saving new champion models")
-    parser.add_argument("--brains-from", type=Path,
-                        help="Source run name in results/ or experiment path; defaults to its latest archived numbered run")
-    parser.add_argument("--brain-run", type=int, help="Archived run number within --brains-from")
-    parser.add_argument("--brain", action="append", default=[], metavar="SPECIES[:SEX]=MODEL",
-                        help="Repeat per species/sex (prey:male=lifespan): criterion (including balanced) from --brains-from, JSON path, best:metric, latest:metric, or fresh")
+    parser.add_argument(
+        "--library-dir",
+        type=Path,
+        help="Optional shared library for selectors and an extra champion copy; run-local brains are always saved",
+    )
+    parser.add_argument(
+        "--checkpoint-format",
+        choices=("binary", "compact", "json"),
+        default="binary",
+        help="Checkpoint output: binary arrays + XZ (default), compact JSON, or legacy JSON",
+    )
+    parser.add_argument(
+        "--no-library", action="store_true", help="Skip saving new champion models"
+    )
+    parser.add_argument(
+        "--brains-from",
+        type=Path,
+        help="Source run name in results/ or experiment path; defaults to its latest archived numbered run",
+    )
+    parser.add_argument(
+        "--brain-run", type=int, help="Archived run number within --brains-from"
+    )
+    parser.add_argument(
+        "--brain",
+        action="append",
+        default=[],
+        metavar="SPECIES[:SEX]=MODEL",
+        help="Repeat per species/sex (prey:male=lifespan): criterion (including balanced) from --brains-from, JSON path, best:metric, latest:metric, or fresh",
+    )
     chain = parser.add_mutually_exclusive_group()
-    chain.add_argument("--chain-brains", dest="chain_brains", action="store_true",
-                       help="Initialize later runs from the previous run's champions (default)")
-    chain.add_argument("--no-chain-brains", dest="chain_brains", action="store_false",
-                       help="Reset every run to the original starting models")
+    chain.add_argument(
+        "--chain-brains",
+        dest="chain_brains",
+        action="store_true",
+        help="Initialize later runs from the previous run's champions (default)",
+    )
+    chain.add_argument(
+        "--no-chain-brains",
+        dest="chain_brains",
+        action="store_false",
+        help="Reset every run to the original starting models",
+    )
     parser.set_defaults(chain_brains=None)
     args = parser.parse_args()
     if args.resume:
-        if any(
-            v is not None for v in (args.runs, args.steps, args.seed, args.seed_policy,
-                                    args.brains_from, args.brain_run, args.chain_brains)
-        ) or args.brain:
+        if (
+            any(
+                v is not None
+                for v in (
+                    args.runs,
+                    args.steps,
+                    args.seed,
+                    args.seed_policy,
+                    args.brains_from,
+                    args.brain_run,
+                    args.chain_brains,
+                )
+            )
+            or args.brain
+        ):
             parser.error("Configuration overrides cannot be used with --resume")
-        experiment = Experiment.restore(
-            read_checkpoint(args.resume), mode=args.mode
-        )
+        experiment = Experiment.restore(read_checkpoint(args.resume), mode=args.mode)
     else:
         config = load(args.environment)
         if args.chain_brains is not None:
@@ -104,9 +139,18 @@ def main():
         elif args.seed_policy is not None:
             config["experiment"]["world_seed_policy"] = args.seed_policy
         try:
-            apply_brain_overrides(config, args.brain, args.brains_from,
-                                  args.brain_run, root=args.library_dir or DEFAULT_LIBRARY)
-            experiment = Experiment(config, args.mode or "train", library_root=args.library_dir or DEFAULT_LIBRARY)
+            apply_brain_overrides(
+                config,
+                args.brain,
+                args.brains_from,
+                args.brain_run,
+                root=args.library_dir or DEFAULT_LIBRARY,
+            )
+            experiment = Experiment(
+                config,
+                args.mode or "train",
+                library_root=args.library_dir or DEFAULT_LIBRARY,
+            )
         except (ValueError, OSError) as error:
             parser.error(str(error))
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -125,11 +169,19 @@ def main():
             "python": sys.version,
             "platform": platform.platform(),
             "resumed_from": str(args.resume) if args.resume else None,
-            "initialized_from": {species: {sex: value["provenance"] for sex, value in groups.items()} for species, groups in experiment.initial_models.items()},
+            "initialized_from": {
+                species: {sex: value["provenance"] for sex, value in groups.items()}
+                for species, groups in experiment.initial_models.items()
+            },
             "randomization_seed": experiment.randomization_seed,
-            "checkpoint_version": {"json":1,"compact":2,"binary":3}[args.checkpoint_format],
+            "checkpoint_version": {"json": 1, "compact": 2, "binary": 3}[
+                args.checkpoint_format
+            ],
             "checkpoint_format": args.checkpoint_format,
-            "observation_version": max(experiment.config["brains"][spec["brain"]].get("observation_version",1) for spec in experiment.config["species"].values()),
+            "observation_version": max(
+                experiment.config["brains"][spec["brain"]].get("observation_version", 1)
+                for spec in experiment.config["species"].values()
+            ),
             "playback_recording": not args.no_record
             and settings(experiment.config)["enabled"],
         },
@@ -143,8 +195,16 @@ def main():
     progress = RunProgress(experiment.mode, enabled=args.progress)
     completed = False
     try:
-        run_experiment(experiment, folder, save, recorder, progress,
-                       library_root=args.library_dir, save_brains=not args.no_library, checkpoint_format=args.checkpoint_format)
+        run_experiment(
+            experiment,
+            folder,
+            save,
+            recorder,
+            progress,
+            library_root=args.library_dir,
+            save_brains=not args.no_library,
+            checkpoint_format=args.checkpoint_format,
+        )
         completed = True
     finally:
         progress.close()
@@ -153,15 +213,36 @@ def main():
     print(f"Results: {folder.resolve()}")
 
 
-def run_experiment(experiment, folder, save, recorder, progress=None, library_root=None, save_brains=True, checkpoint_format="compact"):
-    suffix = {"binary":".bin.xz", "compact":".json.gz", "json":".json"}[checkpoint_format]
+def run_experiment(
+    experiment,
+    folder,
+    save,
+    recorder,
+    progress=None,
+    library_root=None,
+    save_brains=True,
+    checkpoint_format="compact",
+):
+    suffix = {"binary": ".bin.xz", "compact": ".json.gz", "json": ".json"}[
+        checkpoint_format
+    ]
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
-        fields = ["run", "seed", "tick", "food", "starvation", "predation"] + (["drowning"] if "terrain" in experiment.config else []) + [
-            f"{s}_{metric}"
-            for s in species
-            for metric in ("population", "energy_gained", "kills", "births", "mutations")
-        ]
+        fields = (
+            ["run", "seed", "tick", "food", "starvation", "predation"]
+            + (["drowning"] if "terrain" in experiment.config else [])
+            + [
+                f"{s}_{metric}"
+                for s in species
+                for metric in (
+                    "population",
+                    "energy_gained",
+                    "kills",
+                    "births",
+                    "mutations",
+                )
+            ]
+        )
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
 
@@ -174,7 +255,8 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                 starvation=m["deaths"].get("starvation", 0),
                 predation=m["deaths"].get("predation", 0),
             )
-            if "terrain" in experiment.config:row["drowning"]=m["deaths"].get("drowning",0)
+            if "terrain" in experiment.config:
+                row["drowning"] = m["deaths"].get("drowning", 0)
             for s in species:
                 row.update(
                     {
@@ -182,7 +264,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                         f"{s}_energy_gained": m["energy_gained"].get(s, 0),
                         f"{s}_kills": m["kills"].get(s, 0),
                         f"{s}_births": m["births"].get(s, 0),
-                        f"{s}_mutations": m.get('mutations',{}).get(s,0),
+                        f"{s}_mutations": m.get("mutations", {}).get(s, 0),
                     }
                 )
             writer.writerow(row)
@@ -214,14 +296,23 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                 run = experiment.run_index + 1
                 if save_brains and experiment.mode == "train":
                     try:
-                        export_champions(experiment, folder / f"champions/run_{run:04d}.json",
-                                         label=folder.name)
+                        export_champions(
+                            experiment,
+                            folder / f"champions/run_{run:04d}.json",
+                            label=folder.name,
+                        )
                         if library_root is not None:
-                            export_champions(experiment, folder / f"champions/shared_{run:04d}.json",
-                                             root=library_root, label=folder.name)
+                            export_champions(
+                                experiment,
+                                folder / f"champions/shared_{run:04d}.json",
+                                root=library_root,
+                                label=folder.name,
+                            )
                     except (OSError, ValueError):
                         # A library failure must not discard trained controllers.
-                        experiment.write_checkpoint(folder / ("checkpoints/library_error"+suffix))
+                        experiment.write_checkpoint(
+                            folder / ("checkpoints/library_error" + suffix)
+                        )
                         raise
                 print(
                     f"Run {run} (seed {experiment.world.seed}): {experiment.world.metrics()}",
@@ -239,7 +330,7 @@ def run_experiment(experiment, folder, save, recorder, progress=None, library_ro
                 handle.flush()
     save("run_seeds.json", experiment.run_seeds)
     save("summary.json", experiment.summaries)
-    experiment.write_checkpoint(folder / ("checkpoints/final"+suffix))
+    experiment.write_checkpoint(folder / ("checkpoints/final" + suffix))
 
 
 if __name__ == "__main__":

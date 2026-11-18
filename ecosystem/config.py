@@ -5,7 +5,16 @@ import math
 import re
 from pathlib import Path
 
-ACTIONS = ("move_forward", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce")
+ACTIONS = (
+    "move_forward",
+    "turn_left",
+    "turn_right",
+    "rest",
+    "eat",
+    "attack",
+    "swim",
+    "reproduce",
+)
 
 
 def fail(path, message):
@@ -55,11 +64,12 @@ def validate(c):
         ),
         optional=("recording", "terrain", "placement"),
     )
-    if 'terrain' in c:
+    if "terrain" in c:
         from .geography import resolve_map
-        resolved=resolve_map(c['terrain'])
-        if resolved is not c['terrain']:
-            c=dict(c,terrain=resolved)
+
+        resolved = resolve_map(c["terrain"])
+        if resolved is not c["terrain"]:
+            c = dict(c, terrain=resolved)
     if type(c["schema_version"]) is not int or c["schema_version"] != 1:
         fail("schema_version", "only version 1 is supported")
     if not isinstance(c["name"], str) or not re.fullmatch(r"[a-zA-Z0-9_-]+", c["name"]):
@@ -74,10 +84,11 @@ def validate(c):
     num(w["max_steps"], "world.max_steps", 1, 10000000, True)
     if w["boundary"] != "closed":
         fail("world.boundary", "must be closed")
-    geography=None
-    if 'terrain' in c:
+    geography = None
+    if "terrain" in c:
         from .geography import Geography
-        geography=Geography(c['terrain'],w['width'],w['height'])
+
+        geography = Geography(c["terrain"], w["width"], w["height"])
     o = c["obstacles"]
     obj(o, "obstacles", ("generation", "occupied_fraction", "explicit_cells"))
     if o["generation"] not in ("scattered", "explicit"):
@@ -122,9 +133,9 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
-        if 'observation_version' in b:
-            num(b['observation_version'],p+'.observation_version',1,2,True)
-            b={k:v for k,v in b.items() if k!='observation_version'}
+        if "observation_version" in b:
+            num(b["observation_version"], p + ".observation_version", 1, 2, True)
+            b = {k: v for k, v in b.items() if k != "observation_version"}
         if b["type"] == "q_network":
             obj(
                 b,
@@ -185,8 +196,11 @@ def validate(c):
                     "max_grad_norm",
                     "normalize_advantages",
                 ),
-                optional=("target_kl",) + {"recurrent_ppo": ("recurrent_size", "sequence_length"),
-                                           "mappo": ("critic_hidden_layers",)}.get(b["type"], ()),
+                optional=("target_kl",)
+                + {
+                    "recurrent_ppo": ("recurrent_size", "sequence_length"),
+                    "mappo": ("critic_hidden_layers",),
+                }.get(b["type"], ()),
             )
             network = b["network"]
             obj(
@@ -218,48 +232,85 @@ def validate(c):
             if "target_kl" in b:
                 num(b["target_kl"], p + ".target_kl", 0, 1)
             if b["type"] == "recurrent_ppo":
-                for key in ('recurrent_size', 'sequence_length'):
+                for key in ("recurrent_size", "sequence_length"):
                     if key not in b:
-                        fail(f'{p}.{key}', 'required field')
-                num(b['recurrent_size'], p+'.recurrent_size', 1, 128, True)
-                num(b['sequence_length'], p+'.sequence_length', 1, min(128, b['rollout_steps']), True)
-                if b['batch_size'] < b['sequence_length']:
-                    fail(p+'.batch_size', 'must cover at least one recurrent sequence')
-            elif b['type'] == 'mappo':
-                layers = b.get('critic_hidden_layers')
+                        fail(f"{p}.{key}", "required field")
+                num(b["recurrent_size"], p + ".recurrent_size", 1, 128, True)
+                num(
+                    b["sequence_length"],
+                    p + ".sequence_length",
+                    1,
+                    min(128, b["rollout_steps"]),
+                    True,
+                )
+                if b["batch_size"] < b["sequence_length"]:
+                    fail(
+                        p + ".batch_size", "must cover at least one recurrent sequence"
+                    )
+            elif b["type"] == "mappo":
+                layers = b.get("critic_hidden_layers")
                 if not isinstance(layers, list) or not 1 <= len(layers) <= 4:
-                    fail(p+'.critic_hidden_layers', 'one to four critic hidden layers required')
+                    fail(
+                        p + ".critic_hidden_layers",
+                        "one to four critic hidden layers required",
+                    )
                 for i, size in enumerate(layers):
-                    num(size, f'{p}.critic_hidden_layers.{i}', 1, 256, True)
-        elif b['type'] == 'qrdqn':
-            obj(b, p, ('type', 'network', 'learning_rate', 'discount_factor', 'batch_size',
-                       'replay_capacity', 'learning_starts_after', 'train_every_steps',
-                       'target_update_every_training_steps', 'exploration', 'num_quantiles',
-                       'huber_threshold', 'max_grad_norm'))
-            network = b['network']
-            obj(network, p+'.network', ('type', 'hidden_layers'), optional=('activation',))
-            if network['type'] != 'mlp' or network.get('activation', 'tanh') != 'tanh':
-                fail(p+'.network', 'must use an mlp with tanh activation')
-            layers = network['hidden_layers']
+                    num(size, f"{p}.critic_hidden_layers.{i}", 1, 256, True)
+        elif b["type"] == "qrdqn":
+            obj(
+                b,
+                p,
+                (
+                    "type",
+                    "network",
+                    "learning_rate",
+                    "discount_factor",
+                    "batch_size",
+                    "replay_capacity",
+                    "learning_starts_after",
+                    "train_every_steps",
+                    "target_update_every_training_steps",
+                    "exploration",
+                    "num_quantiles",
+                    "huber_threshold",
+                    "max_grad_norm",
+                ),
+            )
+            network = b["network"]
+            obj(
+                network,
+                p + ".network",
+                ("type", "hidden_layers"),
+                optional=("activation",),
+            )
+            if network["type"] != "mlp" or network.get("activation", "tanh") != "tanh":
+                fail(p + ".network", "must use an mlp with tanh activation")
+            layers = network["hidden_layers"]
             if not isinstance(layers, list) or not 1 <= len(layers) <= 4:
-                fail(p+'.network.hidden_layers', 'one to four hidden layers required')
+                fail(p + ".network.hidden_layers", "one to four hidden layers required")
             for i, size in enumerate(layers):
-                num(size, f'{p}.network.hidden_layers.{i}', 1, 256, True)
-            num(b['learning_rate'], p+'.learning_rate', 0.000001, 0.1)
-            num(b['discount_factor'], p+'.discount_factor', 0, 1)
-            for key in ('batch_size', 'replay_capacity', 'learning_starts_after', 'train_every_steps', 'target_update_every_training_steps'):
-                num(b[key], f'{p}.{key}', 1, 1000000, True)
-            if max(b['batch_size'], b['learning_starts_after']) > b['replay_capacity']:
-                fail(p, 'batch size and learning start must not exceed replay capacity')
-            num(b['num_quantiles'], p+'.num_quantiles', 2, 128, True)
-            num(b['huber_threshold'], p+'.huber_threshold', 0.00001, 100)
-            num(b['max_grad_norm'], p+'.max_grad_norm', 0.00001, 100)
-            e = b['exploration']
-            obj(e, p+'.exploration', ('initial', 'minimum', 'decay_per_decision'))
+                num(size, f"{p}.network.hidden_layers.{i}", 1, 256, True)
+            num(b["learning_rate"], p + ".learning_rate", 0.000001, 0.1)
+            num(b["discount_factor"], p + ".discount_factor", 0, 1)
+            for key in (
+                "batch_size",
+                "replay_capacity",
+                "learning_starts_after",
+                "train_every_steps",
+                "target_update_every_training_steps",
+            ):
+                num(b[key], f"{p}.{key}", 1, 1000000, True)
+            if max(b["batch_size"], b["learning_starts_after"]) > b["replay_capacity"]:
+                fail(p, "batch size and learning start must not exceed replay capacity")
+            num(b["num_quantiles"], p + ".num_quantiles", 2, 128, True)
+            num(b["huber_threshold"], p + ".huber_threshold", 0.00001, 100)
+            num(b["max_grad_norm"], p + ".max_grad_norm", 0.00001, 100)
+            e = b["exploration"]
+            obj(e, p + ".exploration", ("initial", "minimum", "decay_per_decision"))
             for key in e:
-                num(e[key], f'{p}.exploration.{key}', 0, 1)
-            if e['minimum'] > e['initial']:
-                fail(p+'.exploration.minimum', 'must not exceed initial')
+                num(e[key], f"{p}.exploration.{key}", 0, 1)
+            if e["minimum"] > e["initial"]:
+                fail(p + ".exploration.minimum", "must not exceed initial")
         elif b["type"] in ("a2c", "reinforce", "grpo"):
             common = (
                 "type",
@@ -354,7 +405,7 @@ def validate(c):
     for name, s in c["species"].items():
         p = f"species.{name}"
         if not isinstance(name, str) or not name.strip():
-            fail('species', 'species names must be nonempty strings')
+            fail("species", "species names must be nonempty strings")
         obj(
             s,
             p,
@@ -366,13 +417,28 @@ def validate(c):
                 "brain",
                 "rewards",
             ),
-            optional=("reproduction", "initial_brain", "learning_rate_multiplier", "champion_selection", "mutation", "initial_brains", "champion_selection_by_sex", "display", "locomotion"),
+            optional=(
+                "reproduction",
+                "initial_brain",
+                "learning_rate_multiplier",
+                "champion_selection",
+                "mutation",
+                "initial_brains",
+                "champion_selection_by_sex",
+                "display",
+                "locomotion",
+            ),
         )
-        if 'display' in s:
-            obj(s['display'], p+'.display', (), optional=('color','male_color'))
-            for key, color in s['display'].items():
-                if not isinstance(color, str) or not re.fullmatch(r'#[0-9A-Fa-f]{6}', color):
-                    fail(p+'.display.'+key, 'must be a six-digit hex color such as #7de2bd')
+        if "display" in s:
+            obj(s["display"], p + ".display", (), optional=("color", "male_color"))
+            for key, color in s["display"].items():
+                if not isinstance(color, str) or not re.fullmatch(
+                    r"#[0-9A-Fa-f]{6}", color
+                ):
+                    fail(
+                        p + ".display." + key,
+                        "must be a six-digit hex color such as #7de2bd",
+                    )
         num(s["initial_population"], p + ".initial_population", 0, 10000, True)
         population += s["initial_population"]
         if s["diet"] not in ("resource", "prey"):
@@ -392,15 +458,32 @@ def validate(c):
             fail(p + ".allowed_actions", "feeding action incompatible with diet")
         if not isinstance(s["brain"], str) or s["brain"] not in c["brains"]:
             fail(p + ".brain", "unknown brain template")
-        if c['brains'][s['brain']]['type'] == 'maskable_ppo' and not set(s['allowed_actions']).intersection(('rest', 'turn_left', 'turn_right')):
-            fail(p+'.allowed_actions', 'masked policies require rest or turning as an always-available fallback')
-        if 'mutation' in s:
-            m=s['mutation'];mp=p+'.mutation'
-            obj(m,mp,('enabled','probability_per_birth','max_changed_weights','noise_std'))
-            if type(m['enabled']) is not bool:fail(mp+'.enabled','must be boolean')
-            num(m['probability_per_birth'],mp+'.probability_per_birth',0,1)
-            num(m['max_changed_weights'],mp+'.max_changed_weights',1,1024,True)
-            num(m['noise_std'],mp+'.noise_std',0,1)
+        if c["brains"][s["brain"]]["type"] == "maskable_ppo" and not set(
+            s["allowed_actions"]
+        ).intersection(("rest", "turn_left", "turn_right")):
+            fail(
+                p + ".allowed_actions",
+                "masked policies require rest or turning as an always-available fallback",
+            )
+        if "mutation" in s:
+            m = s["mutation"]
+            mp = p + ".mutation"
+            obj(
+                m,
+                mp,
+                (
+                    "enabled",
+                    "probability_per_birth",
+                    "max_changed_weights",
+                    "noise_std",
+                ),
+            )
+            if type(m["enabled"]) is not bool:
+                fail(mp + ".enabled", "must be boolean")
+            num(m["probability_per_birth"], mp + ".probability_per_birth", 0, 1)
+            num(m["max_changed_weights"], mp + ".max_changed_weights", 1, 1024, True)
+            num(m["noise_std"], mp + ".noise_std", 0, 1)
+
         def validate_initial(initial, ip):
             if isinstance(initial, dict) and "path" in initial:
                 obj(initial, ip, ("path",))
@@ -410,38 +493,87 @@ def validate(c):
                 obj(initial, ip, ("selection", "metric"))
                 if initial["selection"] not in ("best", "latest"):
                     fail(ip + ".selection", "must be best or latest")
-                if initial["metric"] not in ("health", "kills", "lifespan", "food", "balanced"):
-                    fail(ip + ".metric", "must be health, kills, lifespan, food or balanced")
-        if 'initial_brain' in s:
-            validate_initial(s['initial_brain'], p+'.initial_brain')
-        if 'initial_brains' in s:
-            requests = s['initial_brains']
-            obj(requests, p+'.initial_brains', (), optional=('female','male'))
+                if initial["metric"] not in (
+                    "health",
+                    "kills",
+                    "lifespan",
+                    "food",
+                    "balanced",
+                ):
+                    fail(
+                        ip + ".metric",
+                        "must be health, kills, lifespan, food or balanced",
+                    )
+
+        if "initial_brain" in s:
+            validate_initial(s["initial_brain"], p + ".initial_brain")
+        if "initial_brains" in s:
+            requests = s["initial_brains"]
+            obj(requests, p + ".initial_brains", (), optional=("female", "male"))
             for sex, request in requests.items():
-                if request is not None:validate_initial(request, p+'.initial_brains.'+sex)
-        if 'champion_selection_by_sex' in s:
-            choices = s['champion_selection_by_sex']
-            obj(choices, p+'.champion_selection_by_sex', (), optional=('female','male'))
+                if request is not None:
+                    validate_initial(request, p + ".initial_brains." + sex)
+        if "champion_selection_by_sex" in s:
+            choices = s["champion_selection_by_sex"]
+            obj(
+                choices,
+                p + ".champion_selection_by_sex",
+                (),
+                optional=("female", "male"),
+            )
             for sex, metric in choices.items():
-                if metric not in ('health','kills','food','lifespan','balanced'):
-                    fail(p+'.champion_selection_by_sex.'+sex, 'unknown champion criterion')
-                if metric=='balanced' and s['diet']!='prey':
-                    fail(p+'.champion_selection_by_sex.'+sex, 'balanced selection requires a predator species')
+                if metric not in ("health", "kills", "food", "lifespan", "balanced"):
+                    fail(
+                        p + ".champion_selection_by_sex." + sex,
+                        "unknown champion criterion",
+                    )
+                if metric == "balanced" and s["diet"] != "prey":
+                    fail(
+                        p + ".champion_selection_by_sex." + sex,
+                        "balanced selection requires a predator species",
+                    )
         if "champion_selection" in s:
             cp = p + ".champion_selection"
-            policy = s['champion_selection']
-            obj(policy,cp,('criterion',),optional=('survival_steps_per_kill','max_survival_bonus'))
-            if policy['criterion'] not in ('health','kills','lifespan','food','balanced'):
-                fail(cp+'.criterion','unknown champion criterion')
-            if policy['criterion']=='balanced' and s['diet']!='prey':
-                fail(cp+'.criterion','balanced selection requires a predator species')
-            num(policy.get('survival_steps_per_kill',300),cp+'.survival_steps_per_kill',1,10000000)
-            num(policy.get('max_survival_bonus',2),cp+'.max_survival_bonus',0,100)
-        if s.get('initial_brain',{}).get('metric')=='balanced' and s['diet']!='prey':
-            fail(p+'.initial_brain.metric','balanced selection requires a predator species')
-        for request in s.get('initial_brains', {}).values():
-            if request and request.get('metric')=='balanced' and s['diet']!='prey':
-                fail(p+'.initial_brains', 'balanced selection requires a predator species')
+            policy = s["champion_selection"]
+            obj(
+                policy,
+                cp,
+                ("criterion",),
+                optional=("survival_steps_per_kill", "max_survival_bonus"),
+            )
+            if policy["criterion"] not in (
+                "health",
+                "kills",
+                "lifespan",
+                "food",
+                "balanced",
+            ):
+                fail(cp + ".criterion", "unknown champion criterion")
+            if policy["criterion"] == "balanced" and s["diet"] != "prey":
+                fail(
+                    cp + ".criterion", "balanced selection requires a predator species"
+                )
+            num(
+                policy.get("survival_steps_per_kill", 300),
+                cp + ".survival_steps_per_kill",
+                1,
+                10000000,
+            )
+            num(policy.get("max_survival_bonus", 2), cp + ".max_survival_bonus", 0, 100)
+        if (
+            s.get("initial_brain", {}).get("metric") == "balanced"
+            and s["diet"] != "prey"
+        ):
+            fail(
+                p + ".initial_brain.metric",
+                "balanced selection requires a predator species",
+            )
+        for request in s.get("initial_brains", {}).values():
+            if request and request.get("metric") == "balanced" and s["diet"] != "prey":
+                fail(
+                    p + ".initial_brains",
+                    "balanced selection requires a predator species",
+                )
         template = c["brains"][s["brain"]]
         multiplier = s.get("learning_rate_multiplier", 1.0)
         num(multiplier, p + ".learning_rate_multiplier", 0.01, 10)
@@ -459,10 +591,13 @@ def validate(c):
                 p + ".brain",
                 "REINFORCE max_episode_steps must cover world.max_steps to retain complete episodes",
             )
-        if geography is not None and template.get('observation_version',1)!=2:
-            fail(p+'.brain','terrain maps require observation_version 2 on referenced brain templates')
-        if 'swim' in s['allowed_actions'] and geography is None:
-            fail(p+'.allowed_actions','swim requires a terrain map')
+        if geography is not None and template.get("observation_version", 1) != 2:
+            fail(
+                p + ".brain",
+                "terrain maps require observation_version 2 on referenced brain templates",
+            )
+        if "swim" in s["allowed_actions"] and geography is None:
+            fail(p + ".allowed_actions", "swim requires a terrain map")
         fields = [
             "initial_energy",
             "max_energy",
@@ -484,14 +619,32 @@ def validate(c):
             num(s["body"][k], f"{p}.body.{k}", 0.001)
         num(s["body"]["vision_radius"], p + ".body.vision_radius", 1, 256, True)
         if "water_vision_bonus" in s["body"]:
-            num(s["body"]["water_vision_bonus"], p+".body.water_vision_bonus", 0, 32, True)
+            num(
+                s["body"]["water_vision_bonus"],
+                p + ".body.water_vision_bonus",
+                0,
+                32,
+                True,
+            )
         if s["body"]["initial_energy"] > s["body"]["max_energy"]:
             fail(p + ".body.initial_energy", "exceeds maximum")
-        if 'locomotion' in s:
-            fields_m=('swim_min_health','swim_energy_cost','water_energy_cost','drowning_damage','uphill_energy_cost','max_climb')
-            obj(s['locomotion'],p+'.locomotion',(),optional=fields_m)
-            for k,value in s['locomotion'].items():
-                num(value,p+'.locomotion.'+k,0,s['body']['max_health'] if k=='swim_min_health' else 100)
+        if "locomotion" in s:
+            fields_m = (
+                "swim_min_health",
+                "swim_energy_cost",
+                "water_energy_cost",
+                "drowning_damage",
+                "uphill_energy_cost",
+                "max_climb",
+            )
+            obj(s["locomotion"], p + ".locomotion", (), optional=fields_m)
+            for k, value in s["locomotion"].items():
+                num(
+                    value,
+                    p + ".locomotion." + k,
+                    0,
+                    s["body"]["max_health"] if k == "swim_min_health" else 100,
+                )
         if "reproduction" in s:
             r = s["reproduction"]
             rp = p + ".reproduction"
@@ -507,7 +660,13 @@ def validate(c):
                     "energy_cost",
                     "max_population",
                 ),
-                optional=("age_deviation_pct", "cooldown_deviation_pct", "age_deviation_steps", "cooldown_deviation_steps", "mate_radius"),
+                optional=(
+                    "age_deviation_pct",
+                    "cooldown_deviation_pct",
+                    "age_deviation_steps",
+                    "cooldown_deviation_steps",
+                    "mate_radius",
+                ),
             )
             if type(r["enabled"]) is not bool:
                 fail(rp + ".enabled", "must be boolean")
@@ -520,13 +679,16 @@ def validate(c):
             num(r.get("mate_radius", 2), rp + ".mate_radius", 1, 10, True)
             num(r["min_age_steps"], rp + ".min_age_steps", 1, 10000000, True)
             num(r["cooldown_steps"], rp + ".cooldown_steps", 1, 10000000, True)
-            for key in ('age_deviation_steps', 'cooldown_deviation_steps'):
-                num(r.get(key, 0), f'{rp}.{key}', 0, 10000000, True)
-            for prefix in ('age', 'cooldown'):
-                key = prefix + '_deviation_pct'
-                num(r.get(key, 0), f'{rp}.{key}', 0, 100)
-                if key in r and prefix + '_deviation_steps' in r:
-                    fail(f'{rp}.{key}', 'cannot combine percentage and legacy step deviations for the same clock')
+            for key in ("age_deviation_steps", "cooldown_deviation_steps"):
+                num(r.get(key, 0), f"{rp}.{key}", 0, 10000000, True)
+            for prefix in ("age", "cooldown"):
+                key = prefix + "_deviation_pct"
+                num(r.get(key, 0), f"{rp}.{key}", 0, 100)
+                if key in r and prefix + "_deviation_steps" in r:
+                    fail(
+                        f"{rp}.{key}",
+                        "cannot combine percentage and legacy step deviations for the same clock",
+                    )
             num(r["energy_cost"], rp + ".energy_cost", 0.001, s["body"]["max_energy"])
             num(
                 r["min_energy"],
@@ -539,14 +701,19 @@ def validate(c):
             s["rewards"],
             p + ".rewards",
             ("per_energy_gained", "per_damage_taken", "death"),
-            optional=("per_damage_dealt", "per_energy_cost", "failed_action", "per_offspring"),
+            optional=(
+                "per_damage_dealt",
+                "per_energy_cost",
+                "failed_action",
+                "per_offspring",
+            ),
         )
         for k, value in s["rewards"].items():
             num(
                 value,
                 f"{p}.rewards.{k}",
-                0 if k in ("per_damage_dealt","per_offspring") else -100000,
-                0 if k in ("per_energy_cost","failed_action") else 100000,
+                0 if k in ("per_damage_dealt", "per_offspring") else -100000,
+                0 if k in ("per_energy_cost", "failed_action") else 100000,
             )
     if not population:
         fail("species", "total population must be positive")
@@ -556,14 +723,21 @@ def validate(c):
         else int(w["width"] * w["height"] * o["occupied_fraction"])
     )
     if geography is not None:
-        unavailable=geography.obstacles | geography.water.keys()
-        blocked=(len(unavailable | cells) if o['generation']=='explicit' else min(w['width']*w['height'],len(unavailable)+blocked))
+        unavailable = geography.obstacles | geography.water.keys()
+        blocked = (
+            len(unavailable | cells)
+            if o["generation"] == "explicit"
+            else min(w["width"] * w["height"], len(unavailable) + blocked)
+        )
     free = w["width"] * w["height"] - blocked
     if max(population, c["resources"]["patch_count"]) > free:
         fail("world", "insufficient free cells for animals or resources")
     if "placement" in c:
         from .placement import validate_placement
-        unavailable = set(cells) | (geography.obstacles | geography.water.keys() if geography else set())
+
+        unavailable = set(cells) | (
+            geography.obstacles | geography.water.keys() if geography else set()
+        )
         validate_placement(c, unavailable)
     e = c["experiment"]
     obj(

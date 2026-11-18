@@ -21,9 +21,12 @@ def config():
     c = load(ROOT / "environments/baseline.json")
     c["recording"].update(encoding="delta", compression="gzip")
     for spec in c["species"].values():
-        spec.pop('mutation',None)
-        for key in ('per_energy_cost','failed_action','per_offspring'):spec['rewards'].pop(key,None)
-        spec["reproduction"].update(enabled=False, age_deviation_pct=0, cooldown_deviation_pct=0)
+        spec.pop("mutation", None)
+        for key in ("per_energy_cost", "failed_action", "per_offspring"):
+            spec["rewards"].pop(key, None)
+        spec["reproduction"].update(
+            enabled=False, age_deviation_pct=0, cooldown_deviation_pct=0
+        )
     c["species"]["prey"]["initial_population"] = 3
     c["species"]["predator"]["initial_population"] = 1
     # Mechanics fixtures intentionally exercise multi-hit combat, independently
@@ -184,7 +187,11 @@ class LearningTests(unittest.TestCase):
 
     def test_independent_brains(self):
         e = Experiment(config())
-        ids = [i for i,a in e.world.animals.items() if a.species=='prey' and a.sex=='female']
+        ids = [
+            i
+            for i, a in e.world.animals.items()
+            if a.species == "prey" and a.sex == "female"
+        ]
         a, b = [e.brains[i] for i in ids]
         self.assertEqual(a.weights, b.weights)
         saved = copy.deepcopy(b.checkpoint())
@@ -235,6 +242,7 @@ class ExperimentTests(unittest.TestCase):
 
     def test_next_run_uses_champion_or_original_weights(self):
         from ecosystem.brains import model_snapshot
+
         for chain in (True, False):
             c = config()
             c["experiment"]["chain_best_brains"] = chain
@@ -243,7 +251,11 @@ class ExperimentTests(unittest.TestCase):
             original = model_snapshot(e.brains[0])
             for _ in range(3):
                 e.step()
-            expected = e.champions.entries["prey"]['female']["food"]["model"] if chain else original
+            expected = (
+                e.champions.entries["prey"]["female"]["food"]["model"]
+                if chain
+                else original
+            )
             e.next_run()
             self.assertEqual(model_snapshot(e.brains[0]), expected)
             self.assertEqual(e.brains[0].steps, 0)
@@ -327,20 +339,29 @@ class ServerTests(unittest.TestCase):
 
     def test_replay_gzip_negotiation_and_plain_fallback(self):
         import gzip
+
         path = self.url + "/api/recordings/recorded_test/runs/1/chunks/0"
         req = Request(path, headers={"Accept-Encoding": "gzip"})
         with urlopen(req, timeout=10) as response:
             self.assertEqual(response.headers.get("Content-Encoding"), "gzip")
-            self.assertEqual(set(response.headers.get("Vary").split(", ")), {"Accept-Encoding", "X-WTF-Replay"})
+            self.assertEqual(
+                set(response.headers.get("Vary").split(", ")),
+                {"Accept-Encoding", "X-WTF-Replay"},
+            )
             frames = json.loads(gzip.decompress(response.read()))
         self.assertEqual(len(frames), 4)
         from ecosystem.replay_codec import decode_chunk
-        req = Request(path, headers={"Accept-Encoding": "gzip", "X-WTF-Replay": "delta-v1"})
+
+        req = Request(
+            path, headers={"Accept-Encoding": "gzip", "X-WTF-Replay": "delta-v1"}
+        )
         with urlopen(req, timeout=10) as response:
             payload = json.loads(gzip.decompress(response.read()))
         self.assertEqual(payload["codec"], "wtf-delta-v1")
         self.assertEqual(decode_chunk(payload), frames)
-        req = Request(path, headers={"Accept-Encoding": "identity", "X-WTF-Replay": "delta-v1"})
+        req = Request(
+            path, headers={"Accept-Encoding": "identity", "X-WTF-Replay": "delta-v1"}
+        )
         with urlopen(req, timeout=10) as response:
             self.assertIsNone(response.headers.get("Content-Encoding"))
             self.assertEqual(json.load(response), payload)
@@ -350,15 +371,20 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(json.load(response), frames)
 
     def test_per_step_telemetry_endpoint_and_validation(self):
-        with self.request("/api/recordings/recorded_test/runs/1/telemetry/0") as response:
-            page=json.load(response)
-        self.assertEqual(page["page_size"],128)
-        self.assertEqual([p["tick"] for p in page["points"]],[0,1,2,3])
-        self.assertEqual(set(page["points"][0]["species"]),{"prey","predator"})
-        for path,code in [("/api/recordings/recorded_test/runs/1/telemetry/1",404),
-                          ("/api/recordings/recorded_test/runs/1/telemetry/-1",400)]:
-            with self.assertRaises(HTTPError) as raised:self.request(path)
-            self.assertEqual(raised.exception.code,code)
+        with self.request(
+            "/api/recordings/recorded_test/runs/1/telemetry/0"
+        ) as response:
+            page = json.load(response)
+        self.assertEqual(page["page_size"], 128)
+        self.assertEqual([p["tick"] for p in page["points"]], [0, 1, 2, 3])
+        self.assertEqual(set(page["points"][0]["species"]), {"prey", "predator"})
+        for path, code in [
+            ("/api/recordings/recorded_test/runs/1/telemetry/1", 404),
+            ("/api/recordings/recorded_test/runs/1/telemetry/-1", 400),
+        ]:
+            with self.assertRaises(HTTPError) as raised:
+                self.request(path)
+            self.assertEqual(raised.exception.code, code)
 
     def test_all_live_simulation_endpoints_removed(self):
         for path in ("/api/step", "/api/load", "/api/restore"):

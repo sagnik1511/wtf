@@ -62,9 +62,9 @@ class RecordingTests(unittest.TestCase):
                 while pending:
                     value = pending.pop()
                     if isinstance(value, dict):
-                        self.assertNotIn('weights', value)
-                        self.assertNotIn('moments', value)
-                        self.assertNotIn('variances', value)
+                        self.assertNotIn("weights", value)
+                        self.assertNotIn("moments", value)
+                        self.assertNotIn("variances", value)
                         pending.extend(value.values())
                     elif isinstance(value, list):
                         pending.extend(value)
@@ -197,7 +197,7 @@ class RecordingTests(unittest.TestCase):
                     sys.executable,
                     "-m",
                     "ecosystem.cli",
-                        "--no-library",
+                    "--no-library",
                     "environments/baseline.json",
                     "--runs",
                     "2",
@@ -232,7 +232,7 @@ class RecordingTests(unittest.TestCase):
                             sys.executable,
                             "-m",
                             "ecosystem.cli",
-                        "--no-library",
+                            "--no-library",
                             "--resume",
                             str(folder / "checkpoints/final.json"),
                             "--output",

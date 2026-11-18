@@ -123,7 +123,7 @@ class EfficiencyTests(unittest.TestCase):
             for sample in range(3):
                 observation = tuple((i - sample) / 20 for i in range(20))
                 outputs, activations = network.forward(observation)
-                output_gradient = [value - .25 for value in outputs]
+                output_gradient = [value - 0.25 for value in outputs]
                 network.accumulate_gradient(activations, output_gradient, actual)
                 # Reference propagates through the first layer's inner branch.
                 delta = output_gradient
@@ -132,7 +132,7 @@ class EfficiencyTests(unittest.TestCase):
                     inputs = network.sizes[index]
                     weights = network.layers[index]["weights"]
                     dw, db = expected[index]["weights"], expected[index]["bias"]
-                    previous_gradient = [0.] * inputs if index else None
+                    previous_gradient = [0.0] * inputs if index else None
                     for j, derivative in enumerate(delta):
                         db[j] += derivative
                         offset = j * inputs
@@ -141,7 +141,10 @@ class EfficiencyTests(unittest.TestCase):
                             if index:
                                 previous_gradient[i] += derivative * weights[offset + i]
                     if index:
-                        delta = [g * (1. - value * value) for g, value in zip(previous_gradient, previous)]
+                        delta = [
+                            g * (1.0 - value * value)
+                            for g, value in zip(previous_gradient, previous)
+                        ]
                 self.assertEqual(actual, expected)
 
     def test_native_forward_has_identical_arithmetic(self):

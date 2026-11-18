@@ -22,7 +22,9 @@ def main():
     parser.add_argument(
         "--case", choices=["simulate", "record", "checkpoint"], required=True
     )
-    parser.add_argument("--environment", type=Path, default=Path("environments/baseline.json"))
+    parser.add_argument(
+        "--environment", type=Path, default=Path("environments/baseline.json")
+    )
     parser.add_argument("--steps", type=int, default=180)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--profile", type=Path)

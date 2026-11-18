@@ -25,7 +25,14 @@ def make_handler(state):
         def log_message(self, fmt, *args):
             pass
 
-        def send(self, status, data, content_type="application/json", content_encoding=None, vary_encoding=False):
+        def send(
+            self,
+            status,
+            data,
+            content_type="application/json",
+            content_encoding=None,
+            vary_encoding=False,
+        ):
             body = (
                 data
                 if isinstance(data, bytes)
@@ -33,7 +40,7 @@ def make_handler(state):
             )
             self.send_response(status)
             self.send_header("Content-Type", content_type)
-            self.send_header('X-WTF-Replay-Protocol', 'binary-v1')
+            self.send_header("X-WTF-Replay-Protocol", "binary-v1")
             self.send_header("Content-Length", str(len(body)))
             if content_encoding:
                 self.send_header("Content-Encoding", content_encoding)
@@ -57,7 +64,11 @@ def make_handler(state):
                 if len(parts) >= 3 and parts[:2] == ["api", "recordings"]:
                     if len(parts) == 3:
                         return self.send(200, state.recordings.metadata(parts[2]))
-                    if len(parts) == 6 and parts[3] == "runs" and parts[5] == "analysis":
+                    if (
+                        len(parts) == 6
+                        and parts[3] == "runs"
+                        and parts[5] == "analysis"
+                    ):
                         return self.send(
                             200, state.recordings.analysis(parts[2], int(parts[4]))
                         )
@@ -65,8 +76,17 @@ def make_handler(state):
                         return self.send(
                             200, state.recordings.metrics(parts[2], int(parts[4]))
                         )
-                    if len(parts) == 7 and parts[3] == "runs" and parts[5] == "telemetry":
-                        return self.send(200,state.recordings.telemetry(parts[2],int(parts[4]),int(parts[6])))
+                    if (
+                        len(parts) == 7
+                        and parts[3] == "runs"
+                        and parts[5] == "telemetry"
+                    ):
+                        return self.send(
+                            200,
+                            state.recordings.telemetry(
+                                parts[2], int(parts[4]), int(parts[6])
+                            ),
+                        )
                     if len(parts) == 7 and parts[3] == "runs" and parts[5] == "chunks":
                         chunk = state.recordings.chunk(
                             parts[2], int(parts[4]), int(parts[6])
@@ -76,24 +96,57 @@ def make_handler(state):
                         for encoding in accepted.lower().split(","):
                             parts = [part.strip() for part in encoding.split(";")]
                             if parts[0] == "gzip":
-                                quality = next((part[2:] for part in parts[1:] if part.startswith("q=")), "1")
+                                quality = next(
+                                    (
+                                        part[2:]
+                                        for part in parts[1:]
+                                        if part.startswith("q=")
+                                    ),
+                                    "1",
+                                )
                                 try:
                                     gzip_ok = float(quality) > 0
                                 except ValueError:
                                     gzip_ok = False
-                        binary = '.bin' in chunk.suffixes
-                        requested = self.headers.get('X-WTF-Replay')
-                        if requested == 'binary-v1' or requested == 'delta-v1' and not binary:
-                            content_type = 'application/vnd.wtf.replay-binary' if binary else 'application/json'
-                            if chunk.suffix == '.gz' and gzip_ok:
-                                return self.send(200, chunk.read_bytes(), content_type, content_encoding='gzip', vary_encoding=True)
-                            return self.send(200, read_chunk_bytes(chunk), content_type, vary_encoding=True)
+                        binary = ".bin" in chunk.suffixes
+                        requested = self.headers.get("X-WTF-Replay")
+                        if (
+                            requested == "binary-v1"
+                            or requested == "delta-v1"
+                            and not binary
+                        ):
+                            content_type = (
+                                "application/vnd.wtf.replay-binary"
+                                if binary
+                                else "application/json"
+                            )
+                            if chunk.suffix == ".gz" and gzip_ok:
+                                return self.send(
+                                    200,
+                                    chunk.read_bytes(),
+                                    content_type,
+                                    content_encoding="gzip",
+                                    vary_encoding=True,
+                                )
+                            return self.send(
+                                200,
+                                read_chunk_bytes(chunk),
+                                content_type,
+                                vary_encoding=True,
+                            )
                         # Older clients keep the full-frame JSON API. Modern
                         # viewers receive compact stored chunks without expansion.
-                        data = json.dumps(load_chunk(chunk),separators=(",",":"),allow_nan=False).encode()
+                        data = json.dumps(
+                            load_chunk(chunk), separators=(",", ":"), allow_nan=False
+                        ).encode()
                         if gzip_ok:
-                            return self.send(200,gzip.compress(data,compresslevel=1),content_encoding="gzip",vary_encoding=True)
-                        return self.send(200,data,vary_encoding=True)
+                            return self.send(
+                                200,
+                                gzip.compress(data, compresslevel=1),
+                                content_encoding="gzip",
+                                vary_encoding=True,
+                            )
+                        return self.send(200, data, vary_encoding=True)
                     return self.send(404, {"error": "Recording endpoint not found"})
                 target = (
                     ROOT

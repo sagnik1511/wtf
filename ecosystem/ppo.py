@@ -3,6 +3,7 @@
 A small standard-library implementation for inspectable CPU experiments.
 Each animal owns all network, optimizer, rollout, and random-generator state.
 """
+
 from . import kernels
 from .kernels import gradient_zeros
 from .numeric import Float32, packed, plain, precision_of, restore_numeric
@@ -29,7 +30,7 @@ class RolloutStep(NamedTuple):
 
 
 def policy_distribution(logits):
-    if kernels.available('distribution'):
+    if kernels.available("distribution"):
         return kernels.native.distribution(logits)
     maximum = max(logits)
     exponentials = [math.exp(z - maximum) for z in logits]
@@ -55,9 +56,17 @@ def advantages_and_returns(rollout, discount, gae_lambda):
 
 def loss_and_gradient(outputs, action, old_log_probability, advantage, target, config):
     """Loss and output derivatives, separated for numerical gradient checks."""
-    if kernels.available('ppo_loss'):
-        return kernels.native.ppo_loss(outputs, action, old_log_probability, advantage, target,
-                                       config['clip_ratio'], config['entropy_coefficient'], config['value_coefficient'])
+    if kernels.available("ppo_loss"):
+        return kernels.native.ppo_loss(
+            outputs,
+            action,
+            old_log_probability,
+            advantage,
+            target,
+            config["clip_ratio"],
+            config["entropy_coefficient"],
+            config["value_coefficient"],
+        )
     probabilities, logs = policy_distribution(outputs[:-1])
     log_ratio = max(-60.0, min(60.0, logs[action] - old_log_probability))
     ratio = math.exp(log_ratio)
@@ -113,8 +122,14 @@ class MLP:
             inputs = self.sizes[index]
             weights = layer["weights"]
             if kernels.native is not None and isinstance(weights, Float32):
-                values = kernels.native.affine(previous, weights, layer['bias'],
-                                               index < len(self.layers)-1, 0, len(layer['bias']))
+                values = kernels.native.affine(
+                    previous,
+                    weights,
+                    layer["bias"],
+                    index < len(self.layers) - 1,
+                    0,
+                    len(layer["bias"]),
+                )
                 activations.append(values)
                 continue
             values = [
@@ -131,29 +146,51 @@ class MLP:
     def _predict(self, observation, value_only=False, output_range=None):
         """Inference keeps one layer at a time; no backpropagation tape."""
         previous = tuple(observation)
-        if kernels.available('mlp_predict') and isinstance(self.layers[0]['weights'], Float32):
-            start, stop = ((self.sizes[-1]-1, self.sizes[-1]) if value_only else
-                           output_range if output_range is not None else (0, self.sizes[-1]))
+        if kernels.available("mlp_predict") and isinstance(
+            self.layers[0]["weights"], Float32
+        ):
+            start, stop = (
+                (self.sizes[-1] - 1, self.sizes[-1])
+                if value_only
+                else output_range if output_range is not None else (0, self.sizes[-1])
+            )
             result = kernels.native.mlp_predict(self.layers, previous, start, stop)
             return result[0] if value_only else result
         last = len(self.layers) - 1
         for index, layer in enumerate(self.layers):
-            inputs, weights = self.sizes[index], layer['weights']
+            inputs, weights = self.sizes[index], layer["weights"]
             if kernels.native is not None and isinstance(weights, Float32):
-                start, stop = (len(layer['bias'])-1, len(layer['bias'])) if value_only and index == last else (
-                    output_range if output_range is not None and index == last else (0, len(layer['bias'])))
-                previous = kernels.native.affine(previous, weights, layer['bias'], index < last, start, stop)
-                if value_only and index == last:return previous[0]
+                start, stop = (
+                    (len(layer["bias"]) - 1, len(layer["bias"]))
+                    if value_only and index == last
+                    else (
+                        output_range
+                        if output_range is not None and index == last
+                        else (0, len(layer["bias"]))
+                    )
+                )
+                previous = kernels.native.affine(
+                    previous, weights, layer["bias"], index < last, start, stop
+                )
+                if value_only and index == last:
+                    return previous[0]
                 continue
             if value_only and index == last:
-                output = len(layer['bias']) - 1
-                return layer['bias'][output] + sum(map(mul, previous, weights[output*inputs:(output+1)*inputs]))
+                output = len(layer["bias"]) - 1
+                return layer["bias"][output] + sum(
+                    map(mul, previous, weights[output * inputs : (output + 1) * inputs])
+                )
             if output_range is not None and index == last:
                 start, stop = output_range
-                return [layer['bias'][j] + sum(map(mul, previous, weights[j*inputs:(j+1)*inputs]))
-                        for j in range(start, stop)]
-            values = [bias + sum(map(mul, previous, weights[j*inputs:(j+1)*inputs]))
-                      for j,bias in enumerate(layer['bias'])]
+                return [
+                    layer["bias"][j]
+                    + sum(map(mul, previous, weights[j * inputs : (j + 1) * inputs]))
+                    for j in range(start, stop)
+                ]
+            values = [
+                bias + sum(map(mul, previous, weights[j * inputs : (j + 1) * inputs]))
+                for j, bias in enumerate(layer["bias"])
+            ]
             previous = [math.tanh(v) for v in values] if index < last else values
         return previous
 
@@ -167,7 +204,7 @@ class MLP:
     def predict_range(self, observation, start, stop):
         """Evaluate only the requested final-layer heads, preserving their arithmetic."""
         if not 0 <= start <= stop <= self.sizes[-1]:
-            raise ValueError('Invalid output range')
+            raise ValueError("Invalid output range")
         return self._predict(observation, output_range=(start, stop))
 
     @staticmethod
@@ -183,18 +220,34 @@ class MLP:
             for layer in self.layers
         ]
 
-    def accumulate_gradient(self, activations, output_gradient, gradients, return_input_gradient=False):
+    def accumulate_gradient(
+        self, activations, output_gradient, gradients, return_input_gradient=False
+    ):
         delta = output_gradient
         for index in range(len(self.layers) - 1, -1, -1):
             previous = activations[index]
             inputs = self.sizes[index]
             weights = self.layers[index]["weights"]
             dw, db = gradients[index]["weights"], gradients[index]["bias"]
-            if kernels.native is not None and isinstance(weights, Float32) and not isinstance(dw, list):
-                previous_gradient = kernels.native.backward(previous, delta, weights, dw, db,
-                                                              bool(index or return_input_gradient))
-                if not index:return previous_gradient
-                delta = [g * (1.0-value*value) for g, value in zip(previous_gradient, previous)]
+            if (
+                kernels.native is not None
+                and isinstance(weights, Float32)
+                and not isinstance(dw, list)
+            ):
+                previous_gradient = kernels.native.backward(
+                    previous,
+                    delta,
+                    weights,
+                    dw,
+                    db,
+                    bool(index or return_input_gradient),
+                )
+                if not index:
+                    return previous_gradient
+                delta = [
+                    g * (1.0 - value * value)
+                    for g, value in zip(previous_gradient, previous)
+                ]
                 continue
             if index or return_input_gradient:
                 previous_gradient = [0.0] * inputs
@@ -245,14 +298,20 @@ class PPOBrain(AdamOptimizer):
         self.last_metrics = {}
 
     def _new_network(self, config, actions, seed):
-        return MLP(config['network']['hidden_layers'], actions, seed, inputs=observation_inputs(config))
+        return MLP(
+            config["network"]["hidden_layers"],
+            actions,
+            seed,
+            inputs=observation_inputs(config),
+        )
 
     def distribution(self, outputs, observation):
         return policy_distribution(outputs[:-1])
 
     def objective(self, outputs, step, advantage, target):
-        return loss_and_gradient(outputs, step.action, step.log_probability,
-                                 advantage, target, self.config)
+        return loss_and_gradient(
+            outputs, step.action, step.log_probability, advantage, target, self.config
+        )
 
     def action_probabilities(self, observation):
         return self.distribution(self.network.predict(observation), observation)[0]
@@ -340,13 +399,30 @@ class PPOBrain(AdamOptimizer):
                 else:
                     self.network.clear_gradients(gradients)
                 batch_metrics = {}
-                if (kernels.available('ppo_batch') and type(self.network) is MLP
-                        and getattr(self.objective, '__func__', None) is PPOBrain.objective
-                        and isinstance(self.network.layers[0]['weights'], Float32)):
-                    samples_for_batch = [(self.rollout[i].observation, self.rollout[i].action,
-                                          self.rollout[i].log_probability, advantages[i], targets[i]) for i in batch]
-                    batch_metrics = kernels.native.ppo_batch(self.network.layers, gradients, samples_for_batch,
-                        c['clip_ratio'], c['entropy_coefficient'], c['value_coefficient'])
+                if (
+                    kernels.available("ppo_batch")
+                    and type(self.network) is MLP
+                    and getattr(self.objective, "__func__", None) is PPOBrain.objective
+                    and isinstance(self.network.layers[0]["weights"], Float32)
+                ):
+                    samples_for_batch = [
+                        (
+                            self.rollout[i].observation,
+                            self.rollout[i].action,
+                            self.rollout[i].log_probability,
+                            advantages[i],
+                            targets[i],
+                        )
+                        for i in batch
+                    ]
+                    batch_metrics = kernels.native.ppo_batch(
+                        self.network.layers,
+                        gradients,
+                        samples_for_batch,
+                        c["clip_ratio"],
+                        c["entropy_coefficient"],
+                        c["value_coefficient"],
+                    )
                 else:
                     for i in batch:
                         step = self.rollout[i]
@@ -354,7 +430,9 @@ class PPOBrain(AdamOptimizer):
                         _, derivative, info = self.objective(
                             outputs, step, advantages[i], targets[i]
                         )
-                        self.network.accumulate_gradient(activations, derivative, gradients)
+                        self.network.accumulate_gradient(
+                            activations, derivative, gradients
+                        )
                         for key, value in info.items():
                             batch_metrics[key] = batch_metrics.get(key, 0.0) + value
                 # Stop before an excessive policy update; value and policy

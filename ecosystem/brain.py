@@ -3,6 +3,7 @@
 Packed float32 parameters and standard-library math keep installation self-contained.
 Networks are small deliberately; immutable replay tuples reduce overhead.
 """
+
 from . import kernels
 from .kernels import gradient_zeros
 from .numeric import Float32, packed, plain, precision_of, restore_numeric
@@ -19,7 +20,7 @@ TERRAIN_INPUTS = 32
 
 
 def observation_inputs(config):
-    return TERRAIN_INPUTS if config.get('observation_version',1)==2 else INPUTS
+    return TERRAIN_INPUTS if config.get("observation_version", 1) == 2 else INPUTS
 
 
 class Experience(NamedTuple):
@@ -63,10 +64,15 @@ class Brain:
         w1 = weights["w1"]
         hidden = self.hidden
         if kernels.native is not None and isinstance(w1, Float32):
-            return kernels.native.affine(observation, w1, weights['b1'], True, 0, hidden)
+            return kernels.native.affine(
+                observation, w1, weights["b1"], True, 0, hidden
+            )
         return [
             math.tanh(
-                bias + sum(map(mul, observation, w1[j * self.inputs : (j + 1) * self.inputs]))
+                bias
+                + sum(
+                    map(mul, observation, w1[j * self.inputs : (j + 1) * self.inputs])
+                )
             )
             for j, bias in enumerate(weights["b1"])
         ]
@@ -76,7 +82,7 @@ class Brain:
         h = self._hidden(observation, w)
         w2, hidden = w["w2"], self.hidden
         if kernels.native is not None and isinstance(w2, Float32):
-            return h, kernels.native.affine(h, w2, w['b2'], False, 0, len(self.actions))
+            return h, kernels.native.affine(h, w2, w["b2"], False, 0, len(self.actions))
         # Preserve summation order for policies, diagnostics and target values.
         q = [
             bias + sum(map(mul, h, w2[a * hidden : (a + 1) * hidden]))
@@ -116,9 +122,12 @@ class Brain:
             # Only Q(s, action_taken) contributes to this replay loss. Other
             # output heads are still computed for policy and target inference.
             offset = a * hidden
-            value = (kernels.native.affine(h, w2, self.weights['b2'], False, a, a+1)[0]
-                     if kernels.native is not None and isinstance(w2, Float32) else
-                     self.weights['b2'][a] + sum(map(mul, h, w2[offset:offset+hidden])))
+            value = (
+                kernels.native.affine(h, w2, self.weights["b2"], False, a, a + 1)[0]
+                if kernels.native is not None and isinstance(w2, Float32)
+                else self.weights["b2"][a]
+                + sum(map(mul, h, w2[offset : offset + hidden]))
+            )
             expected = e.reward
             if not e.terminated:
                 expected += c["discount_factor"] * max(
@@ -126,7 +135,9 @@ class Brain:
                 )
             delta = max(-1.0, min(1.0, value - expected))
             if kernels.native is not None and isinstance(w2, Float32):
-                kernels.native.q_backward(e.observation, h, w2, a, gw1, gb1, gw2, gb2, delta)
+                kernels.native.q_backward(
+                    e.observation, h, w2, a, gw1, gb1, gw2, gb2, delta
+                )
             else:
                 gb2[a] += delta
                 for j in range(self.hidden):

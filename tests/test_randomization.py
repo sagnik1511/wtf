@@ -29,7 +29,13 @@ class RandomizationTests(unittest.TestCase):
         self.assertNotEqual(a.world.seed, b.world.seed)
         self.assertNotEqual(a.world.snapshot(), b.world.snapshot())
         self.assertNotEqual(a.brains[0].weights, b.brains[0].weights)
-        same=next(i for i,x in a.world.animals.items() if i!=0 and x.species==a.world.animals[0].species and x.sex==a.world.animals[0].sex)
+        same = next(
+            i
+            for i, x in a.world.animals.items()
+            if i != 0
+            and x.species == a.world.animals[0].species
+            and x.sex == a.world.animals[0].sex
+        )
         self.assertEqual(a.brains[0].weights, a.brains[same].weights)
 
     def test_each_run_has_unique_seed_and_chains_champions(self):
@@ -58,7 +64,13 @@ class RandomizationTests(unittest.TestCase):
         e.next_run()
         self.assertEqual(e.brains[0].weights, weights)
         self.assertEqual(e.brains[0].steps, 0)
-        same=next(i for i,x in e.world.animals.items() if i!=0 and x.species==e.world.animals[0].species and x.sex==e.world.animals[0].sex)
+        same = next(
+            i
+            for i, x in e.world.animals.items()
+            if i != 0
+            and x.species == e.world.animals[0].species
+            and x.sex == e.world.animals[0].sex
+        )
         self.assertEqual(e.brains[0].weights, e.brains[same].weights)
 
     def test_random_checkpoint_continues_future_seed_sequence_exactly(self):
@@ -112,7 +124,7 @@ class RandomizationTests(unittest.TestCase):
                     sys.executable,
                     "-m",
                     "ecosystem.cli",
-                        "--no-library",
+                    "--no-library",
                     "environments/baseline.json",
                     "--runs",
                     "2",

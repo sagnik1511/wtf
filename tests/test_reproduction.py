@@ -40,8 +40,12 @@ def breeding_world():
     w = empty_world()
     w.config["species"]["prey"]["reproduction"] = reproduction()
     w.config["species"]["prey"]["body"]["living_cost"] = 0
-    w.animals = {0: animal(0, "prey", 2, 2, energy=60), 1: animal(1, "prey", 3, 2, energy=60)}
-    w.animals[0].sex = 'female';w.animals[1].sex = 'male'
+    w.animals = {
+        0: animal(0, "prey", 2, 2, energy=60),
+        1: animal(1, "prey", 3, 2, energy=60),
+    }
+    w.animals[0].sex = "female"
+    w.animals[1].sex = "male"
     w.next_animal_id = 2
     return w
 
@@ -61,80 +65,115 @@ def breeding_experiment(kind="q_network"):
             spec["body"].update(attack_damage=0, attack_cost=0)
     e = Experiment(c)
     for i, a in e.world.animals.items():
-        a.x, a.y = i+1, 2
-        if a.species == 'prey':a.sex = 'female' if i == 0 else 'male'
+        a.x, a.y = i + 1, 2
+        if a.species == "prey":
+            a.sex = "female" if i == 0 else "male"
     e.observations = e.world.observe_all()
     return force_reproduction(e)
 
 
 class BirthMechanicsTests(unittest.TestCase):
     def step(self, w):
-        return w.step({i: 'reproduce' for i in w.animals})
+        return w.step({i: "reproduce" for i in w.animals})
 
     def test_birth_state_two_parents_cost_and_transition(self):
-        w = breeding_world();r = self.step(w)
-        born = next(e for e in r.events if e.kind == 'born');child = w.animals[born.target]
+        w = breeding_world()
+        r = self.step(w)
+        born = next(e for e in r.events if e.kind == "born")
+        child = w.animals[born.target]
         self.assertEqual((born.actor, born.mate), (0, 1))
-        self.assertEqual((child.parent_id, child.second_parent_id, child.age, child.generation), (0,1,0,1))
-        self.assertIn(child.sex, ('female','male'))
-        self.assertEqual((child.energy, child.health), (60,30))
-        self.assertEqual([w.animals[i].energy for i in (0,1)], [55,55])
-        self.assertEqual([w.animals[i].last_reproduced_age for i in (0,1)], [1,1])
+        self.assertEqual(
+            (child.parent_id, child.second_parent_id, child.age, child.generation),
+            (0, 1, 0, 1),
+        )
+        self.assertIn(child.sex, ("female", "male"))
+        self.assertEqual((child.energy, child.health), (60, 30))
+        self.assertEqual([w.animals[i].energy for i in (0, 1)], [55, 55])
+        self.assertEqual([w.animals[i].last_reproduced_age for i in (0, 1)], [1, 1])
         self.assertEqual(len(w.animals), 3)
-        self.assertEqual(set(r.rewards), {0,1})
-        self.assertEqual(set(r.observations), {0,1,child.id})
+        self.assertEqual(set(r.rewards), {0, 1})
+        self.assertEqual(set(r.observations), {0, 1, child.id})
 
     def test_no_asexual_same_sex_or_cross_species_births(self):
-        for mode in ('single','same_sex','species','distant','occluded'):
+        for mode in ("single", "same_sex", "species", "distant", "occluded"):
             w = breeding_world()
-            if mode == 'single':del w.animals[1]
-            elif mode == 'same_sex':w.animals[1].sex = 'female'
-            elif mode == 'species':w.animals[1].species = 'predator'
-            elif mode == 'distant':w.config['species']['prey']['reproduction']['mate_radius']=1;w.animals[1].x=5
-            else:w.animals[1].x=4;w.obstacles={(3,2)}
-            self.assertFalse(any(e.kind=='born' for e in self.step(w).events), mode)
+            if mode == "single":
+                del w.animals[1]
+            elif mode == "same_sex":
+                w.animals[1].sex = "female"
+            elif mode == "species":
+                w.animals[1].species = "predator"
+            elif mode == "distant":
+                w.config["species"]["prey"]["reproduction"]["mate_radius"] = 1
+                w.animals[1].x = 5
+            else:
+                w.animals[1].x = 4
+                w.obstacles = {(3, 2)}
+            self.assertFalse(any(e.kind == "born" for e in self.step(w).events), mode)
             self.assertEqual(w.animals[0].energy, 60)
             self.assertEqual(w.animals[0].last_reproduced_age, -1)
 
     def test_both_parents_must_pass_health_age_energy_cooldown(self):
-        for index in (0,1):
-            for field, value in (('health',24),('energy',5),('age',-1),('last_reproduced_age',0)):
-                w = breeding_world();setattr(w.animals[index],field,value)
-                self.assertFalse(any(e.kind=='born' for e in self.step(w).events),(index,field))
-        w=breeding_world();w.animals[1].health=24.001
-        self.assertTrue(any(e.kind=='born' for e in self.step(w).events))
+        for index in (0, 1):
+            for field, value in (
+                ("health", 24),
+                ("energy", 5),
+                ("age", -1),
+                ("last_reproduced_age", 0),
+            ):
+                w = breeding_world()
+                setattr(w.animals[index], field, value)
+                self.assertFalse(
+                    any(e.kind == "born" for e in self.step(w).events), (index, field)
+                )
+        w = breeding_world()
+        w.animals[1].health = 24.001
+        self.assertTrue(any(e.kind == "born" for e in self.step(w).events))
 
     def test_capacity_and_no_free_space_leave_parents_uncharged(self):
-        for mode in ('capacity','space'):
-            w=breeding_world()
-            if mode=='capacity':w.config['species']['prey']['reproduction']['max_population']=2
+        for mode in ("capacity", "space"):
+            w = breeding_world()
+            if mode == "capacity":
+                w.config["species"]["prey"]["reproduction"]["max_population"] = 2
             else:
-                w.obstacles={(a.x+dx,a.y+dy) for a in w.animals.values() for dx,dy in ((0,1),(0,-1),(1,0),(-1,0))} - {a.position for a in w.animals.values()}
-            self.assertFalse(any(e.kind=='born' for e in self.step(w).events))
+                w.obstacles = {
+                    (a.x + dx, a.y + dy)
+                    for a in w.animals.values()
+                    for dx, dy in ((0, 1), (0, -1), (1, 0), (-1, 0))
+                } - {a.position for a in w.animals.values()}
+            self.assertFalse(any(e.kind == "born" for e in self.step(w).events))
             for a in w.animals.values():
-                self.assertEqual(a.energy,60);self.assertEqual(a.last_reproduced_age,-1)
+                self.assertEqual(a.energy, 60)
+                self.assertEqual(a.last_reproduced_age, -1)
 
     def test_one_male_can_only_parent_once_per_step_and_no_newborn_cascade(self):
-        w=breeding_world();w.animals[2]=animal(2,'prey',4,2,energy=60);w.next_animal_id=3
+        w = breeding_world()
+        w.animals[2] = animal(2, "prey", 4, 2, energy=60)
+        w.next_animal_id = 3
         self.step(w)
-        self.assertEqual(w.births['prey'],1)
-        self.assertEqual(len({a.position for a in w.animals.values()}),4)
-        self.assertEqual(sum(a.last_reproduced_age==1 for a in w.animals.values()),2)
+        self.assertEqual(w.births["prey"], 1)
+        self.assertEqual(len({a.position for a in w.animals.values()}), 4)
+        self.assertEqual(sum(a.last_reproduced_age == 1 for a in w.animals.values()), 2)
 
     def test_post_combat_death_cannot_parent(self):
-        w=breeding_world();w.animals[1].health=.1;w.animals[1].energy=0
-        r=self.step(w)
-        self.assertIn(1,r.dead_ids)
-        self.assertFalse(any(e.kind=='born' for e in r.events))
+        w = breeding_world()
+        w.animals[1].health = 0.1
+        w.animals[1].energy = 0
+        r = self.step(w)
+        self.assertIn(1, r.dead_ids)
+        self.assertFalse(any(e.kind == "born" for e in r.events))
 
     def test_old_world_restores_sexes_but_cannot_clone(self):
-        w=breeding_world();del w.animals[1]
-        state=json.loads(json.dumps(w.checkpoint()))
-        for a in state['snapshot']['animals']:
-            a.pop('sex');a.pop('second_parent_id')
-        restored=World.restore(state);self.step(restored)
-        self.assertEqual(len(restored.animals),1)
-        self.assertEqual(restored.animals[0].sex,'female')
+        w = breeding_world()
+        del w.animals[1]
+        state = json.loads(json.dumps(w.checkpoint()))
+        for a in state["snapshot"]["animals"]:
+            a.pop("sex")
+            a.pop("second_parent_id")
+        restored = World.restore(state)
+        self.step(restored)
+        self.assertEqual(len(restored.animals), 1)
+        self.assertEqual(restored.animals[0].sex, "female")
 
 
 class InheritanceTests(unittest.TestCase):
@@ -186,7 +225,16 @@ class InheritanceTests(unittest.TestCase):
         e.step()
         child = next(a for a in e.world.animals.values() if a.parent_id == 0)
         for key, values in e.brains[child.id].weights.items():
-            self.assertTrue(all(v in (e.brains[child.parent_id].weights[key][j], e.brains[child.second_parent_id].weights[key][j]) for j,v in enumerate(values)))
+            self.assertTrue(
+                all(
+                    v
+                    in (
+                        e.brains[child.parent_id].weights[key][j],
+                        e.brains[child.second_parent_id].weights[key][j],
+                    )
+                    for j, v in enumerate(values)
+                )
+            )
         self.assertEqual(e.brains[child.id].updates, 0)
         self.assertEqual(e.brains[child.id].replay, [])
         self.assertEqual(child.age, 0)
