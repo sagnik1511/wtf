@@ -87,6 +87,7 @@ the model signature, so start fresh or load matching saved weights.
 | Learning rate per species | `species.<name>.learning_rate_multiplier` (template rate × multiplier) |
 | Model and training algorithm | `species.<name>.brain` and the referenced `brains` template |
 | Predator survival + kill selection | `species.predator.champion_selection` ([scoring rule](brain-library.md#balance-predator-kills-and-survival)) |
+| Family success and biological generations | `species.<name>.champion_selection.criterion: "lineage"`, optional `lineage_min_age_steps`, or `--champion SPECIES[:SEX]=lineage` ([scoring rule](brain-library.md#select-successful-biological-lineages)) |
 | Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |
 | Reproduction | `species.<name>.reproduction` |

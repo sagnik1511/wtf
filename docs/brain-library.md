@@ -11,6 +11,9 @@ kill under the current rules, so their kill score remains zero; use `food` for
 a useful foraging champion. These are observed records, not validated estimates
 of a model's quality on other worlds. Predators also track a `balanced` champion
 that combines kills with capped survival credit; see the scoring rule below.
+Both diets also archive a `lineage` champion, using successful biological
+generations and founder-family performance. Existing default selectors remain
+unchanged; enable lineage explicitly as described below.
 
 Champions capture the model at the step the record is set, after that step's
 learning. Dead animals are considered before their controllers are discarded.
@@ -74,6 +77,98 @@ together.
   --brain predator=balanced --progress
 ```
 
+## Select successful biological lineages
+
+Use `--champion` to choose later-run winners without loading starting weights:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/meandering_river.json \
+  --runs 10 --seed 100 --progress \
+  --champion prey=lineage --champion predator=lineage
+```
+
+This preset starts fresh with A2C prey and GRPO predators. Run 1 starts with its
+configured initialization; subsequent runs use the previous run's matching
+species/sex lineage winners. `--runs 1` still archives those winners for later
+use. `--no-chain-brains` disables promotion while preserving the archives.
+`--champion prey:male=food` selects a different male criterion; sex-specific
+choices override broad choices regardless of argument order. `--champion`
+takes precedence over the criterion implied by `--brain`.
+
+The JSON equivalent, inside each species object, is:
+
+```json
+"champion_selection": {"criterion": "lineage"}
+```
+
+A **family** consists of one founder and its descendants, including both sexes.
+Each newborn inherits the union of its parents' founder memberships. An animal
+contributes its own lifetime kills, actual food energy and age once to each
+founder family it belongs to. Shared ancestry cannot duplicate a kill within
+one family. For an animal in several families, selection uses its strongest
+family, rather than summing overlapping family totals. Family size is allowed
+to contribute to fitness; rates are recorded alongside totals for interpretation.
+Family counters include deceased relatives without retaining their controllers.
+
+A candidate must reach the selection age and earn **at least one personal kill**
+for a prey-eating species, or **positive personal food energy** for a resource-
+eating species, before receiving a generation advantage. The selection age
+normally equals `reproduction.min_age_steps` (at least one step), without the
+per-animal reproduction timing deviation. Override it with the positive integer
+`champion_selection.lineage_min_age_steps`. Reaching this age counts a descendant
+as viable even if it dies later; this is a maturity proxy, not reproductive proof.
+
+Ranks compare left to right:
+
+| Diet | Rank, highest first |
+| --- | --- |
+| Predator (`prey`) | Proven birth generation, family kills, viable descendants, family animal-time, family kills per animal-step, personal kills, personal age, HP |
+| Prey (`resource`) | Proven birth generation, family animal-time, viable descendants, family food energy, food energy per animal-step, personal age, personal food energy, HP |
+
+Animal-time is the sum of family members' ages. A newborn cannot displace a
+proven adult on ancestry alone. If no proven animal exists for a species/sex,
+a provisional candidate is still saved: `score: -1`, `lineage.qualified: false`.
+These fallbacks compare personal kills/age for predators or age/food for prey.
+Once a proven candidate exists, its nonnegative generation score wins.
+
+Only actual births advance biological generation. Founders begin at zero,
+and a child advances beyond the maximum **tracked** parent generation. Loading
+weights, replaying an episode or advancing `model_generation` does not create
+births. Each new episode resets its physical family history, even when models
+are chained from an older episode; this is selection across independent worlds,
+not one continuous biological world.
+
+The additional snapshots live at
+`<species>/<female-or-male>/lineage.json`. They contain the selected founder,
+observed generation, family totals, rates, qualification, partial-history flag,
+scoring policy and exact rank. Counts are **as of the snapshot step**. Later
+family success does not rewrite dead animals' historical models or retroactively
+rescore every discarded brain. Species/sex champion pools remain independent.
+
+Exact checkpoints include the compact family ledger and counters. Legacy
+checkpoints without a ledger start tracked family history from the available
+animals; these snapshots are marked `partial_history: true`. Missing deceased
+ancestors and their offspring are not invented. Old champion archives without
+`lineage` cannot be reconstructed from lifespan/kill winners alone, so explicit
+lineage loading reports no matching champion instead of guessing.
+
+To load a new run's archived winners:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/meandering_river.json \
+  --brains-from results/<experiment-name> \
+  --brain prey=lineage --brain predator=lineage --runs 10 --progress
+```
+
+Shared-library `best:lineage` and `latest:lineage` require matching lineage policy,
+algorithm, architecture, action signature, species and sex. Explicit run/path
+loading transfers compatible weights under the new environment's policy; it
+does not import the old physical family. Compare ranks across equal episode
+budgets and comparable worlds: a longer episode provides more opportunities.
+Lineage selection changes curation and inheritance, not RL rewards, observations
+or mating decisions. It is a fitness heuristic, not proof of general intelligence
+or a self-sustaining ecosystem.
+
 ## Brains belong to their run
 
 Each completed training run saves its own champions. There is no need to track
@@ -82,8 +177,8 @@ which separate model-library generation contains a result:
 ```text
 results/<run-name>/champions/run_0001.json
 results/<run-name>/champions/run_0001/manifest.json
-results/<run-name>/champions/run_0001/prey/{female,male}/{health,kills,lifespan,food}.json
-results/<run-name>/champions/run_0001/predator/{female,male}/{health,kills,lifespan,food,balanced}.json
+results/<run-name>/champions/run_0001/prey/{female,male}/{health,kills,lifespan,food,lineage}.json
+results/<run-name>/champions/run_0001/predator/{female,male}/{health,kills,lifespan,food,balanced,lineage}.json
 ```
 
 The experiment folder is self-contained. Moving it keeps its models usable.

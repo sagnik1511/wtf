@@ -11,10 +11,11 @@ import shutil
 import uuid
 
 from .brains import model_signature, model_snapshot
+from .lineage import LineageBook, lineage_policy
 
 PROJECT = Path(__file__).resolve().parent.parent
 DEFAULT_LIBRARY = PROJECT / "brain_library"
-CRITERIA = ("health", "kills", "lifespan", "food", "balanced")
+CRITERIA = ("health", "kills", "lifespan", "food", "balanced", "lineage")
 SEXES = ("female", "male")
 
 
@@ -67,8 +68,9 @@ def ranks(animal):
 class ChampionBook:
     """Bounded copies of model weights at the moment a new record is achieved."""
 
-    def __init__(self, config, entries=None):
+    def __init__(self, config, entries=None, lineage_state=None):
         self.config = config
+        self.lineage = LineageBook(config, lineage_state)
         self.entries = {}
         for species, groups in (entries or {}).items():
             if any(k in CRITERIA for k in groups):
@@ -82,7 +84,9 @@ class ChampionBook:
             else:
                 self.entries[species] = copy.deepcopy(groups)
 
-    def consider(self, animals, brains, source):
+    def consider(self, animals, brains, source, newborns=()):
+        animals = tuple(animals)
+        self.lineage.observe(animals + tuple(newborns))
         # Resolve all ranking comparisons first: intermediate record breakers
         # need no model copies if another animal wins before this pass ends.
         policies, winners = {}, {}
@@ -92,6 +96,7 @@ class ChampionBook:
             )
             selected = winners.setdefault((animal.species, animal.sex), {})
             scores = ranks(animal)
+            scores["lineage"] = self.lineage.rank(animal)[0]
             if self.config["species"][animal.species]["diet"] == "prey":
                 if animal.species not in policies:
                     policies[animal.species] = balanced_policy(
@@ -149,6 +154,9 @@ class ChampionBook:
                 )
                 if key == "balanced":
                     entry["selection_policy"] = policies[species]
+                elif key == "lineage":
+                    entry["selection_policy"] = lineage_policy(self.config, species)
+                    entry["lineage"] = self.lineage.rank(animal)[1]
                 self.entries[species][sex][key] = entry
 
 
@@ -249,6 +257,10 @@ def load_initial_models(config, root=DEFAULT_LIBRARY):
                     and (
                         request["metric"] != "balanced"
                         or e.get("selection_policy") == balanced_policy(config, species)
+                    )
+                    and (
+                        request["metric"] != "lineage"
+                        or e.get("selection_policy") == lineage_policy(config, species)
                     )
                 ]
                 matching_sex = [
@@ -477,6 +489,35 @@ def apply_brain_overrides(
     return config
 
 
+def apply_champion_overrides(config, requests=()):
+    """Choose chaining criteria without requesting any initial saved weights."""
+    selected = {}
+    for request in requests:
+        group, separator, criterion = request.partition("=")
+        species, sex = group, None
+        if group not in config["species"]:
+            species, _, sex = group.rpartition(":")
+        if (
+            not separator
+            or species not in config["species"]
+            or sex not in (None, *SEXES)
+            or criterion not in CRITERIA
+        ):
+            raise ValueError("--champion requires SPECIES[:SEX]=CRITERION")
+        if (species, sex) in selected:
+            raise ValueError(f"Duplicate --champion selection for {group}")
+        if criterion == "balanced" and config["species"][species]["diet"] != "prey":
+            raise ValueError("Balanced selection requires a predator species")
+        selected[species, sex] = criterion
+    for (species, sex), criterion in sorted(
+        selected.items(), key=lambda item: item[0][1] is not None
+    ):
+        choices = config["species"][species].setdefault("champion_selection_by_sex", {})
+        for target in SEXES if sex is None else (sex,):
+            choices[target] = criterion
+    return config
+
+
 def export_champions(experiment, destination, root=None, label=None):
     """Publish a complete generation atomically; never overwrite old models.
 
@@ -570,10 +611,12 @@ def export_champions(experiment, destination, root=None, label=None):
                             model_generation=artifact["model_generation"],
                         )
                     )
-                    if criterion == "balanced":
+                    if criterion in ("balanced", "lineage"):
                         manifest["entries"][-1]["selection_policy"] = entry[
                             "selection_policy"
                         ]
+                    if criterion == "lineage":
+                        manifest["entries"][-1]["lineage"] = entry["lineage"]
         (staging / "manifest.json").write_text(
             json.dumps(manifest, indent=2, allow_nan=False) + "\n"
         )

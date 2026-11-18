@@ -112,7 +112,8 @@
                 "kills",
                 "lifespan",
                 "food",
-                "balanced"
+                "balanced",
+                "lineage"
               ]
             }
           }
@@ -343,7 +344,8 @@
                   "kills",
                   "lifespan",
                   "food",
-                  "balanced"
+                  "balanced",
+                  "lineage"
                 ]
               },
               "male": {
@@ -352,7 +354,8 @@
                   "kills",
                   "lifespan",
                   "food",
-                  "balanced"
+                  "balanced",
+                  "lineage"
                 ]
               }
             }
@@ -388,7 +391,8 @@
                       "kills",
                       "lifespan",
                       "food",
-                      "balanced"
+                      "balanced",
+                      "lineage"
                     ]
                   }
                 },
@@ -570,7 +574,8 @@
                   "kills",
                   "lifespan",
                   "food",
-                  "balanced"
+                  "balanced",
+                  "lineage"
                 ]
               },
               "survival_steps_per_kill": {
@@ -584,6 +589,12 @@
                 "minimum": 0,
                 "maximum": 100,
                 "default": 2
+              },
+              "lineage_min_age_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000,
+                "description": "Lineage maturity gate; defaults to reproduction.min_age_steps (at least one step)."
               }
             }
           },

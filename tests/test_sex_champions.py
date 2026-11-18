@@ -47,7 +47,7 @@ class SexChampionTests(unittest.TestCase):
             e, archive = source(Path(d))
             manifest = json.loads((archive / "manifest.json").read_text())
             self.assertEqual(manifest["library_version"], 2)
-            self.assertEqual(len(manifest["entries"]), 18)
+            self.assertEqual(len(manifest["entries"]), 22)
             self.assertEqual(
                 {(x["species"], x["sex"]) for x in manifest["entries"]},
                 {

@@ -2,6 +2,11 @@
 
 [Configuration](configuration.md) · [Architecture](architecture.md) · [Analysis](analysis.md)
 
+The [cross-environment feedback review](feedback-review.md) maps all nine
+controllers and seven geography maps to these shared rules, documents current
+coefficient scales and explains the distinction between raw feedback and
+MAPPO's training reward.
+
 The environment returns a reward for each animal’s transition. Q algorithms use
 it in value targets; policy algorithms use it in returns/advantages and their
 own losses. The environment does not directly assign a neural-network loss.

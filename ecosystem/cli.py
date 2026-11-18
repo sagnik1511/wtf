@@ -13,7 +13,12 @@ from .runner import Experiment
 from .checkpoint_io import read_checkpoint
 from .recording import Recorder, settings
 from .progress import RunProgress
-from .library import DEFAULT_LIBRARY, export_champions, apply_brain_overrides
+from .library import (
+    DEFAULT_LIBRARY,
+    export_champions,
+    apply_brain_overrides,
+    apply_champion_overrides,
+)
 
 
 def main():
@@ -86,7 +91,14 @@ def main():
         action="append",
         default=[],
         metavar="SPECIES[:SEX]=MODEL",
-        help="Repeat per species/sex (prey:male=lifespan): criterion (including balanced) from --brains-from, JSON path, best:metric, latest:metric, or fresh",
+        help="Repeat per species/sex (prey:male=lifespan): criterion (including balanced or lineage) from --brains-from, JSON path, best:metric, latest:metric, or fresh",
+    )
+    parser.add_argument(
+        "--champion",
+        action="append",
+        default=[],
+        metavar="SPECIES[:SEX]=CRITERION",
+        help="Choose the champion used for later-run chaining, without loading saved starting weights",
     )
     chain = parser.add_mutually_exclusive_group()
     chain.add_argument(
@@ -118,6 +130,7 @@ def main():
                 )
             )
             or args.brain
+            or args.champion
         ):
             parser.error("Configuration overrides cannot be used with --resume")
         experiment = Experiment.restore(read_checkpoint(args.resume), mode=args.mode)
@@ -146,6 +159,7 @@ def main():
                 args.brain_run,
                 root=args.library_dir or DEFAULT_LIBRARY,
             )
+            apply_champion_overrides(config, args.champion)
             experiment = Experiment(
                 config,
                 args.mode or "train",

@@ -169,7 +169,7 @@ class MultipleSpeciesTests(unittest.TestCase):
             e = Experiment(configuration())
             archive = export_champions(e, root / "source/champions/run_0001.json")
             entries = json.loads((archive / "manifest.json").read_text())["entries"]
-            self.assertEqual(len(entries), 36)
+            self.assertEqual(len(entries), 44)
             self.assertEqual(
                 {(x["species"], x["sex"]) for x in entries},
                 {(s, sex) for s in NAMES for sex in ("female", "male")},

@@ -499,10 +499,11 @@ def validate(c):
                     "lifespan",
                     "food",
                     "balanced",
+                    "lineage",
                 ):
                     fail(
                         ip + ".metric",
-                        "must be health, kills, lifespan, food or balanced",
+                        "must be health, kills, lifespan, food, balanced or lineage",
                     )
 
         if "initial_brain" in s:
@@ -522,7 +523,14 @@ def validate(c):
                 optional=("female", "male"),
             )
             for sex, metric in choices.items():
-                if metric not in ("health", "kills", "food", "lifespan", "balanced"):
+                if metric not in (
+                    "health",
+                    "kills",
+                    "food",
+                    "lifespan",
+                    "balanced",
+                    "lineage",
+                ):
                     fail(
                         p + ".champion_selection_by_sex." + sex,
                         "unknown champion criterion",
@@ -539,7 +547,11 @@ def validate(c):
                 policy,
                 cp,
                 ("criterion",),
-                optional=("survival_steps_per_kill", "max_survival_bonus"),
+                optional=(
+                    "survival_steps_per_kill",
+                    "max_survival_bonus",
+                    "lineage_min_age_steps",
+                ),
             )
             if policy["criterion"] not in (
                 "health",
@@ -547,6 +559,7 @@ def validate(c):
                 "lifespan",
                 "food",
                 "balanced",
+                "lineage",
             ):
                 fail(cp + ".criterion", "unknown champion criterion")
             if policy["criterion"] == "balanced" and s["diet"] != "prey":
@@ -560,6 +573,14 @@ def validate(c):
                 10000000,
             )
             num(policy.get("max_survival_bonus", 2), cp + ".max_survival_bonus", 0, 100)
+            if "lineage_min_age_steps" in policy:
+                num(
+                    policy["lineage_min_age_steps"],
+                    cp + ".lineage_min_age_steps",
+                    1,
+                    10000000,
+                    True,
+                )
         if (
             s.get("initial_brain", {}).get("metric") == "balanced"
             and s["diet"] != "prey"

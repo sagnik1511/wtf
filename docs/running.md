@@ -62,6 +62,10 @@ when reverting learning code.
 
 Training displays a tqdm bar automatically in a terminal, showing run/step progress, elapsed time, ETA, step rate, populations, kills and food. `--progress` forces display in redirected/IDE output; `--no-progress` disables it. Evaluation/random runs and redirected logs omit the bar by default. Resume starts at the saved step, and early extinction completes the bar at the actual final step. Progress is throttled to avoid rendering overhead.
 
+`--champion prey=lineage --champion predator=lineage` selects lineage champions
+for later-run chaining without loading saved starting weights. Existing criteria
+and sex-specific overrides remain available; see [lineage scoring and archives](brain-library.md#select-successful-biological-lineages).
+
 Each invocation creates a unique folder inside `results/` containing:
 
 - `environment.json`: exact effective configuration, including CLI overrides.

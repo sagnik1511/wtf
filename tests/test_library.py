@@ -200,7 +200,7 @@ class LibraryTests(unittest.TestCase):
             self.assertEqual(
                 latest.initial_models["prey"]["female"]["provenance"]["score"], 1
             )
-            self.assertEqual(len(catalog(root / "library")), 26)
+            self.assertEqual(len(catalog(root / "library")), 32)
             third = self.export(latest, root)
             artifact = json.loads((third / "prey/female/lifespan.json").read_text())
             self.assertEqual(artifact["model_generation"], 2)
@@ -557,7 +557,7 @@ class LibraryTests(unittest.TestCase):
             )
             folder = next((root / "results").iterdir())
             self.assertEqual(
-                len(list((folder / "champions/run_0001").glob("*/*/*.json"))), 13
+                len(list((folder / "champions/run_0001").glob("*/*/*.json"))), 16
             )
             c = config()
             apply_brain_overrides(c, source_experiment=folder)

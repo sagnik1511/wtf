@@ -31,6 +31,9 @@ The priorities established during development are:
 - Record first, play later: training can finish and exit before opening the viewer.
 - Private animal brains, inherited learned weights, run-local species/sex champion archives and
   optional matching-sex champion chaining between runs.
+  Optional `lineage` curation tracks unique founder-family descendants and
+  proven biological generations; its compact counters persist in checkpoints
+  but reset between independently spawned episodes. See [saved brains](brain-library.md#select-successful-biological-lineages).
 - Small disk footprints and bounded replay memory, preserving viewer features and
   numerical information. Binary replay data need not be human-readable; metrics do.
 - Charts that follow the current replay step, with distinct whole-run analysis.
@@ -53,6 +56,11 @@ preset and metadata captured with the experiment.
 | Replay/checkpoint formats | `recording.py`, `replay_codec.py`, `replay_io.py`, `binary_io.py`, `checkpoint_io.py` in `ecosystem/` | [Binary storage](binary-storage.md), [recordings](recording.md) |
 | Read-only playback | `ecosystem/server.py`, `viewer/api.mjs`, `playback.mjs`, `binary-codec.mjs`, `app.js` | [Recordings](recording.md) |
 | Metrics and interpretation | `ecosystem/telemetry.py`, `analyze.py`, viewer dashboard modules | [Analysis](analysis.md) |
+
+The [feedback review](feedback-review.md) describes the shared physical reward
+contract across environments and algorithms. Keep reward coefficients in species
+JSON and avoid map-name/algorithm branches in environmental feedback; MAPPO's
+documented species-mean adapter belongs in the learner delivery path.
 
 ## Semantics worth preserving
 

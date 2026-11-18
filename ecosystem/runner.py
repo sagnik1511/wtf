@@ -22,6 +22,7 @@ from .library import (
     selection_criterion,
     sex_models,
     SEXES,
+    CRITERIA,
 )
 
 
@@ -280,7 +281,14 @@ class Experiment:
             # Includes the final action and terminal learning of dead animals,
             # before deceased descendants' controllers are released.
             self.champions.consider(
-                tracked_animals, self.brains, self._champion_source()
+                tracked_animals,
+                self.brains,
+                self._champion_source(),
+                newborns=(
+                    self.world.animals[event.target]
+                    for event in result.events
+                    if event.kind == "born"
+                ),
             )
         # Parents receive the current step's feedback before model inheritance.
         mutation_events = []
@@ -412,6 +420,7 @@ class Experiment:
             champion_artifacts=copy.deepcopy(self.champion_artifacts),
             legacy_brain_retention=self.legacy_brain_retention,
             champions=copy.deepcopy(self.champions.entries),
+            lineage=self.champions.lineage.checkpoint(),
             retired_updates=self.retired_updates,
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
             randomization_seed=self.randomization_seed,
@@ -466,12 +475,13 @@ class Experiment:
         )
         e.champion_artifacts = copy.deepcopy(state.get("champion_artifacts", {}))
         for species, groups in list(e.champion_artifacts.items()):
-            if any(
-                metric in groups
-                for metric in ("health", "kills", "food", "lifespan", "balanced")
-            ):
+            if any(metric in groups for metric in CRITERIA):
                 e.champion_artifacts[species] = {}
-        e.champions = ChampionBook(e.config, state.get("champions"))
+        e.champions = ChampionBook(
+            e.config,
+            state.get("champions"),
+            state.get("lineage", dict(partial=True)),
+        )
         e.retired_updates = state.get("retired_updates", 0)
         e.inherited_updates = {
             int(i): n for i, n in state.get("inherited_updates", {}).items()
@@ -511,9 +521,7 @@ class Experiment:
             else:
                 e.brains[animal_id] = restore_brain(brain_state)
         legacy_champions = any(
-            any(
-                k in groups for k in ("health", "kills", "food", "lifespan", "balanced")
-            )
+            any(k in groups for k in CRITERIA)
             for groups in state.get("champions", {}).values()
         )
         if ("champions" not in state or legacy_champions) and e.mode == "train":

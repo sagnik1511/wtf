@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from ecosystem.brains import create_brain, model_snapshot
 from ecosystem.library import ChampionBook, balanced_policy, balanced_rank, ranks
+from ecosystem.lineage import lineage_policy
 from ecosystem.runner import Experiment
 from ecosystem.world import World, VISIBILITY_CACHE_LIMIT
 from tests.test_simulation import config, animal, empty_world
@@ -15,11 +16,14 @@ from tests.test_efficiency import reference_observation
 from tests.test_advanced_algorithms import environment
 
 
-def old_consider(book, animals, brains, source):
+def old_consider(book, animals, brains, source, newborns=()):
+    animals = tuple(animals)
+    book.lineage.observe(animals + tuple(newborns))
     policies = {}
     for a in animals:
         champions = book.entries.setdefault(a.species, {}).setdefault(a.sex, {})
         scores = ranks(a)
+        scores["lineage"] = book.lineage.rank(a)[0]
         if book.config["species"][a.species]["diet"] == "prey":
             if a.species not in policies:
                 policies[a.species] = balanced_policy(book.config, a.species)
@@ -62,6 +66,11 @@ def old_consider(book, animals, brains, source):
             )
             if key == "balanced":
                 champions[key]["selection_policy"] = policies[a.species]
+            elif key == "lineage":
+                champions[key]["selection_policy"] = lineage_policy(
+                    book.config, a.species
+                )
+                champions[key]["lineage"] = book.lineage.rank(a)[1]
 
 
 class SimulationCacheTests(unittest.TestCase):

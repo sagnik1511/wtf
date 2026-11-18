@@ -6,9 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.0](0.0.1.0.md), `abd310d`.
-**Latest committed runtime implementation:** [0.0.1.0](0.0.1.0.md), `abd310d`.
-**Pending:** [0.0.1.1](0.0.1.1.md), four landscape geography presets and static map previews.
+**Latest committed rollout:** [0.0.1.1](0.0.1.1.md), `d320059`.
+**Latest committed runtime implementation:** [0.0.1.1](0.0.1.1.md), `d320059`.
+**Pending:** [0.0.1.2](0.0.1.2.md), biological lineage champion selection;
+[0.0.1.3](0.0.1.3.md), generic environment/controller feedback review.
 
 ## Rollout index
 
@@ -19,7 +20,9 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.1](0.0.1.1.md) | Pending | Prepared 2026-11-18 | — | Meandering river with A2C/GRPO, three further PPO landscapes and map diagrams |
+| [0.0.1.3](0.0.1.3.md) | Pending | Prepared 2026-11-18 | — | Generic feedback audit and 216 preset/controller contract combinations; no runtime tuning changes |
+| [0.0.1.2](0.0.1.2.md) | Pending | Prepared 2026-11-18 | — | Proven biological generations, unique founder-family fitness and independent lineage champion selectors |
+| [0.0.1.1](0.0.1.1.md) | Committed | 2026-11-18 | `d320059` | Meandering river with A2C/GRPO, three further PPO landscapes and map diagrams |
 | [0.0.1.0](0.0.1.0.md) | Committed | 2026-11-18 | `abd310d` | Fused PPO/GRU/quantile math, spatial/world/replay/dashboard kernels and native-to-native benchmarks |
 | [0.0.0.43](0.0.0.43.md) | Committed | 2026-11-18 | `baa5101` | Optional dense/backprop, DQN/SGD and Adam kernels with matched benchmarks |
 | [0.0.0.42](0.0.0.42.md) | Committed | 2026-11-18 | `baa5101` | Float32 model/optimizer buffers, precision-aware resume and lossless narrow binary arrays |
