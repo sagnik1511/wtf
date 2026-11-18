@@ -2,6 +2,7 @@
 from .numeric import packed, plain, precision_of, restore_numeric
 
 
+from . import kernels
 import copy
 from .brain import observation_inputs
 import random
@@ -12,6 +13,8 @@ from .ppo import MLP
 
 def quantile_huber(predictions, targets, kappa):
     """Mean pairwise quantile Huber objective and prediction derivatives."""
+    if kernels.available('quantile'):
+        return kernels.native.quantile(predictions, targets, kappa)
     n, m = len(predictions), len(targets)
     loss, gradient = 0.0, [0.0] * n
     for i, value in enumerate(predictions):

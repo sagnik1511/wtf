@@ -22,3 +22,4 @@ brain_library/
 build/
 *.egg-info/
 !work/performance/benchmark_kernels.py
+!work/performance/benchmark_data_kernels.py

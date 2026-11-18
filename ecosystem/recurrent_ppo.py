@@ -1,6 +1,7 @@
 """GRU PPO with chronological truncated backpropagation through time."""
+from . import kernels
 from .kernels import gradient_zeros
-from .numeric import packed
+from .numeric import Float32, packed
 
 
 import copy
@@ -57,6 +58,12 @@ class GRUNetwork:
     def step(self, observation, hidden, tape=False, value_only=False):
         h = self.hidden_size
         wx, wh, bias = (self.cell[k] for k in ('input_weights', 'recurrent_weights', 'bias'))
+        if kernels.available('gru_step') and isinstance(wx, Float32):
+            current, gates = kernels.native.gru_step(observation, hidden, wx, wh, bias, tape)
+            if tape:
+                outputs, ht = self.head.forward(current)
+                return outputs, current, (tuple(observation), tuple(hidden), *gates, ht)
+            return (self.head.value(current) if value_only else self.head.predict(current)), current
         def gate(offset, previous, activation):
             return [activation(bias[offset+j]
                     + sum(map(mul, observation, wx[(offset+j)*self.inputs:(offset+j+1)*self.inputs]))
@@ -75,6 +82,10 @@ class GRUNetwork:
         h = self.hidden_size
         derivative = self.head.accumulate_gradient(
             ht, output_gradient, gradients[1:], return_input_gradient=True)
+        if (kernels.available('gru_backward') and isinstance(self.cell['recurrent_weights'], Float32)
+                and not isinstance(gradients[0]['bias'], list)):
+            return kernels.native.gru_backward((x, old, z, r, candidate, rh, derivative, future_gradient),
+                                               self.cell['recurrent_weights'], gradients[0])
         dh = [a+b for a, b in zip(derivative, future_gradient)]
         dz = [d*(v-n)*a*(1-a) for d, v, n, a in zip(dh, old, candidate, z)]
         dn = [d*(1-a)*(1-n*n) for d, a, n in zip(dh, z, candidate)]

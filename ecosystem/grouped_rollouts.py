@@ -60,13 +60,14 @@ def collect_group(world, brains, focal_id):
         raise ValueError("No simulation steps remain for a GRPO trial")
     group = []
     has_masks = any(brains[i].config['type']=='maskable_ppo' for i in world.animals)
+    reusable_generators = {i: random.Random(0) for i in states if i != focal_id}
     for _ in range(focal.config["group_size"]):
         trial = (World.restore(initial_world, static_geography=world.geography)
                  if world.geography else World.restore(initial_world))
         generators = {}
-        for i, state in states.items():
-            generators[i] = random.Random(0)
-            generators[i].setstate(state)
+        for i, generator in reusable_generators.items():
+            generator.setstate(states[i])
+            generators[i] = generator
         generators[focal_id] = random.Random(focal.group_rng.getrandbits(64))
         policies = {i: brains[i] for i in trial.animals}
         memories = {i: b.hidden[:] for i, b in policies.items() if b.config['type']=='recurrent_ppo'}

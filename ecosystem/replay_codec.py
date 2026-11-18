@@ -1,4 +1,5 @@
 """Chunk-local keyframes and lossless sparse field updates; no simulation logic."""
+from . import kernels
 import copy
 import math
 
@@ -9,7 +10,17 @@ ANIMAL_FIELDS = ['id','species','x','y','heading','energy','health','age','last_
 RESOURCE_FIELDS = ['x','y','quantity']
 
 
+def clone(value):
+    if kernels.available('clone_tree'):
+        result=kernels.native.clone_tree(value)
+        if result is not NotImplemented:return result
+    return copy.deepcopy(value)
+
+
 def same(a, b):
+    if kernels.available('same_tree'):
+        result=kernels.native.same_tree(a,b)
+        if result is not NotImplemented:return result
     # JSON numbers distinguish integer/float representations and signed zero.
     if type(a) is not type(b):
         return False
@@ -99,7 +110,7 @@ class DeltaEncoder:
 
 def apply_mapping(target, patch):
     for key in patch.get('drop',[]):target.pop(key,None)
-    target.update(copy.deepcopy(patch.get('set',{})))
+    target.update(clone(patch.get('set',{})))
 
 
 def apply_entities(records, patch, fields, kind):
@@ -108,7 +119,7 @@ def apply_entities(records, patch, fields, kind):
         entities.pop(normalize_key(key,kind))
     for name in ('replace','add'):
         for record in patch.get(name,[]):
-            entities[entity_key(record,kind)] = copy.deepcopy(record)
+            entities[entity_key(record,kind)] = clone(record)
     for key,mask,values in patch.get('update',[]):
         if type(mask) is not int or mask < 0 or mask >= 2**len(fields) or bin(mask).count('1') != len(values):
             raise ValueError('Invalid replay field mask')
@@ -116,7 +127,7 @@ def apply_entities(records, patch, fields, kind):
         value_index = 0
         for i,field in enumerate(fields):
             if mask & (1 << i):
-                record[field] = copy.deepcopy(values[value_index]);value_index += 1
+                record[field] = clone(values[value_index]);value_index += 1
     if 'order' in patch:
         order = [normalize_key(k,kind) for k in patch['order']]
         if len(order) != len(entities) or set(order) != entities.keys():
@@ -141,10 +152,10 @@ def iter_decode(payload):
     for packet in payload['frames']:
         if not isinstance(packet,dict):raise ValueError('Invalid replay frame')
         if previous is None:
-            current = copy.deepcopy(packet)
+            current = clone(packet)
         else:
             overwritten = set(packet.get('drop',[])) | packet.get('set',{}).keys()
-            current = {k:copy.deepcopy(v) for k,v in previous.items() if k not in overwritten}
+            current = {k:clone(v) for k,v in previous.items() if k not in overwritten}
             apply_mapping(current,packet)
             if 'metrics' in packet:apply_mapping(current.setdefault('metrics',{}),packet['metrics'])
             for kind in fields:

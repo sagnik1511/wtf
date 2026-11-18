@@ -29,6 +29,8 @@ class RolloutStep(NamedTuple):
 
 
 def policy_distribution(logits):
+    if kernels.available('distribution'):
+        return kernels.native.distribution(logits)
     maximum = max(logits)
     exponentials = [math.exp(z - maximum) for z in logits]
     normalizer = sum(exponentials)
@@ -53,6 +55,9 @@ def advantages_and_returns(rollout, discount, gae_lambda):
 
 def loss_and_gradient(outputs, action, old_log_probability, advantage, target, config):
     """Loss and output derivatives, separated for numerical gradient checks."""
+    if kernels.available('ppo_loss'):
+        return kernels.native.ppo_loss(outputs, action, old_log_probability, advantage, target,
+                                       config['clip_ratio'], config['entropy_coefficient'], config['value_coefficient'])
     probabilities, logs = policy_distribution(outputs[:-1])
     log_ratio = max(-60.0, min(60.0, logs[action] - old_log_probability))
     ratio = math.exp(log_ratio)
@@ -126,6 +131,11 @@ class MLP:
     def _predict(self, observation, value_only=False, output_range=None):
         """Inference keeps one layer at a time; no backpropagation tape."""
         previous = tuple(observation)
+        if kernels.available('mlp_predict') and isinstance(self.layers[0]['weights'], Float32):
+            start, stop = ((self.sizes[-1]-1, self.sizes[-1]) if value_only else
+                           output_range if output_range is not None else (0, self.sizes[-1]))
+            result = kernels.native.mlp_predict(self.layers, previous, start, stop)
+            return result[0] if value_only else result
         last = len(self.layers) - 1
         for index, layer in enumerate(self.layers):
             inputs, weights = self.sizes[index], layer['weights']
@@ -330,15 +340,23 @@ class PPOBrain(AdamOptimizer):
                 else:
                     self.network.clear_gradients(gradients)
                 batch_metrics = {}
-                for i in batch:
-                    step = self.rollout[i]
-                    outputs, activations = self.network.forward(step.observation)
-                    _, derivative, info = self.objective(
-                        outputs, step, advantages[i], targets[i]
-                    )
-                    self.network.accumulate_gradient(activations, derivative, gradients)
-                    for key, value in info.items():
-                        batch_metrics[key] = batch_metrics.get(key, 0.0) + value
+                if (kernels.available('ppo_batch') and type(self.network) is MLP
+                        and getattr(self.objective, '__func__', None) is PPOBrain.objective
+                        and isinstance(self.network.layers[0]['weights'], Float32)):
+                    samples_for_batch = [(self.rollout[i].observation, self.rollout[i].action,
+                                          self.rollout[i].log_probability, advantages[i], targets[i]) for i in batch]
+                    batch_metrics = kernels.native.ppo_batch(self.network.layers, gradients, samples_for_batch,
+                        c['clip_ratio'], c['entropy_coefficient'], c['value_coefficient'])
+                else:
+                    for i in batch:
+                        step = self.rollout[i]
+                        outputs, activations = self.network.forward(step.observation)
+                        _, derivative, info = self.objective(
+                            outputs, step, advantages[i], targets[i]
+                        )
+                        self.network.accumulate_gradient(activations, derivative, gradients)
+                        for key, value in info.items():
+                            batch_metrics[key] = batch_metrics.get(key, 0.0) + value
                 # Stop before an excessive policy update; value and policy
                 # share a trunk, so the whole minibatch is skipped on this cap.
                 target_kl = c.get("target_kl", 0.03)

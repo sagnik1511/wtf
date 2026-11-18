@@ -30,10 +30,17 @@ if _mode != 'python':
 
 def status():
     return dict(backend='native' if native is not None else 'python',
-                requested=_mode, fallback_reason=_reason)
+                requested=_mode, fallback_reason=_reason,
+                native_api_version=getattr(native,'api_version',1) if native is not None else None)
 
 
 def gradient_zeros(values):
     # Legacy list-backed networks preserve the reference representation too.
     packed_gradient = isinstance(values, array) and (native is not None or values.typecode == 'd')
     return array('d', [0.0]) * len(values) if packed_gradient else [0.0] * len(values)
+
+
+def available(name):
+    if native is None:return False
+    version=getattr(native, 'api_version', 1)
+    return type(version) is int and version == 2 and hasattr(native, name)

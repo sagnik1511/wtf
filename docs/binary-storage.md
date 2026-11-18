@@ -172,3 +172,12 @@ binary layout above directly handles those records with native browser APIs.
 uses an uncompressed ZIP64 archive by default; installing it would not by itself
 shrink these files. This project currently trains standard-library networks with packed numeric model buffers. Adopting tensor libraries for faster training is a separate design
 change, not necessary for storing their numeric parameters in compressed binary.
+
+
+## Native replay helpers
+
+Optional [v2 CPU kernels](native-kernels-v2.md) accelerate integer-array/varint
+handling, replay comparisons/copies and dashboard groups without changing the
+binary tags, compression, canonical values or chunk memory bounds. Matched old/new
+recordings have identical compressed chunk bytes. Unsupported Python tree types
+and stale/missing extension APIs retain the existing reference operations.

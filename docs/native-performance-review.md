@@ -12,8 +12,9 @@ Subsequent implementation: [rollout 42](releases/0.0.0.42.md) adds packed float3
 model/optimizer storage and lossless narrow binary arrays. The table below is
 the preceding assessment, not an inventory of work still pending.
 [Optional CPU kernels](native-kernels.md) now implement shared dense math,
-DQN gradients/SGD and Adam. GRU cells, pairwise quantile loss, packed rollout
-columns and fused visibility remain proposals. Double arithmetic is retained.
+DQN gradients/SGD and Adam. The [second rollout](native-kernels-v2.md) adds GRU,
+quantile, fused PPO/inference, perception/ray, world/replay/dashboard helpers.
+Packed rollout columns remain a proposal. Double arithmetic is retained.
 
 ## Most useful boundaries
 

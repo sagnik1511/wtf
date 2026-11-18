@@ -142,3 +142,10 @@ legacy fallback, malformed buffers/dimensions and missing-extension behavior.
 Run the full suite with both `WTF_KERNELS=native` and `WTF_KERNELS=python` after
 changes. Native-specific checks skip when no supported extension is built. See
 [CPU kernels](native-kernels.md) for build requirements and reproducible benchmarks.
+
+
+The second rollout adds `tests/test_native_extensions.py` for exact fused PPO,
+GRU, quantile, group, codec and lifecycle behavior, malformed inputs and API-version
+fallback. See [the v2 report](native-kernels-v2.md) for native-to-native benchmark
+commands, replay-byte checks and the saved 1,500-step comparison. The data-path
+probe is `work/performance/benchmark_data_kernels.py`.

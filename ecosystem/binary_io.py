@@ -3,6 +3,7 @@
 No pickle, JSON payloads, optional packages, or whole-file buffering. One record
 (frame or controller) is buffered at a time. A symbol table resets per file.
 """
+from . import kernels
 from array import array
 import io
 import math
@@ -13,7 +14,7 @@ MAX_RECORD = 256 * 1024 * 1024
 MAX_SAFE_INTEGER = 2**53 - 1
 
 
-def varint(value):
+def _python_varint(value):
     result = bytearray()
     while value >= 128:
         result.append((value & 127) | 128)
@@ -22,12 +23,20 @@ def varint(value):
     return result
 
 
+def varint(value):
+    if kernels.available("varint") and 0 <= value <= 2**64-1:
+        return kernels.native.varint(value)
+    return _python_varint(value)
+
+
 class Encoder:
     def __init__(self):
         self.symbols = {}
+        self._varint = kernels.native.varint if kernels.available('varint') else _python_varint
 
     def encode(self, value):
         output = bytearray()
+        encode_varint = self._varint
         def put(v, depth=0):
             if depth > 128:raise ValueError('Binary nesting too deep')
             if v is None:output.append(0)
@@ -37,20 +46,20 @@ class Encoder:
                 if abs(v)>MAX_SAFE_INTEGER:
                     n=(v.bit_length()+8)//8
                     if n>128:raise ValueError('Binary integer too large')
-                    output.append(14);output.extend(varint(n));output.extend(v.to_bytes(n,'little',signed=True))
+                    output.append(14);output.extend(encode_varint(n));output.extend(v.to_bytes(n,'little',signed=True))
                 else:
-                    output.append(3);output.extend(varint(v*2 if v>=0 else -v*2-1))
+                    output.append(3);output.extend(encode_varint(v*2 if v>=0 else -v*2-1))
             elif type(v) is float:
                 if not math.isfinite(v):raise ValueError('Non-finite binary number')
                 output.append(4);output.extend(struct.pack('<d',v))
             elif isinstance(v,str):
                 if v in self.symbols:
-                    output.append(6);output.extend(varint(self.symbols[v]))
+                    output.append(6);output.extend(encode_varint(self.symbols[v]))
                 else:
                     self.symbols[v]=len(self.symbols)
-                    data=v.encode('utf-8');output.append(5);output.extend(varint(len(data)));output.extend(data)
+                    data=v.encode('utf-8');output.append(5);output.extend(encode_varint(len(data)));output.extend(data)
             elif isinstance(v,dict):
-                output.append(8);output.extend(varint(len(v)))
+                output.append(8);output.extend(encode_varint(len(v)))
                 for key,item in v.items():
                     if not isinstance(key,str):raise ValueError('Binary map keys must be strings')
                     put(key,depth+1);put(item,depth+1)
@@ -66,25 +75,28 @@ class Encoder:
                     except OverflowError:
                         exact = False
                     code, tag = ('f', 15) if exact else ('d', 10)
-                    output.append(tag);output.extend(varint(n));output.extend(struct.pack('<'+str(n)+code,*v))
+                    output.append(tag);output.extend(encode_varint(n));output.extend(struct.pack('<'+str(n)+code,*v))
                 elif n>=4 and all(type(item) is int and abs(item)<=MAX_SAFE_INTEGER for item in v):
                     varbytes = sum(max(1, ((item*2 if item>=0 else -item*2-1).bit_length()+6)//7) for item in v)
                     minimum, maximum = min(v), max(v)
                     width = 1 if maximum < 256 else 2 if maximum < 65536 else 4
                     if minimum >= 0 and maximum < 2**32 and width*n < varbytes:
                         tag, code = {1:(16,'B'), 2:(17,'H'), 4:(12,'I')}[width]
-                        output.append(tag);output.extend(varint(n));output.extend(struct.pack('<'+str(n)+code,*v))
+                        output.append(tag);output.extend(encode_varint(n));output.extend(struct.pack('<'+str(n)+code,*v))
                     else:
-                        output.append(9);output.extend(varint(n))
-                        for item in v:
-                            output.extend(varint(item*2 if item>=0 else -item*2-1))
+                        output.append(9);output.extend(encode_varint(n))
+                        if kernels.available('integer_array'):
+                            output.extend(kernels.native.integer_array(v))
+                        else:
+                            for item in v:
+                                output.extend(encode_varint(item*2 if item>=0 else -item*2-1))
                 elif n>=2 and isinstance(v[0],dict) and v[0] and all(isinstance(row,dict) and list(row)==list(v[0]) for row in v):
                     # Known-shaped entity/event records become columns, with one
                     # field table instead of a dictionary per entity.
-                    output.append(11);output.extend(varint(n));put(list(v[0]),depth+1)
+                    output.append(11);output.extend(encode_varint(n));put(list(v[0]),depth+1)
                     for key in v[0]:put([row[key] for row in v],depth+1)
                 else:
-                    output.append(7);output.extend(varint(n))
+                    output.append(7);output.extend(encode_varint(n))
                     for item in v:put(item,depth+1)
             else:raise ValueError('Unsupported binary value: '+type(v).__name__)
         put(value)
@@ -115,6 +127,7 @@ class Decoder:
             if n>MAX_RECORD:raise ValueError('Binary collection too large')
             return n
         def get(depth=0):
+            nonlocal position
             if depth>128:raise ValueError('Binary nesting too deep')
             tag=take(1)[0]
             if tag==0:return None
@@ -141,8 +154,12 @@ class Decoder:
                     result[key]=get(depth+1)
                 return result
             if tag==9:
+                n=length()
+                if kernels.available('decode_integers'):
+                    values,position=kernels.native.decode_integers(view,position,n)
+                    return values
                 result=[]
-                for _ in range(length()):
+                for _ in range(n):
                     n=uint();result.append(n//2 if n%2==0 else -(n//2)-1)
                 return result
             if tag in (10,15):

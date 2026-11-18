@@ -179,7 +179,29 @@ static PyObject *sgd(PyObject *self, PyObject *args) {
 done:
     release(views, 2); return result;
 }
+#include "_kernels_math.h"
+#include "_kernels_spatial.h"
+#include "_kernels_data.h"
+
 static PyMethodDef methods[] = {
+    {"groups", groups_native, METH_VARARGS, "Sparse native spatial group statistics."},
+    {"varint", varint_native, METH_O, "Encode a bounded unsigned integer."},
+    {"integer_array", integer_array_native, METH_O, "Encode signed integer arrays."},
+    {"decode_integers", decode_ints_native, METH_VARARGS, "Decode signed integer arrays."},
+    {"clone_tree", clone_native, METH_O, "Copy primitive replay trees."},
+    {"same_tree", same_native, METH_VARARGS, "Type/signed-zero exact replay comparison."},
+    {"resource_growth", grow_native, METH_VARARGS, "Batch resource growth, original numeric dispatch."},
+    {"flat_metabolism", metabolism_native, METH_VARARGS, "Batch flat-body costs/age/starvation."},
+    {"ray", ray_native, METH_VARARGS, "Fused visibility and water ray."},
+    {"nearest", nearest_native, METH_VARARGS, "Ordered native nearest visible target."},
+    {"group_pairs", group_pairs_native, METH_VARARGS, "Union-find of nearby animals."},
+    {"distribution", policy_distribution_native, METH_VARARGS, "Ordered softmax/log probabilities."},
+    {"ppo_loss", ppo_loss_native, METH_VARARGS, "PPO objective and gradient."},
+    {"quantile", quantile_native, METH_VARARGS, "Pairwise quantile Huber objective."},
+    {"gru_step", gru_step_native, METH_VARARGS, "GRU gates and hidden update."},
+    {"gru_backward", gru_backward_native, METH_VARARGS, "GRU BPTT accumulation."},
+    {"mlp_predict", mlp_predict_native, METH_VARARGS, "Fused dense inference."},
+    {"ppo_batch", ppo_batch_native, METH_VARARGS, "Fused PPO batch gradients and metrics."},
     {"affine", affine, METH_VARARGS, "Dense layer, optional tanh, and output range."},
     {"backward", backward, METH_VARARGS, "Accumulate dense gradients in float64 buffers."},
     {"adam", adam, METH_VARARGS, "Clipped Adam with float32 storage rounding."},
@@ -188,4 +210,4 @@ static PyMethodDef methods[] = {
     {NULL, NULL, 0, NULL}
 };
 static struct PyModuleDef module = {PyModuleDef_HEAD_INIT, "_kernels", NULL, -1, methods};
-PyMODINIT_FUNC PyInit__kernels(void) { return PyModule_Create(&module); }
+PyMODINIT_FUNC PyInit__kernels(void) { PyObject *m=PyModule_Create(&module); if(!m)return NULL; if(PyModule_AddIntConstant(m,"api_version",2)<0){Py_DECREF(m);return NULL;}return m; }

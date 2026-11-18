@@ -9,6 +9,11 @@ row. They do not change model sizes, training schedules, policy sampling or
 per-animal ownership. Python remains responsible for environment logic, replay,
 rollouts, rewards, reproduction, mutation and recording.
 
+The [second rollout report](native-kernels-v2.md) covers the current GRU,
+PPO minibatch, perception, world, replay and dashboard extensions, with benchmarks
+against the preceding native setup. The benchmark table later in this guide is
+the historical first rollout's comparison against FP32 Python code.
+
 ## Build and select
 
 From the repository root, with a C compiler and Python development headers:
@@ -51,7 +56,8 @@ summation; newer versions deliberately use Python until their reduction behavior
 has a separately verified native implementation. See the
 [Python summation change](https://docs.python.org/3.12/library/functions.html#sum).
 `native` fails explicitly on those interpreters instead of silently changing
-arithmetic. Legacy list-backed float64 brains also retain Python math.
+arithmetic. Legacy list-backed float64 parameter operations retain Python math; shared policy
+probability/objective helpers use equivalent double arithmetic when available.
 
 ## Coverage and precision
 
@@ -60,8 +66,8 @@ arithmetic. Legacy list-backed float64 brains also retain Python math.
 | DQN | Hidden/output inference, chosen output, replay gradient accumulation and SGD |
 | PPO, A2C, REINFORCE, GRPO, Maskable PPO | Shared MLP forward/backward and Adam |
 | MAPPO | Independent actor/critic MLPs and Adam |
-| QR-DQN | Network forward/backward and Adam; pairwise quantile loss remains Python |
-| Recurrent PPO | Output MLP and whole-network Adam; GRU gates/BPTT remain Python |
+| QR-DQN | Network forward/backward, pairwise quantile loss and Adam |
+| Recurrent PPO | GRU gates/BPTT, output MLP and whole-network Adam |
 
 Parameters and optimizer state keep their float32 storage. C expressions use
 double arithmetic, matching the reference's Python floats. Temporary parameter
@@ -70,8 +76,8 @@ its list-based scratch storage to avoid buffer-indexing overhead. Kernels preser
 add bias after the reduction, round moments/variances before using them in Adam,
 and disable fast-math/FMA contraction. They own no RNG or global scratch data.
 The GIL remains held: these are single-process CPU-loop improvements, not
-threading or GPU acceleration. Visibility/rivers and GRU/quantile kernels are
-separate future opportunities.
+threading or GPU acceleration. Perception, flat-world phases, replay and dashboard helpers are covered by
+the [second rollout](native-kernels-v2.md); terrain-specific physics stays Python.
 
 Checkpoints/champion/replay formats are unchanged by the kernels. Backend
 selection is a process option, not part of saved learned state. Native and Python
@@ -168,4 +174,4 @@ Final validation: **385 Python tests passed with `WTF_KERNELS=native` and
 385 with `WTF_KERNELS=python`; 50 JavaScript viewer tests passed**. Tests
 also compare decoded native/Python binary recordings across chunk boundaries.
 Documentation links and source/export diagram checks pass. The rollout is
-[0.0.0.43](releases/0.0.0.43.md), pending a user-created commit.
+[0.0.0.43](releases/0.0.0.43.md), committed in `baa5101`.

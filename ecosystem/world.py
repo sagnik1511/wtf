@@ -1,4 +1,6 @@
 """Physical state and simultaneous action resolution; no learning dependencies."""
+from . import kernels
+
 
 import copy
 import math
@@ -246,7 +248,15 @@ class World:
         if key in cache:
             cache.move_to_end(key)
             return cache[key]
-        result = self.visible(start, end)
+        maps = getattr(self, '_native_sight', None)
+        if (maps is not None and kernels.available('ray') and
+                getattr(self.visible, '__func__', None) is World.visible and
+                all(0<=p[0]<self.width and 0<=p[1]<self.height for p in (start,end))):
+            result, wet = kernels.native.ray(*start, *end, *maps, self.width, self.height)
+            self._water_sight_cache[key] = wet
+            if len(self._water_sight_cache)>VISIBILITY_CACHE_LIMIT:self._water_sight_cache.popitem(last=False)
+        else:
+            result = self.visible(start, end)
         cache[key] = result
         if len(cache) > VISIBILITY_CACHE_LIMIT:
             cache.popitem(last=False)
@@ -259,6 +269,13 @@ class World:
         if key in cache:
             cache.move_to_end(key)
             return cache[key]
+        maps=getattr(self,'_native_sight',None)
+        if (maps is not None and kernels.available('ray') and
+                all(0<=p[0]<self.width and 0<=p[1]<self.height for p in (start,end))):
+            _,count=kernels.native.ray(*start,*end,*maps,self.width,self.height)
+            cache[key]=count
+            if len(cache)>VISIBILITY_CACHE_LIMIT:cache.popitem(last=False)
+            return count
         x,y = start; tx,ty = end
         dx,dy = abs(tx-x),-abs(ty-y)
         sx,sy = (1 if x<tx else -1),(1 if y<ty else -1)
@@ -301,6 +318,16 @@ class World:
         if obstacles_changed:
             self._observed_obstacles = self.obstacles.copy()
             self._visibility_cache.clear()
+        if obstacles_changed or visibility_changed or not hasattr(self, '_native_sight'):
+            self._native_sight = None
+            self._native_sight_callback = World._perception_visible
+            if (kernels.available('nearest') and visibility_impl is World.visible and
+                    all(0<=x<self.width and 0<=y<self.height for x,y in self.obstacles)):
+                blocked=bytearray(self.width*self.height);water=bytearray(len(blocked))
+                for x,y in self.obstacles:blocked[y*self.width+x]=1
+                if self.geography:
+                    for x,y in self.geography.water:water[y*self.width+x]=1
+                self._native_sight = bytes(blocked),bytes(water)
         for index, points in zip(self._perception, ([(None, p) for p in food], prey, predators)):
             index.sync(points, self.animals.keys(), obstacles_changed or visibility_changed)
         return occupied, *self._perception
@@ -327,6 +354,7 @@ class World:
                     return True
                 allowed = radius + min(bonus,self._water_sight_cells(start,end))
                 return squared<=allowed*allowed
+            in_range._native_sight_range = (radius, bonus)
             for index in (food,prey,predators):
                 features += index.nearest(a,radius+bonus,self._perception_visible,in_range,(radius,bonus))
         else:
@@ -455,33 +483,37 @@ class World:
         attack_deaths={i for i in attacks if self.animals[i].health<=0}
         drowned=set()
         rewards = {i: 0.0 for i in self.animals}
-        for i, a in self.animals.items():
-            b = self.body(a)
-            cost = b["living_cost"]
-            if actions[i] in ("move_forward","swim"):
-                cost += b["movement_cost"]
-            if actions[i] == "attack":
-                cost += b["attack_cost"]
-            a.energy = max(0.0, a.energy - cost)
-            rewards[i] += cost*self.config["species"][a.species]["rewards"].get("per_energy_cost",0)
-            a.age += 1
-            if self.geography and a.health>0:
-                depth=self.geography.depth(a.position)
-                if depth:
-                    spec=self.config['species'][a.species];rules=spec.get('locomotion',{})
-                    self._terrain_charge(a,depth*rules.get('water_energy_cost',0.25),events,'water')
-                    minimum=rules.get('swim_min_health',b['max_health']*0.5)*depth
-                    if 'swim' not in spec['allowed_actions'] or a.health<minimum or a.energy<=0:
-                        damage=min(a.health,depth*rules.get('drowning_damage',2.0))
-                        a.health-=damage
-                        if damage:events.append(Event('damage_taken',i,amount=damage,cause='drowning'))
-                        if a.health<=0:drowned.add(i)
-            if a.energy <= 0 and a.health > 0:
-                damage = min(a.health, b["starvation_damage"])
-                a.health -= damage
-                events.append(
-                    Event("damage_taken", i, amount=damage, cause="starvation")
-                )
+        native_metabolism = (not self.geography and kernels.available('flat_metabolism') and
+            kernels.native.flat_metabolism(self.animals.values(), actions, self.config['species'],
+                                             rewards, events, Event, Animal))
+        if not native_metabolism:
+            for i, a in self.animals.items():
+                b = self.body(a)
+                cost = b["living_cost"]
+                if actions[i] in ("move_forward","swim"):
+                    cost += b["movement_cost"]
+                if actions[i] == "attack":
+                    cost += b["attack_cost"]
+                a.energy = max(0.0, a.energy - cost)
+                rewards[i] += cost*self.config["species"][a.species]["rewards"].get("per_energy_cost",0)
+                a.age += 1
+                if self.geography and a.health>0:
+                    depth=self.geography.depth(a.position)
+                    if depth:
+                        spec=self.config['species'][a.species];rules=spec.get('locomotion',{})
+                        self._terrain_charge(a,depth*rules.get('water_energy_cost',0.25),events,'water')
+                        minimum=rules.get('swim_min_health',b['max_health']*0.5)*depth
+                        if 'swim' not in spec['allowed_actions'] or a.health<minimum or a.energy<=0:
+                            damage=min(a.health,depth*rules.get('drowning_damage',2.0))
+                            a.health-=damage
+                            if damage:events.append(Event('damage_taken',i,amount=damage,cause='drowning'))
+                            if a.health<=0:drowned.add(i)
+                if a.energy <= 0 and a.health > 0:
+                    damage = min(a.health, b["starvation_damage"])
+                    a.health -= damage
+                    events.append(
+                        Event("damage_taken", i, amount=damage, cause="starvation")
+                    )
         dead = {i for i, a in self.animals.items() if a.health <= 0}
         for i in sorted(dead):
             a = self.animals[i]
@@ -534,10 +566,13 @@ class World:
                 if i in dead and penalty:events.append(Event('action_failed',i,amount=penalty,cause=action))
             a.last_reward=rewards[i]
         r = self.config["resources"]
-        for patch in self.resources.values():
-            patch.quantity = min(
-                r["capacity_per_patch"], patch.quantity + r["growth_per_step"]
-            )
+        native_growth = (kernels.available('resource_growth') and
+            kernels.native.resource_growth(self.resources.values(), Resource, r['capacity_per_patch'], r['growth_per_step']))
+        if not native_growth:
+            for patch in self.resources.values():
+                patch.quantity = min(
+                    r["capacity_per_patch"], patch.quantity + r["growth_per_step"]
+                )
         self.tick += 1
         self.events = events
         return StepResult(self.observe_all(), rewards, dead, events)

@@ -4,6 +4,14 @@
 
 Commands in this guide run from the project root.
 
+The latest [second native-kernel report](native-kernels-v2.md) compares against
+commit `baa5101` **with the existing native backend enabled**. Median additional
+180-step speedups include PPO 2.22×, recurrent PPO 21.36× and QR-DQN 4.46×.
+Replay expansion is 3.39× and dashboard summarization 1.90× faster on their saved
+fixtures. All matched checkpoints and recorded chunk bytes agree. Raw binary
+decoding is essentially unchanged (1.03×); peak RAM is not consistently lower.
+The report includes the complete tables, workload, memory tradeoffs and checks.
+
 For implemented CPU acceleration, build/backend controls and numerical boundaries,
 see [optional CPU kernels](native-kernels.md). The preceding
 [native performance review](native-performance-review.md) records the original
@@ -24,7 +32,7 @@ and [rollout 42](releases/0.0.0.42.md).
 
 The [native-kernel benchmark results](native-kernels.md#benchmark-results) compare
 three-process medians against the preceding FP32 code on 11 matched 180-step
-presets. Complete-state hashes match. Measured training-loop speedups range from
+presets. Complete-state hashes match. Those first-rollout training-loop speedups range from
 1.53× (recurrent PPO) to 12.97× (MAPPO); the valley with binary/XZ recording gains
 2.41×. Peak RSS is not consistently lower; QR-DQN rose from 26.3 to 30.6 MiB in
 these samples. See the linked report for settings, all timings, limitations and

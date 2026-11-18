@@ -1,4 +1,5 @@
 """Exact per-recorded-step dashboard data, derived without running a simulation."""
+from . import kernels
 from collections import Counter, defaultdict
 import math
 
@@ -12,6 +13,9 @@ def mean(values):
 
 def groups(animals):
     """Same-species connected components within three cells, ignoring obstacles."""
+    if kernels.available('groups'):
+        result=kernels.native.groups(animals,GROUP_RADIUS)
+        if result is not NotImplemented:return result
     parent = list(range(len(animals)))
     buckets = defaultdict(list)
     def find(i):

@@ -1,4 +1,5 @@
 """Incremental spatial windows; all state is derived and checkpoint independent."""
+from . import kernels
 import math
 from itertools import chain
 
@@ -128,6 +129,21 @@ class SpatialIndex:
         previous = self.results.get(animal_id)
         if previous is not None and previous[0] == key:
             return previous[1]
+        owner = getattr(visible, '__self__', None)
+        maps = getattr(owner, '_native_sight', None)
+        native_range = getattr(range_check, '_native_sight_range', None)
+        if (maps is not None and kernels.available('nearest') and
+                getattr(visible, '__func__', None) is getattr(owner, '_native_sight_callback', None) and
+                (range_check is None or native_range is not None)):
+            base, bonus = native_range if native_range is not None else (radius,0)
+            point = kernels.native.nearest(points, ax, ay, animal_id, radius,
+                                               *maps, owner.width, owner.height, base, bonus)
+            # CPython 3.9's compensated hypot differs from libm hypot for some
+            # integer pairs. Keep the original final feature calculation.
+            features = ([0.0,0.0,0.0,0.0] if point is None else
+                        [point[0]/radius,point[1]/radius,math.hypot(*point)/radius,1.0])
+            self.results[animal_id] = key, features
+            return features
         best, best_squared, best_order = None, float('inf'), float('inf')
         start, radius_squared = (ax, ay), radius * radius
         for order, other_id, x, y in points:

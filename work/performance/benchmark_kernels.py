@@ -24,6 +24,7 @@ CASES = {
     'qrdqn': ('qrdqn.json', False), 'maskable_ppo': ('maskable_ppo.json', False),
     'mappo': ('mappo.json', False), 'ppo_large': ('ppo_large_predator.json', False),
     'valley_record': ('enclosed_valleys.json', True),
+    'ppo_record': ('ppo.json', True),
 }
 
 
@@ -66,6 +67,12 @@ def worker(args):
         for part in json.JSONEncoder(sort_keys=True,separators=(',',':'),allow_nan=False).iterencode(experiment.checkpoint()):
             digest.update(part.encode())
         result['state_sha256']=digest.hexdigest()
+        if record:
+            replay_digest=hashlib.sha256()
+            chunks=sorted(folder.rglob('*.bin*'))
+            if not chunks:raise RuntimeError('No replay chunks found for recording comparison')
+            for chunk in chunks:replay_digest.update(chunk.read_bytes())
+            result['replay_bytes_sha256']=replay_digest.hexdigest()
     print(json.dumps(result),flush=True)
 
 
@@ -76,6 +83,7 @@ def main():
     p.add_argument('--cases',nargs='+',choices=list(CASES),default=list(CASES))
     p.add_argument('--output',type=Path,default=Path('.cache/native-build/benchmark.json'))
     p.add_argument('--reference',type=Path)
+    p.add_argument('--reference-backend',choices=['python','native'],default='python')
     p.add_argument('--backends',nargs='+',choices=['python','native'],default=['python','native'])
     p.add_argument('--worker',action='store_true',help=argparse.SUPPRESS)
     p.add_argument('--case',choices=list(CASES),help=argparse.SUPPRESS)
@@ -91,7 +99,7 @@ def main():
                 command=[sys.executable,'-m','work.performance.benchmark_kernels','--worker',
                          '--case',case,'--steps',str(args.steps)]
                 if mode=='reference':command+=['--reference',str(args.reference)]
-                env=dict(os.environ,WTF_KERNELS='python' if mode=='reference' else mode,
+                env=dict(os.environ,WTF_KERNELS=args.reference_backend if mode=='reference' else mode,
                          PYTHONDONTWRITEBYTECODE='1')
                 run=subprocess.run(command,env=env,capture_output=True,text=True)
                 if run.returncode:
@@ -107,6 +115,8 @@ def main():
         samples=[s for s in results if s['case']==case]
         if len({s['state_sha256'] for s in samples})!=1:
             raise RuntimeError(f'Complete state differs across backends/repeats: {case}; raw samples retained')
+        replay_hashes={s['replay_bytes_sha256'] for s in samples if 'replay_bytes_sha256' in s}
+        if len(replay_hashes)>1:raise RuntimeError(f'Replay bytes differ: {case}')
         row={mode:{key:statistics.median(s[key] for s in samples if s['mode']==mode)
                    for key in ('seconds','initialization_seconds','peak_rss_mib','output_bytes')}
              for mode in modes}
@@ -114,6 +124,7 @@ def main():
             row['speedup_vs_python']=row['python']['seconds']/row['native']['seconds']
         if 'reference' in row and 'native' in row:
             row['speedup_vs_reference']=row['reference']['seconds']/row['native']['seconds']
+        if replay_hashes:row['replay_bytes_sha256']=next(iter(replay_hashes))
         row['state_sha256']=samples[0]['state_sha256'];row['updates']=samples[0]['updates']
         row['completed_steps']=samples[0]['completed_steps'];summary[case]=row
     report=dict(status='complete',python=platform.python_version(),platform=platform.platform(),
