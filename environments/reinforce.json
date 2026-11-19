@@ -131,9 +131,7 @@
     "small_reinforce": {
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "learning_rate": 0.001,

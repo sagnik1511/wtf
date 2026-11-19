@@ -19,10 +19,16 @@ rather than loading every document or result into context.
   state. Rare birth mutation changes only that child. Preserve RNG isolation
   and exact checkpoint continuation when changing these paths. Champion pools,
   model loading and run-to-run chaining are species/sex-specific; never substitute
-  a known opposite-sex winner for an unavailable group.
+  a known opposite-sex winner for an unavailable group. Fresh experiments retain
+  best-so-far ranks and only replace a champion on strict improvement, including
+  existing tie-breakers. Keep old-checkpoint resume behavior explicit. Champion
+  metadata is JSON; version-3 weights use a shared content-addressed binary/XZ
+  pool. Preserve legacy artifact loading and relative-path portability.
 - Terrain is opt-in. Preserve flat observation version 1 (20 inputs); terrain
   version 2 has 32 inputs and a distinct model contract. Optional version 3 adds
-  mating readiness for 42 inputs, with terrain padding on flat maps. Preserve
+  mating readiness for 42 inputs, with terrain padding on flat maps. These sizes
+  assume default `observation_top_k: 1`; each extra slot adds 12 inputs. Include k
+  in model compatibility and preserve nearest-only legacy signatures. Preserve
   RNG-free observation/mask eligibility and reject incompatible saved weights.
   Keep map geometry in
   metadata, not repeated frames. GRPO may share read-only geography, while bodies,
@@ -44,6 +50,28 @@ Use `.venv/bin/python` and install runtime dependencies only in `.venv`.
 dependency. Preserve progress reporting during training. Prefer code inspection
 for optimization requests; do not start profiling or expensive training without
 scope that calls for it.
+
+### Mandatory formatting after development updates
+
+After every code-changing development update, run the formatters over **all
+project source files**, including tracked files and new non-ignored source files,
+even when only one file changed. Format before final validation and before
+reporting the update complete. Follow [the formatting workflow](docs/development.md#mandatory-formatting).
+
+- Python: Black, including simulation, tests and `work/` tools.
+- C/C++ and CPython extensions: clang-format, including native headers.
+- JavaScript (`.js`, `.mjs`, `.cjs`), CSS, HTML and maintained JSON: Prettier.
+- Shell scripts: shfmt, preserving each script's shell dialect.
+
+Exclude virtual environments, dependencies, results, checkpoints/model archives,
+build products, caches and generated documentation/media. Preserve existing
+formatter configuration; formatting must not change program behavior or rewrite
+generated assets. Keep formatter dependencies isolated in the project's dev
+environment. If a formatter is unavailable or fails, resolve it when authorized
+or report the exact blocker; never silently skip a language or claim success.
+Run the corresponding check modes after formatting; if validation needs another
+code edit, repeat formatting and the relevant checks. Include formatting status
+in the final handoff. Documentation-only edits use documentation validation.
 
 Inspect `git status` before editing and preserve existing work. Select relevant
 checks from [development](docs/development.md). The standard suites are:

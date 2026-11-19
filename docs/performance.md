@@ -4,6 +4,57 @@
 
 Commands in this guide run from the project root.
 
+Champion exports now use lossless binary/XZ arrays and a content-addressed shared
+weight directory. A measured deep-river archive fell from 8.66 MB to 0.62 MB
+(92.8% smaller); a subsequent unchanged archive wrote zero new weight bytes.
+See [measurement and compatibility](binary-storage.md#champion-storage-measurement).
+An export-local identity cache reuses serialization references for shared,
+immutable snapshots; it is bounded by distinct champion models in that export
+and discarded afterward. It never caches live controller parameters or enters
+checkpoints. No training throughput/RAM improvement is claimed for this change.
+
+## Recent export and inspector work
+
+Champion export now serializes and hashes each shared configuration object once
+per export, alongside the existing immutable-model reference reuse. The cache key
+is object identity; it keeps strong references until export returns, is bounded
+by the distinct configurations in that generation and is then discarded. A later
+export always reads current values. Different historical training configurations
+remain separate, and equal serialized configurations still share the same file.
+JSON bytes, model blobs, artifact identities and compatibility are unchanged.
+
+The inspector builds its recent-prediction chart only when its disclosure opens.
+It processes each sample once when building that chart and reuses the chart when
+closed/reopened until the diagnostic sample changes. Closed panels retain only
+the existing bounded score history, without allocating SVG dots for it. Collecting
+samples validates finite scores without constructing full bar-layout objects.
+Current radar and action bars, expanded-state persistence, the 64-score-vector
+limit, chunk loading and backward-seek filtering are unchanged.
+
+Operation-count tests cover one configuration serialization per identity, exact
+configuration/model round trips and fresh values after a later export. Viewer
+checks cover deferred rendering, one score pass, reopen reuse, mixed score types
+and signed/zero scales. No profiling or throughput/peak-RAM benchmark was run,
+so these are removed operations rather than measured speedup percentages.
+
+A remaining training candidate is `SpatialIndex.nearest_many(k>1)`: candidate
+filtering/sorting runs in Python rather than the fused native nearest-target
+selector used for k=1. Visibility rays can already use native code. A future
+top-k kernel needs exact distance/insertion ties, wall/water filtering and cache
+invalidation parity; it is not part of this optimization.
+
+## Earlier optimizations and measurements
+
+Lineage accounting now allocates a founder-family dictionary only on first use.
+Champion comparisons request rank tuples without diagnostic dictionaries; full,
+detached family metadata is generated only for final lineage winners. No new
+cache or checkpoint state is introduced. In a 60-animal accounting/ranking probe
+(500 passes, seven alternating samples, baseline `65345bf`), median time fell
+from 0.15828 s to 0.09859 s (37.7%). This measures that path, not end-to-end
+training speed or peak RAM. Forty-step seed-42 checkpoint comparisons matched
+across all nine algorithms and the mixed meandering-river preset. See
+[rollout 0.0.1.5](releases/0.0.1.5.md) for scope and verification.
+
 The latest [second native-kernel report](native-kernels-v2.md) compares against
 commit `baa5101` **with the existing native backend enabled**. Median additional
 180-step speedups include PPO 2.22×, recurrent PPO 21.36× and QR-DQN 4.46×.

@@ -79,11 +79,11 @@ Each invocation creates a unique folder inside `results/` containing:
 - `playback/recording.json`: versioned recording manifest and static layout per run.
 - `playback/run_0001_chunk_000000.bin.xz`, etc.: independently decodable binary frame chunks (older JSON layouts remain readable).
 
-Pass `--output PATH` to choose another result directory. Trained champion weights are stored inside that experiment under `champions/run_0001/`, etc.; see [saved brains](brain-library.md) for loading them and changing archive settings. Generated results and optional shared libraries are ignored by Git.
+Pass `--output PATH` to choose another result directory. Champion metadata is stored under `champions/run_0001/`, etc., and references shared weight blobs in `champions/models/`; see [saved brains](brain-library.md) for loading them and changing archive settings. Generated results and optional shared libraries are ignored by Git.
 
 ## Randomized and reproducible runs
 
-Example environments default to `"world_seed_policy": "random"`. Each fresh CLI invocation gets a new random seed stream, and every run in that experiment gets a distinct seed. Positions, resource locations, obstacle layouts and conflict outcomes vary. Newly initialized species base brains and individual exploration streams vary too. Animals receive independent copies of their species' starting weights. `chain_best_brains: true` (the default) promotes the previous run's chosen champions into the next world; `--no-chain-brains` restores the experiment's original starting models each time.
+Example environments default to `"world_seed_policy": "random"`. Each fresh CLI invocation gets a new random seed stream, and every run in that experiment gets a distinct seed. Positions, resource locations, obstacle layouts and conflict outcomes vary. Newly initialized species base brains and individual exploration streams vary too. Animals receive independent copies of their species' starting weights. `chain_best_brains: true` (the default) promotes the matching best-so-far champions into the next world (strict improvement by default; see [retention](brain-library.md#promote-only-improvements)); `--no-chain-brains` restores the experiment's original starting models each time.
 
 The three policies are:
 
@@ -107,6 +107,64 @@ For reproducible comparisons, `--seed 42` automatically selects `increment` unle
 ```
 
 Actual world seeds are printed, written to `run_seeds.json` as runs start, and stored with recordings and summaries. `manifest.json` also records the experiment's randomization seed. The viewer's run selector displays each recorded world seed. Checkpoints preserve the seed generator state, so restoring continues the same future seed sequence and learning trajectory, rather than starting a fresh random sequence. Old deterministic checkpoints remain supported. To compare configurations, use the same explicit base seed and policy and repeat with several seeds. Layouts differ when obstacle or population settings differ, even with the same seed.
+
+## Stop on performance plateaus
+
+![Completed-run patience resets on any monitored champion rank improvement and survives resume](assets/diagrams/early-stopping-patience.svg)
+
+Early stopping is optional and disabled by default. Set a patience in completed
+training runs. Stop only after that many consecutive runs fail to improve a
+monitored champion's **full existing rank**, including tie-breakers.
+
+```sh
+# Stop after 10 runs without predator progress (maximum 100 runs).
+.venv/bin/python -m ecosystem.cli environments/river_crossing_strong_predator_deep.json \
+  --runs 100 --seed 100 --progress \
+  --early-stop-runs 10 --early-stop-species predator
+
+# Watch prey instead: --early-stop-species prey
+# With no species restriction, any species' selected champion can reset patience.
+.venv/bin/python -m ecosystem.cli environments/river_crossing_strong_predator_deep.json \
+  --runs 100 --seed 100 --progress --early-stop-runs 10
+```
+
+The JSON equivalent belongs inside `experiment`:
+
+```json
+"early_stopping": {
+  "patience_runs": 10,
+  "species": ["predator"]
+}
+```
+
+Omit `species` to monitor all configured species, or list several names. The CLI
+flag can repeat, e.g. `--early-stop-species prey --early-stop-species predator`.
+Explicit CLI species replace any JSON list. `--early-stop-runs 0` disables the
+feature. A species-only flag needs patience supplied by JSON or the CLI.
+
+Each watched species/sex uses its selected `--champion`/`--brain` criterion,
+including sex-specific overrides. **Any** improvement in the monitored groups
+resets the shared counter. Updates to unused archive criteria, optimizer counters,
+losses or weight bytes do not count. Exact rank ties and lower ranks use patience.
+Names are actual species keys, supporting custom multi-species configurations.
+
+A fresh first run establishes the baseline. With patience 2, two subsequent
+unchanged runs stop at run 3. A comparable typed warm-start champion establishes
+a known baseline before run 1, so an unchanged first run already uses patience.
+The monitor keeps its own best ranks even with per-episode promotion enabled;
+`--no-chain-brains` can still reset brains independently each episode. Evaluation
+and random modes do not update the training patience counter.
+
+The stop happens at the completed run boundary. Its replay, champion archive,
+metrics, summary and final exact checkpoint are saved normally. The CLI prints
+the reason, and `early_stopping.json` plus per-run summary metadata record the
+counter, monitored criteria and ranks. Checkpoints preserve that counter across
+mid-run or completed-run resumes. A completed early stop stays completed on
+resume; start a new warm-start experiment to change its settings or continue.
+Existing checkpoints without the feature configured keep it disabled.
+
+Changing seeds/opponents can affect these observed ranks. This is a practical
+training budget rule, not statistical evidence of convergence or generalization.
 
 ## Resume an exact experiment
 
@@ -132,6 +190,11 @@ Older plain/compact JSON checkpoints remain readable.
 `Experiment.restore(...)`; do not pass a serialized envelope directly to restore.
 Old `.json` and `.json.gz` paths also resolve a converted binary counterpart
 when the original is absent. Loading still decodes a complete state in memory.
+
+Champion retention does not suppress numbered full-resume checkpoints: these
+still follow `experiment.checkpoint_every_runs`, and the final checkpoint retains
+the latest continuation state. Champion weights contain only reusable models;
+resume checkpoints also contain optimizer/RNG state and experience buffers.
 
 Checkpoints include the world, counters, private replay buffers, online/target weights, and policy/training/world random-generator states. They use versioned typed records (or legacy JSON), not executable pickle files. Resume continues remaining runs from the saved experiment; a completed experiment stays completed.
 

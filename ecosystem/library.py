@@ -12,6 +12,7 @@ import uuid
 
 from .brains import model_signature, model_snapshot
 from .lineage import LineageBook, lineage_policy
+from .model_io import read_model, write_model, model_path, publish_models
 
 PROJECT = Path(__file__).resolve().parent.parent
 DEFAULT_LIBRARY = PROJECT / "brain_library"
@@ -96,7 +97,7 @@ class ChampionBook:
             )
             selected = winners.setdefault((animal.species, animal.sex), {})
             scores = ranks(animal)
-            scores["lineage"] = self.lineage.rank(animal)[0]
+            scores["lineage"] = self.lineage.rank(animal, include_metadata=False)[0]
             if self.config["species"][animal.species]["diet"] == "prey":
                 if animal.species not in policies:
                     policies[animal.species] = balanced_policy(
@@ -192,7 +193,7 @@ def catalog(root=DEFAULT_LIBRARY):
 
 def read_artifact(path):
     artifact = json.loads(Path(path).read_text())
-    if artifact.get("brain_artifact_version") not in (1, 2):
+    if artifact.get("brain_artifact_version") not in (1, 2, 3):
         raise ValueError(f"Unsupported saved-brain format: {path}")
     if artifact.get("criterion") not in CRITERIA:
         raise ValueError(f"Invalid saved-brain criterion: {path}")
@@ -207,11 +208,46 @@ def read_artifact(path):
     if not isinstance(artifact["source"], dict) or "species" not in artifact["source"]:
         raise ValueError(f"Missing saved-brain species: {path}")
     if (
-        artifact["brain_artifact_version"] == 2
+        artifact["brain_artifact_version"] in (2, 3)
         and artifact["source"].get("sex") not in SEXES
     ):
         raise ValueError(f"Missing saved-brain sex: {path}")
+    if artifact["brain_artifact_version"] == 3:
+        artifact["model"] = read_model(path, artifact["model"])
+        archive_root = Path(path).resolve().parents[2]
+        config_file = artifact.get("training_config_file", "training_config.json")
+        if config_file != "training_config.json" and not re.fullmatch(
+            r"configs/[0-9a-f]{64}\.json", config_file
+        ):
+            raise ValueError("Invalid champion configuration reference")
+        config_path = (archive_root / config_file).resolve()
+        if archive_root not in config_path.parents:
+            raise ValueError("Champion configuration outside archive")
+        artifact["training_config"] = json.loads(config_path.read_text())
     return artifact
+
+
+def initial_champions(config, models):
+    """Seed known warm-start performance; never guess missing legacy ranks."""
+    entries = {}
+    for species, groups in models.items():
+        for sex, initial in groups.items():
+            entry = initial.get("champion")
+            if entry is not None and entry.get("source", {}).get("sex") == sex:
+                metric = entry["criterion"]
+                if metric in ("balanced", "lineage"):
+                    policy_function = (
+                        balanced_policy if metric == "balanced" else lineage_policy
+                    )
+                    policy = policy_function(config, species)
+                    if entry.get("selection_policy") != policy:
+                        continue
+                entries.setdefault(species, {})[sex] = {
+                    metric: dict(
+                        copy.deepcopy(entry), model=copy.deepcopy(initial["model"])
+                    )
+                }
+    return entries
 
 
 def sex_models(models):
@@ -315,6 +351,25 @@ def load_initial_models(config, root=DEFAULT_LIBRARY):
                     model_generation=artifact["model_generation"],
                 ),
             )
+            entry["champion"] = {
+                key: copy.deepcopy(artifact[key])
+                for key in (
+                    "criterion",
+                    "score",
+                    "rank",
+                    "source",
+                    "selection_policy",
+                    "lineage",
+                    "training_config",
+                )
+                if key in artifact
+            }
+            entry["provenance"]["rank"] = list(artifact["rank"])
+            entry["champion_parent"] = copy.deepcopy(artifact.get("parent_artifact"))
+            entry["champion_origin"] = {
+                key: copy.deepcopy(artifact.get(key))
+                for key in ("experiment_id", "run_complete", "continued_from_run")
+            }
             if artifact["criterion"] == "lineage":
                 entry["provenance"]["lineage_qualified"] = artifact.get(
                     "lineage", {}
@@ -525,8 +580,8 @@ def apply_champion_overrides(config, requests=()):
 def export_champions(experiment, destination, root=None, label=None):
     """Publish a complete generation atomically; never overwrite old models.
 
-    Artifacts contain weights and metadata only, never replay/optimizer/RNG
-    buffers. By default models live beside their run-local index, making the
+    Artifact JSON references deduplicated lossless weights and configuration;
+    neither includes replay/optimizer/RNG buffers. By default models live beside their run-local index, making the
     experiment folder self-contained. An explicit root publishes a shared copy.
     """
     if not experiment.champions.entries:
@@ -557,6 +612,9 @@ def export_champions(experiment, destination, root=None, label=None):
         label=label,
         entries=[],
     )
+    artifact_provenance = {}
+    model_references = {}  # Immutable snapshots; bounded to this export call.
+    config_references = {}  # Strong references prevent identity reuse during export.
     try:
         for species, groups in experiment.champions.entries.items():
             for sex, champions in groups.items():
@@ -566,17 +624,34 @@ def export_champions(experiment, destination, root=None, label=None):
                     .get("provenance")
                 )
                 for criterion, entry in champions.items():
+                    previous = (
+                        experiment.champion_artifacts.get(species, {})
+                        .get(sex, {})
+                        .get(criterion)
+                    )
+                    retained = bool(
+                        experiment.improvement_only
+                        and previous
+                        and previous.get("rank") == list(entry["rank"])
+                    )
                     artifact_id = (
-                        f"{generation}:{_component(species)}:{sex}:{criterion}"
+                        previous["artifact_id"]
+                        if retained
+                        else f"{generation}:{_component(species)}:{sex}:{criterion}"
                     )
                     artifact = dict(
-                        brain_artifact_version=2,
+                        brain_artifact_version=3,
                         artifact_id=artifact_id,
-                        model_generation=(initial["model_generation"] if initial else 0)
-                        + 1,
-                        parent_artifact=copy.deepcopy(initial),
+                        model_generation=(
+                            previous["model_generation"]
+                            if retained
+                            else (initial["model_generation"] if initial else 0) + 1
+                        ),
+                        parent_artifact=copy.deepcopy(
+                            previous.get("parent_artifact") if retained else initial
+                        ),
                         experiment_id=label,
-                        training_config=experiment.config,
+                        training_config_file="training_config.json",
                         run_complete=experiment.finished_run,
                         continued_from_run=(
                             experiment.run_index
@@ -594,6 +669,46 @@ def export_champions(experiment, destination, root=None, label=None):
                         ),
                         **entry,
                     )
+                    if retained:
+                        for key in (
+                            "experiment_id",
+                            "run_complete",
+                            "continued_from_run",
+                        ):
+                            if key in previous:
+                                artifact[key] = previous[key]
+                    training_config = artifact.pop("training_config", experiment.config)
+                    config_key = id(training_config)
+                    if config_key not in config_references:
+                        config_text = (
+                            json.dumps(
+                                training_config, separators=(",", ":"), allow_nan=False
+                            )
+                            + "\n"
+                        )
+                        config_digest = hashlib.sha256(config_text.encode()).hexdigest()
+                        config_file = f"configs/{config_digest}.json"
+                        config_path = staging / config_file
+                        if not config_path.exists():
+                            config_path.parent.mkdir(parents=True, exist_ok=True)
+                            config_path.write_text(config_text)
+                        config_references[config_key] = training_config, config_file
+                    artifact["training_config_file"] = config_references[config_key][1]
+                    model_key = id(entry["model"])
+                    if model_key not in model_references:
+                        model_references[model_key] = write_model(
+                            entry["model"], staging, root / "models"
+                        )
+                    artifact["model"] = model_references[model_key]
+                    artifact_provenance[artifact_id] = {
+                        key: artifact[key]
+                        for key in (
+                            "parent_artifact",
+                            "experiment_id",
+                            "run_complete",
+                            "continued_from_run",
+                        )
+                    }
                     relative = Path(_component(species)) / sex / (criterion + ".json")
                     target = staging / relative
                     target.parent.mkdir(parents=True, exist_ok=True)
@@ -613,6 +728,7 @@ def export_champions(experiment, destination, root=None, label=None):
                             file=relative.as_posix(),
                             source=entry["source"],
                             model_generation=artifact["model_generation"],
+                            improved=not retained,
                         )
                     )
                     if criterion in ("balanced", "lineage"):
@@ -624,6 +740,7 @@ def export_champions(experiment, destination, root=None, label=None):
         (staging / "manifest.json").write_text(
             json.dumps(manifest, indent=2, allow_nan=False) + "\n"
         )
+        publish_models(staging, root / "models")
         staging.rename(final)
     finally:
         if staging.exists():
@@ -652,7 +769,9 @@ def export_champions(experiment, destination, root=None, label=None):
                 score=entry["score"],
                 sex=entry["sex"],
                 model_generation=entry["model_generation"],
-                source_run=experiment.run_index + 1,
+                source_run=entry["source"].get("run", experiment.run_index + 1),
+                rank=list(entry["rank"]),
+                **artifact_provenance[entry["artifact_id"]],
             )
     return final
 
@@ -677,6 +796,12 @@ def localize_champions(index_path):
     else:
         staging.mkdir()
         try:
+            for auxiliary in ("models", "configs", "training_config.json"):
+                path = origin / auxiliary
+                if path.is_dir():
+                    shutil.copytree(path, staging / auxiliary)
+                elif path.is_file():
+                    shutil.copyfile(path, staging / auxiliary)
             for entry in source["entries"]:
                 path = (origin / entry["file"]).resolve()
                 target = (staging / entry["file"]).resolve()
@@ -684,6 +809,17 @@ def localize_champions(index_path):
                     raise ValueError("Champion path outside archive")
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(path, target)
+                metadata = json.loads(path.read_text())
+                if metadata.get("brain_artifact_version") == 3:
+                    weight = model_path(path, metadata["model"])
+                    destination_weight = (
+                        index_path.parent / "models" / weight.name
+                    ).resolve()
+                    if index_path.parent not in destination_weight.parents:
+                        raise ValueError("Champion weights outside destination")
+                    destination_weight.parent.mkdir(parents=True, exist_ok=True)
+                    if not destination_weight.exists():
+                        shutil.copyfile(weight, destination_weight)
             (staging / "manifest.json").write_text(json.dumps(source, indent=2) + "\n")
             staging.rename(final)
         finally:

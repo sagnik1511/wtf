@@ -554,6 +554,8 @@ class World:
     def observe(self, a, context=None):
         body = self.body(a)
         radius = body["vision_radius"]
+        template = self.config["brains"][self.config["species"][a.species]["brain"]]
+        top_k = template.get("observation_top_k", 1)
         occupied, food, prey, predators = (
             self._observation_context() if context is None else context
         )
@@ -585,20 +587,20 @@ class World:
 
             in_range._native_sight_range = (radius, bonus)
             for index in (food, prey, predators):
-                features += index.nearest(
+                features += index.nearest_many(
                     a,
                     radius + bonus,
                     self._perception_visible,
+                    top_k,
                     in_range,
                     (radius, bonus),
                 )
         else:
-            features += food.nearest(a, radius, self._perception_visible)
-            features += prey.nearest(a, radius, self._perception_visible)
-            features += predators.nearest(a, radius, self._perception_visible)
-        version = self.config["brains"][self.config["species"][a.species]["brain"]].get(
-            "observation_version", 1
-        )
+            for index in (food, prey, predators):
+                features += index.nearest_many(
+                    a, radius, self._perception_visible, top_k
+                )
+        version = template.get("observation_version", 1)
         if version >= 2:
             features += (
                 self.geography.features(a, DIRECTIONS) if self.geography else [0.0] * 12

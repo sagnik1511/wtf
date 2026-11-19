@@ -136,9 +136,7 @@
     "small_grpo": {
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "learning_rate": 0.001,
@@ -157,9 +155,7 @@
     },
     "small_q": {
       "type": "q_network",
-      "hidden_layers": [
-        16
-      ],
+      "hidden_layers": [16],
       "learning_rate": 0.003,
       "discount_factor": 0.98,
       "batch_size": 8,

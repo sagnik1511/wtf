@@ -47,8 +47,15 @@ The effective configuration is captured with results. Later edits affect a new i
 Flat maps remain the default. Optional `river_crossing.json`, `highlands.json`
 and `enclosed_valleys.json` environments select editable map files under `maps/`.
 `river_crossing_ppo.json` uses the same river with PPO for both species.
+For three-layer prey `[64, 32, 16]`, four-layer predators `[128, 96, 64, 32]`
+and longer predator sight, use
+[`river_crossing_strong_predator_deep.json`](../environments/river_crossing_strong_predator_deep.json).
+The earlier `river_crossing_strong_predator.json` keeps prey `[16]` and predators
+`[128, 64]`;
+see the [river preset details](geography.md#river-crossing-with-stronger-predator-capacity).
 Rivers require swimming, currents carry animals, and elevation adds climbing
-costs and limits. Terrain-enabled brains use observation version 2 (32 features).
+costs and limits. Terrain-enabled brains use observation version 2 (32 features with default k=1;
+both enhanced river presets use k=4 for 68 features).
 See [geography](geography.md) for map syntax, locomotion settings and model
 compatibility. These presets still contain one prey species and one predator.
 
@@ -78,6 +85,7 @@ the model signature, so start fresh or load matching saved weights.
 | Species colors | `species.<name>.display.color`, `.display.male_color` |
 | Body health/energy | `species.<name>.body` |
 | Perception radius | `species.<name>.body.vision_radius` |
+| Visible targets per category | `brains.<template>.observation_top_k` (1–16, default 1; [input layout](observations.md)) |
 | Sight extension across water | `species.<name>.body.water_vision_bonus` ([directional sight](geography.md#directional-sight-across-water)) |
 | Food supply/regrowth | `resources` |
 | Founder zones and boundary food | `placement` ([layout guide](geography.md#enclosed-valley-starting-layout)) |
@@ -88,6 +96,8 @@ the model signature, so start fresh or load matching saved weights.
 | Model and training algorithm | `species.<name>.brain` and the referenced `brains` template |
 | Predator survival + kill selection | `species.predator.champion_selection` ([scoring rule](brain-library.md#balance-predator-kills-and-survival)) |
 | Family success and biological generations | `species.<name>.champion_selection.criterion: "lineage"`, optional `lineage_min_age_steps`, or `--champion SPECIES[:SEX]=lineage` ([scoring rule](brain-library.md#select-successful-biological-lineages)) |
+| Stop after stagnant runs | `experiment.early_stopping.patience_runs`, optional `.species` ([guide](running.md#stop-on-performance-plateaus)) |
+| Strict best-so-far champions | `experiment.promote_only_improved` (default `true`; exact rank ties retain the incumbent) |
 | Cross-run inheritance | `experiment.chain_best_brains` (default `true`), or `--no-chain-brains` |
 | Reject provisional lineage replacements | `experiment.guard_lineage_chaining` (default `true` for fresh experiments; [details](mating-observations.md#guard-provisional-lineage-winners)) |
 | Initial learned weights | `species.<name>.initial_brain` ([guide](brain-library.md)) |

@@ -105,7 +105,7 @@ def main():
         "--chain-brains",
         dest="chain_brains",
         action="store_true",
-        help="Initialize later runs from the previous run's champions (default)",
+        help="Initialize later runs from matching best-so-far champions (default)",
     )
     chain.add_argument(
         "--no-chain-brains",
@@ -114,6 +114,18 @@ def main():
         help="Reset every run to the original starting models",
     )
     parser.set_defaults(chain_brains=None)
+    parser.add_argument(
+        "--early-stop-runs",
+        type=int,
+        help="Stop after K consecutive runs without a selected champion improvement; 0 disables",
+    )
+    parser.add_argument(
+        "--early-stop-species",
+        action="append",
+        default=None,
+        metavar="SPECIES",
+        help="Monitor this species (repeat to monitor several); default: any configured species",
+    )
     args = parser.parse_args()
     if args.resume:
         if (
@@ -127,6 +139,8 @@ def main():
                     args.brains_from,
                     args.brain_run,
                     args.chain_brains,
+                    args.early_stop_runs,
+                    args.early_stop_species,
                 )
             )
             or args.brain
@@ -151,6 +165,16 @@ def main():
             config["experiment"]["world_seed_policy"] = args.seed_policy or "increment"
         elif args.seed_policy is not None:
             config["experiment"]["world_seed_policy"] = args.seed_policy
+        if args.early_stop_runs is not None or args.early_stop_species is not None:
+            stop = config["experiment"].setdefault("early_stopping", {})
+            if args.early_stop_runs is not None:
+                stop["patience_runs"] = args.early_stop_runs
+            if args.early_stop_species is not None:
+                stop["species"] = args.early_stop_species
+            if "patience_runs" not in stop:
+                parser.error(
+                    "--early-stop-species needs --early-stop-runs or configured patience_runs"
+                )
         try:
             apply_brain_overrides(
                 config,
@@ -197,6 +221,8 @@ def main():
                 for spec in experiment.config["species"].values()
             ),
             "guard_lineage_chaining": experiment.guard_lineage_chaining,
+            "promote_only_improved": experiment.improvement_only,
+            "early_stopping": experiment.config["experiment"].get("early_stopping"),
             "playback_recording": not args.no_record
             and settings(experiment.config)["enabled"],
         },
@@ -285,9 +311,14 @@ def run_experiment(
             writer.writerow(row)
 
         record(experiment.world.metrics())
-        if recorder is not None:
+        if recorder is not None and (
+            not experiment.finished_run
+            or (experiment.done and not experiment.early_stopping.stopped)
+        ):
+            # Retain the legacy final-frame view for ordinary completed resumes,
+            # while skipping already-finished episodes before the next run.
             recorder.begin_run(experiment)
-        if progress is not None:
+        if progress is not None and not experiment.finished_run:
             progress.start(experiment)
         while not experiment.done:
             if experiment.finished_run:
@@ -333,6 +364,12 @@ def run_experiment(
                     f"Run {run} (seed {experiment.world.seed}): {experiment.world.metrics()}",
                     flush=True,
                 )
+                if experiment.early_stopping.stopped:
+                    print(
+                        f"Early stopping after run {run}: no selected champion improvement "
+                        f"for {experiment.early_stopping.stagnant_runs} consecutive runs.",
+                        flush=True,
+                    )
                 if (
                     not experiment.done
                     and run % experiment.config["experiment"]["checkpoint_every_runs"]
@@ -345,6 +382,8 @@ def run_experiment(
                 handle.flush()
     save("run_seeds.json", experiment.run_seeds)
     save("summary.json", experiment.summaries)
+    if experiment.early_stopping.patience:
+        save("early_stopping.json", experiment.early_stopping.checkpoint())
     experiment.write_checkpoint(folder / ("checkpoints/final" + suffix))
 
 

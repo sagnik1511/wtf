@@ -4,6 +4,47 @@
 
 Commands in this guide run from the project root.
 
+## Promote only improvements
+
+Fresh experiments default to `experiment.promote_only_improved: true`.
+Champions retain the **best observed rank so far** across the experiment for
+independent species/sex/criterion groups. A candidate replaces a record only
+when its full existing rank tuple is strictly higher, including its documented
+tie-breakers. An exactly equal rank keeps the incumbent weights. This applies
+to every tracked criterion; the chosen `--champion`/`--brain` criterion determines
+which group's record initializes the next episode.
+
+For example, a predator kill champion with 11 kills cannot be replaced by an
+8-kill candidate. Equal kills can still improve a secondary ranking field, such
+as lifespan. Loaded typed champions seed their recorded criterion/rank, so the
+first new episode must improve that record too. An unchanged winner retains its
+artifact ID and model generation. A lineage ledger still resets for each new
+world; retained champion snapshots keep their original run/family provenance.
+
+Every numbered run has a small index of the best models available at that point.
+Entries mark `improved: false` when they retain an earlier record; source run and
+animal metadata identify where the weights were actually acquired. Selecting
+`--brain-run N` therefore selects the best-so-far archive as of N. Weights are not
+written again for an unchanged champion. `--no-chain-brains` restarts each world
+from the configured initial models while still tracking archive records.
+
+Set `experiment.promote_only_improved: false` to restore per-episode champion
+replacement. Old checkpoints without the effective `improvement_only` field keep
+their previous behavior on exact resume; fresh invocations and warm starts use
+the new default. The experiment manifest/checkpoint records the effective flag.
+A running Python process keeps the implementation it already loaded.
+
+Optional [early stopping](running.md#stop-on-performance-plateaus) watches the
+selected species/sex criteria and stops after a configurable number of runs with
+no new rank record. It does not count optimizer updates or unused archive criteria.
+
+These are observed episode records, not frozen-policy evaluations across matched
+worlds. Different seeds, opponent policies and survival conditions can affect
+rank; strict retention prevents rank regression but does not prove generalization.
+
+
+## Tracked champion criteria
+
 Training automatically tracks four independent champions for each sex within every species:
 `health` (highest HP), `kills` (most individual kills), `lifespan` (oldest age
 reached) and `food` (most actual energy gained from food or prey). Prey cannot
@@ -88,9 +129,9 @@ Use `--champion` to choose later-run winners without loading starting weights:
 ```
 
 This preset starts fresh with A2C prey and GRPO predators. Run 1 starts with its
-configured initialization; subsequent runs use the previous run's matching
-species/sex lineage winners, retaining a previous qualified brain when a new
-winner is unqualified. See [guarded promotion](mating-observations.md#guard-provisional-lineage-winners).
+configured initialization; subsequent runs use matching species/sex best-so-far
+lineage winners. The earlier qualified-lineage guard also remains available
+when strict retention is disabled. See [guarded promotion](mating-observations.md#guard-provisional-lineage-winners).
 `--runs 1` still archives those winners for later
 use. `--no-chain-brains` disables promotion while preserving the archives.
 `--champion prey:male=food` selects a different male criterion; sex-specific
@@ -173,15 +214,25 @@ or a self-sustaining ecosystem.
 
 ## Brains belong to their run
 
-Each completed training run saves its own champions. There is no need to track
+Each completed training run indexes its best-so-far champions. There is no need to track
 which separate model-library generation contains a result:
 
 ```text
 results/<run-name>/champions/run_0001.json
 results/<run-name>/champions/run_0001/manifest.json
+results/<run-name>/champions/models/<sha256>.bin.xz
+results/<run-name>/champions/run_0001/configs/<sha256>.json
 results/<run-name>/champions/run_0001/prey/{female,male}/{health,kills,lifespan,food,lineage}.json
 results/<run-name>/champions/run_0001/predator/{female,male}/{health,kills,lifespan,food,balanced,lineage}.json
 ```
+
+New version-3 champion JSON files contain metadata and a reference to lossless
+binary/XZ model weights in the shared `champions/models/` directory. Identical
+weights across criteria or episodes share one file. Training configuration is
+stored once per distinct configuration in the numbered generation's `configs/`
+directory. The loader returns the same full model structure to callers; old
+version-1/2 inline-JSON weights remain readable. Keep the shared models directory
+when copying an experiment; a single new JSON artifact alone is insufficient.
 
 The experiment folder is self-contained. Moving it keeps its models usable.
 Experiments with several numbered runs keep separate `run_0002`, `run_0003`, etc.
@@ -222,7 +273,7 @@ Repeat `--brain SPECIES[:SEX]=MODEL` to select a species or a particular sex. `M
 
 | Value | Selection |
 | --- | --- |
-| `health`, `kills`, `lifespan`, `food`, `balanced` | That champion from `--brains-from` |
+| `health`, `kills`, `lifespan`, `food`, `balanced`, `lineage` | That champion from `--brains-from` |
 | `best:food`, `best:kills`, etc. | Best compatible champion across the library |
 | `latest:lifespan`, etc. | Criterion from the latest compatible library generation |
 | Path to an artifact JSON | Exact saved model |
@@ -308,22 +359,24 @@ so resuming does not need the original files or newer archive versions.
 ## Automatically chain runs
 
 `experiment.chain_best_brains` defaults to `true`. When `--runs` is greater than
-one, each later training run starts each species/sex group from its own previous
-run's selected champion. The criterion stays the same: `--brain prey=lifespan` keeps
-choosing the previous run's female and male prey lifespan champions separately,
-and `predator=kills` does the same for predator kill champions. Without a saved starting model, these are also the
-default criteria unless `species.<name>.champion_selection.criterion` selects
-another. Explicit CLI criterion selectors also set that species' chaining
-criterion. Models transfer in memory even with `--no-library`.
+one, each later training run starts each species/sex group from its selected
+best-so-far champion. For example, `--brain prey=lifespan` chooses female and male
+prey lifespan records separately, and `--brain predator=kills` chooses predator
+kill records. An unchanged or worse run retains the earlier winner. With
+`promote_only_improved: false`, each episode supplies its own champions instead.
+Without a saved starting model, the selected JSON criterion applies. If omitted,
+the generic fallback is `lifespan` for resource eaters and `kills` for prey eaters.
+Explicit CLI criterion selectors also set that species' chaining criterion. Models transfer in memory even with `--no-library`.
 
 ```sh
 .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 3 \
   --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills
 ```
 
-Run 1 starts from the named source; run 2 starts from run 1's champions; run 3
-starts from run 2's champions. Body state, optimizer state, experience buffers
-and controller counters restart each run; learned model weights carry forward.
+Run 1 starts from the named source. Later runs use the best records available
+after each completed run, which can still come from that source or an earlier run.
+Body state, optimizer state, experience buffers and controller counters restart
+each run; learned model weights carry forward.
 Archive parent links and recorded run metadata identify the actual source.
 
 To start every run from the original initialization instead:

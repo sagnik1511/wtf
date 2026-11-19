@@ -219,7 +219,9 @@ class PromotionGuardTests(unittest.TestCase):
         for guard in (True, False):
             with self.subTest(guard=guard):
                 c = configured()
-                c["experiment"].update(runs=4, guard_lineage_chaining=guard)
+                c["experiment"].update(
+                    runs=4, guard_lineage_chaining=guard, promote_only_improved=False
+                )
                 a = Experiment(c)
                 while not a.finished_run:
                     a.step()

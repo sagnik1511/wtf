@@ -16,6 +16,7 @@ from ecosystem.library import (
     apply_brain_overrides,
     catalog,
     export_champions,
+    read_artifact,
 )
 from ecosystem.runner import Experiment
 from tests.test_mutation import KINDS, environment
@@ -58,12 +59,12 @@ class SexChampionTests(unittest.TestCase):
                 },
             )
             for entry in manifest["entries"]:
-                artifact = json.loads((archive / entry["file"]).read_text())
+                artifact = read_artifact(archive / entry["file"])
                 self.assertEqual(artifact["source"]["sex"], entry["sex"])
                 self.assertEqual(
                     Path(entry["file"]).parts[:2], (entry["species"], entry["sex"])
                 )
-                self.assertEqual(artifact["brain_artifact_version"], 2)
+                self.assertEqual(artifact["brain_artifact_version"], 3)
             self.assertFalse((archive / "prey/lifespan.json").exists())
 
     def test_automatic_source_loading_and_chain_match_sex_for_every_algorithm(self):
@@ -226,7 +227,7 @@ class SexChampionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             _, archive = source(root)
-            typed = json.loads((archive / "prey/female/lifespan.json").read_text())
+            typed = read_artifact(archive / "prey/female/lifespan.json")
             c = configuration()
             c["species"]["prey"]["initial_brain"] = {
                 "path": str(archive / "prey/female/lifespan.json")
@@ -269,7 +270,7 @@ class SexChampionTests(unittest.TestCase):
                 item.pop("sex")
                 item["source"].pop("sex")
                 item["file"] = item["species"] + "/" + item["criterion"] + ".json"
-                artifact = json.loads((archive / entry["file"]).read_text())
+                artifact = read_artifact(archive / entry["file"])
                 artifact["brain_artifact_version"] = 1
                 artifact["source"].pop("sex")
                 target = old / item["file"]
@@ -302,6 +303,9 @@ class SexChampionTests(unittest.TestCase):
                 for x in old["entries"]
             }
             c = configuration()
+            # Exercise explicit per-episode publication ancestry; strict mode
+            # retains imported identities when no improvement has occurred.
+            c["experiment"]["promote_only_improved"] = False
             apply_brain_overrides(c, source_experiment=root / "source")
             e = Experiment(c)
             target = export_champions(e, root / "next/champions/run_0001.json")

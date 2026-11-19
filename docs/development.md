@@ -20,6 +20,56 @@ node --test tests/*.test.mjs
 Tests cover strict configuration validation, resource limits, blocked and contested movement, feeding rewards, simultaneous hunts, starvation, occlusion, independent weights, positive-feedback learning, terminal versus truncated experience, evaluation behavior, deterministic and randomized runs, exact JSON checkpoint continuation including future random seeds and mixed PPO/Q models, PPO finite-difference gradient checks and terminal/truncated rollouts, resets, streamed recording correctness, recording transparency, committed-chunk visibility, bounded playback chunk loading, seeking, and read-only HTTP endpoints.
 
 
+## Mandatory formatting
+
+Every code-changing development update ends with repository-wide source
+formatting, followed by formatter check modes and the checks relevant to the
+change. This is required for developer agents by [AGENTS.md](../AGENTS.md#mandatory-formatting-after-development-updates).
+Format all maintained source files, including new non-ignored files, rather than
+only the files changed in that update.
+
+| Source | Formatter | Verification |
+| --- | --- | --- |
+| Python in `ecosystem/`, `tests/`, `work/` | Black | `black --check` on the same source set |
+| C/C++ and CPython extension source/headers | clang-format | `clang-format --dry-run --Werror` on the same source set |
+| JavaScript, CSS, HTML and maintained JSON | Prettier | `prettier --check` on the same source set |
+| Shell scripts | shfmt | `shfmt -i 2 -d` on the same source set |
+
+Use the repository's existing formatter settings, with dependencies isolated in
+`.venv` or the project's local development-tool environment. Python formatter
+invocations should use `.venv/bin/python -m black` once installed there. Do not
+silently fetch or run an unpinned tool through a package-runner command. If a
+required tool is unavailable or fails, resolve the dependency within authorized
+scope or report which formatter prevented completion.
+
+The repository keeps native indentation in [`.clang-format`](../.clang-format)
+and JavaScript quote style in [`.prettierrc.json`](../.prettierrc.json). Shell
+formatting uses two-space indentation (`shfmt -i 2`) and the script's own dialect.
+The 0.0.1.14 formatting pass used Black 24.10.0, clang-format 22.1.5,
+Prettier 3.3.3 and shfmt v3.11.0 (`shfmt-py` 3.11.0.2). Local tool setup:
+
+```sh
+.venv/bin/python -m pip install black==24.10.0 shfmt-py==3.11.0.2
+npm install --prefix .cache/formatters --cache .cache/npm --no-audit --no-fund --save-exact prettier@3.3.3
+```
+
+Black and shfmt run from `.venv`; Prettier runs from
+`.cache/formatters/node_modules/.bin/prettier`. The native formatter uses the
+installed `clang-format` executable. These development tools and their caches
+are isolated from runtime dependencies and remain ignored by Git.
+
+Build the file set from Git-tracked files plus new non-ignored source files.
+Exclude `.venv`, `node_modules`, results, brain libraries/checkpoints, native build
+outputs, caches, generated documentation assets and media. Format native headers
+as well as implementation files, and preserve shell dialects. Formatting source
+strings must preserve behavior; generated SVG/HTML exports are regenerated with
+their own tools only when their source or output actually changes.
+
+Run relevant tests after formatting. If a fix changes code again, repeat the
+format/check cycle. Summarize formatter results in the final handoff, including
+any unavailable tools. Documentation-only updates require link/asset checks;
+they do not trigger an unrelated source-wide reformat or training run.
+
 ## Choose checks for the change
 
 Use the focused checks described below. Documentation/media work does not require a new ecology training experiment.
@@ -149,3 +199,28 @@ GRU, quantile, group, codec and lifecycle behavior, malformed inputs and API-ver
 fallback. See [the v2 report](native-kernels-v2.md) for native-to-native benchmark
 commands, replay-byte checks and the saved 1,500-step comparison. The data-path
 probe is `work/performance/benchmark_data_kernels.py`.
+
+`tests/test_champion_promotion.py` covers strict and tied records, independent
+species/sex pools, warm-start baselines, opt-out/legacy resume, source removal,
+all-algorithm binary checkpoint continuation, unchanged archive identities,
+weight deduplication, signed zero/legacy FP64 and invalid/corrupt references.
+Legacy per-episode ancestry tests explicitly opt out of strict retention.
+
+`tests/test_early_stopping.py` covers patience boundaries, rank ties/regressions,
+any-group resets, species and sex-specific criteria, warm-start baselines,
+disabled/non-training modes, validation, exact binary continuation for all nine
+algorithms, unchanged choices before stopping, CLI final artifacts, periodic and
+completed-stop resume, and rejection of CLI resume overrides.
+
+`tests/inspector-stats.test.mjs` verifies input offsets for observation versions
+1/2/3 and k=1/4/16, presence padding, signed Q/probability scales, masks,
+seek-safe bounded score-only histories and static sight-cache invalidation.
+It compares overlay visibility against Python World rays on 48 cases spanning
+eight presets and both diets. `tests/inspector-view.test.mjs` checks SVG rendering,
+missing/legacy inputs, mating/terrain sections and disclosure persistence.
+
+`tests/test_export_efficiency.py` counts configuration serializations during an
+archive export, checks exact saved config/model values and verifies cache release
+between exports. Inspector tests additionally cover deferred history creation,
+one score pass per chart build, reopen reuse and score-only sample validation.
+These checks use operation counts rather than timing thresholds.

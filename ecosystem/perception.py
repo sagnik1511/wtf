@@ -201,3 +201,55 @@ class SpatialIndex:
         )
         self.results[animal_id] = key, features
         return features
+
+    def nearest_many(
+        self, animal, radius, visible, k, range_check=None, range_key=None
+    ):
+        """Distance-ordered visible slots, padded to k; reuse phase-local indexes.
+
+        One result per observer replaces the previous query. Position, target
+        bucket revisions, radius, k and directional range settings key it;
+        sync clears results on obstacle/visibility edits and removes dead IDs.
+        """
+        if k == 1:
+            return self.nearest(animal, radius, visible, range_check, range_key)
+        ax, ay, animal_id = animal.x, animal.y, animal.id
+        buckets = self._window(animal_id, ax, ay, radius)
+        if buckets is None:
+            revision = self.version
+            points = self.points.values()
+        else:
+            revision = tuple(bucket.version for bucket in buckets)
+            points = chain.from_iterable(bucket.points.values() for bucket in buckets)
+        key = ax, ay, radius, revision, "top_k", k, range_key
+        previous = self.results.get(animal_id)
+        if previous is not None and previous[0] == key:
+            return previous[1]
+        radius_squared = radius * radius
+        candidates = []
+        for order, other_id, x, y in points:
+            if other_id == animal_id:
+                continue
+            squared = (x - ax) ** 2 + (y - ay) ** 2
+            if squared <= radius_squared:
+                candidates.append((squared, order, x, y))
+        # Sorting before ray tests avoids checking targets beyond the kth
+        # visible one. Stable insertion-order ties match nearest(k=1).
+        candidates.sort()
+        features = []
+        start = ax, ay
+        for squared, order, x, y in candidates:
+            end = x, y
+            if range_check is not None and not range_check(start, end, squared):
+                continue
+            if not visible(start, end):
+                continue
+            dx, dy = x - ax, y - ay
+            features.extend(
+                (dx / radius, dy / radius, math.hypot(dx, dy) / radius, 1.0)
+            )
+            if len(features) == 4 * k:
+                break
+        features.extend([0.0] * (4 * k - len(features)))
+        self.results[animal_id] = key, features
+        return features

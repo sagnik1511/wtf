@@ -2,7 +2,7 @@
 
 [Visual documentation guide](../../visual-guide.md) · [Asset index](../README.md)
 
-The guides embed **23 SVG diagrams** across 16 pages. Readers need no Mermaid
+The guides embed **27 SVG diagrams** across 17 pages. Readers need no Mermaid
 plugin or JavaScript. These show ownership, data dependencies and decision order;
 they do not depict measured performance or guarantee learning outcomes.
 
@@ -40,6 +40,11 @@ light/dark styles and an opaque light fallback for simpler image renderers.
 | [Choose checks for the change](choose-checks-for-the-change.svg) | [Guide](../../development.md#choose-checks-for-the-change) | `choose-checks-for-the-change.mmd` |
 | [Rollout record lifecycle](rollout-record-lifecycle.svg) | [Guide](../../releases/README.md#rollout-record-lifecycle) | `rollout-record-lifecycle.mmd` |
 
+| [Top-k observation pipeline](top-k-observation-pipeline.svg) | [Guide](../../observations.md#visible-target-slots) | `top-k-observation-pipeline.mmd` |
+| [Inspector: current and sampled state](inspector-current-and-sampled.svg) | [Guide](../../recording.md#visual-agent-inspector) | `inspector-current-and-sampled.mmd` |
+| [Shared champion weight storage](shared-champion-weights.svg) | [Guide](../../binary-storage.md#champion-storage-measurement) | `shared-champion-weights.mmd` |
+| [Early-stopping patience](early-stopping-patience.svg) | [Guide](../../running.md#stop-on-performance-plateaus) | `early-stopping-patience.mmd` |
+
 ## Regenerate and verify
 
 From the repository root, with Graphviz (`dot`) installed:
@@ -51,8 +56,8 @@ From the repository root, with Graphviz (`dot`) installed:
 
 Viewing the SVGs needs no Graphviz installation. Regeneration requires only
 Graphviz and Python's standard library; no runtime project dependencies changed.
-Keep any authoring sources you need locally; fresh clones contain only SVGs and
-the manifest. Rendering requires those local sources. Edit sources and the
+For the original flows, keep authoring sources locally; fresh clones contain
+SVGs and the manifest. Regenerating those flows requires the local sources. Edit sources and the
 manifest together when adding/removing nodes or edges. With sources present,
 `--check` compares regenerated exports with tracked SVGs; without them, it checks
 SVG structure and topology counts only and reports that reduced scope. Layout details may
@@ -64,3 +69,17 @@ existing physics asset workflow rather than relying on unsupported syntax.
 These are original explanatory diagrams based on repository code and guide
 semantics. They contain no model arrays, experiment snapshots or personal paths.
 PNG previews used for visual review stay under ignored `.cache/docs-viz/`.
+
+## Recent feature diagrams
+
+The four recent flows above and the revised champion-chaining flow have portable
+authoring definitions in [build_recent_doc_diagrams.py](../../../work/build_recent_doc_diagrams.py).
+They can be regenerated from a fresh clone without retained `.mmd` files:
+
+```sh
+.venv/bin/python -m work.build_recent_doc_diagrams
+.venv/bin/python -m work.build_recent_doc_diagrams --check
+```
+
+This also builds the [controlled inspector illustration](../inspector/README.md).
+Generated `.mmd` files and PNG previews remain ignored local caches.

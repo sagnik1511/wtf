@@ -151,9 +151,7 @@
     "small_a2c": {
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "learning_rate": 0.001,
@@ -170,9 +168,7 @@
     "small_grpo": {
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "learning_rate": 0.001,

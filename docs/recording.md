@@ -7,6 +7,57 @@ Commands in this guide run from the project root.
 See the [recorded terrain previews](geography.md#recorded-terrain-previews) for
 short full-screen clips of this viewer on all three maps.
 
+## Visual agent inspector
+
+![Illustrated inspector: current sight at step 120 and sampled inputs and example probabilities at step 110](assets/inspector/inspector-example.svg)
+
+Click a living animal on the board. **Show selected animal’s sight on board**
+highlights its current visible cells using recorded body/map settings, wall
+occlusion and directional water bonuses. Heading does not restrict sight to a
+cone; elevation and other animals do not occlude sight under the current rules.
+The highlighted area is current-frame geometry, not a replayed older input.
+
+This [controlled illustration](assets/inspector/README.md) uses actual observation
+inputs and labelled example probabilities; it is not a captured experiment.
+
+The inspector adds:
+
+- A radar of the sampled food/prey/predator target slots, heading, presence counts,
+  energy/health gauges and blocked walking directions. Food at the animal's own
+  position remains a present target. Wet maps show a dashed base-range ring
+  inside the maximum range; actual wall/water-limited visibility is on the board.
+- Terrain and version-3 mating inputs in expandable sections. Target categories
+  are grouped by diet; general target slots do not reveal identities or sex.
+- Horizontal action-probability bars for policies, and signed Q-return bars with
+  a zero axis for Q learners. Masked actions are marked; the outline means highest
+  predicted score, not the action actually sampled or an accuracy measurement.
+- **Recent prediction samples**, an expandable time plot of up to 64 already
+  loaded diagnostic samples for the selected agent. Dots are measured values;
+  missing intervals are not filled. The small score-only history survives forward
+  chunk crossings, drops future points on backward seeks and resets on agent/run/
+  recording changes. It never downloads all earlier chunks or retains frames.
+  The chart is built on opening this section, reuses its SVG on reopening, and
+  processes each recorded score sample once per chart build.
+
+![Current replay geometry and sampled brain diagnostics follow separate timestamps, with bounded prediction history](assets/diagrams/inspector-current-and-sampled.svg)
+
+Graphs update when a new diagnostic sample is available; they do not invent
+values between samples. Sampling cadence is controlled by the saved
+`recording.diagnostics_every_steps` setting.
+
+Every observation/prediction card states its recorded step. Body fields and board
+sight are current; brain diagnostics may be older between samples. The radar
+uses that sample's heading/relative positions, not the current animal pose.
+Unknown layouts and missing diagnostics remain explicit, with raw input arrays
+available in a disclosure. **Current body & training details** retains the
+existing numerical body/learning fields. Expanded disclosures stay open as
+samples advance.
+
+Refresh the viewer page to load the new UI. Existing recordings work without
+conversion when their diagnostics are present. No extra replay fields, model
+weights, inference, screen recordings or runtime packages are required. See the
+[input layout](observations.md) for supported versions and k values.
+
 ## Playback controls
 
 The Python simulator and JavaScript viewer are independent. Run training first,

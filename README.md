@@ -54,10 +54,11 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 | [Physics illustrated](docs/physics.md) | Interactive examples and diagrams for visibility, water, elevation and reproduction |
 | [Geography and terrain](docs/geography.md) | Full-viewer terrain GIFs, river currents, swimming, elevation and map presets |
 | [Adding species](docs/species.md) | Named prey/predator species, diets, colors and species/sex champions |
+| [Animal observations](docs/observations.md) | Visibility, top-k target slots and brain input layouts |
 | [Configuration](docs/configuration.md) | Presets, populations, food, obstacles and reproduction |
 | [Learning algorithms](docs/algorithms.md) | Q-learning, PPO, A2C, REINFORCE, experimental GRPO and network settings |
 | [Saved brains](docs/brain-library.md) | Champions, warm starts, compatibility and model generations |
-| [Playback and recordings](docs/recording.md) | Viewer controls, animations, file format, memory and HTTP API |
+| [Playback and recordings](docs/recording.md) | Viewer controls, visual agent inspector, recording format and HTTP API |
 | [Behavior analysis](docs/analysis.md) | Feeding, hunting, energy, lifespan and learning statistics |
 | [Architecture](docs/architecture.md) | Python/JS components, simulation rules, rewards and observations |
 | [Performance](docs/performance.md) | Optimizations, memory tradeoffs and reproducible benchmarks |

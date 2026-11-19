@@ -41,12 +41,13 @@ static int maps_valid(PyObject *blocked, PyObject *water, Py_ssize_t width,
 static PyObject *ray_native(PyObject *self, PyObject *args) {
     Py_ssize_t x, y, tx, ty, width, height;
     PyObject *blocked, *water;
-    if (!PyArg_ParseTuple(args, "nnnnOOnn", &x, &y, &tx, &ty, &blocked, &water, &width,
-                          &height))
+    if (!PyArg_ParseTuple(args, "nnnnOOnn", &x, &y, &tx, &ty, &blocked, &water,
+                          &width, &height))
         return NULL;
     if (!maps_valid(blocked, water, width, height))
         return NULL;
-    /* A finite ray bound also rejects overflow/pathological private-API input. */
+    /* A finite ray bound also rejects overflow/pathological private-API input.
+     */
     if (x < 0 || x >= width || tx < 0 || tx >= width || y < 0 || y >= height ||
         ty < 0 || ty >= height) {
         PyErr_SetString(PyExc_ValueError, "Ray outside map");
@@ -55,19 +56,20 @@ static PyObject *ray_native(PyObject *self, PyObject *args) {
     int visible;
     Py_ssize_t wet;
     trace_ray(x, y, tx, ty, (unsigned char *)PyBytes_AS_STRING(blocked),
-              (unsigned char *)PyBytes_AS_STRING(water), width, height, &visible, &wet);
+              (unsigned char *)PyBytes_AS_STRING(water), width, height,
+              &visible, &wet);
     return Py_BuildValue("On", visible ? Py_True : Py_False, wet);
 }
 static PyObject *nearest_native(PyObject *self, PyObject *args) {
     PyObject *points, *id, *blocked, *water;
     Py_ssize_t x, y, radius, width, height, base, bonus;
-    if (!PyArg_ParseTuple(args, "OnnOnOOnnnn", &points, &x, &y, &id, &radius, &blocked,
-                          &water, &width, &height, &base, &bonus))
+    if (!PyArg_ParseTuple(args, "OnnOnOOnnnn", &points, &x, &y, &id, &radius,
+                          &blocked, &water, &width, &height, &base, &bonus))
         return NULL;
     if (!maps_valid(blocked, water, width, height))
         return NULL;
-    if (x < 0 || x >= width || y < 0 || y >= height || radius < 1 || radius > 4096 ||
-        base < 0 || bonus < 0 || base > 4096 || bonus > 4096) {
+    if (x < 0 || x >= width || y < 0 || y >= height || radius < 1 ||
+        radius > 4096 || base < 0 || bonus < 0 || base > 4096 || bonus > 4096) {
         PyErr_SetString(PyExc_ValueError, "Invalid sight range");
         return NULL;
     }
@@ -75,7 +77,8 @@ static PyObject *nearest_native(PyObject *self, PyObject *args) {
     if (!iterator)
         return NULL;
     PyObject *point, *result = NULL;
-    Py_ssize_t bx = 0, by = 0, best = PY_SSIZE_T_MAX, best_order = PY_SSIZE_T_MAX;
+    Py_ssize_t bx = 0, by = 0, best = PY_SSIZE_T_MAX,
+               best_order = PY_SSIZE_T_MAX;
     int found = 0;
     while ((point = PyIter_Next(iterator))) {
         if (!PyTuple_Check(point) || PyTuple_GET_SIZE(point) != 4) {
@@ -83,7 +86,8 @@ static PyObject *nearest_native(PyObject *self, PyObject *args) {
             PyErr_SetString(PyExc_ValueError, "Invalid spatial point");
             goto done;
         }
-        int same = PyObject_RichCompareBool(PyTuple_GET_ITEM(point, 1), id, Py_EQ);
+        int same =
+            PyObject_RichCompareBool(PyTuple_GET_ITEM(point, 1), id, Py_EQ);
         if (same < 0) {
             Py_DECREF(point);
             goto done;
@@ -135,7 +139,8 @@ done:
     return result;
 }
 /* Union-find on the same candidate pairs as the Python 3x3 bucket scan.
-   Bucket construction remains sparse; no O(map-size) scratch for group metrics. */
+   Bucket construction remains sparse; no O(map-size) scratch for group metrics.
+ */
 static Py_ssize_t root_of(Py_ssize_t *parent, Py_ssize_t i) {
     while (parent[i] != i) {
         parent[i] = parent[parent[i]];
@@ -188,8 +193,8 @@ static PyObject *group_pairs_native(PyObject *self, PyObject *args) {
         if (sizes[i] > largest)
             largest = sizes[i];
     }
-    r = Py_BuildValue("{s:n,s:n,s:n}", "clusters", clusters, "solitary", solitary,
-                      "largest", largest);
+    r = Py_BuildValue("{s:n,s:n,s:n}", "clusters", clusters, "solitary",
+                      solitary, "largest", largest);
 done:
     Py_XDECREF(it);
     PyMem_Free(parent);
@@ -227,7 +232,8 @@ static PyObject *groups_native(PyObject *self, PyObject *args) {
             r = Py_NotImplemented;
             goto done;
         }
-        PyObject *xo = PyDict_GetItemString(a, "x"), *yo = PyDict_GetItemString(a, "y");
+        PyObject *xo = PyDict_GetItemString(a, "x"),
+                 *yo = PyDict_GetItemString(a, "y");
         if (!xo || !yo || !PyLong_Check(xo) || !PyLong_Check(yo)) {
             Py_INCREF(Py_NotImplemented);
             r = Py_NotImplemented;
@@ -293,8 +299,8 @@ static PyObject *groups_native(PyObject *self, PyObject *args) {
         if (sizes[i] > largest)
             largest = sizes[i];
     }
-    r = Py_BuildValue("{s:n,s:n,s:n}", "clusters", clusters, "solitary", solitary,
-                      "largest", largest);
+    r = Py_BuildValue("{s:n,s:n,s:n}", "clusters", clusters, "solitary",
+                      solitary, "largest", largest);
 done:
     Py_XDECREF(key);
     Py_XDECREF(index);

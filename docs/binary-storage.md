@@ -4,7 +4,7 @@
 
 The disk-focused defaults are binary replay chunks and binary checkpoints,
 compressed with XZ. Training and rendering remain separate. CSV metrics, JSON
-summaries, environment definitions, indexes and champion artifacts stay readable.
+summaries, environment definitions and champion metadata/indexes stay readable.
 No NumPy, PyTorch, browser package, database or build step is required.
 
 ## What is stored
@@ -14,13 +14,38 @@ No NumPy, PyTorch, browser package, database or build step is required.
 | Replay chunks | `run_0001_chunk_000000.bin.xz` | World frames, events and sampled brain diagnostics |
 | Checkpoints | `run_0001.bin.xz`, `final.bin.xz` | Exact continuation, including models, optimizers, memories and RNGs |
 | Metrics and summaries | Existing CSV / JSON | Readable experiment outcomes |
-| Champions and indexes | Existing JSON | Reusable weights, criteria, scores and ancestry |
+| Champion weights | Shared `champions/models/<sha256>.bin.xz` | Lossless, deduplicated warm-start model snapshots |
+| Champion metadata and indexes | JSON | Criteria, ranks, scores, source and weight references |
 
 Replay files do not contain model weights or optimizer buffers. Checkpoints do.
-Champion artifacts remain in their existing format because they were a small
-part of the measured experiment; compatibility and run-local model selection are
-preserved. Disk size grows with retained episodes, recording cadence, diagnostics,
+Version-3 champion artifacts now reference shared binary/XZ weights. The existing
+codec stores exactly representable arrays as FP32 and preserves legacy FP64
+values without quantization. Identical models are stored once across criteria
+and runs; unchanged records preserve their identity. Configurations are pooled
+within each generation. Old version-1/2 JSON artifacts still load. See
+[champion retention](brain-library.md#promote-only-improvements). Disk size grows with retained episodes, recording cadence, diagnostics,
 checkpoint cadence, model size and population even with the binary format.
+
+## Champion storage measurement
+
+![Per-run JSON metadata references deduplicated, lossless binary model blobs](assets/diagrams/shared-champion-weights.svg)
+
+One frozen first-run archive from the deep river experiment contained 22
+criterion artifacts and used 8,663,633 bytes in the prior JSON layout. Exporting
+the same exact model values in the new layout used 620,497 bytes, including its
+index, metadata/configurations and shared weights: **92.8% smaller**. Eight
+unique model blobs accounted for 521,548 bytes. All 22 model round trips matched.
+A second unchanged archive added 98,993 metadata/index bytes and **zero new weight
+bytes**. These measurements describe one archive, not total experiment storage;
+replays and full resume checkpoints are separate. No runtime/RAM speedup is
+claimed. Existing result folders were not rewritten.
+
+Each model blob is one `WTFB` version-1 record with kind `champion_model`,
+containing the signature, precision and parameters. SHA-256 names and verifies
+the uncompressed record bytes; it is not a pickle or executable model object.
+Weights and configuration references are constrained to their archive layout.
+New readers support both layouts; older runtimes cannot load version-3 champions.
+The viewer does not read champion weights and needs no format change.
 
 ## Structured binary layout
 

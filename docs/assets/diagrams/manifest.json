@@ -122,8 +122,8 @@
     "anchor": "champion-chaining-between-runs",
     "source": "champion-chaining-between-runs.mmd",
     "asset": "champion-chaining-between-runs.svg",
-    "nodes": 7,
-    "edges": 6
+    "nodes": 10,
+    "edges": 10
   },
   {
     "title": "Child-only mutation path",
@@ -205,5 +205,41 @@
     "asset": "rollout-record-lifecycle.svg",
     "nodes": 6,
     "edges": 5
+  },
+  {
+    "title": "Top-k observation pipeline",
+    "document": "docs/observations.md",
+    "anchor": "visible-target-slots",
+    "source": "top-k-observation-pipeline.mmd",
+    "asset": "top-k-observation-pipeline.svg",
+    "nodes": 8,
+    "edges": 7
+  },
+  {
+    "title": "Inspector: current and sampled state",
+    "document": "docs/recording.md",
+    "anchor": "visual-agent-inspector",
+    "source": "inspector-current-and-sampled.mmd",
+    "asset": "inspector-current-and-sampled.svg",
+    "nodes": 7,
+    "edges": 6
+  },
+  {
+    "title": "Shared champion weight storage",
+    "document": "docs/binary-storage.md",
+    "anchor": "champion-storage-measurement",
+    "source": "shared-champion-weights.mmd",
+    "asset": "shared-champion-weights.svg",
+    "nodes": 10,
+    "edges": 10
+  },
+  {
+    "title": "Early-stopping patience",
+    "document": "docs/running.md",
+    "anchor": "stop-on-performance-plateaus",
+    "source": "early-stopping-patience.mmd",
+    "asset": "early-stopping-patience.svg",
+    "nodes": 10,
+    "edges": 10
   }
 ]

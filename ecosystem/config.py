@@ -133,6 +133,9 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
+        if "observation_top_k" in b:
+            num(b["observation_top_k"], p + ".observation_top_k", 1, 16, True)
+            b = {k: v for k, v in b.items() if k != "observation_top_k"}
         if "observation_version" in b:
             num(b["observation_version"], p + ".observation_version", 1, 3, True)
             b = {k: v for k, v in b.items() if k != "observation_version"}
@@ -778,12 +781,40 @@ def validate(c):
             "grpo_updates_per_step",
             "chain_best_brains",
             "guard_lineage_chaining",
+            "promote_only_improved",
+            "early_stopping",
         ),
     )
     for k in ("runs", "record_metrics_every_steps", "checkpoint_every_runs"):
         num(e[k], f"experiment.{k}", 1, 1000000, True)
+    if "early_stopping" in e:
+        stop = e["early_stopping"]
+        obj(
+            stop, "experiment.early_stopping", ("patience_runs",), optional=("species",)
+        )
+        num(
+            stop["patience_runs"],
+            "experiment.early_stopping.patience_runs",
+            0,
+            1000000,
+            True,
+        )
+        if "species" in stop:
+            watched = stop["species"]
+            if (
+                not isinstance(watched, list)
+                or not watched
+                or any(not isinstance(s, str) or s not in c["species"] for s in watched)
+                or len(set(watched)) != len(watched)
+            ):
+                fail(
+                    "experiment.early_stopping.species",
+                    "must list unique configured species names",
+                )
     if "grpo_updates_per_step" in e:
         num(e["grpo_updates_per_step"], "experiment.grpo_updates_per_step", 1, 8, True)
+    if "promote_only_improved" in e and type(e["promote_only_improved"]) is not bool:
+        fail("experiment.promote_only_improved", "must be boolean")
     if "guard_lineage_chaining" in e and type(e["guard_lineage_chaining"]) is not bool:
         fail("experiment.guard_lineage_chaining", "must be boolean")
     if "chain_best_brains" in e and type(e["chain_best_brains"]) is not bool:

@@ -53,6 +53,53 @@ def body(i, species="predator", age=3, kills=1, food=2, parents=(-1, -1), sex="f
 
 
 class LineageTests(unittest.TestCase):
+    def test_rank_only_preserves_family_ties_and_detached_metadata(self):
+        for species in ("prey", "predator"):
+            with self.subTest(species=species):
+                book = LineageBook(configured())
+                parents = [body(0, species), body(1, species)]
+                child = body(2, species, parents=(0, 1))
+                book.observe(parents + [child])
+                rank, metadata = book.rank(child)
+                self.assertEqual(metadata["founder_id"], 0)
+                self.assertEqual(book.rank(child, include_metadata=False), (rank, None))
+                saved = copy.deepcopy(metadata)
+                parents[1].age += 10
+                parents[1].kills += 5
+                parents[1].energy_gained += 10
+                book.observe(parents + [child])
+                updated, family = book.rank(child)
+                self.assertEqual(family["founder_id"], 1)
+                self.assertEqual(
+                    book.rank(child, include_metadata=False), (updated, None)
+                )
+                self.assertEqual(metadata, saved)
+
+    def test_champions_materialize_lineage_metadata_only_for_winners(self):
+        from unittest.mock import patch
+
+        e = Experiment(configured())
+        animals = tuple(e.world.animals.values())
+        book = ChampionBook(e.config)
+        with patch.object(book.lineage, "rank", wraps=book.lineage.rank) as rank:
+            book.consider(animals, e.brains, {"tick": 0})
+            full_calls = sum(
+                call.kwargs.get("include_metadata", True)
+                for call in rank.call_args_list
+            )
+            pools = sum(len(groups) for groups in book.entries.values())
+            self.assertEqual(full_calls, pools)
+            self.assertEqual(rank.call_count, len(animals) + pools)
+            rank.reset_mock()
+            book.consider(animals, e.brains, {"tick": 1})
+            self.assertEqual(rank.call_count, len(animals))
+            self.assertTrue(
+                all(
+                    call.kwargs == {"include_metadata": False}
+                    for call in rank.call_args_list
+                )
+            )
+
     def test_fractional_food_accumulation_continues_exactly(self):
         import random
 

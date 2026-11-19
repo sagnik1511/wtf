@@ -138,9 +138,7 @@
       "type": "qrdqn",
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "discount_factor": 0.98,
@@ -163,10 +161,7 @@
       "type": "qrdqn",
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          64,
-          32
-        ],
+        "hidden_layers": [64, 32],
         "activation": "tanh"
       },
       "discount_factor": 0.98,

@@ -1,26 +1,127 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const dir=require('path').resolve(__dirname,'../docs/assets/physics'),html=fs.readFileSync(dir+'/explorer.fragment.html','utf8'),code=html.match(/<script>([\s\S]*?)<\/script>/)[1];
-const elements=new Map();const context=new Proxy({},{get:(t,k)=>t[k]||(()=>{}),set:(t,k,v)=>(t[k]=v,true)});
-for(const id of [...html.matchAll(/id="([^"]+)"/g)].map(x=>x[1]))elements.set(id,{id,style:{},listeners:{},clientWidth:736,textContent:'',value:'',checked:false,append(){},replaceChildren(){},setAttribute(k,v){this[k]=v},addEventListener(k,v){this.listeners[k]=v},getContext(){return context}});
-const root=elements.get('wtf-physics-explainer');root.querySelector=s=>{const e=elements.get(s.slice(1));assert(e,'Missing element '+s);return e;};
-const document={getElementById:id=>elements.get(id),documentElement:{},createElement:()=>({style:{},append(){}}),createTextNode:x=>x};
-const window={devicePixelRatio:1,addEventListener(){},openai:{setWidgetState:()=>Promise.resolve()}};
-const style={color:'rgb(70,80,90)',fontSize:'14px',fontFamily:'sans-serif'};
-const sandbox={document,window,getComputedStyle:()=>style,ResizeObserver:class{observe(){}},MutationObserver:class{observe(){}},console};
-vm.runInNewContext(code.replace(/\}\)\(\);\s*$/,'globalThis.__test={sight,example,valley};})();'),sandbox);
-const e=id=>elements.get('wtf-'+id),change=(id,v)=>{e(id).value=v;e(id).listeners.change({target:e(id)})},click=id=>e(id).listeners.click({}),status=()=>e('status').textContent;
-assert.match(status(),/Newly visible.*water 3.*limit 9/);
-e('bonus').checked=false;e('bonus').listeners.change({target:e('bonus')});assert.match(status(),/Beyond directional/);
-e('bonus').checked=true;e('bonus').listeners.change({target:e('bonus')});click('wall');assert.match(status(),/Wall blocks sight/);
-change('scene','valley');assert.match(status(),/Newly visible.*water 1.*limit 7/);
-change('rule','water');click('step');assert.match(status(),/energy 58.100/);
-change('action','move_forward');click('step');assert.match(status(),/Movement blocked/);
-change('rule','height');change('slope','2');click('step');assert.match(status(),/Movement blocked/);
-change('rule','birth');assert.match(status(),/Child born/);change('distance','3');assert.match(status(),/outside radius 2/);
-change('distance','2');e('consent').checked=false;e('consent').listeners.change({target:e('consent')});assert.match(status(),/both choices required/);
-console.log('Interactive state checks passed: water sight, walls, actual valley, swimming, failed walking/climbing, mutual proximal birth.');
+const fs = require('fs'),
+  vm = require('vm'),
+  assert = require('assert');
+const dir = require('path').resolve(__dirname, '../docs/assets/physics'),
+  html = fs.readFileSync(dir + '/explorer.fragment.html', 'utf8'),
+  code = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const elements = new Map();
+const context = new Proxy(
+  {},
+  { get: (t, k) => t[k] || (() => {}), set: (t, k, v) => ((t[k] = v), true) },
+);
+for (const id of [...html.matchAll(/id="([^"]+)"/g)].map((x) => x[1]))
+  elements.set(id, {
+    id,
+    style: {},
+    listeners: {},
+    clientWidth: 736,
+    textContent: '',
+    value: '',
+    checked: false,
+    append() {},
+    replaceChildren() {},
+    setAttribute(k, v) {
+      this[k] = v;
+    },
+    addEventListener(k, v) {
+      this.listeners[k] = v;
+    },
+    getContext() {
+      return context;
+    },
+  });
+const root = elements.get('wtf-physics-explainer');
+root.querySelector = (s) => {
+  const e = elements.get(s.slice(1));
+  assert(e, 'Missing element ' + s);
+  return e;
+};
+const document = {
+  getElementById: (id) => elements.get(id),
+  documentElement: {},
+  createElement: () => ({ style: {}, append() {} }),
+  createTextNode: (x) => x,
+};
+const window = {
+  devicePixelRatio: 1,
+  addEventListener() {},
+  openai: { setWidgetState: () => Promise.resolve() },
+};
+const style = {
+  color: 'rgb(70,80,90)',
+  fontSize: '14px',
+  fontFamily: 'sans-serif',
+};
+const sandbox = {
+  document,
+  window,
+  getComputedStyle: () => style,
+  ResizeObserver: class {
+    observe() {}
+  },
+  MutationObserver: class {
+    observe() {}
+  },
+  console,
+};
+vm.runInNewContext(
+  code.replace(
+    /\}\)\(\);\s*$/,
+    'globalThis.__test={sight,example,valley};})();',
+  ),
+  sandbox,
+);
+const e = (id) => elements.get('wtf-' + id),
+  change = (id, v) => {
+    e(id).value = v;
+    e(id).listeners.change({ target: e(id) });
+  },
+  click = (id) => e(id).listeners.click({}),
+  status = () => e('status').textContent;
+assert.match(status(), /Newly visible.*water 3.*limit 9/);
+e('bonus').checked = false;
+e('bonus').listeners.change({ target: e('bonus') });
+assert.match(status(), /Beyond directional/);
+e('bonus').checked = true;
+e('bonus').listeners.change({ target: e('bonus') });
+click('wall');
+assert.match(status(), /Wall blocks sight/);
+change('scene', 'valley');
+assert.match(status(), /Newly visible.*water 1.*limit 7/);
+change('rule', 'water');
+click('step');
+assert.match(status(), /energy 58.100/);
+change('action', 'move_forward');
+click('step');
+assert.match(status(), /Movement blocked/);
+change('rule', 'height');
+change('slope', '2');
+click('step');
+assert.match(status(), /Movement blocked/);
+change('rule', 'birth');
+assert.match(status(), /Child born/);
+change('distance', '3');
+assert.match(status(), /outside radius 2/);
+change('distance', '2');
+e('consent').checked = false;
+e('consent').listeners.change({ target: e('consent') });
+assert.match(status(), /both choices required/);
+console.log(
+  'Interactive state checks passed: water sight, walls, actual valley, swimming, failed walking/climbing, mutual proximal birth.',
+);
 
-change('animal','predator');e('consent').checked=true;e('consent').listeners.change({target:e('consent')});assert.match(status(),/Child born/);
-change('rule','water');change('action','swim');click('step');assert.match(status(),/energy 77.535/);
-e('weak').checked=true;e('weak').listeners.change({target:e('weak')});click('step');assert.match(status(),/Movement blocked.*health 10.0/);
-console.log('Predator controls and species-specific energy/health checks passed.');
+change('animal', 'predator');
+e('consent').checked = true;
+e('consent').listeners.change({ target: e('consent') });
+assert.match(status(), /Child born/);
+change('rule', 'water');
+change('action', 'swim');
+click('step');
+assert.match(status(), /energy 77.535/);
+e('weak').checked = true;
+e('weak').listeners.change({ target: e('weak') });
+click('step');
+assert.match(status(), /Movement blocked.*health 10.0/);
+console.log(
+  'Predator controls and species-specific energy/health checks passed.',
+);

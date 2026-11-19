@@ -25,7 +25,9 @@ The priorities established during development are:
   and elevation costs. Flat brains use 20 features; terrain version 2 uses 32.
   Optional version 3 uses 42 inputs including local mating readiness; the
   meandering-river preset opts in. [Mating observations](mating-observations.md)
-  describes compatibility and guarded lineage promotion.
+  describes compatibility and guarded lineage promotion. Configurable
+  [top-k observations](observations.md) add 12 inputs per additional target slot;
+  defaults remain one target per category.
   [Geography guide](geography.md) covers physics and saved-model compatibility.
   Landscape presets include meandering rivers, a branching delta, alpine passes
   and lake islands, with editable map JSON and generated static diagrams.
@@ -33,7 +35,11 @@ The priorities established during development are:
   species of each. [Species guide](species.md) covers adding more and display colors.
 - Record first, play later: training can finish and exit before opening the viewer.
 - Private animal brains, inherited learned weights, run-local species/sex champion archives and
-  optional matching-sex champion chaining between runs.
+  optional matching-sex champion chaining between runs. Fresh experiments retain
+  best-so-far ranks by default (`promote_only_improved`); binary/XZ champion
+  weights are deduplicated in the experiment's shared `champions/models/` pool.
+  Optional [early stopping](running.md#stop-on-performance-plateaus) watches selected
+  champion ranks for configurable species; its patience survives exact resume.
   Optional `lineage` curation tracks unique founder-family descendants and
   proven biological generations; its compact counters persist in checkpoints
   but reset between independently spawned episodes. See [saved brains](brain-library.md#select-successful-biological-lineages).

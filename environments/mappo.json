@@ -138,9 +138,7 @@
       "type": "mappo",
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "learning_rate": 0.001,
@@ -155,18 +153,13 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "critic_hidden_layers": [
-        32
-      ]
+      "critic_hidden_layers": [32]
     },
     "predator_mappo": {
       "type": "mappo",
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          64,
-          32
-        ],
+        "hidden_layers": [64, 32],
         "activation": "tanh"
       },
       "learning_rate": 0.001,
@@ -181,9 +174,7 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "critic_hidden_layers": [
-        32
-      ]
+      "critic_hidden_layers": [32]
     }
   },
   "experiment": {

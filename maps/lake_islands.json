@@ -40,24 +40,15 @@
     },
     "s": {
       "water_depth": 0.6,
-      "flow": [
-        0,
-        0
-      ]
+      "flow": [0, 0]
     },
     "~": {
       "water_depth": 1,
-      "flow": [
-        0,
-        0
-      ]
+      "flow": [0, 0]
     },
     "%": {
       "water_depth": 1.4,
-      "flow": [
-        0,
-        0
-      ]
+      "flow": [0, 0]
     }
   }
 }

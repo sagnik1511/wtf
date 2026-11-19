@@ -11,8 +11,16 @@ from ecosystem.brains import model_snapshot
 from ecosystem.config import validate
 from ecosystem.library import export_champions
 from ecosystem.runner import Experiment
-from tests.test_simulation import config
+from tests.test_simulation import config as base_config
 from tests.test_library import settings
+
+
+def config():
+    # This suite specifies the historical per-episode winner mode. Strict
+    # best-so-far promotion has its own regression tests.
+    c = base_config()
+    c["experiment"]["promote_only_improved"] = False
+    return c
 
 
 class BrainChainingTests(unittest.TestCase):

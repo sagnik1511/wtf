@@ -6,9 +6,18 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.3](0.0.1.3.md), `47d8d54`.
-**Latest committed runtime implementation:** [0.0.1.2](0.0.1.2.md), `47d8d54`.
-**Pending:** [0.0.1.4](0.0.1.4.md), guarded lineage promotion and mating observations.
+**Latest committed rollout:** [0.0.1.4](0.0.1.4.md), `65345bf`.
+**Latest committed runtime implementation:** [0.0.1.4](0.0.1.4.md), `65345bf`.
+**Pending:** [0.0.1.14](0.0.1.14.md), repository-wide source formatting and formatter settings;
+[0.0.1.13](0.0.1.13.md), mandatory developer formatting across all source languages;
+[0.0.1.12](0.0.1.12.md), export-local configuration reuse and deferred inspector history;
+[0.0.1.11](0.0.1.11.md), recent-feature diagrams and documentation consistency;
+[0.0.1.10](0.0.1.10.md), visual observations and prediction graphs in the inspector;
+[0.0.1.9](0.0.1.9.md), species-selectable plateau early stopping;
+[0.0.1.8](0.0.1.8.md), strict best-so-far promotion and binary champion weights;
+[0.0.1.7](0.0.1.7.md), configurable visible top-k target observations;
+[0.0.1.6](0.0.1.6.md), separate river-crossing PPO depth presets and predator sight;
+[0.0.1.5](0.0.1.5.md), fewer lineage accounting and ranking allocations.
 
 ## Rollout index
 
@@ -19,7 +28,17 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.4](0.0.1.4.md) | Pending | Prepared 2026-11-19 | — | Qualified lineage retention, 42-input mating observations and longer/more frequent meandering GRPO trials |
+| [0.0.1.14](0.0.1.14.md) | Pending | Prepared 2026-11-19 | — | Format 162 maintained source files, establish style settings and verify full suites |
+| [0.0.1.13](0.0.1.13.md) | Pending | Prepared 2026-11-19 | — | Mandatory repository-wide formatting after code updates and explicit formatter checks |
+| [0.0.1.12](0.0.1.12.md) | Pending | Prepared 2026-11-19 | — | Export-local configuration reuse, lazy history SVGs and single-pass score processing |
+| [0.0.1.11](0.0.1.11.md) | Pending | Prepared 2026-11-19 | — | Top-k, inspector, champion storage and plateau visuals with maintained guides |
+| [0.0.1.10](0.0.1.10.md) | Pending | Prepared 2026-11-19 | — | Selected-agent sight overlay, sampled-input radar, action bars and bounded prediction history |
+| [0.0.1.9](0.0.1.9.md) | Pending | Prepared 2026-11-19 | — | Optional plateau patience over selected champion ranks, species monitoring and exact-resume counters |
+| [0.0.1.8](0.0.1.8.md) | Pending | Prepared 2026-11-19 | — | Strict improvement-only champion promotion and lossless deduplicated binary/XZ model weights |
+| [0.0.1.7](0.0.1.7.md) | Pending | Prepared 2026-11-19 | — | Configurable top-k target slots, compatible input sizing and enhanced river opt-in |
+| [0.0.1.6](0.0.1.6.md) | Pending | Prepared 2026-11-19 | — | Separate standard/deep strong-predator river PPO presets with longer predator sight |
+| [0.0.1.5](0.0.1.5.md) | Pending | Prepared 2026-11-19 | — | Deferred lineage diagnostics and allocation only for new founder families |
+| [0.0.1.4](0.0.1.4.md) | Committed | 2026-11-19 | `65345bf` | Qualified lineage retention, 42-input mating observations and longer/more frequent meandering GRPO trials |
 | [0.0.1.3](0.0.1.3.md) | Committed | 2026-11-18 | `47d8d54` | Generic feedback audit and 216 preset/controller contract combinations; no runtime tuning changes |
 | [0.0.1.2](0.0.1.2.md) | Committed | 2026-11-18 | `47d8d54` | Proven biological generations, unique founder-family fitness and independent lineage champion selectors |
 | [0.0.1.1](0.0.1.1.md) | Committed | 2026-11-18 | `d320059` | Meandering river with A2C/GRPO, three further PPO landscapes and map diagrams |

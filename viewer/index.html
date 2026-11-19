@@ -1,41 +1,244 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>WTF — Wildlife Trial Framework · RL Playback</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
-<body>
-<header><div><span class="eyebrow">REINFORCEMENT LEARNING ECOSYSTEM SIMULATOR</span><h1>WTF <span>Wildlife Trial Framework</span></h1></div><div id="connection" class="badge">Loading recordings</div></header>
-<main>
-<section class="workspace">
-<div class="toolbar"><label>Saved experiment<select id="recording"></select></label><label>Run<select id="recorded-run" aria-label="Choose recorded run"></select></label><button id="metrics-open" disabled>Metrics dashboard</button><button id="refresh">Refresh list</button><button id="load">Load recording</button><span class="spacer"></span><button id="previous-run" disabled>Previous run</button><button id="next-run" disabled>Next run</button><button id="back">Back</button><button id="step">Next frame</button><button id="play" class="primary" disabled>Play recording</button></div>
-<div class="stats"><div><span>RECORDED STEP</span><strong id="tick">—</strong></div><div><span>RUN</span><strong id="run">—</strong></div><div><span>TOTAL PREY</span><strong id="prey">—</strong></div><div><span>TOTAL PREDATORS</span><strong id="predator">—</strong></div><div><span>AVAILABLE FOOD</span><strong id="food">—</strong></div><div class="kill-stat"><span>CONFIRMED KILLS</span><strong id="kills">—</strong></div><div class="birth-stat"><span>BIRTHS</span><strong id="births">—</strong></div><div><span>LEARNING UPDATES</span><strong id="updates">—</strong></div></div>
-<div class="world-wrap"><canvas id="world" width="1200" height="840" aria-label="Recorded ecosystem grid. Click an animal to inspect recorded diagnostics."></canvas><div id="kill-banner" class="kill-banner" role="status" aria-live="polite" hidden></div><div id="birth-banner" class="birth-banner" role="status" aria-live="polite" hidden></div><div id="empty" hidden></div></div>
-<div class="world-footer"><div class="legend"><span id="species-legend" class="species-legend"></span><span id="terrain-legend" class="terrain-legend" hidden></span><span class="resource">■ Resource</span><span class="obstacle">■ Obstacle</span><span class="kill-legend">⊗ Kill</span><span class="birth-legend">⊕ Birth</span><span class="natural-legend">⊗ Natural death</span></div><label>Frames / second <input id="speed" type="range" min="1" max="60" value="20"><output id="speed-value">20</output></label></div>
-<div class="timeline"><input id="timeline" type="range" min="0" max="0" value="0" aria-label="Seek recorded frame"><output id="frame-label">No frames loaded</output></div>
-<details class="chart-panel"><summary class="section-head"><h2>Population & food</h2><span>Run history · food uses right axis</span></summary><canvas id="chart" width="1200" height="220" aria-label="Recorded population and food"></canvas></details>
-</section>
-<aside>
-<section class="panel"><div class="section-head"><h2>Agent inspector</h2><span id="agent-label">No selection</span></div><p id="inspect-hint" class="muted">Click an animal to view recorded body state and periodically sampled brain diagnostics.</p><div id="inspector"></div></section>
-<section class="panel"><h2>Recorded outcomes</h2><div id="outcomes" class="muted">Load a recording.</div><div id="summaries" class="muted"></div></section>
-<section class="panel"><h2>Behavior & learning</h2><p class="muted">Whole saved run, including frames after the playback position. Early/late changes also reflect age and population selection.</p><div id="behavior" class="muted">Load a recording.</div></section>
-<section class="panel"><h2>Recorded environment</h2><p class="muted">Read-only configuration captured with this experiment.</p><textarea id="config" readonly spellcheck="false" aria-label="Recorded environment configuration"></textarea></section>
-<section class="panel"><h2>Create another recording</h2><p class="muted">Run the Python simulator separately. After it finishes, refresh the recording list here.</p><pre class="command">.venv/bin/python -m ecosystem.cli
-./run.sh</pre><p class="muted">Playback loads one chunk at a time. It never starts a simulation or restores a learning checkpoint.</p></section>
-</aside>
-</main>
-<dialog id="metrics-dialog" aria-labelledby="dashboard-title">
-  <div class="dashboard-head"><div><h2 id="dashboard-title">Species trends over time</h2><p id="dashboard-position" class="muted"></p></div><form method="dialog"><button>Close</button></form></div>
-  <div class="dashboard-controls">
-    <label>Species<select id="dashboard-species"><option value="">All species</option></select></label>
-    <label>History<select id="dashboard-window"><option value="128">Last 128 frames</option><option value="512" selected>Last 512 frames</option><option value="1024">Last 1,024 frames</option></select></label>
-    <label>Action for prediction charts<select id="dashboard-action"></select></label>
-    <button id="dashboard-play">Play recording</button><button id="dashboard-back">Back</button><button id="dashboard-next">Next frame</button>
-  </div>
-  <label class="dashboard-seek">Replay position<input id="dashboard-timeline" type="range" min="0" max="0" value="0" aria-label="Seek replay and metrics together"></label>
-  <p id="dashboard-status" class="muted" role="status">Load a recording.</p>
-  <div id="dashboard-legend" class="legend"></div>
-  <div id="species-now"></div>
-  <div id="trend-grid"></div>
-  <p class="muted dashboard-notes">Each point is one recorded simulation step; cards show the current step. Choose a metric for each chart. Missing steps and absent diagnostics are not filled in. Hunting/feeding success is kills per attack for predators and productive feeds per eat attempt for prey; no attempt = no value. Reward excludes animals that died that step. Action coverage reports how many previous animals' actions were recovered.</p>
-  <p class="muted dashboard-notes">Groups are same-species proximity clusters: linked animals within 3 cells, including transitive links. Solitary animals are separate. Obstacles are ignored; proximity does not establish cooperation. Prediction dots average sampled agents on their changing observations, not prediction accuracy or proof of learning. Policy probabilities and Q values have separate chart options.</p>
-</dialog>
-<div id="error" role="alert" hidden></div><footer>WTF · Python records to disk · JavaScript replays saved frames · Playback speed does not affect simulation outcomes</footer>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WTF — Wildlife Trial Framework · RL Playback</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <span class="eyebrow">REINFORCEMENT LEARNING ECOSYSTEM SIMULATOR</span>
+        <h1>WTF <span>Wildlife Trial Framework</span></h1>
+      </div>
+      <div id="connection" class="badge">Loading recordings</div>
+    </header>
+    <main>
+      <section class="workspace">
+        <div class="toolbar">
+          <label>Saved experiment<select id="recording"></select></label
+          ><label
+            >Run<select
+              id="recorded-run"
+              aria-label="Choose recorded run"
+            ></select></label
+          ><button id="metrics-open" disabled>Metrics dashboard</button
+          ><button id="refresh">Refresh list</button
+          ><button id="load">Load recording</button><span class="spacer"></span
+          ><button id="previous-run" disabled>Previous run</button
+          ><button id="next-run" disabled>Next run</button
+          ><button id="back">Back</button><button id="step">Next frame</button
+          ><button id="play" class="primary" disabled>Play recording</button>
+        </div>
+        <div class="stats">
+          <div><span>RECORDED STEP</span><strong id="tick">—</strong></div>
+          <div><span>RUN</span><strong id="run">—</strong></div>
+          <div><span>TOTAL PREY</span><strong id="prey">—</strong></div>
+          <div>
+            <span>TOTAL PREDATORS</span><strong id="predator">—</strong>
+          </div>
+          <div><span>AVAILABLE FOOD</span><strong id="food">—</strong></div>
+          <div class="kill-stat">
+            <span>CONFIRMED KILLS</span><strong id="kills">—</strong>
+          </div>
+          <div class="birth-stat">
+            <span>BIRTHS</span><strong id="births">—</strong>
+          </div>
+          <div>
+            <span>LEARNING UPDATES</span><strong id="updates">—</strong>
+          </div>
+        </div>
+        <div class="world-wrap">
+          <canvas
+            id="world"
+            width="1200"
+            height="840"
+            aria-label="Recorded ecosystem grid. Click an animal to inspect recorded diagnostics."
+          ></canvas>
+          <div
+            id="kill-banner"
+            class="kill-banner"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+          <div
+            id="birth-banner"
+            class="birth-banner"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+          <div id="empty" hidden></div>
+        </div>
+        <div class="world-footer">
+          <div class="legend">
+            <span id="species-legend" class="species-legend"></span
+            ><span id="terrain-legend" class="terrain-legend" hidden></span
+            ><span
+              id="observation-status"
+              class="observation-status"
+              hidden
+            ></span
+            ><span class="resource">■ Resource</span
+            ><span class="obstacle">■ Obstacle</span
+            ><span class="kill-legend">⊗ Kill</span
+            ><span class="birth-legend">⊕ Birth</span
+            ><span class="natural-legend">⊗ Natural death</span>
+          </div>
+          <label
+            >Frames / second
+            <input id="speed" type="range" min="1" max="60" value="20" /><output
+              id="speed-value"
+              >20</output
+            ></label
+          >
+        </div>
+        <div class="timeline">
+          <input
+            id="timeline"
+            type="range"
+            min="0"
+            max="0"
+            value="0"
+            aria-label="Seek recorded frame"
+          /><output id="frame-label">No frames loaded</output>
+        </div>
+        <details class="chart-panel">
+          <summary class="section-head">
+            <h2>Population & food</h2>
+            <span>Run history · food uses right axis</span>
+          </summary>
+          <canvas
+            id="chart"
+            width="1200"
+            height="220"
+            aria-label="Recorded population and food"
+          ></canvas>
+        </details>
+      </section>
+      <aside>
+        <section class="panel">
+          <div class="section-head">
+            <h2>Agent inspector</h2>
+            <span id="agent-label">No selection</span>
+          </div>
+          <p id="inspect-hint" class="muted">
+            Click an animal to see its sight, sampled observations and action
+            prediction graphs.
+          </p>
+          <label class="inspector-visibility"
+            ><input id="show-observation" type="checkbox" checked disabled />
+            Show selected animal’s sight on board</label
+          >
+          <div id="inspector"></div>
+        </section>
+        <section class="panel">
+          <h2>Recorded outcomes</h2>
+          <div id="outcomes" class="muted">Load a recording.</div>
+          <div id="summaries" class="muted"></div>
+        </section>
+        <section class="panel">
+          <h2>Behavior & learning</h2>
+          <p class="muted">
+            Whole saved run, including frames after the playback position.
+            Early/late changes also reflect age and population selection.
+          </p>
+          <div id="behavior" class="muted">Load a recording.</div>
+        </section>
+        <section class="panel">
+          <h2>Recorded environment</h2>
+          <p class="muted">
+            Read-only configuration captured with this experiment.
+          </p>
+          <textarea
+            id="config"
+            readonly
+            spellcheck="false"
+            aria-label="Recorded environment configuration"
+          ></textarea>
+        </section>
+        <section class="panel">
+          <h2>Create another recording</h2>
+          <p class="muted">
+            Run the Python simulator separately. After it finishes, refresh the
+            recording list here.
+          </p>
+          <pre class="command">
+.venv/bin/python -m ecosystem.cli
+./run.sh</pre
+          >
+          <p class="muted">
+            Playback loads one chunk at a time. It never starts a simulation or
+            restores a learning checkpoint.
+          </p>
+        </section>
+      </aside>
+    </main>
+    <dialog id="metrics-dialog" aria-labelledby="dashboard-title">
+      <div class="dashboard-head">
+        <div>
+          <h2 id="dashboard-title">Species trends over time</h2>
+          <p id="dashboard-position" class="muted"></p>
+        </div>
+        <form method="dialog"><button>Close</button></form>
+      </div>
+      <div class="dashboard-controls">
+        <label
+          >Species<select id="dashboard-species">
+            <option value="">All species</option>
+          </select></label
+        >
+        <label
+          >History<select id="dashboard-window">
+            <option value="128">Last 128 frames</option>
+            <option value="512" selected>Last 512 frames</option>
+            <option value="1024">Last 1,024 frames</option>
+          </select></label
+        >
+        <label
+          >Action for prediction charts<select id="dashboard-action"></select
+        ></label>
+        <button id="dashboard-play">Play recording</button
+        ><button id="dashboard-back">Back</button
+        ><button id="dashboard-next">Next frame</button>
+      </div>
+      <label class="dashboard-seek"
+        >Replay position<input
+          id="dashboard-timeline"
+          type="range"
+          min="0"
+          max="0"
+          value="0"
+          aria-label="Seek replay and metrics together"
+      /></label>
+      <p id="dashboard-status" class="muted" role="status">Load a recording.</p>
+      <div id="dashboard-legend" class="legend"></div>
+      <div id="species-now"></div>
+      <div id="trend-grid"></div>
+      <p class="muted dashboard-notes">
+        Each point is one recorded simulation step; cards show the current step.
+        Choose a metric for each chart. Missing steps and absent diagnostics are
+        not filled in. Hunting/feeding success is kills per attack for predators
+        and productive feeds per eat attempt for prey; no attempt = no value.
+        Reward excludes animals that died that step. Action coverage reports how
+        many previous animals' actions were recovered.
+      </p>
+      <p class="muted dashboard-notes">
+        Groups are same-species proximity clusters: linked animals within 3
+        cells, including transitive links. Solitary animals are separate.
+        Obstacles are ignored; proximity does not establish cooperation.
+        Prediction dots average sampled agents on their changing observations,
+        not prediction accuracy or proof of learning. Policy probabilities and Q
+        values have separate chart options.
+      </p>
+    </dialog>
+    <div id="error" role="alert" hidden></div>
+    <footer>
+      WTF · Python records to disk · JavaScript replays saved frames · Playback
+      speed does not affect simulation outcomes
+    </footer>
+  </body>
+</html>

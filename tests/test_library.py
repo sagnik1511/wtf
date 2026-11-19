@@ -203,9 +203,10 @@ class LibraryTests(unittest.TestCase):
             self.assertEqual(len(catalog(root / "library")), 32)
             third = self.export(latest, root)
             artifact = json.loads((third / "prey/female/lifespan.json").read_text())
-            self.assertEqual(artifact["model_generation"], 2)
+            # Exporting the unchanged imported winner preserves its identity.
+            self.assertEqual(artifact["model_generation"], 1)
             self.assertEqual(
-                artifact["parent_artifact"]["artifact_id"],
+                artifact["artifact_id"],
                 latest.initial_models["prey"]["female"]["provenance"]["artifact_id"],
             )
 

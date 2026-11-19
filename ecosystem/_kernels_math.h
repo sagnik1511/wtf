@@ -14,7 +14,8 @@ static PyObject *double_list(const double *x, Py_ssize_t n) {
     }
     return a;
 }
-static int distribution(const double *x, Py_ssize_t n, double *p, double *logs) {
+static int distribution(const double *x, Py_ssize_t n, double *p,
+                        double *logs) {
     if (n < 1) {
         PyErr_SetString(PyExc_ValueError, "Empty policy");
         return 0;
@@ -61,11 +62,12 @@ done:
     PyMem_Free(scratch);
     return result;
 }
-/* info order: policy loss, value loss, entropy, approximate KL, clip fraction. */
+/* info order: policy loss, value loss, entropy, approximate KL, clip fraction.
+ */
 static int ppo_derivative(const double *out, Py_ssize_t n, Py_ssize_t action,
-                          double old, double adv, double target, double clip, double ec,
-                          double vc, double *gradient, double *info, double *scratch,
-                          double *loss) {
+                          double old, double adv, double target, double clip,
+                          double ec, double vc, double *gradient, double *info,
+                          double *scratch, double *loss) {
     Py_ssize_t actions = n - 1;
     if (action < 0 || action >= actions) {
         PyErr_SetString(PyExc_ValueError, "Invalid policy action");
@@ -76,15 +78,16 @@ static int ppo_derivative(const double *out, Py_ssize_t n, Py_ssize_t action,
         return 0;
     double lr = fmax(-60.0, fmin(60.0, logs[action] - old)), ratio = exp(lr);
     double clipped = fmax(1.0 - clip, fmin(1.0 + clip, ratio));
-    int inactive = (adv > 0 && ratio > 1.0 + clip) || (adv < 0 && ratio < 1.0 - clip);
-    double pl = -fmin(ratio * adv, clipped * adv), d = inactive ? 0.0 : -adv * ratio,
-           sum = 0.0;
+    int inactive =
+        (adv > 0 && ratio > 1.0 + clip) || (adv < 0 && ratio < 1.0 - clip);
+    double pl = -fmin(ratio * adv, clipped * adv),
+           d = inactive ? 0.0 : -adv * ratio, sum = 0.0;
     for (Py_ssize_t j = 0; j < actions; j++)
         sum += p[j] * logs[j];
     double entropy = -sum;
     for (Py_ssize_t j = 0; j < actions; j++)
-        gradient[j] =
-            d * ((j == action ? 1.0 : 0.0) - p[j]) + ec * p[j] * (logs[j] + entropy);
+        gradient[j] = d * ((j == action ? 1.0 : 0.0) - p[j]) +
+                      ec * p[j] * (logs[j] + entropy);
     double error = out[actions] - target, vl = 0.5 * error * error;
     gradient[actions] = vc * error;
     info[0] = pl;
@@ -96,16 +99,16 @@ static int ppo_derivative(const double *out, Py_ssize_t n, Py_ssize_t action,
     return 1;
 }
 static PyObject *ppo_metrics(const double *info) {
-    return Py_BuildValue("{s:d,s:d,s:d,s:d,s:d}", "policy_loss", info[0], "value_loss",
-                         info[1], "entropy", info[2], "approximate_kl", info[3],
-                         "clip_fraction", info[4]);
+    return Py_BuildValue("{s:d,s:d,s:d,s:d,s:d}", "policy_loss", info[0],
+                         "value_loss", info[1], "entropy", info[2],
+                         "approximate_kl", info[3], "clip_fraction", info[4]);
 }
 static PyObject *ppo_loss_native(PyObject *self, PyObject *args) {
     PyObject *o;
     Py_ssize_t action;
     double old, adv, target, clip, ec, vc;
-    if (!PyArg_ParseTuple(args, "Ondddddd", &o, &action, &old, &adv, &target, &clip,
-                          &ec, &vc))
+    if (!PyArg_ParseTuple(args, "Ondddddd", &o, &action, &old, &adv, &target,
+                          &clip, &ec, &vc))
         return NULL;
     Py_ssize_t n;
     double *x = vector(o, &n), *g = NULL, info[5], loss;
@@ -117,8 +120,8 @@ static PyObject *ppo_loss_native(PyObject *self, PyObject *args) {
         PyErr_NoMemory();
         goto done;
     }
-    if (!ppo_derivative(x, n, action, old, adv, target, clip, ec, vc, g, info, g + n,
-                        &loss))
+    if (!ppo_derivative(x, n, action, old, adv, target, clip, ec, vc, g, info,
+                        g + n, &loss))
         goto done;
     gradient = double_list(g, n);
     metrics = ppo_metrics(info);
@@ -154,7 +157,8 @@ static PyObject *quantile_native(PyObject *self, PyObject *args) {
     for (Py_ssize_t i = 0; i < n; i++) {
         double tau = ((double)i + 0.5) / (double)n;
         for (Py_ssize_t j = 0; j < m; j++) {
-            double d = y[j] - x[i], w = fabs(tau - (double)(d < 0)), v = fabs(d);
+            double d = y[j] - x[i], w = fabs(tau - (double)(d < 0)),
+                   v = fabs(d);
             double huber = v <= k ? 0.5 * d * d : k * (v - 0.5 * k);
             loss += w * huber / k;
             g[i] -= w * fmax(-k, fmin(k, d)) / k;
@@ -256,7 +260,8 @@ static PyObject *gru_backward_native(PyObject *self, PyObject *args) {
     PyObject *r = NULL;
     double *parts[8] = {0}, *s = NULL;
     Py_ssize_t sizes[8] = {0};
-    if (!PyTuple_Check(seqs) || PyTuple_GET_SIZE(seqs) != 8 || !PyDict_Check(go)) {
+    if (!PyTuple_Check(seqs) || PyTuple_GET_SIZE(seqs) != 8 ||
+        !PyDict_Check(go)) {
         PyErr_SetString(PyExc_TypeError, "Invalid GRU tape");
         goto done;
     }
@@ -299,8 +304,8 @@ static PyObject *gru_backward_native(PyObject *self, PyObject *args) {
         PyErr_NoMemory();
         goto done;
     }
-    double *dh = s, *dz = s + h, *dn = s + 2 * h, *drh = s + 3 * h, *dr = s + 4 * h,
-           *prev = s + 5 * h;
+    double *dh = s, *dz = s + h, *dn = s + 2 * h, *drh = s + 3 * h,
+           *dr = s + 4 * h, *prev = s + 5 * h;
     double *x = parts[0], *old = parts[1], *z = parts[2], *reset = parts[3],
            *candidate = parts[4], *rh = parts[5];
     const float *wh = views[0].buf;
@@ -319,7 +324,8 @@ static PyObject *gru_backward_native(PyObject *self, PyObject *args) {
     for (Py_ssize_t i = 0; i < h; i++) {
         double sum = 0.0;
         for (Py_ssize_t j = 0; j < h; j++)
-            sum += dz[j] * (double)wh[j * h + i] + dr[j] * (double)wh[(h + j) * h + i];
+            sum += dz[j] * (double)wh[j * h + i] +
+                   dr[j] * (double)wh[(h + j) * h + i];
         prev[i] = (dh[i] * z[i] + drh[i] * reset[i]) + sum;
     }
     double *dwx = views[1].buf, *dwh = views[2].buf, *db = views[3].buf;
@@ -363,8 +369,9 @@ static void dense_release(DenseRow *rows, Py_ssize_t n) {
     }
     PyMem_Free(rows);
 }
-static DenseRow *dense_rows(PyObject *layers, PyObject *grads, Py_ssize_t inputs,
-                            Py_ssize_t *count, Py_ssize_t *total, Py_ssize_t *maximum) {
+static DenseRow *dense_rows(PyObject *layers, PyObject *grads,
+                            Py_ssize_t inputs, Py_ssize_t *count,
+                            Py_ssize_t *total, Py_ssize_t *maximum) {
     if (!PyList_Check(layers) || PyList_GET_SIZE(layers) < 1 || inputs < 1) {
         PyErr_SetString(PyExc_ValueError, "Invalid dense model");
         return NULL;
@@ -418,7 +425,8 @@ static DenseRow *dense_rows(PyObject *layers, PyObject *grads, Py_ssize_t inputs
                 PyErr_SetString(PyExc_ValueError, "Missing dense gradients");
                 goto fail;
             }
-            if (!buffer(dw, &rows[j].dw, 'd', 1) || !buffer(db, &rows[j].db, 'd', 1) ||
+            if (!buffer(dw, &rows[j].dw, 'd', 1) ||
+                !buffer(db, &rows[j].db, 'd', 1) ||
                 !length(&rows[j].dw, size(&rows[j].w)) ||
                 !length(&rows[j].db, rows[j].m))
                 goto fail;
@@ -455,7 +463,8 @@ static void dense_forward(DenseRow *rows, Py_ssize_t count, double *tape,
         DenseRow *r = rows + j;
         const float *w = r->w.buf, *b = r->b.buf;
         double *x = tape + r->offset, *y = x + r->n;
-        Py_ssize_t from = j == count - 1 ? start : 0, to = j == count - 1 ? stop : r->m;
+        Py_ssize_t from = j == count - 1 ? start : 0,
+                   to = j == count - 1 ? stop : r->m;
         for (Py_ssize_t k = from; k < to; k++) {
             double sum = 0.0;
             for (Py_ssize_t i = 0; i < r->n; i++)
@@ -500,7 +509,8 @@ done:
 static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
     PyObject *layers, *grads, *samples;
     double clip, ec, vc;
-    if (!PyArg_ParseTuple(args, "OOOddd", &layers, &grads, &samples, &clip, &ec, &vc))
+    if (!PyArg_ParseTuple(args, "OOOddd", &layers, &grads, &samples, &clip, &ec,
+                          &vc))
         return NULL;
     if (!PyList_Check(samples) || !PyList_GET_SIZE(samples)) {
         PyErr_SetString(PyExc_ValueError, "Empty PPO batch");
@@ -511,8 +521,8 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
         PyErr_SetString(PyExc_ValueError, "Invalid PPO sample");
         return NULL;
     }
-    Py_ssize_t n = PySequence_Size(PyTuple_GET_ITEM(first, 0)), count = 0, total = 0,
-               maximum = 0;
+    Py_ssize_t n = PySequence_Size(PyTuple_GET_ITEM(first, 0)), count = 0,
+               total = 0, maximum = 0;
     if (n < 0)
         return NULL;
     DenseRow *rows = dense_rows(layers, grads, n, &count, &total, &maximum);
@@ -558,8 +568,8 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
             goto done;
         dense_forward(rows, count, tape, 0, m);
         double info[5], loss;
-        if (!ppo_derivative(tape + total - m, m, action, old, adv, target, clip, ec, vc,
-                            delta, info, scratch, &loss))
+        if (!ppo_derivative(tape + total - m, m, action, old, adv, target, clip,
+                            ec, vc, delta, info, scratch, &loss))
             goto done;
         for (Py_ssize_t j = count; j-- > 0;) {
             DenseRow *r = rows + j;

@@ -24,7 +24,8 @@ static int buffer(PyObject *object, Py_buffer *view, char kind, int writable) {
 static Py_ssize_t size(Py_buffer *view) { return view->len / view->itemsize; }
 static int length(Py_buffer *view, Py_ssize_t expected) {
     if (size(view) != expected) {
-        PyErr_SetString(PyExc_ValueError, "Kernel vector dimensions do not match");
+        PyErr_SetString(PyExc_ValueError,
+                        "Kernel vector dimensions do not match");
         return 0;
     }
     return 1;
@@ -62,8 +63,8 @@ static PyObject *affine(PyObject *self, PyObject *args) {
     PyObject *xobj, *wobj, *bobj;
     int activate;
     Py_ssize_t start, stop;
-    if (!PyArg_ParseTuple(args, "OOOpnn", &xobj, &wobj, &bobj, &activate, &start,
-                          &stop))
+    if (!PyArg_ParseTuple(args, "OOOpnn", &xobj, &wobj, &bobj, &activate,
+                          &start, &stop))
         return NULL;
     Py_buffer views[2] = {{0}};
     PyObject *result = NULL;
@@ -182,13 +183,14 @@ static PyObject *adam(PyObject *self, PyObject *args) {
     for (Py_ssize_t j = 0; j < n; j++) {
         PyObject *row = PyList_GET_ITEM(rows, j);
         if (!PyTuple_Check(row) || PyTuple_GET_SIZE(row) != 4) {
-            PyErr_SetString(PyExc_ValueError,
-                            "Expected Adam parameter/moment/variance/gradient rows");
+            PyErr_SetString(
+                PyExc_ValueError,
+                "Expected Adam parameter/moment/variance/gradient rows");
             goto done;
         }
         for (int k = 0; k < 4; k++)
-            if (!buffer(PyTuple_GET_ITEM(row, k), &views[j * 4 + k], k == 3 ? 'd' : 'f',
-                        k != 3))
+            if (!buffer(PyTuple_GET_ITEM(row, k), &views[j * 4 + k],
+                        k == 3 ? 'd' : 'f', k != 3))
                 goto done;
         for (int k = 1; k < 4; k++)
             if (!length(&views[j * 4 + k], size(&views[j * 4])))
@@ -212,9 +214,9 @@ static PyObject *adam(PyObject *self, PyObject *args) {
             double g = gradient[i] * factor;
             m[i] = (float)(0.9 * (double)m[i] + 0.1 * g);
             v[i] = (float)(0.999 * (double)v[i] + 0.001 * g * g);
-            p[i] =
-                (float)((double)p[i] - rate * ((double)m[i] / correction1) /
-                                           (sqrt((double)v[i] / correction2) + 1e-8));
+            p[i] = (float)((double)p[i] -
+                           rate * ((double)m[i] / correction1) /
+                               (sqrt((double)v[i] / correction2) + 1e-8));
         }
     }
     Py_INCREF(Py_None);
@@ -228,8 +230,8 @@ static PyObject *q_backward(PyObject *self, PyObject *args) {
     PyObject *xobj, *hobj, *wobj, *gw1, *gb1, *gw2, *gb2;
     Py_ssize_t action;
     double delta;
-    if (!PyArg_ParseTuple(args, "OOOnOOOOd", &xobj, &hobj, &wobj, &action, &gw1, &gb1,
-                          &gw2, &gb2, &delta))
+    if (!PyArg_ParseTuple(args, "OOOnOOOOd", &xobj, &hobj, &wobj, &action, &gw1,
+                          &gb1, &gw2, &gb2, &delta))
         return NULL;
     Py_buffer views[5] = {{0}};
     double *x = NULL, *h = NULL;
@@ -244,9 +246,9 @@ static PyObject *q_backward(PyObject *self, PyObject *args) {
     if (!x || !h)
         goto done;
     if (n <= 0 || m <= 0 || action < 0 || action >= size(&views[4]) ||
-        size(&views[1]) / n != m || size(&views[1]) % n || !length(&views[2], m) ||
-        size(&views[0]) / m != size(&views[4]) || size(&views[0]) % m ||
-        !length(&views[3], size(&views[0]))) {
+        size(&views[1]) / n != m || size(&views[1]) % n ||
+        !length(&views[2], m) || size(&views[0]) / m != size(&views[4]) ||
+        size(&views[0]) % m || !length(&views[3], size(&views[0]))) {
         if (!PyErr_Occurred())
             PyErr_SetString(PyExc_ValueError, "Invalid Q gradient dimensions");
         goto done;
@@ -290,14 +292,16 @@ done:
     release(views, 2);
     return result;
 }
+#include "_kernels_data.h"
 #include "_kernels_math.h"
 #include "_kernels_spatial.h"
-#include "_kernels_data.h"
 
 static PyMethodDef methods[] = {
-    {"groups", groups_native, METH_VARARGS, "Sparse native spatial group statistics."},
+    {"groups", groups_native, METH_VARARGS,
+     "Sparse native spatial group statistics."},
     {"varint", varint_native, METH_O, "Encode a bounded unsigned integer."},
-    {"integer_array", integer_array_native, METH_O, "Encode signed integer arrays."},
+    {"integer_array", integer_array_native, METH_O,
+     "Encode signed integer arrays."},
     {"decode_integers", decode_ints_native, METH_VARARGS,
      "Decode signed integer arrays."},
     {"clone_tree", clone_native, METH_O, "Copy primitive replay trees."},
@@ -308,23 +312,29 @@ static PyMethodDef methods[] = {
     {"flat_metabolism", metabolism_native, METH_VARARGS,
      "Batch flat-body costs/age/starvation."},
     {"ray", ray_native, METH_VARARGS, "Fused visibility and water ray."},
-    {"nearest", nearest_native, METH_VARARGS, "Ordered native nearest visible target."},
-    {"group_pairs", group_pairs_native, METH_VARARGS, "Union-find of nearby animals."},
+    {"nearest", nearest_native, METH_VARARGS,
+     "Ordered native nearest visible target."},
+    {"group_pairs", group_pairs_native, METH_VARARGS,
+     "Union-find of nearby animals."},
     {"distribution", policy_distribution_native, METH_VARARGS,
      "Ordered softmax/log probabilities."},
     {"ppo_loss", ppo_loss_native, METH_VARARGS, "PPO objective and gradient."},
-    {"quantile", quantile_native, METH_VARARGS, "Pairwise quantile Huber objective."},
+    {"quantile", quantile_native, METH_VARARGS,
+     "Pairwise quantile Huber objective."},
     {"gru_step", gru_step_native, METH_VARARGS, "GRU gates and hidden update."},
-    {"gru_backward", gru_backward_native, METH_VARARGS, "GRU BPTT accumulation."},
+    {"gru_backward", gru_backward_native, METH_VARARGS,
+     "GRU BPTT accumulation."},
     {"mlp_predict", mlp_predict_native, METH_VARARGS, "Fused dense inference."},
     {"ppo_batch", ppo_batch_native, METH_VARARGS,
      "Fused PPO batch gradients and metrics."},
-    {"affine", affine, METH_VARARGS, "Dense layer, optional tanh, and output range."},
+    {"affine", affine, METH_VARARGS,
+     "Dense layer, optional tanh, and output range."},
     {"backward", backward, METH_VARARGS,
      "Accumulate dense gradients in float64 buffers."},
     {"adam", adam, METH_VARARGS, "Clipped Adam with float32 storage rounding."},
     {"q_backward", q_backward, METH_VARARGS, "Chosen-action Q gradients."},
-    {"sgd", sgd, METH_VARARGS, "Float32 parameter update with double arithmetic."},
+    {"sgd", sgd, METH_VARARGS,
+     "Float32 parameter update with double arithmetic."},
     {NULL, NULL, 0, NULL}};
 static struct PyModuleDef module = {PyModuleDef_HEAD_INIT, "_kernels", NULL, -1,
                                     methods};

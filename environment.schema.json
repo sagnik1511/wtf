@@ -3,14 +3,7 @@
     "terrainMap": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "map_version",
-        "name",
-        "width",
-        "height",
-        "rows",
-        "legend"
-      ],
+      "required": ["map_version", "name", "width", "height", "rows", "legend"],
       "properties": {
         "map_version": {
           "const": 1
@@ -82,9 +75,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "path"
-          ],
+          "required": ["path"],
           "properties": {
             "path": {
               "type": "string",
@@ -95,16 +86,10 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "selection",
-            "metric"
-          ],
+          "required": ["selection", "metric"],
           "properties": {
             "selection": {
-              "enum": [
-                "best",
-                "latest"
-              ]
+              "enum": ["best", "latest"]
             },
             "metric": {
               "enum": [
@@ -131,9 +116,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "map_file"
-          ],
+          "required": ["map_file"],
           "properties": {
             "map_file": {
               "type": "string",
@@ -180,22 +163,14 @@
           "maximum": 10000000
         }
       },
-      "required": [
-        "width",
-        "height",
-        "boundary",
-        "max_steps"
-      ],
+      "required": ["width", "height", "boundary", "max_steps"],
       "additionalProperties": false
     },
     "obstacles": {
       "type": "object",
       "properties": {
         "generation": {
-          "enum": [
-            "scattered",
-            "explicit"
-          ]
+          "enum": ["scattered", "explicit"]
         },
         "occupied_fraction": {
           "type": "number",
@@ -217,11 +192,7 @@
           }
         }
       },
-      "required": [
-        "generation",
-        "occupied_fraction",
-        "explicit_cells"
-      ],
+      "required": ["generation", "occupied_fraction", "explicit_cells"],
       "additionalProperties": false
     },
     "resources": {
@@ -371,19 +342,14 @@
                     "minLength": 1
                   }
                 },
-                "required": [
-                  "path"
-                ]
+                "required": ["path"]
               },
               {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
                   "selection": {
-                    "enum": [
-                      "best",
-                      "latest"
-                    ]
+                    "enum": ["best", "latest"]
                   },
                   "metric": {
                     "enum": [
@@ -396,10 +362,7 @@
                     ]
                   }
                 },
-                "required": [
-                  "selection",
-                  "metric"
-                ]
+                "required": ["selection", "metric"]
               }
             ]
           },
@@ -409,10 +372,7 @@
             "maximum": 10000
           },
           "diet": {
-            "enum": [
-              "resource",
-              "prey"
-            ]
+            "enum": ["resource", "prey"]
           },
           "allowed_actions": {
             "type": "array",
@@ -564,9 +524,7 @@
           "champion_selection": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "criterion"
-            ],
+            "required": ["criterion"],
             "properties": {
               "criterion": {
                 "enum": [
@@ -649,11 +607,7 @@
                 "description": "Optional reward per actual damage point credited to this attacker; omitted means zero."
               }
             },
-            "required": [
-              "per_energy_gained",
-              "per_damage_taken",
-              "death"
-            ],
+            "required": ["per_energy_gained", "per_damage_taken", "death"],
             "additionalProperties": false
           },
           "mutation": {
@@ -782,11 +736,7 @@
                 "const": "q_network"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "hidden_layers": {
@@ -801,7 +751,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 1
               },
               "discount_factor": {
@@ -853,12 +803,14 @@
                     "maximum": 1
                   }
                 },
-                "required": [
-                  "initial",
-                  "minimum",
-                  "decay_per_decision"
-                ],
+                "required": ["initial", "minimum", "decay_per_decision"],
                 "additionalProperties": false
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -883,20 +835,13 @@
                 "const": "ppo"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -918,7 +863,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -963,7 +908,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "normalize_advantages": {
@@ -973,6 +918,12 @@
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -999,20 +950,13 @@
                 "const": "a2c"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1034,7 +978,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1049,7 +993,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "gae_lambda": {
@@ -1069,6 +1013,12 @@
               },
               "normalize_advantages": {
                 "type": "boolean"
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1092,20 +1042,13 @@
                 "const": "reinforce"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1127,7 +1070,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1142,7 +1085,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "max_episode_steps": {
@@ -1157,6 +1100,12 @@
               },
               "normalize_advantages": {
                 "type": "boolean"
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1179,20 +1128,13 @@
                 "const": "grpo"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1214,7 +1156,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1229,7 +1171,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "clip_ratio": {
@@ -1271,6 +1213,12 @@
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1297,20 +1245,13 @@
                 "const": "recurrent_ppo"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1332,7 +1273,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1377,7 +1318,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "normalize_advantages": {
@@ -1397,6 +1338,12 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 128
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1425,20 +1372,13 @@
                 "const": "maskable_ppo"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1460,7 +1400,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1505,7 +1445,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "normalize_advantages": {
@@ -1515,6 +1455,12 @@
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1541,20 +1487,13 @@
                 "const": "mappo"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1576,7 +1515,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1621,7 +1560,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "normalize_advantages": {
@@ -1641,6 +1580,12 @@
                   "minimum": 1,
                   "maximum": 256
                 }
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1667,16 +1612,12 @@
                 "const": "qrdqn"
               },
               "observation_version": {
-                "enum": [
-                  1,
-                  2,
-                  3
-                ],
+                "enum": [1, 2, 3],
                 "maximum": 3
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-06,
+                "minimum": 1e-6,
                 "maximum": 0.1
               },
               "discount_factor": {
@@ -1728,20 +1669,13 @@
                     "maximum": 1
                   }
                 },
-                "required": [
-                  "initial",
-                  "minimum",
-                  "decay_per_decision"
-                ],
+                "required": ["initial", "minimum", "decay_per_decision"],
                 "additionalProperties": false
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "type",
-                  "hidden_layers"
-                ],
+                "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
                     "const": "mlp"
@@ -1768,13 +1702,19 @@
               },
               "huber_threshold": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-05,
+                "minimum": 1e-5,
                 "maximum": 100
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1
               }
             },
             "required": [
@@ -1813,11 +1753,7 @@
           "type": "boolean"
         },
         "world_seed_policy": {
-          "enum": [
-            "random",
-            "fixed",
-            "increment"
-          ]
+          "enum": ["random", "fixed", "increment"]
         },
         "record_metrics_every_steps": {
           "type": "integer",
@@ -1838,6 +1774,33 @@
           "type": "boolean",
           "default": true,
           "description": "Retain the previous qualified matching-sex lineage brain when a new episode only provides an unqualified fallback."
+        },
+        "promote_only_improved": {
+          "type": "boolean",
+          "default": true,
+          "description": "Retain best-so-far species/sex/criterion champions; ties keep the incumbent."
+        },
+        "early_stopping": {
+          "type": "object",
+          "properties": {
+            "patience_runs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000,
+              "description": "Consecutive completed runs without a selected champion rank improvement; zero disables."
+            },
+            "species": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              },
+              "description": "Configured species to monitor. Omit to watch all; any monitored sex/species improvement resets patience."
+            }
+          },
+          "required": ["patience_runs"],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -1873,19 +1836,11 @@
           "maximum": 256
         },
         "encoding": {
-          "enum": [
-            "binary",
-            "delta",
-            "snapshot"
-          ],
+          "enum": ["binary", "delta", "snapshot"],
           "default": "binary"
         },
         "compression": {
-          "enum": [
-            "gzip",
-            "xz",
-            "none"
-          ],
+          "enum": ["gzip", "xz", "none"],
           "default": "xz"
         },
         "compression_level": {
@@ -1904,11 +1859,7 @@
     "placement": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "enclosure_bounds",
-        "species",
-        "resources"
-      ],
+      "required": ["enclosure_bounds", "species", "resources"],
       "properties": {
         "enclosure_bounds": {
           "type": "array",
@@ -1923,10 +1874,7 @@
         "species": {
           "type": "object",
           "additionalProperties": {
-            "enum": [
-              "inside",
-              "outside"
-            ]
+            "enum": ["inside", "outside"]
           }
         },
         "resources": {

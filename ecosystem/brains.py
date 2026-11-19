@@ -117,6 +117,8 @@ def model_signature(config, actions):
         actions=list(actions),
         value_head=kind in ("ppo", "a2c", "recurrent_ppo", "maskable_ppo", "mappo"),
     )
+    if config.get("observation_top_k", 1) != 1:
+        signature["observation_top_k"] = config["observation_top_k"]
     if kind == "recurrent_ppo":
         signature.update(recurrent_size=config["recurrent_size"], recurrent_cell="gru")
     elif kind == "qrdqn":

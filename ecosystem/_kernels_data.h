@@ -1,4 +1,5 @@
-/* Lossless helpers keep existing record tags, integer widths and object types. */
+/* Lossless helpers keep existing record tags, integer widths and object types.
+ */
 #include <stdint.h>
 static PyObject *varint_native(PyObject *self, PyObject *o) {
     unsigned long long n = PyLong_AsUnsignedLongLong(o);
@@ -40,8 +41,9 @@ static PyObject *integer_array_native(PyObject *self, PyObject *o) {
             Py_CLEAR(r);
             break;
         }
-        unsigned long long v = value >= 0 ? (unsigned long long)value * 2
-                                          : (unsigned long long)(-value) * 2 - 1;
+        unsigned long long v = value >= 0
+                                   ? (unsigned long long)value * 2
+                                   : (unsigned long long)(-value) * 2 - 1;
         while (v >= 128) {
             dest[count++] = (unsigned char)((v & 127) | 128);
             v >>= 7;
@@ -276,7 +278,8 @@ static PyObject *grow_native(PyObject *self, PyObject *args) {
             return NULL;
         }
         int less = PyObject_RichCompareBool(sum, cap, Py_LT);
-        if (less < 0 || PyDict_SetItemString(dict, "quantity", less ? sum : cap) < 0) {
+        if (less < 0 ||
+            PyDict_SetItemString(dict, "quantity", less ? sum : cap) < 0) {
             Py_DECREF(sum);
             Py_DECREF(dict);
             Py_DECREF(seq);
@@ -289,7 +292,8 @@ static PyObject *grow_native(PyObject *self, PyObject *args) {
     Py_RETURN_TRUE;
 }
 static PyObject *metabolism_native(PyObject *self, PyObject *args) {
-    PyObject *items, *actions, *species, *rewards, *events, *eventcls, *animalcls;
+    PyObject *items, *actions, *species, *rewards, *events, *eventcls,
+        *animalcls;
     if (!PyArg_ParseTuple(args, "OOOOOOO", &items, &actions, &species, &rewards,
                           &events, &eventcls, &animalcls))
         return NULL;
@@ -297,7 +301,8 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
     if (!seq)
         return NULL;
     for (Py_ssize_t i = 0; i < PySequence_Fast_GET_SIZE(seq); i++)
-        if ((PyObject *)Py_TYPE(PySequence_Fast_GET_ITEM(seq, i)) != animalcls) {
+        if ((PyObject *)Py_TYPE(PySequence_Fast_GET_ITEM(seq, i)) !=
+            animalcls) {
             Py_DECREF(seq);
             Py_RETURN_FALSE;
         }
@@ -309,8 +314,8 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
     if (!zero || !one || !minusone || !kind || !cause || !default_zero)
         goto done;
     for (Py_ssize_t i = 0; i < PySequence_Fast_GET_SIZE(seq); i++) {
-        PyObject *dict =
-                     PyObject_GenericGetDict(PySequence_Fast_GET_ITEM(seq, i), NULL),
+        PyObject *dict = PyObject_GenericGetDict(
+                     PySequence_Fast_GET_ITEM(seq, i), NULL),
                  *cost = NULL, *remaining = NULL, *term = NULL, *reward = NULL,
                  *age = NULL, *healthnew = NULL, *event = NULL;
         if (!dict)
@@ -351,10 +356,11 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
         const char *name = PyUnicode_AsUTF8(action);
         if (!name)
             goto body_fail;
-        const char *extra = (!strcmp(name, "move_forward") || !strcmp(name, "swim"))
-                                ? "movement_cost"
-                            : !strcmp(name, "attack") ? "attack_cost"
-                                                      : NULL;
+        const char *extra =
+            (!strcmp(name, "move_forward") || !strcmp(name, "swim"))
+                ? "movement_cost"
+            : !strcmp(name, "attack") ? "attack_cost"
+                                      : NULL;
         if (extra) {
             PyObject *c = PyDict_GetItemString(body, extra);
             if (!c) {
@@ -372,7 +378,8 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
         int positive = PyObject_RichCompareBool(remaining, zero, Py_GT);
         if (positive < 0)
             goto body_fail;
-        if (PyDict_SetItemString(dict, "energy", positive ? remaining : zero) < 0)
+        if (PyDict_SetItemString(dict, "energy", positive ? remaining : zero) <
+            0)
             goto body_fail;
         PyObject *coefficient = PyDict_GetItemString(r, "per_energy_cost");
         if (!coefficient)
@@ -391,9 +398,11 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
             if (alive < 0)
                 goto body_fail;
             if (alive) {
-                PyObject *damage = PyDict_GetItemString(body, "starvation_damage");
+                PyObject *damage =
+                    PyDict_GetItemString(body, "starvation_damage");
                 if (!damage) {
-                    PyErr_SetString(PyExc_ValueError, "Missing starvation damage");
+                    PyErr_SetString(PyExc_ValueError,
+                                    "Missing starvation damage");
                     goto body_fail;
                 }
                 int smaller = PyObject_RichCompareBool(damage, health, Py_LT);
@@ -403,12 +412,13 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
                     damage = health;
                 Py_INCREF(damage);
                 healthnew = PyNumber_Subtract(health, damage);
-                if (!healthnew || PyDict_SetItemString(dict, "health", healthnew) < 0) {
+                if (!healthnew ||
+                    PyDict_SetItemString(dict, "health", healthnew) < 0) {
                     Py_DECREF(damage);
                     goto body_fail;
                 }
-                event = PyObject_CallFunctionObjArgs(eventcls, kind, id, minusone,
-                                                     damage, cause, NULL);
+                event = PyObject_CallFunctionObjArgs(
+                    eventcls, kind, id, minusone, damage, cause, NULL);
                 Py_DECREF(damage);
                 if (!event || PyList_Append(events, event) < 0)
                     goto body_fail;

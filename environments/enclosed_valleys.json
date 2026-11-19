@@ -152,9 +152,7 @@
       "type": "ppo",
       "network": {
         "type": "mlp",
-        "hidden_layers": [
-          16
-        ],
+        "hidden_layers": [16],
         "activation": "tanh"
       },
       "learning_rate": 0.001,
@@ -173,9 +171,7 @@
     },
     "small_dqn": {
       "type": "q_network",
-      "hidden_layers": [
-        16
-      ],
+      "hidden_layers": [16],
       "learning_rate": 0.003,
       "discount_factor": 0.98,
       "batch_size": 8,
@@ -212,12 +208,7 @@
     "map_file": "maps/enclosed_valleys.json"
   },
   "placement": {
-    "enclosure_bounds": [
-      8,
-      4,
-      31,
-      23
-    ],
+    "enclosure_bounds": [8, 4, 31, 23],
     "species": {
       "prey": "inside",
       "predator": "outside"

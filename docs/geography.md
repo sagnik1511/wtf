@@ -5,12 +5,14 @@
 For diagrams and the interactive explorer, see [Physics illustrated](physics.md).
 
 Terrain is optional. Existing environments remain flat unless they select a map.
-Eight optional presets cover seven maps, keeping one prey species and one predator species:
+Ten optional presets cover seven maps, keeping one prey species and one predator species:
 
 | Environment | Map |
 | --- | --- |
 | [river_crossing.json](../environments/river_crossing.json) | A river bisects the world, with a fast deep channel and a slower shallow ford |
 | [river_crossing_ppo.json](../environments/river_crossing_ppo.json) | The same river map with PPO for both species |
+| [river_crossing_strong_predator.json](../environments/river_crossing_strong_predator.json) | PPO prey `[16]`, predator `[128, 64]`, top-k=4 and extended predator sight |
+| [river_crossing_strong_predator_deep.json](../environments/river_crossing_strong_predator_deep.json) | The same enhanced river setup with prey `[64, 16]` and predators `[128, 96, 64, 32]` |
 | [highlands.json](../environments/highlands.json) | Terraced highlands, a steep central plateau, a climbable north ramp and obstacle approaches |
 | [enclosed_valleys.json](../environments/enclosed_valleys.json) | One elevated enclosure, two three-cell-wide gates, an exterior river and boundary-biased food |
 | [meandering_river.json](../environments/meandering_river.json) | A2C prey / GRPO predators on a floodplain with river bends, two shallow fords, slow margins and low knolls |
@@ -32,6 +34,44 @@ Enclosed-valley prey can load matching terrain Q/DQN weights; predators need
 matching terrain PPO weights. The river presets provide corresponding compatible
 signatures. Dry highlands omits `swim` and has a different action signature.
 Older 20-input flat brains cannot initialize these 32-input terrain models.
+
+## River crossing with stronger predator capacity
+
+Two enhanced river presets share the same map, top-k inputs and predator sight:
+
+| Preset | Prey hidden layers | Predator hidden layers |
+| --- | --- | --- |
+| `river_crossing_strong_predator.json` | `[16]` | `[128, 64]` |
+| `river_crossing_strong_predator_deep.json` | `[64, 16]` | `[128, 96, 64, 32]` |
+
+The separate `_deep` JSON keeps the configured two-/four-hidden-layer networks
+available without replacing the earlier architecture. Both use version-2
+observations with `observation_top_k: 4` (68 inputs each). Predator sight is 14
+plus up to 6 across water; prey sight remains 6 plus up to 3. PPO training settings
+match `river_crossing_ppo.json`, including the predator learning-rate multiplier
+of 1.25. See the [observation layout](observations.md).
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/river_crossing_strong_predator_deep.json --runs 1 --seed 100 --progress
+# Earlier network sizes: environments/river_crossing_strong_predator.json
+```
+
+This starts with fresh weights. With multiple runs, matching species/sex champion
+chaining applies by default; add `--no-chain-brains` for independent starts.
+Predator sight can reach 20 cells only when the sight line crosses at least six
+water cells. Walls still occlude, and the normal swimming/health/current rules
+apply. Both presets preserve the PPO baseline's populations, health, costs,
+rewards, reproduction and recording settings.
+
+The current deep networks have 5,592 parameters per prey and 29,768 per predator,
+including biases and action/value outputs. They require more computation and
+memory; better decisions still need evaluation. To compare architectures, run
+both JSONs on matching seeds and align champion criteria.
+
+Weights must match the selected architecture, observation version and k.
+The earlier `[16]` prey and `[128, 64]` predator weights cannot initialize the
+deeper networks, even with the same 68 inputs. Exact checkpoint resume continues
+to use its saved configuration.
 
 ## Landscape-inspired maps
 

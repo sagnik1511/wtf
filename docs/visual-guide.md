@@ -13,6 +13,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | --- | --- |
 | Where do Python and JavaScript meet? | [Runtime boundaries](architecture.md#runtime-boundaries) |
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
+| Which visible targets enter the brain? | [Top-k input pipeline](observations.md#visible-target-slots) |
 | How does an animal learn? | [Private learning loop](algorithms.md#private-learning-loop) |
 | How do GRPO trials avoid changing the real world? | [Trial isolation](algorithms.md#grpo-trial-isolation) |
 | What does recurrent memory do? | [Recurrent state](advanced-algorithms.md#recurrent-decision-state) |
@@ -20,6 +21,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | What does action masking change? | [Masked decisions](advanced-algorithms.md#masked-decisions) |
 | Which MAPPO inputs are local/global? | [Information boundaries](advanced-algorithms.md#mappo-information-boundaries) |
 | How do I start, resume or view? | [Run entry points](running.md#run-continue-or-view) |
+| When does training stop improving? | [Completed-run patience](running.md#stop-on-performance-plateaus) |
 | How do JSON settings become a run? | [Configuration flow](configuration.md#from-configuration-to-experiment) |
 | Why did reproduction fail? | [Physical and decision gates](configuration.md#reproduction-gates) |
 | Do species share a brain? | [Example private controllers](species.md#names-roles-and-private-brains) |
@@ -28,6 +30,8 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | Which animal does mutation affect? | [Child-only path](mutation.md#child-only-mutation-path) |
 | How do physical costs reach an optimizer? | [Reward feedback](rewards.md#physical-costs-and-learning-feedback) |
 | Why does seeking not load every run? | [Playback and chart data](recording.md#seeking-and-charts-use-separate-data) |
+| Why do inspector inputs lag the board? | [Current sight, sampled inputs and prediction graphs](recording.md#visual-agent-inspector) |
+| How do archives avoid repeating model weights? | [Shared champion blobs](binary-storage.md#champion-storage-measurement) |
 | What is compressed and what is restored? | [Replay and checkpoint payloads](binary-storage.md#two-payloads-one-bounded-file-at-a-time) |
 | Where would compiled kernels and smaller dtypes help? | [Native performance review](native-performance-review.md) (priority and dtype tables) |
 | When is an observation cache invalidated? | [Cache dependencies](performance.md#observation-cache-dependencies) |

@@ -44,3 +44,9 @@ learning, inheritance, saved state, storage, analysis and maintenance. The
 [visual guide](../visual-guide.md) maps questions to these diagrams. All exports
 are tracked vector assets; editable flowchart sources are local-only and ignored.
 No new GIFs or recordings were needed for these conceptual explanations.
+
+## Agent inspector example
+
+The [inspector illustration](inspector/README.md) shows current sight alongside
+older sampled inputs and action bars. Its provenance distinguishes controlled
+observation values from invented example probabilities. No new recording is used.

@@ -40,16 +40,15 @@ class LineageBook:
     def _add(self, animal_id, node, previous=None, new=False):
         previous = previous or {}
         for root in node["roots"]:
-            family = self.families.setdefault(
-                root,
-                dict(
+            family = self.families.get(root)
+            if family is None:
+                family = self.families[root] = dict(
                     members=0,
                     viable_descendants=0,
                     kills=0,
                     energy_gained=0.0,
                     animal_steps=0,
-                ),
-            )
+                )
             family["members"] += int(new)
             family["viable_descendants"] += int(
                 node["viable"]
@@ -92,7 +91,8 @@ class LineageBook:
             self._add(animal.id, node, old, new=old is None)
             self.nodes[key] = node
 
-    def rank(self, animal):
+    def rank(self, animal, *, include_metadata=True):
+        """Rank a candidate; materialize detached diagnostics only when requested."""
         node = self.nodes[str(animal.id)]
         predator = self.policies[animal.species]["diet"] == "prey"
         qualified = node["viable"] and (
@@ -122,16 +122,22 @@ class LineageBook:
                 animal.health,
             )
             if best is None or rank > best[0]:
-                best = rank, dict(
-                    founder_id=root,
-                    generation=node["generation"],
-                    qualified=qualified,
-                    partial_history=self.partial,
-                    **family,
-                    kills_per_1000_animal_steps=1000 * family["kills"] / max(1, time),
-                    energy_per_animal_step=family["energy_gained"] / max(1, time),
-                )
-        return best
+                best = rank, root
+        rank, root = best
+        metadata = None
+        if include_metadata:
+            family = self.families[root]
+            time = family["animal_steps"]
+            metadata = dict(
+                founder_id=root,
+                generation=node["generation"],
+                qualified=qualified,
+                partial_history=self.partial,
+                **family,
+                kills_per_1000_animal_steps=1000 * family["kills"] / max(1, time),
+                energy_per_animal_step=family["energy_gained"] / max(1, time),
+            )
+        return rank, metadata
 
     def checkpoint(self):
         return dict(

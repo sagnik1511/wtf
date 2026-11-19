@@ -21,9 +21,10 @@ MATING_INPUTS = 42
 
 
 def observation_inputs(config):
-    return {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS}[
+    base = {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS}[
         config.get("observation_version", 1)
     ]
+    return base + 12 * (config.get("observation_top_k", 1) - 1)
 
 
 class Experience(NamedTuple):

@@ -15,9 +15,11 @@ from .brains import (
     model_snapshot,
 )
 from .config import validate
+from .early_stopping import EarlyStopping
 from .world import World
 from .library import (
     ChampionBook,
+    initial_champions,
     load_initial_models,
     selection_criterion,
     sex_models,
@@ -35,13 +37,30 @@ class Experiment:
             "guard_lineage_chaining", True
         )
         self.mode = mode
+        self.improvement_only = self.config["experiment"].get(
+            "promote_only_improved", True
+        )
         self.brain_precision = "float32"
         self.legacy_brain_retention = False
         self.initial_models = load_initial_models(
             self.config, **({"root": library_root} if library_root is not None else {})
         )
+        self.early_stopping = EarlyStopping(self.config, mode, self.initial_models)
         self.run_initial_models = copy.deepcopy(self.initial_models)
         self.champion_artifacts = {}
+        if self.improvement_only:
+            for species, groups in self.initial_models.items():
+                for sex, initial in groups.items():
+                    if initial["provenance"].get("sex") != sex:
+                        continue
+                    provenance = copy.deepcopy(initial["provenance"])
+                    provenance["parent_artifact"] = copy.deepcopy(
+                        initial.get("champion_parent")
+                    )
+                    provenance.update(copy.deepcopy(initial.get("champion_origin", {})))
+                    self.champion_artifacts.setdefault(species, {})[sex] = {
+                        provenance["criterion"]: provenance
+                    }
         self.initial_weights = {}
         randomized = self.config["experiment"]["world_seed_policy"] == "random"
         self.randomization_seed = secrets.randbits(64) if randomized else None
@@ -58,6 +77,13 @@ class Experiment:
 
     def _start_run(self):
         c = self.config
+        best_entries = None
+        if self.improvement_only:
+            best_entries = (
+                self.champions.entries
+                if self.run_index > 0
+                else initial_champions(c, self.initial_models)
+            )
         if self.run_index > 0 and not self.legacy_brain_retention:
             models = copy.deepcopy(self.initial_models)
             if c["experiment"].get("chain_best_brains", True) and self.mode == "train":
@@ -79,6 +105,17 @@ class Experiment:
                             continue
                         previous = self.run_initial_models.get(species, {}).get(sex)
                         if (
+                            self.improvement_only
+                            and previous
+                            and previous["provenance"].get("criterion") == metric
+                            and previous["provenance"].get("rank")
+                            == list(candidate["rank"])
+                        ):
+                            models.setdefault(species, {})[sex] = copy.deepcopy(
+                                previous
+                            )
+                            continue
+                        if (
                             metric == "lineage"
                             and self.guard_lineage_chaining
                             and not candidate.get("lineage", {}).get("qualified", False)
@@ -97,6 +134,12 @@ class Experiment:
                             .get(sex, {})
                             .get(metric)
                         )
+                        if (
+                            self.improvement_only
+                            and provenance is not None
+                            and provenance.get("rank") != list(candidate["rank"])
+                        ):
+                            provenance = None
                         if provenance is None:
                             parent = (
                                 self.run_initial_models.get(species, {})
@@ -110,8 +153,16 @@ class Experiment:
                                 score=candidate["score"],
                                 sex=sex,
                                 model_generation=parent.get("model_generation", 0) + 1,
-                                source_run=self.run_index,
+                                source_run=candidate["source"].get(
+                                    "run", self.run_index
+                                ),
+                                rank=list(candidate["rank"]),
                             )
+                        provenance = {
+                            k: v
+                            for k, v in provenance.items()
+                            if k != "parent_artifact"
+                        }
                         models.setdefault(species, {})[sex] = dict(
                             model=copy.deepcopy(candidate["model"]),
                             provenance=copy.deepcopy(provenance),
@@ -122,7 +173,8 @@ class Experiment:
                             )
             self.run_initial_models = models
             self._retire_brains(list(self.brains))
-        self.champion_artifacts = {}
+        if not self.improvement_only:
+            self.champion_artifacts = {}
         policy = c["experiment"]["world_seed_policy"]
         if policy == "random":
             used = set(self.run_seeds)
@@ -174,7 +226,13 @@ class Experiment:
                                 self.initial_weights[species][a.sex] = model_snapshot(
                                     self.brains[i]
                                 )
-        self.champions = ChampionBook(c)
+        self.champions = ChampionBook(c, best_entries)
+        if self.run_index == 0 and self.early_stopping.active:
+            self.early_stopping.seed(
+                best_entries
+                if best_entries is not None
+                else initial_champions(c, self.initial_models)
+            )
         if self.mode == "train":
             self.champions.consider(
                 self.world.animals.values(), self.brains, self._champion_source()
@@ -223,9 +281,9 @@ class Experiment:
 
     @property
     def done(self):
-        return (
-            self.finished_run
-            and self.run_index + 1 >= self.config["experiment"]["runs"]
+        return self.finished_run and (
+            self.run_index + 1 >= self.config["experiment"]["runs"]
+            or self.early_stopping.stopped
         )
 
     def step(self):
@@ -365,6 +423,9 @@ class Experiment:
                     ],
                 )
             )
+            self.early_stopping.finish_run(self.run_index + 1, self.champions.entries)
+            if self.early_stopping.patience:
+                self.summaries[-1]["early_stopping"] = self.early_stopping.checkpoint()
         return None
 
     def _champion_source(self):
@@ -414,6 +475,7 @@ class Experiment:
         data.update(
             run=self.run_index + 1,
             total_runs=self.config["experiment"]["runs"],
+            early_stopping=self.early_stopping.checkpoint(),
             done=self.done,
             finished_run=self.finished_run,
             mode=self.mode,
@@ -444,6 +506,8 @@ class Experiment:
             champions=copy.deepcopy(self.champions.entries),
             lineage=self.champions.lineage.checkpoint(),
             guard_lineage_chaining=self.guard_lineage_chaining,
+            improvement_only=self.improvement_only,
+            early_stopping=self.early_stopping.checkpoint(),
             retired_updates=self.retired_updates,
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
             randomization_seed=self.randomization_seed,
@@ -488,6 +552,10 @@ class Experiment:
             "guard_lineage_chaining",
             e.config["experiment"].get("guard_lineage_chaining", False),
         )
+        e.improvement_only = state.get(
+            "improvement_only",
+            e.config["experiment"].get("promote_only_improved", False),
+        )
         e.initial_models = sex_models(state.get("initial_models", {}))
         e.legacy_brain_retention = state.get(
             "legacy_brain_retention", "chain_best_brains" not in e.config["experiment"]
@@ -519,6 +587,9 @@ class Experiment:
             raise ValueError("Invalid checkpoint mode")
         for key in ("run_index", "history", "summaries", "run_seeds", "finished_run"):
             setattr(e, key, copy.deepcopy(state[key]))
+        e.early_stopping = EarlyStopping(
+            e.config, e.mode, e.initial_models, state.get("early_stopping")
+        )
         e.randomization_seed = state.get("randomization_seed")
         e.seed_rng = None
         if e.config["experiment"]["world_seed_policy"] == "random":
