@@ -13,6 +13,10 @@ in the reviewed paths. Runtime formulas and preset coefficients are unchanged.
 This is a code/contract review, not a claim that the presets are calibrated or
 that every policy learns the desired behavior.
 
+The maintained [reward-accounting diagram](rewards.md#physical-costs-and-learning-feedback)
+shows the physical-cost and learning-feedback boundary. Its flow also applies
+here; the review tables below describe the algorithm-specific differences.
+
 ## One environmental reward, different learning algorithms
 
 `World.step` produces per-animal feedback from actual physical costs and events.

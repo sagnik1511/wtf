@@ -110,6 +110,9 @@ shape expected by `Experiment.restore`; no pickle or executable object loader is
 involved. Restore still materializes the full checkpoint in RAM.
 
 
+For the checkpoint record envelope, per-controller state and restore/access paths,
+see [checkpoint block diagrams](checkpoint-data-structures.md).
+
 ## Two payloads, one bounded file at a time
 
 Binary layout and compression are separate layers. Playback chunks are independently decodable; an exact checkpoint still restores the whole learning state.

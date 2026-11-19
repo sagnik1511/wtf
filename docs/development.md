@@ -70,6 +70,13 @@ format/check cycle. Summarize formatter results in the final handoff, including
 any unavailable tools. Documentation-only updates require link/asset checks;
 they do not trigger an unrelated source-wide reformat or training run.
 
+## Documentation visuals
+
+Apply the [selective visual guidance](visual-guide.md#when-a-visual-helps): diagrams
+should reveal useful structure or relationships. A clear table, short paragraph
+or command often needs no figure. Prefer existing visual cross-links and verify
+new structural examples against the implementation.
+
 ## Choose checks for the change
 
 Use the focused checks described below. Documentation/media work does not require a new ecology training experiment.

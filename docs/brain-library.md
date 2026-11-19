@@ -72,6 +72,9 @@ lifespan. The exact tie-breaking ranks are included with each model.
 
 ## Weights versus exact state
 
+For the full continuation payload and restored runtime ownership, see
+[checkpoint structures](checkpoint-data-structures.md).
+
 Champion loading transfers compatible learned parameters. It does not restore an animal’s body, optimizer, memory or pending experience.
 
 ![Weights versus exact state](assets/diagrams/weights-versus-exact-state.svg)
@@ -146,6 +149,13 @@ The JSON equivalent, inside each species object, is:
 ```json
 "champion_selection": {"criterion": "lineage"}
 ```
+
+### Founder membership and family credit
+
+![Repeated ancestry produces a set of founder memberships, two separate family ledgers and strongest-family selection](assets/structures/founder-family-membership.svg)
+
+The pedigree is a controlled ancestry example. Parent links explain set union
+and credit; physical mating eligibility remains governed by the normal rules.
 
 A **family** consists of one founder and its descendants, including both sexes.
 Each newborn inherits the union of its parents' founder memberships. An animal

@@ -10,9 +10,14 @@ improvement in a long experiment.
 ## Observation version 3
 
 Set `observation_version: 3` on any algorithm's brain template. All nine
-controllers support it on flat and terrain maps. Its **42 inputs** contain the
-existing 20 local inputs, 12 terrain inputs (zero on flat maps) and ten new values.
-Versions 1 (20 inputs) and 2 (32 inputs) retain their vectors and signatures.
+controllers support it on flat and terrain maps. With default k=1, its **42
+inputs** contain 20 local inputs, 12 terrain inputs (zero on flat maps) and ten
+mating values. Each extra target slot adds 12 inputs: k=4 has 78. The
+[vector block diagram](observations.md#input-layout) shows how these sections
+shift. Versions 1/2 retain their signatures when k is unchanged.
+
+The indexes below assume k=1. Add `12 * (k - 1)` to each mating index for
+a larger target count; the ten-field mating summary itself stays the same.
 
 | Zero-based index | Feature | Meaning |
 | --- | --- | --- |

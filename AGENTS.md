@@ -43,6 +43,16 @@ rather than loading every document or result into context.
 - Keep shared examples portable: use repo-relative paths or `/path/to/wtf`,
   without personal usernames or machine-specific home paths.
 
+## Documentation visuals
+
+Use visuals selectively when they make structure, ownership, spatial relations
+or state transitions quicker to understand. Prefer connected/nested blocks for
+containers, records, arrays and references; use diagrams to explain relationships,
+with values as supporting examples. Do not add a figure to every guide or turn
+prose into boxes. Keep tables for comparisons/field lists and prose or commands
+for straightforward instructions. Reuse/link existing figures before duplicating
+them. See [visual documentation guidance](docs/visual-guide.md#when-a-visual-helps).
+
 ## Working and checking
 
 Use `.venv/bin/python` and install runtime dependencies only in `.venv`.

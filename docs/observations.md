@@ -47,6 +47,12 @@ turn/move/swim/attack; an observation slot is not a direct attack-target command
 
 ## Input layout
 
+![Contiguous self, target, terrain and mating blocks with four-field target slots](assets/structures/observation-vector-layout.svg)
+
+The illustrated version-3, k=4 vector has terrain at indexes 56–67 and mating
+at 68–77. With k=1 those blocks start at 20 and 32. More target slots shift the
+following blocks; they do not duplicate terrain or mating inputs.
+
 | Section | Number of values |
 | --- | ---: |
 | Own energy, health and heading vector | 4 |

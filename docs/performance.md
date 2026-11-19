@@ -268,6 +268,16 @@ introduced, and no complete world-chunk cache is retained on the server.
 
 
 
+## Spatial window structure
+
+![Overlapping observer windows reuse shared bucket objects while target revisions invalidate cached query results](assets/structures/spatial-window-cache.svg)
+
+Each world has separate food/resource-eater/prey-eater indexes. Windows retain
+bucket references, so a target change inside an overlapping bucket is visible
+without copying the window contents. Revisions invalidate target selections;
+current self/terrain/mating fields are assembled separately. Sparse/wide queries
+can scan directly. The following dependency flow describes the invalidations.
+
 ## Observation cache dependencies
 
 Dynamic targets and static geometry have different invalidation rules. An observer staying still is not enough to reuse a target result.

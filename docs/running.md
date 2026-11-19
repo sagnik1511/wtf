@@ -168,6 +168,9 @@ training budget rule, not statistical evidence of convergence or generalization.
 
 ## Resume an exact experiment
 
+The [checkpoint structure guide](checkpoint-data-structures.md) shows stored
+optimizer/RNG/buffer blocks and how the restored training loop accesses them.
+
 Resume a checkpoint:
 
 ```sh

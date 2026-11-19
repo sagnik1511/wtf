@@ -1,12 +1,15 @@
-# Playback storage structure illustrations
+# Playback, model and checkpoint structure illustrations
 
-[Data-structure guide](../../replay-data-structures.md) · [Asset index](../README.md)
+[Data-structure guide](../../replay-data-structures.md) · [Checkpoint structures](../../checkpoint-data-structures.md) · [Asset index](../README.md)
 
 | SVG source | Purpose |
 | --- | --- |
 | [Experiment artifacts](experiment-artifacts.svg) | Connected directory/file blocks, with dashed references to pooled champion dependencies |
 | [Binary chunk layout](binary-chunk-layout.svg) | Nested prefix/length/payload blocks and physical entity-table columns |
 | [Model-weight structure](model-weight-storage.svg) | Shared artifact references, one-record binary blob, signature/precision and MLP layer arrays |
+| [Checkpoint file layout](checkpoint-record-layout.svg) | Metadata, per-brain records, internal shared-value references and atomic publication |
+| [Private controller state](checkpoint-controller-state.svg) | Nested network, optimizer, experience, RNG and algorithm-specific state blocks |
+| [Restore and runtime access](checkpoint-restore-access.svg) | Decode/restore stages, object ownership and decision/learning consumers |
 | [Frame delta example](frame-delta-example.svg) | Before/after field cells, highlighted mask bits, update-tuple blocks and reconstruction |
 
 These are original, directly editable SVG sources with accessible titles and
@@ -31,3 +34,10 @@ MLP implementation. Its example shapes (68 → 16 → 8, 1,240 scalars) were che
 against a constructed controller without training. Two writes reused one blob;
 SHA-256, exact readback and loading into a fresh controller were verified. Other
 algorithms' parameter trees differ, as the guide explains.
+
+Checkpoint diagrams follow the I/O writer/reader, `Experiment.restore`, world
+restore and each algorithm's checkpoint/restore methods. A controlled Q/PPO check
+verified record order, shared-value detachment, nonempty buffers, nonzero Adam
+state, restored RNGs and identical next steps. The existing binary continuation
+test passed across all nine algorithms with XZ and gzip. The diagrams describe
+state ownership/access, not a changed simulation execution order.

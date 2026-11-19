@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 842" role="img" aria-labelledby="title desc">
+<title id="title">Observation cache: shared buckets, private window references</title><desc id="desc">Schematic bucket view, not the animal sight grid. Every bucket covers 8 x 8 world cells; visibility is checked separately.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
+<rect width="1040" height="842" fill="#101720"/>
+<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Observation cache: shared buckets, private window references</text>
+<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Schematic bucket view, not the animal sight grid. Every bucket covers 8 x 8 world cells; visibility is checked separately.</text>
+<rect x="24" y="96" width="474" height="414" rx="7" fill="#14202d" stroke="#486077"/>
+<text x="42" y="126" font-size="19" fill="#8ac8ff" style="fill:#8ac8ff">Moving observer: reuse the overlap</text>
+<text x="42" y="154" font-size="13" fill="#acbfd1" style="fill:#acbfd1">Dashed: old bounds | Solid: new bounds</text>
+<rect x="62" y="179" width="89" height="74" rx="2" fill="#593a30" stroke="#486077"/>
+<text x="106" y="206" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B0,0</text>
+<text x="106" y="232" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="155" y="179" width="89" height="74" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="199" y="206" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B1,0</text>
+<text x="199" y="232" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="248" y="179" width="89" height="74" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="292" y="206" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B2,0</text>
+<text x="292" y="232" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="341" y="179" width="89" height="74" rx="2" fill="#24445b" stroke="#486077"/>
+<text x="385" y="206" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B3,0</text>
+<text x="385" y="232" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="62" y="258" width="89" height="74" rx="2" fill="#593a30" stroke="#486077"/>
+<text x="106" y="285" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B0,1</text>
+<text x="106" y="311" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="155" y="258" width="89" height="74" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="199" y="285" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B1,1</text>
+<text x="199" y="311" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="248" y="258" width="89" height="74" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="292" y="285" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B2,1</text>
+<text x="292" y="311" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="341" y="258" width="89" height="74" rx="2" fill="#24445b" stroke="#486077"/>
+<text x="385" y="285" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B3,1</text>
+<text x="385" y="311" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="62" y="337" width="89" height="74" rx="2" fill="#593a30" stroke="#486077"/>
+<text x="106" y="364" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B0,2</text>
+<text x="106" y="390" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="155" y="337" width="89" height="74" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="199" y="364" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B1,2</text>
+<text x="199" y="390" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="248" y="337" width="89" height="74" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="292" y="364" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B2,2</text>
+<text x="292" y="390" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="341" y="337" width="89" height="74" rx="2" fill="#24445b" stroke="#486077"/>
+<text x="385" y="364" font-size="14" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">B3,2</text>
+<text x="385" y="390" font-size="11" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">points / rev</text>
+<rect x="57" y="174" width="279" height="237" rx="5" fill="none" stroke="#ffbd75" stroke-width="2" stroke-dasharray="6 4"/>
+<rect x="150" y="170" width="279" height="245" rx="5" fill="none" stroke="#8ac8ff" stroke-width="2"/>
+<text x="42" y="451" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Leave: orange | Keep: green | Enter: blue</text>
+<text x="42" y="479" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Window changes references, not copies of target data.</text>
+<path d="M498 298H529" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="530" y="96" width="486" height="414" rx="7" fill="#14202d" stroke="#486077"/>
+<text x="548" y="126" font-size="18" fill="#8ac8ff" style="fill:#8ac8ff">One SpatialIndex per world target category</text>
+<rect x="548" y="151" width="450" height="88" rx="7" fill="#192532" stroke="#486077"/>
+<text x="773.0" y="178" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Shared bucket objects</text>
+<text x="773.0" y="203" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">points: IDs / coordinates / insertion order</text>
+<text x="773.0" y="225" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">version increases when relevant contents change</text>
+<path d="M773 239V262" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="548" y="263" width="450" height="90" rx="7" fill="#192532" stroke="#486077"/>
+<text x="773.0" y="290" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">windows[observer_id]</text>
+<text x="773.0" y="315" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">bucket bounds + references to current buckets</text>
+<text x="773.0" y="337" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">overlap keeps the same objects after movement</text>
+<path d="M773 353V376" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="548" y="377" width="450" height="104" rx="7" fill="#192532" stroke="#486077"/>
+<text x="773.0" y="404" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">results[observer_id]</text>
+<text x="773.0" y="429" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">one last query key + target feature list</text>
+<text x="773.0" y="451" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">position / radius / k / range settings</text>
+<text x="773.0" y="473" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">bucket revisions (or global scan revision)</text>
+<rect x="24" y="537" width="310" height="174" rx="7" fill="#192532" stroke="#486077"/>
+<text x="179.0" y="564" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Dynamic target update</text>
+<text x="179.0" y="589" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">sync authoritative bodies / food</text>
+<text x="179.0" y="611" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">moves / births / deaths / presence</text>
+<text x="179.0" y="633" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">update bucket contents + revisions</text>
+<text x="179.0" y="655" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">stationary observers see the change</text>
+<rect x="360" y="537" width="310" height="174" rx="7" fill="#192532" stroke="#486077"/>
+<text x="515.0" y="564" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Query again</text>
+<text x="515.0" y="589" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">same complete key -&gt; reuse targets</text>
+<text x="515.0" y="611" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">changed key -&gt; select visible targets</text>
+<text x="515.0" y="633" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">recompute self / health / heading</text>
+<text x="515.0" y="655" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">heading does not freeze the world</text>
+<rect x="696" y="537" width="320" height="174" rx="7" fill="#192532" stroke="#486077"/>
+<text x="856.0" y="564" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Lifetime and invalidation</text>
+<text x="856.0" y="589" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">obstacle or visibility edits: clear</text>
+<text x="856.0" y="611" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">dead observer: remove its entries</text>
+<text x="856.0" y="633" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">restore: rebuild derived caches</text>
+<text x="856.0" y="655" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">trial worlds own separate caches</text>
+<text x="26" y="756" font-size="14" fill="#acbfd1" style="fill:#acbfd1">A cache hit reuses target features only. It never reuses a frozen full observation after health or readiness changes.</text>
+<text x="26" y="785" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Sparse or wide queries can use a direct scan instead of a bucket window; their cache key uses the global revision.</text>
+<text x="26" y="814" font-size="14" fill="#acbfd1" style="fill:#acbfd1">This diagram explains existing ownership and invalidation. It does not introduce a new cache or alter visibility.</text>
+</svg>

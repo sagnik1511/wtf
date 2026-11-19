@@ -55,6 +55,16 @@ observation values from invented example probabilities. No new recording is used
 
 The [storage illustration catalog](storage/README.md) covers the experiment
 artifact map, binary chunk record layout, worked frame-delta/mask example and
-model-weight reference/parameter structure.
+model-weight reference/parameter structure. It also includes checkpoint file,
+controller-state and restoration/access diagrams; see the
+[checkpoint guide](../checkpoint-data-structures.md).
 The [structure guide](../replay-data-structures.md) embeds them beside their
 schemas and field tables. These are controlled code-verified illustrations.
+
+## Selected runtime structures
+
+The [runtime structure catalog](structures/README.md) covers observation-vector
+packing, overlapping founder families and observation-window bucket references.
+These three diagrams were selected for structural clarity; the
+[visual guidance](../visual-guide.md#when-a-visual-helps) records where existing
+figures, tables and prose remain the better choice.

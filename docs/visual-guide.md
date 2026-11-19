@@ -13,6 +13,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | --- | --- |
 | Where do Python and JavaScript meet? | [Runtime boundaries](architecture.md#runtime-boundaries) |
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
+| How are input fields packed into the vector? | [Contiguous blocks and repeated slots](observations.md#input-layout) |
 | Which visible targets enter the brain? | [Top-k input pipeline](observations.md#visible-target-slots) |
 | How does an animal learn? | [Private learning loop](algorithms.md#private-learning-loop) |
 | How do GRPO trials avoid changing the real world? | [Trial isolation](algorithms.md#grpo-trial-isolation) |
@@ -26,16 +27,19 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | Why did reproduction fail? | [Physical and decision gates](configuration.md#reproduction-gates) |
 | Do species share a brain? | [Example private controllers](species.md#names-roles-and-private-brains) |
 | What is restored by a champion versus a checkpoint? | [Initialization paths](brain-library.md#weights-versus-exact-state) |
+| How does repeated ancestry affect family credit? | [Founder sets and overlapping ledgers](brain-library.md#founder-membership-and-family-credit) |
 | How are champions carried into later runs? | [Species/sex chaining](brain-library.md#champion-chaining-between-runs) |
 | Which animal does mutation affect? | [Child-only path](mutation.md#child-only-mutation-path) |
 | How do physical costs reach an optimizer? | [Reward feedback](rewards.md#physical-costs-and-learning-feedback) |
 | Why does seeking not load every run? | [Playback and chart data](recording.md#seeking-and-charts-use-separate-data) |
 | Why do inspector inputs lag the board? | [Current sight, sampled inputs and prediction graphs](recording.md#visual-agent-inspector) |
+| How do checkpoints restore optimizer, RNG and buffers? | [File records, private controller state and access paths](checkpoint-data-structures.md) |
 | What is inside a stored model? | [References, binary model record and layer arrays](replay-data-structures.md#champion-weight-records) |
 | How do archives avoid repeating model weights? | [Shared champion blobs](binary-storage.md#champion-storage-measurement) |
 | How are replay files and frame deltas structured? | [Artifact map, binary records and field masks](replay-data-structures.md) |
 | What is compressed and what is restored? | [Replay and checkpoint payloads](binary-storage.md#two-payloads-one-bounded-file-at-a-time) |
 | Where would compiled kernels and smaller dtypes help? | [Native performance review](native-performance-review.md) (priority and dtype tables) |
+| What is shared between observation windows? | [Bucket objects, references and revisions](performance.md#spatial-window-structure) |
 | When is an observation cache invalidated? | [Cache dependencies](performance.md#observation-cache-dependencies) |
 | Can a behavior report prove learning? | [Evidence path](analysis.md#from-recorded-behavior-to-an-assessment) |
 | How were the calibration comparisons organized? | [Historical experiment flow](calibration.md#historical-calibration-study-flow) |
@@ -49,3 +53,29 @@ asset catalogs already map filenames to cases. They link these visuals rather
 than duplicating them. Historical release notes retain their original evidence;
 the release hub explains their lifecycle. New illustrations belong alongside
 the behavior they explain, with source/provenance for any measured values.
+
+## When a visual helps
+
+Add a visual when seeing containment, references, ordering, spatial overlap or
+state ownership makes the explanation faster to understand. Use connected or
+nested blocks to reveal those relationships; example values should support the
+structure. A paragraph split among boxes is not automatically a useful diagram.
+Reuse an existing figure by linking it when the same relationship applies.
+
+Keep tables for comparisons, field definitions and benchmark results. Keep prose
+and commands for setup, flags and short rules. A document needs no new figure
+merely because it currently has none. Preserve these choices in future updates.
+
+The latest review added three structural views: input-vector packing, founder
+family membership and spatial-window references. It also reused the reward
+figure from the feedback review and linked mating inputs to the vector layout.
+
+| Reviewed area | Visual choice | Reason |
+| --- | --- | --- |
+| Observation fields / mating extension | Added one shared vector layout | Section offsets and repeated slots are easier to see spatially |
+| Lineage curation | Added a pedigree with separate family ledgers | Explains overlapping ancestry and strongest-family credit |
+| Spatial observation cache | Added window/bucket/reference structure | Separates shared objects from invalidation dependencies |
+| Feedback audit | Link existing reward figure | Same accounting boundary; algorithm differences already fit a table |
+| Native kernels, dtypes and performance reports | Keep coverage/benchmark tables and architecture links | Comparisons and measured values are already clear |
+| Physics, maps, inheritance and algorithm information boundaries | Keep existing figures/explorer and add links where needed | Existing visuals cover these relationships |
+| Configuration flags, setup commands, calibration records and release history | Keep prose/tables and existing navigation | No new structural question warrants another diagram |

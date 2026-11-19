@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 759" role="img" aria-labelledby="title desc">
+<title id="title">Observation vector: contiguous blocks and repeated slots</title><desc id="desc">Example: observation version 3 with k=4. All positions are zero-based; dimensions follow the actual packing order.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
+<rect width="1040" height="759" fill="#101720"/>
+<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Observation vector: contiguous blocks and repeated slots</text>
+<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Example: observation version 3 with k=4. All positions are zero-based; dimensions follow the actual packing order.</text>
+<rect x="24" y="96" width="992" height="141" rx="7" fill="#14202d" stroke="#486077"/>
+<text x="42" y="126" font-size="19" fill="#8ac8ff" style="fill:#8ac8ff">One animal -&gt; one ordered vector of 78 numeric inputs</text>
+<rect x="42" y="153" width="96.05128205128206" height="65" rx="2" fill="#23364a" stroke="#486077"/>
+<text x="90.02564102564102" y="176" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle">Self</text>
+<text x="90.02564102564102" y="201" font-size="14" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">0..7</text>
+<rect x="140.05128205128204" y="153" width="194.10256410256412" height="65" rx="2" fill="#34482d" stroke="#486077"/>
+<text x="237.1025641025641" y="176" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle">Food</text>
+<text x="237.1025641025641" y="201" font-size="14" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">8..23</text>
+<rect x="336.1538461538462" y="153" width="194.10256410256412" height="65" rx="2" fill="#234b45" stroke="#486077"/>
+<text x="433.20512820512823" y="176" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle">Resource eaters</text>
+<text x="433.20512820512823" y="201" font-size="14" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">24..39</text>
+<rect x="532.2564102564103" y="153" width="194.10256410256412" height="65" rx="2" fill="#593a30" stroke="#486077"/>
+<text x="629.3076923076924" y="176" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle">Prey eaters</text>
+<text x="629.3076923076924" y="201" font-size="14" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">40..55</text>
+<rect x="728.3589743589744" y="153" width="145.0769230769231" height="65" rx="2" fill="#24445b" stroke="#486077"/>
+<text x="800.8974358974359" y="176" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle">Terrain</text>
+<text x="800.8974358974359" y="201" font-size="14" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">56..67</text>
+<rect x="875.4358974358975" y="153" width="120.56410256410257" height="65" rx="2" fill="#443758" stroke="#486077"/>
+<text x="935.7179487179487" y="176" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle">Mating</text>
+<text x="935.7179487179487" y="201" font-size="14" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">68..77</text>
+<path d="M238.10256410256412 218V275H520V299" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="360" y="265" font-size="16" fill="#acbfd1" style="fill:#acbfd1">Expand the food block: 4 slots x 4 fields</text>
+<rect x="24" y="300" width="992" height="154" rx="7" fill="#14202d" stroke="#486077"/>
+<text x="153" y="329" font-size="15" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle">Slot 1: indexes 8..11</text>
+<rect x="42" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="69.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dx</text>
+<text x="69.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="98" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="125.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dy</text>
+<text x="125.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="154" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="181.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dist</text>
+<text x="181.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="210" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="237.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">present</text>
+<text x="237.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0 / 1</text>
+<text x="395" y="329" font-size="15" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle">Slot 2: indexes 12..15</text>
+<rect x="284" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="311.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dx</text>
+<text x="311.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="340" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="367.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dy</text>
+<text x="367.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="396" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="423.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dist</text>
+<text x="423.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="452" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="479.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">present</text>
+<text x="479.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0 / 1</text>
+<text x="637" y="329" font-size="15" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle">Slot 3: indexes 16..19</text>
+<rect x="526" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="553.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dx</text>
+<text x="553.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="582" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="609.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dy</text>
+<text x="609.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="638" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="665.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dist</text>
+<text x="665.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="694" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="721.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">present</text>
+<text x="721.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0 / 1</text>
+<text x="879" y="329" font-size="15" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle">Slot 4: indexes 20..23</text>
+<rect x="768" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="795.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dx</text>
+<text x="795.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="824" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="851.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dy</text>
+<text x="851.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="880" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="907.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">dist</text>
+<text x="907.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">norm</text>
+<rect x="936" y="348" width="54" height="67" rx="2" fill="#1b2b3c" stroke="#58728c"/>
+<text x="963.0" y="368" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">present</text>
+<text x="963.0" y="393" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0 / 1</text>
+<text x="42" y="441" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Missing target: four zero values. A target at the current cell has distance 0 and presence 1.</text>
+<rect x="24" y="477" width="310" height="118" rx="7" fill="#192532" stroke="#486077"/>
+<text x="179.0" y="504" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Version 1</text>
+<text x="179.0" y="529" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">self 8 + targets 12k</text>
+<text x="179.0" y="551" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">k=1 -&gt; 20   k=4 -&gt; 56</text>
+<rect x="360" y="477" width="310" height="118" rx="7" fill="#192532" stroke="#486077"/>
+<text x="515.0" y="504" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Version 2</text>
+<text x="515.0" y="529" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">version 1 + terrain 12</text>
+<text x="515.0" y="551" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">k=1 -&gt; 32   k=4 -&gt; 68</text>
+<rect x="696" y="477" width="320" height="118" rx="7" fill="#192532" stroke="#486077"/>
+<text x="856.0" y="504" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Version 3</text>
+<text x="856.0" y="529" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">version 2 + mating 10</text>
+<text x="856.0" y="551" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">k=1 -&gt; 42   k=4 -&gt; 78</text>
+<rect x="24" y="618" width="486" height="93" rx="7" fill="#192532" stroke="#486077"/>
+<text x="267.0" y="645" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Target slots are per diet category</text>
+<text x="267.0" y="670" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">sort visible targets by distance</text>
+<text x="267.0" y="692" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">they do not identify a commanded attack target</text>
+<rect x="530" y="618" width="486" height="93" rx="7" fill="#192532" stroke="#486077"/>
+<text x="773.0" y="645" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Mating remains one separate summary</text>
+<text x="773.0" y="670" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">same-species / opposite-sex nearest visible mate</text>
+<text x="773.0" y="692" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">readiness and pair opportunity are separate inputs</text>
+<text x="26" y="739" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Slot identity can change as targets move. Self, terrain and mating fields are not duplicated for each target.</text>
+</svg>

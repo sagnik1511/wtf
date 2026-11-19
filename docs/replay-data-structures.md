@@ -247,6 +247,9 @@ Weights do not feed playback rendering; the viewer uses sampled diagnostics.
 See [champion selection and loading](brain-library.md) and
 [checkpoint records](binary-storage.md#structured-binary-layout).
 
+For optimizer arrays, RNG states, experience buffers and their runtime consumers,
+see [checkpoint storage and restoration](checkpoint-data-structures.md).
+
 ## Loading and memory boundaries
 
 The server decompresses a requested XZ chunk and serves binary records to the
