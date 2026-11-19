@@ -1,0 +1,20 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=7mm and 8mm]
+\node[block] (replay) {Replay chunk\\keyframe + field deltas};
+\node[block,right=of replay] (checkpoint) {Exact checkpoint\\metadata + brain records};
+\node[block,right=of checkpoint] (champion) {Champion metadata\\rank + source + references};
+\node[block,below=of replay] (view) {Viewer access\\one world chunk at a time};
+\node[block,below=of checkpoint] (restore) {Restore all learning state\\models, optimizer, RNG, buffers};
+\node[block,below=of champion] (pool) {Shared model blob\\signature + precision + arrays};
+\node[block,below=of pool] (fresh) {Fresh controller initialization\\copy compatible parameters};
+\draw[arrow] (replay)--(view);
+\draw[arrow] (checkpoint)--(restore);
+\draw[arrow] (champion)--(pool);
+\draw[arrow] (pool)--(fresh);
+\end{tikzpicture}
+\caption{Artifact structure determines access semantics. Lossless compression
+applies to each binary payload, while readable metadata remains outside it.
+Checkpoint loading materializes full learning state; champion loading and
+viewer replay serve different purposes.}\label{fig:artifacts}
+\end{figure}

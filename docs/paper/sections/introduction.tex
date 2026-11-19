@@ -1,0 +1,51 @@
+An animal that survives an episode may have learned to forage, started near
+abundant food, inherited a useful policy, or simply avoided encounters. A stable
+population can similarly reflect effective reproduction or a favorable energy
+budget rather than improved decision making. Separating these explanations
+requires explicit world rules, independent learner state, controlled comparisons
+and a recording format that supports retrospective inspection.
+
+\framework\ addresses these practical requirements in an inspectable ecosystem
+simulator. Each living animal owns its controller, random streams, optimizer and
+experience. Named species select a resource-eating or prey-eating role and a
+brain template through JSON. Animals interact through shared physical state
+while learning independently. Their bodies can die; eligible pairs can choose
+to reproduce; descendants inherit learned parameters without inheriting their
+parents' optimizer or experience buffers. This combination produces a changing,
+nonstationary population rather than a fixed set of interchangeable agents.
+
+The framework separates simulation, training, recording and visualization.
+Headless Python runs produce portable artifacts; JavaScript replays saved data
+without loading live controllers. Engineering choices therefore affect both
+experimental cost and what evidence remains available afterward. A compressed
+file alone is insufficient if the viewer must decode an entire experiment, or
+if model-only exports are mistaken for exact resumable checkpoints.
+
+The contributions described here are: (i) a configurable environment and
+controller interface for individual learning with changing populations;
+(ii) explicit separation of within-lifetime updates, paired parameter
+inheritance, and between-run champion initialization; and (iii) a reproducible
+recording/checkpoint architecture with native CPU acceleration and lossless,
+deduplicated storage. These are system-design contributions. The present draft
+reports historical engineering checks and measurements, while population-level
+learning outcomes remain to be established by the studies in
+Supplementary Section~\ref{sec:observations}.
+
+Multi-agent platforms such as PettingZoo~\citep{terry2021pettingzoo} emphasize
+reusable environment interfaces, while MAgent~\citep{zheng2017magent} supports
+large interacting populations. \framework\ instead focuses on transparent
+per-animal learner ownership, reproductive inheritance and replay artifacts for
+small CPU-oriented experiments. It does not claim comparable scale or direct
+compatibility with those APIs, and no comparative performance study against
+those platforms is included.
+
+The learner implementations draw on established methods: deep Q-learning
+\citep{mnih2013dqn}, policy gradients~\citep{williams1992reinforce},
+actor--critic learning~\citep{mnih2016asynchronous}, PPO~\citep{schulman2017ppo},
+generalized advantage estimation~\citep{schulman2015gae}, distributional quantile
+learning~\citep{dabney2018quantile}, action masking~\citep{huang2020masking}, and
+centralized-critic PPO~\citep{yu2022mappo}. Their inclusion is not a claim of a
+new reinforcement-learning algorithm. In particular, the GRPO controller is a
+simulator adaptation of the group-relative objective introduced by
+\citet{shao2024deepseekmath}, with local observations and matched hypothetical
+world trajectories rather than language-model completions.

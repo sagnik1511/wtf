@@ -1,0 +1,80 @@
+\subsection{Reproduction, Inheritance and Model Selection}\label{sec:inheritance}
+\subsubsection{Decision-mediated paired birth}
+Reproduction requires simultaneous \code{reproduce} choices by two living,
+same-species, opposite-sex animals. Eligibility includes local distance,
+unobstructed sight, a dry route, maturity, strict health threshold, sufficient
+energy after the configured cost, cooldown, species population capacity and a
+reachable empty birth cell. A parent participates in at most one birth per step.
+Proximity alone never produces a child. Failed eligibility or contention leaves
+successful-birth cost/cooldown unapplied, while ordinary costs and failure
+feedback remain.
+
+Maturity/cooldown variation is configured as a percentage window. For center
+$c$ and percentage $p$, the integer deviation is
+$\Delta=\lfloor cp/100+0.5\rfloor$; due intervals are sampled from the resulting
+inclusive, positive-clipped integer window. The sampled due age is retained in
+body/checkpoint state rather than redrawn on every observation. The sensing
+interface may use optimistic earliest eligibility before the clock has been
+sampled; physical resolution remains authoritative.
+
+\subsubsection{Parameter crossover and rare mutation}
+The child starts at the configured initial body energy and health. Both parents
+pay energy; reproduction does not directly consume all parental health.
+Compatible parental networks are mixed by uniform per-parameter crossover.
+For a scalar coordinate $j$, the conceptual inheritance rule is
+\begin{equation}
+ \widetilde\theta_{c,j}=m_j\theta_{p,j}+(1-m_j)\theta_{q,j},
+ \qquad m_j\sim\operatorname{Bernoulli}(1/2).
+\end{equation}
+The implementation traverses its algorithm-specific parameter tree and creates
+independent storage. Rare mutation events choose a bounded sparse subset of
+matrix weights and add configured small Gaussian perturbations. They do not
+mutate the whole species or a parent's live network. Event probability, maximum
+changed weights and noise scale are configurable; mutation is not an operation
+on every birth and is disabled in frozen evaluation.
+
+Crossover/mutation use deterministically derived offspring streams. The newborn
+receives fresh optimizers, experience, temporal state and random generators;
+Q targets or a GRPO reference are initialized consistently with the inherited
+model. This is inheritance of learned weights, including acquired within-life
+changes. It is an artificial mechanism and should not be described as faithful
+biological genetic inheritance. Figure~\ref{fig:inheritance} separates the
+mechanisms explicitly.
+
+\subsubsection{Champion archives and run chaining}
+Training tracks species/sex-specific records for health, kills, lifespan, food
+energy, lineage and, for prey-eating species, a balanced hunting/survival score.
+Selectors are configurable; a lifespan score includes the age of a still-living
+animal and therefore need not be a completed lifespan. Models are captured at
+the record-setting step after that step's learning, including terminal animals
+before their controllers are retired.
+
+Fresh experiments retain the best observed full rank tuple across runs by
+strict comparison; exact ties keep the incumbent identity and parameters.
+Known typed warm starts can establish the initial record. When chaining is
+enabled, the selected matching species/sex record initializes the next world's
+private controllers with fresh training/body state. A no-chain option instead
+restores the original initialization each episode. Opt-out and legacy-resume
+semantics are explicit. Optional early stopping counts completed runs without
+improvement among chosen species/sex criteria; any monitored rank improvement
+resets patience. This is a budget rule on observed records, not convergence or
+held-out evaluation.
+
+\subsubsection{Lineage selection}
+Biological generation and model-archive generation are distinct. A newborn's
+tracked founder set is the union of its parents' sets, and tracked birth
+generation advances beyond the maximum known parent generation. An animal
+contributes lifetime kills, actual food energy and age once to each distinct
+founder family. Shared ancestry does not multiply credit within a family;
+selection uses the candidate's strongest single family rather than summing
+overlapping families.
+
+Generation advantage requires maturity plus a personal kill for a prey-eating
+animal, or positive food energy for a resource eater. Predator lineage ranks
+then prioritize family kills; prey ranks prioritize family animal-time.
+Documented tie-breakers include viable descendants, rates and personal outcomes.
+Unqualified fallbacks have a provisional generation score. A qualification guard
+can retain a proven starting model, and strict best-so-far retention additionally
+compares the whole rank. Family ledgers reset in each new world even when weights
+are chained; warm starts do not import a physical genealogy. Missing legacy
+ancestry is marked partial rather than reconstructed speculatively.

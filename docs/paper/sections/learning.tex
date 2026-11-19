@@ -1,0 +1,68 @@
+\subsection{Learning Controllers}\label{sec:learning}
+Each animal owns a controller selected from Table~\ref{tab:algorithms}. Network
+settings and learning-rate multipliers can differ by species. Policy MLPs support
+configurable tanh hidden layers; the legacy Q network retains its small
+single-hidden-layer contract. A deeper neural network is an architecture choice,
+not an additional RL algorithm. Recurrent PPO uses GRU-style state
+\citep{cho2014gru}; QR-DQN estimates return quantiles rather than one scalar Q
+value per action. Adam~\citep{kingma2015adam} is used by the policy and QR-DQN
+controllers; the legacy Q learner uses SGD.
+
+\begin{table}[t]
+\centering\small
+\caption{Implemented controllers. All parameter/buffer ownership is per animal.
+These are repository implementations and adaptations, not wrappers around the
+cited authors' training libraries.}\label{tab:algorithms}
+\begin{tabularx}{\linewidth}{@{}lYY@{}}\toprule
+Controller & Update mechanism & Distinct state or information boundary\\\midrule
+Q network / DQN & Replay, target network, Huber TD gradients, SGD & Epsilon-greedy actions and bounded replay\\
+PPO & Clipped policy objective, GAE, critic and Adam & Private recent rollout; configurable epochs/minibatches\\
+A2C & One actor--critic update per rollout & Private value estimates and advantages\\
+REINFORCE & Discounted finite-episode policy gradient & Actor-only trajectory; baseline from earlier episodes\\
+GRPO & Group-relative clipped actor updates & Matched trial worlds, frozen reference policy, no critic\\
+Recurrent PPO & PPO with chronological recurrent gradients & GRU hidden state and sequence inputs\\
+QR-DQN & Quantile-regression Double DQN and Adam & Return quantiles and target network\\
+Maskable PPO & PPO over immediate feasible actions & Stored decision-time masks; consent remains unknown\\
+MAPPO variant & PPO with centralized critic & Local actor; private actor/critic; species-mean training reward\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{On-policy and off-policy updates}
+The Q learner draws minibatches from its own bounded replay and refreshes its
+target at a configured update interval. Policy learners retain the observations
+and decision data required by their objective. PPO uses clipped likelihood
+ratios, GAE, entropy regularization, an unclipped mean-square critic objective,
+gradient clipping and optional approximate-KL stopping. Advantages are normalized
+within an individual's rollout when configured. A2C uses the same actor--critic
+infrastructure without repeated PPO epochs. REINFORCE consumes a completed finite
+trajectory and does not bootstrap a time-limit value. These distinctions are
+preserved when a death or episode boundary flushes a partial buffer.
+
+The experimental MAPPO implementation combines local actor observations with a
+versioned centralized critic context and species-mean training reward. It does
+not replace all animals with a shared population policy, nor should it be
+interpreted as an exact reproduction of a published benchmark implementation.
+Action masking similarly reflects the current local rules, not perfect
+knowledge of simultaneous movements, attacks or another animal's consent.
+
+\subsubsection{Matched simulator GRPO trials}
+A due focal animal samples $G$ alternative trajectories from the same current
+world state. Nonfocal policies remain frozen; world and nonfocal action RNGs
+restart from matched states, while focal action samples differ. Trial rewards
+come from the ordinary physical rules. No trial calls a real controller's
+learning/action methods, advances the real world, or records hypothetical kills
+and births as real events.
+
+Let $R_g$ be the discounted return of trial $g$. The implementation standardizes
+returns within the group to obtain $A_g$, then applies a clipped policy-ratio
+objective with a reference-policy KL term. Each trajectory contributes equally
+to the group mean rather than being implicitly weighted by its length. Groups
+with equal returns are discarded, including the KL update. This makes reward
+spread an important diagnostic but does not ensure useful exploration.
+
+Trials run sequentially with isolated mutable state; read-only geography can be
+shared. If at most $U$ groups are scheduled per real step with horizon $H$,
+the extra physical-step budget is bounded by $UGH$, before early termination.
+Group size, horizon, trial frequency and per-step scheduling must therefore be
+reported when comparing algorithms. Matching real-world steps alone does not
+match GRPO's computational or simulated-experience budget.

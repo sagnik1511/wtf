@@ -6,6 +6,10 @@ This is maintained project context, not a transcript or experiment log. Verify
 current defaults in source and the chosen JSON preset before describing a run.
 Local results and running processes change independently of Git.
 
+The [paper draft](paper/README.md) describes the system in Nature Machine Intelligence Article format.
+Future ecological results belong in `docs/paper/sections/observations.tex`;
+keep them separate from historical engineering benchmarks.
+
 For diagrams matched to common questions, start with the
 [visual guide](visual-guide.md). The [physics gallery](physics.md) and
 [recorded terrain previews](geography.md#recorded-terrain-previews) show spatial

@@ -1,0 +1,47 @@
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+ width=.82\linewidth,height=8.5cm,xmode=log,xmin=.15,xmax=40,
+ y dir=reverse,ymin=-.6,ymax=11.6,ytick={0,...,11},
+ yticklabels={DQN,PPO,A2C,REINFORCE,GRPO + DQN,Recurrent PPO,QR-DQN,Maskable PPO,MAPPO,Larger-predator PPO,Valley + recording,Flat PPO + recording},
+ xtick={.2,.5,1,2,5,10,20},xticklabels={0.2,0.5,1,2,5,10,20},
+ xlabel={Loop time (s; logarithmic axis)},tick label style={font=\footnotesize},
+ grid=major,grid style={black!10},legend style={font=\footnotesize,at={(.98,.97)},anchor=north east},
+ title={\textbf{a}\quad Native-to-native runtime comparison},title style={font=\small},
+]
+\addplot[only marks,mark=square*,mark size=2.2pt,black!55] table[col sep=comma,x=before,y expr=\coordindex]{figures/native-timings.csv};
+\addlegendentry{Previous native}
+\addplot[only marks,mark=*,mark size=2.2pt,blue!65!black] table[col sep=comma,x=after,y expr=\coordindex]{figures/native-timings.csv};
+\addlegendentry{Updated native}
+\end{axis}
+\end{tikzpicture}
+
+\vspace{7mm}
+\begin{tikzpicture}
+\begin{axis}[
+ width=.82\linewidth,height=5.3cm,xmin=0,xmax=110,ymin=-.6,ymax=3.6,y dir=reverse,
+ ytick={0,1,2,3},yticklabels={401-frame replay,PPO checkpoint,20-run A2C conversion,Deep champion archive},
+ xtick={0,25,50,75,100},xlabel={Bytes retained (\% of each fixture's own baseline)},
+ tick label style={font=\footnotesize},xmajorgrids,grid style={black!10},
+ title={\textbf{b}\quad Independent historical storage fixtures},title style={font=\small},
+]
+\addplot[xbar,bar width=11pt,fill=black!10,draw=none,bar shift=0pt] coordinates {(100,0)(100,1)(100,2)(100,3)};
+\addplot[xbar,bar width=11pt,fill=blue!55,draw=none,bar shift=0pt,nodes near coords,nodes near coords align={horizontal},every node near coord/.append style={font=\footnotesize},point meta=explicit] table[col sep=comma,x expr=100*\thisrow{after}/\thisrow{before},y expr=\coordindex,meta expr=100*\thisrow{after}/\thisrow{before}]{figures/storage-fixtures.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{\textbf{Recorded engineering evidence, without ecological performance claims.}
+\textbf{a}, Medians of three alternating separate-process measurements per
+variant, 180 steps, seed 42, 48 resource eaters and 12 prey eaters on an ARM64
+Mac with CPython 3.9.6. Initialization and validation are excluded; recording
+rows include writing. Both versions use native execution. All 72 samples matched
+complete-state hashes within their comparison case. Raw replicate distributions
+are unavailable here, so uncertainty bars are omitted.
+\textbf{b}, Compressed output as a percentage of each independent input fixture;
+gray denotes its own 100\% baseline. The first two fixtures are earlier gzip
+milestones; later fixtures concern binary conversion and pooled binary/XZ
+weights. These percentages cannot be compounded. Exact bytes, times and source
+reports appear in Supplementary Tables~\ref{tab:native} and~\ref{tab:storage} and
+Supplementary Section~\ref{app:evidence}.}
+\label{fig:engineering}
+\end{figure}

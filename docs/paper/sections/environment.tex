@@ -1,0 +1,114 @@
+\subsection{Environment and Agent Interface}\label{sec:environment}
+\subsubsection{State and transition model}
+Let $\mathcal{G}=\{0,\ldots,W-1\}\times\{0,\ldots,H-1\}$ be the grid and
+$\mathcal{I}_t$ the living animals at step $t$. World state $s_t$ includes their
+positions, headings, energy, health, age, sex labels, reproductive clocks and
+ancestry; resource quantities; obstacles; terrain; cumulative counters; and
+random-generator state. Each animal $i$ has species $z_i$, private controller
+parameters $\theta_i$, and training state $\xi_i$. The simulator is naturally a
+partially observed stochastic game with a variable agent set:
+\begin{equation}
+ o_{i,t}=O_i(s_t),\qquad a_{i,t}\sim\pi_{\theta_i}(\cdot\mid o_{i,t}),\qquad
+ (s_{t+1},r_t,\mathcal{I}_{t+1})=T(s_t,a_t;\omega_t),
+\end{equation}
+where $\omega_t$ denotes draws from the world's explicit RNG. An experiment
+consists of finite episodes, called \emph{runs} by the CLI. Independent learners
+and changing opponents make each learner's experienced transition distribution
+nonstationary.
+
+Species names are arbitrary configuration keys. Diet determines feeding role;
+exact species identity determines mating and species-specific reporting.
+Several species can share a brain template without sharing live parameters.
+The current reproduction model uses two reproductive sex labels; it does not
+model a complete biological account of sex or development.
+
+\subsubsection{Physical update order}
+All actions are collected before the physical transition. The world resolves
+turning and voluntary movement, applies river drift, resolves feeding and
+simultaneous attacks, charges living/action demand, applies starvation or
+water-related harm, records deaths, resolves eligible births, regrows resources
+and constructs observations. Parent controllers receive the completed step's
+learning update before newborn controllers are mixed from them. This ordering
+matters: an animal can complete its feeding action in the step it is killed,
+and a newborn has no experience transition on its birth step.
+
+Initial occupancy blocks moves; swaps and following into a cell vacated in the
+same step are disallowed. Seeded contention resolves competing empty-cell
+claims. Resource eaters feed at their current or forward cell, bounded by
+available resources and remaining energy capacity. Prey eaters attack a
+resource-eating target in their forward cell. Damage credit is capped at actual
+remaining target health; exactly one seeded attacker receives kill energy.
+
+Energy and health have distinct roles. Living and action demand spend energy;
+exhausted animals receive starvation damage. Ordinary starvation/combat health
+has no recovery mechanic, and dead bodies do not persist as edible corpses.
+Resource regrowth is capped. Newborn initial energy is an explicit grant, so the
+system should not be treated as a closed energy-conserving ecosystem.
+
+\subsubsection{Actions, terrain and visibility}
+Species configure their discrete action list. The available vocabulary includes
+forward motion, turns, rest, feeding, attack, reproduction and, on appropriate
+maps, swimming. An environment need not include irrelevant outputs: dry presets
+can omit swimming. Policies may choose infeasible actions and receive their
+physical cost/failure feedback; maskable PPO restricts some immediately
+infeasible choices.
+
+Terrain adds water depth, current vectors and elevation. Entering water requires
+a swim action and the configured health/energy eligibility; swimming and uphill
+motion can incur additional demand. Currents accumulate fractional displacement
+and traverse intermediate cells under terrain constraints. There is no
+separate hand-coded route-planning or river-crossing policy. Geography presets
+include a straight river, highlands, enclosed valleys, a meandering floodplain,
+a branching delta, alpine passes and lake islands.
+
+Sight uses a circular base radius and integer line-of-sight tests with wall
+occlusion. Heading, other animals and elevation do not occlude sight. A map with
+water can extend range directionally. Writing $R_i$ for base radius, $B_i$ for
+the maximum water bonus and $w(p_i,p)$ for counted intermediate water cells,
+the range condition is
+\begin{equation}
+ \lVert p-p_i\rVert_2\leq R_i+\min\{B_i,w(p_i,p)\},
+\end{equation}
+combined with the ordinary wall-visibility check. This is an authored sensing
+rule, not an empirical model of animal vision.
+
+\subsubsection{Observation structure}
+Observations contain eight self/local-movement values and up to $k$ visible
+targets in each of three diet-based categories: resource patches,
+resource-eating animals and prey-eating animals. Each target slot holds
+$(\Delta x,\Delta y,d,\text{presence})$. Coordinates/distances are normalized by
+the maximum query radius. Targets are ordered by distance, with authoritative
+insertion-order ties, after visibility filtering; missing slots are zero padded.
+No target identity, health, sex or brain state is disclosed by those slots.
+
+Versions 2 and 3 add 12 local terrain values; version 3 adds ten mating-related
+values, including personal readiness and one nearest-visible-mate summary.
+Thus the input dimension is
+\begin{equation}\label{eq:obswidth}
+ d(v,k)=8+12k+12\ind[v\geq2]+10\ind[v=3],\qquad 1\leq k\leq16.
+\end{equation}
+For $k=1$ the widths are 20, 32 and 42; for $k=4$ they are 56, 68 and 78.
+Terrain fields are padded on flat maps where needed. Mate information remains a
+single summary rather than $k$ extra mates. Readiness does not expose future
+consent, and observing never consumes reproductive RNG draws.
+
+\subsubsection{Feedback and transition boundaries}
+For animal $i$, write $F_i$ for actual energy gained, $D_i^+$ and $D_i^-$ for
+actual damage dealt/taken, $C_i$ for energy demand, $M_i$ for a failed attempted
+action, $B_i$ for successful-parent credit and $Z_i$ for death. The environmental
+reward is described by
+\begin{equation}\label{eq:reward}
+ r_i=c_FF_i+c_+D_i^++c_-D_i^-+c_CC_i+c_MM_i+c_BB_i+c_ZZ_i.
+\end{equation}
+Coefficients belong to species JSON, not map-name branches. This expression
+summarizes accounting; it is not a change to numerical summation order. Demand
+is counted before energy is floored at zero. Physical spending and scalar
+feedback do not debit energy twice. Failed reproduction does not pay the
+successful-birth cost or start a cooldown, although normal living demand and
+failure feedback still apply. Survival and proximity have no implicit bonus.
+
+Death terminates an individual's transition. The episode time limit truncates
+it; value-based and actor--critic methods retain their bootstrap semantics.
+Actor-only finite-return methods keep their own return definitions. Recorded
+reward remains individual; MAPPO intentionally uses a species-mean adaptation
+for training. Environmental feedback is not itself the learner's loss.

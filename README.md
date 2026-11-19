@@ -49,6 +49,7 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 
 | Guide | Contents |
 | --- | --- |
+| [Paper draft](docs/paper/README.md) | Nature Machine Intelligence Article draft with a separate space for future experimental observations |
 | [Visual guide](docs/visual-guide.md) | Find diagrams for simulation, learning, inheritance, storage and workflows |
 | [Setup and runs](docs/running.md) | Installation, CLI flags, seeds, progress and exact checkpoint resume |
 | [Physics illustrated](docs/physics.md) | Interactive examples and diagrams for visibility, water, elevation and reproduction |

@@ -1,0 +1,71 @@
+\subsection{Engineering evaluation}\label{sec:engineering}
+This section transcribes historical measurements from the repository's
+performance/storage reports. No new timing campaign was performed for this
+manuscript. Each row applies to its reported revision, fixture and hardware;
+newer deep/top-$k$ configurations are not implicitly benchmarked by those rows.
+These results evaluate implementation cost and equivalence, not learned fitness.
+The source reports and commit identifiers are listed in
+Supplementary Section~\ref{app:evidence}.
+
+\paragraph{Runtime and numerical equivalence.}
+The second native rollout was measured on an ARM64 Mac using CPython 3.9.6.
+Both variants enabled native execution, with the previous implementation at
+\code{baa5101} and the update recorded in \code{abd310d}. Each preset used seed
+42, 48 resource eaters and 12 prey eaters, one 180-step episode, and medians of
+three alternating separate-process measurements per variant. Initialization and
+verification hashing were outside the timed loop. Recording cases included
+ordinary binary/XZ writing. Figure~\ref{fig:engineering} visualizes the measurements; Supplementary Table~\ref{tab:native} gives exact values.\input{figures/engineering}
+
+
+
+All 72 simulation samples matched complete-state hashes within their comparison
+case, including world, controller parameters, optimizer/buffers, RNGs and
+champions. Both recorded cases matched compressed chunk hashes. A separate
+1,500-step PPO recording check also matched final state and all 1,501 recorded
+frames; its single timing per version is not used as a repeated benchmark.
+
+The earlier native rollout, evaluated against its preceding FP32 Python
+implementation, reported $5.30\times$ for PPO and $12.97\times$ for MAPPO, among
+other preset-specific gains. The two campaigns have different baselines and
+must not be multiplied into a cumulative speedup. Data-path measurements in the
+second campaign reported $3.39\times$ for replay expansion and $1.90\times$ for
+dashboard summaries, but only $1.03\times$ for raw binary decoding. These are
+fixture loop timings with their own repeat counts, not complete-run latencies.
+
+\paragraph{Storage measurements.}
+Supplementary Table~\ref{tab:storage} keeps unrelated fixtures separate. MB means $10^6$ bytes;
+percentages are calculated from the exact byte counts in the source reports.
+The replay delta/gzip and compact-checkpoint rows are earlier milestones, while
+current defaults use binary/XZ. They should not be read as one sequential
+conversion of a common dataset.
+
+
+
+The A2C conversion verified 480 replay chunks and 20 checkpoints before replacing
+500 files. Its replay bytes fell from 69,983,482 to 44,842,236; checkpoint bytes
+fell from 32,675,595 to 29,434,732. Readable artifacts were retained. This
+illustrates that reductions depend on which component dominates an experiment.
+
+The champion fixture contained 22 criterion artifacts but eight unique model
+blobs. Its new total includes indexes, metadata, configurations and 521,548 bytes
+of weights. A subsequent unchanged archive added 98,993 metadata/index bytes
+and zero new weight bytes. These figures concern champion archives, not replay
+or full-resume checkpoint storage. Existing results were not silently rewritten.
+
+\paragraph{Memory, correctness and interpretation.}
+An earlier 180-step save-path comparison reported peak RSS of 114.53 versus
+29.25 MiB and checkpoint writing of 1.04 versus 0.15 seconds. This primarily
+reflects streamed checkpoint construction, not an equivalent reduction in live
+training memory. Native rollout RSS was not consistently lower: the second
+campaign reported approximately 31.9 to 35.2 MiB for recurrent PPO and 34.7 to
+33.7 MiB for QR-DQN. Cache/workspace benefits can therefore trade time for memory.
+
+Other recent optimizations were validated by operation counts rather than timed
+speed claims: shared configuration serialization once per export identity,
+final-winner snapshot copying, deferred closed charts and one score-layout pass
+per displayed history sample. Regression checks cover exact continuation,
+recording transparency, numerical derivatives, terminal/truncated transitions,
+reproductive isolation and Python/JavaScript decoding. A reward-contract review
+also checked 216 preset/controller combinations. Passing these checks supports
+implementation correctness within their scope; it is not evidence of biological
+realism or successful emergent behavior.

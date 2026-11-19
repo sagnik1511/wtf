@@ -6,9 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.15](0.0.1.15.md), `f3d5a1a`.
+**Latest committed rollout:** [0.0.1.16](0.0.1.16.md), `6e354d3`.
 **Latest committed runtime implementation:** [0.0.1.14](0.0.1.14.md), `91697aa`.
-**Pending:** [0.0.1.16](0.0.1.16.md), checkpoint structures and selectively added runtime diagrams.
+**Pending:** [0.0.1.17](0.0.1.17.md), Nature Machine Intelligence paper with a separate experimental-observations section.
 
 ## Rollout index
 
@@ -19,7 +19,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.16](0.0.1.16.md) | Pending | Prepared 2026-11-19 | — | Checkpoint state/access blocks, observation packing, founder families and spatial-window references |
+| [0.0.1.17](0.0.1.17.md) | Pending | Prepared 2026-11-19 | — | Nature Machine Intelligence paper source, method citations and editable future-observation tables |
+| [0.0.1.16](0.0.1.16.md) | Committed | 2026-11-19 | `6e354d3` | Checkpoint state/access blocks, observation packing, founder families and spatial-window references |
 | [0.0.1.15](0.0.1.15.md) | Committed | 2026-11-19 | `f3d5a1a` | Playback/model artifacts, binary records, entity columns, layer arrays and field masks |
 | [0.0.1.14](0.0.1.14.md) | Committed | 2026-11-19 | `91697aa` | Format 162 maintained source files, establish style settings and verify full suites |
 | [0.0.1.13](0.0.1.13.md) | Committed | 2026-11-19 | `91697aa` | Mandatory repository-wide formatting after code updates and explicit formatter checks |
