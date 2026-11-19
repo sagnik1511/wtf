@@ -8,7 +8,8 @@ child document. Operational instructions remain in the relevant project guides.
 
 **Latest committed rollout:** [0.0.1.4](0.0.1.4.md), `65345bf`.
 **Latest committed runtime implementation:** [0.0.1.4](0.0.1.4.md), `65345bf`.
-**Pending:** [0.0.1.14](0.0.1.14.md), repository-wide source formatting and formatter settings;
+**Pending:** [0.0.1.15](0.0.1.15.md), playback/model-weight structure blocks and a worked binary delta;
+[0.0.1.14](0.0.1.14.md), repository-wide source formatting and formatter settings;
 [0.0.1.13](0.0.1.13.md), mandatory developer formatting across all source languages;
 [0.0.1.12](0.0.1.12.md), export-local configuration reuse and deferred inspector history;
 [0.0.1.11](0.0.1.11.md), recent-feature diagrams and documentation consistency;
@@ -28,6 +29,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
+| [0.0.1.15](0.0.1.15.md) | Pending | Prepared 2026-11-19 | — | Playback/model artifacts, binary records, entity columns, layer arrays and field masks |
 | [0.0.1.14](0.0.1.14.md) | Pending | Prepared 2026-11-19 | — | Format 162 maintained source files, establish style settings and verify full suites |
 | [0.0.1.13](0.0.1.13.md) | Pending | Prepared 2026-11-19 | — | Mandatory repository-wide formatting after code updates and explicit formatter checks |
 | [0.0.1.12](0.0.1.12.md) | Pending | Prepared 2026-11-19 | — | Export-local configuration reuse, lazy history SVGs and single-pass score processing |

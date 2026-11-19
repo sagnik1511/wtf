@@ -2,6 +2,9 @@
 
 [Playback](recording.md) · [Runs and checkpoints](running.md) · [Performance](performance.md)
 
+For file trees, record layouts, entity schemas and a worked field-mask example,
+see [Playback data structures](replay-data-structures.md).
+
 The disk-focused defaults are binary replay chunks and binary checkpoints,
 compressed with XZ. Training and rendering remain separate. CSV metrics, JSON
 summaries, environment definitions and champion metadata/indexes stay readable.
@@ -26,6 +29,9 @@ within each generation. Old version-1/2 JSON artifacts still load. See
 [champion retention](brain-library.md#promote-only-improvements). Disk size grows with retained episodes, recording cadence, diagnostics,
 checkpoint cadence, model size and population even with the binary format.
 
+For the weight reference object, one-record blob and example layer dimensions,
+see [champion weight records](replay-data-structures.md#champion-weight-records).
+
 ## Champion storage measurement
 
 ![Per-run JSON metadata references deduplicated, lossless binary model blobs](assets/diagrams/shared-champion-weights.svg)
@@ -49,7 +55,8 @@ The viewer does not read champion weights and needs no format change.
 
 ## Structured binary layout
 
-Each file starts with the five bytes `WTFB` plus version byte `1`. A sequence of
+Each file starts with four magic bytes `WTFB` followed by version byte `0x01`
+(five bytes total). A sequence of
 little-endian 32-bit record lengths follows, each followed by a typed record.
 An encoder/decoder symbol table is scoped to that one file, never to another
 chunk. Unknown versions, invalid symbols, malformed records and non-finite

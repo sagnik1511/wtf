@@ -2,6 +2,9 @@
 
 [Project overview](../README.md) · [Setup and runs](running.md) · [Analysis](analysis.md)
 
+For file trees, record layouts, entity schemas and a worked field-mask example,
+see [Playback data structures](replay-data-structures.md).
+
 Commands in this guide run from the project root.
 
 See the [recorded terrain previews](geography.md#recorded-terrain-previews) for

@@ -4,6 +4,9 @@
 
 Commands in this guide run from the project root.
 
+For the nested binary record, shared blob references and layer-array shapes, see
+[the model-weight block diagram](replay-data-structures.md#champion-weight-records).
+
 ## Promote only improvements
 
 Fresh experiments default to `experiment.promote_only_improved: true`.

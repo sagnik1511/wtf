@@ -50,3 +50,11 @@ No new GIFs or recordings were needed for these conceptual explanations.
 The [inspector illustration](inspector/README.md) shows current sight alongside
 older sampled inputs and action bars. Its provenance distinguishes controlled
 observation values from invented example probabilities. No new recording is used.
+
+## Playback data structures
+
+The [storage illustration catalog](storage/README.md) covers the experiment
+artifact map, binary chunk record layout, worked frame-delta/mask example and
+model-weight reference/parameter structure.
+The [structure guide](../replay-data-structures.md) embeds them beside their
+schemas and field tables. These are controlled code-verified illustrations.
