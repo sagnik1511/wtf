@@ -56,6 +56,27 @@ Elevation and other animals do not occlude sight. The
 [physics guide](physics.md) explains the corresponding movement and visibility
 rules; the [map gallery](geography.md) shows maintained environments.
 
+## Day and night
+
+![Board lighting at dawn, midday, dusk and night with the sunlight curve](assets/viewer/day-night.svg)
+
+Optional [day–night cycles](day-night.md) dim the board and warm the low-light
+periods. The time label follows saved world steps; night remains legible.
+The sun/moon dial moves with saved frames and freezes on pause. It is hidden
+when the cycle is absent or disabled. Species sight overlays and inspector costs
+follow configured light effects.
+
+## Interface themes
+
+![Light and dark interface palettes, including panels, input fields and theme controls](assets/viewer/themes.svg)
+
+Use **Light mode / Dark mode** in the header. The preference is saved in the
+browser and applies to controls, panels, dialogs, inspector views, chart axes
+and the board grid/terrain. The comparison includes midday and night in both
+interface palettes.
+It is independent of simulated sunlight; daylight lights the ground and night
+dims it in either interface theme.
+
 ## Workspace and charts
 
 ![Schematic placement of recording controls, current totals, board, agent inspector, timeline, history and supporting panels](assets/viewer/workspace-map.svg)

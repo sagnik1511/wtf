@@ -1,3 +1,4 @@
+import { circadianBody } from './day-night.mjs';
 // Read recorded inputs only. No inference, model weights or simulation updates.
 const WIDTHS = { 1: 20, 2: 32, 3: 42, 4: 45 };
 export const TARGET_COLORS = {
@@ -177,9 +178,17 @@ function ray(start, end, blocked, water) {
   return { visible: true, wet };
 }
 
-export function visibilityCells(state, animal, terrain) {
-  const body = state.species[animal.species]?.body,
-    base = body?.vision_radius;
+export function visibilityCells(
+  state,
+  animal,
+  terrain,
+  body = circadianBody(
+    state.species[animal.species],
+    state.day_night,
+    state.tick,
+  ),
+) {
+  const base = body?.vision_radius;
   if (!Number.isFinite(base) || base < 1) return [];
   const bonus = terrain?.hasWater ? (body.water_vision_bonus ?? 0) : 0,
     max = base + bonus;
@@ -207,9 +216,23 @@ export function visibilityCells(state, animal, terrain) {
 }
 
 export class ObservationOverlay {
-  draw(ctx, state, animal, terrain, cw, ch) {
+  draw(
+    ctx,
+    state,
+    animal,
+    terrain,
+    cw,
+    ch,
+    light = false,
+    body = animal
+      ? circadianBody(
+          state.species[animal.species],
+          state.day_night,
+          state.tick,
+        )
+      : null,
+  ) {
     if (!animal) return;
-    const body = state.species[animal.species]?.body;
     const key = [
       animal.id,
       animal.x,
@@ -222,10 +245,10 @@ export class ObservationOverlay {
       terrain,
     ];
     if (!this.key || key.some((v, i) => v !== this.key[i])) {
-      this.cells = visibilityCells(state, animal, terrain);
+      this.cells = visibilityCells(state, animal, terrain, body);
       this.key = key;
     }
-    ctx.fillStyle = '#8ac8ff22';
+    ctx.fillStyle = light ? '#2d78b82e' : '#8ac8ff22';
     for (const [x, y] of this.cells)
       ctx.fillRect(
         x * cw + 1,

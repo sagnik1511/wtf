@@ -31,14 +31,14 @@ export function terrainView(definition) {
   };
 }
 
-export function drawTerrain(ctx, terrain, cw, ch) {
+export function drawTerrain(ctx, terrain, cw, ch, light = false) {
   if (!terrain) return;
   for (const t of terrain.tiles) {
     const x = t.x * cw,
       y = t.y * ch;
     ctx.fillStyle = t.depth
-      ? `hsl(207, 65%, ${22 + Math.min(t.depth, 3) * 5}%)`
-      : `hsl(${85 - (50 * t.elevation) / terrain.maxElevation}, 25%, ${19 + (14 * t.elevation) / terrain.maxElevation}%)`;
+      ? `hsl(207, 65%, ${(light ? 65 : 22) + Math.min(t.depth, 3) * (light ? -5 : 5)}%)`
+      : `hsl(${85 - (50 * t.elevation) / terrain.maxElevation}, 25%, ${(light ? 84 : 19) + ((light ? -20 : 14) * t.elevation) / terrain.maxElevation}%)`;
     ctx.fillRect(x, y, cw, ch);
     if (t.depth && (t.x + t.y) % 3 === 0) {
       const [dx, dy] = t.flow,
@@ -49,7 +49,7 @@ export function drawTerrain(ctx, terrain, cw, ch) {
           r = Math.min(cw, ch) * 0.32,
           cx = x + cw / 2,
           cy = y + ch / 2;
-        ctx.strokeStyle = '#89d4ff90';
+        ctx.strokeStyle = light ? '#145b8fb0' : '#89d4ff90';
         ctx.lineWidth = 1.1;
         ctx.beginPath();
         ctx.moveTo(cx - ux * r, cy - uy * r);
@@ -67,7 +67,7 @@ export function drawTerrain(ctx, terrain, cw, ch) {
         ctx.stroke();
       }
     } else if (!t.depth && t.x % 4 === 0 && t.y % 4 === 0) {
-      ctx.fillStyle = '#f0dfba75';
+      ctx.fillStyle = light ? '#4d492dce' : '#f0dfba75';
       ctx.font = `${Math.max(8, Math.min(cw, ch) * 0.4)}px system-ui`;
       ctx.textAlign = 'center';
       ctx.fillText(String(t.elevation), x + cw / 2, y + ch * 0.7);

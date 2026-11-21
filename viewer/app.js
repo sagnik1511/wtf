@@ -1,3 +1,11 @@
+import { installTheme, boardPalette } from './theme.mjs';
+import {
+  daylight,
+  circadianBody,
+  drawDaylight,
+  drawSunlitGround,
+  DayNightClock,
+} from './day-night.mjs';
 import { DEFAULT_NETWORK_RANK, rankLimit } from './network-structure.mjs';
 import { api } from './api.mjs';
 import { Dashboard } from './dashboard.mjs';
@@ -35,6 +43,7 @@ function showError(error) {
 
 let networkRankLimit = DEFAULT_NETWORK_RANK;
 const player = new Playback(api);
+const dayNightClock = new DayNightClock($('day-night-clock'));
 const observationOverlay = new ObservationOverlay();
 const brainExplanation = new BrainExplanation(api);
 const animalBrain = new AnimalBrainView();
@@ -244,22 +253,55 @@ function drawWorld() {
   } else if (!canvas.style.width) fitWorld();
   const cw = canvas.width / state.width,
     ch = canvas.height / state.height;
-  ctx.fillStyle = '#101a22';
+  const palette = boardPalette(document.documentElement.dataset.theme);
+  ctx.fillStyle = palette.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawTerrain(ctx, terrain, cw, ch);
+  drawTerrain(ctx, terrain, cw, ch, palette.light);
+  const sun = daylight(state.day_night, state.tick);
+  drawSunlitGround(
+    ctx,
+    state.day_night,
+    state.tick,
+    canvas.width,
+    canvas.height,
+    sun,
+  );
+  dayNightClock.update(state.day_night, state.tick, sun);
+  const cycleStatus = $('day-night-status');
+  if (cycleStatus) {
+    if (cycleStatus.hidden !== !sun.enabled) cycleStatus.hidden = !sun.enabled;
+    if (sun.enabled) {
+      const label = `${sun.label} · sunlight ${Math.round(sun.light * 100)}% · cycle ${Math.floor(state.tick / state.day_night.cycle_steps) + 1}`;
+      if (cycleStatus.textContent !== label) cycleStatus.textContent = label;
+    }
+  }
   const observed = state.animals.find((a) => a.id === selected),
     sight = $('observation-status');
   if (observed && $('show-observation').checked) {
-    observationOverlay.draw(ctx, state, observed, terrain, cw, ch);
-    const body = state.species[observed.species].body,
+    const body = circadianBody(
+        state.species[observed.species],
+        state.day_night,
+        state.tick,
+        sun,
+      ),
       bonus = terrain?.hasWater ? (body?.water_vision_bonus ?? 0) : 0;
+    observationOverlay.draw(
+      ctx,
+      state,
+      observed,
+      terrain,
+      cw,
+      ch,
+      palette.light,
+      body,
+    );
     sight.hidden = false;
     sight.textContent = `Current sight #${observed.id} · radius ${body?.vision_radius ?? '?'}${bonus ? ` + up to ${bonus} across water` : ''}`;
   } else {
     observationOverlay.clear();
     sight.hidden = true;
   }
-  ctx.strokeStyle = '#172630';
+  ctx.strokeStyle = palette.grid;
   ctx.lineWidth = 0.6;
   for (let x = 0; x <= state.width; x++) {
     ctx.beginPath();
@@ -274,7 +316,7 @@ function drawWorld() {
     ctx.stroke();
   }
   for (const [x, y] of state.obstacles) {
-    ctx.fillStyle = '#3a4b5c';
+    ctx.fillStyle = palette.obstacle;
     ctx.fillRect(x * cw + 1, y * ch + 1, cw - 2, ch - 2);
   }
   const capacity = state.resource_capacity;
@@ -304,6 +346,11 @@ function drawWorld() {
       ctx.closePath();
     } else ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.fill();
+    if (palette.light) {
+      ctx.strokeStyle = '#304c52';
+      ctx.lineWidth = a.sex === 'male' ? 2.8 : 1;
+      ctx.stroke();
+    }
     if (a.sex === 'male') {
       ctx.strokeStyle = '#edf5ff';
       ctx.lineWidth = 1.4;
@@ -315,13 +362,22 @@ function drawWorld() {
     ctx.fill();
     ctx.restore();
     if (a.id === selected) {
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle =
+        palette.light && sun.light > 0.25 ? palette.selection : '#fff';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(x, y, r + 5, 0, Math.PI * 2);
       ctx.stroke();
     }
   }
+  drawDaylight(
+    ctx,
+    state.day_night,
+    state.tick,
+    canvas.width,
+    canvas.height,
+    sun,
+  );
 }
 function drawDeathHighlights() {
   const canvas = $('world'),
@@ -496,7 +552,7 @@ function drawChart() {
   ctx.fillText(state.tick.toLocaleString(), left + w, height - 7);
   for (let n = 0; n <= 3; n++) {
     const y = top + (h * n) / 3;
-    ctx.strokeStyle = '#263341';
+    ctx.strokeStyle = style.getPropertyValue('--border').trim() || '#263341';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(left, y);
@@ -631,6 +687,18 @@ function drawInspector() {
     ['Training updates', b.updates],
     ['Last action', a.last_action],
   ];
+  if (state.day_night?.enabled) {
+    const body = circadianBody(
+      state.species[a.species],
+      state.day_night,
+      state.tick,
+    );
+    fields.push(
+      ['Current sight radius', body.vision_radius],
+      ['Current living cost', body.living_cost.toFixed(3)],
+      ['Current movement cost', body.movement_cost.toFixed(3)],
+    );
+  }
   if (Number.isFinite(a.mating_intent_until_tick)) {
     const remaining = Math.max(0, a.mating_intent_until_tick - state.tick + 1);
     fields.push([
@@ -701,7 +769,10 @@ function drawInspector() {
     inspectorVisuals = inspectorGraphs({
       diagnostic: b,
       template: player.metadata.config.brains?.[state.species[a.species].brain],
-      spec: state.species[a.species],
+      spec: {
+        ...state.species[a.species],
+        body: circadianBody(state.species[a.species], state.day_night, b.tick),
+      },
       hasWater: terrain?.hasWater ?? false,
       sections: inspectorSections,
       rank: networkRankLimit,
@@ -1099,6 +1170,26 @@ $('dashboard-timeline').onchange = () => {
       ),
     );
 };
+let themeStorage;
+try {
+  themeStorage = window.localStorage;
+} catch {
+  /* Embedded browsers can deny storage access. */
+}
+installTheme({
+  root: document.documentElement,
+  button: $('theme-toggle'),
+  storage: themeStorage,
+  onChange() {
+    if (state) {
+      drawWorld();
+      drawBirthHighlights();
+      drawDeathHighlights();
+      drawChart();
+    }
+    if ($('metrics-dialog').open) dashboard.draw();
+  },
+});
 operation(refreshCatalog);
 
 $('show-observation').onchange = () => {

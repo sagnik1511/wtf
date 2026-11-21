@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import { Playback } from '../viewer/playback.mjs';
 import { recentBirths } from '../viewer/birth-highlights.mjs';
 
-function setup() {
+function setup(cycle) {
   const manifest = {
     recording_version: 1,
     name: 'test',
     mode: 'train',
     recording: { frames_per_chunk: 3 },
     config: {
+      ...(cycle ? { day_night: cycle } : {}),
       world: { width: 8, height: 8 },
       resources: { capacity_per_patch: 20 },
       species: { prey: { diet: 'resource' } },
@@ -754,4 +755,18 @@ test('Paired birth highlights retain both parents through chunk carry and legacy
     markers,
   );
   assert.equal(carried[0].mate, 7);
+});
+
+test('Playback preserves cycle metadata on seek and run changes without frame additions', async () => {
+  const cycle = { enabled: true, cycle_steps: 100, start_phase: 0.25 };
+  const { p } = setup(cycle);
+  await p.open('test');
+  assert.deepEqual(p.snapshot().day_night, cycle);
+  await p.seek(7);
+  assert.deepEqual(p.snapshot().day_night, cycle);
+  await p.changeRun(2);
+  assert.deepEqual(p.snapshot().day_night, cycle);
+  const old = setup().p;
+  await old.open('test');
+  assert.equal('day_night' in old.snapshot(), false);
 });

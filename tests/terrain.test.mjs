@@ -204,3 +204,33 @@ test('Decision metrics preserve missing history, zero attempts and changing valu
     );
   }
 });
+
+test('light terrain retains geometry, depth and arrows while changing the palette', () => {
+  const draws = (light) => {
+    const values = [];
+    const ctx = new Proxy(
+      {
+        fillRect(...args) {
+          values.push({ kind: 'tile', color: this.fillStyle, args });
+        },
+        fillText(...args) {
+          values.push({ kind: 'label', color: this.fillStyle, args });
+        },
+      },
+      {
+        get(o, k) {
+          return k in o ? o[k] : () => {};
+        },
+      },
+    );
+    drawTerrain(ctx, terrainView(map), 20, 20, light);
+    return values;
+  };
+  const dark = draws(false),
+    light = draws(true);
+  assert.deepEqual(
+    dark.map((v) => [v.kind, v.args]),
+    light.map((v) => [v.kind, v.args]),
+  );
+  assert.ok(light.some((v, i) => v.color !== dark[i].color));
+});

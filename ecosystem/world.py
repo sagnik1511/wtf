@@ -11,6 +11,7 @@ from collections import Counter, OrderedDict, defaultdict, deque
 from dataclasses import dataclass
 from .perception import SpatialIndex
 from .geography import Geography, resolve_map
+from .day_night import sunlight, effective_body
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 VISIBILITY_CACHE_LIMIT = 2048
@@ -170,7 +171,39 @@ class World:
         self.lifespans = []
 
     def body(self, animal):
-        return self.config["species"][animal.species]["body"]
+        cycle = self.config.get("day_night")
+        if not cycle or not cycle.get("enabled", False):
+            return self.config["species"][animal.species]["body"]
+        if getattr(self, "_body_tick", None) != self.tick:
+            self._refresh_cycle_bodies(cycle)
+        return self._cycle_bodies[animal.species]
+
+    def _refresh_cycle_bodies(self, cycle):
+        light = sunlight(cycle, self.tick)
+        species = self.config["species"]
+        self._cycle_bodies = {
+            name: effective_body(spec, light) for name, spec in species.items()
+        }
+        self._cycle_specs = None
+        self._body_tick = self.tick
+
+    def _metabolism_species(self):
+        cycle = self.config.get("day_night")
+        if not cycle or not cycle.get("enabled", False):
+            return self.config["species"]
+        if getattr(self, "_body_tick", None) != self.tick:
+            self._refresh_cycle_bodies(cycle)
+        if self._cycle_specs is None:
+            # Build only when flat native metabolism actually needs this view.
+            self._cycle_specs = {
+                name: (
+                    dict(spec, body=self._cycle_bodies[name])
+                    if self._cycle_bodies[name] is not spec["body"]
+                    else spec
+                )
+                for name, spec in self.config["species"].items()
+            }
+        return self._cycle_specs
 
     def diet(self, animal):
         return self.config["species"][animal.species]["diet"]
@@ -804,7 +837,7 @@ class World:
             and kernels.native.flat_metabolism(
                 self.animals.values(),
                 actions,
-                self.config["species"],
+                self._metabolism_species(),
                 rewards,
                 events,
                 Event,

@@ -7,6 +7,11 @@
   --text: #e6edf3;
   --mint: #7de2bd;
   --orange: #ff9a77;
+  --surface: #0b131c;
+  --code-text: #bbd4e5;
+  --accent: #8ac8ff;
+  --positive: #7de2bd;
+  --negative: #ff9aab;
 }
 * {
   box-sizing: border-box;
@@ -221,10 +226,10 @@ textarea {
   width: 100%;
   min-height: 220px;
   resize: vertical;
-  background: #0b131c;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 5px;
-  color: #bbd4e5;
+  color: var(--code-text);
   font:
     11px/1.6 ui-monospace,
     monospace;
@@ -308,7 +313,7 @@ footer {
 .meter {
   height: 5px;
   border-radius: 3px;
-  background: #223441;
+  background: var(--border);
   overflow: hidden;
   margin-top: 5px;
 }
@@ -638,7 +643,7 @@ footer {
 
 .kill-banner.natural-death.prey-natural-death {
   background: #102c23eb;
-  border-color: #7de2bd;
+  border-color: var(--positive);
   color: #d4fff0;
 }
 
@@ -876,7 +881,7 @@ footer {
 }
 
 .terrain-legend {
-  color: #8dceef;
+  color: var(--accent);
 }
 .terrain-legend[hidden] {
   display: none;
@@ -892,10 +897,10 @@ footer {
   margin: 10px 0;
 }
 .inspector-visibility input {
-  accent-color: #8ac8ff;
+  accent-color: var(--accent);
 }
 .observation-status {
-  color: #8ac8ff;
+  color: var(--accent);
 }
 .observation-status[hidden] {
   display: none;
@@ -922,7 +927,7 @@ footer {
   display: block;
   width: 100%;
   height: 170px;
-  background: #0b131c;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
 }
@@ -954,7 +959,7 @@ footer {
 .input-gauge-track {
   height: 4px;
   border-radius: 3px;
-  background: #263341;
+  background: var(--border);
   overflow: hidden;
   margin-top: 4px;
 }
@@ -975,10 +980,10 @@ footer {
   border-radius: 4px;
 }
 .blocked-inputs .blocked {
-  color: #ff9aab;
+  color: var(--negative);
 }
 .blocked-inputs .open {
-  color: #7de2bd;
+  color: var(--positive);
 }
 .prediction-row {
   display: grid;
@@ -1000,8 +1005,8 @@ footer {
 .prediction-track {
   position: relative;
   height: 10px;
-  background: #0b131c;
-  border: 1px solid #263341;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -1042,7 +1047,7 @@ footer {
   display: block;
   width: 100%;
   height: auto;
-  background: #0b131c;
+  background: var(--surface);
   border-radius: 5px;
   margin-top: 6px;
 }
@@ -1178,7 +1183,7 @@ footer {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  color: #8ac8ff;
+  color: var(--accent);
 }
 .brain-layer {
   margin-top: 14px;
@@ -1285,4 +1290,97 @@ footer {
   border-radius: 6px;
   padding: 7px;
   font: inherit;
+}
+
+.day-night-clock {
+  display: inline-flex;
+  flex: 0 0 112px;
+  align-items: center;
+}
+.day-night-clock[hidden] {
+  display: none;
+}
+.day-night-clock svg {
+  display: block;
+  width: 112px;
+  height: 68px;
+}
+
+/* Viewer appearance is independent of a recording's simulated sunlight. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f2f5f8;
+  --panel: #ffffff;
+  --surface: #eaf0f5;
+  --border: #c0cdd8;
+  --muted: #4b6073;
+  --text: #172c3c;
+  --code-text: #29495e;
+  --mint: #19714f;
+  --orange: #a84122;
+  --accent: #1f639c;
+  --positive: #19714f;
+  --negative: #b33352;
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+:root[data-theme='light'] .observation-radar > circle:first-child {
+  fill: var(--surface);
+}
+:root[data-theme='light'] .observation-radar > line[stroke='#fff'],
+:root[data-theme='light'] .observation-radar > circle[fill='#fff'] {
+  stroke: var(--text);
+  fill: var(--text);
+}
+:root[data-theme='light'] .prediction-zero {
+  border-color: #526a7c;
+}
+:root[data-theme='light'] .prediction-row.best .prediction-track {
+  outline-color: #526a7c;
+}
+:root[data-theme='light'] .kill-stat strong,
+:root[data-theme='light'] .kill-legend {
+  color: #b52b42;
+}
+:root[data-theme='light'] .birth-stat strong,
+:root[data-theme='light'] .birth-legend {
+  color: #176b95;
+}
+:root[data-theme='light'] .natural-legend {
+  color: #846118;
+}
+:root[data-theme='light'] .day-night-clock text {
+  fill: var(--text);
+}
+@media (max-width: 600px) {
+  .header-controls {
+    gap: 6px;
+  }
+}
+:root[data-theme='light'] .kill-stat span {
+  color: #a52e43;
+}
+:root[data-theme='light'] .birth-stat span {
+  color: #176b95;
+}
+:root[data-theme='light'] .species-legend > *,
+:root[data-theme='light'] #dashboard-legend > *,
+:root[data-theme='light'] .species-card > strong {
+  filter: brightness(0.58) saturate(1.15);
+}
+:root[data-theme='light'] #chart,
+:root[data-theme='light'] .trend-card canvas {
+  filter: brightness(0.7) saturate(1.15);
+}
+
+:root[data-theme='light'] .world-wrap {
+  background: #dce6d8;
+}
+:root[data-theme='light'] .day-night-clock [data-crescent] {
+  fill: var(--bg);
 }

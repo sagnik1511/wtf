@@ -78,6 +78,12 @@ see its [data-flow diagram](explainability.md#what-is-being-explained) and
 No screen recording or additional runtime package is needed. See the
 [input layout](observations.md) for supported versions and k values.
 
+## Interface appearance
+
+Use the header **Light mode / Dark mode** button to switch the viewer palette.
+Your browser remembers the preference. See [theme examples](viewer-visual-reference.md#interface-themes);
+this setting is independent of recorded day/night.
+
 ## Playback controls
 
 The Python simulator and JavaScript viewer are independent. Run training first,
@@ -298,3 +304,8 @@ inspector displays them even when a brain diagnostic was not sampled that step.
 CSV/summary metrics and per-step telemetry track species mutation counts. No
 model parameter arrays or extra animation delays are added. See
 [rare mutations](mutation.md) for settings and inheritance behavior.
+
+## Optional day–night cycle
+
+See [day–night configuration and playback](day-night.md) for gradual sunlight,
+species-specific night vision/energy modifiers and the maintained example.

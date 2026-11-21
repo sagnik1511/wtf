@@ -12,6 +12,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | Question | Guide and visual |
 | --- | --- |
 | What do viewer objects, overlays and brain graphs look like? | [Viewer appearance reference](viewer-visual-reference.md) |
+| How does dawn/day/dusk/night change the board and animals? | [Day–night appearance and rules](day-night.md) |
 | Where do Python and JavaScript meet? | [Runtime boundaries](architecture.md#runtime-boundaries) |
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
 | How are input fields packed into the vector? | [Contiguous blocks and repeated slots](observations.md#input-layout) |

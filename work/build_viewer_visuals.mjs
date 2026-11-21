@@ -1,5 +1,14 @@
 #!/usr/bin/env node
+import {
+  daylight,
+  circadianBody,
+  drawDaylight,
+  drawSunlitGround,
+  clockMarkup,
+  clockState,
+} from '../viewer/day-night.mjs';
 // Controlled documentation specimens, not experiment replays or learned outputs.
+import { boardPalette } from '../viewer/theme.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -156,12 +165,17 @@ function board({
   births = [],
   kills = [],
   deaths = [],
+  theme = 'dark',
+  day_night = null,
+  tick = 0,
 } = {}) {
   const canvas = new SVGCanvas(width * 48, height * 48),
     terrain = terrainView(definition),
     state = {
       width,
       height,
+      day_night,
+      tick,
       animals,
       resources,
       obstacles,
@@ -177,6 +191,13 @@ function board({
     'observation-status': {},
   };
   const context = vm.createContext({
+    document: { documentElement: { dataset: { theme } } },
+    boardPalette,
+    dayNightClock: { update() {} },
+    daylight,
+    circadianBody,
+    drawDaylight,
+    drawSunlitGround,
     state,
     selected,
     terrain,
@@ -738,7 +759,149 @@ const workspace = sheet(
   850,
   body,
 );
+const demoCycle = { enabled: true, cycle_steps: 400, start_phase: 0 };
+const dayCards = [
+  ['Dawn', 110],
+  ['Midday', 200],
+  ['Dusk', 290],
+  ['Night', 340],
+];
+body = dayCards
+  .map(([name, tick], i) => {
+    const x = 28 + i * 288;
+    const scene = board({
+      day_night: demoCycle,
+      tick,
+      animals: [animal(), animal('predator', 'male', 1, 1, 2, 1)],
+      resources: [{ x: 1, y: 2, quantity: 20 }],
+      obstacles: [[0, 0]],
+    });
+    return tile(
+      x,
+      95,
+      name,
+      [`Sunlight ${Math.round(daylight(demoCycle, tick).light * 100)}%`],
+      scene,
+    );
+  })
+  .join('');
+const curve = Array.from(
+  { length: 401 },
+  (_, tick) =>
+    `${tick ? 'L' : 'M'}${80 + tick * 2.6} ${535 - daylight(demoCycle, tick).light * 150}`,
+).join(' ');
+body +=
+  box(28, 345, 1144, 240) +
+  text(50, 377, 'Sunlight over one cycle', 19, '#e6edf3', 'start', true) +
+  `<path d="${curve}" fill="none" stroke="#f6d365" stroke-width="3"/>` +
+  text(80, 562, 'Midnight', 14) +
+  text(340, 562, 'Sunrise', 14) +
+  text(600, 562, 'Midday', 14) +
+  text(860, 562, 'Sunset', 14) +
+  text(1070, 562, 'Midnight', 14);
+body += text(
+  50,
+  623,
+  'Frame-synchronized sun/moon indicator',
+  19,
+  '#e6edf3',
+  'start',
+  true,
+);
+body += dayCards
+  .map(
+    ([name, tick], i) =>
+      `<g transform="translate(${80 + i * 288} 643)">${clockMarkup(clockState(demoCycle, tick))}</g>` +
+      text(80 + i * 288, 738, name, 14),
+  )
+  .join('');
+const dayNight = sheet(
+  'Day–night lighting in playback',
+  'Same objects at different saved ticks · actual lighting renderer · controlled 400-step cycle',
+  770,
+  body,
+);
+const themeCSS = fs.readFileSync(path.join(root, 'viewer/style.css'), 'utf8');
+const themeTokens = (selector) =>
+  Object.fromEntries(
+    [
+      ...themeCSS
+        .slice(themeCSS.indexOf(selector))
+        .split('}')[0]
+        .matchAll(/--([a-z-]+):\s*([^;]+);/g),
+    ].map((m) => [m[1], m[2].trim()]),
+  );
+body = ['dark', 'light']
+  .map((theme, i) => {
+    const c = themeTokens(
+        theme === 'dark' ? ':root {' : ":root[data-theme='light']",
+      ),
+      x = 28 + i * 582;
+    return (
+      `<rect x="${x}" y="95" width="560" height="380" rx="12" fill="${c.bg}" stroke="${c.border}"/>` +
+      text(
+        x + 20,
+        128,
+        `${theme === 'dark' ? 'Dark' : 'Light'} interface`,
+        20,
+        c.text,
+        'start',
+        true,
+      ) +
+      `<rect x="${x + 20}" y="149" width="520" height="140" rx="8" fill="${c.panel}" stroke="${c.border}"/>` +
+      text(x + 38, 180, 'Agent inspector', 18, c.text, 'start', true) +
+      text(x + 38, 213, 'Observed inputs · action predictions', 15, c.muted) +
+      `<rect x="${x + 38}" y="235" width="235" height="34" rx="5" fill="${c.surface}" stroke="${c.border}"/>` +
+      text(x + 48, 257, 'Animal ID', 14, c['code-text']) +
+      text(
+        x + 20,
+        324,
+        'Saved locally · applies to all recordings',
+        15,
+        c.muted,
+      ) +
+      text(x + 20, 354, 'Independent of world sunlight and time', 15, c.muted) +
+      `<rect x="${x + 20}" y="380" width="176" height="42" rx="6" fill="${c.panel}" stroke="${c.border}"/>` +
+      text(
+        x + 34,
+        406,
+        theme === 'dark' ? 'Light mode' : 'Dark mode',
+        16,
+        c.text,
+      )
+    );
+  })
+  .join('');
+body += ['dark', 'light']
+  .flatMap((theme, i) =>
+    [50, 0].map((tick, j) => {
+      const x = 28 + (i * 2 + j) * 288;
+      return tile(
+        x,
+        510,
+        `${theme} · ${tick === 50 ? 'midday' : 'night'}`,
+        ['Theme palette + saved sunlight'],
+        board({
+          theme,
+          day_night: { enabled: true, cycle_steps: 100, start_phase: 0 },
+          tick,
+          animals: [animal(), animal('predator', 'male', 1, 1, 2, 1)],
+          resources: [{ x: 1, y: 2, quantity: 20 }],
+          obstacles: [[0, 0]],
+        }),
+      );
+    }),
+  )
+  .join('');
+const themes = sheet(
+  'Viewer light and dark themes',
+  'Schematic interface specimens using current CSS tokens · world lighting remains tied to the recording',
+  755,
+  body,
+);
 const outputs = {
+  'themes.svg': themes,
+  'day-night.svg': dayNight,
   'board-objects.svg': objects,
   'terrain-and-sight.svg': terrains,
   'brain-views.svg': brains,

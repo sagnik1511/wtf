@@ -5,6 +5,8 @@ They contain no run IDs, measurements, recordings or saved model weights.
 
 | Asset | Contents |
 | --- | --- |
+| [Interface themes](themes.svg) | Schematic light/dark UI specimens from the actual CSS palette tokens |
+| [Day and night](day-night.svg) | Same objects under actual dawn/midday/dusk/night lighting and a deterministic sunlight curve |
 | [Board objects](board-objects.svg) | Sex/species shapes and colors, resource quantities, obstacles, selection, heading and event markers |
 | [Terrain and sight](terrain-and-sight.svg) | Water depth/current, elevation, occlusion, directional water visibility and gates |
 | [Inspector and brains](brain-views.svg) | Actual radar/output/network SVG components with illustrative data; deep-view summary |

@@ -13,7 +13,10 @@
         <span class="eyebrow">REINFORCEMENT LEARNING ECOSYSTEM SIMULATOR</span>
         <h1>WTF <span>Wildlife Trial Framework</span></h1>
       </div>
-      <div id="connection" class="badge">Loading recordings</div>
+      <div class="header-controls">
+        <button id="theme-toggle" type="button">Light mode</button>
+        <div id="connection" class="badge">Loading recordings</div>
+      </div>
     </header>
     <main>
       <section class="workspace">
@@ -75,9 +78,20 @@
         </div>
         <div class="world-footer">
           <div class="legend">
+            <span
+              id="day-night-clock"
+              class="day-night-clock"
+              role="img"
+              hidden
+            ></span>
             <span id="species-legend" class="species-legend"></span
             ><span id="terrain-legend" class="terrain-legend" hidden></span
             ><span
+              id="day-night-status"
+              class="observation-status"
+              hidden
+            ></span>
+            <span
               id="observation-status"
               class="observation-status"
               hidden

@@ -86,9 +86,9 @@ class FeedbackContractTests(unittest.TestCase):
                                     )
                                 )
                                 spec = c["species"][original_species[i]]
-                                expected[i] = spec["body"]["living_cost"] * spec[
-                                    "rewards"
-                                ].get("per_energy_cost", 0)
+                                expected[i] = e.world.body(e.world.animals[i])[
+                                    "living_cost"
+                                ] * spec["rewards"].get("per_energy_cost", 0)
                                 if terminal and i == victim:
                                     damage = min(
                                         0.25, spec["body"]["starvation_damage"]

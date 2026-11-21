@@ -203,6 +203,7 @@ export class Playback {
       obstacles: this.run.obstacles,
       ...(c.terrain ? { terrain: c.terrain } : {}),
       species: c.species,
+      ...(c.day_night ? { day_night: c.day_night } : {}),
       name: this.metadata.name,
       mode: this.metadata.mode,
       run: this.run.run,

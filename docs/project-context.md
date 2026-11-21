@@ -33,6 +33,8 @@ The priorities established during development are:
   and lake islands, with editable map JSON and generated static diagrams.
 - Arbitrary named species grouped into resource/prey diets; presets keep one
   species of each. [Species guide](species.md) covers adding more and display colors.
+- Optional [day–night cycles](day-night.md) change sunlight, species-specific vision
+  and energy costs; playback derives matching lighting from saved ticks.
 - Record first, play later: training can finish and exit before opening the viewer.
 - Private animal brains, inherited learned weights, run-local species/sex champion archives and
   optional matching-sex champion chaining between runs. Fresh experiments retain

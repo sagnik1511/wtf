@@ -65,8 +65,15 @@ def validate(c):
             "brains",
             "experiment",
         ),
-        optional=("recording", "terrain", "placement"),
+        optional=("recording", "terrain", "placement", "day_night"),
     )
+    if "day_night" in c:
+        cycle = c["day_night"]
+        obj(cycle, "day_night", ("enabled", "cycle_steps"), optional=("start_phase",))
+        if type(cycle["enabled"]) is not bool:
+            fail("day_night.enabled", "must be boolean")
+        num(cycle["cycle_steps"], "day_night.cycle_steps", 4, 10000000, True)
+        num(cycle.get("start_phase", 0.25), "day_night.start_phase", 0, 1)
     if "terrain" in c:
         from .geography import resolve_map
 
@@ -433,8 +440,17 @@ def validate(c):
                 "champion_selection_by_sex",
                 "display",
                 "locomotion",
+                "circadian",
             ),
         )
+        if "circadian" in s:
+            fields = tuple(
+                "night_" + key + "_multiplier"
+                for key in ("vision_radius", "living_cost", "movement_cost")
+            )
+            obj(s["circadian"], p + ".circadian", (), optional=fields)
+            for key, value in s["circadian"].items():
+                num(value, p + ".circadian." + key, 0.05, 4)
         if "display" in s:
             obj(s["display"], p + ".display", (), optional=("color", "male_color"))
             for key, color in s["display"].items():

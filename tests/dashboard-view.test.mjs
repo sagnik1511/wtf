@@ -44,7 +44,11 @@ globalThis.document = {
   createElement: (tag) => new Node(tag),
 };
 globalThis.window = { devicePixelRatio: 1 };
-globalThis.getComputedStyle = () => ({ fontFamily: 'system-ui' });
+globalThis.getComputedStyle = () => ({
+  fontFamily: 'system-ui',
+  getPropertyValue: (key) =>
+    ({ '--muted': '#4b6073', '--border': '#c0cdd8' })[key] ?? '',
+});
 globalThis.ResizeObserver = class {
   observe() {}
 };

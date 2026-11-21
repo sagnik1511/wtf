@@ -521,3 +521,35 @@ Advanced disclosures. Threshold changes re-render only the selected view from
 already loaded data; they do not issue explanation requests or change the model.
 The threshold is separate from observation top-k and is not stored in environment
 files or model/checkpoint signatures.
+
+## Day–night rendering and metabolism
+
+The board shares a single sunlight result during each draw: ground light,
+night shading, dial and selected-animal body calculations consume that same
+value. The overlay receives the effective body already used by the sight
+caption, and passes it through to visibility geometry on a cache miss. These
+are frame-local values, not a cross-frame cache; backward seeking and changing
+recordings always read the current saved tick/configuration. Diagnostic radar
+inputs still use their own sample tick. The existing overlay cache includes
+effective radius and invalidates when that radius changes.
+
+The dial retains only its last phase and SVG node references. An unchanged
+phase returns before orbit trigonometry or SVG writes, with visibility still
+updated when switching enabled/disabled recordings. Repeated status text is
+not assigned again; disabled cycles skip hidden label construction. No browser
+animation timer or replay storage is added.
+
+In Python, effective bodies remain bounded by the species count and are rebuilt
+once per tick. A native-metabolism configuration view reuses those body objects
+and shallow-copies only affected species entries. It is allocated lazily only
+for flat native metabolism, retained for that tick, and invalidated alongside
+the body cache. Configuration is immutable during a run; loading another JSON
+creates a new world. Views are read-only by convention and never checkpointed.
+Restore/GRPO trial worlds reconstruct private caches. Terrain and unavailable
+native kernels continue through the Python reference path.
+
+Regression evidence includes exact native/reference checkpoint, observation,
+event and reward equality across 120 steps, one sunlight computation per tick,
+restore isolation, explicit frame-value reuse and byte-identical regeneration
+of the viewer appearance sheets. These remove repeated operations; no measured
+end-to-end speedup or RAM reduction is claimed.

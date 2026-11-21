@@ -720,6 +720,27 @@
               "energy_cost",
               "max_population"
             ]
+          },
+          "circadian": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "night_vision_radius_multiplier": {
+                "type": "number",
+                "minimum": 0.05,
+                "maximum": 4
+              },
+              "night_living_cost_multiplier": {
+                "type": "number",
+                "minimum": 0.05,
+                "maximum": 4
+              },
+              "night_movement_cost_multiplier": {
+                "type": "number",
+                "minimum": 0.05,
+                "maximum": 4
+              }
+            }
           }
         },
         "required": [
@@ -1915,6 +1936,26 @@
               "maximum": 32
             }
           }
+        }
+      }
+    },
+    "day_night": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "cycle_steps"],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "cycle_steps": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 10000000
+        },
+        "start_phase": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     }

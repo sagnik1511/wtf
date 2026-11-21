@@ -232,7 +232,7 @@ export class Dashboard {
       span = Math.max(1, last - first);
     const x = (tick) => left + (w * (tick - first)) / span,
       y = (value) => top + h * (1 - (value - min) / (max - min));
-    ctx.fillStyle = '#8b9cad';
+    ctx.fillStyle = style.getPropertyValue('--muted').trim() || '#8b9cad';
     ctx.textAlign = 'right';
     const label = (value) =>
       definition.percent ? `${Math.round(value * 100)}%` : number(value);
@@ -243,7 +243,7 @@ export class Dashboard {
     ctx.textAlign = 'right';
     ctx.fillText(String(last), width - right, height - 8);
     for (let i = 0; i < 3; i++) {
-      ctx.strokeStyle = '#263341';
+      ctx.strokeStyle = style.getPropertyValue('--border').trim() || '#263341';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(left, top + (h * i) / 2);

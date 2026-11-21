@@ -353,3 +353,8 @@ are stored as FP32; simulation/learning precision is unchanged. Set the flag to
 `false` to omit this field. The existing `diagnostics_every_steps` interval and
 recording/chunk sampling rules determine capture frequency; zero diagnostics
 disables it. See [recorded brain activity](explainability.md#recorded-animal-activations).
+
+## Optional day–night cycle
+
+See [day–night configuration and playback](day-night.md) for gradual sunlight,
+species-specific night vision/energy modifiers and the maintained example.
