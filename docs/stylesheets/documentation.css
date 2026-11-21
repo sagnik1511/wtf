@@ -83,3 +83,17 @@
   align-items: center;
   flex-shrink: 0;
 }
+
+/* Recorded pixels keep their colors; select an actual export for each theme. */
+.md-typeset .replay-theme-dark {
+  display: none;
+}
+.md-typeset .replay-theme-light {
+  display: block;
+}
+[data-md-color-scheme='slate'] .md-typeset .replay-theme-light {
+  display: none;
+}
+[data-md-color-scheme='slate'] .md-typeset .replay-theme-dark {
+  display: block;
+}

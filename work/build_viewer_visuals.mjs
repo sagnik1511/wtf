@@ -909,7 +909,13 @@ const outputs = {
 };
 const check = process.argv.includes('--check');
 if (!check) fs.mkdirSync(outdir, { recursive: true });
-for (const [name, contents] of Object.entries(outputs)) {
+for (const [name, original] of Object.entries(outputs)) {
+  const contents = ['themes.svg', 'day-night.svg'].includes(name)
+    ? original
+    : original.replace(
+        '</svg>',
+        `<style>${fs.readFileSync(path.join(outdir, 'theme-palette.css'), 'utf8')}</style></svg>`,
+      );
   const target = path.join(outdir, name);
   if (check)
     assert.equal(fs.readFileSync(target, 'utf8'), contents, `Outdated ${name}`);

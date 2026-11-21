@@ -1,3 +1,4 @@
+import { visualColor } from './theme.mjs';
 // Display-only topology from existing observations and layer arrays. No weight requests.
 import { observationView, predictionView } from './inspector-stats.mjs';
 const NS = 'http://www.w3.org/2000/svg';
@@ -292,9 +293,9 @@ export function networkStructure(description, k = DEFAULT_NETWORK_RANK) {
       chart.append(
         svg('polygon', {
           points: `${right},${lowA} ${left},${lowB} ${left},${highB} ${right},${highA}`,
-          fill: '#8ac8ff',
+          fill: visualColor('#8ac8ff'),
           opacity: 0.08,
-          stroke: '#8ac8ff',
+          stroke: visualColor('#8ac8ff'),
         }),
       );
     } else {
@@ -306,7 +307,7 @@ export function networkStructure(description, k = DEFAULT_NETWORK_RANK) {
         svg('path', {
           d: path,
           fill: 'none',
-          stroke: '#8ac8ff',
+          stroke: visualColor('#8ac8ff'),
           'stroke-width': 0.5,
           opacity: 0.16,
         }),
@@ -343,7 +344,11 @@ export function networkStructure(description, k = DEFAULT_NETWORK_RANK) {
           width: 7,
           height: 7,
           rx: 2,
-          fill: known ? (v >= 0 ? '#7de2bd' : '#ff9aab') : '#61798f',
+          fill: known
+            ? v >= 0
+              ? visualColor('#7de2bd')
+              : visualColor('#ff9aab')
+            : visualColor('#61798f'),
           opacity: known ? 0.25 + 0.75 * Math.min(1, Math.abs(v)) : 0.4,
         });
       box.append(

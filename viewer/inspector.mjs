@@ -1,3 +1,4 @@
+import { visualColor } from './theme.mjs';
 import {
   observationView,
   predictionView,
@@ -47,13 +48,21 @@ function radar(observation, baseFraction) {
     cy = 94,
     r = 76;
   chart.append(
-    svg('circle', { cx, cy, r, fill: '#0b131c', stroke: '#415569' }),
+    svg('circle', {
+      cx,
+      cy,
+      r,
+      fill: visualColor('#0b131c'),
+      stroke: visualColor('#415569'),
+    }),
   );
   for (const [x1, y1, x2, y2] of [
     [cx - r, cy, cx + r, cy],
     [cx, cy - r, cx, cy + r],
   ])
-    chart.append(svg('line', { x1, y1, x2, y2, stroke: '#263341' }));
+    chart.append(
+      svg('line', { x1, y1, x2, y2, stroke: visualColor('#263341') }),
+    );
   if (baseFraction < 1)
     chart.append(
       svg('circle', {
@@ -61,7 +70,7 @@ function radar(observation, baseFraction) {
         cy,
         r: r * baseFraction,
         fill: 'none',
-        stroke: '#8ac8ff88',
+        stroke: visualColor('#8ac8ff88'),
         'stroke-dasharray': '3 4',
       }),
     );
@@ -110,10 +119,10 @@ function radar(observation, baseFraction) {
       y1: cy,
       x2: cx + hx * 12,
       y2: cy + hy * 12,
-      stroke: '#fff',
+      stroke: visualColor('#fff'),
       'stroke-width': 2,
     }),
-    svg('circle', { cx, cy, r: 2.5, fill: '#fff' }),
+    svg('circle', { cx, cy, r: 2.5, fill: visualColor('#fff') }),
   );
   chart.append(
     svg(
@@ -304,7 +313,13 @@ function historyGraph(samples, policy, sections) {
     for (const fraction of [0, 0.5, 1]) {
       const y = 10 + fraction * 105;
       chart.append(
-        svg('line', { x1: 38, y1: y, x2: 272, y2: y, stroke: '#263341' }),
+        svg('line', {
+          x1: 38,
+          y1: y,
+          x2: 272,
+          y2: y,
+          stroke: visualColor('#263341'),
+        }),
         svg(
           'text',
           { x: 34, y: y + 4, 'text-anchor': 'end' },

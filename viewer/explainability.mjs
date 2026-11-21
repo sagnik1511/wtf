@@ -1,3 +1,4 @@
+import { visualColor } from './theme.mjs';
 import {
   DEFAULT_NETWORK_RANK,
   rankLimit,
@@ -23,7 +24,7 @@ const svg = (tag, attrs = {}, text) => {
   return n;
 };
 const signed = (v) => `${v >= 0 ? '+' : ''}${v.toPrecision(3)}`;
-const color = (v) => (v >= 0 ? '#7de2bd' : '#ff9aab');
+const color = (v) => (v >= 0 ? visualColor('#7de2bd') : visualColor('#ff9aab'));
 function chart(title, width, height) {
   const n = svg('svg', {
     viewBox: `0 0 ${width} ${height}`,
@@ -105,7 +106,7 @@ export function routeGraph(report) {
         r: active ? 10 : 7,
         fill: color(n.value),
         opacity: 0.4 + 0.6 * Math.min(1, Math.abs(n.value)),
-        stroke: active ? '#fff' : '#415569',
+        stroke: active ? visualColor('#fff') : visualColor('#415569'),
         'stroke-width': active ? 2 : 1,
       });
       dot.append(
@@ -154,7 +155,7 @@ function attributionChart(report) {
       y1: 6,
       x2: zero,
       y2: height - 24,
-      stroke: '#61798f',
+      stroke: visualColor('#61798f'),
     }),
   );
   rows.forEach((r, i) => {
@@ -225,7 +226,10 @@ function outputChart(report) {
       y,
       width: Math.abs(x(r.score) - x(0)),
       height: 11,
-      fill: r.action === report.target ? '#7de2bd' : '#8ac8ff',
+      fill:
+        r.action === report.target
+          ? visualColor('#7de2bd')
+          : visualColor('#8ac8ff'),
       rx: 2,
     });
     rect.append(
@@ -239,7 +243,7 @@ function outputChart(report) {
           y: y + 13,
           width: Math.abs(x(recorded[r.action]) - x(0)),
           height: 6,
-          fill: '#8b9cad',
+          fill: visualColor('#8b9cad'),
           rx: 2,
         }),
       );

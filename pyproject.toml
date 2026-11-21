@@ -23,7 +23,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/sagnik1511/wtf"
-Documentation = "https://github.com/sagnik1511/wtf#documentation"
+Documentation = "https://sagnik1511.github.io/wtf/"
 Source = "https://github.com/sagnik1511/wtf"
 Issues = "https://github.com/sagnik1511/wtf/issues"
 

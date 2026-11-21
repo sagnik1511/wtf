@@ -4,8 +4,8 @@
     "source": "current viewer replay frame exports; no desktop video recording",
     "preset": "environments/river_crossing.json",
     "preset_sha256": "d4ced4ffcc5315d113c028dbe677ca7e51c7f762e23a7f8482152117297aa80d",
-    "viewer_sha256": "fc1a37c66ca463c6df134236d6cb1194beca5396e780c1ae35a1e715716f20f8",
-    "frame_sequence_sha256": "68adc0d3257c5534784be46b64b2e6bba61155f23a64b7554aa6a94a262f6e55",
+    "viewer_sha256": "cf413a23f37e839d15aeb58ec73c0102f37b26617872b41f417655907b4232bf",
+    "frame_sequence_sha256": "fbf4fdc43bd267475df06f8850f23573e0e580d7788407cf550cbde696a8b3f1",
     "seed": 100,
     "runs": 1,
     "steps": 300,
@@ -37,15 +37,19 @@
     "palette_colors": 128,
     "loop": true,
     "crop": null,
-    "bytes": 775056
+    "bytes": 786558,
+    "light_asset": "themed/river-crossing-light.webp",
+    "light_bytes": 542320,
+    "light_frame_sequence_sha256": "52974589d1a14daae0dd6f8922d9b972a7742ef31b4f02169a8cc0b5e17170af",
+    "theme_selection": "site palette; GitHub picture media; original GIF fallback"
   },
   {
     "asset": "highlands.gif",
     "source": "current viewer replay frame exports; no desktop video recording",
     "preset": "environments/highlands.json",
     "preset_sha256": "6054710324d17dfbded1bc9bc492f466e7b56e69cc3da0c742b0dc57957a5e80",
-    "viewer_sha256": "fc1a37c66ca463c6df134236d6cb1194beca5396e780c1ae35a1e715716f20f8",
-    "frame_sequence_sha256": "da09ad1874cc60ad918878cfb19a2b91e4da866dcd2fd326cc3bdedbdfb66429",
+    "viewer_sha256": "cf413a23f37e839d15aeb58ec73c0102f37b26617872b41f417655907b4232bf",
+    "frame_sequence_sha256": "c7bf8be7e300432446372f992a4901563af6f754630894a2e0f268e3f8a829ff",
     "seed": 100,
     "runs": 1,
     "steps": 300,
@@ -77,15 +81,19 @@
     "palette_colors": 128,
     "loop": true,
     "crop": null,
-    "bytes": 756322
+    "bytes": 762129,
+    "light_asset": "themed/highlands-light.webp",
+    "light_bytes": 537792,
+    "light_frame_sequence_sha256": "19a6bf1225f837480e8514ade59b2a889e55c244de7f623c061233aeaa6ed7c6",
+    "theme_selection": "site palette; GitHub picture media; original GIF fallback"
   },
   {
     "asset": "enclosed-valleys.gif",
     "source": "current viewer replay frame exports; no desktop video recording",
     "preset": "environments/enclosed_valleys.json",
     "preset_sha256": "9a81ab1b3c008ca50adffb9a2914c41a5dc80a4545e9727fe29a6c2f65ffa081",
-    "viewer_sha256": "fc1a37c66ca463c6df134236d6cb1194beca5396e780c1ae35a1e715716f20f8",
-    "frame_sequence_sha256": "40dea303c7bd63da36f021ff290b36d3eeb52fd123cee36658c0b28898e8354a",
+    "viewer_sha256": "cf413a23f37e839d15aeb58ec73c0102f37b26617872b41f417655907b4232bf",
+    "frame_sequence_sha256": "56678af6aeb7e334278ec6b3dcb5342bb7b2abd497e85df6fdc94ef875c08522",
     "seed": 100,
     "runs": 1,
     "steps": 300,
@@ -117,6 +125,10 @@
     "palette_colors": 128,
     "loop": true,
     "crop": null,
-    "bytes": 704893
+    "bytes": 677139,
+    "light_asset": "themed/enclosed-valleys-light.webp",
+    "light_bytes": 488248,
+    "light_frame_sequence_sha256": "f2d6726e7f8386b39307063c505ed75be348d6686462177aec06d7467ac957cc",
+    "theme_selection": "site palette; GitHub picture media; original GIF fallback"
   }
 ]

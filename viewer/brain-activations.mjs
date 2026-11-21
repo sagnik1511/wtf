@@ -1,3 +1,4 @@
+import { visualColor } from './theme.mjs';
 import {
   DEFAULT_NETWORK_RANK,
   inputInterpretation,
@@ -53,7 +54,7 @@ function activationMap(values, title, compact) {
         width: cell - 3,
         height: cell - 4,
         rx: 2,
-        fill: v >= 0 ? '#7de2bd' : '#ff9aab',
+        fill: v >= 0 ? visualColor('#7de2bd') : visualColor('#ff9aab'),
         opacity: 0.18 + 0.82 * Math.min(1, Math.abs(v)),
       });
     r.append(svg('title', {}, `Unit ${i}: ${v.toPrecision(6)}`));

@@ -966,7 +966,7 @@ footer {
 .input-gauge-track > span {
   display: block;
   height: 100%;
-  background: #8ac8ff;
+  background: var(--accent);
 }
 .blocked-inputs {
   display: flex;
@@ -1309,6 +1309,23 @@ footer {
 /* Viewer appearance is independent of a recording's simulated sunlight. */
 :root[data-theme='light'] {
   color-scheme: light;
+  --viz-0b131c: #eaf0f5;
+  --viz-415569: #a2b5c7;
+  --viz-263341: #b7c8d7;
+  --viz-8ac8ff88: #1f639c88;
+  --viz-fff: #172c3c;
+  --viz-61798f: #617385;
+  --viz-8b9cad: #667788;
+  --viz-7de2bd: #19714f;
+  --viz-ff9aab: #b33352;
+  --viz-ff9a77: #a84122;
+  --viz-c6a5ff: #7252a5;
+  --viz-a2c76b: #5c741a;
+  --viz-8ac8ff: #1f639c;
+  --viz-ffbd75: #965616;
+  --viz-a1c8b0: #416d55;
+  --viz-e1d17c: #7c6a18;
+  --viz-79d6df: #236f7c;
   --bg: #f2f5f8;
   --panel: #ffffff;
   --surface: #eaf0f5;

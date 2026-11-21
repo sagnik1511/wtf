@@ -4,8 +4,9 @@
 
 The distribution is named `wtf-wildlife-trial-framework`; the Python import is
 `ecosystem`. Version `0.1.0` is configured locally. Building and checking it does
-not publish it or reserve the name on PyPI. No upload command or publishing
-workflow is included in this preparation.
+not publish it or reserve the name on PyPI. The trial-release target is
+**TestPyPI**, which has separate accounts, tokens and projects from production
+PyPI. See [the upload procedure](#testpypi-trial-release).
 
 ## Build a wheel and source archive
 
@@ -146,3 +147,48 @@ jobs use the same pinned OS/architecture. Review GitHub's
 [Python build manifest](https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json)
 before changing this pin. A setup-python download failure occurs before package
 installation tests; it is not evidence of a simulator/runtime failure.
+
+## TestPyPI trial release
+
+Build and validate a dedicated artifact directory so a trial upload cannot pick
+up stale/native distributions from another build:
+
+```sh
+WTF_BUILD_NATIVE=0 .venv/bin/python -m build --outdir dist/testpypi-0.1.0
+.venv/bin/python -m twine check --strict dist/testpypi-0.1.0/*
+```
+
+Inspect the wheel and source archive, test each in a fresh environment with
+`work/check_installation.py`, and run the project checks before uploading.
+Keep results, local research, credentials and host native binaries out of both
+archives. Publish only the named version's two reviewed artifacts:
+
+```sh
+.venv/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ \
+  dist/testpypi-0.1.0/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl \
+  dist/testpypi-0.1.0/wtf_wildlife_trial_framework-0.1.0.tar.gz
+```
+
+Authenticate to TestPyPI with the `__token__` username and a TestPyPI API token
+through Twine's password prompt or a locally configured keyring. Do not put a
+token in a shell command, repository file, build log or chat. First-time project
+creation may require an account-scoped token; after creation, prefer a token
+scoped to this project. TestPyPI accounts/tokens are distinct from PyPI. See the
+[official TestPyPI guide](https://packaging.python.org/en/latest/guides/using-testpypi/).
+
+Once uploaded, check the project page and install the exact trial from the index
+in another fresh Python 3.12+ environment:
+
+```sh
+python -m pip install "tqdm>=4.66,<5"
+python -m pip install --index-url https://test.pypi.org/simple/ --no-deps \
+  wtf-wildlife-trial-framework==0.1.0
+```
+
+Install dependencies from PyPI separately rather than using `--extra-index-url`.
+Run the same installed-package smoke check against this download, including its
+viewer assets, maps, presets and checkpoint/replay readers. Record the artifact
+hashes and actual upload/installation outcome. A wheel validated locally is not
+an uploaded release; keep status Pending until the index confirms the files.
+Avoid reusing a version/filename after upload: indexes treat release files as
+immutable. A TestPyPI trial does not authorize a production PyPI upload.

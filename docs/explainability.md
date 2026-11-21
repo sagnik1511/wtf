@@ -10,7 +10,11 @@ archive or explanation API request.
 
 ## Recorded animal activations
 
-![Selected animal’s recorded input summaries, action estimates and small-network activations updating through replay](assets/animal-brain.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/animal-brain-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/animal-brain.gif" type="image/gif" />
+  <img src="assets/animal-brain.gif" alt="Selected animal’s recorded input summaries, action estimates and small-network activations updating through replay" />
+</picture>
 
 This time-compressed current-viewer clip follows one selected animal through
 saved samples. Colors and scores update only when its recorded diagnostic sample
@@ -73,7 +77,11 @@ new recordings that saved no champion archives.
 
 ## Archived comparison
 
-![Archived brain explanation following changing replay observations, with input sensitivities, action-score comparisons and network activations](assets/archived-brain.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/archived-brain-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/archived-brain.gif" type="image/gif" />
+  <img src="assets/archived-brain.gif" alt="Archived brain explanation following changing replay observations, with input sensitivities, action-score comparisons and network activations" />
+</picture>
 
 Here the archive stays fixed while the selected animal's replay observations
 change. The changing input sensitivities, predicted returns and activation

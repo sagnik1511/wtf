@@ -13,6 +13,21 @@ biological realism or established policy improvement.
 Requires Python **3.12 or newer**. Optional native kernels support CPython
 3.12–3.13; newer interpreters use the Python backend.
 
+## TestPyPI trial installation
+
+Use Python 3.12+ in a virtual environment. Install the runtime dependency from
+PyPI, then install the trial package from TestPyPI without mixing package indexes:
+
+```sh
+python -m venv .venv
+# Activate .venv using your platform's shell command.
+python -m pip install "tqdm>=4.66,<5"
+python -m pip install --index-url https://test.pypi.org/simple/ --no-deps wtf-wildlife-trial-framework==0.1.0
+```
+
+TestPyPI is a separate trial index. Availability there does not mean the package
+has been published on the production PyPI index.
+
 ## Local package installation
 
 For an unpublished checkout, build distributions and install the resulting wheel:
@@ -40,7 +55,8 @@ choice for supported CPython versions; they are not required to install or run.
 Use `wtf --help`, `wtf run --help`, `wtf view --help` and `wtf analyze --help`
 for commands. `python -m ecosystem` provides the same command hub.
 
-See the [repository and documentation](https://github.com/sagnik1511/wtf) for
+See the [documentation](https://sagnik1511.github.io/wtf/) and
+[source repository](https://github.com/sagnik1511/wtf) for
 installation, Docker, complete tutorials, all configuration definitions, species,
 policy/action/geography extension guidance, storage and artifact compatibility.
 

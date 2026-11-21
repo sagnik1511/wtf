@@ -3,7 +3,8 @@
 [Project overview](README.md) · [Python 3.12 rollout](docs/releases/0.0.1.31.md) · [Complete tutorial](docs/tutorial.md)
 
 Choose a built Python wheel, a source checkout or Docker. Rollout **0.0.1.30**
-adds package builds; nothing has been uploaded to PyPI. The distribution name is
+adds package builds. TestPyPI trial uploads and production PyPI publication are
+separate steps; see the [trial release procedure](docs/packaging.md#testpypi-trial-release). The distribution name is
 `wtf-wildlife-trial-framework`, and the import remains `ecosystem`.
 
 ## Install the built wheel

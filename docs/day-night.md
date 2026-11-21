@@ -65,7 +65,11 @@ initialize these worlds, but suitability requires evaluation under the cycle.
 
 ## Playback and storage
 
-![Current viewer progressing from dawn through midday and dusk into night, with its moving time dial](assets/day-night.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/day-night-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/day-night.gif" type="image/gif" />
+  <img src="assets/day-night.gif" alt="Current viewer progressing from dawn through midday and dusk into night, with its moving time dial" />
+</picture>
 
 This 3.5-second full-viewer preview samples the maintained day–night preset
 at 20-step intervals. It compresses world time to show the sunlight cycle and

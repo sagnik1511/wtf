@@ -176,6 +176,41 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertTrue(any("missing section" in e for e in report["errors"]))
             self.assertTrue(any("missing target" in e for e in report["errors"]))
 
+    def test_replay_pictures_follow_site_theme_and_nested_paths(self):
+        page = SimpleNamespace(
+            file=SimpleNamespace(
+                src_uri="nested/guide.md", dest_uri="nested/guide/index.html"
+            )
+        )
+        picture = (
+            '<picture class="replay-preview">'
+            '<source media="(prefers-color-scheme: light)" srcset="../assets/themed/demo-light.webp" />'
+            '<source media="(prefers-color-scheme: dark)" srcset="../assets/themed/demo-dark.webp" />'
+            '<img src="../assets/demo.gif" alt="Replay &amp; charts" />'
+            "</picture>"
+        )
+        rendered = self.site.on_page_markdown(picture, page, self.config, None)
+        self.assertIn('class="replay-theme-light"', rendered)
+        self.assertIn('class="replay-theme-dark"', rendered)
+        self.assertIn('src="../../assets/themed/demo-light.webp"', rendered)
+        self.assertIn('alt="Replay &amp; charts"', rendered)
+        self.assertNotIn("prefers-color-scheme", rendered)
+        fenced = "```html\n" + picture + "\n```\n"
+        self.assertEqual(
+            self.site.on_page_markdown(fenced, page, self.config, None), fenced
+        )
+
+    def test_inspector_and_map_specimens_have_theme_support(self):
+        root = Path(__file__).resolve().parents[1]
+        ns = {"s": "http://www.w3.org/2000/svg"}
+        for folder in ("inspector", "geography", "viewer"):
+            for path in (root / "docs/assets" / folder).glob("*.svg"):
+                if path.name in ("themes.svg", "day-night.svg"):
+                    continue
+                svg = ET.parse(path).getroot()
+                style = "".join(e.text or "" for e in svg.findall(".//s:style", ns))
+                self.assertIn("prefers-color-scheme: light", style, str(path))
+
     def test_ignored_research_and_symlink_files_are_never_published(self):
         from mkdocs.config.defaults import MkDocsConfig
         from mkdocs.structure.files import File, Files

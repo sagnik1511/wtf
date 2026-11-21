@@ -2,7 +2,7 @@
 
 [Geography gallery](../../geography.md#recorded-terrain-previews) · [Asset index](../README.md)
 
-These GIFs show the **whole current viewer window**, including its project
+These theme-aware previews show the **whole current viewer window**, including its project
 header, toolbar, counters, board, sidebar and visible chart area. They are
 assembled from exported replay frames; no desktop screen recording is needed.
 The 1280 × 720 composition stays fixed throughout each clip, with no spatial
@@ -45,6 +45,7 @@ stay local. These are interface demonstrations, not evidence of policy quality.
    For the archive clip, allow the temporary replay to save champions: replace
    `--no-library` with `--library-dir /path/to/temporary-library` and clean that
    directory up with the replay afterward.
+   Export the same samples in both viewer themes into separate light/dark roots.
 3. Save each sequence as `000.jpg` through `013.jpg` in one of these folders:
    `simulation-playback/`, `species-metrics/`, `day-night/`, `animal-brain/`,
    `archived-brain/`, `river-crossing/`, `highlands/`, `enclosed-valleys/`. Each folder also needs `capture.json`:
@@ -65,7 +66,8 @@ stay local. These are interface demonstrations, not evidence of policy quality.
 4. Encode the sequences and refresh both manifests with FFmpeg/ffprobe installed:
 
    ```sh
-   .venv/bin/python -m work.export_viewer_gifs --frames-dir /path/to/frame-exports
+   .venv/bin/python -m work.export_viewer_gifs --frames-dir /path/to/dark-frames \
+     --light-frames-dir /path/to/light-frames
    ```
 
 5. Check the first, middle and final GIF frames, timing and file sizes. Confirm
@@ -77,3 +79,10 @@ The encoder uses palette generation and rectangular differential rendering;
 it adds no viewer or simulator dependency. `work/export_terrain_gifs.py` remains
 a legacy importer for supplied MOV files, not the refresh path for these
 current-viewer exports.
+
+The original `.gif` files remain dark-theme fallbacks and keep existing direct
+asset URLs working. Light-theme clips use animated WebP after the same 128-color
+quantization, avoiding another full set of GIFs. Both carry the same frame count,
+step samples and duration. Page markup uses `<picture class="replay-preview">`:
+GitHub selects its media source, while the MkDocs hook resolves nested paths and
+emits image variants controlled by the site's explicit palette toggle.

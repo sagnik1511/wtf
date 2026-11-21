@@ -287,6 +287,12 @@ def inspector_example():
         "#a4b5c5",
     )
     parts.append("</svg>")
+    parts.insert(
+        1,
+        "<style>"
+        + (ROOT / "docs/assets/viewer/theme-palette.css").read_text()
+        + "</style>",
+    )
     return "\n".join(parts) + "\n"
 
 

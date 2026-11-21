@@ -52,3 +52,8 @@ export function boardPalette(theme) {
         selection: '#ffffff',
       };
 }
+
+// CSS resolves these at paint time, so cached inspector charts follow theme toggles.
+export function visualColor(hex) {
+  return `var(--viz-${hex.slice(1)}, ${hex})`;
+}

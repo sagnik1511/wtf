@@ -112,10 +112,14 @@ appear in the playback catalog.
 
 ## Per-step species dashboard
 
-![Species dashboard charts updating as the saved replay advances](assets/species-metrics.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/species-metrics-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/species-metrics.gif" type="image/gif" />
+  <img src="assets/species-metrics.gif" alt="Species dashboard charts updating as the saved replay advances" />
+</picture>
 
-A 3.5-second excerpt showing species trends during playback. The dashboard
-scrolls to reveal additional charts while the recorded timeline advances.
+A 3.5-second preview showing species trends as the recorded timeline advances.
+The selected animation matches the documentation theme.
 
 Click **Metrics dashboard** in the toolbar. Its charts follow the replay position
 while playing, stepping or scrubbing; no future frames are displayed. The modal

@@ -6,6 +6,7 @@ import json
 import posixpath
 import re
 import subprocess
+from xml.etree import ElementTree as ET
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 from mkdocs.structure.files import File
@@ -104,12 +105,47 @@ def _site_link(href, origin, destination, config):
     return urlunsplit(("", "", relative, parts.query, parts.fragment))
 
 
+REPLAY_PICTURES = re.compile(r'<picture class="replay-preview">.*?</picture>', re.S)
+
+
+def _replay_picture(match, origin, destination):
+    """GitHub uses picture media; Pages follows its explicit palette toggle."""
+    picture = ET.fromstring(match[0])
+    fallback = picture.find("img")
+    alt = html.escape(fallback.get("alt", "Saved replay preview"), quote=True)
+    images = []
+    for source in picture.findall("source"):
+        media = source.get("media", "")
+        theme = "dark" if "dark" in media else "light"
+        href = source.get("srcset", "")
+        parsed = urlsplit(href)
+        asset = posixpath.normpath(
+            posixpath.join(posixpath.dirname(origin), unquote(parsed.path))
+        )
+        if parsed.scheme or parsed.netloc or not asset.startswith("docs/assets/"):
+            raise ValueError(
+                f"Replay previews must use local documentation assets: {href}"
+            )
+        relative = posixpath.relpath(asset[5:], posixpath.dirname(destination) or ".")
+        images.append(
+            f'<img class="replay-theme-{theme}" src="{html.escape(relative, quote=True)}" alt="{alt}" loading="lazy" />'
+        )
+    if len(images) != 2:
+        raise ValueError("Replay previews need light and dark sources")
+    return "\n".join(images)
+
+
 def on_page_markdown(markdown, page, config, files):
     """Preserve checkout links and literal code; resolve website links in memory."""
     destination = page.file.src_uri
     origin = EXTRA_PAGES.get(destination, "docs/" + destination)
     sections = FENCES.split(markdown)
     for index in range(0, len(sections), 3):
+        if REPLAY_PICTURES.search(sections[index]):
+            sections[index] = REPLAY_PICTURES.sub(
+                lambda match: _replay_picture(match, origin, page.file.dest_uri),
+                sections[index],
+            )
         sections[index] = LINKS.sub(
             lambda match: match[1]
             + _site_link(match[2], origin, destination, config)

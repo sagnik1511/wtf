@@ -87,6 +87,11 @@ Use **Light mode / Dark mode** in the header. The preference is saved in the
 browser and applies to controls, panels, dialogs, inspector views, chart axes
 and the board grid/terrain. The comparison includes midday and night in both
 interface palettes.
+Inspector radars, target legends, prediction histories, action bars, neuron
+activations and archived-model sensitivity/route charts use theme-aware colors.
+Cached or expanded charts recolor immediately on a theme toggle without seeking
+or waiting for another diagnostic sample.
+
 It is independent of simulated sunlight; daylight lights the ground and night
 dims it in either interface theme.
 

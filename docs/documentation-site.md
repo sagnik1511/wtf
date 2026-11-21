@@ -14,7 +14,8 @@ manual choice is remembered in that browser. Page surfaces, navigation, text and
 project logos follow the selected site theme. The project symbol remains visible
 beside the title on every page and at mobile widths. Adaptive SVG diagrams follow
 the same toggle; [visual theme rules](visual-guide.md#light-and-dark-appearance)
-explain why recorded clips and fixed scene specimens retain their source colors. The standalone viewer has its own
+explain how paired replay exports and standalone SVG specimens follow the theme
+without recoloring recorded data. The standalone viewer has its own
 separate theme control; its simulated day–night lighting is another setting.
 
 ## Build or preview locally

@@ -161,15 +161,27 @@ the rules; these clips show the actual viewer UI.
 
 ### River crossing
 
-![Full viewer playback of river crossing, including controls, statistics and event highlights](assets/terrains/river-crossing.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/river-crossing-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/terrains/river-crossing.gif" type="image/gif" />
+  <img src="assets/terrains/river-crossing.gif" alt="Full viewer playback of river crossing, including controls, statistics and event highlights" />
+</picture>
 
 ### Highlands
 
-![Full viewer playback of highlands, showing elevation shading, terrain and statistics](assets/terrains/highlands.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/highlands-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/terrains/highlands.gif" type="image/gif" />
+  <img src="assets/terrains/highlands.gif" alt="Full viewer playback of highlands, showing elevation shading, terrain and statistics" />
+</picture>
 
 ### Enclosed valleys
 
-![Full viewer playback of enclosed valleys, showing the wall, gates, river, animals and statistics](assets/terrains/enclosed-valleys.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="assets/themed/enclosed-valleys-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/terrains/enclosed-valleys.gif" type="image/gif" />
+  <img src="assets/terrains/enclosed-valleys.gif" alt="Full viewer playback of enclosed valleys, showing the wall, gates, river, animals and statistics" />
+</picture>
 
 Animals may pass through the gates during playback; the inside/outside placement
 rule applies to founders, not permanent confinement.

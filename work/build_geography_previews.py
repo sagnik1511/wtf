@@ -63,6 +63,12 @@ def preview(config):
             "</g></svg>",
         ]
     )
+    parts.insert(
+        1,
+        "<style>"
+        + (ROOT / "docs/assets/viewer/theme-palette.css").read_text()
+        + "</style>",
+    )
     return "\n".join(parts) + "\n"
 
 

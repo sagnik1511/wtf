@@ -1,4 +1,259 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="672" height="564" viewBox="0 0 672 564" role="img" aria-labelledby="title desc">
+<style>/* Shared source for standalone viewer/inspector SVG specimens. */
+@media (prefers-color-scheme: light) {
+  svg {
+    --viz-0b131c: #eaf0f5;
+    --viz-415569: #a2b5c7;
+    --viz-263341: #b7c8d7;
+    --viz-8ac8ff88: #1f639c88;
+    --viz-fff: #172c3c;
+    --viz-61798f: #617385;
+    --viz-8b9cad: #667788;
+    --viz-7de2bd: #19714f;
+    --viz-ff9aab: #b33352;
+    --viz-ff9a77: #a84122;
+    --viz-c6a5ff: #7252a5;
+    --viz-a2c76b: #5c741a;
+    --viz-8ac8ff: #1f639c;
+    --viz-ffbd75: #965616;
+    --viz-a1c8b0: #416d55;
+    --viz-e1d17c: #7c6a18;
+    --viz-79d6df: #236f7c;
+  }
+  svg text {
+    fill: #172c3c;
+  }
+  svg .muted,
+  svg .viewer-component text {
+    fill: #4b6073;
+  }
+  [fill='#0b131c'] {
+    fill: #eaf0f5;
+  }
+  [stroke='#0b131c'] {
+    stroke: #eaf0f5;
+  }
+  [style*='fill:#0b131c'] {
+    fill: #eaf0f5 !important;
+  }
+  [fill='#415569'] {
+    fill: #a2b5c7;
+  }
+  [stroke='#415569'] {
+    stroke: #a2b5c7;
+  }
+  [style*='fill:#415569'] {
+    fill: #a2b5c7 !important;
+  }
+  [fill='#263341'] {
+    fill: #b7c8d7;
+  }
+  [stroke='#263341'] {
+    stroke: #b7c8d7;
+  }
+  [style*='fill:#263341'] {
+    fill: #b7c8d7 !important;
+  }
+  [fill='#fff'] {
+    fill: #172c3c;
+  }
+  [stroke='#fff'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#fff'] {
+    fill: #172c3c !important;
+  }
+  [fill='#61798f'] {
+    fill: #617385;
+  }
+  [stroke='#61798f'] {
+    stroke: #617385;
+  }
+  [style*='fill:#61798f'] {
+    fill: #617385 !important;
+  }
+  [fill='#8b9cad'] {
+    fill: #667788;
+  }
+  [stroke='#8b9cad'] {
+    stroke: #667788;
+  }
+  [style*='fill:#8b9cad'] {
+    fill: #667788 !important;
+  }
+  [fill='#7de2bd'] {
+    fill: #19714f;
+  }
+  [stroke='#7de2bd'] {
+    stroke: #19714f;
+  }
+  [style*='fill:#7de2bd'] {
+    fill: #19714f !important;
+  }
+  [fill='#ff9aab'] {
+    fill: #b33352;
+  }
+  [stroke='#ff9aab'] {
+    stroke: #b33352;
+  }
+  [style*='fill:#ff9aab'] {
+    fill: #b33352 !important;
+  }
+  [fill='#ff9a77'] {
+    fill: #a84122;
+  }
+  [stroke='#ff9a77'] {
+    stroke: #a84122;
+  }
+  [style*='fill:#ff9a77'] {
+    fill: #a84122 !important;
+  }
+  [fill='#c6a5ff'] {
+    fill: #7252a5;
+  }
+  [stroke='#c6a5ff'] {
+    stroke: #7252a5;
+  }
+  [style*='fill:#c6a5ff'] {
+    fill: #7252a5 !important;
+  }
+  [fill='#a2c76b'] {
+    fill: #5c741a;
+  }
+  [stroke='#a2c76b'] {
+    stroke: #5c741a;
+  }
+  [style*='fill:#a2c76b'] {
+    fill: #5c741a !important;
+  }
+  [fill='#8ac8ff'] {
+    fill: #1f639c;
+  }
+  [stroke='#8ac8ff'] {
+    stroke: #1f639c;
+  }
+  [style*='fill:#8ac8ff'] {
+    fill: #1f639c !important;
+  }
+  [fill='#ffbd75'] {
+    fill: #965616;
+  }
+  [stroke='#ffbd75'] {
+    stroke: #965616;
+  }
+  [style*='fill:#ffbd75'] {
+    fill: #965616 !important;
+  }
+  [fill='#a1c8b0'] {
+    fill: #416d55;
+  }
+  [stroke='#a1c8b0'] {
+    stroke: #416d55;
+  }
+  [style*='fill:#a1c8b0'] {
+    fill: #416d55 !important;
+  }
+  [fill='#e1d17c'] {
+    fill: #7c6a18;
+  }
+  [stroke='#e1d17c'] {
+    stroke: #7c6a18;
+  }
+  [style*='fill:#e1d17c'] {
+    fill: #7c6a18 !important;
+  }
+  [fill='#79d6df'] {
+    fill: #236f7c;
+  }
+  [stroke='#79d6df'] {
+    stroke: #236f7c;
+  }
+  [style*='fill:#79d6df'] {
+    fill: #236f7c !important;
+  }
+  [fill='#0b1118'] {
+    fill: #f2f5f8;
+  }
+  [stroke='#0b1118'] {
+    stroke: #f2f5f8;
+  }
+  [style*='fill:#0b1118'] {
+    fill: #f2f5f8 !important;
+  }
+  [fill='#111c21'] {
+    fill: #f2f5f8;
+  }
+  [stroke='#111c21'] {
+    stroke: #f2f5f8;
+  }
+  [style*='fill:#111c21'] {
+    fill: #f2f5f8 !important;
+  }
+  [fill='#111c27'] {
+    fill: #ffffff;
+  }
+  [stroke='#111c27'] {
+    stroke: #ffffff;
+  }
+  [style*='fill:#111c27'] {
+    fill: #ffffff !important;
+  }
+  [fill='#101a22'] {
+    fill: #dce6d8;
+  }
+  [stroke='#101a22'] {
+    stroke: #dce6d8;
+  }
+  [style*='fill:#101a22'] {
+    fill: #dce6d8 !important;
+  }
+  [fill='#e6edf3'] {
+    fill: #172c3c;
+  }
+  [stroke='#e6edf3'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#e6edf3'] {
+    fill: #172c3c !important;
+  }
+  [fill='#e1e9e8'] {
+    fill: #172c3c;
+  }
+  [stroke='#e1e9e8'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#e1e9e8'] {
+    fill: #172c3c !important;
+  }
+  [fill='#a4b5c5'] {
+    fill: #4b6073;
+  }
+  [stroke='#a4b5c5'] {
+    stroke: #4b6073;
+  }
+  [style*='fill:#a4b5c5'] {
+    fill: #4b6073 !important;
+  }
+  [fill='#a9bacc'] {
+    fill: #4b6073;
+  }
+  [stroke='#a9bacc'] {
+    stroke: #4b6073;
+  }
+  [style*='fill:#a9bacc'] {
+    fill: #4b6073 !important;
+  }
+  [fill='#3a4b5c'] {
+    fill: #6a7d89;
+  }
+  [stroke='#3a4b5c'] {
+    stroke: #6a7d89;
+  }
+  [style*='fill:#3a4b5c'] {
+    fill: #6a7d89 !important;
+  }
+}
+</style>
 <title id="title">Lake Islands</title>
 <desc id="desc">Static map diagram. Green is dry land, brown is higher land, blue is water, gray is blocked rock. Arrows show configured currents. Animals and food are not shown.</desc>
 <rect width="100%" height="100%" fill="#111c21"/>

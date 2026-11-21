@@ -134,3 +134,38 @@ test('actual app theme handler repaints a loaded paused board and events without
   button.onclick();
   assert.deepEqual(paints, []);
 });
+
+test('inspector semantic colors have contrasting light variants and exact dark fallbacks', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { visualColor } = await import('../viewer/theme.mjs');
+  const { TARGET_COLORS, ACTION_COLORS } = await import(
+    '../viewer/inspector-stats.mjs'
+  );
+  const css = await readFile(
+    new URL('../viewer/style.css', import.meta.url),
+    'utf8',
+  );
+  const light = css.match(/:root\[data-theme='light'\]\s*\{([^}]+)\}/)[1];
+  const colors = new Map(
+    [...light.matchAll(/--viz-([\da-f]+):\s*(#[\da-f]+);/g)].map((m) => [
+      m[1],
+      m[2],
+    ]),
+  );
+  const luminance = (hex) => {
+    const rgb = [1, 3, 5]
+      .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+  };
+  for (const color of [...Object.values(TARGET_COLORS), ...ACTION_COLORS]) {
+    const [, key, fallback] = color.match(
+      /^var\(--viz-([\da-f]+), (#[\da-f]+)\)$/,
+    );
+    assert.equal(color, visualColor(fallback));
+    const mapped = colors.get(key);
+    assert.ok(mapped, `missing light variant: ${fallback}`);
+    const contrast = (luminance('#eaf0f5') + 0.05) / (luminance(mapped) + 0.05);
+    assert.ok(contrast >= 3, `${fallback} light chart contrast: ${contrast}`);
+  }
+});

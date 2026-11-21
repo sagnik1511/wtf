@@ -10,7 +10,7 @@ lockups and PNG fallbacks, including light/dark variants and usage rules.
 
 ## Current playback clips
 
-The playback GIFs are exported from the current viewer using saved replay
+The playback previews are exported from the current viewer using saved replay
 frames, rather than trimmed from an older desktop video. Each preserves the
 whole viewer window (1280 × 720, or 1280 × 1440 for the taller XAI dialogs),
 including its header and controls; there is no
@@ -30,7 +30,9 @@ previews rather than real-time screen recordings. Chart history stops at the
 playhead. The small demonstration replays illustrate the interface and do not
 establish learning quality. Source frames and temporary replays stay outside
 Git; only optimized GIFs and [the provenance manifest](playback-manifest.json)
-are tracked. See [the export workflow](terrains/README.md#refresh-the-clips).
+are tracked, along with the paired light-theme WebP animations under `themed/`.
+Pages selects the export using its theme toggle; GitHub uses picture media.
+See [the export workflow](terrains/README.md#refresh-the-clips).
 
 ## Physics diagrams and interactive explorer
 

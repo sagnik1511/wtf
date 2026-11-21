@@ -1,21 +1,22 @@
+import { visualColor } from './theme.mjs';
 import { circadianBody } from './day-night.mjs';
 // Read recorded inputs only. No inference, model weights or simulation updates.
 const WIDTHS = { 1: 20, 2: 32, 3: 42, 4: 45 };
 export const TARGET_COLORS = {
-  food: '#a2c76b',
-  prey: '#7de2bd',
-  predator: '#ff9a77',
-  mate: '#c6a5ff',
+  food: visualColor('#a2c76b'),
+  prey: visualColor('#7de2bd'),
+  predator: visualColor('#ff9a77'),
+  mate: visualColor('#c6a5ff'),
 };
 export const ACTION_COLORS = [
-  '#8ac8ff',
-  '#c6a5ff',
-  '#ffbd75',
-  '#a1c8b0',
-  '#7de2bd',
-  '#ff9aab',
-  '#e1d17c',
-  '#79d6df',
+  visualColor('#8ac8ff'),
+  visualColor('#c6a5ff'),
+  visualColor('#ffbd75'),
+  visualColor('#a1c8b0'),
+  visualColor('#7de2bd'),
+  visualColor('#ff9aab'),
+  visualColor('#e1d17c'),
+  visualColor('#79d6df'),
 ];
 
 export function observationView(features, template) {

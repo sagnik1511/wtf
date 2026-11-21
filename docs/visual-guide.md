@@ -94,13 +94,19 @@ CSS `color-scheme`, even when the operating-system theme differs. Opened on
 their own, these SVGs follow the browser's system preference. Logo variants are
 selected explicitly by the site theme.
 
-Recorded GIFs, geographic map exports and viewer/inspector specimen sheets keep
-their source colors. They illustrate a particular rendered scene or compare both
-palettes; recoloring them would change the example. Their opaque surfaces retain
-contrast in either surrounding page theme. The standalone physics explorer
-adapts to system light/dark preference. The live viewer has its own theme toggle
-for controls, board, charts and inspector graphics, separate from simulated
-sunlight.
+Playback previews select an actual light or dark export: the website follows
+its palette toggle and GitHub uses picture media selection. The light animation
+uses compact WebP; the original GIF remains the dark/legacy fallback. No CSS
+color-inversion filter changes recorded animals, lighting or chart values.
+Standalone GIF URLs still show their saved pixels; theme selection belongs to
+the page embedding them.
+
+Geography and inspector/viewer SVG specimens have light/dark presentation
+palettes too. Terrain values, node activities, action scores and sign/category
+meanings are preserved. The sheets explicitly comparing both interface themes
+or daylight phases remain fixed comparisons. The standalone physics explorer
+adapts to system light/dark preference. The live viewer has its own theme toggle,
+separate from simulated sunlight.
 
 The project symbol stays to the left of the shared documentation header title
 on every page, including narrow layouts. It is a home link and uses the matching

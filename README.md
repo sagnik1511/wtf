@@ -15,7 +15,11 @@ through JSON; the presets start with one of each.
 The simulator records first and the viewer plays later, keeping training and
 rendering independent. Replay chunks use structured binary deltas and lossless XZ compression to reduce disk usage.
 
-![Saved ecosystem playback with prey, predators, obstacles and event highlights](docs/assets/simulation-playback.gif)
+<picture class="replay-preview">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/themed/simulation-playback-light.webp" type="image/webp" />
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/simulation-playback.gif" type="image/gif" />
+  <img src="docs/assets/simulation-playback.gif" alt="Saved ecosystem playback with prey, predators, obstacles and event highlights" />
+</picture>
 
 A short replay of a saved experiment. See the [live species charts](docs/recording.md#per-step-species-dashboard)
 for population, energy, births and hunting trends.

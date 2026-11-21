@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--frames-dir", type=Path, required=True)
+    parser.add_argument("--light-frames-dir", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "docs/assets")
     args = parser.parse_args()
     manifest = []
@@ -111,6 +112,55 @@ def main():
                 "bytes": output.stat().st_size,
             }
         )
+        if args.light_frames_dir:
+            light_folder = args.light_frames_dir / name
+            light_capture = json.loads((light_folder / "capture.json").read_text())
+            if (
+                light_capture["steps"] != capture["steps"]
+                or light_capture["frames"] != count
+            ):
+                raise ValueError(f"{name}: light/dark replay samples differ")
+            light_path = args.output / "themed" / f"{name}-light.webp"
+            light_path.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run(
+                [
+                    "ffmpeg",
+                    "-hide_banner",
+                    "-loglevel",
+                    "error",
+                    "-y",
+                    "-framerate",
+                    str(count / duration),
+                    "-i",
+                    str(light_folder / "%03d.jpg"),
+                    "-filter_complex",
+                    "[0:v]split[v][p];[p]palettegen=max_colors=128:stats_mode=diff[pal];"
+                    "[v][pal]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle",
+                    "-c:v",
+                    "libwebp_anim",
+                    "-lossless",
+                    "1",
+                    "-compression_level",
+                    "6",
+                    "-frames:v",
+                    str(count),
+                    "-loop",
+                    "0",
+                    str(light_path),
+                ],
+                check=True,
+            )
+            light_hash = hashlib.sha256()
+            for index in range(count):
+                light_hash.update((light_folder / f"{index:03d}.jpg").read_bytes())
+            manifest[-1].update(
+                {
+                    "light_asset": light_path.relative_to(args.output).as_posix(),
+                    "light_bytes": light_path.stat().st_size,
+                    "light_frame_sequence_sha256": light_hash.hexdigest(),
+                    "theme_selection": "site palette; GitHub picture media; original GIF fallback",
+                }
+            )
         print(f"{destination}: {output.stat().st_size:,} bytes")
     (args.output / "playback-manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n"
