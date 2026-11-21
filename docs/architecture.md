@@ -9,7 +9,12 @@ Commands in this guide run from the project root.
 
 Python owns simulation and learning. Playback reads saved artifacts; it does not call a live world or load controllers.
 
-![Runtime boundaries](assets/diagrams/runtime-boundaries.svg)
+![Runtime boundaries, including the optional archived-model analysis branch](assets/diagrams/runtime-boundaries.svg)
+
+Ordinary playback reads recorded chunks. The optional explanation branch combines
+one sampled observation with saved species/sex champion weights; it does not
+restore the learning checkpoints or feed explanations back into the simulation.
+See [archived-model explanation](explainability.md#what-is-being-explained).
 
 ## Components
 
@@ -25,6 +30,7 @@ Python owns simulation and learning. Playback reads saved artifacts; it does not
 | `ecosystem/recording.py` | Frame streaming and read-only recording access |
 | `ecosystem/analyze.py` | Offline behavior analysis from saved frames |
 | `ecosystem/server.py` | Read-only playback HTTP server |
+| `ecosystem/explanations.py`, `explainability.py` | Bounded archived-weight analysis without live controllers |
 | `viewer/` | JavaScript canvas playback and inspection |
 | `environments/` | JSON experiment presets |
 
@@ -39,7 +45,7 @@ See [adding species](species.md) for behavior and configuration details.
 
 ## Simulation steps and observations
 
-`world.py` owns physical state and emits events. `brain.py` owns individual learning. `runner.py` connects observations, actions, consequences and experiences. `recording.py` writes playback files; `server.py` only serves those files; `viewer/` renders saved data and controls playback.
+`world.py` owns physical state and emits events. `brain.py` owns individual learning. `runner.py` connects observations, actions, consequences and experiences. `recording.py` writes playback files; `server.py` serves those files and can analyze archived model weights on demand without restoring a world or learner; `viewer/` renders saved data and controls playback.
 
 
 ## One simulation step
@@ -100,3 +106,16 @@ snapshots own detached metric maps. Standalone world/recorder calls still read
 fresh state, including after direct edits within a tick. This removes repeated
 scans without changing sampling schedules, replay contents or playback; see
 [shared reporting](performance.md#founder-initialization-and-shared-reporting).
+
+The [brain explanation window](explainability.md) is opened from the Agent
+inspector. It combines one recorded observation with an explicitly identified
+archived species/sex champion, not the animal’s unrecorded historical weights.
+Stateless forward/reverse arithmetic and bounded caches live on the playback
+side; training and replay formats are unchanged.
+
+For [actual animal activity](explainability.md#recorded-animal-activations), the
+recorder requests hidden activations in the existing diagnostic forward pass.
+Detached, storage-only FP32 arrays accompany observations and scores in each
+sampled diagnostic. Playback reads them directly and follows the selected
+animal without an archive lookup, live controller or new inference. This path
+is separate from the optional stateless archived-weight analysis.

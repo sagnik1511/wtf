@@ -2,7 +2,7 @@
 
 [Visual documentation guide](../../visual-guide.md) · [Asset index](../README.md)
 
-The guides embed **27 SVG diagrams** across 17 pages. Readers need no Mermaid
+The guides embed **26 SVG diagrams** across 16 pages. Readers need no Mermaid
 plugin or JavaScript. These show ownership, data dependencies and decision order;
 they do not depict measured performance or guarantee learning outcomes.
 
@@ -82,3 +82,10 @@ They can be regenerated from a fresh clone without retained `.mmd` files:
 
 This also builds the [controlled inspector illustration](../inspector/README.md).
 Generated `.mmd` files and PNG previews remain ignored local caches.
+
+The runtime-boundaries diagram includes optional archived-brain analysis: a
+selected recorded observation and matching saved champion weights feed a
+stateless analysis branch into the inspector. Exact checkpoints and live
+controllers remain outside that playback path. The separate
+[explanation flow and worked network](../structures/README.md) provide the
+selected-data ownership and numerical detail without crowding this overview.

@@ -20,7 +20,10 @@ No NumPy, PyTorch, browser package, database or build step is required.
 | Champion weights | Shared `champions/models/<sha256>.bin.xz` | Lossless, deduplicated warm-start model snapshots |
 | Champion metadata and indexes | JSON | Criteria, ranks, scores, source and weight references |
 
-Replay files do not contain model weights or optimizer buffers. Checkpoints do.
+Replay files do not contain model weights or optimizer buffers. Optional
+hidden-activation visualization arrays are sampled as FP32 before encoding;
+existing prediction/observation values and the lossless codec are unchanged.
+See [actual brain activity](explainability.md#recorded-animal-activations). Checkpoints do.
 Version-3 champion artifacts now reference shared binary/XZ weights. The existing
 codec stores exactly representable arrays as FP32 and preserves legacy FP64
 values without quantization. Identical models are stored once across criteria

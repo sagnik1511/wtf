@@ -64,6 +64,8 @@ preset and metadata captured with the experiment.
 | Brain inheritance/archive | `ecosystem/library.py`, `runner.py` | [Saved brains](brain-library.md) |
 | Replay/checkpoint formats | `recording.py`, `replay_codec.py`, `replay_io.py`, `binary_io.py`, `checkpoint_io.py` in `ecosystem/` | [Binary storage](binary-storage.md), [recordings](recording.md) |
 | Read-only playback | `ecosystem/server.py`, `viewer/api.mjs`, `playback.mjs`, `binary-codec.mjs`, `app.js` | [Recordings](recording.md) |
+| Actual sampled animal activity | `activation_diagnostics.py`, per-brain diagnostics, `viewer/brain-activations.mjs` | [Recorded animal activations](explainability.md#recorded-animal-activations) |
+| Archived-model explanation | `ecosystem/explanations.py`, `explainability.py`, `viewer/explainability.mjs` | [Brain explanations](explainability.md) |
 | Metrics and interpretation | `ecosystem/telemetry.py`, `analyze.py`, viewer dashboard modules | [Analysis](analysis.md) |
 
 The [feedback review](feedback-review.md) describes the shared physical reward

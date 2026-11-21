@@ -1,3 +1,4 @@
+import { DEFAULT_NETWORK_RANK, rankLimit } from './network-structure.mjs';
 import { api } from './api.mjs';
 import { Dashboard } from './dashboard.mjs';
 import { Playback } from './playback.mjs';
@@ -5,6 +6,8 @@ import { behaviorRows } from './behavior-stats.mjs';
 import { speciesStyles } from './species-style.mjs';
 import { terrainView, drawTerrain } from './terrain.mjs';
 import { inspectorGraphs } from './inspector.mjs';
+import { BrainExplanation } from './explainability.mjs';
+import { AnimalBrainView } from './brain-activations.mjs';
 import {
   ObservationOverlay,
   PredictionHistory,
@@ -30,8 +33,91 @@ function showError(error) {
   errorTimer = setTimeout(() => ($('error').hidden = true), 12000);
 }
 
+let networkRankLimit = DEFAULT_NETWORK_RANK;
 const player = new Playback(api);
 const observationOverlay = new ObservationOverlay();
+const brainExplanation = new BrainExplanation(api);
+const animalBrain = new AnimalBrainView();
+for (const id of ['network-rank', 'brain-rank', 'explain-rank']) {
+  const update = () => {
+    const next = rankLimit($(id).value);
+    for (const key of ['network-rank', 'brain-rank', 'explain-rank'])
+      $(key).value = String(next);
+    if (next === networkRankLimit) return;
+    networkRankLimit = next;
+    brainExplanation.setRankLimit(next);
+    inspectorVisuals = null;
+    if (state) render();
+  };
+  $(id).onchange = update;
+  $(id).oninput = () => {
+    const value = $(id).value;
+    if (
+      value.trim() !== '' &&
+      Number.isInteger(Number(value)) &&
+      Number(value) >= 0 &&
+      Number(value) <= 12
+    )
+      update();
+  };
+}
+$('brain-open').onclick = () => {
+  if (!busy && state && brainContext().animal) animalBrain.open(brainContext());
+};
+$('brain-play').onclick = () => $('play').onclick();
+$('brain-step').onclick = () => $('step').onclick();
+$('brain-back').onclick = () => $('back').onclick();
+$('explain-play').onclick = () => $('play').onclick();
+$('explain-step').onclick = () => $('step').onclick();
+$('explain-back').onclick = () => $('back').onclick();
+brainExplanation.onPin = () => pause();
+function brainContext() {
+  const animal = state?.animals.find((a) => a.id === selected);
+  return {
+    id: player.id,
+    run: state?.run,
+    tick: state?.tick,
+    animal,
+    diagnostic: state?.selected,
+    rankLimit: networkRankLimit,
+    template: animal
+      ? player.metadata.config.brains?.[state.species[animal.species].brain]
+      : null,
+    playing,
+    done: state?.done,
+  };
+}
+$('inspect-animal').onclick = () => {
+  if (busy) return;
+  const value = $('inspect-animal-id').value.trim(),
+    id = Number(value);
+  if (
+    !value ||
+    !Number.isInteger(id) ||
+    !state?.animals.some((a) => a.id === id)
+  ) {
+    showError(
+      new Error('Enter the ID of an animal alive at this replay frame.'),
+    );
+    return;
+  }
+  selected = id;
+  render();
+};
+$('explain-open').onclick = () => {
+  if (busy) return;
+  if (!state || selected === null || !state.selected?.features) return;
+  brainExplanation.open({
+    id: player.id,
+    run: state.run,
+    frame: state.frame_index,
+    animal: selected,
+    diagnosticTick: state.selected.tick,
+    tick: state.tick,
+    playing,
+    done: state.done,
+  });
+};
 const inspectorSections = {};
 const inspectorHistory = new PredictionHistory();
 let inspectorVisuals = null,
@@ -40,6 +126,8 @@ let inspectorVisuals = null,
 function pause() {
   playing = false;
   $('play').textContent = 'Play recording';
+  $('brain-play').textContent = 'Play replay';
+  $('explain-play').textContent = 'Play replay';
   $('dashboard-play').textContent = 'Play recording';
 }
 async function operation(fn) {
@@ -57,6 +145,10 @@ async function operation(fn) {
     'dashboard-back',
     'dashboard-next',
     'dashboard-timeline',
+    'inspect-animal',
+    'inspect-animal-id',
+    'brain-open',
+    'explain-open',
   ])
     $(id).disabled = true;
   try {
@@ -78,8 +170,16 @@ async function operation(fn) {
       'dashboard-back',
       'dashboard-next',
       'dashboard-timeline',
+      'inspect-animal',
+      'inspect-animal-id',
+      'brain-open',
+      'explain-open',
     ])
       $(id).disabled = false;
+    const alive = state?.animals.some((a) => a.id === selected);
+    $('inspect-animal').disabled = !state?.animals.length;
+    $('brain-open').disabled = !alive;
+    $('explain-open').disabled = !alive || !state?.selected?.features;
     updateRunButtons();
   }
 }
@@ -438,6 +538,20 @@ function drawInspector() {
   box.replaceChildren();
   const a = state.animals.find((a) => a.id === selected),
     b = state.selected;
+  animalBrain.update(brainContext());
+  brainExplanation.update({
+    id: player.id,
+    run: state.run,
+    frame: state.frame_index,
+    animal: a?.id ?? null,
+    diagnosticTick: b?.tick ?? null,
+    tick: state.tick,
+    playing,
+    done: state.done,
+  });
+  $('brain-open').disabled = !a;
+  $('inspect-animal').disabled = !state.animals.length;
+  $('explain-open').disabled = !a || !b?.features;
   $('agent-label').textContent = a ? `${a.species} #${a.id}` : 'No selection';
   $('inspect-hint').hidden = Boolean(a);
   $('show-observation').disabled = !a;
@@ -590,6 +704,7 @@ function drawInspector() {
       spec: state.species[a.species],
       hasWater: terrain?.hasWater ?? false,
       sections: inspectorSections,
+      rank: networkRankLimit,
       samples: inspectorHistory.update(
         `${player.id}:${state.run}:${selected}`,
         predictionSamples(
@@ -860,8 +975,8 @@ function render(snapshot = null) {
   drawBirthHighlights();
   drawDeathHighlights();
   drawChart();
-  drawInspector();
   if (state.done) pause();
+  drawInspector();
 }
 async function openRecording() {
   const id = $('recording').value;

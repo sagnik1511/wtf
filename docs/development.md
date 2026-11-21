@@ -299,3 +299,32 @@ independent weights/configuration/RNGs. It also checks shared report scan counts
 through the CLI, detached summary/snapshot maps, unsampled captures and fresh
 standalone reads after same-tick edits. Keep report reuse explicit and confined
 to the unchanged completed state; never infer freshness from tick alone.
+
+`tests/test_explainability.py` compares archived inference and analytic local
+gradients across all nine learners, verifies deep/top-k contracts, blob-cache
+freshness/deduplication, inline compatibility, path bounds and the read-only HTTP
+endpoint. `tests/explainability-view.test.mjs` checks signed charts, explicit
+selected-animal requests, missing-model behavior, stale-response rejection and
+release on close. Keep archived predictions distinct from recorded animal scores;
+never label zero-state GRU analysis as historical recurrent inference.
+
+`tests/test_activation_diagnostics.py` checks all nine learners for unchanged
+controller/world checkpoints and existing prediction fields with recording on
+and off, one diagnostic inference pass, actual recurrent memory, detached FP32
+visualization-only arrays, diagnostic scheduling and option validation.
+`tests/brain-activations.test.mjs` checks selected-only display, chart reuse between
+samples, backward/run/chunk transitions, death/close clearing and older-recording
+fallback without archive/API requests.
+
+Saved-brain follow-mode regressions in `tests/explainability-view.test.mjs` also
+cover sample-level request deduplication, one in-flight/latest-pending queue,
+stale selection/death results, pin/resume and bounded error retries.
+`tests/api.test.mjs` checks the actionable restart message for old servers missing
+the explanation endpoint. Archive-read tests fingerprint all fixture files before
+and after analysis to verify that following cannot grow saved artifacts.
+
+`tests/network-structure.test.mjs` checks depth-based rank (default k=2), full
+unit counts, bundled dense connectivity, deep summaries, recurrent blocks and
+legacy gray-unit topology. Brain-view tests verify lazy Advanced sections,
+input/output priority and threshold redraws without explanation requests. Rank
+is a viewer-only depth limit, separate from observation top-k or matrix rank.

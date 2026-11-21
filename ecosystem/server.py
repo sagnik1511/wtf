@@ -6,8 +6,9 @@ import json
 import mimetypes
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 from .recording import RecordingStore
+from .explanations import ExplanationStore
 from .replay_io import read_chunk_bytes, load_chunk
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -18,6 +19,7 @@ class State:
         self.recordings = RecordingStore(
             results if results is not None else ROOT / "results"
         )
+        self.explanations = ExplanationStore(self.recordings)
 
 
 def make_handler(state):
@@ -85,6 +87,32 @@ def make_handler(state):
                             200,
                             state.recordings.telemetry(
                                 parts[2], int(parts[4]), int(parts[6])
+                            ),
+                        )
+                    if len(parts) == 8 and parts[3] == "runs" and parts[5] == "explain":
+                        query = parse_qs(
+                            urlparse(self.path).query, keep_blank_values=True
+                        )
+                        if set(query) - {
+                            "criterion",
+                            "action",
+                            "feature",
+                            "value",
+                        } or any(len(v) != 1 for v in query.values()):
+                            raise ValueError("Invalid explanation query")
+                        options = {k: v[0] for k, v in query.items()}
+                        if "feature" in options:
+                            options["feature"] = int(options["feature"])
+                        if "value" in options:
+                            options["value"] = float(options["value"])
+                        return self.send(
+                            200,
+                            state.explanations.explain(
+                                parts[2],
+                                int(parts[4]),
+                                int(parts[7]),
+                                int(parts[6]),
+                                **options,
                             ),
                         )
                     if len(parts) == 7 and parts[3] == "runs" and parts[5] == "chunks":

@@ -4,6 +4,7 @@ A small standard-library implementation for inspectable CPU experiments.
 Each animal owns all network, optimizer, rollout, and random-generator state.
 """
 
+from .activation_diagnostics import activation_sample
 from . import kernels
 from .kernels import gradient_zeros
 from .numeric import Float32, packed, plain, precision_of, restore_numeric
@@ -457,10 +458,14 @@ class PPOBrain(AdamOptimizer):
         self.last_metrics["early_stopped"] = stopped
         self.rollout.clear()  # Old-policy samples must never enter another rollout.
 
-    def diagnostics(self, observation):
-        outputs = self.network.predict(observation)
+    def diagnostics(self, observation, include_activations=False):
+        if include_activations:
+            forward = getattr(self.network, "activation_forward", self.network.forward)
+            outputs, layers = forward(observation)
+        else:
+            outputs = self.network.predict(observation)
         probabilities, logs = self.distribution(outputs, observation)
-        return dict(
+        info = dict(
             algorithm=self.algorithm,
             buffer_kind="rollout",
             buffer_size=len(self.rollout),
@@ -473,6 +478,7 @@ class PPOBrain(AdamOptimizer):
             rollout_size=len(self.rollout),
             training_metrics=self.last_metrics.copy(),
         )
+        return activation_sample(info, layers[1:-1]) if include_activations else info
 
     def checkpoint(self):
         return dict(

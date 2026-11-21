@@ -1054,3 +1054,235 @@ footer {
   flex-basis: 100%;
   font-size: 10px;
 }
+
+/* Explanation is allocated only for the selected animal's opened dialog. */
+#explain-open {
+  width: 100%;
+  margin-top: 12px;
+}
+#explain-dialog {
+  width: min(1240px, 96vw);
+  max-height: 92dvh;
+  overflow: auto;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+#explain-dialog::backdrop {
+  background: #03080dbb;
+}
+.explain-notice {
+  padding: 12px;
+  border-left: 3px solid #ffbd75;
+  background: #ffbd750c;
+  line-height: 1.6;
+}
+.explain-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 14px 0;
+}
+.explain-controls label {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 180px;
+}
+.explain-controls select,
+.explain-controls input {
+  width: 100%;
+}
+#explain-status {
+  line-height: 1.65;
+}
+.explain-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.explain-card {
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.explain-wide {
+  grid-column: 1/-1;
+}
+.explain-card h3 {
+  margin-top: 0;
+}
+.explain-card p {
+  line-height: 1.55;
+}
+.explain-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.explain-card svg text {
+  font:
+    12px system-ui,
+    sans-serif;
+  fill: var(--muted);
+}
+.explain-card svg .explain-layer {
+  font-weight: 600;
+  fill: var(--text);
+}
+.explain-routes {
+  overflow-x: auto;
+}
+.explain-routes svg {
+  min-width: 850px;
+}
+@media (max-width: 800px) {
+  .explain-charts {
+    grid-template-columns: 1fr;
+  }
+  #explain-dialog {
+    padding: 14px;
+  }
+}
+
+.inspect-id-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.inspect-id-controls input {
+  min-width: 0;
+  width: 80px;
+  flex: 1;
+}
+
+#brain-open {
+  width: 100%;
+  margin-top: 12px;
+}
+.animal-brain-activity {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.animal-brain-activity p {
+  line-height: 1.6;
+}
+.brain-flow {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #8ac8ff;
+}
+.brain-layer {
+  margin-top: 14px;
+  min-width: 0;
+}
+.brain-layer h4 {
+  margin: 8px 0;
+}
+.brain-layer svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.brain-layer svg text {
+  font:
+    11px system-ui,
+    sans-serif;
+  fill: var(--muted);
+}
+#brain-dialog {
+  width: min(960px, 96vw);
+  max-height: 92dvh;
+  overflow: auto;
+  padding: 24px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+#brain-dialog::backdrop {
+  background: #03080dbb;
+}
+#brain-dialog .animal-brain-activity {
+  margin-top: 8px;
+}
+#brain-dialog .brain-layer svg {
+  max-width: 680px;
+}
+.brain-playback {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#brain-status {
+  line-height: 1.6;
+}
+
+.network-rank-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  color: var(--muted);
+}
+.network-rank-control input {
+  width: 70px;
+  min-width: 60px;
+}
+.brain-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.brain-input-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.brain-input-grid span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.network-structure {
+  margin: 16px 0;
+  min-width: 0;
+}
+.network-structure-scroll {
+  overflow-x: auto;
+}
+.network-structure svg {
+  display: block;
+  width: 100%;
+  min-width: 650px;
+  height: auto;
+}
+.network-structure svg text {
+  font:
+    12px system-ui,
+    sans-serif;
+  fill: var(--muted);
+}
+.brain-activation-details summary,
+.explain-card > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.network-rank-control input {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px;
+  font: inherit;
+}

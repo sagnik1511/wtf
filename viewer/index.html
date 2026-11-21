@@ -133,6 +133,35 @@
             ><input id="show-observation" type="checkbox" checked disabled />
             Show selected animal’s sight on board</label
           >
+          <label
+            class="network-rank-control"
+            title="Rank counts hidden processing layers; a GRU memory block counts as one."
+            >Whole structure when rank ≤ k
+            <input
+              id="network-rank"
+              type="number"
+              min="0"
+              max="12"
+              step="1"
+              value="2"
+              aria-label="Whole network rank threshold"
+          /></label>
+          <button id="brain-open" disabled>Watch animal brain</button>
+          <button id="explain-open" disabled>Explain saved brain</button>
+          <p class="muted inspector-note">
+            Watch this animal’s recorded activations as replay plays, or compare
+            a separate archived species/sex brain.
+          </p>
+          <div class="inspect-id-controls">
+            <label for="inspect-animal-id">Animal ID</label
+            ><input
+              id="inspect-animal-id"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="ID"
+            /><button id="inspect-animal" disabled>Inspect</button>
+          </div>
           <div id="inspector"></div>
         </section>
         <section class="panel">
@@ -234,6 +263,109 @@
         not prediction accuracy or proof of learning. Policy probabilities and Q
         values have separate chart options.
       </p>
+    </dialog>
+    <dialog id="brain-dialog" aria-labelledby="brain-title">
+      <div class="section-head">
+        <h2 id="brain-title">Selected animal’s brain</h2>
+        <button id="brain-close">Close</button>
+      </div>
+      <div class="brain-playback">
+        <button id="brain-back">Back</button
+        ><button id="brain-step">Next frame</button
+        ><button id="brain-play">Play replay</button>
+      </div>
+      <label
+        class="network-rank-control"
+        title="Rank counts hidden processing layers; a GRU memory block counts as one."
+        >Whole structure when rank ≤ k
+        <input
+          id="brain-rank"
+          type="number"
+          min="0"
+          max="12"
+          step="1"
+          value="2"
+          aria-label="Whole network rank threshold"
+      /></label>
+      <p id="brain-status" role="status" class="muted"></p>
+      <div id="brain-content"></div>
+    </dialog>
+    <dialog id="explain-dialog" aria-labelledby="explain-title">
+      <div class="section-head">
+        <h2 id="explain-title">Brain explanation</h2>
+        <button id="explain-close">Close</button>
+      </div>
+      <div class="brain-playback">
+        <button id="explain-back">Back</button
+        ><button id="explain-step">Next frame</button
+        ><button id="explain-play">Play replay</button
+        ><button id="explain-retry">Retry</button
+        ><label
+          ><input id="explain-follow" type="checkbox" checked /> Follow replay
+          samples</label
+        >
+      </div>
+      <label
+        class="network-rank-control"
+        title="Rank counts hidden processing layers; a GRU memory block counts as one."
+        >Whole structure when rank ≤ k
+        <input
+          id="explain-rank"
+          type="number"
+          min="0"
+          max="12"
+          step="1"
+          value="2"
+          aria-label="Whole network rank threshold"
+      /></label>
+      <p class="explain-notice">
+        Archived model analysis — this is not the selected animal’s historical
+        weights or a reconstruction of its thoughts. The archive may come from a
+        later step or another animal. Recorded predictions are shown separately.
+        Following replay changes observations, not the archived weights.
+      </p>
+      <div class="explain-controls">
+        <label
+          >Champion criterion<select
+            id="explain-criterion"
+            aria-label="Champion criterion"
+          ></select
+        ></label>
+        <label
+          >Explain action<select
+            id="explain-action"
+            aria-label="Explain action"
+          ></select
+        ></label>
+      </div>
+      <details class="feature-details">
+        <summary>Advanced · What if one observation input changes?</summary>
+        <p class="muted">
+          Change one normalized input only. Other inputs and recorded action
+          masks stay fixed; terrain or mating eligibility is not recalculated.
+          Applying a what-if pins this observation and pauses replay. Enable
+          Follow replay samples to return to the playhead.
+        </p>
+        <div class="explain-controls">
+          <label
+            >Input<select
+              id="explain-feature"
+              aria-label="Input"
+            ></select></label
+          ><label
+            >Value (−1 to 1)<input
+              id="explain-value"
+              aria-label="Value (−1 to 1)"
+              type="number"
+              min="-1"
+              max="1"
+              step="0.05" /></label
+          ><button id="explain-apply" disabled>Apply input</button
+          ><button id="explain-reset">Reset inputs</button>
+        </div>
+      </details>
+      <p id="explain-status" class="muted" role="status"></p>
+      <div id="explain-content"></div>
     </dialog>
     <div id="error" role="alert" hidden></div>
     <footer>

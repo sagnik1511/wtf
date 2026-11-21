@@ -64,7 +64,13 @@ schemas and field tables. These are controlled code-verified illustrations.
 ## Selected runtime structures
 
 The [runtime structure catalog](structures/README.md) covers observation-vector
-packing, overlapping founder families and observation-window bucket references.
-These three diagrams were selected for structural clarity; the
+packing, overlapping founder families, observation-window bucket references,
+actual sampled animal activity, archived-brain analysis ownership and a worked
+activation/sensitivity example.
+These illustrations were selected for structural clarity; the
 [visual guidance](../visual-guide.md#when-a-visual-helps) records where existing
 figures, tables and prose remain the better choice.
+
+## Viewer appearance catalog
+
+[Source-rendered viewer specimens](viewer/README.md) identify animal/sex glyphs, resources, events, terrain, visibility and inspector/brain graphics. The [appearance reference](../viewer-visual-reference.md) embeds the four sheets with their meaning; chart values are illustrative.

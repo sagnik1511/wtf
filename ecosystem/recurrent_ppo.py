@@ -1,5 +1,6 @@
 """GRU PPO with chronological truncated backpropagation through time."""
 
+from .activation_diagnostics import activation_sample
 from . import kernels
 from .kernels import gradient_zeros
 from .numeric import Float32, packed
@@ -302,10 +303,15 @@ class RecurrentPPOBrain(PPOBrain):
         self.last_metrics["early_stopped"] = stopped
         self.rollout.clear()
 
-    def diagnostics(self, observation):
-        outputs, _ = self.network.step(observation, self.hidden)
+    def diagnostics(self, observation, include_activations=False):
+        if include_activations:
+            outputs, current, tape = self.network.step(
+                observation, self.hidden, tape=True
+            )
+        else:
+            outputs, _ = self.network.step(observation, self.hidden)
         probabilities, logs = policy_distribution(outputs[:-1])
-        return dict(
+        info = dict(
             algorithm=self.algorithm,
             features=observation,
             action_probabilities=dict(zip(self.actions, probabilities)),
@@ -319,6 +325,11 @@ class RecurrentPPOBrain(PPOBrain):
             memory_norm=math.sqrt(sum(v * v for v in self.hidden)),
             training_metrics=self.last_metrics.copy(),
         )
+        if include_activations:
+            return activation_sample(
+                info, [current] + list(tape[-1][1:-1]), self.hidden
+            )
+        return info
 
     def checkpoint(self):
         state = super().checkpoint()

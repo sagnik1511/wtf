@@ -84,3 +84,26 @@ test('Only chunk requests negotiate the binary transport', async () => {
   await api('/api/recordings', fetch);
   assert.equal(options, undefined);
 });
+
+test('Missing saved-brain endpoint requests a restart without mislabeling missing recording data', async () => {
+  await assert.rejects(
+    api('/api/recordings/run/runs/1/explain/2/0', async () =>
+      response(
+        { error: 'Recording endpoint not found' },
+        { 'X-WTF-Replay-Protocol': 'binary-v1' },
+        404,
+      ),
+    ),
+    /Restart the playback server.*does not support saved-brain explanations/,
+  );
+  await assert.rejects(
+    api('/api/recordings/run/runs/1/explain/2/0', async () =>
+      response(
+        { error: 'Recording or chunk not found' },
+        { 'X-WTF-Replay-Protocol': 'binary-v1' },
+        404,
+      ),
+    ),
+    /Recording or chunk not found/,
+  );
+});

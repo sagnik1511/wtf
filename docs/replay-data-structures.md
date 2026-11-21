@@ -135,6 +135,7 @@ refer to the **header table**, not an assumed layout in an older recording.
 | 10–14 | `parent_id`, `generation`, `last_reproduced_age`, `kills`, `energy_gained` |
 | 15–19 | `statistics_since_age`, `reproduction_due_age`, `mutated`, `mutation_count`, `mutation_weights` |
 | 20–23 | `sex`, `second_parent_id`, `drift_x`, `drift_y` |
+| 24–25 | `mating_intent_until_tick`, `last_mating_failure` |
 
 Resources use the ordered fields `x`, `y`, `quantity`. Events carry `kind`,
 `actor`, `target`, `amount`, `cause`, `mate` and `position`; events may identify
@@ -148,6 +149,15 @@ experience. They are sampled, not present at every step. A diagnostic's timestam
 can precede the displayed body frame; the [inspector diagram](recording.md#visual-agent-inspector)
 explains the two clocks. Metric and diagnostic extension fields vary by algorithm
 and recording version; readers preserve their maps rather than a fixed field list.
+
+New diagnostic records can additionally contain `activations.version: 1` and
+`activations.layers`, an array of hidden-layer arrays. Recurrent PPO also adds
+`activations.recurrent_prior`. These visualization values are sampled as FP32;
+existing features and output scores keep their previous precision. No input or
+output arrays, weights or optimizer state are duplicated. The field follows the
+normal diagnostic cadence and is optional for older/disabled recordings. See
+[activation sampling and replay](explainability.md#recorded-animal-activations)
+for its ownership diagram and `recording.record_activations` setting.
 
 ## Field masks and frame deltas
 
@@ -243,7 +253,9 @@ additional lossy quantization in the file codec.
 | Q targets / GRPO reference initialized from imported weights | Existing target/reference networks restored |
 | Used to initialize a new experiment or chained world | Used to resume the same experiment |
 
-Weights do not feed playback rendering; the viewer uses sampled diagnostics.
+Ordinary world/brain-activity playback uses sampled diagnostics. The separate
+[archived comparison](explainability.md#archived-comparison) reads matching saved
+weights for on-demand analysis.
 See [champion selection and loading](brain-library.md) and
 [checkpoint records](binary-storage.md#structured-binary-layout).
 

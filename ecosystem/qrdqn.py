@@ -1,5 +1,6 @@
 """Quantile-regression Double DQN with bounded per-animal replay and Adam."""
 
+from .activation_diagnostics import activation_sample
 from .numeric import packed, plain, precision_of, restore_numeric
 
 
@@ -123,9 +124,13 @@ class QRDQNBrain(AdamOptimizer):
                     target[key][:] = values
         self.last_metrics = {"quantile_loss": total_loss / c["batch_size"]}
 
-    def diagnostics(self, observation):
-        outputs, n = self.network.predict(observation), self.quantiles
-        return dict(
+    def diagnostics(self, observation, include_activations=False):
+        if include_activations:
+            outputs, layers = self.network.forward(observation)
+        else:
+            outputs = self.network.predict(observation)
+        n = self.quantiles
+        info = dict(
             algorithm=self.algorithm,
             features=observation,
             action_values=dict(zip(self.actions, self._mean_values(outputs))),
@@ -137,6 +142,7 @@ class QRDQNBrain(AdamOptimizer):
             replay_size=len(self.replay),
             training_metrics=self.last_metrics.copy(),
         )
+        return activation_sample(info, layers[1:-1]) if include_activations else info
 
     def checkpoint(self):
         return dict(

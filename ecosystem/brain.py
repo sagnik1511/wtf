@@ -4,6 +4,7 @@ Packed float32 parameters and standard-library math keep installation self-conta
 Networks are small deliberately; immutable replay tuples reduce overhead.
 """
 
+from .activation_diagnostics import activation_sample
 from . import kernels
 from .kernels import gradient_zeros
 from .numeric import Float32, packed, plain, precision_of, restore_numeric
@@ -164,15 +165,17 @@ class Brain:
             for key, values in self.weights.items():
                 self.target[key][:] = values
 
-    def diagnostics(self, observation):
-        return dict(
+    def diagnostics(self, observation, include_activations=False):
+        hidden, outputs = self.forward(observation)
+        info = dict(
             algorithm="q_learning",
             features=observation,
-            action_values=dict(zip(self.actions, self.forward(observation)[1])),
+            action_values=dict(zip(self.actions, outputs)),
             epsilon=self.epsilon,
             updates=self.updates,
             replay_size=len(self.replay),
         )
+        return activation_sample(info, [hidden]) if include_activations else info
 
     def checkpoint(self):
         return dict(

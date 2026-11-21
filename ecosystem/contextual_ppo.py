@@ -177,8 +177,8 @@ class MaskablePPOBrain(PPOBrain):
                 gradient[i] = 0.0
         return loss, gradient, info
 
-    def diagnostics(self, observation):
-        d = super().diagnostics(self._pack(observation))
+    def diagnostics(self, observation, include_activations=False):
+        d = super().diagnostics(self._pack(observation), include_activations)
         d.update(features=observation, action_mask=dict(zip(self.actions, self.mask)))
         return d
 
@@ -232,6 +232,11 @@ class CentralNetwork:
         return self.actor.predict(observation[: self.inputs]) + [
             self.value(observation)
         ]
+
+    def activation_forward(self, observation):
+        # Only the local actor's tape is displayed. Keep critic inference value-only.
+        outputs, layers = self.actor.forward(observation[: self.inputs])
+        return outputs + [self.value(observation)], layers
 
     def value(self, observation):
         return self.critic.predict(observation)[0]
@@ -288,8 +293,8 @@ class MAPPOBrain(PPOBrain):
             )
         )
 
-    def diagnostics(self, observation):
-        d = super().diagnostics(tuple(observation) + self.context)
+    def diagnostics(self, observation, include_activations=False):
+        d = super().diagnostics(tuple(observation) + self.context, include_activations)
         d.update(
             features=observation,
             critic_context=list(self.context),

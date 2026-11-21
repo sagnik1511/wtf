@@ -20,6 +20,7 @@ DEFAULT_RECORDING = dict(
     frame_every_steps=1,
     frames_per_chunk=64,
     diagnostics_every_steps=10,
+    record_activations=True,
     compression="xz",
     compression_level=6,
     encoding="binary",
@@ -202,7 +203,12 @@ class Recorder:
             for i, a in experiment.world.animals.items():
                 b = experiment.brains[i]
                 o = experiment.observations[i]
-                frame["diagnostics"][str(i)] = dict(tick=tick, **b.diagnostics(o))
+                diagnostic = (
+                    b.diagnostics(o, include_activations=True)
+                    if self.options["record_activations"]
+                    else b.diagnostics(o)
+                )
+                frame["diagnostics"][str(i)] = dict(tick=tick, **diagnostic)
             self.last_diagnostic_tick = tick
         packet = self.encoder.encode(frame) if self.encoder else frame
         if self.binary_writer is not None:

@@ -3,6 +3,8 @@ import {
   predictionView,
   TARGET_COLORS,
 } from './inspector-stats.mjs';
+import { DEFAULT_NETWORK_RANK } from './network-structure.mjs';
+import { activationPanel } from './brain-activations.mjs';
 const NS = 'http://www.w3.org/2000/svg';
 const label = (action) => action.replaceAll('_', ' ');
 const el = (tag, value, cls) => {
@@ -353,6 +355,7 @@ export function inspectorGraphs({
   hasWater,
   samples = [],
   sections = {},
+  rank = DEFAULT_NETWORK_RANK,
 }) {
   const root = el('div', undefined, 'inspector-graphs'),
     observation = observationView(diagnostic.features, template);
@@ -406,6 +409,7 @@ export function inspectorGraphs({
   root.append(
     inputs,
     predictions(diagnostic),
+    activationPanel(diagnostic, template, { rank, sections }),
     historyGraph(samples, Boolean(diagnostic.action_probabilities), sections),
   );
   return root;

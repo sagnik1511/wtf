@@ -343,3 +343,13 @@ configuration, probability semantics, lineage tracking and exact resume behavior
 walking, version-4 inputs, signatures and physical constraints. Set populations,
 mating radii and allowed actions in the environment JSON; consult the
 [calibration guide](calibration.md) for current recommendations and their scope.
+
+## Recording animal activations
+
+`recording.record_activations` is an optional boolean, defaulting to `true`. It
+adds each living animal's hidden-layer visualization arrays to existing diagnostic
+samples. Recurrent PPO also records prior recurrent memory. Only these new arrays
+are stored as FP32; simulation/learning precision is unchanged. Set the flag to
+`false` to omit this field. The existing `diagnostics_every_steps` interval and
+recording/chunk sampling rules determine capture frequency; zero diagnostics
+disables it. See [recorded brain activity](explainability.md#recorded-animal-activations).

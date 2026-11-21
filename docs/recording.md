@@ -7,6 +7,8 @@ see [Playback data structures](replay-data-structures.md).
 
 Commands in this guide run from the project root.
 
+See the [viewer appearance reference](viewer-visual-reference.md) for board objects, event markers, terrain, sight and brain-view graphics.
+
 See the [recorded terrain previews](geography.md#recorded-terrain-previews) for
 short full-screen clips of this viewer on all three maps.
 
@@ -22,6 +24,17 @@ The highlighted area is current-frame geometry, not a replayed older input.
 
 This [controlled illustration](assets/inspector/README.md) uses actual observation
 inputs and labelled example probabilities; it is not a captured experiment.
+
+**Watch animal brain** follows the selected animal's own sampled hidden
+activations as replay plays, with a larger window and playback controls. Inputs and outputs lead the inspector, and **Whole structure when rank ≤ k**
+(default two hidden stages) selects whole-network structure versus a deep-network
+summary. Individual activation maps remain under Advanced. This uses recorded diagnostic arrays and needs no saved
+champions. See [animal activity and storage](explainability.md#recorded-animal-activations).
+The separate **Explain saved brain** button re-evaluates an archived champion
+on the selected animal's recorded observation samples. Its **Follow replay
+samples** option and playback controls keep the weighted diagrams updating with
+the playhead, without storing additional data. What-if analysis pins a sample;
+see [archive following and pinning](explainability.md#archived-comparison).
 
 The inspector adds:
 
@@ -57,8 +70,12 @@ existing numerical body/learning fields. Expanded disclosures stay open as
 samples advance.
 
 Refresh the viewer page to load the new UI. Existing recordings work without
-conversion when their diagnostics are present. No extra replay fields, model
-weights, inference, screen recordings or runtime packages are required. See the
+conversion when their diagnostics are present. The observation and prediction graphs need no model weights or inference.
+Activation maps additionally use the optional sampled activation field.
+The optional **Explain saved brain** window additionally reads an archived model;
+see its [data-flow diagram](explainability.md#what-is-being-explained) and
+[worked activation example](explainability.md#worked-activation-example).
+No screen recording or additional runtime package is needed. See the
 [input layout](observations.md) for supported versions and k values.
 
 ## Playback controls
@@ -72,7 +89,8 @@ checkpoint or advances the world.
 - Choose any saved run using the **Run** dropdown in the top toolbar. **Previous run** and **Next run** jump between runs; the frame slider, **Back**, and **Next frame** inspect the current timeline.
 - Playback automatically continues into the next recorded run and stops after the final run.
 - A recording opened during training discovers new committed frames/runs when it reaches the available end. It waits for new data and refreshes metadata at most once every two seconds.
-- Click an animal to see its body, sex, both biological parents, lineage and sampled brain diagnostics.
+- Click an animal, or use **Animal ID → Inspect**, to see its body, sex, both biological parents, lineage and sampled brain diagnostics.
+- **Explain saved brain** opens activation routes, local input sensitivity, action comparisons, layer maps and single-input what-if controls for a matching archived champion. See [brain explanations](explainability.md); archived weights are distinct from the animal’s historical predictions.
 - The board legend shows every configured species with female/male colors and ♀/♂ keys. The first prey/predator use green/blue and orange/gold; extra species get their own colors, optionally set in JSON. Prey are circles, predators triangles, and males have light outlines. See [species appearance](species.md#viewer-colors-and-metrics). Older recordings without sex data retain their base species colors.
 - Set **Frames / second** to change playback speed; simulation outcomes stay fixed.
 - Kills have red rings, attacker highlights, KILL labels and a banner.
@@ -154,6 +172,7 @@ Each environment has a recording section:
   "frame_every_steps": 1,
   "frames_per_chunk": 64,
   "diagnostics_every_steps": 10,
+  "record_activations": true,
   "encoding": "binary",
   "compression": "xz",
   "compression_level": 6
@@ -181,8 +200,9 @@ report sharing does not add frames, change diagnostic sampling or change encoded
 values. Replay-only steps and standalone captures still obtain current metrics.
 See [report ownership and freshness](performance.md#founder-initialization-and-shared-reporting).
 
-All layouts preserve every recorded frame, full-precision number, event and
-sampled diagnostic. Updates store absolute values, avoiding cumulative rounding.
+All layouts preserve every recorded frame, stored numeric value, event and
+sampled diagnostic. Hidden-activation visualization arrays are sampled as FP32;
+existing observation and prediction values retain their previous precision. Updates store absolute values, avoiding cumulative rounding.
 Every chunk has its own keyframe and field table: seeking reconstructs at most
 one chunk, never the whole run. The recorder streams frames and retains only the
 previous frame for computing changes. No database or new package is required.
@@ -192,7 +212,7 @@ Previous configurations without this section use the same defaults. Set `enabled
 The recorder encodes one frame at a time into an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
 
 The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads bounded requested chunks and caches at most four stat-validated
-derived telemetry pages, without caching an entire recording. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
+derived telemetry pages, without caching an entire recording. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. Hidden-activation samples add compact FP32 layer arrays and recurrent prior memory where applicable. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
 Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes a compact compressed checkpoint ([format and migration](running.md#optimize-existing-checkpoint-files)). Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a checkpoint still materializes that complete state. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
 

@@ -11,6 +11,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 
 | Question | Guide and visual |
 | --- | --- |
+| What do viewer objects, overlays and brain graphs look like? | [Viewer appearance reference](viewer-visual-reference.md) |
 | Where do Python and JavaScript meet? | [Runtime boundaries](architecture.md#runtime-boundaries) |
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
 | How are input fields packed into the vector? | [Contiguous blocks and repeated slots](observations.md#input-layout) |
@@ -33,6 +34,10 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | How do physical costs reach an optimizer? | [Reward feedback](rewards.md#physical-costs-and-learning-feedback) |
 | Why does seeking not load every run? | [Playback and chart data](recording.md#seeking-and-charts-use-separate-data) |
 | Why do inspector inputs lag the board? | [Current sight, sampled inputs and prediction graphs](recording.md#visual-agent-inspector) |
+| How does the selected animal’s brain change during replay? | [Actual activation sampling and playback](explainability.md#recorded-animal-activations) |
+| How does a saved brain respond to an animal’s observation? | [Selected inputs, archived weights and explanation views](explainability.md#what-is-being-explained) |
+| When is a whole network shown versus a summary? | [Input/output first and hidden-rank threshold](explainability.md#inputoutput-first-and-the-rank-threshold) |
+| What do weighted links, activations and local input influence mean? | [Worked forward and reverse pass](explainability.md#worked-activation-example) |
 | How do checkpoints restore optimizer, RNG and buffers? | [File records, private controller state and access paths](checkpoint-data-structures.md) |
 | What is inside a stored model? | [References, binary model record and layer arrays](replay-data-structures.md#champion-weight-records) |
 | How do archives avoid repeating model weights? | [Shared champion blobs](binary-storage.md#champion-storage-measurement) |

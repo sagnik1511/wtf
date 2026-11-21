@@ -16,6 +16,14 @@ export async function api(path, fetchImpl = globalThis.fetch) {
     ? decodeBinaryReplay(await response.arrayBuffer())
     : await response.json();
   if (!response.ok) {
+    if (
+      path.includes('/explain/') &&
+      response.status === 404 &&
+      value.error === 'Recording endpoint not found'
+    )
+      throw new Error(
+        'Restart the playback server with ./run.sh, then refresh the page. The running server does not support saved-brain explanations.',
+      );
     if (chunk && response.status === 404 && protocol !== 'binary-v1')
       throw new Error(RESTART_MESSAGE);
     throw new Error(value.error || `HTTP ${response.status}`);

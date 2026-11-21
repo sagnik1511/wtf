@@ -83,6 +83,8 @@ selectors use the exact configured name:
 
 ## Viewer colors and metrics
 
+See the [animal appearance sheet](viewer-visual-reference.md#animals-resources-and-event-markers) for enlarged glyphs, sex colors and event markers.
+
 The board legend is generated from the recorded species, with actual species
 names and female/male colors. Prey remain circles and predators triangles;
 males have light outlines. The first prey/predator retain the familiar palette,

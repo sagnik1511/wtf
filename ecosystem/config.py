@@ -840,8 +840,15 @@ def validate(c):
                 "frames_per_chunk",
                 "diagnostics_every_steps",
             ),
-            optional=("compression", "compression_level", "encoding"),
+            optional=(
+                "compression",
+                "compression_level",
+                "encoding",
+                "record_activations",
+            ),
         )
+        if "record_activations" in r and type(r["record_activations"]) is not bool:
+            fail("recording.record_activations", "must be boolean")
         if r.get("encoding", "delta") not in ("binary", "delta", "snapshot"):
             fail("recording.encoding", "must be binary, delta or snapshot")
         if r.get("compression", "gzip") not in ("gzip", "none", "xz"):

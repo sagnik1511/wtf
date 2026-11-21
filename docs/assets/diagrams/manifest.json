@@ -5,8 +5,8 @@
     "anchor": "runtime-boundaries",
     "source": "runtime-boundaries.mmd",
     "asset": "runtime-boundaries.svg",
-    "nodes": 10,
-    "edges": 10
+    "nodes": 11,
+    "edges": 13
   },
   {
     "title": "One simulation step",

@@ -1,5 +1,6 @@
 """Independent A2C, episodic REINFORCE, and experimental branched GRPO."""
 
+from .activation_diagnostics import activation_sample
 from .numeric import packed, plain, precision_of, restore_numeric
 
 
@@ -159,8 +160,12 @@ class ActorBrain(AdamOptimizer):
         self.pending = (tuple(observation), action, logs[action])
         return self.actions[action]
 
-    def diagnostics(self, observation):
-        probabilities, logs = policy_distribution(self.network.predict(observation))
+    def diagnostics(self, observation, include_activations=False):
+        if include_activations:
+            outputs, layers = self.network.forward(observation)
+        else:
+            outputs = self.network.predict(observation)
+        probabilities, logs = policy_distribution(outputs)
         info = dict(
             algorithm=self.algorithm,
             features=observation,
@@ -179,7 +184,7 @@ class ActorBrain(AdamOptimizer):
                 group_size=self.config["group_size"],
                 rollout_horizon=self.config["rollout_horizon"],
             )
-        return info
+        return activation_sample(info, layers[1:-1]) if include_activations else info
 
     def checkpoint(self):
         state = dict(

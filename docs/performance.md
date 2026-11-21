@@ -413,3 +413,111 @@ Both versions perform 432 optimizer updates and produce 53,297 bytes of playback
 artifacts. Complete state and replay artifact hashes match for every timed pair.
 Temporary recordings are deleted after each sample; measurements and the local
 benchmark helper remain under ignored `.cache/`, outside `results/`.
+
+## On-demand brain explanations
+
+[Brain explanations](explainability.md) run only when the selected animal's
+inspector window is opened, its controls change, or a new recorded observation
+sample arrives while **Follow replay samples** is enabled. The archived-analysis
+path adds no training callbacks, model snapshots or replay bytes. It never restores a world or a full
+checkpoint to explain a champion. One stateless forward/reverse pass computes
+activations and local input sensitivity, avoiding a forward pass per input.
+
+The optimization review adopted these bounds:
+
+- Decode only the selected published chunk, extract one animal's diagnostic and
+  release the frame list. A two-entry context cache keys recording/run/frame/ID
+  and chunk path/size/mtime/ctime. It never retains full chunks or later samples.
+- Validate/prepare a champion once; retain packed double arrays to preserve
+  legacy weights exactly. Cache at most two models with a combined one-million
+  scalar-parameter limit, keyed by weight-blob stat identity and its reference,
+  or artifact stat identity for inline models. Identical blobs are shared across
+  criteria. Only weight loading/preparation is locked; arithmetic is read-only.
+- The model cache limit bounds retained parameter payload, not total process RAM
+  or concurrent response memory. Cache misses serialize model decompression;
+  oversized/unsupported models fail with an explanation message. Layers are
+  limited to 1,024 units and input vectors to 512 values.
+- Reuse one manifest read per context request; avoid prefix-list allocation when
+  finding the diagnostic. Cache ownership is playback-server-local and ephemeral.
+- Send a bounded route graph rather than weight matrices: up to 12 selected
+  hidden units per layer and three incoming visible links per displayed unit,
+  plus layer activations and feature sensitivities. The browser retains one
+  displayed response while open, skips identical samples and rejects stale
+  responses. Following has one in-flight request and only the newest pending
+  request; there is no unbounded queue or per-animation-frame inference. Errors
+  stop automatic retries until a manual retry or group change. Closing/death/run
+  changes invalidate pending work. Following writes no new artifacts or replay
+  fields, and does not alter diagnostic capture frequency.
+
+A CPython 3.9.6/macOS ARM64 check using stateless Python inference on a
+153-input, 64/32-hidden-unit
+masked-PPO archived actor (12,167 parameters) measured 30.7 ms for one cold store
+request and 3.28 ms median across 20 subsequent action-target requests
+(3.06–3.63 ms). Across all 21 requests there was one chunk decode and one model
+load. The cached parameter arrays occupied 97,336 bytes; a representative JSON
+response was 41,558 bytes with 43 graph nodes and 93 links. A separate warm
+`tracemalloc` sample peaked at 226,727 bytes of transient traced Python allocation,
+excluding already-cached arrays and untraced native allocations. Timings exclude
+HTTP transport and browser rendering; they are not training-throughput numbers.
+Temporary playback artifacts are local test fixtures and are removed after use.
+
+Tests compare all nine algorithms' probabilities/Q means with actual model
+prediction functions, check analytic derivatives against finite differences,
+and cover packed-weight deduplication, stat invalidation, legacy inline archives,
+current top-k/consent layouts, HTTP validation and asynchronous UI ownership.
+
+## Sampled animal activations
+
+[Actual brain activity](explainability.md#recorded-animal-activations) reuses the
+existing diagnostic sampling schedule for every living animal. Each sampled
+controller performs one diagnostic forward pass; its hidden values are detached
+and rounded to FP32 for visualization storage only. Learning arithmetic, state,
+RNG consumption and existing observation/prediction values are unchanged. No
+inference is added on unsampled frames. Setting `recording.record_activations`
+to `false` omits the new arrays and uses the previous diagnostic path.
+
+Only hidden layers are added: inputs, action scores, values and quantiles already
+exist in diagnostics. Recurrent PPO adds actual prior memory and the resulting
+GRU activation; sampling never assigns to its live hidden state. MAPPO retains
+only its actor's hidden tape, while its critic remains value-only inference.
+No weights, optimizers, gradients, layer labels or weighted routes are repeated
+in these samples. FP32 values use the existing lossless narrow-array codec;
+there is no model or world arithmetic conversion.
+
+The browser renders only the selected animal, keeps one world chunk and reuses
+its activation DOM between diagnostic samples. The large window follows the
+existing replay loop rather than starting a polling/inference loop. Closing it
+releases its retained sample/view. Selection, death and recording/run changes
+replace or clear the display. Inline maps show at most 64 units per layer; the
+window shows all units. This saves display work without dropping recorded units.
+
+A controlled 32-step native-backend check of the masked-PPO preset, seed 100,
+with 48 prey/6 predators initially and its default binary/XZ recording cadence,
+produced 48,660 bytes of replay chunks without activations and 74,776 bytes with
+them: an additional 26,116 bytes. The 268 animal diagnostics contained 6,688 new
+activation scalars (26,752 raw FP32 bytes). This is additional storage, not a disk
+reduction compared with omitting the feature. The same scalars would occupy twice
+as many bytes as FP64 before compression. Long-run costs depend on sample
+cadence, populations and layer widths; this short check is not a throughput or
+peak-RAM benchmark. Temporary fixture recordings are removed after verification.
+
+Regression tests compare complete controller/world checkpoints and existing
+recorded fields with sampling enabled/disabled across all nine learners, including
+nonzero recurrent memory, and pass on both native and Python fallback paths.
+Tests also verify one inference pass, no unused centralized critic tape, sampling
+cadence, FP32 isolation, buffer ownership, seek/run boundaries and chart reuse.
+
+## Rank-based explanation display
+
+Input/output cards are the default. Whole-structure visualization uses the
+existing complete activation arrays and declared stage sizes when hidden rank
+is at most the viewer's k (default two). It does not request full matrices or
+expand the saved replay payload. Every unit is represented; above 1,024 total
+dense inter-stage links, connectivity is bundled instead of allocating one
+element per edge. Deeper brains default to a stage-size summary.
+
+Individual unit maps, recurrent details and selected weighted routes are lazy
+Advanced disclosures. Threshold changes re-render only the selected view from
+already loaded data; they do not issue explanation requests or change the model.
+The threshold is separate from observation top-k and is not stored in environment
+files or model/checkpoint signatures.
