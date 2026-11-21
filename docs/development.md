@@ -77,6 +77,13 @@ format/check cycle. Summarize formatter results in the final handoff, including
 any unavailable tools. Documentation-only updates require link/asset checks;
 they do not trigger an unrelated source-wide reformat or training run.
 
+## Documentation website
+
+Use the [website maintenance guide](documentation-site.md) for GitHub Pages,
+local preview, navigation and publication boundaries. The [documentation hub](index.md)
+is the starting point for readers. Documentation deployment does not require a
+software release.
+
 ## Documentation visuals
 
 Apply the [selective visual guidance](visual-guide.md#when-a-visual-helps): diagrams

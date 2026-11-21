@@ -49,32 +49,18 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 
 ## Documentation
 
-| Guide | Contents |
+Browse the [documentation hub](docs/index.md) for a reading path, or use the
+[GitHub Pages documentation](https://sagnik1511.github.io/wtf/) once its deployment
+is enabled. The site adds search and grouped navigation to these same guides.
+
+| Area | Entry points |
 | --- | --- |
-| [Visual guide](docs/visual-guide.md) | Find diagrams for simulation, learning, inheritance, storage and workflows |
-| [Complete tutorial](docs/tutorial.md) | Full Python example from configuration through recording, analysis and checkpoint restore |
-| [Python distribution](docs/packaging.md) | Build/install wheels and source archives, bundled assets and isolated installation checks |
-| [Linux and Ubuntu](docs/linux.md) | Portable setup, optional native compilation and Ubuntu CI coverage |
-| [Docker](docs/docker.md) | Container build, training and read-only playback commands |
-| [Compatibility](docs/compatibility.md) | Package/API policy and checkpoint, brain and replay format support |
-| [Setup and runs](docs/running.md) | Installation, CLI flags, seeds, progress and exact checkpoint resume |
-| [Physics illustrated](docs/physics.md) | Interactive examples and diagrams for visibility, water, elevation and reproduction |
-| [Geography and terrain](docs/geography.md) | Full-viewer terrain GIFs, river currents, swimming, elevation and map presets |
-| [Adding species](docs/species.md) | Named prey/predator species, diets, colors and species/sex champions |
-| [Animal observations](docs/observations.md) | Visibility, top-k target slots and brain input layouts |
-| [Customization handbook](docs/customization.md) | What to edit, definitions of every configuration field, species recipes and new-policy integration |
-| [Configuration](docs/configuration.md) | Presets, populations, food, obstacles and reproduction |
-| [Learning algorithms](docs/algorithms.md) | Q-learning, PPO, A2C, REINFORCE, experimental GRPO and network settings |
-| [Saved brains](docs/brain-library.md) | Champions, warm starts, compatibility and model generations |
-| [Playback and recordings](docs/recording.md) | Viewer controls, visual agent inspector, recording format and HTTP API |
-| [Behavior analysis](docs/analysis.md) | Feeding, hunting, energy, lifespan and learning statistics |
-| [Evaluation](docs/evaluation.md) | Matched policies, controlled comparisons and interpretation |
-| [Calibration](docs/calibration.md) | Current supported recommendations, scope and tradeoffs |
-| [Architecture](docs/architecture.md) | Python/JS components, simulation rules, rewards and observations |
-| [Performance](docs/performance.md) | Optimizations, memory tradeoffs and reproducible benchmarks |
-| [Releases and rollouts](docs/releases/README.md) | Versioned commit history, compatibility, validation and release maintenance |
-| [Project context](docs/project-context.md) | Design decisions, code navigation, agent instructions and reusable workflows |
-| [Development](docs/development.md) | Tests and project conventions |
+| Get started | [Installation](INSTALL.md), [complete tutorial](docs/tutorial.md), [run/resume](docs/running.md) |
+| Worlds and species | [Customization](docs/customization.md), [configuration](docs/configuration.md), [geography](docs/geography.md), [species](docs/species.md) |
+| Learning and behavior | [Algorithms](docs/algorithms.md), [observations](docs/observations.md), [champions](docs/brain-library.md), [evaluation](docs/evaluation.md) |
+| Viewer and storage | [Playback](docs/recording.md), [appearance](docs/viewer-visual-reference.md), [explainability](docs/explainability.md), [artifact structures](docs/replay-data-structures.md) |
+| Development | [Architecture](docs/architecture.md), [testing](docs/development.md), [extensions](docs/extending-worlds-and-actions.md), [packaging](docs/packaging.md) |
+| Reference | [Configuration fields](docs/configuration-reference.md), [commands](docs/command-reference.md), [visual guide](docs/visual-guide.md), [compatibility](docs/compatibility.md) |
 
 ## Project layout
 

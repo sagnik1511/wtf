@@ -1,0 +1,14 @@
+/* Keep detailed tables readable and existing exported figures legible in both themes. */
+.md-grid {
+  max-width: 84rem;
+}
+.md-typeset table:not([class]) {
+  font-size: 0.75rem;
+}
+.md-typeset img[src$='.svg'] {
+  background: #fff;
+  border-radius: 0.35rem;
+}
+.md-typeset img {
+  height: auto;
+}

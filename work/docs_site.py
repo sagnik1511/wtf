@@ -1,0 +1,119 @@
+"""Build public docs from existing guides without copying local research output."""
+
+from pathlib import Path
+import posixpath
+import re
+import subprocess
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
+
+from mkdocs.structure.files import File
+
+ROOT = Path(__file__).resolve().parents[1]
+EXTRA_PAGES = {"installation.md": "INSTALL.md", "examples.md": "examples/README.md"}
+FENCES = re.compile(r"(^(`{3,}|~{3,})[^\n]*\n.*?^\2[^\n]*(?:\n|$))", re.M | re.S)
+LINKS = re.compile(r'(!?\[[^\]\n]*\]\()([^\s)]+)((?:\s+"[^"\n]*")?\))')
+
+
+def on_files(files, config):
+    """Git-ignored files never enter the build, even when previewing locally."""
+    visible = set(
+        subprocess.check_output(
+            [
+                "git",
+                "ls-files",
+                "-z",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "--",
+                "docs",
+            ],
+            cwd=ROOT,
+        )
+        .decode()
+        .split("\0")
+    )
+    ignored = set(
+        subprocess.check_output(
+            [
+                "git",
+                "ls-files",
+                "-z",
+                "--cached",
+                "--ignored",
+                "--exclude-standard",
+                "--",
+                "docs",
+            ],
+            cwd=ROOT,
+        )
+        .decode()
+        .split("\0")
+    )
+    visible -= ignored
+    for file in list(files):
+        # MkDocs has already added trusted theme CSS/JS/icons. Publication
+        # filtering applies to repository docs, not installed theme resources.
+        if file.src_dir is None or Path(file.src_dir).resolve() != ROOT / "docs":
+            continue
+        source = "docs/" + file.src_uri
+        path = ROOT / source
+        if (
+            source not in visible
+            or file.src_uri.startswith(("paper/", "experiments/"))
+            or not path.resolve().is_relative_to(ROOT / "docs")
+            or path.is_symlink()
+        ):
+            files.remove(file)
+    for target, source in EXTRA_PAGES.items():
+        files.append(
+            File.generated(config, target, content=(ROOT / source).read_text())
+        )
+    return files
+
+
+def _site_link(href, origin, destination, config):
+    parts = urlsplit(href)
+    if parts.scheme or parts.netloc or not parts.path or parts.path.startswith("/"):
+        return href
+    source = posixpath.normpath(
+        posixpath.join(posixpath.dirname(origin), unquote(parts.path))
+    )
+    aliases = {"README.md": "index.md", **{v: k for k, v in EXTRA_PAGES.items()}}
+    if source in aliases:
+        target = aliases[source]
+    elif source.startswith("docs/"):
+        target = source[5:]
+    else:
+        # Code/config/agent links open their canonical source instead of shipping
+        # the source tree, environment files or model artifacts with the website.
+        kind = "tree" if (ROOT / source).is_dir() else "blob"
+        repository = urlsplit(config.repo_url)
+        return urlunsplit(
+            (
+                repository.scheme,
+                repository.netloc,
+                f"{repository.path.rstrip('/')}/{kind}/main/{quote(source, safe='/')}",
+                parts.query,
+                parts.fragment,
+            )
+        )
+    relative = posixpath.relpath(target, posixpath.dirname(destination) or ".")
+    return urlunsplit(("", "", relative, parts.query, parts.fragment))
+
+
+def on_page_markdown(markdown, page, config, files):
+    """Preserve checkout links and literal code; resolve website links in memory."""
+    destination = page.file.src_uri
+    origin = EXTRA_PAGES.get(destination, "docs/" + destination)
+    sections = FENCES.split(markdown)
+    for index in range(0, len(sections), 3):
+        sections[index] = LINKS.sub(
+            lambda match: match[1]
+            + _site_link(match[2], origin, destination, config)
+            + match[3],
+            sections[index],
+        )
+    if destination in EXTRA_PAGES:
+        page.edit_url = config.repo_url.rstrip("/") + "/edit/main/" + origin
+    return "".join(part for index, part in enumerate(sections) if index % 3 != 2)

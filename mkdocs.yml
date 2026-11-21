@@ -1,0 +1,126 @@
+site_name: WTF — Wildlife Trial Framework
+site_description: Configure, train, inspect and extend independently learning ecosystems.
+site_url: https://sagnik1511.github.io/wtf/
+repo_url: https://github.com/sagnik1511/wtf
+repo_name: sagnik1511/wtf
+edit_uri: edit/main/docs/
+copyright: Copyright © 2026 Sagnik Roy · MIT License
+docs_dir: docs
+site_dir: .cache/docs-site
+strict: true
+hooks:
+  - work/docs_site.py
+watch:
+  - INSTALL.md
+  - examples/README.md
+  - work/docs_site.py
+exclude_docs: |
+  /paper/
+  /experiments/
+theme:
+  name: material
+  language: en
+  font: false
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+plugins:
+  - search
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - fenced_code
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+validation:
+  nav:
+    omitted_files: info
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn
+extra_css:
+  - stylesheets/documentation.css
+nav:
+  - Home: index.md
+  - Get started:
+      - Installation: installation.md
+      - Linux and Ubuntu: linux.md
+      - Docker: docker.md
+      - Run and resume: running.md
+      - Complete tutorial: tutorial.md
+      - 'Tutorial 1: Configure': tutorials/01-configuration.md
+      - 'Tutorial 2: Run and analyze': tutorials/02-run-record-analyze.md
+      - 'Tutorial 3: Restore and view': tutorials/03-restore-and-view.md
+      - Python example: examples.md
+  - Worlds and species:
+      - Customization handbook: customization.md
+      - Environment configuration: configuration.md
+      - Species: species.md
+      - Geography and maps: geography.md
+      - Physics illustrated: physics.md
+      - Day and night: day-night.md
+      - Current calibration: calibration.md
+  - Learning and behavior:
+      - Algorithms and networks: algorithms.md
+      - Advanced algorithms: advanced-algorithms.md
+      - Animal observations: observations.md
+      - Rewards and costs: rewards.md
+      - Feedback contracts: feedback-review.md
+      - Mating observations: mating-observations.md
+      - Mating intent: mating-intent.md
+      - Escape and consent: escape-and-consent.md
+      - Mutation: mutation.md
+      - Champions and inheritance: brain-library.md
+      - Behavior analysis: analysis.md
+      - Evaluation: evaluation.md
+  - Viewer and storage:
+      - Playback and metrics: recording.md
+      - Viewer appearance: viewer-visual-reference.md
+      - Brain explainability: explainability.md
+      - Replay data structures: replay-data-structures.md
+      - Checkpoint data structures: checkpoint-data-structures.md
+      - Binary storage: binary-storage.md
+  - Development:
+      - Architecture: architecture.md
+      - Development and testing: development.md
+      - Add policy models: extending-policies.md
+      - Add geography and actions: extending-worlds-and-actions.md
+      - Package builds: packaging.md
+      - Performance: performance.md
+      - Native kernels: native-kernels.md
+      - Extended native kernels: native-kernels-v2.md
+      - Native performance review: native-performance-review.md
+      - Contributor context: project-context.md
+      - Documentation website: documentation-site.md
+  - Reference:
+      - Configuration fields: configuration-reference.md
+      - Command reference: command-reference.md
+      - Compatibility policy: compatibility.md
+      - Visual guide: visual-guide.md
+      - Release history: releases/README.md
