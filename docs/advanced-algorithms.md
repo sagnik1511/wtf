@@ -9,8 +9,11 @@ continues to replay saved data independently of training.
 ## Presets and commands
 
 Each preset configures both species with its named algorithm and explicitly
-selects longest-lived champions for cross-episode inheritance. They preserve the
-world, bodies, rewards and reproduction settings of `ppo_large_predator.json`.
+selects longest-lived champions for cross-episode inheritance. Recurrent PPO,
+QR-DQN and MAPPO preserve the world, bodies, rewards and reproduction settings
+of `ppo_large_predator.json`. The masked-PPO preset instead uses the maintained
+flat-world [survival calibration](calibration.md), with six predators, version-4
+consent inputs and prey escape actions.
 The feedforward hidden layers are `[16]` for prey and `[64, 32]` for predators.
 Recurrent PPO adds a GRU before those layers; MAPPO adds a separate critic.
 
@@ -127,7 +130,10 @@ A species must allow rest or turning so its mask can never become empty. Masks
 apply to training, greedy evaluation and random-mode decisions for this
 algorithm. They are recorded with each rollout sample and reused when computing
 PPO ratios and entropy; old masks are never replaced with current ones.
-The network and critic receive the configured 20/32 local features, not mask bits.
+The network and critic receive the configured observation vector, including its
+version/top-k contract, rather than mask bits. The maintained preset uses 69
+prey inputs and 153 predator inputs. Earlier observation versions remain
+supported for compatible captured configurations and checkpoints.
 
 This is action availability under an explicit immediate-neighborhood rule,
 including conditions not fully represented by the nearest-target feature vector.

@@ -517,6 +517,18 @@ function drawInspector() {
     ['Training updates', b.updates],
     ['Last action', a.last_action],
   ];
+  if (Number.isFinite(a.mating_intent_until_tick)) {
+    const remaining = Math.max(0, a.mating_intent_until_tick - state.tick + 1);
+    fields.push([
+      'Mating intent',
+      remaining ? `${remaining} steps remaining` : 'Inactive',
+    ]);
+  }
+  if (a.last_mating_failure)
+    fields.push([
+      'Last mating failure',
+      a.last_mating_failure.replaceAll('_', ' '),
+    ]);
   if (Number.isFinite(a.kills))
     fields.push(
       ['Lifetime kills', a.kills],

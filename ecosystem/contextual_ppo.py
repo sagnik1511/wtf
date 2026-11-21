@@ -1,6 +1,7 @@
 """PPO variants with local action masks or a centralized training critic."""
 
 import math
+from .actions import WALK_ACTIONS
 from .brain import INPUTS, observation_inputs
 from .ppo import MLP, PPOBrain, loss_and_gradient, policy_distribution
 
@@ -20,9 +21,9 @@ def action_mask(world, animal, actions, occupied=None, populations=None):
     result = []
     for action in actions:
         valid = True
-        if action == "move_forward":
+        if action in WALK_ACTIONS:
             valid = not world.movement_block_reason(
-                animal, front, "move_forward", occupied
+                animal, world.movement_destination(animal, action), action, occupied
             )
         elif action == "reproduce":
             valid = world.reproduction_available(animal, occupied, populations)

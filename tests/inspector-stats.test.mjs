@@ -37,12 +37,13 @@ function features(version, k) {
       0.4,
       0.05,
     );
-  if (version === 3) result.push(1, 0.9, 0.2, 1, 0.25, -0.25, 0.35, 1, 0, 1);
+  if (version >= 3) result.push(1, 0.9, 0.2, 1, 0.25, -0.25, 0.35, 1, 0, 1);
+  if (version === 4) result.push(0.8, 0.4, 1);
   return result;
 }
 
 test('Observation slots decode all versions and k without confusing terrain or mating offsets', () => {
-  for (const version of [1, 2, 3])
+  for (const version of [1, 2, 3, 4])
     for (const k of [1, 4, 16]) {
       const values = features(version, k),
         copy = JSON.stringify(values),
@@ -53,7 +54,7 @@ test('Observation slots decode all versions and k without confusing terrain or m
       assert.equal(view.k, k);
       assert.equal(
         view.inputs,
-        { 1: 20, 2: 32, 3: 42 }[version] + 12 * (k - 1),
+        { 1: 20, 2: 32, 3: 42, 4: 45 }[version] + 12 * (k - 1),
       );
       assert.deepEqual(view.heading, [0, -1]);
       assert.deepEqual(view.blocked, [0, 1, 0, 0]);
@@ -65,18 +66,23 @@ test('Observation slots decode all versions and k without confusing terrain or m
         assert.equal(view.terrain.elevation, 3);
         assert.equal(view.terrain.neighbors[1].climb, -1);
       }
-      if (version === 3) {
+      if (version >= 3) {
         assert.equal(view.mating.sex, 'male');
         assert.equal(view.mating.pair, 1);
         assert.equal(view.mating.mateReady, 0);
         assert.equal(view.targets.at(-1).category, 'mate');
+      }
+      if (version === 4) {
+        assert.equal(view.mating.selfIntent, 0.8);
+        assert.equal(view.mating.mateIntent, 0.4);
+        assert.equal(view.mating.consentingPair, 1);
       }
       assert.equal(JSON.stringify(values), copy);
     }
 });
 
 test('Legacy widths work while unknown, mismatched and non-finite layouts stay unlabelled', () => {
-  for (const version of [1, 2, 3])
+  for (const version of [1, 2, 3, 4])
     assert.equal(observationView(features(version, 1)).version, version);
   assert.equal(observationView(features(2, 4)), null);
   assert.equal(

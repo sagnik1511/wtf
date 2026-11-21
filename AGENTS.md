@@ -15,7 +15,8 @@ rather than loading every document or result into context.
   behavior and exact species identity for mating, metrics and champions; avoid
   hardcoded `prey`/`predator` names in generic paths.
 - Animals learn independently. Birth requires an eligible same-species male/female
-  pair choosing `reproduce` in the same step and mixes their parameters into an independent child with fresh training
+  pair consenting through `reproduce` (same-step by default, or overlapping configured
+  mating-intent windows while resting) and mixes their parameters into an independent child with fresh training
   state. Rare birth mutation changes only that child. Preserve RNG isolation
   and exact checkpoint continuation when changing these paths. Champion pools,
   model loading and run-to-run chaining are species/sex-specific; never substitute
@@ -28,7 +29,8 @@ rather than loading every document or result into context.
   version 2 has 32 inputs and a distinct model contract. Optional version 3 adds
   mating readiness for 42 inputs, with terrain padding on flat maps. These sizes
   assume default `observation_top_k: 1`; each extra slot adds 12 inputs. Include k
-  in model compatibility and preserve nearest-only legacy signatures. Preserve
+  in model compatibility and preserve nearest-only legacy signatures. Version 4
+  appends three local consent signals (45 inputs at k=1); preserve versions 1–3. Preserve
   RNG-free observation/mask eligibility and reject incompatible saved weights.
   Keep map geometry in
   metadata, not repeated frames. GRPO may share read-only geography, while bodies,
@@ -42,6 +44,28 @@ rather than loading every document or result into context.
   inside this checkout; do not commit source screen recordings or experiment data.
 - Keep shared examples portable: use repo-relative paths or `/path/to/wtf`,
   without personal usernames or machine-specific home paths.
+
+## Documentation boundaries
+
+Keep package Markdown focused on current mechanics, interfaces, configuration,
+architecture and reusable workflows. Do not add individual run names/IDs,
+observation tables, campaign progress or trial histories to general guides.
+Implementation and regression/benchmark evidence may explain adopted improvements.
+
+The local, Git-ignored paper workspace under `docs/paper/` may retain observation
+history and supporting evidence. It is separate from package documentation; do not link
+ordinary operational guides to studies unless that connection is necessary.
+Store other experiment reports in ignored results or caches by default.
+
+`docs/calibration.md` is the living exception for recommendations: after relevant
+evaluation, update the current best-supported settings, objective, applicable
+conditions and tradeoffs when warranted. Keep it a current decision reference,
+not an experiment log; inconclusive trials do not require another entry.
+
+Running/analyzing an experiment or adding paper observations is not a software
+release and must not create/extend a rollout record. Release notes cover actual
+implementation, interface or adopted configuration changes and their validation.
+Keep existing version/commit history accurate without recording experiment outcomes.
 
 ## Documentation visuals
 
@@ -96,8 +120,8 @@ link/asset/skill checks rather than a training run. Restart a playback server af
 Python reader/server changes; it can otherwise serve new JS with old readers.
 Stop only a process you started or that the user asked you to stop.
 
-Update the relevant guide and [release hub](docs/releases/README.md) for a
-rollout. Versions have four components. Mark uncommitted work Pending; record
+For an adopted implementation/configuration rollout, update the relevant guide
+and [release hub](docs/releases/README.md). Versions have four components. Mark uncommitted work Pending; record
 only real commit hashes. Do not create commits, tags or package-version changes
 just to maintain release docs.
 

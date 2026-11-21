@@ -7,6 +7,10 @@ more frequent predator GRPO trials. Reward coefficients and physical mating
 rules are unchanged. These changes have not yet been validated as an ecological
 improvement in a long experiment.
 
+The optional [mating-intent preset](mating-intent.md) combines these inputs with
+masked PPO and persistent proximal consent. It uses the existing version-3 layout: 66 inputs for prey at k=3 and
+42 for predators at k=1.
+
 ## Observation version 3
 
 Set `observation_version: 3` on any algorithm's brain template. All nine
@@ -34,7 +38,8 @@ a larger target count; the ten-field mating summary itself stays the same.
 Mate position/presence/readiness values are zero without a visible mate.
 Nearest-mate ties prefer lower IDs. A nearer unready mate can be reported while
 another nearby ready mate makes pair opportunity true. These inputs do not
-predict another controller's action: both animals must still choose reproduction.
+predict another controller's action: both animals must still consent to reproduction (same-step by default, or
+overlapping configured intent while resting).
 Movement, combat, expenditure or contention can invalidate an opportunity.
 
 Readiness shares the action mask's read-only eligibility calculation. Births

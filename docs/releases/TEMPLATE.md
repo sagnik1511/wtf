@@ -13,7 +13,8 @@
 ## Overview
 
 Describe the concrete problem and the resulting behavior for a reader who has
-not seen the development conversation.
+not seen the development conversation. Describe an implementation or adopted
+configuration change; do not create a record for executing experiments.
 
 ## Changes
 
@@ -30,6 +31,7 @@ requirements and any user migration steps. For documentation-only work, say so.
 Record checks actually performed, their result, and the scope they cover.
 Identify any material unverified behavior. Give benchmark workload and baseline
 with performance numbers; do not turn an unmeasured expectation into a result.
+Exclude individual experiment IDs, ecological observations and campaign history.
 
 ## Rollout and rollback notes
 

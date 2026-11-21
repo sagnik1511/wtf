@@ -120,7 +120,7 @@ together.
 
 ```sh
 .venv/bin/python -m ecosystem.cli environments/grpo.json --runs 50 --seed 100 \
-  --brains-from results/grpo_20261115T195632Z_9f2f16 \
+  --brains-from results/EXPERIMENT \
   --brain predator=balanced --progress
 ```
 
@@ -454,9 +454,7 @@ self-contained, copy its existing models into the run with:
 ```
 
 This preserves model bytes and artifact identities and keeps the original shared
-copies. It can be repeated safely. The four existing archived experiments were
-localized when this workflow was introduced, including
-`ppo_20261115T044556Z_889391`.
+copies. It can be repeated safely.
 
 For modern champion chaining, dead controllers (including founders) are released
 after their terminal learning and champion snapshot. Their optimizer update

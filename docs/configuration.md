@@ -19,13 +19,20 @@ Each JSON file is a complete experiment definition:
 | [ppo_large_predator.json](../environments/ppo_large_predator.json) | 48 | 12 | ppo [16] / ppo [64, 32] |
 | [recurrent_ppo.json](../environments/recurrent_ppo.json) | 48 | 12 | recurrent_ppo / recurrent_ppo |
 | [qrdqn.json](../environments/qrdqn.json) | 48 | 12 | qrdqn / qrdqn |
-| [maskable_ppo.json](../environments/maskable_ppo.json) | 48 | 12 | maskable_ppo / maskable_ppo |
+| [maskable_ppo.json](../environments/maskable_ppo.json) | 48 | 6 | maskable_ppo / maskable_ppo |
 | [mappo.json](../environments/mappo.json) | 48 | 12 | mappo / mappo |
 | [predator_heavy.json](../environments/predator_heavy.json) | 24 | 14 | q_network / q_network |
 | [reinforce.json](../environments/reinforce.json) | 48 | 12 | reinforce / reinforce |
 | [scarce_food.json](../environments/scarce_food.json) | 24 | 6 | q_network / q_network |
 
 `champion_lineage.json` requires archived compatible Q models; the other presets start fresh unless you add `initial_brain`.
+
+The common `maskable_ppo.json` contains the supported flat-world survival profile:
+version-4 consent inputs, prey escape actions, predator/prey top-k 10/3, predator
+radius 3 and 60 energy per kill. See [current calibration](calibration.md) for its
+scope and unresolved tradeoffs. Other algorithm and terrain presets retain their
+own contracts. Superseded exploratory JSONs stay local instead of expanding the
+public preset list.
 
 Copy a JSON file, edit its name and values, and pass its path to the Python CLI to add a scenario. The playback viewer shows the recorded configuration as read-only text.
 
@@ -182,7 +189,7 @@ new presets select lifespan champions for both species.
 
 ## Reproduction
 
-For energy budgets, eligibility bottlenecks and a comparison preset, see
+For current recommendations, energy budgets and eligibility bottlenecks, see
 [survival/reproduction calibration](calibration.md).
 
 All supplied environments enable paired male/female reproduction for both species.
@@ -208,8 +215,10 @@ not a percentage). Both parents must be alive after combat/starvation, the same
 species and opposite sexes, and meet their own age, energy and cooldown gates.
 Each must afford `energy_cost` with energy left over. They must be within
 `mate_radius` Euclidean grid cells (integer 1–10, default 2), with an unobstructed
-line of sight. Both must choose `reproduce` in the same step; proximity alone
-never triggers a birth. Include `reproduce` in each species’ `allowed_actions`.
+line of sight. Both must consent through `reproduce`; the default requires the
+same step. Optional `intent_steps` preserves consent while resting (1–128, default
+1). Proximity alone never triggers a birth. See [mating intent](mating-intent.md)
+for persistence, cancellation and failure reasons. Include `reproduce` in each species’ `allowed_actions`.
 There is no neural-weight similarity gate. See [learning feedback](rewards.md)
 for configurable successful-birth rewards and failed-attempt penalties.
 
@@ -327,3 +336,10 @@ perturbations on 1–3 matrix weights, fresh optimizer state and synchronized
 algorithm targets/references. The parent is unchanged. Omit the block or disable
 it to retain ordinary inheritance. See the [mutation guide](mutation.md) for
 configuration, probability semantics, lineage tracking and exact resume behavior.
+
+## Relative walking and visible consent
+
+[Escape actions and visible consent](escape-and-consent.md) describes relative
+walking, version-4 inputs, signatures and physical constraints. Set populations,
+mating radii and allowed actions in the environment JSON; consult the
+[calibration guide](calibration.md) for current recommendations and their scope.

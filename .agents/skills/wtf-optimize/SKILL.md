@@ -40,4 +40,7 @@ Choose relevant suites from development docs (cache, training-loop efficiency,
 binary storage, checkpoint, replay, mutation and JS playback tests). Record only
 measured byte/time/RAM results with a baseline/workload; otherwise describe the
 removed operation and expected benefit without invented speedup claims. Update
-applicable guides and use the rollout workflow for the completed change.
+applicable guides and use the rollout workflow for an adopted implementation
+change. Keep individual experiment IDs and ecological observations out of guides
+and releases; reusable benchmark methods and verified implementation properties
+may document the optimization.

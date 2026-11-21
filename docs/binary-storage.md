@@ -36,15 +36,12 @@ see [champion weight records](replay-data-structures.md#champion-weight-records)
 
 ![Per-run JSON metadata references deduplicated, lossless binary model blobs](assets/diagrams/shared-champion-weights.svg)
 
-One frozen first-run archive from the deep river experiment contained 22
-criterion artifacts and used 8,663,633 bytes in the prior JSON layout. Exporting
-the same exact model values in the new layout used 620,497 bytes, including its
-index, metadata/configurations and shared weights: **92.8% smaller**. Eight
-unique model blobs accounted for 521,548 bytes. All 22 model round trips matched.
-A second unchanged archive added 98,993 metadata/index bytes and **zero new weight
-bytes**. These measurements describe one archive, not total experiment storage;
-replays and full resume checkpoints are separate. No runtime/RAM speedup is
-claimed. Existing result folders were not rewritten.
+Measure metadata/index bytes separately from unique weight blobs. Compare the
+same exact model set and verify every round trip before reporting a storage gain.
+An unchanged export should reuse existing weight blobs; it still writes its own
+small metadata/index. Replays and full resume checkpoints are separate budgets,
+so a champion-only reduction is not a whole-experiment reduction. Compression
+ratios do not establish faster training or lower runtime memory.
 
 Each model blob is one `WTFB` version-1 record with kind `champion_model`,
 containing the signature, precision and parameters. SHA-256 names and verifies

@@ -14,8 +14,8 @@ when a run is opened in the viewer. Existing recordings work immediately.
 To save a reusable JSON report (all runs by default):
 
 ```sh
-.venv/bin/python -m ecosystem.analyze results/grpo_20261115T040119Z_c52525
-.venv/bin/python -m ecosystem.analyze results/grpo_20261115T040119Z_c52525 --run 1 --window-steps 250
+.venv/bin/python -m ecosystem.analyze results/EXPERIMENT
+.venv/bin/python -m ecosystem.analyze results/EXPERIMENT --run 1 --window-steps 250
 ```
 
 The default output is `analysis.json` inside that ignored results folder.
@@ -85,3 +85,8 @@ Analysis reconstructs [reward accounting](rewards.md), including energy demand,
 failed attempts and each parent’s birth reward. Terminal failed choices carry a
 small event so death does not hide their action or penalty. Legacy recordings
 without that information retain their existing action-coverage limitations.
+
+## Comparing policies and configurations
+
+See [evaluation methods](evaluation.md) for frozen policies, matched starting
+conditions, offspring-specific measures and uncertainty across seeds.

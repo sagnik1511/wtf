@@ -36,6 +36,8 @@ def settings(kind):
     c = copy.deepcopy(
         load(ROOT / f"environments/{kind}.json")["brains"]["prey_" + kind]
     )
+    # Numerical unit fixtures keep their fixed 20-input contract as presets evolve.
+    c.update(observation_version=1, observation_top_k=1)
     c["network"]["hidden_layers"] = [3]
     if kind == "qrdqn":
         c.update(

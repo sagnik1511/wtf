@@ -6,10 +6,6 @@ This is maintained project context, not a transcript or experiment log. Verify
 current defaults in source and the chosen JSON preset before describing a run.
 Local results and running processes change independently of Git.
 
-The [paper draft](paper/README.md) describes the system in Nature Machine Intelligence Article format.
-Future ecological results belong in `docs/paper/sections/observations.tex`;
-keep them separate from historical engineering benchmarks.
-
 For diagrams matched to common questions, start with the
 [visual guide](visual-guide.md). The [physics gallery](physics.md) and
 [recorded terrain previews](geography.md#recorded-terrain-previews) show spatial
@@ -19,8 +15,8 @@ behavior and actual playback.
 
 WTF — Wildlife Trial Framework — explores independently learning prey and
 predators in a grid world with food, obstacles, energy, health, death and
-paired male/female reproduction. Both parents must choose `reproduce` in the same
-step and satisfy physical eligibility. [Reward accounting](rewards.md) covers
+paired male/female reproduction. Both parents must consent through `reproduce`, either in the same step or within
+a configured resting intent window, and satisfy physical eligibility. [Reward accounting](rewards.md) covers
 energy-demand penalties, failed choices and successful-parent feedback. It is an experimental ecosystem, not a calibrated biological model.
 The priorities established during development are:
 
@@ -169,13 +165,26 @@ docs/project-context.md           Stable decisions and code map
 
 Add scripts, references or assets inside an individual skill only when its
 workflow needs them. The current skills link existing guides rather than copying
-them. Skill-creator validation used PyYAML in the ignored `.cache/skill-tools/`
-virtual environment; this is optional authoring tooling, not a runtime package.
-
-The built-in `skill-creator` skill was used to author these workflows. Earlier
-media excerpts used FFmpeg directly; no separate image-generation or video skill
-was used. Tool availability and skill discovery depend on the coding environment.
+them. Optional skill-authoring dependencies belong in ignored tooling environments.
 
 Keep this file for stable decisions, the guides for detailed behavior, release
 records for implementation history and ignored result folders for measurements.
 Update affected links and workflow instructions when commands/formats change.
+
+## Reproduction and consent
+
+The [mating-intent guide](mating-intent.md) describes consent windows, physical
+gates, failure reasons and legacy defaults. [Escape and consent](escape-and-consent.md)
+covers backward/sideways walking and observation version 4. Version 3 retains
+mating readiness without the added consent inputs; action and input signatures
+must match archived models.
+
+## Documentation ownership
+
+Package guides describe supported mechanics, APIs, configuration and workflows.
+Release records describe adopted software/configuration changes and their tests.
+Experiment identifiers, observations and campaign histories belong in ignored
+results or the separate paper workspace when relevant to the manuscript.
+The [calibration guide](calibration.md) is a current recommendation reference:
+update supported settings and tradeoffs after evaluation, without adding a trial
+log. Running or analyzing an experiment alone does not create a release.

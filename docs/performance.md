@@ -5,8 +5,8 @@
 Commands in this guide run from the project root.
 
 Champion exports now use lossless binary/XZ arrays and a content-addressed shared
-weight directory. A measured deep-river archive fell from 8.66 MB to 0.62 MB
-(92.8% smaller); a subsequent unchanged archive wrote zero new weight bytes.
+weight directory. Repeated unchanged models reuse the existing weight blobs
+rather than storing another parameter copy.
 See [measurement and compatibility](binary-storage.md#champion-storage-measurement).
 An export-local identity cache reuses serialization references for shared,
 immutable snapshots; it is bounded by distinct champion models in that export
@@ -243,21 +243,12 @@ the previous base64/JSON wrapper while retaining shared metadata/models and
 one-controller-at-a-time writing. Readable metrics and champion archives retain
 their existing formats. See [binary storage](binary-storage.md).
 
-A verified conversion of the completed 20-episode experiment
-`a2c_20261117T044059Z_e2b39a` measured these actual file sizes (decimal MB):
-
-| Data | Before | After | Reduction |
-| --- | ---: | ---: | ---: |
-| 480 replay chunks | 69.98 MB | 44.84 MB | 35.9% |
-| 20 exact checkpoints | 32.68 MB | 29.43 MB | 9.9% |
-| Whole experiment, including unchanged readable files | 106.18 MB | 77.80 MB | 26.7% |
-
-All 500 replaced files passed expanded-frame/state verification, with smaller
-replacements only. Actual converted first/last replay chunks also matched the
-JavaScript decoder, and the converted final checkpoint restored all 20 completed
-episodes. The measurement is disk size, not a timing or peak-memory benchmark.
-LZMA2 uses a 1 MiB dictionary but has additional encoder memory and CPU costs.
-Use gzip for a faster compression option; no throughput improvement is claimed.
+Storage conversion is validated by comparing expanded replay frames and exact
+checkpoint states before replacing a file. Only smaller verified replacements
+are published. Python/JavaScript decoder parity, seeking and checkpoint restore
+must remain intact. Disk reduction depends on entity counts, numeric ranges and
+compression settings; it is not a fixed property of every recording. LZMA2 adds
+encoder memory and CPU cost; gzip offers a faster compression option.
 
 Recording avoids sorting/copying static obstacles and dimensions into every
 frame before discarding them. The playback server reads metadata once per

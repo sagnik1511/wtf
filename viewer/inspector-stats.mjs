@@ -1,5 +1,5 @@
 // Read recorded inputs only. No inference, model weights or simulation updates.
-const WIDTHS = { 1: 20, 2: 32, 3: 42 };
+const WIDTHS = { 1: 20, 2: 32, 3: 42, 4: 45 };
 export const TARGET_COLORS = {
   food: '#a2c76b',
   prey: '#7de2bd',
@@ -21,7 +21,7 @@ export function observationView(features, template) {
   if (!Array.isArray(features) || !features.every(Number.isFinite)) return null;
   const version = template
     ? (template.observation_version ?? 1)
-    : { 20: 1, 32: 2, 42: 3 }[features.length];
+    : { 20: 1, 32: 2, 42: 3, 45: 4 }[features.length];
   const k = template?.observation_top_k ?? 1;
   if (
     !WIDTHS[version] ||
@@ -61,7 +61,7 @@ export function observationView(features, template) {
     };
     offset += 12;
   }
-  if (version === 3) {
+  if (version >= 3) {
     const [
       sex,
       maturity,
@@ -85,6 +85,12 @@ export function observationView(features, template) {
     };
     if (present > 0)
       targets.push({ category: 'mate', slot: 1, dx, dy, distance });
+    if (version >= 4) {
+      const [selfIntent, mateIntent, consentingPair] = features.slice(
+        offset + 10,
+      );
+      Object.assign(result.mating, { selfIntent, mateIntent, consentingPair });
+    }
   }
   return result;
 }

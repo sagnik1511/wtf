@@ -7,6 +7,9 @@ from pathlib import Path
 
 ACTIONS = (
     "move_forward",
+    "move_backward",
+    "strafe_left",
+    "strafe_right",
     "turn_left",
     "turn_right",
     "rest",
@@ -137,7 +140,7 @@ def validate(c):
             num(b["observation_top_k"], p + ".observation_top_k", 1, 16, True)
             b = {k: v for k, v in b.items() if k != "observation_top_k"}
         if "observation_version" in b:
-            num(b["observation_version"], p + ".observation_version", 1, 3, True)
+            num(b["observation_version"], p + ".observation_version", 1, 4, True)
             b = {k: v for k, v in b.items() if k != "observation_version"}
         if b["type"] == "q_network":
             obj(
@@ -618,10 +621,11 @@ def validate(c):
         if geography is not None and template.get("observation_version", 1) not in (
             2,
             3,
+            4,
         ):
             fail(
                 p + ".brain",
-                "terrain maps require observation_version 2 or 3 on referenced brain templates",
+                "terrain maps require observation_version 2, 3 or 4 on referenced brain templates",
             )
         if "swim" in s["allowed_actions"] and geography is None:
             fail(p + ".allowed_actions", "swim requires a terrain map")
@@ -693,6 +697,7 @@ def validate(c):
                     "age_deviation_steps",
                     "cooldown_deviation_steps",
                     "mate_radius",
+                    "intent_steps",
                 ),
             )
             if type(r["enabled"]) is not bool:
@@ -704,6 +709,7 @@ def validate(c):
                 s["body"]["max_health"],
             )
             num(r.get("mate_radius", 2), rp + ".mate_radius", 1, 10, True)
+            num(r.get("intent_steps", 1), rp + ".intent_steps", 1, 128, True)
             num(r["min_age_steps"], rp + ".min_age_steps", 1, 10000000, True)
             num(r["cooldown_steps"], rp + ".cooldown_steps", 1, 10000000, True)
             for key in ("age_deviation_steps", "cooldown_deviation_steps"):

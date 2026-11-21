@@ -6,6 +6,7 @@ import json
 import math
 from pathlib import Path
 from .replay_io import chunk_path, load_chunk
+from .actions import MOVE_ACTIONS, WALK_ACTIONS, ATTEMPT_ACTIONS, movement_action
 
 DEFINITIONS = {
     "agent_steps": "One living animal present at the start of one observed consecutive step.",
@@ -66,7 +67,7 @@ class Statistics:
         body = spec["body"]
         cost = (
             body["movement_cost"]
-            if action in ("move_forward", "swim")
+            if action in MOVE_ACTIONS
             else body["attack_cost"] if action == "attack" else 0
         )
         self.counts["energy_demand"] += cost
@@ -118,6 +119,8 @@ class Statistics:
         elif kind == "mutated":
             c["mutations"] += 1
             c["mutated_weights"] += amount
+        elif kind == "mating_failed":
+            c["mating_failed:" + event.get("cause", "unknown")] += 1
         elif kind == "died":
             c["completed_lives"] += 1
             c["death_age_sum"] += animal["age"] + 1
@@ -173,16 +176,30 @@ class Statistics:
             feeding_success=ratio(c["productive_feeds"], a["eat"]),
             hunt_success=ratio(c["kills"], a["attack"]),
             hit_success=ratio(c["hits"], a["attack"]),
-            movement_success=ratio(c["moves"], a["move_forward"]),
+            movement_success=ratio(
+                c["moves"], sum(a[action] for action in WALK_ACTIONS)
+            ),
             swim_success=ratio(c["swim_moves"], a["swim"]),
             swim_attempts=a["swim"],
             failed_actions=c["failed_actions"],
             reproduction_attempts=a["reproduce"],
-            reproduction_success=ratio(2 * c["births"], a["reproduce"]),
+            reproduction_success=(
+                ratio(2 * c["births"], a["reproduce"])
+                if self.config["species"][species]
+                .get("reproduction", {})
+                .get("intent_steps", 1)
+                == 1
+                else None
+            ),
             drift_moves=c["drift_moves"],
             terrain_energy=c["terrain_energy"],
             reward_per_agent_step=ratio(c["reward"], c["agent_steps"]),
             births=c["births"],
+            mating_failures={
+                k.split(":", 1)[1]: v
+                for k, v in c.items()
+                if k.startswith("mating_failed:")
+            },
             kills=c["kills"],
             deaths=dict(self.deaths),
             mutations=c["mutations"],
@@ -265,12 +282,10 @@ def analyze_run(config, frames, window_steps=250):
                 if i in prior and i not in actions:
                     if kind == "action_failed":
                         actions[i] = event["cause"]
+                    elif kind == "mating_failed":
+                        actions[i] = "reproduce"
                     elif kind in ("moved", "movement_blocked"):
-                        actions[i] = (
-                            "swim"
-                            if event.get("cause", "").startswith("swim")
-                            else "move_forward"
-                        )
+                        actions[i] = movement_action(event.get("cause", ""))
                     elif kind == "damage_dealt":
                         actions[i] = "attack"
                     elif kind == "energy_gained" and event.get("cause") == "resource":
@@ -292,10 +307,7 @@ def analyze_run(config, frames, window_steps=250):
             for i, action in actions.items():
                 for stat in destinations(prior[i]["species"]):
                     stat.action(prior[i], action)
-                    if (
-                        action in ("move_forward", "swim", "attack", "eat", "reproduce")
-                        and i not in successful
-                    ):
+                    if action in ATTEMPT_ACTIONS and i not in successful:
                         stat.failed(prior[i])
             for event in frame.get("events", []):
                 animal = prior.get(event["actor"])

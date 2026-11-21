@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "maskable_ppo",
-  "description": "Independent PPO with immediate local action masks and lifespan champions",
+  "description": "Independent masked PPO with local consent, prey escape actions and a survival-oriented predator density",
   "seed": 42,
   "world": {
     "width": 40,
@@ -26,6 +26,9 @@
       "diet": "resource",
       "allowed_actions": [
         "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
         "turn_left",
         "turn_right",
         "rest",
@@ -35,10 +38,10 @@
       "body": {
         "initial_energy": 60,
         "max_energy": 100,
-        "max_health": 30,
-        "vision_radius": 6,
+        "max_health": 40,
+        "vision_radius": 10,
         "living_cost": 0.1,
-        "movement_cost": 0.15,
+        "movement_cost": 0.1,
         "starvation_damage": 1,
         "bite_size": 4,
         "energy_per_food_unit": 2
@@ -55,7 +58,7 @@
       },
       "reproduction": {
         "enabled": true,
-        "health_threshold": 24.0,
+        "health_threshold": 32.0,
         "min_age_steps": 300,
         "cooldown_steps": 225,
         "min_energy": 30,
@@ -63,7 +66,8 @@
         "max_population": 96,
         "age_deviation_pct": 10,
         "cooldown_deviation_pct": 10,
-        "mate_radius": 2
+        "mate_radius": 2,
+        "intent_steps": 5
       },
       "learning_rate_multiplier": 1.0,
       "champion_selection": {
@@ -77,7 +81,7 @@
       }
     },
     "predator": {
-      "initial_population": 12,
+      "initial_population": 6,
       "diet": "prey",
       "allowed_actions": [
         "move_forward",
@@ -97,7 +101,7 @@
         "starvation_damage": 1,
         "attack_damage": 30,
         "attack_cost": 1,
-        "energy_per_kill": 40
+        "energy_per_kill": 60
       },
       "brain": "predator_maskable_ppo",
       "rewards": {
@@ -119,7 +123,8 @@
         "max_population": 24,
         "age_deviation_pct": 10,
         "cooldown_deviation_pct": 10,
-        "mate_radius": 2
+        "mate_radius": 3,
+        "intent_steps": 5
       },
       "learning_rate_multiplier": 1.25,
       "champion_selection": {
@@ -152,7 +157,9 @@
       "batch_size": 16,
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
-      "target_kl": 0.03
+      "target_kl": 0.03,
+      "observation_version": 4,
+      "observation_top_k": 3
     },
     "predator_maskable_ppo": {
       "type": "maskable_ppo",
@@ -172,7 +179,9 @@
       "batch_size": 16,
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
-      "target_kl": 0.03
+      "target_kl": 0.03,
+      "observation_version": 4,
+      "observation_top_k": 10
     }
   },
   "experiment": {

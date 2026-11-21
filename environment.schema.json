@@ -387,7 +387,10 @@
                 "eat",
                 "attack",
                 "swim",
-                "reproduce"
+                "reproduce",
+                "move_backward",
+                "strafe_left",
+                "strafe_right"
               ]
             }
           },
@@ -652,6 +655,12 @@
                 "minimum": 1,
                 "maximum": 10
               },
+              "intent_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128,
+                "description": "Consent duration including the reproduce step. Rest preserves intent; other actions cancel it. Default 1 retains same-step consent."
+              },
               "health_threshold": {
                 "type": "number",
                 "minimum": 0
@@ -736,8 +745,8 @@
                 "const": "q_network"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "hidden_layers": {
                 "type": "array",
@@ -835,8 +844,8 @@
                 "const": "ppo"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -950,8 +959,8 @@
                 "const": "a2c"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -1042,8 +1051,8 @@
                 "const": "reinforce"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -1128,8 +1137,8 @@
                 "const": "grpo"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -1245,8 +1254,8 @@
                 "const": "recurrent_ppo"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -1372,8 +1381,8 @@
                 "const": "maskable_ppo"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -1487,8 +1496,8 @@
                 "const": "mappo"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "network": {
                 "type": "object",
@@ -1612,8 +1621,8 @@
                 "const": "qrdqn"
               },
               "observation_version": {
-                "enum": [1, 2, 3],
-                "maximum": 3
+                "enum": [1, 2, 3, 4],
+                "maximum": 4
               },
               "learning_rate": {
                 "type": "number",

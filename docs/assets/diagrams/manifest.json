@@ -180,15 +180,6 @@
     "edges": 7
   },
   {
-    "title": "Historical calibration study flow",
-    "document": "docs/calibration.md",
-    "anchor": "historical-calibration-study-flow",
-    "source": "historical-calibration-study-flow.mmd",
-    "asset": "historical-calibration-study-flow.svg",
-    "nodes": 8,
-    "edges": 7
-  },
-  {
     "title": "Choose checks for the change",
     "document": "docs/development.md",
     "anchor": "choose-checks-for-the-change",

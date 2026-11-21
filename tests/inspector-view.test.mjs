@@ -176,3 +176,41 @@ test('Closed history defers score processing and SVG creation; opening reads eac
     chart,
   );
 });
+
+test('Version four renders recorded consent gauges and escape prediction bars', () => {
+  const f = [
+    ...features,
+    ...Array(12).fill(0),
+    -1,
+    1,
+    0,
+    1,
+    0.2,
+    0,
+    0.2,
+    1,
+    1,
+    1,
+    0.8,
+    0.4,
+    1,
+  ];
+  const root = inspectorGraphs({
+    diagnostic: {
+      tick: 1,
+      features: f,
+      action_probabilities: { strafe_left: 0.7, rest: 0.3 },
+    },
+    template: { observation_version: 4 },
+    spec: { body },
+    hasWater: false,
+    samples: [],
+    sections: { mating: true },
+  });
+  const labels = text(root);
+  assert(labels.includes('45 inputs'));
+  assert(labels.includes('Own consent remaining'));
+  assert(labels.includes('Visible mate consent remaining'));
+  assert(labels.includes('Nearby consenting pair opportunity yes'));
+  assert(labels.includes('strafe left'));
+});

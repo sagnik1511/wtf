@@ -49,7 +49,6 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 
 | Guide | Contents |
 | --- | --- |
-| [Paper draft](docs/paper/README.md) | Nature Machine Intelligence Article draft with a separate space for future experimental observations |
 | [Visual guide](docs/visual-guide.md) | Find diagrams for simulation, learning, inheritance, storage and workflows |
 | [Setup and runs](docs/running.md) | Installation, CLI flags, seeds, progress and exact checkpoint resume |
 | [Physics illustrated](docs/physics.md) | Interactive examples and diagrams for visibility, water, elevation and reproduction |
@@ -61,6 +60,8 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 | [Saved brains](docs/brain-library.md) | Champions, warm starts, compatibility and model generations |
 | [Playback and recordings](docs/recording.md) | Viewer controls, visual agent inspector, recording format and HTTP API |
 | [Behavior analysis](docs/analysis.md) | Feeding, hunting, energy, lifespan and learning statistics |
+| [Evaluation](docs/evaluation.md) | Matched policies, controlled comparisons and interpretation |
+| [Calibration](docs/calibration.md) | Current supported recommendations, scope and tradeoffs |
 | [Architecture](docs/architecture.md) | Python/JS components, simulation rules, rewards and observations |
 | [Performance](docs/performance.md) | Optimizations, memory tradeoffs and reproducible benchmarks |
 | [Releases and rollouts](docs/releases/README.md) | Versioned commit history, compatibility, validation and release maintenance |

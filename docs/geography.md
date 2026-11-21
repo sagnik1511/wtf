@@ -349,10 +349,8 @@ climb or swim receives a failed-action penalty; normal attempt costs still apply
 Current drift is forced motion and cannot make a blocked voluntary action count
 as successful.
 
-For the selected constants now applied to the original river, highlands and
-enclosed-valley presets, and the
-matched short comparisons used to select their constants with radius two, see
-[survival/reproduction calibration](calibration.md).
+For current energy-budget recommendations and their terrain-specific scope,
+see [survival/reproduction calibration](calibration.md).
 
 ## Enclosed-valley starting layout
 
@@ -401,8 +399,8 @@ chosen positions. No permanent species barrier or automatic reproduction was
 added. Configurations without `placement` retain their original seeded spawning.
 Saved checkpoints/recordings embed the geometry and placement configuration;
 resuming never redraws or relocates bodies. New invocations use the edited map.
-The earlier calibration study used the previous two-valley geometry, so its
-counts are historical rather than predictions for this layout.
+Changing enclosure geometry changes access, encounters and travel cost; reassess
+calibration for the edited layout rather than carrying over ecological assumptions.
 
 ## Directional sight across water
 

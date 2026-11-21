@@ -70,6 +70,7 @@ flat maps. General target slots do not distinguish sex or exact species.
 | 1: base | 20 | 56 |
 | 2: terrain | 32 | 68 |
 | 3: terrain + mating | 42 | 78 |
+| 4: mating + visible consent | 45 | 81 |
 
 The general formula is the original version width plus `12 * (k - 1)`.
 Changing k changes the input layout and required model signature. Start fresh,
@@ -100,3 +101,9 @@ The [visual inspector](recording.md#visual-agent-inspector) draws current sight 
 the board and the recorded input slots in a radar, alongside probability/Q bars
 and bounded prediction-sample history. The observation and prediction timestamps
 are shown separately from the current body/frame.
+
+## Visible consent
+
+[Version 4](escape-and-consent.md#observation-version-4) appends own consent,
+nearest visible mate consent and a proximal consenting opportunity flag. It
+preserves versions 1–3 and uses a distinct saved-model signature.

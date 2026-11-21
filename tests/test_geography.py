@@ -281,7 +281,8 @@ class TerrainPhysicsTests(unittest.TestCase):
         w.next_animal_id = 2
         events = []
         w._reproduce(events)
-        self.assertFalse(events)
+        self.assertFalse(any(e.kind == "born" for e in events))
+        self.assertTrue(any(e.kind == "mating_failed" for e in events))
         rows = ["........."] * 7
         rows[2] = "...3....."
         c = configuration(rows=rows)
@@ -289,16 +290,20 @@ class TerrainPhysicsTests(unittest.TestCase):
         w = World(validate(c), 42)
         w.animals = {0: animal(0, 2, 2), 1: animal(1, 3, 2, sex="male")}
         w.next_animal_id = 2
+        events = []
         w._reproduce(events)
-        self.assertFalse(events)
+        self.assertFalse(any(e.kind == "born" for e in events))
+        self.assertTrue(any(e.kind == "mating_failed" for e in events))
         rows = ["#####", "#..##", "#..##", "###..", "###.."]
         c = configuration(rows=rows)
         c["species"]["prey"]["reproduction"].update(enabled=True, mate_radius=3)
         w = World(validate(c), 42)
         w.animals = {0: animal(0, 2, 2), 1: animal(1, 3, 3, sex="male")}
         w.next_animal_id = 2
+        events = []
         w._reproduce(events)
-        self.assertFalse(events)
+        self.assertFalse(any(e.kind == "born" for e in events))
+        self.assertTrue(any(e.kind == "mating_failed" for e in events))
 
 
 class TerrainLearningAndStorageTests(unittest.TestCase):

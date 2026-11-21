@@ -42,7 +42,6 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | What is shared between observation windows? | [Bucket objects, references and revisions](performance.md#spatial-window-structure) |
 | When is an observation cache invalidated? | [Cache dependencies](performance.md#observation-cache-dependencies) |
 | Can a behavior report prove learning? | [Evidence path](analysis.md#from-recorded-behavior-to-an-assessment) |
-| How were the calibration comparisons organized? | [Historical experiment flow](calibration.md#historical-calibration-study-flow) |
 | Which checks fit a change? | [Verification paths](development.md#choose-checks-for-the-change) |
 | When is a rollout committed? | [Record lifecycle](releases/README.md#rollout-record-lifecycle) |
 | What do rivers, cliffs, visibility and births look like? | [Physics SVG gallery and interactive explorer](physics.md) |

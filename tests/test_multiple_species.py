@@ -154,9 +154,11 @@ class MultipleSpeciesTests(unittest.TestCase):
             a.age = 100
         events = []
         w._reproduce(events)
-        self.assertEqual(events, [])
+        self.assertEqual([e.kind for e in events], ["mating_failed", "mating_failed"])
+        self.assertTrue(all(e.cause == "no_nearby_mate" for e in events))
         w.animals[1].species = "rabbits"
         w.next_animal_id = 2
+        events = []
         w._reproduce(events)
         self.assertEqual(len(events), 1)
         child = w.animals[events[0].target]

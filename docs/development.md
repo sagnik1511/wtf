@@ -231,3 +231,57 @@ archive export, checks exact saved config/model values and verifies cache releas
 between exports. Inspector tests additionally cover deferred history creation,
 one score pass per chart build, reopen reuse and score-only sample validation.
 These checks use operation counts rather than timing thresholds.
+
+## Generated files and Git hygiene
+
+The root [ignore rules](../.gitignore) keep local results, brain libraries,
+virtual environments, tool caches, native builds, coverage, dependency installs,
+logs and temporary files out of new commits. Raw study work under
+`docs/experiments/` is local output, including the uncompressed matrix tables.
+The entire local manuscript workspace, `docs/paper/`, is ignored, including
+sources and evidence. It is optional and is not available in a fresh clone.
+Source code, environment/map JSON, repo-local skills, intentional diagrams and
+documentation GIFs remain trackable. Do not add package-documentation links that
+require files from the ignored manuscript workspace.
+
+Check tracked files that already match ignore rules with:
+
+```sh
+git ls-files -ci --exclude-standard
+```
+
+Adding an ignore rule does not remove an already tracked file. After confirming
+that a particular file is generated, `git rm --cached -- path/to/file` removes it
+from the index while keeping the local copy. Avoid broad directory removal when
+it contains maintained source, paper evidence or pending work. Ignoring outputs
+does not delete them locally or reduce existing Git history.
+
+## Documentation scope
+
+Keep operational guides about current supported behavior and reusable procedures.
+Use placeholder recording names in examples. Tests may substantiate an adopted
+fix or optimization; individual ecological trials and campaign logs are not
+package documentation or software releases. Paper observations stay in the
+separate manuscript workspace without making operational guides depend on them.
+
+After relevant evaluation, maintain `docs/calibration.md` as the current
+best-supported recommendation, including objective, applicable conditions and
+remaining tradeoffs. Replace superseded recommendations instead of appending
+trial reports. Do not create or extend release notes solely because an
+experiment ran or its observations were analyzed.
+
+## Shared tools versus local research
+
+Keep `work/build_*`, the documented calibration utility, documentation/media
+regeneration tools and the maintained performance benchmarks available in Git.
+They support package development, verification and public documentation assets.
+Runtime tests, environment/map presets and repo-local skills remain maintained
+source, even when the runtime can execute without them.
+
+Paper runners, matrix campaigns, exploratory lineage/inheritance/density studies
+and their experiment-only tests stay local under the explicit ignore rules.
+Keep their import dependencies together locally; a fresh clone must not require
+them to import the package or collect the maintained test suite. Source recordings,
+learned models and generated measurements are also local. A study-only pending
+note is not a package rollout. Intentional documentation GIFs, the banner and
+reusable diagram sources/exports remain shared assets.

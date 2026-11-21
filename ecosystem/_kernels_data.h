@@ -357,7 +357,9 @@ static PyObject *metabolism_native(PyObject *self, PyObject *args) {
         if (!name)
             goto body_fail;
         const char *extra =
-            (!strcmp(name, "move_forward") || !strcmp(name, "swim"))
+            (!strcmp(name, "move_forward") || !strcmp(name, "move_backward") ||
+             !strcmp(name, "strafe_left") || !strcmp(name, "strafe_right") ||
+             !strcmp(name, "swim"))
                 ? "movement_cost"
             : !strcmp(name, "attack") ? "attack_cost"
                                       : NULL;

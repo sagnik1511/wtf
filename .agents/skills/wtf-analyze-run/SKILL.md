@@ -39,3 +39,10 @@ reproduction, changed physics and simultaneous opponent learning confound them.
 Recommend matched frozen-policy comparisons across held-out seeds when useful;
 run new experiments only when requested. Lead with the meaningful findings and
 specific next configuration choices, with measured values and coverage limits.
+
+Keep run-specific findings in the reply and structured artifacts under ignored
+results. Do not append experiment histories to package guides or release notes.
+The paper workspace may retain observations when requested. After relevant
+analysis, update current calibration recommendations only when supported;
+record the scope and tradeoff rather than a trial log. An analysis task alone
+is not a software rollout.

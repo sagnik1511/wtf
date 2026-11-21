@@ -184,6 +184,16 @@ function inputDetails(observation, sections) {
       ),
     );
     savedDisclosure(d, 'mating', sections);
+    if (Number.isFinite(m.selfIntent)) {
+      d.append(
+        gauge('Own consent remaining', m.selfIntent),
+        gauge('Visible mate consent remaining', m.mateIntent),
+        el(
+          'p',
+          `Nearby consenting pair opportunity ${m.consentingPair ? 'yes' : 'no'}`,
+        ),
+      );
+    }
     d.append(
       gauge('Maturity', m.maturity),
       gauge('Cooldown remaining', m.cooldown),

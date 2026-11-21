@@ -342,7 +342,8 @@ PyMODINIT_FUNC PyInit__kernels(void) {
     PyObject *m = PyModule_Create(&module);
     if (!m)
         return NULL;
-    if (PyModule_AddIntConstant(m, "api_version", 2) < 0) {
+    if (PyModule_AddIntConstant(m, "api_version", 2) < 0 ||
+        PyModule_AddIntConstant(m, "escape_movement", 1) < 0) {
         Py_DECREF(m);
         return NULL;
     }

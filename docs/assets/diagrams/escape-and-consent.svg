@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360" role="img" aria-labelledby="title desc">
+<title id="title">Learned escape directions and visible mating consent</title>
+<desc id="desc">A north-facing animal can step backward, left or right without turning. Its own consent and a visible mate's consent enter observation version four; mating remains within radius two.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315d7c"/></marker></defs>
+<rect width="900" height="360" fill="#f8fafc"/>
+<g font-family="system-ui,sans-serif" fill="#16314a" text-anchor="middle">
+<text x="205" y="31" font-size="19" font-weight="600">One learned move per step</text>
+<g fill="#fff" stroke="#b6c6d6"><rect x="156" y="62" width="90" height="70"/><rect x="66" y="132" width="90" height="70"/><rect x="156" y="132" width="90" height="70" fill="#d8efe1"/><rect x="246" y="132" width="90" height="70"/><rect x="156" y="202" width="90" height="70"/></g>
+<text x="201" y="165" font-size="15">prey</text><text x="201" y="185" font-size="12">heading ↑</text>
+<g fill="none" stroke="#315d7c" stroke-width="2" marker-end="url(#a)"><path d="M163 167H104"/><path d="M239 167H299"/><path d="M201 200V243"/></g>
+<text x="76" y="115" font-size="13">strafe left</text><text x="318" y="115" font-size="13">strafe right</text>
+<text x="201" y="295" font-size="13">move backward</text>
+<text x="205" y="330" font-size="12">Heading stays fixed · normal collision and effort</text>
+<text x="656" y="31" font-size="19" font-weight="600">Current local consent → observation v4</text>
+<g fill="#fff" stroke="#b6c6d6"><rect x="453" y="65" width="165" height="70" rx="7"/><rect x="669" y="65" width="185" height="70" rx="7"/><rect x="489" y="195" width="330" height="86" rx="7" fill="#eee9fb"/></g>
+<text x="535" y="94" font-size="15">Own consent</text><text x="535" y="117" font-size="12">Remaining fraction</text>
+<text x="761" y="94" font-size="15">Visible mate consent</text><text x="761" y="117" font-size="12">Remaining fraction</text>
+<g fill="none" stroke="#315d7c" stroke-width="2" marker-end="url(#a)"><path d="M535 135V171H593V195"/><path d="M761 135V171H710V195"/></g>
+<text x="654" y="221" font-size="16">Three extra neural inputs</text><text x="654" y="245" font-size="13">Own · visible mate · proximal opportunity</text><text x="654" y="267" font-size="12">69 inputs for prey · 45 for predators</text>
+<text x="654" y="315" font-size="13">Mating radius 2 · physical gates · mutual consent</text>
+<text x="654" y="336" font-size="12">No distant mate information or future actions</text>
+</g></svg>

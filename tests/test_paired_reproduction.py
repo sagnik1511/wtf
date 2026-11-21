@@ -11,7 +11,7 @@ from ecosystem.checkpoint_io import read_checkpoint
 from ecosystem.config import load
 from ecosystem.runner import Experiment
 from tests.reproduction_support import force_reproduction
-from ecosystem.world import World
+from ecosystem.world import Animal, World
 from tests.test_mutation import KINDS, environment
 from tests.test_reproduction import breeding_world
 
@@ -186,10 +186,39 @@ class PairedGeneticsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "compatible"):
             mix_parent_brains(mother, father, 1)
 
-    def test_presets_expose_mate_radius(self):
-        for p in (Path(__file__).resolve().parents[1] / "environments").glob("*.json"):
-            for s in load(p)["species"].values():
-                self.assertEqual(s["reproduction"]["mate_radius"], 2)
+    def test_calibrated_predator_mask_respects_proximal_radius(self):
+        c = load(Path(__file__).resolve().parents[1] / "environments/maskable_ppo.json")
+        w = World(c, 100)
+        w.obstacles.clear()
+        w.animals = {
+            0: Animal(
+                0,
+                "predator",
+                2,
+                2,
+                0,
+                80,
+                55,
+                age=1000,
+                sex="female",
+                reproduction_due_age=100,
+            ),
+            1: Animal(
+                1,
+                "predator",
+                5,
+                2,
+                0,
+                80,
+                55,
+                age=1000,
+                sex="male",
+                reproduction_due_age=100,
+            ),
+        }
+        self.assertTrue(w.reproduction_available(w.animals[0]))
+        w.animals[1].x = 6
+        self.assertFalse(w.reproduction_available(w.animals[0]))
 
 
 if __name__ == "__main__":

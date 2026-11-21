@@ -1,6 +1,7 @@
 """Exact per-recorded-step dashboard data, derived without running a simulation."""
 
 from . import kernels
+from .actions import ATTEMPT_ACTIONS, movement_action
 from collections import Counter, defaultdict
 import math
 
@@ -59,12 +60,10 @@ def summarize(config, frame, previous=None):
             if i in prior and i not in observed:
                 if kind == "action_failed":
                     observed[i] = event["cause"]
+                elif kind == "mating_failed":
+                    observed[i] = "reproduce"
                 elif kind in ("moved", "movement_blocked"):
-                    observed[i] = (
-                        "swim"
-                        if event.get("cause", "").startswith("swim")
-                        else "move_forward"
-                    )
+                    observed[i] = movement_action(event.get("cause", ""))
                 elif kind == "damage_dealt":
                     observed[i] = "attack"
                 elif kind == "energy_gained" and event.get("cause") == "resource":
@@ -87,6 +86,8 @@ def summarize(config, frame, previous=None):
                     counter[kind] += 1
                 if kind == "energy_spent":
                     counter["terrain_energy"] += event.get("amount", 0)
+                if kind == "mating_failed":
+                    counter["mating_failed:" + event.get("cause", "unknown")] += 1
                 if kind == "died":
                     counter[event.get("cause", "unknown")] += 1
                 if (
@@ -97,10 +98,7 @@ def summarize(config, frame, previous=None):
                     counter["productive_feeds"] += 1
         for i, action in observed.items():
             actions[prior[i]["species"]][action] += 1
-            if (
-                action in ("move_forward", "swim", "attack", "eat", "reproduce")
-                and i not in successful
-            ):
+            if action in ATTEMPT_ACTIONS and i not in successful:
                 events[prior[i]["species"]]["failed_actions"] += 1
     species = {}
     for name, spec in config["species"].items():
@@ -152,10 +150,21 @@ def summarize(config, frame, previous=None):
             drowning_deaths=event["drowning"] if consecutive else None,
             swim_attempts=action["swim"] if consecutive else None,
             reproduction_attempts=action["reproduce"] if consecutive else None,
+            mating_failures=(
+                {
+                    k.split(":", 1)[1]: v
+                    for k, v in event.items()
+                    if k.startswith("mating_failed:")
+                }
+                if consecutive
+                else None
+            ),
             failed_actions=event["failed_actions"] if consecutive else None,
             reproduction_success=(
                 2 * event["born"] / action["reproduce"]
-                if consecutive and action["reproduce"]
+                if consecutive
+                and action["reproduce"]
+                and spec.get("reproduction", {}).get("intent_steps", 1) == 1
                 else None
             ),
             drift_moves=event["drifted"] if consecutive else None,

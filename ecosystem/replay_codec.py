@@ -30,6 +30,8 @@ ANIMAL_FIELDS = [
     "second_parent_id",
     "drift_x",
     "drift_y",
+    "mating_intent_until_tick",
+    "last_mating_failure",
 ]
 RESOURCE_FIELDS = ["x", "y", "quantity"]
 

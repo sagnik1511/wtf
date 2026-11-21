@@ -18,10 +18,11 @@ from typing import NamedTuple, Optional
 INPUTS = 20
 TERRAIN_INPUTS = 32
 MATING_INPUTS = 42
+INTENT_INPUTS = 45
 
 
 def observation_inputs(config):
-    base = {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS}[
+    base = {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS, 4: INTENT_INPUTS}[
         config.get("observation_version", 1)
     ]
     return base + 12 * (config.get("observation_top_k", 1) - 1)

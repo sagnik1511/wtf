@@ -6,9 +6,11 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.16](0.0.1.16.md), `6e354d3`.
+**Latest committed rollout:** [0.0.1.17](0.0.1.17.md), `e62e0ad`.
 **Latest committed runtime implementation:** [0.0.1.14](0.0.1.14.md), `91697aa`.
-**Pending:** [0.0.1.17](0.0.1.17.md), Nature Machine Intelligence paper with a separate experimental-observations section.
+**Pending configuration:** [0.0.1.22](0.0.1.22.md), consolidated masked-PPO defaults and local exploratory presets.
+**Pending runtime:** [0.0.1.20](0.0.1.20.md), learned escape actions and visible mating consent.
+**Pending maintenance:** [0.0.1.21](0.0.1.21.md), generated-file tracking hygiene.
 
 ## Rollout index
 
@@ -19,7 +21,11 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.17](0.0.1.17.md) | Pending | Prepared 2026-11-19 | — | Nature Machine Intelligence paper source, method citations and editable future-observation tables |
+| [0.0.1.22](0.0.1.22.md) | Pending | Prepared 2026-11-21 | — | Promote supported masked-PPO defaults under the common name; localize superseded variants |
+| [0.0.1.21](0.0.1.21.md) | Pending | Prepared 2026-11-21 | — | Ignore local experiment output, developer artifacts and LaTeX intermediates |
+| [0.0.1.20](0.0.1.20.md) | Pending | Prepared 2026-11-21 | — | Learned escape actions, version-4 consent signals and compatible readers |
+| [0.0.1.19](0.0.1.19.md) | Pending | Prepared 2026-11-21 | — | Proximal consent, prey survival, lineage selection and mating diagnostics |
+| [0.0.1.17](0.0.1.17.md) | Committed | 2026-11-19 | `e62e0ad` | Nature Machine Intelligence paper source, method citations and editable future-observation tables |
 | [0.0.1.16](0.0.1.16.md) | Committed | 2026-11-19 | `6e354d3` | Checkpoint state/access blocks, observation packing, founder families and spatial-window references |
 | [0.0.1.15](0.0.1.15.md) | Committed | 2026-11-19 | `f3d5a1a` | Playback/model artifacts, binary records, entity columns, layer arrays and field masks |
 | [0.0.1.14](0.0.1.14.md) | Committed | 2026-11-19 | `91697aa` | Format 162 maintained source files, establish style settings and verify full suites |
@@ -45,7 +51,7 @@ dates, or explicitly labeled preparation dates for pending work.
 | [0.0.0.38](0.0.0.38.md) | Committed | 2026-11-17 | `2d2e036` | Ten SVG physics cases, standalone explorer, illustrated guide and regeneration tools |
 | [0.0.0.37](0.0.0.37.md) | Committed | 2026-11-17 | `2d2e036` | Water-directed sight extension with wall occlusion and bounded static caching |
 | [0.0.0.36](0.0.0.36.md) | Committed | 2026-11-17 | `2d2e036` | One enclosed valley, prey/predator founder zones and exact boundary-food allocation |
-| [0.0.0.35](0.0.0.35.md) | Committed | 2026-11-17 | `2d2e036` | Proximal terrain calibrations, matched short trials and scalar-only harness |
+| [0.0.0.35](0.0.0.35.md) | Committed | 2026-11-17 | `2d2e036` | Terrain energy configuration and scalar calibration tooling |
 | [0.0.0.34](0.0.0.34.md) | Committed | 2026-11-17 | `68855f3` | Mutual reproduction choices, energy/failure/birth rewards and decision metrics |
 | [0.0.0.33](0.0.0.33.md) | Committed | 2026-11-17 | `68855f3` | Optional map geography, health-gated swimming, fractional currents and climb costs |
 | [0.0.0.32](0.0.0.32.md) | Committed | 2026-11-17 | `6480da8` | Arbitrary species names, dynamic legends/colors and multi-species coverage |
@@ -114,6 +120,11 @@ version changes. Sort versions numerically by all four components, not as text.
 
 ## Maintain the next rollout
 
+Create records for implementation, public-interface or adopted configuration
+changes. Executing experiments, analyzing a run or adding manuscript observations
+is not a rollout. Record tests of changed behavior; keep ecological findings and
+campaign progress out of the release history.
+
 1. Copy [TEMPLATE.md](TEMPLATE.md) to the next version file before preparing a
    rollout. A rollout may identify one implementation commit or an explicit
    contiguous range. Keep its status Pending until the changes are committed.
@@ -148,9 +159,9 @@ existing guides and linked from release notes instead of copied into the README.
 Historical validation sections describe coverage introduced by the revision.
 They are not assertions that every historical revision was re-executed. Actual
 session pass counts are included only where recorded for that implementation.
-Learning outcomes from local experiments belong in experiment analysis, not as
-proof that a rollout improved learned policies. Generated experiment folders are
-ignored and may not be available on another checkout.
+Individual experiment outcomes and identifiers do not belong in release records.
+Keep them in ignored reports or the separate paper workspace. Current supported
+calibration recommendations belong in the calibration guide, not a trial history.
 
 ## Operational rollback
 

@@ -1,6 +1,7 @@
 """Physical state and simultaneous action resolution; no learning dependencies."""
 
 from . import kernels
+from .actions import WALK_OFFSETS, WALK_ACTIONS, MOVE_ACTIONS, ATTEMPT_ACTIONS
 
 
 import copy
@@ -41,6 +42,8 @@ class Animal:
     second_parent_id: int = -1
     drift_x: float = 0.0
     drift_y: float = 0.0
+    mating_intent_until_tick: int = -1
+    last_mating_failure: str = ""
 
     @property
     def position(self):
@@ -176,6 +179,10 @@ class World:
         dx, dy = DIRECTIONS[animal.heading]
         return animal.x + dx, animal.y + dy
 
+    def movement_destination(self, animal, action):
+        dx, dy = DIRECTIONS[(animal.heading + WALK_OFFSETS.get(action, 0)) % 4]
+        return animal.x + dx, animal.y + dy
+
     def blocked(self, p):
         x, y = p
         return not (0 <= x < self.width and 0 <= y < self.height) or p in self.obstacles
@@ -207,7 +214,7 @@ class World:
         rules = self.config["species"][animal.species].get("locomotion", {})
         source_depth = self.geography.depth(animal.position)
         target_depth = self.geography.depth(destination)
-        if action == "move_forward" and (source_depth or target_depth):
+        if action in WALK_ACTIONS and (source_depth or target_depth):
             return "requires_swim"
         if action == "swim":
             depth = max(source_depth, target_depth)
@@ -449,7 +456,7 @@ class World:
                 points, self.animals.keys(), obstacles_changed or visibility_changed
             )
         if any(
-            b.get("observation_version", 1) == 3 for b in self.config["brains"].values()
+            b.get("observation_version", 1) >= 3 for b in self.config["brains"].values()
         ):
             self._prepare_mating_context()
         return occupied, *self._perception
@@ -490,7 +497,7 @@ class World:
             )
         self._mate_context = occupied, populations, buckets, status
 
-    def _mating_features(self, a):
+    def _mating_features(self, a, include_intent=False):
         occupied, populations, buckets, status = self._mate_context
         spec = self.config["species"][a.species]
         rules = spec.get("reproduction", {})
@@ -504,7 +511,7 @@ class World:
         limit = radius + bonus
         scale = max(1, limit)
         opposite = "male" if a.sex == "female" else "female"
-        best, pair = None, False
+        best, pair, consenting_pair = None, False, False
         for by in range((a.y - limit) // 8, (a.y + limit) // 8 + 1):
             for bx in range((a.x - limit) // 8, (a.x + limit) // 8 + 1):
                 for mate in buckets.get((a.species, opposite, bx, by), ()):
@@ -526,7 +533,7 @@ class World:
                     if best is None or key < best[0]:
                         best = key, mate
                     if (
-                        not pair
+                        (not pair or (include_intent and not consenting_pair))
                         and status[a.id][2]
                         and status[mate.id][2]
                         and populations[a.species] < rules["max_population"]
@@ -537,6 +544,9 @@ class World:
                         and self._birth_cells(a, mate, occupied)
                     ):
                         pair = True
+                        consenting_pair = (
+                            consenting_pair or self._intent_fraction(mate) > 0
+                        )
         features = [1.0 if a.sex == "male" else -1.0, *status[a.id]]
         if best is None:
             features += [0.0] * 5
@@ -549,7 +559,22 @@ class World:
                 1.0,
                 status[mate.id][2],
             ]
-        return features + [float(pair)]
+        features += [float(pair)]
+        if include_intent:
+            features += [
+                self._intent_fraction(a),
+                self._intent_fraction(best[1]) if best is not None else 0.0,
+                float(consenting_pair),
+            ]
+        return features
+
+    def _intent_fraction(self, animal):
+        steps = (
+            self.config["species"][animal.species]
+            .get("reproduction", {})
+            .get("intent_steps", 1)
+        )
+        return min(1.0, max(0, animal.mating_intent_until_tick - self.tick + 1) / steps)
 
     def observe(self, a, context=None):
         body = self.body(a)
@@ -605,8 +630,8 @@ class World:
             features += (
                 self.geography.features(a, DIRECTIONS) if self.geography else [0.0] * 12
             )
-        if version == 3:
-            features += self._mating_features(a)
+        if version >= 3:
+            features += self._mating_features(a, include_intent=version >= 4)
         return tuple(features)
 
     def observe_all(self):
@@ -638,8 +663,8 @@ class World:
                 a.heading = (a.heading - 1) % 4
             elif action == "turn_right":
                 a.heading = (a.heading + 1) % 4
-            elif action in ("move_forward", "swim"):
-                destination = self.front(a)
+            elif action in MOVE_ACTIONS:
+                destination = self.movement_destination(a, action)
                 reason = self.movement_block_reason(a, destination, action, occupied)
                 if reason:
                     cause = (
@@ -647,6 +672,8 @@ class World:
                         if action == "swim"
                         else reason if self.geography else ""
                     )
+                    if action in WALK_ACTIONS and action != "move_forward":
+                        cause = action + ":" + reason
                     events.append(Event("movement_blocked", i, cause=cause))
                 else:
                     claims[destination].append(i)
@@ -663,7 +690,9 @@ class World:
             a.x, a.y = destination
             events.append(
                 Event(
-                    "moved", winner, cause="swim" if actions[winner] == "swim" else ""
+                    "moved",
+                    winner,
+                    cause=actions[winner] if actions[winner] != "move_forward" else "",
                 )
             )
             events.extend(
@@ -673,7 +702,11 @@ class World:
                     cause=(
                         "swim:competing_claim"
                         if actions[i] == "swim"
-                        else "competing_claim"
+                        else (
+                            actions[i] + ":competing_claim"
+                            if actions[i] != "move_forward"
+                            else "competing_claim"
+                        )
                     ),
                 )
                 for i in ids
@@ -758,6 +791,10 @@ class World:
         native_metabolism = (
             not self.geography
             and kernels.available("flat_metabolism")
+            and (
+                getattr(kernels.native, "escape_movement", False)
+                or not any(action in WALK_ACTIONS[1:] for action in actions.values())
+            )
             and kernels.native.flat_metabolism(
                 self.animals.values(),
                 actions,
@@ -772,7 +809,7 @@ class World:
             for i, a in self.animals.items():
                 b = self.body(a)
                 cost = b["living_cost"]
-                if actions[i] in ("move_forward", "swim"):
+                if actions[i] in MOVE_ACTIONS:
                     cost += b["movement_cost"]
                 if actions[i] == "attack":
                     cost += b["attack_cost"]
@@ -885,11 +922,11 @@ class World:
                 ].get("per_energy_cost", 0)
         for i, action in actions.items():
             a = self.animals.get(i) or dead_animals[i]
+            if action == "reproduce" and i in dead:
+                a.last_mating_failure = "parent_died"
+                events.append(Event("mating_failed", i, cause="parent_died"))
             rules = self.config["species"][a.species]["rewards"]
-            if (
-                action in ("move_forward", "swim", "attack", "eat", "reproduce")
-                and i not in successful
-            ):
+            if action in ATTEMPT_ACTIONS and i not in successful:
                 penalty = rules.get("failed_action", 0)
                 rewards[i] += penalty
                 # Living bodies already record their action/reward. Only terminal
@@ -1034,15 +1071,63 @@ class World:
         return due
 
     def _reproduction_eligible(self, a, rules):
-        age = a.age + 1
-        due = self._reproduction_due(a, rules)
-        return (
-            age >= due
-            and a.health > rules["health_threshold"]
-            and a.energy >= rules["min_energy"]
-            and a.energy > rules["energy_cost"]
-            and not (self.geography and self.geography.depth(a.position))
-        )
+        return not self._personal_mating_failure(a, rules, a.age + 1)
+
+    def _personal_mating_failure(self, animal, rules, age):
+        if not rules or not rules["enabled"]:
+            return "disabled"
+        if age < self._reproduction_due(animal, rules):
+            return "immature" if animal.last_reproduced_age < 0 else "cooldown"
+        if animal.health <= rules["health_threshold"]:
+            return "low_health"
+        if animal.energy < rules["min_energy"] or animal.energy <= rules["energy_cost"]:
+            return "low_energy"
+        if self.geography and self.geography.depth(animal.position):
+            return "in_water"
+        return ""
+
+    def _mating_failure_reason(self, animal, occupied, populations, paired):
+        rules = self.config["species"][animal.species].get("reproduction")
+        reason = self._personal_mating_failure(animal, rules, animal.age)
+        if reason:
+            return reason
+        if populations[animal.species] >= rules["max_population"]:
+            return "population_cap"
+        radius = rules.get("mate_radius", 2)
+        nearby = []
+        for dy in range(-radius, radius + 1):
+            for dx in range(-radius, radius + 1):
+                mate = occupied.get((animal.x + dx, animal.y + dy))
+                if (
+                    dx * dx + dy * dy <= radius * radius
+                    and mate is not None
+                    and mate.species == animal.species
+                    and mate.sex != animal.sex
+                ):
+                    nearby.append(mate)
+        if not nearby:
+            return "no_nearby_mate"
+        reachable = [
+            mate
+            for mate in nearby
+            if self.visible(animal.position, mate.position)
+            and self._mating_land_route(animal, mate, radius)
+        ]
+        if not reachable:
+            return "blocked_route"
+        if any(mate.id in paired for mate in reachable):
+            return "mate_unavailable"
+        ready = [
+            mate
+            for mate in reachable
+            if not self._personal_mating_failure(mate, rules, mate.age)
+        ]
+        if not ready:
+            return "mate_not_ready"
+        willing = [mate for mate in ready if mate.mating_intent_until_tick >= self.tick]
+        if not willing:
+            return "awaiting_consent"
+        return "no_birth_space"
 
     def reproduction_available(self, animal, occupied=None, populations=None):
         """Decision-time mask, without RNG/clock mutation or assuming consent.
@@ -1113,17 +1198,26 @@ class World:
                 if r and r["enabled"]
                 else False
             )
+            if a.last_action == "reproduce":
+                a.last_mating_failure = ""
+                a.mating_intent_until_tick = (
+                    self.tick + r.get("intent_steps", 1) - 1
+                    if ready and not self._personal_mating_failure(a, r, a.age)
+                    else -1
+                )
+            elif a.last_action != "rest":
+                a.mating_intent_until_tick = -1
+            if not ready or (r and self._personal_mating_failure(a, r, a.age)):
+                a.mating_intent_until_tick = -1
             if (
                 ready
-                and a.last_action == "reproduce"
+                and a.mating_intent_until_tick >= self.tick
                 and not (self.geography and self.geography.depth(a.position))
                 and a.health > r["health_threshold"]
                 and a.energy >= r["min_energy"]
                 and a.energy > r["energy_cost"]
             ):
                 eligible.append(a)
-        if not eligible:
-            return
         self.rng.shuffle(eligible)
         occupied = {a.position for a in parents}
         males = {(a.species, a.x, a.y): a for a in eligible if a.sex == "male"}
@@ -1181,6 +1275,8 @@ class World:
             counts[mother.species] += 1
             for parent in (mother, father):
                 used.add(parent.id)
+                parent.mating_intent_until_tick = -1
+                parent.last_mating_failure = ""
                 parent.energy -= r["energy_cost"]
                 parent.last_reproduced_age = parent.age
                 if windowed[parent.species]:
@@ -1197,6 +1293,17 @@ class World:
                     mate=father.id,
                 )
             )
+        attempts = [
+            a for a in parents if a.last_action == "reproduce" and a.id not in used
+        ]
+        if attempts:
+            final_occupied = {a.position: a for a in self.animals.values()}
+            for animal in attempts:
+                reason = self._mating_failure_reason(
+                    animal, final_occupied, counts, used
+                )
+                animal.last_mating_failure = reason
+                events.append(Event("mating_failed", animal.id, cause=reason))
 
     def metrics(self):
         populations = Counter(a.species for a in self.animals.values())

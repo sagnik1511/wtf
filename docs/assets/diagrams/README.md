@@ -36,7 +36,6 @@ light/dark styles and an opaque light fallback for simpler image renderers.
 | [Two payloads, one bounded file at a time](two-payloads-one-bounded-file-at-a-time.svg) | [Guide](../../binary-storage.md#two-payloads-one-bounded-file-at-a-time) | `two-payloads-one-bounded-file-at-a-time.mmd` |
 | [Observation cache dependencies](observation-cache-dependencies.svg) | [Guide](../../performance.md#observation-cache-dependencies) | `observation-cache-dependencies.mmd` |
 | [From recorded behavior to an assessment](from-recorded-behavior-to-an-assessment.svg) | [Guide](../../analysis.md#from-recorded-behavior-to-an-assessment) | `from-recorded-behavior-to-an-assessment.mmd` |
-| [Historical calibration study flow](historical-calibration-study-flow.svg) | [Guide](../../calibration.md#historical-calibration-study-flow) | `historical-calibration-study-flow.mmd` |
 | [Choose checks for the change](choose-checks-for-the-change.svg) | [Guide](../../development.md#choose-checks-for-the-change) | `choose-checks-for-the-change.mmd` |
 | [Rollout record lifecycle](rollout-record-lifecycle.svg) | [Guide](../../releases/README.md#rollout-record-lifecycle) | `rollout-record-lifecycle.mmd` |
 

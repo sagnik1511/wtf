@@ -5,6 +5,12 @@ description: Maintain Wildlife Trial Framework four-component release records an
 
 # Maintain WTF rollout records
 
+Apply this workflow to actual implementation, interface or adopted configuration
+changes. Running or analyzing experiments, updating calibration reasoning or
+adding manuscript observations does not by itself create or extend a release.
+Keep run identifiers, ecological outcomes and campaign histories out of rollout
+records. They belong in ignored reports or the separate paper workspace.
+
 Read [hub conventions](../../../docs/releases/README.md) and use the existing
 [template](../../../docs/releases/TEMPLATE.md). Inspect `git status`, recent log,
 relevant diffs and existing pending records before choosing the next version.

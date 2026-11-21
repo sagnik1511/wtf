@@ -1,25 +1,88 @@
+# Local Python environments, bytecode and package/build outputs.
 .venv/
+.venv-*/
+venv/
+env/
 __pycache__/
-*.pyc
-results/
-.DS_Store
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Local experiments and learned model generations.
+/results/
+/brain_library/
+# Raw study working output.
+/docs/experiments/
+# Local manuscript workspace, including source, evidence and generated output.
+/docs/paper/
+
+# Tool caches, test coverage and profiling output.
 .cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+/coverage/
+*.prof
+*.pstats
+node_modules/
+
+# Optional compiled CPU kernels and native intermediate files.
+*.so
+*.pyd
+*.dylib
+*.dll
+*.o
+*.obj
+*.a
+*.lib
 
 # Generated benchmarks and source snapshots; retain runnable scripts.
 work/performance/*
 !work/performance/benchmark.py
 !work/performance/repeat.py
-
-# Learned model generations are local experiment data.
-brain_library/
-
-# Local diagram authoring sources; publish SVG exports instead.
-*.mmd
-
-# Optional compiled CPU kernels and their build outputs.
-*.so
-*.pyd
-build/
-*.egg-info/
 !work/performance/benchmark_kernels.py
 !work/performance/benchmark_data_kernels.py
+
+# Local diagram authoring sources; publish intentional SVG exports instead.
+*.mmd
+
+# Local credentials/configuration; sanitized examples remain shareable.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs and OS/editor temporary files.
+*.log
+.DS_Store
+._*
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Local manuscript/research runners and their experiment-only tests.
+# Retain work/build_*, calibrate_terrain.py and performance benchmark sources.
+/work/paper_*.py
+/work/matrix_*.py
+/work/model_matrix_experiments.py
+/work/lineage_evaluation.py
+/work/inheritance_comparison.py
+/work/predator_density_comparison.py
+/tests/test_whole_parent_experiment.py
+/tests/test_predator_density_experiment.py
+
+# Legacy one-off diagnostic and study-only documentation artifacts.
+/work/check_hunting.py
+/docs/assets/diagrams/historical-calibration-study-flow.svg
+/docs/releases/0.0.1.18.md
+
+# Superseded exploratory presets; maintained settings live under common names.
+/environments/escape_intent_*.json
+/environments/mating_intent_ppo.json

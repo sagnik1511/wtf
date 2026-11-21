@@ -37,7 +37,7 @@ Existing food, damage-dealt, damage-taken and death coefficients still apply.
 | Component | Accounting |
 | --- | --- |
 | Energy demand | Living, walking/swim attempts, attack attempts, successful swim/uphill costs, water maintenance and successful reproduction cost × `per_energy_cost` |
-| Failed action | Once per unsuccessful `move_forward`, `swim`, `attack`, `eat` or `reproduce` choice × `failed_action` |
+| Failed action | Once per unsuccessful walking (forward/backward/sideways), `swim`, `attack`, `eat` or `reproduce` choice × `failed_action` |
 | Successful birth | `per_offspring` for each parent, minus its energy-demand feedback |
 | Harm/death | Actual damage and death use existing configured penalties, including starvation and drowning |
 
@@ -54,7 +54,9 @@ must gain positive resource energy; eating at full energy is unsuccessful.
 
 ## Reproduction decisions
 
-Both same-species, opposite-sex parents must choose `reproduce` in the same step.
+Both same-species, opposite-sex parents must consent through `reproduce`: in the
+same step by default, or overlapping configured [mating-intent windows](mating-intent.md)
+while resting. Delayed-consent parents receive their birth feedback at birth.
 Distance, line of sight, dry terrain route, maturity, strict health threshold,
 energy, cooldown, population capacity and a free reachable birth cell all remain
 required. Each parent can participate in one birth per step.
@@ -86,3 +88,6 @@ not guaranteed. Compare frozen policies across held-out seeds; tune costs and
 rewards in JSON rather than treating larger training rewards as proof of better
 survival or hunting. Restart training processes to adopt code changes; saved
 configs retain their own coefficients.
+
+All [escape walking actions](escape-and-consent.md) use the same movement
+effort, terrain costs and failed-action reward as forward walking.
