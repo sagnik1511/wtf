@@ -65,6 +65,35 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Require workflow-only Pages publishing
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data } = await github.rest.repos.getPages({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            if (data.build_type !== 'workflow') {
+              core.setFailed('Set Settings → Pages → Source to GitHub Actions. Branch/Jekyll publishing can overwrite the MkDocs deployment.');
+            }
       - name: Deploy documentation
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify deployed MkDocs homepage
+        uses: actions/github-script@v8
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        with:
+          script: |
+            const url = new URL(process.env.PAGES_URL);
+            url.searchParams.set('deployment', String(context.runId));
+            for (let attempt = 0; attempt < 6; attempt++) {
+              const response = await fetch(url);
+              const html = await response.text();
+              if (response.ok && /name=["']generator["']\s+content=["']mkdocs-/i.test(html)) {
+                core.info('Live homepage is served by MkDocs.');
+                return;
+              }
+              if (attempt < 5) await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+            core.setFailed('The deployed homepage is not MkDocs. Check Pages Source and competing branch/Jekyll deployments.');

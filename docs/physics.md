@@ -4,8 +4,9 @@
 
 The [interactive physics explorer](assets/physics/explorer.html) contains all four
 views—visibility, swimming/current, elevation and reproduction—with both prey
-and predator settings. Open the HTML locally in a browser. GitHub displays HTML
-source instead of running it; the SVG figures below render directly in the docs.
+and predator settings. On the MkDocs website, follow the link to open the interactive page directly.
+When browsing the repository on GitHub, HTML is shown as source; download/open
+the file locally instead. The SVG figures below render in both places.
 The explorer needs no ChatGPT session, Python backend or network libraries.
 
 If you prefer a local URL, from the repository root:
@@ -61,11 +62,14 @@ river is one cell wide, so it grants **one** extra cell along this ray, not an
 automatic three. The three-cell river in the earlier figures is a controlled
 example used to show the maximum extension.
 
-The brain does not receive this whole shaded visibility grid. It receives one
-nearest accepted target vector for each of food, prey and predator, plus body,
-heading, blocked-neighbor and local-terrain inputs. Terrain observations remain
-32 values. With the water bonus enabled on a wet map, nearest-target vectors are
-normalized by the maximum possible radius. See [the detailed rule](geography.md#directional-sight-across-water).
+The brain does not receive this whole shaded visibility grid. It receives up to
+`observation_top_k` visible target vectors for each of food, resource-eating animals
+and prey-eating animals, ordered by proximity, plus body, heading, blocked-neighbor
+and version-specific inputs. At the default top-k of 1, terrain observation
+version 2 has 32 values; each additional target slot adds 12. Other observation
+versions have their own input layouts; see [animal observations](observations.md).
+With the water bonus enabled on a wet map, target vectors are normalized by the
+maximum possible radius. See [the detailed rule](geography.md#directional-sight-across-water).
 
 ## Walking, swimming and currents
 

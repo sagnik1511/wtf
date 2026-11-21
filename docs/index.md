@@ -1,5 +1,7 @@
 # Wildlife Trial Framework
 
+[Complete documentation directory](directory.md) · [Visual guide](visual-guide.md)
+
 <picture class="brand-lockup brand-on-light">
   <source srcset="assets/branding/wtf-lockup-motion-light.svg" type="image/svg+xml" />
   <img src="assets/branding/wtf-lockup-light.png" width="260" alt="WTF — Wildlife Trial Framework" />
@@ -27,6 +29,7 @@ world later, independently of training.
 | Install and run a first world | [Installation](../INSTALL.md), then [run and resume](running.md) |
 | Use Python directly | [Complete tutorial](tutorial.md) and [example script](../examples/README.md) |
 | Change populations, maps, policies or actions | [Customization handbook](customization.md) |
+| Identify animal pointers and board markers | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
 | Inspect animals and their decisions | [Viewer appearance](viewer-visual-reference.md) and [brain explainability](explainability.md) |
 | Understand a diagram or visual | [Visual guide](visual-guide.md) |
 | Contribute or extend the simulator | [Development](development.md) and [architecture](architecture.md) |
@@ -65,7 +68,7 @@ and [controlled evaluation](evaluation.md) to interpret outcomes.
 
 ## Viewer and storage
 
-[Playback and metrics](recording.md), the [appearance reference](viewer-visual-reference.md)
+[Playback and metrics](recording.md), the [board objects and viewer guide](viewer-visual-reference.md)
 and [explainability](explainability.md) cover the viewer and agent inspector.
 [Replay structures](replay-data-structures.md), [checkpoint structures](checkpoint-data-structures.md)
 and [binary storage](binary-storage.md) explain saved artifacts, compression,

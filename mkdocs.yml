@@ -87,13 +87,13 @@ nav:
       - Environment configuration: configuration.md
       - Species: species.md
       - Geography and maps: geography.md
-      - Physics illustrated: physics.md
+      - Movement and visibility: physics.md
       - Day and night: day-night.md
       - Current calibration: calibration.md
   - Learning and behavior:
       - Algorithms and networks: algorithms.md
       - Advanced algorithms: advanced-algorithms.md
-      - Animal observations: observations.md
+      - Brain inputs and observations: observations.md
       - Rewards and costs: rewards.md
       - Feedback contracts: feedback-review.md
       - Mating observations: mating-observations.md
@@ -104,12 +104,14 @@ nav:
       - Behavior analysis: analysis.md
       - Evaluation: evaluation.md
   - Viewer and storage:
-      - Playback and metrics: recording.md
-      - Viewer appearance: viewer-visual-reference.md
-      - Brain explainability: explainability.md
-      - Replay data structures: replay-data-structures.md
-      - Checkpoint data structures: checkpoint-data-structures.md
-      - Binary storage: binary-storage.md
+      - Playback and inspection:
+          - Playback controls and metrics: recording.md
+          - Board objects and viewer guide: viewer-visual-reference.md
+          - Agent inspector and brain explanations: explainability.md
+      - Stored artifacts:
+          - Replay files and data structures: replay-data-structures.md
+          - Checkpoint state and restoration: checkpoint-data-structures.md
+          - Binary formats and compression: binary-storage.md
   - Development:
       - Architecture: architecture.md
       - Development and testing: development.md
@@ -123,6 +125,8 @@ nav:
       - Contributor context: project-context.md
       - Documentation website: documentation-site.md
   - Reference:
+      - Complete documentation directory: directory.md
+      - Visual assets and sources: assets/README.md
       - Configuration fields: configuration-reference.md
       - Command reference: command-reference.md
       - Compatibility policy: compatibility.md

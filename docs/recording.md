@@ -7,7 +7,10 @@ see [Playback data structures](replay-data-structures.md).
 
 Commands in this guide run from the project root.
 
-See the [viewer appearance reference](viewer-visual-reference.md) for board objects, event markers, terrain, sight and brain-view graphics.
+Identify animal pointers, food, obstacles and birth/death symbols in the
+[board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers).
+The [viewer visual guide](viewer-visual-reference.md) also covers terrain, sight,
+themes and brain-view graphics.
 
 See the [recorded terrain previews](geography.md#recorded-terrain-previews) for
 short full-screen clips of this viewer on all three maps.

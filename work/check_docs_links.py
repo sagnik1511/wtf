@@ -12,9 +12,15 @@ class PageLinks(HTMLParser):
         super().__init__()
         self.links = []
         self.anchors = set()
+        self.is_document = False
+        self.destinations = []
 
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
+        if tag == "meta" and attrs.get("name") == "generator":
+            self.is_document = attrs.get("content", "").startswith("mkdocs-")
+        if tag == "a" and attrs.get("href"):
+            self.destinations.append(attrs["href"])
         for key in ("id", "name" if tag == "a" else "id"):
             if attrs.get(key):
                 self.anchors.add(attrs[key])
@@ -30,6 +36,7 @@ class PageLinks(HTMLParser):
             match = re.search(r"url\s*=\s*(.*)", attrs.get("content", ""), re.I)
             if match:
                 self.links.append(match[1].strip("\"'"))
+                self.destinations.append(match[1].strip("\"'"))
 
 
 def check_site(site_dir, site_url):
@@ -38,6 +45,7 @@ def check_site(site_dir, site_url):
     location = urlsplit(base)
     pages = {}
     references = []
+    page_urls = {}
     for path in root.rglob("*.html"):
         page = PageLinks()
         page.feed(path.read_text())
@@ -46,6 +54,7 @@ def check_site(site_dir, site_url):
         url = urljoin(
             base, relative[:-10] if relative.endswith("index.html") else relative
         )
+        page_urls[path] = url
         references.extend((relative, urljoin(url, href)) for href in page.links)
     if not pages:
         raise ValueError(f"No built HTML pages found in {root}")
@@ -78,7 +87,47 @@ def check_site(site_dir, site_url):
             and unquote(target.fragment) not in pages[destination].anchors
         ):
             errors.append(f"{origin}: missing section: {href}")
-    return {"pages": len(pages), "references": checked, "errors": errors}
+    # A valid target can still be invisible to readers if nothing links to it.
+    # Traverse anchors/redirects from home, excluding image/script references.
+    graph = {}
+    for path, page in pages.items():
+        destinations = set()
+        for href in page.destinations:
+            target = urlsplit(urljoin(page_urls[path], href))
+            if target.netloc != location.netloc or not target.path.startswith(
+                location.path
+            ):
+                continue
+            destination = (root / unquote(target.path[len(location.path) :])).resolve()
+            if destination.is_dir():
+                destination /= "index.html"
+            if destination in pages:
+                destinations.add(destination)
+        graph[path] = destinations
+    reachable = set()
+    pending = [root / "index.html"]
+    while pending:
+        path = pending.pop()
+        if path in reachable or path not in graph:
+            continue
+        reachable.add(path)
+        pending.extend(graph[path] - reachable)
+    documents = {
+        path
+        for path, page in pages.items()
+        if page.is_document and path != root / "404.html"
+    }
+    for path in sorted(documents - reachable):
+        errors.append(
+            f"{path.relative_to(root)}: documentation page is unreachable from home"
+        )
+    return {
+        "pages": len(pages),
+        "references": checked,
+        "errors": errors,
+        "documents": len(documents),
+        "reachable_documents": len(documents & reachable),
+    }
 
 
 def main():
@@ -92,7 +141,8 @@ def main():
     for error in report["errors"]:
         print(error)
     print(
-        f'Checked {report["pages"]} HTML pages and {report["references"]} local links/assets/anchors; {len(report["errors"])} errors.'
+        f'Checked {report["pages"]} HTML pages and {report["references"]} local links/assets/anchors; '
+        f'{report["reachable_documents"]}/{report["documents"]} documentation pages reachable from home; {len(report["errors"])} errors.'
     )
     raise SystemExit(bool(report["errors"]))
 

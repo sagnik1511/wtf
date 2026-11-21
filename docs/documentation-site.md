@@ -44,6 +44,14 @@ branch. Site builds require a Git checkout to enforce ignored-file exclusions.
    run for that push. Check the build and deployment jobs.
 4. Open the URL shown by the `github-pages` deployment environment.
 
+Select **GitHub Actions**, not **Deploy from a branch**. A branch-source Jekyll
+build can overwrite a successful custom MkDocs deployment at the same URL.
+The resulting source-rendered site uses different paths and bypasses the MkDocs
+link/visual-theme hooks. A successful Documentation workflow alone does not
+prove the live homepage is its output. The deployment checks Pages build type
+before publishing and verifies the live homepage identifies itself as MkDocs
+after deployment. Check this again when repository Pages settings change.
+
 The workflow builds on documentation pull requests and deploys only from `main`.
 It uses GitHub's Pages artifact/deployment actions, with `pages: write` and
 `id-token: write` limited to deployment. It needs no personal access token or
@@ -68,7 +76,8 @@ filters and source-link branch in [the build hook](../work/docs_site.py).
 | Reference | Complete field/command definitions, compatibility, visual index and existing release history |
 
 Keep the detailed guides in their current locations so GitHub links remain
-useful. Edit [the home page](index.md) for reader routes and `nav` in
+useful. Use the [complete directory](directory.md) for all guides, feature shortcuts and
+supporting visual catalogs. Edit [the home page](index.md) for reader routes and `nav` in
 [mkdocs.yml](../mkdocs.yml) for the website hierarchy. This setup does not create
 or require a new software release.
 
@@ -100,7 +109,8 @@ is excluded from published document content.
 
 1. Edit the relevant guide; update existing visual exports only when they clarify
    a changed structure or behavior.
-2. For a new guide, add a useful home-page route and a navigation entry. Generated
+2. For a new guide, update the [complete directory](directory.md), add a useful
+   home-page route and a navigation entry. Generated
    field references still come from the schema via `work.build_config_reference`.
 3. Build with `--strict`; fix missing targets and anchors instead of hiding them.
 4. Check the rendered page, search and links, including under the `/wtf/` project
@@ -132,6 +142,20 @@ Ignored research sources and theme partials never receive public redirects.
 The Documentation workflow runs `work.check_docs_links` after building. This
 checks actual generated HTML links, section anchors, image sources (including
 `picture` variants), CSS asset URLs and redirect destinations under the configured
-project prefix. It does not fetch third-party websites. A successful local build
+project prefix. It also traverses document links from the homepage and rejects
+public MkDocs pages that have become unreachable; the generated 404 page is
+excluded. Asset catalogs and release details must remain reachable through their
+indexes. The documentation tests also require every primary guide to appear in
+navigation and every navigation destination to appear in the complete directory.
+It does not fetch third-party websites. A successful local build
 only changes the checkout; commit and push the source changes to `main` for the
 Pages workflow to deploy the updated site and redirects.
+
+## Verify the deployed site, not only the build
+
+After deployment, start at the public home URL. Confirm its HTML generator is
+MkDocs, follow every same-site document/asset destination, and validate section
+anchors against the destination HTML. Include picture sources and nested paths.
+A local link audit cannot detect another publishing workflow replacing the site.
+Keep detailed URL/status audit reports local; report exact checked counts and
+any HTTP failures or rate-limited external destinations when sharing results.

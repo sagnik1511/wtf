@@ -176,6 +176,68 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertTrue(any("missing section" in e for e in report["errors"]))
             self.assertTrue(any("missing target" in e for e in report["errors"]))
 
+    def test_navigation_and_directory_cover_all_primary_guides(self):
+        from mkdocs.config import load_config
+
+        root = Path(__file__).resolve().parents[1]
+        config = load_config(str(root / "mkdocs.yml"))
+
+        def destinations(entries):
+            for entry in entries:
+                if isinstance(entry, str):
+                    yield entry
+                else:
+                    for value in entry.values():
+                        if isinstance(value, list):
+                            yield from destinations(value)
+                        else:
+                            yield value
+
+        navigation = set(destinations(config.nav))
+        directory = (root / "docs/directory.md").read_text()
+        directory_targets = {
+            match[2].split("#", 1)[0] for match in self.site.LINKS.finditer(directory)
+        }
+        self.assertFalse(navigation - {"index.md", "directory.md"} - directory_targets)
+        for target in navigation:
+            if target not in self.site.EXTRA_PAGES:
+                self.assertTrue((root / "docs" / target).is_file(), target)
+        # Supporting catalogs and individual historical releases have their own
+        # linked indexes; current user/contributor guides belong in navigation.
+        for source in (root / "docs").glob("*.md"):
+            self.assertIn(source.name, navigation, source.name)
+        for source in (root / "docs/tutorials").glob("*.md"):
+            self.assertIn(source.relative_to(root / "docs").as_posix(), navigation)
+
+    def test_built_link_audit_rejects_orphan_pages_and_follows_index_hubs(self):
+        from work.check_docs_links import check_site
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            generator = '<meta name="generator" content="mkdocs-1.6.1">'
+            (root / "index.html").write_text(
+                generator + '<a href="catalog/">Catalog</a>'
+            )
+            (root / "catalog").mkdir()
+            (root / "catalog/index.html").write_text(generator)
+            (root / "figure-guide").mkdir()
+            (root / "figure-guide/index.html").write_text(generator)
+            (root / "404.html").write_text(generator)
+            report = check_site(root, "https://example.com/wtf/")
+            self.assertEqual(report["documents"], 3)
+            self.assertEqual(report["reachable_documents"], 2)
+            self.assertEqual(len(report["errors"]), 1)
+            self.assertIn(
+                "figure-guide/index.html: documentation page is unreachable",
+                report["errors"][0],
+            )
+            (root / "catalog/index.html").write_text(
+                generator + '<a href="../figure-guide/">Figure guide</a>'
+            )
+            report = check_site(root, "https://example.com/wtf/")
+            self.assertEqual(report["errors"], [])
+            self.assertEqual(report["reachable_documents"], 3)
+
     def test_replay_pictures_follow_site_theme_and_nested_paths(self):
         page = SimpleNamespace(
             file=SimpleNamespace(

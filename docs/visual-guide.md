@@ -1,6 +1,6 @@
 # Visual guide to the documentation
 
-[Project overview](../README.md) · [Project context](project-context.md) · [Release history](releases/README.md)
+[Documentation directory](directory.md) · [Project overview](../README.md) · [Project context](project-context.md) · [Release history](releases/README.md)
 
 Use the diagrams in the guide that matches your question. They describe the
 implemented data flow and ownership, not measured performance or proof of
@@ -11,7 +11,8 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 
 | Question | Guide and visual |
 | --- | --- |
-| What do viewer objects, overlays and brain graphs look like? | [Viewer appearance reference](viewer-visual-reference.md) |
+| What do animal pointers, food and birth/death markers mean? | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
+| What do viewer overlays and brain graphs look like? | [Board objects and viewer guide](viewer-visual-reference.md) |
 | How does dawn/day/dusk/night change the board and animals? | [Day–night appearance and rules](day-night.md) |
 | Where do Python and JavaScript meet? | [Runtime boundaries](architecture.md#runtime-boundaries) |
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
