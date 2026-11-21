@@ -20,15 +20,16 @@ static int distribution(const double *x, Py_ssize_t n, double *p,
         PyErr_SetString(PyExc_ValueError, "Empty policy");
         return 0;
     }
-    double maximum = x[0], total = 0.0;
+    double maximum = x[0];
+    FloatSum accumulator = {0};
     for (Py_ssize_t i = 1; i < n; i++)
         if (x[i] > maximum)
             maximum = x[i];
     for (Py_ssize_t i = 0; i < n; i++) {
         p[i] = exp(x[i] - maximum);
-        total += p[i];
+        sum_add(&accumulator, p[i]);
     }
-    double normalizer = log(total);
+    double total = sum_finish(accumulator), normalizer = log(total);
     for (Py_ssize_t i = 0; i < n; i++) {
         logs[i] = (x[i] - maximum) - normalizer;
         p[i] /= total;
@@ -81,10 +82,11 @@ static int ppo_derivative(const double *out, Py_ssize_t n, Py_ssize_t action,
     int inactive =
         (adv > 0 && ratio > 1.0 + clip) || (adv < 0 && ratio < 1.0 - clip);
     double pl = -fmin(ratio * adv, clipped * adv),
-           d = inactive ? 0.0 : -adv * ratio, sum = 0.0;
+           d = inactive ? 0.0 : -adv * ratio;
+    FloatSum sum = {0};
     for (Py_ssize_t j = 0; j < actions; j++)
-        sum += p[j] * logs[j];
-    double entropy = -sum;
+        sum_add(&sum, p[j] * logs[j]);
+    double entropy = -sum_finish(sum);
     for (Py_ssize_t j = 0; j < actions; j++)
         gradient[j] = d * ((j == action ? 1.0 : 0.0) - p[j]) +
                       ec * p[j] * (logs[j] + entropy);
@@ -211,12 +213,13 @@ static PyObject *gru_step_native(PyObject *self, PyObject *args) {
         const double *previous = gate == 2 ? rh : old;
         for (Py_ssize_t j = 0; j < h; j++) {
             Py_ssize_t row = gate * h + j;
-            double sx = 0.0, sh = 0.0;
+            FloatSum sx = {0}, sh = {0};
             for (Py_ssize_t i = 0; i < n; i++)
-                sx += x[i] * (double)wx[row * n + i];
+                sum_add(&sx, x[i] * (double)wx[row * n + i]);
             for (Py_ssize_t i = 0; i < h; i++)
-                sh += previous[i] * (double)wh[row * h + i];
-            double value = ((double)bias[row] + sx) + sh;
+                sum_add(&sh, previous[i] * (double)wh[row * h + i]);
+            double value =
+                ((double)bias[row] + sum_finish(sx)) + sum_finish(sh);
             s[gate * h + j] = gate == 2 ? tanh(value) : stable_sigmoid(value);
         }
         if (gate == 1)
@@ -315,18 +318,18 @@ static PyObject *gru_backward_native(PyObject *self, PyObject *args) {
         dn[i] = dh[i] * (1.0 - z[i]) * (1.0 - candidate[i] * candidate[i]);
     }
     for (Py_ssize_t i = 0; i < h; i++) {
-        double sum = 0.0;
+        FloatSum sum = {0};
         for (Py_ssize_t j = 0; j < h; j++)
-            sum += dn[j] * (double)wh[(2 * h + j) * h + i];
-        drh[i] = sum;
+            sum_add(&sum, dn[j] * (double)wh[(2 * h + j) * h + i]);
+        drh[i] = sum_finish(sum);
         dr[i] = drh[i] * old[i] * reset[i] * (1.0 - reset[i]);
     }
     for (Py_ssize_t i = 0; i < h; i++) {
-        double sum = 0.0;
+        FloatSum sum = {0};
         for (Py_ssize_t j = 0; j < h; j++)
-            sum += dz[j] * (double)wh[j * h + i] +
-                   dr[j] * (double)wh[(h + j) * h + i];
-        prev[i] = (dh[i] * z[i] + drh[i] * reset[i]) + sum;
+            sum_add(&sum, dz[j] * (double)wh[j * h + i] +
+                              dr[j] * (double)wh[(h + j) * h + i]);
+        prev[i] = (dh[i] * z[i] + drh[i] * reset[i]) + sum_finish(sum);
     }
     double *dwx = views[1].buf, *dwh = views[2].buf, *db = views[3].buf;
     for (int gate = 0; gate < 3; gate++) {
@@ -466,10 +469,10 @@ static void dense_forward(DenseRow *rows, Py_ssize_t count, double *tape,
         Py_ssize_t from = j == count - 1 ? start : 0,
                    to = j == count - 1 ? stop : r->m;
         for (Py_ssize_t k = from; k < to; k++) {
-            double sum = 0.0;
+            FloatSum sum = {0};
             for (Py_ssize_t i = 0; i < r->n; i++)
-                sum += x[i] * (double)w[k * r->n + i];
-            double v = (double)b[k] + sum;
+                sum_add(&sum, x[i] * (double)w[k * r->n + i]);
+            double v = (double)b[k] + sum_finish(sum);
             y[k] = j == count - 1 ? v : tanh(v);
         }
     }

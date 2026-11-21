@@ -18,6 +18,13 @@ def main():
     root = Path(__file__).resolve().parents[1]
     if Path.cwd() != root:
         raise SystemExit("Run this command from the repository root")
+    if sys.implementation.name != "cpython" or not (3, 12) <= sys.version_info[:2] < (
+        3,
+        14,
+    ):
+        raise SystemExit(
+            "Native builds support CPython 3.12–3.13; use the Python backend on other interpreters"
+        )
     configure_compiler()
     setup(
         name="wtf-native-kernels",

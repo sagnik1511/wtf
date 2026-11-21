@@ -41,7 +41,7 @@ explicit read-only config mount in a local Compose override.
 
 | Component | Behavior |
 | --- | --- |
-| Builder | Python 3.11 slim plus a compiler; builds kernels inside Linux, never copies host `.so` files |
+| Builder | Python 3.12 slim plus a compiler; builds kernels inside Linux, never copies host `.so` files |
 | Runtime | Matching Python image, tqdm, non-root user, sources and runtime assets; no compiler installation |
 | `train` service | Opt-in Compose profile, writable `./results:/data/results`, CLI entry point |
 | `viewer` service | Read-only result mount and root filesystem, temporary `/tmp`, HTTP health check |

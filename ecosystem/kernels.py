@@ -1,8 +1,8 @@
 """Optional compiled CPU kernels; never compile or install during imports.
 
 Use WTF_KERNELS=python for the reference path or native to require the extension.
-Python 3.12 changed float summation; keep its reference behavior until the native
-reduction has a separately verified implementation for that interpreter.
+Native float reductions match builtin sum() on CPython 3.12 and 3.13.
+New interpreter versions fall back until numerical equivalence is validated.
 """
 
 import os
@@ -15,8 +15,11 @@ if _mode not in ("auto", "python", "native"):
 native = None
 _reason = "disabled by WTF_KERNELS=python"
 if _mode != "python":
-    if sys.implementation.name != "cpython" or sys.version_info >= (3, 12):
-        _reason = "native reductions currently support CPython 3.9–3.11"
+    if sys.implementation.name != "cpython" or not (3, 12) <= sys.version_info[:2] < (
+        3,
+        14,
+    ):
+        _reason = "native reductions currently support CPython 3.12–3.13"
     else:
         try:
             from . import _kernels as native

@@ -89,7 +89,7 @@ champion exports. Templates and actions retain their normal compatibility rules.
 
 ## Optional native source build
 
-On supported CPython 3.9–3.11 with a compiler and matching headers:
+On supported CPython 3.12–3.13 with a compiler and matching headers:
 
 ```sh
 WTF_BUILD_NATIVE=1 python -m pip install --no-cache-dir --force-reinstall \
@@ -125,17 +125,24 @@ Inspect distribution file lists as well as successful imports: local results or
 host `.so` files must never leak into a portable wheel.
 
 The Ubuntu workflow in [package.yml](../.github/workflows/package.yml) repeats
-wheel/source checks on Python 3.9, 3.11 and 3.13 and an opt-in native build on 3.11.
+wheel/source checks on Python 3.12, 3.13 and 3.14 and opt-in native builds on
+3.12/3.13. Native jobs run the full Python suite with both backend selections.
 Those jobs execute only when CI runs; a locally prepared workflow is not evidence
 of an Ubuntu pass. Keep platform support claims aligned with actual CI results.
 
 ## Current local verification
 
-The 0.1.0 portable wheel, source archive and optional macOS/CPython 3.9 native
-wheel have passed fresh-venv installation smoke checks. The checks run with
-isolated imports from temporary working directories outside the checkout and
-remove their experiment output afterward. All 27 presets, checkpoint/replay
-round trips, installed commands and viewer HTTP endpoints passed. Twine metadata
-checks pass; the portable wheel contains 57 runtime assets and no compiled host
-binary. Full source checks pass 532 Python and 99 JavaScript tests. Ubuntu jobs
-are configured but have not run as part of this local preparation.
+Python 3.12 is the minimum declared in distribution metadata. Fresh virtual
+environments must use 3.12 or newer, including source-archive builds. Optional
+native kernels are validated for CPython 3.12–3.13; other supported interpreters
+use the portable backend. Local verification results for this migration are
+recorded in [rollout 0.0.1.31](releases/0.0.1.31.md). Ubuntu jobs are configured;
+their execution must be confirmed on the pushed commit.
+
+The packaging jobs pin **Ubuntu 24.04 x64** rather than `ubuntu-latest`. The
+Selected Python versions need interpreter builds for that exact runner OS; a
+moving latest image may advance before compatible builds are provided. Native
+jobs use the same pinned OS/architecture. Review GitHub's
+[Python build manifest](https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json)
+before changing this pin. A setup-python download failure occurs before package
+installation tests; it is not evidence of a simulator/runtime failure.

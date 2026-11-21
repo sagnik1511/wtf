@@ -128,9 +128,9 @@ models and sensitive optimizer statistics.
    changed food still need immediate correct observations.
 
 `Animal`/`Resource`/`Event` instance dictionaries are another allocation source,
-but slots are a lower-priority change for small populations. Python 3.9 support
-and several `vars(...)` snapshot paths require a serialization refactor; adding
-`dataclass(slots=True)` alone is not compatible with the current minimum runtime.
+but slots are a lower-priority change for small populations. Python 3.12 now
+supports dataclass slots, but several `vars(...)` snapshot paths still require a
+serialization refactor before adding `dataclass(slots=True)`.
 GRPO also rebuilds `random.Random` objects for every agent/trial. Preserve exact
 streams if pursuing that path; network and buffer work is the clearer shared
 starting point.

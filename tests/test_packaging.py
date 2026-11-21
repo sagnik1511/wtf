@@ -2,6 +2,8 @@
 
 import json
 import os
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -16,6 +18,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PackagingTests(unittest.TestCase):
+    def test_source_checkout_rejects_older_interpreters_clearly(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import sys; sys.version_info = (3, 11); import ecosystem",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("requires Python 3.12+", result.stderr)
+
     def test_presets_load_outside_checkout_with_packaged_map_lookup(self):
         old = Path.cwd()
         with tempfile.TemporaryDirectory() as temporary:

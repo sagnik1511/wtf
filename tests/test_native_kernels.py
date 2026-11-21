@@ -3,6 +3,7 @@
 from array import array
 import copy
 import json
+import math
 import os
 from pathlib import Path
 import random
@@ -26,10 +27,41 @@ except ImportError:
 
 
 @unittest.skipIf(
-    _kernels is None or sys.version_info >= (3, 12),
+    _kernels is None or not (3, 12) <= sys.version_info[:2] < (3, 14),
     "Build supported native kernels first",
 )
 class NativeKernelTests(unittest.TestCase):
+    def test_float_reductions_match_compensated_python_sum(self):
+        # The old left-to-right native reduction returned zero for this input.
+        cases = (
+            [1e16, 1.0, -1e16],
+            [1e16, 1.0, 1.0, -1e16],
+            [0.1] * 257,
+            [-0.0],
+            [float("inf"), 1.0],
+            [1e308, 1e308],
+            [float("inf"), -float("inf")],
+        )
+        for values in cases:
+            with self.subTest(values=values[:4]):
+                got = _kernels.affine(
+                    values, Float32([1.0] * len(values)), Float32([0.0]), False, 0, 1
+                )[0]
+                expected = 0.0 + sum(values)
+                if math.isnan(expected):
+                    self.assertTrue(math.isnan(got))
+                else:
+                    self.assertEqual(got, expected)
+                    self.assertEqual(
+                        math.copysign(1.0, got), math.copysign(1.0, expected)
+                    )
+        # Fused inference has a separate dense loop from affine().
+        network = MLP([], 1, 7, inputs=3)
+        network.layers[0]["weights"][:] = Float32([1.0] * 6)
+        network.layers[0]["bias"][:] = Float32([0.0, 0.0])
+        with patch.object(kernels, "native", _kernels):
+            self.assertEqual(network.predict((1e16, 1.0, -1e16)), [1.0, 1.0])
+
     def test_dense_forward_ranges_and_gradients_are_bit_exact(self):
         rng = random.Random(123)
         for width in (20, 32):
@@ -199,6 +231,26 @@ class NativeKernelTests(unittest.TestCase):
 
 
 class BackendSelectionTests(unittest.TestCase):
+    def test_future_interpreter_falls_back_until_native_is_validated(self):
+        code = """import sys
+sys.version_info = (3, 14)
+from ecosystem.kernels import status
+assert status()['backend'] == 'python'
+assert '3.12–3.13' in status()['fallback_reason']
+"""
+        for mode in ("auto", "native"):
+            result = subprocess.run(
+                [sys.executable, "-c", code],
+                env=dict(os.environ, WTF_KERNELS=mode),
+                capture_output=True,
+                text=True,
+            )
+            if mode == "auto":
+                self.assertEqual(result.returncode, 0, result.stderr)
+            else:
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("3.12–3.13", result.stderr)
+
     def test_explicit_python_backend_never_imports_extension(self):
         code = 'import sys;from ecosystem.kernels import status;assert status()["backend"]=="python";assert "ecosystem._kernels" not in sys.modules'
         p = subprocess.run(

@@ -46,12 +46,12 @@ mode = os.environ.get("WTF_BUILD_NATIVE", "0")
 if mode not in ("0", "1"):
     raise ValueError("WTF_BUILD_NATIVE must be 0 or 1")
 if mode == "1":
-    if sys.implementation.name != "cpython" or not (3, 9) <= sys.version_info[:2] < (
+    if sys.implementation.name != "cpython" or not (3, 12) <= sys.version_info[:2] < (
         3,
-        12,
+        14,
     ):
         raise RuntimeError(
-            "Native builds currently support CPython 3.9–3.11; omit WTF_BUILD_NATIVE for the portable wheel"
+            "Native builds currently support CPython 3.12–3.13; omit WTF_BUILD_NATIVE for the portable wheel"
         )
     runpy.run_path(str(ROOT / "_build_support.py"))["configure_compiler"]()
     extensions = [

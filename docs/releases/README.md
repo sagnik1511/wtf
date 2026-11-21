@@ -6,9 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.28](0.0.1.28.md), `92fb6e7`.
-**Latest committed runtime implementation:** [0.0.1.28](0.0.1.28.md), `92fb6e7`.
-**Pending runtime:** [0.0.1.29](0.0.1.29.md), distribution preparation and customization docs; [0.0.1.30](0.0.1.30.md), installable Python packages and Ubuntu installation checks.
+**Latest committed rollout:** [0.0.1.30](0.0.1.30.md), `18126f4`.
+**Latest committed runtime implementation:** [0.0.1.30](0.0.1.30.md), `18126f4`.
+**Pending rollout:** [0.0.1.31](0.0.1.31.md), Python 3.12 minimum, native reduction port and pinned Ubuntu packaging CI.
 
 ## Rollout index
 
@@ -19,8 +19,9 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.30](0.0.1.30.md) | Pending | Prepared 2026-11-21 | — | Portable wheel/sdist, installed runtime assets/commands and isolated installation/Ubuntu CI checks |
-| [0.0.1.29](0.0.1.29.md) | Pending | Prepared 2026-11-21 | — | Docker training/playback launcher, compatibility policy and complete Python/Markdown example |
+| [0.0.1.31](0.0.1.31.md) | Pending | Prepared 2026-11-21 | — | Require Python 3.12+, port native arithmetic to 3.12/3.13 and pin Ubuntu packaging CI |
+| [0.0.1.30](0.0.1.30.md) | Committed | 2026-11-21 | `18126f4` | Portable wheel/sdist, installed runtime assets/commands and isolated installation/Ubuntu CI checks |
+| [0.0.1.29](0.0.1.29.md) | Committed | 2026-11-21 | `18126f4` | Docker training/playback launcher, compatibility policy and complete Python/Markdown example |
 | [0.0.1.28](0.0.1.28.md) | Committed | 2026-11-21 | `92fb6e7` | Reuse frame lighting/body values and restore native flat metabolism with cycle costs |
 | [0.0.1.27](0.0.1.27.md) | Committed | 2026-11-21 | `92fb6e7` | Light/dark viewer themes and explicit daytime ground illumination |
 | [0.0.1.26](0.0.1.26.md) | Committed | 2026-11-21 | `92fb6e7` | Gradual sunlight, species night vision/energy modifiers and tick-based replay lighting |

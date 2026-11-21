@@ -7,16 +7,18 @@ permissions:
   contents: read
 jobs:
   portable:
-    runs-on: ubuntu-latest
+    # Keep interpreter availability stable; ubuntu-latest can move ahead of old Python builds.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.9', '3.11', '3.13']
+        python: ['3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
+          architecture: x64
       - name: Create isolated build environment
         run: |
           python -m venv .venv
@@ -42,15 +44,27 @@ jobs:
           cd "$RUNNER_TEMP/source-work"
           "$RUNNER_TEMP/source-env/bin/python" -I "$GITHUB_WORKSPACE/work/check_installation.py"
   native:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.13']
+    # Keep interpreter availability stable; ubuntu-latest can move ahead of old Python builds.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
-      - name: Build opt-in native wheel
+          python-version: ${{ matrix.python }}
+          architecture: x64
+      - name: Validate native and reference simulation paths
         run: |
           python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt setuptools wheel
+          .venv/bin/python -m work.build_native
+          WTF_KERNELS=native .venv/bin/python -m unittest discover
+          WTF_KERNELS=python .venv/bin/python -m unittest discover
+      - name: Build opt-in native wheel
+        run: |
           .venv/bin/python -m pip install --upgrade pip build twine
           WTF_BUILD_NATIVE=1 .venv/bin/python -m build --wheel
           .venv/bin/python -m twine check dist/*.whl

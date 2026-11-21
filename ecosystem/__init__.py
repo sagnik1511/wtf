@@ -4,6 +4,13 @@ Heavy simulation modules are loaded only when requested, so playback imports
 remain independent of training.
 """
 
+import sys
+
+if sys.version_info < (3, 12):
+    raise RuntimeError(
+        "Wildlife Trial Framework requires Python 3.12+; recreate .venv with python3.12"
+    )
+
 __all__ = ["Experiment", "load_config"]
 
 

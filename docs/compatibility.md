@@ -9,6 +9,21 @@ Four-component records under `docs/releases/` track implementation rollouts,
 not importable-package versions. Binary magic, checkpoint envelopes, logical
 state and observation versions each have their own version identifiers.
 
+## Python runtime
+
+The minimum is Python 3.12. Native CPU kernels support CPython 3.12–3.13 and must
+be rebuilt for each interpreter/OS/architecture. Newer Python versions use the
+reference backend until native equivalence is validated. Wheel metadata rejects
+older Python installations; source-checkout imports also report the minimum.
+
+Artifact formats and model signatures are unchanged by this runtime migration.
+Existing supported checkpoints/brains/replays retain their readers. Moving a
+checkpoint from Python 3.9–3.11 to 3.12+ can change its future numerical trajectory:
+Python changed float `sum()` in 3.12. Native and reference calculations match
+within each validated interpreter; this does not promise identical results
+across Python versions. Keep the old interpreter and source revision when exact
+historical continuation is required.
+
 ## Current reader capabilities
 
 This table describes the current source readers, not an untested historical

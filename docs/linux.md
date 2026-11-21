@@ -10,7 +10,7 @@ No display server is needed for training or serving saved replay data.
 
 ## Portable Python installation
 
-On an Ubuntu host, install the interpreter's venv support if absent:
+On Ubuntu 24.04 (Python 3.12), install the interpreter's venv support if absent:
 
 ```sh
 sudo apt-get update
@@ -23,8 +23,10 @@ python3 -m venv .venv
 
 Use the wheel built from the checkout until the package is published. An Ubuntu
 Python newer than the native backend's supported range intentionally uses the
-Python fallback; a compiler is not required for the portable wheel. Python 3.9+
-is the declared package range. Keep results in a writable working directory;
+Python fallback; a compiler is not required for the portable wheel. Python 3.12+
+is the declared package range. On older Ubuntu releases, select an installed
+Python 3.12+ interpreter and its matching venv package explicitly; a system
+Python 3.10/3.11 is insufficient. Keep results in a writable working directory;
 installation itself should not write experiments into the system Python or
 site-packages. Commands are case-sensitive on typical Linux filesystems.
 
@@ -42,7 +44,7 @@ container, with the host-published port restricted to localhost.
 
 ## Optional native backend
 
-Native compilation currently targets CPython 3.9–3.11. With a compatible selected
+Native compilation currently targets CPython 3.12–3.13. With a compatible selected
 interpreter, install its **matching** development headers and a compiler (for the
 system interpreter, Ubuntu packages commonly include `python3-dev` and
 `build-essential`). Do not assume those headers match a separately installed
@@ -59,15 +61,22 @@ data; rebuild native code for the target OS/Python/architecture.
 
 Local installation checks on the development host are separate from actual Linux
 execution. [Ubuntu packaging CI](../.github/workflows/package.yml) is configured
-for portable wheel/source installation on CPython 3.9, 3.11 and 3.13, plus a native
-3.11 installation. Each runs outside the checkout and checks presets, a short
+for portable wheel/source installation on CPython 3.12, 3.13 and 3.14, plus native
+3.12/3.13 installations and full reference/native Python tests. Each runs outside the checkout and checks presets, a short
 simulation, checkpoints, replay chunks and viewer HTTP assets. It does not run
 Docker or publish to PyPI. Confirm these jobs pass on the pushed commit before
 claiming that release was executed successfully on Ubuntu.
 
-Current local preparation passed 532 Python tests, 99 JavaScript tests and fresh
-portable/source/native package smoke checks on macOS/CPython 3.9. Archive checks
+Local Python 3.12/3.13 verification is described in [package verification](packaging.md). Archive checks
 verify case-sensitive viewer imports and exclude host binaries from the portable
 wheel. A Linux-platform guard test checks that compiler setup leaves the normal
 Linux environment unchanged. These checks support the code review; they do not
 replace the pending Ubuntu CI executions.
+
+The packaging jobs pin **Ubuntu 24.04 x64** rather than `ubuntu-latest`. The
+Each selected Python needs an interpreter build for that exact runner OS; a
+moving latest image may advance before compatible builds are provided. Native
+jobs use the same pinned OS/architecture. Review GitHub's
+[Python build manifest](https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json)
+before changing this pin. A setup-python download failure occurs before package
+installation tests; it is not evidence of a simulator/runtime failure.

@@ -17,11 +17,11 @@ For Python and Docker setup, see [INSTALL.md](INSTALL.md).
 
 ## Quick start
 
-Requires Python 3.9+. Run from the project directory:
+Requires Python 3.12+. Run from the project directory:
 
 ```sh
 cd /path/to/wtf
-python3 -m venv .venv
+python3.12 -m venv .venv
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
 .venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1
 ./run.sh

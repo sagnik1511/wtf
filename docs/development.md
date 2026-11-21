@@ -2,7 +2,14 @@
 
 [Project overview](../README.md) · [Architecture](architecture.md) · [Performance](performance.md)
 
-Commands in this guide run from the project root.
+Commands in this guide run from the project root using Python 3.12+. Create the
+development environment with `python3.12 -m venv .venv` and install
+`requirements.txt` there. To upgrade an existing environment, stop its processes
+when convenient, rename it to `.venv-py39-backup` (or another ignored backup),
+then recreate **at `.venv`** and reinstall dependencies and formatter/build tools.
+Do not move a newly built venv into place: console-script shebangs embed its
+creation path. Rebuild optional native kernels with the new interpreter. Restore
+the backup to its original path if rolling back, together with compatible source.
 
 For a new coding session, start with [AGENTS.md](../AGENTS.md) and the maintained
 [project context](project-context.md). Repo-local workflows live under

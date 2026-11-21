@@ -51,12 +51,14 @@ WTF_KERNELS=native .venv/bin/python -m ecosystem.cli environments/ppo.json --run
 WTF_KERNELS=python .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 --progress
 ```
 
-Acceleration currently supports CPython 3.9–3.11. Python 3.12 changed floating
-summation; newer versions deliberately use Python until their reduction behavior
-has a separately verified native implementation. See the
+Acceleration supports CPython 3.12–3.13. Native reductions corresponding to
+Python's builtin `sum()` use compensated summation matching those interpreters;
+ordinary explicit accumulation loops keep their original order. See the
 [Python summation change](https://docs.python.org/3.12/library/functions.html#sum).
-`native` fails explicitly on those interpreters instead of silently changing
-arithmetic. Legacy list-backed float64 parameter operations retain Python math; shared policy
+The extension retains float32 parameter storage and double arithmetic. Newer
+interpreters intentionally use Python until native equivalence is validated;
+`WTF_KERNELS=native` fails explicitly outside the validated range. Rebuild the
+extension after changing Python minor version. Legacy list-backed float64 parameter operations retain Python math; shared policy
 probability/objective helpers use equivalent double arithmetic when available.
 
 ## Coverage and precision

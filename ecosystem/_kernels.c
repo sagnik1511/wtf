@@ -3,6 +3,24 @@
 #include <math.h>
 #include <string.h>
 
+/* Match CPython 3.12/3.13 builtin sum() for float reductions. Only use
+   this for reference sum() calls: explicit += loops remain ordered additions.
+   Neumaier compensation also preserves CPython's non-finite/signed-zero finish.
+   Reference: Python/bltinmodule.c, builtin_sum_impl (CPython 3.12 and 3.13). */
+typedef struct {
+    double value, correction;
+} FloatSum;
+static void sum_add(FloatSum *s, double x) {
+    double next = s->value + x;
+    s->correction += fabs(s->value) >= fabs(x) ? (s->value - next) + x
+                                               : (x - next) + s->value;
+    s->value = next;
+}
+static double sum_finish(FloatSum s) {
+    return s.correction && isfinite(s.correction) ? s.value + s.correction
+                                                  : s.value;
+}
+
 /* No fast-math, FMA contraction, reordered reductions, RNG, or global scratch.
    Buffers remain owned by their individual controller. The GIL remains held. */
 static int buffer(PyObject *object, Py_buffer *view, char kind, int writable) {
@@ -85,10 +103,10 @@ static PyObject *affine(PyObject *self, PyObject *args) {
         goto done;
     const float *w = views[0].buf, *bias = views[1].buf;
     for (Py_ssize_t j = start; j < stop; j++) {
-        double sum = 0.0;
+        FloatSum sum = {0};
         for (Py_ssize_t i = 0; i < n; i++)
-            sum += x[i] * (double)w[j * n + i];
-        double value = (double)bias[j] + sum;
+            sum_add(&sum, x[i] * (double)w[j * n + i]);
+        double value = (double)bias[j] + sum_finish(sum);
         PyObject *item = PyFloat_FromDouble(activate ? tanh(value) : value);
         if (!item) {
             Py_CLEAR(result);
@@ -196,13 +214,13 @@ static PyObject *adam(PyObject *self, PyObject *args) {
             if (!length(&views[j * 4 + k], size(&views[j * 4])))
                 goto done;
     }
-    double total = 0.0;
+    FloatSum total = {0};
     for (Py_ssize_t j = 0; j < n; j++) {
         const double *g = views[j * 4 + 3].buf;
         for (Py_ssize_t i = 0; i < size(&views[j * 4 + 3]); i++)
-            total += pow(g[i] / (double)count, 2.0);
+            sum_add(&total, pow(g[i] / (double)count, 2.0));
     }
-    double norm = sqrt(total),
+    double norm = sqrt(sum_finish(total)),
            factor = fmin(1.0, clip / (norm + 1e-12)) / (double)count;
     double correction1 = 1.0 - pow(0.9, (double)updates),
            correction2 = 1.0 - pow(0.999, (double)updates);

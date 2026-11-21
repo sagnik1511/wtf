@@ -111,7 +111,8 @@ them. See [visual documentation guidance](docs/visual-guide.md#when-a-visual-hel
 
 ## Working and checking
 
-Use `.venv/bin/python` and install runtime dependencies only in `.venv`.
+Use Python 3.12+ (`python3.12 -m venv .venv`); native kernels are validated
+on CPython 3.12–3.13. Use `.venv/bin/python` and install runtime dependencies only in `.venv`.
 `requirements.txt` currently contains tqdm; learning code has no ML-framework
 dependency. Preserve progress reporting during training. Prefer code inspection
 for optimization requests; do not start profiling or expensive training without

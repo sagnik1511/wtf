@@ -1,6 +1,6 @@
 # Install Wildlife Trial Framework
 
-[Project overview](README.md) · [Release 0.0.1.29](docs/releases/0.0.1.29.md) · [Complete tutorial](docs/tutorial.md)
+[Project overview](README.md) · [Python 3.12 rollout](docs/releases/0.0.1.31.md) · [Complete tutorial](docs/tutorial.md)
 
 Choose a built Python wheel, a source checkout or Docker. Rollout **0.0.1.30**
 adds package builds; nothing has been uploaded to PyPI. The distribution name is
@@ -15,7 +15,7 @@ into a fresh environment:
 .venv/bin/python -m pip install build twine
 .venv/bin/python -m build
 .venv/bin/python -m twine check dist/*
-python3 -m venv /path/to/test-env
+python3.12 -m venv /path/to/test-env
 /path/to/test-env/bin/python -m pip install dist/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl
 ```
 
@@ -29,7 +29,7 @@ named only `wtf` from a registry.
 
 ## Local Python installation
 
-The project declares Python 3.9+. Python 3.11 matches the Docker runtime and is
+The project declares Python 3.12+. Python 3.12 matches the Docker runtime and is
 suitable for the optional native backend. A modern browser runs the viewer;
 Node.js, npm, PyTorch, NumPy and a GPU are not runtime requirements.
 
@@ -37,7 +37,7 @@ On macOS or Linux:
 
 ```sh
 cd /path/to/wtf
-python3 -m venv .venv
+python3.12 -m venv .venv
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
 .venv/bin/python -m ecosystem.cli --help
 ```
@@ -70,7 +70,7 @@ On Windows PowerShell, use the same CLI with the virtual environment executable:
 
 ```powershell
 cd C:\path\to\wtf
-py -3.11 -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m ecosystem.cli environments/maskable_ppo.json --runs 1 --steps 200 --seed 100 --progress
 .\.venv\Scripts\python.exe -m ecosystem.server --results results --port 8000
@@ -90,7 +90,7 @@ and build from the checkout root:
 .venv/bin/python -c "from ecosystem.kernels import status; print(status())"
 ```
 
-Current native dispatch supports CPython 3.9–3.11. Other supported Python
+Current native dispatch supports CPython 3.12–3.13. Other supported Python
 runtimes use the reference path. Imports do not invoke a compiler. Native files
 are specific to Python, OS and architecture; rebuild rather than copying them
 between machines. See [native kernels](docs/native-kernels.md) for compiler

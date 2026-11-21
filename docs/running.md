@@ -16,7 +16,7 @@ New initialization, exact continuation and saved-frame playback are separate ent
 See [INSTALL.md](../INSTALL.md) for the complete Python, Windows and Docker
 installation paths and optional native build.
 
-Python 3.9+ and a project-local virtual environment are used for the backend.
+Python 3.12+ and a project-local virtual environment are used for the backend.
 JavaScript rendering uses browser APIs and has no package installation or build step.
 
 ```sh

@@ -10,6 +10,9 @@ recurrent PPO, QR-DQN, masked PPO and MAPPO. Controllers, optimizers and RNGs ar
 private to each animal. These are experimental implementations, not claims of
 biological realism or established policy improvement.
 
+Requires Python **3.12 or newer**. Optional native kernels support CPython
+3.12–3.13; newer interpreters use the Python backend.
+
 ## Local package installation
 
 For an unpublished checkout, build distributions and install the resulting wheel:

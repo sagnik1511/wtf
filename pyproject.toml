@@ -10,7 +10,7 @@ readme = "PYPI_README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{name = "Sagnik Roy"}]
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = ["tqdm>=4.66,<5"]
 keywords = ["reinforcement-learning", "ecosystem", "simulation", "multi-agent"]
 classifiers = [
