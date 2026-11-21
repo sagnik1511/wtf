@@ -30,7 +30,9 @@ From the checkout root, install documentation tools into the development venv:
 .venv/bin/python -m mkdocs serve --dev-addr 127.0.0.1:8002
 ```
 
-Open <http://127.0.0.1:8002/wtf/>. Stop the preview with Ctrl+C. Documentation tools
+Open <http://127.0.0.1:8002/wtf/>. Stop the preview with Ctrl+C. Restart the
+server after editing Python build hooks or their imported helpers so cached
+Python modules are reloaded. Markdown and media changes reload automatically. Documentation tools
 are separate from `requirements.txt` and are not simulator dependencies.
 The generated site lives under ignored `.cache/docs-site/` and is rebuilt from
 source. Do not commit generated HTML, a second copy of the guides or a `gh-pages`

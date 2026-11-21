@@ -5,6 +5,25 @@
 These intentional documentation assets are tracked in Git; experiment results
 remain ignored and original videos stay outside the repository.
 
+## Light/dark preview behavior
+
+Start at **Home → All visuals → visual name** for an embedded preview with the
+MkDocs palette toggle. The original-file column keeps the exact source asset
+available separately. Opening a raw file leaves the site's theme controls.
+
+| Asset kind | Preview behavior |
+| --- | --- |
+| Structural, physics, map and inspector SVGs | Adaptive palettes follow the site toggle |
+| Theme/daylight comparison sheets | Outer labels/backgrounds adapt; explicit comparison samples keep their colors |
+| Playback GIFs and light WebP variants | Select the matching recorded export, without color inversion |
+| Logo SVG/PNG variants | Select the matching light/dark artwork; favicon PNG has a contrasting presentation surface |
+| Full physics explorer / editable fragment | Embed the complete interactive explorer with inherited light/dark mode; the fragment remains an editable-source download |
+| GitHub banner PNG | Fixed screenshot shown unchanged, with its purpose stated explicitly |
+
+Preview pages are generated during the MkDocs build and reuse the original media.
+The catalog does not eagerly embed every image or animation. See the
+[complete click sequences](../access-map.md) for each page, file and runtime copy.
+
 ## Project identity
 
 The [branding guide](../branding.md) links the transparent SVG symbols, full
