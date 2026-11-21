@@ -1,0 +1,33 @@
+# Default-deny context: runtime sources and maintained presets only.
+**
+!_build_support.py
+!LICENSE
+!Dockerfile
+!PYPI_README.md
+!pyproject.toml
+!requirements.txt
+!environment.schema.json
+!ecosystem/
+!ecosystem/**
+!viewer/
+!viewer/**
+!environments/
+!environments/**
+!maps/
+!maps/**
+!examples/
+!examples/**
+!work/
+!work/build_native.py
+# Never reuse a host binary or include local experiments/cache artifacts.
+**/__pycache__
+**/*.pyc
+**/*.so
+**/*.pyd
+**/*.dll
+**/*.dylib
+**/.DS_Store
+environments/local/
+environments/escape_intent_*.json
+environments/mating_intent_ppo.json
+examples/.ipynb_checkpoints/

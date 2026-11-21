@@ -190,3 +190,6 @@ Adam moments, RNG restoration and exact subsequent steps were checked with short
 controlled fixtures. The existing all-algorithm binary continuation test also
 covers all nine algorithms with XZ/gzip. These validate the explanations; no
 experiment files were changed and no learning-quality claim is made.
+
+For package-versus-format support and cross-machine limits, see the
+[artifact compatibility policy](compatibility.md).

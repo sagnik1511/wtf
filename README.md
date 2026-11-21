@@ -13,6 +13,8 @@ rendering independent. Replay chunks use structured binary deltas and lossless X
 A short replay of a saved experiment. See the [live species charts](docs/recording.md#per-step-species-dashboard)
 for population, energy, births and hunting trends.
 
+For Python and Docker setup, see [INSTALL.md](INSTALL.md).
+
 ## Quick start
 
 Requires Python 3.9+. Run from the project directory:
@@ -50,11 +52,17 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 | Guide | Contents |
 | --- | --- |
 | [Visual guide](docs/visual-guide.md) | Find diagrams for simulation, learning, inheritance, storage and workflows |
+| [Complete tutorial](docs/tutorial.md) | Full Python example from configuration through recording, analysis and checkpoint restore |
+| [Python distribution](docs/packaging.md) | Build/install wheels and source archives, bundled assets and isolated installation checks |
+| [Linux and Ubuntu](docs/linux.md) | Portable setup, optional native compilation and Ubuntu CI coverage |
+| [Docker](docs/docker.md) | Container build, training and read-only playback commands |
+| [Compatibility](docs/compatibility.md) | Package/API policy and checkpoint, brain and replay format support |
 | [Setup and runs](docs/running.md) | Installation, CLI flags, seeds, progress and exact checkpoint resume |
 | [Physics illustrated](docs/physics.md) | Interactive examples and diagrams for visibility, water, elevation and reproduction |
 | [Geography and terrain](docs/geography.md) | Full-viewer terrain GIFs, river currents, swimming, elevation and map presets |
 | [Adding species](docs/species.md) | Named prey/predator species, diets, colors and species/sex champions |
 | [Animal observations](docs/observations.md) | Visibility, top-k target slots and brain input layouts |
+| [Customization handbook](docs/customization.md) | What to edit, definitions of every configuration field, species recipes and new-policy integration |
 | [Configuration](docs/configuration.md) | Presets, populations, food, obstacles and reproduction |
 | [Learning algorithms](docs/algorithms.md) | Q-learning, PPO, A2C, REINFORCE, experimental GRPO and network settings |
 | [Saved brains](docs/brain-library.md) | Champions, warm starts, compatibility and model generations |
@@ -82,3 +90,7 @@ tests/         Python and JavaScript checks
 Generated `results/`, `brain_library/`, `.cache/` and `.venv/` remain local and are
 ignored by Git. Observed survival and champion scores are useful diagnostics;
 checking learning quality requires matched evaluation on unseen world seeds.
+
+## License
+
+Copyright © 2026 Sagnik Roy. Released under the [MIT License](LICENSE).

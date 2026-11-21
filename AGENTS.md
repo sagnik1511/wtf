@@ -48,6 +48,35 @@ rather than loading every document or result into context.
 - Keep shared examples portable: use repo-relative paths or `/path/to/wtf`,
   without personal usernames or machine-specific home paths.
 
+## Customization and extension contracts
+
+Use the [customization handbook](docs/customization.md),
+[complete schema field definitions](docs/configuration-reference.md),
+[species recipe](docs/species.md) and [policy checklist](docs/extending-policies.md)
+when changing the setup. Every new schema property needs a meaningful description;
+update Python validation and regenerate/check the field reference with
+`python -m work.build_config_reference`. Existing algorithms/species are JSON
+choices; new type identifiers need explicit dispatch, signatures, persistence,
+birth/mutation, diagnostics/viewer semantics and test-fixture integration.
+Use [world/action extensions](docs/extending-worlds-and-actions.md) for new map
+mechanisms or action implementations; review masks, effort, native fallbacks,
+observations, replay codecs and viewer semantics together.
+There is no dynamic external-policy plugin registry unless one is implemented
+and documented. Keep tutorial recipes clearly separate from installed support.
+
+## Distribution resources and platform checks
+
+Preserve installation from a wheel/sdist outside this checkout. Runtime assets
+are allowlisted in `packaging_assets.json` and located by `resources.py`; new
+shipped presets, maps and viewer modules must enter that list. Read-only package
+assets and writable current-directory/explicit result/library paths are separate.
+Do not import training eagerly from the package root just to expose public names.
+Check installed commands, viewer HTTP assets, map presets, replay and checkpoint
+restore using `work/check_installation.py` in an isolated venv/working directory.
+Pure Python is the portable default; native builds are opt-in and must never reuse
+a host `.so`/`.pyd`. Ubuntu CI configuration is not evidence of an executed pass.
+Do not publish or run containers unless authorized.
+
 ## Documentation boundaries
 
 Keep package Markdown focused on current mechanics, interfaces, configuration,

@@ -5,8 +5,6 @@ import math
 from pathlib import Path
 from types import MappingProxyType
 
-PROJECT = Path(__file__).resolve().parent.parent
-
 
 def resolve_map(value):
     if isinstance(value, dict) and "map_file" in value:
@@ -20,7 +18,12 @@ def resolve_map(value):
             )
         path = Path(value["map_file"]).expanduser()
         if not path.is_absolute():
-            path = PROJECT / path
+            local = Path.cwd() / path
+            if local.is_file():
+                return json.loads(local.read_text())
+            from .resources import asset
+
+            return json.loads(asset(path.as_posix()).read_text(encoding="utf-8"))
         return json.loads(path.read_text())
     return value
 

@@ -436,3 +436,11 @@ Dynamic target positions, deaths and resource depletion still invalidate spatial
 results. Sight result keys include base radius and bonus, even if their sum is
 unchanged. These caches are transient and reconstructed after checkpoint restore;
 no per-frame water data or new replay fields are stored.
+
+## Installed preset/map resources
+
+Installed wheels bundle maintained presets and maps. Relative `map_file` paths
+resolve from the working directory first, then bundled/project assets. Use an
+absolute path for an unambiguous external map. Add shipped maps/presets to
+`packaging_assets.json`; local exploratory JSONs remain excluded. See
+[packaging and resource checks](packaging.md).

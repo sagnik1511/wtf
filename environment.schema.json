@@ -6,21 +6,25 @@
       "required": ["map_version", "name", "width", "height", "rows", "legend"],
       "properties": {
         "map_version": {
-          "const": 1
+          "const": 1,
+          "description": "Terrain map format version, independent of environment schema_version."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Stable environment or map name; experiment folder names use the environment name."
         },
         "width": {
           "type": "integer",
           "minimum": 3,
-          "maximum": 256
+          "maximum": 256,
+          "description": "Grid width in cells; must match the map width when terrain is supplied."
         },
         "height": {
           "type": "integer",
           "minimum": 3,
-          "maximum": 256
+          "maximum": 256,
+          "description": "Grid height in cells; must match the map height when terrain is supplied."
         },
         "rows": {
           "type": "array",
@@ -30,7 +34,8 @@
             "type": "string",
             "minLength": 3,
             "maxLength": 256
-          }
+          },
+          "description": "Equal-width strings of terrain symbols, one per map row."
         },
         "legend": {
           "type": "object",
@@ -45,15 +50,18 @@
               "elevation": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Absolute tile elevation used for climbing differences and rendering."
               },
               "blocked": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether this terrain symbol contributes a blocking obstacle."
               },
               "water_depth": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Water depth at this tile; zero means dry land."
               },
               "flow": {
                 "type": "array",
@@ -63,10 +71,12 @@
                   "type": "number",
                   "minimum": -4,
                   "maximum": 4
-                }
+                },
+                "description": "Water-current vector [dx, dy] in grid cells per step; fractional drift is retained."
               }
             }
-          }
+          },
+          "description": "Map symbol definitions for elevation, blocking, water depth and flow."
         }
       }
     },
@@ -79,7 +89,8 @@
           "properties": {
             "path": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "description": "Path to archived champion metadata, not a replay or exact checkpoint file."
             }
           }
         },
@@ -89,7 +100,8 @@
           "required": ["selection", "metric"],
           "properties": {
             "selection": {
-              "enum": ["best", "latest"]
+              "enum": ["best", "latest"],
+              "description": "Shared-library selection strategy for the requested champion metric."
             },
             "metric": {
               "enum": [
@@ -99,7 +111,8 @@
                 "food",
                 "balanced",
                 "lineage"
-              ]
+              ],
+              "description": "Champion ranking criterion to select from the requested library/archive context."
             }
           }
         }
@@ -120,26 +133,32 @@
           "properties": {
             "map_file": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "description": "Path to a terrain map JSON; relative paths resolve from the current working directory first, then bundled/project assets."
             }
           }
         }
-      ]
+      ],
+      "description": "Optional map geometry, either an inline terrain map or a map_file reference."
     },
     "schema_version": {
-      "const": 1
+      "const": 1,
+      "description": "Environment document schema version, not a package or checkpoint version."
     },
     "name": {
       "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]+$"
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "description": "Stable environment or map name; experiment folder names use the environment name."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Human-readable purpose of this preset; does not affect physics."
     },
     "seed": {
       "type": "integer",
       "minimum": 100,
-      "maximum": 4294967295
+      "maximum": 4294967295,
+      "description": "Base seed for layout, controllers and reproducible run-seed generation; CLI overrides can replace it."
     },
     "world": {
       "type": "object",
@@ -147,35 +166,42 @@
         "width": {
           "type": "integer",
           "minimum": 3,
-          "maximum": 256
+          "maximum": 256,
+          "description": "Grid width in cells; must match the map width when terrain is supplied."
         },
         "height": {
           "type": "integer",
           "minimum": 3,
-          "maximum": 256
+          "maximum": 256,
+          "description": "Grid height in cells; must match the map height when terrain is supplied."
         },
         "boundary": {
-          "const": "closed"
+          "const": "closed",
+          "description": "World boundary behavior; current worlds use closed edges."
         },
         "max_steps": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 10000000
+          "maximum": 10000000,
+          "description": "Maximum simulation steps per episode, not wall-clock seconds."
         }
       },
       "required": ["width", "height", "boundary", "max_steps"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Grid dimensions, boundary rule and maximum episode duration."
     },
     "obstacles": {
       "type": "object",
       "properties": {
         "generation": {
-          "enum": ["scattered", "explicit"]
+          "enum": ["scattered", "explicit"],
+          "description": "Choose scattered random obstacle generation or an explicit obstacle list."
         },
         "occupied_fraction": {
           "type": "number",
           "minimum": 0,
-          "maximum": 0.8
+          "maximum": 0.8,
+          "description": "Fraction of world cells selected as scattered obstacles."
         },
         "explicit_cells": {
           "type": "array",
@@ -189,11 +215,13 @@
               "minimum": 0,
               "maximum": 255
             }
-          }
+          },
+          "description": "Obstacle coordinates as [x, y] pairs; used by explicit generation."
         }
       },
       "required": ["generation", "occupied_fraction", "explicit_cells"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Blocking-cell generation or explicit coordinates."
     },
     "resources": {
       "type": "object",
@@ -201,19 +229,23 @@
         "patch_count": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 65536
+          "maximum": 65536,
+          "description": "Number of resource patches placed in free eligible cells."
         },
         "capacity_per_patch": {
           "type": "number",
-          "minimum": 0.001
+          "minimum": 0.001,
+          "description": "Maximum food quantity held by each patch."
         },
         "initial_quantity_per_patch": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Starting food quantity in each patch; cannot exceed capacity."
         },
         "growth_per_step": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Food quantity regenerated per patch per simulation step, capped by capacity."
         }
       },
       "required": [
@@ -222,7 +254,8 @@
         "initial_quantity_per_patch",
         "growth_per_step"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Shared food patch placement, capacity and regrowth."
     },
     "species": {
       "type": "object",
@@ -236,34 +269,41 @@
             "properties": {
               "swim_min_health": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Minimum health required for active swimming under terrain rules."
               },
               "swim_energy_cost": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Additional energy effort for a swim action."
               },
               "water_energy_cost": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Additional energy charged for occupying water, scaled by depth."
               },
               "drowning_damage": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Depth-scaled health damage under the configured unsafe-water conditions."
               },
               "uphill_energy_cost": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Additional energy charged per positive elevation difference traversed."
               },
               "max_climb": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Maximum permitted positive elevation change for ordinary movement."
               }
-            }
+            },
+            "description": "Optional swimming, water exposure and elevation movement rules."
           },
           "display": {
             "type": "object",
@@ -271,13 +311,16 @@
             "properties": {
               "color": {
                 "type": "string",
-                "pattern": "^#[0-9A-Fa-f]{6}$"
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "Female/base species color as a six-digit hex string."
               },
               "male_color": {
                 "type": "string",
-                "pattern": "^#[0-9A-Fa-f]{6}$"
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "Male species color as a six-digit hex string; male body outlines remain a separate cue."
               }
-            }
+            },
+            "description": "Optional stable species/sex colors for the viewer, separate from physics and brain signatures."
           },
           "initial_brains": {
             "type": "object",
@@ -291,7 +334,8 @@
                   {
                     "$ref": "#/$defs/initialBrain"
                   }
-                ]
+                ],
+                "description": "Override for this species' female initialization or champion-selection group."
               },
               "male": {
                 "anyOf": [
@@ -301,9 +345,11 @@
                   {
                     "$ref": "#/$defs/initialBrain"
                   }
-                ]
+                ],
+                "description": "Override for this species' male initialization or champion-selection group."
               }
-            }
+            },
+            "description": "Optional female and male initial champion selectors resolved independently."
           },
           "champion_selection_by_sex": {
             "type": "object",
@@ -317,7 +363,8 @@
                   "food",
                   "balanced",
                   "lineage"
-                ]
+                ],
+                "description": "Override for this species' female initialization or champion-selection group."
               },
               "male": {
                 "enum": [
@@ -327,9 +374,11 @@
                   "food",
                   "balanced",
                   "lineage"
-                ]
+                ],
+                "description": "Override for this species' male initialization or champion-selection group."
               }
-            }
+            },
+            "description": "Female/male champion criterion overrides within this exact species."
           },
           "initial_brain": {
             "oneOf": [
@@ -339,7 +388,8 @@
                 "properties": {
                   "path": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "description": "Path to archived champion metadata, not a replay or exact checkpoint file."
                   }
                 },
                 "required": ["path"]
@@ -349,7 +399,8 @@
                 "additionalProperties": false,
                 "properties": {
                   "selection": {
-                    "enum": ["best", "latest"]
+                    "enum": ["best", "latest"],
+                    "description": "Shared-library selection strategy for the requested champion metric."
                   },
                   "metric": {
                     "enum": [
@@ -359,20 +410,24 @@
                       "food",
                       "balanced",
                       "lineage"
-                    ]
+                    ],
+                    "description": "Champion ranking criterion to select from the requested library/archive context."
                   }
                 },
                 "required": ["selection", "metric"]
               }
-            ]
+            ],
+            "description": "Species-wide champion selector used when a sex-specific initializer does not override it."
           },
           "initial_population": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 10000
+            "maximum": 10000,
+            "description": "Number of founder animals of this species."
           },
           "diet": {
-            "enum": ["resource", "prey"]
+            "enum": ["resource", "prey"],
+            "description": "Resource-eating animals consume food patches; prey-eating animals hunt resource-eating animals across species."
           },
           "allowed_actions": {
             "type": "array",
@@ -392,7 +447,8 @@
                 "strafe_left",
                 "strafe_right"
               ]
-            }
+            },
+            "description": "Ordered action names available to this species; order is part of saved-model compatibility."
           },
           "body": {
             "oneOf": [
@@ -401,45 +457,55 @@
                 "properties": {
                   "initial_energy": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Energy granted to a founder or newborn of this species."
                   },
                   "max_energy": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "exclusiveMinimum": 0,
+                    "description": "Upper bound on stored animal energy."
                   },
                   "max_health": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "exclusiveMinimum": 0,
+                    "description": "Initial health and health cap; current reproduction eligibility uses absolute health units."
                   },
                   "living_cost": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Energy charged each step regardless of selected action, before circadian scaling."
                   },
                   "movement_cost": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Additional energy charged for movement actions, before circadian scaling and geography surcharges."
                   },
                   "starvation_damage": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Health lost per step while energy is exhausted."
                   },
                   "vision_radius": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 256
+                    "maximum": 256,
+                    "description": "Base radial sight distance in grid cells before optional sunlight and water modifiers."
                   },
                   "bite_size": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Maximum food units consumed by one successful eat action."
                   },
                   "energy_per_food_unit": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Energy granted per consumed food unit, subject to the animal energy cap."
                   },
                   "water_vision_bonus": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 32
+                    "maximum": 32,
+                    "description": "Maximum additional sight cells permitted along open-water rays."
                   }
                 },
                 "required": [
@@ -460,49 +526,60 @@
                 "properties": {
                   "initial_energy": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Energy granted to a founder or newborn of this species."
                   },
                   "max_energy": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "exclusiveMinimum": 0,
+                    "description": "Upper bound on stored animal energy."
                   },
                   "max_health": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "exclusiveMinimum": 0,
+                    "description": "Initial health and health cap; current reproduction eligibility uses absolute health units."
                   },
                   "living_cost": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Energy charged each step regardless of selected action, before circadian scaling."
                   },
                   "movement_cost": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Additional energy charged for movement actions, before circadian scaling and geography surcharges."
                   },
                   "starvation_damage": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Health lost per step while energy is exhausted."
                   },
                   "vision_radius": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 256
+                    "maximum": 256,
+                    "description": "Base radial sight distance in grid cells before optional sunlight and water modifiers."
                   },
                   "attack_damage": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Health damage contributed by an attack; simultaneous attackers share kill credit rules."
                   },
                   "attack_cost": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Additional energy cost of selecting attack."
                   },
                   "energy_per_kill": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Energy supplied by a kill, subject to the killer energy cap and shared-kill accounting."
                   },
                   "water_vision_bonus": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 32
+                    "maximum": 32,
+                    "description": "Maximum additional sight cells permitted along open-water rays."
                   }
                 },
                 "required": [
@@ -519,10 +596,12 @@
                 ],
                 "additionalProperties": false
               }
-            ]
+            ],
+            "description": "Physical energy, health, sight and diet-specific feeding/combat parameters."
           },
           "brain": {
-            "type": "string"
+            "type": "string",
+            "description": "Key of the brain template used to initialize this species; each animal receives independent live state."
           },
           "champion_selection": {
             "type": "object",
@@ -537,19 +616,22 @@
                   "food",
                   "balanced",
                   "lineage"
-                ]
+                ],
+                "description": "Champion ranking objective; permitted values and role restrictions are validated separately."
               },
               "survival_steps_per_kill": {
                 "type": "number",
                 "minimum": 1,
                 "maximum": 10000000,
-                "default": 300
+                "default": 300,
+                "description": "Age normalization for the survival bonus in balanced predator selection."
               },
               "max_survival_bonus": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 100,
-                "default": 2
+                "default": 2,
+                "description": "Maximum survival bonus added to kills by balanced predator scoring."
               },
               "lineage_min_age_steps": {
                 "type": "integer",
@@ -557,7 +639,8 @@
                 "maximum": 10000000,
                 "description": "Lineage maturity gate; defaults to reproduction.min_age_steps (at least one step)."
               }
-            }
+            },
+            "description": "Default criterion and scoring parameters used to curate this species' champions."
           },
           "learning_rate_multiplier": {
             "type": "number",
@@ -572,35 +655,41 @@
               "per_energy_gained": {
                 "type": "number",
                 "minimum": -100000,
-                "maximum": 100000
+                "maximum": 100000,
+                "description": "Reward per actual energy unit gained from feeding/hunting."
               },
               "per_energy_cost": {
                 "type": "number",
                 "minimum": -100000,
                 "maximum": 0,
-                "default": 0
+                "default": 0,
+                "description": "Reward coefficient on charged energy demand; normally negative to penalize effort."
               },
               "failed_action": {
                 "type": "number",
                 "minimum": -100000,
                 "maximum": 0,
-                "default": 0
+                "default": 0,
+                "description": "Additional reward/penalty when an attempted action fails."
               },
               "per_offspring": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 100000,
-                "default": 0
+                "default": 0,
+                "description": "Reward credited to a successful parent for producing offspring."
               },
               "per_damage_taken": {
                 "type": "number",
                 "minimum": -100000,
-                "maximum": 100000
+                "maximum": 100000,
+                "description": "Reward coefficient per health damage received; normally negative."
               },
               "death": {
                 "type": "number",
                 "minimum": -100000,
-                "maximum": 100000
+                "maximum": 100000,
+                "description": "Terminal reward/penalty when the animal dies."
               },
               "per_damage_dealt": {
                 "type": "number",
@@ -611,7 +700,8 @@
               }
             },
             "required": ["per_energy_gained", "per_damage_taken", "death"],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "Coefficients converting physical events, energy costs and failed choices into learning feedback."
           },
           "mutation": {
             "type": "object",
@@ -624,36 +714,43 @@
             ],
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Enable the containing optional feature; meaning and required companion fields depend on that feature."
               },
               "probability_per_birth": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Probability of attempting a mutation on an individual newborn."
               },
               "max_changed_weights": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1024
+                "maximum": 1024,
+                "description": "Maximum distinct eligible matrix weights selected in a successful mutation event."
               },
               "noise_std": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Standard deviation of additive Gaussian mutation noise."
               }
-            }
+            },
+            "description": "Rare newborn-only weight perturbation settings; does not mutate the whole species."
           },
           "reproduction": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Enable the containing optional feature; meaning and required companion fields depend on that feature."
               },
               "mate_radius": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Proximal mate distance in cells, combined with same-species, physical-route and birth-space checks."
               },
               "intent_steps": {
                 "type": "integer",
@@ -663,52 +760,62 @@
               },
               "health_threshold": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Each parent's health must be strictly above this absolute value to reproduce."
               },
               "min_age_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 10000000
+                "maximum": 10000000,
+                "description": "Central age in steps at which an animal can first become eligible to reproduce."
               },
               "cooldown_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 10000000
+                "maximum": 10000000,
+                "description": "Central number of age steps required between successful reproductions."
               },
               "age_deviation_pct": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "First-maturity window half-width as a percentage of min_age_steps; takes precedence over legacy absolute deviation."
               },
               "age_deviation_steps": {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 10000000,
-                "deprecated": true
+                "deprecated": true,
+                "description": "Legacy first-maturity window half-width in absolute steps; prefer age_deviation_pct."
               },
               "cooldown_deviation_pct": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Cooldown window half-width as a percentage of cooldown_steps; takes precedence over legacy absolute deviation."
               },
               "cooldown_deviation_steps": {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 10000000,
-                "deprecated": true
+                "deprecated": true,
+                "description": "Legacy cooldown window half-width in absolute steps; prefer cooldown_deviation_pct."
               },
               "min_energy": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Minimum current energy required from each eligible parent."
               },
               "energy_cost": {
                 "type": "number",
-                "minimum": 0.001
+                "minimum": 0.001,
+                "description": "Energy charged to each successful parent at reproduction; not a full health reset."
               },
               "max_population": {
                 "type": "integer",
                 "minimum": 0,
-                "maximum": 10000
+                "maximum": 10000,
+                "description": "Living population cap for this exact species; includes founders and children."
               }
             },
             "required": [
@@ -719,7 +826,8 @@
               "min_energy",
               "energy_cost",
               "max_population"
-            ]
+            ],
+            "description": "Same-species opposite-sex eligibility, consent window, maturity, cost and population limits."
           },
           "circadian": {
             "type": "object",
@@ -728,19 +836,23 @@
               "night_vision_radius_multiplier": {
                 "type": "number",
                 "minimum": 0.05,
-                "maximum": 4
+                "maximum": 4,
+                "description": "Night-time base sight multiplier; blends toward one at midday, then rounds to a valid grid radius."
               },
               "night_living_cost_multiplier": {
                 "type": "number",
                 "minimum": 0.05,
-                "maximum": 4
+                "maximum": 4,
+                "description": "Night-time living-cost multiplier; blends toward one with sunlight."
               },
               "night_movement_cost_multiplier": {
                 "type": "number",
                 "minimum": 0.05,
-                "maximum": 4
+                "maximum": 4,
+                "description": "Night-time movement-cost multiplier; blends toward one with sunlight."
               }
-            }
+            },
+            "description": "Species-specific night multipliers, used only when the world day_night cycle is enabled."
           }
         },
         "required": [
@@ -752,7 +864,8 @@
           "rewards"
         ],
         "additionalProperties": false
-      }
+      },
+      "description": "Named species definitions at the root, species spawn-zone assignments under placement, or monitored species names under early_stopping; keys/names must match the environment."
     },
     "brains": {
       "type": "object",
@@ -763,11 +876,13 @@
             "type": "object",
             "properties": {
               "type": {
-                "const": "q_network"
+                "const": "q_network",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "hidden_layers": {
                 "type": "array",
@@ -777,42 +892,50 @@
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 256
-                }
+                },
+                "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "replay_capacity": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Maximum stored experience transitions for replay-based learners."
               },
               "learning_starts_after": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Minimum collected experiences before replay-based optimization begins."
               },
               "train_every_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Decision-step interval between replay updates or GRPO trial requests, depending on algorithm."
               },
               "target_update_every_training_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Optimizer-update interval between target-network synchronizations."
               },
               "exploration": {
                 "type": "object",
@@ -820,27 +943,32 @@
                   "initial": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "description": "Initial epsilon random-action probability."
                   },
                   "minimum": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "description": "Minimum epsilon random-action probability."
                   },
                   "decay_per_decision": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "description": "Multiplicative epsilon decay per decision, bounded by minimum."
                   }
                 },
                 "required": ["initial", "minimum", "decay_per_decision"],
-                "additionalProperties": false
+                "additionalProperties": false,
+                "description": "Epsilon-greedy action-exploration schedule for value-based learners."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -862,11 +990,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "ppo"
+                "const": "ppo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -874,7 +1004,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -884,76 +1015,92 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "gae_lambda": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
               },
               "clip_ratio": {
                 "type": "number",
                 "minimum": 0.001,
-                "maximum": 1
+                "maximum": 1,
+                "description": "PPO/GRPO policy-ratio clipping width around one."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "value_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
               },
               "rollout_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
               },
               "epochs": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 20
+                "maximum": 20,
+                "description": "Optimizer passes over a collected PPO/GRPO rollout or trial group."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "normalize_advantages": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
               },
               "target_kl": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Optional KL early-stop threshold during repeated policy optimization."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -977,11 +1124,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "a2c"
+                "const": "a2c",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -989,7 +1138,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -999,56 +1149,68 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "gae_lambda": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
               },
               "value_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
               },
               "rollout_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
               },
               "normalize_advantages": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1069,11 +1231,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "reinforce"
+                "const": "reinforce",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -1081,7 +1245,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -1091,51 +1256,62 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "max_episode_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 10000000
+                "maximum": 10000000,
+                "description": "REINFORCE trajectory flush horizon; align with the episode schedule as appropriate."
               },
               "baseline_decay": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Moving-baseline decay factor used by REINFORCE."
               },
               "normalize_advantages": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1155,11 +1331,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "grpo"
+                "const": "grpo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -1167,7 +1345,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -1177,78 +1356,94 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "clip_ratio": {
                 "type": "number",
                 "minimum": 0.001,
-                "maximum": 1
+                "maximum": 1,
+                "description": "PPO/GRPO policy-ratio clipping width around one."
               },
               "kl_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "GRPO penalty weight for divergence from its reference policy."
               },
               "group_size": {
                 "type": "integer",
                 "minimum": 2,
-                "maximum": 8
+                "maximum": 8,
+                "description": "Number of matched GRPO trials compared at an update opportunity."
               },
               "rollout_horizon": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 16
+                "maximum": 16,
+                "description": "Simulation-step horizon of each GRPO trial."
               },
               "train_every_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Decision-step interval between replay updates or GRPO trial requests, depending on algorithm."
               },
               "epochs": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 20
+                "maximum": 20,
+                "description": "Optimizer passes over a collected PPO/GRPO rollout or trial group."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 128
+                "maximum": 128,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "target_kl": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Optional KL early-stop threshold during repeated policy optimization."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1272,11 +1467,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "recurrent_ppo"
+                "const": "recurrent_ppo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -1284,7 +1481,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -1294,86 +1492,104 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "gae_lambda": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
               },
               "clip_ratio": {
                 "type": "number",
                 "minimum": 0.001,
-                "maximum": 1
+                "maximum": 1,
+                "description": "PPO/GRPO policy-ratio clipping width around one."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "value_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
               },
               "rollout_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
               },
               "epochs": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 20
+                "maximum": 20,
+                "description": "Optimizer passes over a collected PPO/GRPO rollout or trial group."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "normalize_advantages": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
               },
               "target_kl": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Optional KL early-stop threshold during repeated policy optimization."
               },
               "recurrent_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 128
+                "maximum": 128,
+                "description": "GRU memory width for recurrent PPO; part of model compatibility."
               },
               "sequence_length": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 128
+                "maximum": 128,
+                "description": "Maximum recurrent training sequence length."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1399,11 +1615,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "maskable_ppo"
+                "const": "maskable_ppo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -1411,7 +1629,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -1421,76 +1640,92 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "gae_lambda": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
               },
               "clip_ratio": {
                 "type": "number",
                 "minimum": 0.001,
-                "maximum": 1
+                "maximum": 1,
+                "description": "PPO/GRPO policy-ratio clipping width around one."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "value_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
               },
               "rollout_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
               },
               "epochs": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 20
+                "maximum": 20,
+                "description": "Optimizer passes over a collected PPO/GRPO rollout or trial group."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "normalize_advantages": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
               },
               "target_kl": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Optional KL early-stop threshold during repeated policy optimization."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1514,11 +1749,13 @@
             "additionalProperties": false,
             "properties": {
               "type": {
-                "const": "mappo"
+                "const": "mappo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
@@ -1526,7 +1763,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -1536,70 +1774,85 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "gae_lambda": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
               },
               "clip_ratio": {
                 "type": "number",
                 "minimum": 0.001,
-                "maximum": 1
+                "maximum": 1,
+                "description": "PPO/GRPO policy-ratio clipping width around one."
               },
               "entropy_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
               },
               "value_coefficient": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 10
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
               },
               "rollout_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
               },
               "epochs": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 20
+                "maximum": 20,
+                "description": "Optimizer passes over a collected PPO/GRPO rollout or trial group."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4096
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "normalize_advantages": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
               },
               "target_kl": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Optional KL early-stop threshold during repeated policy optimization."
               },
               "critic_hidden_layers": {
                 "type": "array",
@@ -1609,13 +1862,15 @@
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 256
-                }
+                },
+                "description": "MAPPO centralized critic widths; the local actor remains a separate route."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1639,46 +1894,55 @@
             "type": "object",
             "properties": {
               "type": {
-                "const": "qrdqn"
+                "const": "qrdqn",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
                 "enum": [1, 2, 3, 4],
-                "maximum": 4
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "learning_rate": {
                 "type": "number",
                 "minimum": 1e-6,
-                "maximum": 0.1
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
               },
               "discount_factor": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 1
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
               },
               "batch_size": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
               },
               "replay_capacity": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Maximum stored experience transitions for replay-based learners."
               },
               "learning_starts_after": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Minimum collected experiences before replay-based optimization begins."
               },
               "train_every_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Decision-step interval between replay updates or GRPO trial requests, depending on algorithm."
               },
               "target_update_every_training_steps": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 1000000
+                "maximum": 1000000,
+                "description": "Optimizer-update interval between target-network synchronizations."
               },
               "exploration": {
                 "type": "object",
@@ -1686,21 +1950,25 @@
                   "initial": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "description": "Initial epsilon random-action probability."
                   },
                   "minimum": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "description": "Minimum epsilon random-action probability."
                   },
                   "decay_per_decision": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "description": "Multiplicative epsilon decay per decision, bounded by minimum."
                   }
                 },
                 "required": ["initial", "minimum", "decay_per_decision"],
-                "additionalProperties": false
+                "additionalProperties": false,
+                "description": "Epsilon-greedy action-exploration schedule for value-based learners."
               },
               "network": {
                 "type": "object",
@@ -1708,7 +1976,8 @@
                 "required": ["type", "hidden_layers"],
                 "properties": {
                   "type": {
-                    "const": "mlp"
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
                   },
                   "hidden_layers": {
                     "type": "array",
@@ -1718,33 +1987,40 @@
                       "type": "integer",
                       "minimum": 1,
                       "maximum": 256
-                    }
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
                   },
                   "activation": {
-                    "const": "tanh"
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
                   }
-                }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
               },
               "num_quantiles": {
                 "type": "integer",
                 "minimum": 2,
-                "maximum": 128
+                "maximum": 128,
+                "description": "Number of return quantiles per action in QR-DQN."
               },
               "huber_threshold": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Huber transition threshold for quantile-regression loss."
               },
               "max_grad_norm": {
                 "type": "number",
                 "minimum": 1e-5,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
               "observation_top_k": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16,
-                "default": 1
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
               }
             },
             "required": [
@@ -1765,7 +2041,8 @@
             "additionalProperties": false
           }
         ]
-      }
+      },
+      "description": "Named controller templates; a template name is separate from its algorithm type."
     },
     "experiment": {
       "type": "object",
@@ -1773,32 +2050,39 @@
         "runs": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 1000000
+          "maximum": 1000000,
+          "description": "Maximum number of episodes in this experiment; early stopping may finish sooner."
         },
         "chain_best_brains": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "description": "Initialize later fresh episodes from matching retained champion groups when enabled."
         },
         "retain_brains_between_runs": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Legacy controller-retention compatibility flag; modern champion chaining is governed by chain_best_brains."
         },
         "world_seed_policy": {
-          "enum": ["random", "fixed", "increment"]
+          "enum": ["random", "fixed", "increment"],
+          "description": "Choose random, fixed or incrementing world seeds across runs; CLI seed overrides are recorded."
         },
         "record_metrics_every_steps": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 1000000
+          "maximum": 1000000,
+          "description": "Simulation-step interval for readable training metric records; final metrics are forced."
         },
         "checkpoint_every_runs": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 1000000
+          "maximum": 1000000,
+          "description": "Completed-run interval for intermediate exact checkpoints in the CLI; final state is saved separately."
         },
         "grpo_updates_per_step": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 8
+          "maximum": 8,
+          "description": "Maximum GRPO animal trial updates scheduled in one real-world step."
         },
         "guard_lineage_chaining": {
           "type": "boolean",
@@ -1830,7 +2114,8 @@
             }
           },
           "required": ["patience_runs"],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Optional consecutive-run stagnation limit and monitored species."
         }
       },
       "required": [
@@ -1840,7 +2125,8 @@
         "record_metrics_every_steps",
         "checkpoint_every_runs"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Run schedule, seeding, model chaining, metric cadence and checkpoint behavior."
     },
     "recording": {
       "type": "object",
@@ -1853,42 +2139,51 @@
       ],
       "properties": {
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Enable the containing optional feature; meaning and required companion fields depend on that feature."
         },
         "frame_every_steps": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 1000000
+          "maximum": 1000000,
+          "description": "World-step interval between recorded playback frames; sparse frames omit intermediate events."
         },
         "frames_per_chunk": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 256
+          "maximum": 256,
+          "description": "Maximum committed replay frames per independently loadable chunk."
         },
         "encoding": {
           "enum": ["binary", "delta", "snapshot"],
-          "default": "binary"
+          "default": "binary",
+          "description": "Replay representation: legacy full snapshots, JSON deltas or structured binary according to allowed values."
         },
         "compression": {
           "enum": ["gzip", "xz", "none"],
-          "default": "xz"
+          "default": "xz",
+          "description": "Replay transport compression; independent of the logical encoding."
         },
         "compression_level": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9,
-          "default": 6
+          "default": 6,
+          "description": "Compression effort level used for the selected replay compressor."
         },
         "diagnostics_every_steps": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 1000000
+          "maximum": 1000000,
+          "description": "Step interval for sampled brain inputs/outputs/activations, with chunk-start/final capture rules; zero disables all diagnostic capture."
         },
         "record_activations": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "description": "Include compact sampled hidden activations for actual-animal playback; does not add weights."
         }
-      }
+      },
+      "description": "Optional replay cadence, chunk format/compression and sampled brain diagnostics."
     },
     "placement": {
       "type": "object",
@@ -1903,13 +2198,15 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 255
-          }
+          },
+          "description": "Rectangle [left, top, right, bottom] defining inside, outside and boundary zones."
         },
         "species": {
           "type": "object",
           "additionalProperties": {
             "enum": ["inside", "outside"]
-          }
+          },
+          "description": "Named species definitions at the root, species spawn-zone assignments under placement, or monitored species names under early_stopping; keys/names must match the environment."
         },
         "resources": {
           "type": "object",
@@ -1923,21 +2220,26 @@
             "boundary_fraction": {
               "type": "number",
               "minimum": 0,
-              "maximum": 1
+              "maximum": 1,
+              "description": "Fraction of resource patches allocated near the enclosure boundary."
             },
             "inside_fraction": {
               "type": "number",
               "minimum": 0,
-              "maximum": 1
+              "maximum": 1,
+              "description": "Fraction of boundary-near resource patches placed on the inside."
             },
             "boundary_width": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 32
+              "maximum": 32,
+              "description": "Width in cells of the boundary-near resource band."
             }
-          }
+          },
+          "description": "Shared food patch placement, capacity and regrowth."
         }
-      }
+      },
+      "description": "Optional founder zones and boundary-biased resource placement for an enclosure."
     },
     "day_night": {
       "type": "object",
@@ -1945,19 +2247,23 @@
       "required": ["enabled", "cycle_steps"],
       "properties": {
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Enable the containing optional feature; meaning and required companion fields depend on that feature."
         },
         "cycle_steps": {
           "type": "integer",
           "minimum": 4,
-          "maximum": 10000000
+          "maximum": 10000000,
+          "description": "Number of world steps in a full simulated day, independent of playback speed."
         },
         "start_phase": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1
+          "maximum": 1,
+          "description": "Initial cycle fraction: zero midnight, 0.25 sunrise, 0.5 midday, 0.75 sunset."
         }
-      }
+      },
+      "description": "Optional repeating sunlight cycle; omitted or disabled leaves static body values and lighting."
     }
   },
   "required": [

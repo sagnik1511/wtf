@@ -309,3 +309,6 @@ model parameter arrays or extra animation delays are added. See
 
 See [day–night configuration and playback](day-night.md) for gradual sunlight,
 species-specific night vision/energy modifiers and the maintained example.
+
+For package-versus-format support and cross-machine limits, see the
+[artifact compatibility policy](compatibility.md).

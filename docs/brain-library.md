@@ -521,3 +521,6 @@ living controllers. Unsaved historical winners cannot be reconstructed. Old
 species-wide source initialization is preserved on checkpoint migration; new
 selection/chaining is sex-specific. Current checkpoints preserve both pools
 and provenance, including when source files are unavailable.
+
+For package-versus-format support and cross-machine limits, see the
+[artifact compatibility policy](compatibility.md).

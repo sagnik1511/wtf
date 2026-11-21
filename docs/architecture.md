@@ -119,3 +119,11 @@ Detached, storage-only FP32 arrays accompany observations and scores in each
 sampled diagnostic. Playback reads them directly and follows the selected
 animal without an archive lookup, live controller or new inference. This path
 is separate from the optional stateless archived-weight analysis.
+
+## Installed runtime resources
+
+The Python wheel retains the same simulation/playback boundary. Viewer files,
+maintained presets, maps and schema are bundled under `ecosystem/assets/` through
+an explicit allowlist; `resources.py` locates them without requiring a checkout.
+Writable results and shared model-library paths use the working directory or
+explicit paths. See [package structure and isolated checks](packaging.md).

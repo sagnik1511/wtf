@@ -1,0 +1,64 @@
+name: Package installation (Ubuntu)
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  portable:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Create isolated build environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip build twine
+      - name: Build and validate distribution metadata
+        run: |
+          .venv/bin/python -m build
+          .venv/bin/python -m twine check dist/*
+      - name: Install wheel away from the checkout
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-env"
+          "$RUNNER_TEMP/wheel-env/bin/python" -m pip install dist/*.whl
+          mkdir -p "$RUNNER_TEMP/wheel-work"
+          cd "$RUNNER_TEMP/wheel-work"
+          "$RUNNER_TEMP/wheel-env/bin/python" -I "$GITHUB_WORKSPACE/work/check_installation.py"
+      - name: Install source archive away from the checkout
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/source-env"
+          "$RUNNER_TEMP/source-env/bin/python" -m pip install dist/*.tar.gz
+          mkdir -p "$RUNNER_TEMP/source-work"
+          cd "$RUNNER_TEMP/source-work"
+          "$RUNNER_TEMP/source-env/bin/python" -I "$GITHUB_WORKSPACE/work/check_installation.py"
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Build opt-in native wheel
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip build twine
+          WTF_BUILD_NATIVE=1 .venv/bin/python -m build --wheel
+          .venv/bin/python -m twine check dist/*.whl
+      - name: Verify compiled installation and checkpoint restore
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/native-env"
+          "$RUNNER_TEMP/native-env/bin/python" -m pip install dist/*.whl
+          mkdir -p "$RUNNER_TEMP/native-work"
+          cd "$RUNNER_TEMP/native-work"
+          WTF_KERNELS=native "$RUNNER_TEMP/native-env/bin/python" -I "$GITHUB_WORKSPACE/work/check_installation.py"

@@ -13,6 +13,9 @@ New initialization, exact continuation and saved-frame playback are separate ent
 
 ## Setup
 
+See [INSTALL.md](../INSTALL.md) for the complete Python, Windows and Docker
+installation paths and optional native build.
+
 Python 3.9+ and a project-local virtual environment are used for the backend.
 JavaScript rendering uses browser APIs and has no package installation or build step.
 
@@ -261,3 +264,10 @@ imported replay readers even when the viewer JavaScript has been updated. Curren
 viewers check the server's binary replay capability and explain when a restart
 is needed. Stop the server with Ctrl+C, run `./run.sh` again and refresh the page.
 This does not require regenerating or converting results.
+
+## Docker and complete examples
+
+Use the [Docker launcher](docker.md) for container training and read-only playback.
+The [complete tutorial](tutorial.md) contains all Python example code and explains
+recording, analysis and checkpoint restoration. See [compatibility](compatibility.md)
+before moving artifacts between runtime/package versions.

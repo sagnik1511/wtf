@@ -1,6 +1,6 @@
 # Adding prey and predator species
 
-[Configuration](configuration.md) · [Saved brains](brain-library.md) · [Playback](recording.md)
+[Customization handbook](customization.md) · [Configuration](configuration.md) · [Saved brains](brain-library.md) · [Playback](recording.md)
 
 Species are the named entries in an environment's `species` object. The supplied
 presets still contain exactly one prey species (`prey`) and one predator species
@@ -35,27 +35,54 @@ its population, body, learning-rate multiplier, reproduction settings and brain
 reference. Keep every required field. A reused brain template initializes private
 controllers; it does not share live weights between species or animals.
 
-This optional command creates a complete four-species configuration from the
-baseline. It does not change the baseline itself:
+This complete recipe splits the existing 48 prey founders into two species of
+24 without increasing the combined founder population. It keeps six predators
+and the existing food/physics settings, and writes only an ignored local preset:
 
-```sh
-.venv/bin/python - <<'PY'
+<!-- species-example:start -->
+```python
 import copy
 import json
 from pathlib import Path
+from ecosystem.config import load, validate
 
-config = json.loads(Path("environments/baseline.json").read_text())
-config["name"] = "my_world"
-for name, template in (("deer", "prey"), ("wolves", "predator")):
-    spec = copy.deepcopy(config["species"][template])
-    spec["initial_population"] = 8
-    spec.pop("initial_brain", None)
-    spec.pop("initial_brains", None)
-    config["species"][name] = spec
-Path("environments/my_world.json").write_text(json.dumps(config, indent=2) + "\n")
-PY
-.venv/bin/python -m ecosystem.cli environments/my_world.json --runs 1 --progress
+config = load("environments/maskable_ppo.json")
+config["name"] = "two_prey_species"
+config["species"]["prey"]["initial_population"] = 24
+config["species"]["prey"]["reproduction"]["max_population"] = 48
+
+deer = copy.deepcopy(config["species"]["prey"])
+deer["initial_population"] = 24
+deer["display"] = {"color": "#b4e580", "male_color": "#ca94ff"}
+deer.pop("initial_brain", None)
+deer.pop("initial_brains", None)
+config["species"]["deer"] = deer
+
+# Other starting presets may define explicit spawn zones for every species.
+if "placement" in config:
+    config["placement"]["species"]["deer"] = config["placement"]["species"]["prey"]
+
+validate(config)
+output = Path("environments/local/two_prey_species.json")
+output.parent.mkdir(parents=True, exist_ok=True)
+output.write_text(json.dumps(config, indent=2) + "\n")
+print(output)
 ```
+<!-- species-example:end -->
+
+Run the Python block from the checkout root (for example in
+`.venv/bin/python`), then:
+
+```sh
+.venv/bin/python -m ecosystem.cli environments/local/two_prey_species.json \
+  --runs 1 --steps 200 --seed 100 --progress
+```
+
+The two prey species compete for the same food and share a diet category, but
+mate only within their own species and keep separate controllers/champions.
+The shared `brain` template remains configuration, not shared live weights.
+Splitting a population also splits its potential mate pool; unchanged total
+population does not imply unchanged reproductive behavior.
 
 You can instead make these copies directly in your JSON editor. Adjust world
 size, food supply and population caps for the combined population. Python
@@ -77,8 +104,8 @@ champions; predator sexes also have balanced champions. Archives and CLI
 selectors use the exact configured name:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/my_world.json --runs 5 \
-  --brains-from PREVIOUS_RUN_NAME --brain deer=lifespan --brain wolves:male=kills
+.venv/bin/python -m ecosystem.cli environments/local/two_prey_species.json --runs 5 \
+  --brains-from PREVIOUS_RUN_NAME --brain deer=lifespan --brain predator:male=kills
 ```
 
 ## Viewer colors and metrics
@@ -106,9 +133,40 @@ The top prey/predator cards show totals by diet; hover for per-species counts.
 Population chart lines, dashboard choices, analysis, CSV columns and champion
 folders remain separate for each species.
 
-The observation vector stays at 20 values: nearest resource, nearest prey across
-all prey species, and nearest predator across all predator species. Brains do not
-receive a species-name ID or separate feature block per species. Adding species
-therefore keeps existing model architectures compatible, without adding explicit
-species recognition. MAPPO's team context groups allies by exact species and
-summarizes all other species together in its non-ally block.
+Adding species does not add input categories: food, resource-eating animals and
+prey-eating animals remain diet-grouped visible top-k slots. Width depends on
+observation version and top-k: versions 1–4 use 20/32/42/45 values at k=1, plus
+12 for each additional slot. There is no explicit species-name ID or per-species
+input block. MAPPO's team context groups allies by exact species and summarizes
+other species in its non-ally block. See [observation definitions](observations.md).
+
+## Customize a new species deliberately
+
+| Setting | What to review |
+| --- | --- |
+| Name and diet | Use a unique nonempty name; copy a resource-eater for another prey or a prey-eater for another predator |
+| Population and caps | Set `initial_population`, per-species `reproduction.max_population`, combined free-cell capacity and food supply |
+| Brain | Reuse a compatible template or deep-copy it under a new key; point `brain` at that exact key |
+| Body and rewards | Keep diet-specific required fields and meaningful costs/thresholds; see the complete field reference |
+| Actions | `eat` belongs to resource-eaters, `attack` to prey-eaters; retain mask fallbacks and terrain-valid swimming rules |
+| Reproduction | Keep proximal distance unless intentionally changing the model; review maturity, health/energy gates and consent windows |
+| Saved weights | Remove copied initializers and use fresh weights for a new identity; later load its matching species/sex archives |
+| Selection criteria | Copy role-compatible champion selection; `balanced` is predator-only |
+| Spawn zones | If `placement` exists, add an entry for every new species and validate inside/outside capacity |
+| Early stopping | Add the exact name to the watched list if it should govern stopping |
+| Optional effects | Review `circadian`, `locomotion` and mutation; these remain per-species settings |
+| Appearance | Use distinct six-digit colors; verify shapes, male outlines and labels in both viewer themes |
+
+For another predator, copy the complete `predator` entry instead of converting a
+prey entry piecemeal. The same existing prey-diet rule lets it hunt all resource-
+eating species. Selective prey preferences, new diets or predator-on-predator
+hunting require source changes; new names alone do not create a food-web rule.
+
+After a short seeded run, verify all species appear separately in the captured
+configuration, population metrics, legend, inspector and champion groups. Existing
+coverage is in `tests/test_multiple_species.py`, `test_species_learning.py` and
+`tests/species-style.test.mjs`. To change the ecological rules themselves, follow
+the [customization handbook](customization.md#developer-extension-boundaries).
+
+For package-versus-format support and cross-machine limits, see the
+[artifact compatibility policy](compatibility.md).

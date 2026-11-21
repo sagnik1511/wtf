@@ -1,6 +1,41 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "wtf-wildlife-trial-framework"
 version = "0.1.0"
 description = "WTF — Wildlife Trial Framework: a reinforcement learning ecosystem simulator"
+readme = "PYPI_README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Sagnik Roy"}]
 requires-python = ">=3.9"
 dependencies = ["tqdm>=4.66,<5"]
+keywords = ["reinforcement-learning", "ecosystem", "simulation", "multi-agent"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/sagnik1511/wtf"
+Documentation = "https://github.com/sagnik1511/wtf#documentation"
+Source = "https://github.com/sagnik1511/wtf"
+Issues = "https://github.com/sagnik1511/wtf/issues"
+
+[project.scripts]
+wtf = "ecosystem.commands:main"
+wtf-run = "ecosystem.cli:main"
+wtf-view = "ecosystem.server:main"
+wtf-analyze = "ecosystem.analyze:main"
+
+[tool.setuptools]
+packages = ["ecosystem"]
+include-package-data = false
+
+[tool.setuptools.package-data]
+ecosystem = ["_kernels*.c", "_kernels*.h"]

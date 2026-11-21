@@ -886,4 +886,11 @@ def validate(c):
 
 
 def load(path):
-    return validate(json.loads(Path(path).read_text()))
+    path = Path(path)
+    if path.is_file():
+        text = path.read_text()
+    else:
+        from .resources import preset_text
+
+        text = preset_text(path.as_posix())
+    return validate(json.loads(text))

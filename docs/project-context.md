@@ -11,6 +11,28 @@ For diagrams matched to common questions, start with the
 [recorded terrain previews](geography.md#recorded-terrain-previews) show spatial
 behavior and actual playback.
 
+## Customizing or extending the setup
+
+Start with the [customization handbook](customization.md) and [command definitions](command-reference.md) to distinguish JSON,
+CLI, viewer preferences and source-code extensions. The
+[complete field reference](configuration-reference.md) defines every schema
+field, allowed range/choice, required status and declared default, including
+all algorithm variants and terrain symbols. Meanings live in schema descriptions;
+regenerate with `python -m work.build_config_reference` and check with `--check`.
+New settings must update both Python validation and schema definitions.
+
+For more species, follow [the complete recipe](species.md); arbitrary names use
+existing diets, exact species identity controls mating/archives and live state
+stays independent. For new algorithms, follow [the policy integration checklist](extending-policies.md):
+there is no dynamic policy registry today. Include creation/restore dispatch,
+signatures, champion I/O, child-state reset/mutation, diagnostics, archive
+explanations, viewer semantics and cross-algorithm test fixtures. Documentation
+examples of an unregistered type are contributor recipes, not supported presets.
+Do not infer support from a schema enum or successful constructor alone.
+The [world/action extension guide](extending-worlds-and-actions.md) separates
+new map symbols and action subsets from genuinely new physics/actions, including
+masks, native fallbacks, reward events, replay and viewer integration.
+
 ## Purpose and decisions
 
 WTF — Wildlife Trial Framework — explores independently learning prey and
@@ -201,3 +223,13 @@ results or the separate paper workspace when relevant to the manuscript.
 The [calibration guide](calibration.md) is a current recommendation reference:
 update supported settings and tradeoffs after evaluation, without adding a trial
 log. Running or analyzing an experiment alone does not create a release.
+
+## Python distribution boundary
+
+`pyproject.toml` and `setup.py` build an explicit `ecosystem` package;
+`packaging_assets.json` whitelists maintained presets/maps/viewer/schema data.
+`resources.py` resolves installed assets via importlib.resources with a checkout
+fallback. Writable results and library paths belong to the current working
+directory or explicit CLI arguments, never the package installation. Preserve
+`wtf` commands and isolated [installation checks](packaging.md) when extending
+the setup; [Ubuntu coverage](linux.md) must distinguish configured CI from passes.

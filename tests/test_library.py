@@ -513,7 +513,7 @@ class LibraryTests(unittest.TestCase):
                 e.champions.entries["prey"]["female"]["lifespan"]["model"],
             )
 
-    def test_source_run_name_resolves_under_project_results(self):
+    def test_source_run_name_resolves_under_working_directory_results(self):
         from unittest.mock import patch
         from ecosystem import library
 
@@ -521,7 +521,7 @@ class LibraryTests(unittest.TestCase):
             root = Path(directory)
             e = Experiment(config())
             export_champions(e, root / "results/example/champions/run_0001.json")
-            with patch.object(library, "PROJECT", root):
+            with patch.object(library.Path, "cwd", return_value=root):
                 c = config()
                 apply_brain_overrides(c, source_experiment="example")
                 loaded = Experiment(c)

@@ -2,6 +2,8 @@
 
 [Project overview](../README.md) · [Configuration](configuration.md) · [Analysis](analysis.md)
 
+Use [the customization handbook](customization.md) for setup changes, or [the new-policy checklist](extending-policies.md) to implement another learner.
+
 Commands in this guide run from the project root.
 
 The `species.<name>.brain` field selects a template in `brains`. Each animal receives its own model, optimizer, random streams and experience storage; referencing a common template never shares live weights between animals. The supplied baseline remains the existing Q-network comparison.

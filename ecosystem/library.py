@@ -14,8 +14,7 @@ from .brains import model_signature, model_snapshot
 from .lineage import LineageBook, lineage_policy
 from .model_io import read_model, write_model, model_path, publish_models
 
-PROJECT = Path(__file__).resolve().parent.parent
-DEFAULT_LIBRARY = PROJECT / "brain_library"
+DEFAULT_LIBRARY = Path("brain_library")
 CRITERIA = ("health", "kills", "lifespan", "food", "balanced", "lineage")
 SEXES = ("female", "male")
 
@@ -280,7 +279,7 @@ def load_initial_models(config, root=DEFAULT_LIBRARY):
             if "path" in request:
                 path = Path(request["path"]).expanduser()
                 if not path.is_absolute():
-                    path = PROJECT / path
+                    path = Path.cwd() / path
             else:
                 if choices is None:
                     choices = catalog(root)
@@ -392,9 +391,9 @@ def source_index(source_experiment, source_run=None):
     source_folder = Path(source_experiment).expanduser()
     if not source_folder.is_absolute():
         if len(source_folder.parts) == 1:
-            source_folder = PROJECT / "results" / source_folder
+            source_folder = Path.cwd() / "results" / source_folder
         elif not source_folder.is_dir():
-            source_folder = PROJECT / source_folder
+            source_folder = Path.cwd() / source_folder
     for path in (source_folder / "champions").glob("run_*.json"):
         match = re.fullmatch(r"run_(\d+)", path.stem)
         if match:
@@ -463,7 +462,7 @@ def apply_brain_overrides(
                     f'Archived champion file is unavailable: {entry["file"]}'
                 )
         try:
-            return str(path.relative_to(PROJECT))
+            return str(path.relative_to(Path.cwd()))
         except ValueError:
             return str(path)
 

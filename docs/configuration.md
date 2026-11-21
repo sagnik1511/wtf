@@ -43,6 +43,8 @@ All costs and growth rates are per simulation step. Playback speed changes only 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
 
+For all field definitions and allowed values, see the [complete reference](configuration-reference.md). For an end-to-end editing workflow and extension map, see [customization](customization.md).
+
 ## From configuration to experiment
 
 The effective configuration is captured with results. Later edits affect a new invocation, not an existing replay or checkpoint.

@@ -10,14 +10,13 @@ from urllib.parse import parse_qs, unquote, urlparse
 from .recording import RecordingStore
 from .explanations import ExplanationStore
 from .replay_io import read_chunk_bytes, load_chunk
-
-ROOT = Path(__file__).resolve().parent.parent
+from .resources import asset
 
 
 class State:
     def __init__(self, results=None):
         self.recordings = RecordingStore(
-            results if results is not None else ROOT / "results"
+            results if results is not None else Path.cwd() / "results"
         )
         self.explanations = ExplanationStore(self.recordings)
 
@@ -176,14 +175,13 @@ def make_handler(state):
                             )
                         return self.send(200, data, vary_encoding=True)
                     return self.send(404, {"error": "Recording endpoint not found"})
-                target = (
-                    ROOT
-                    / "viewer"
-                    / ("index.html" if path == "/" else path.lstrip("/"))
-                ).resolve()
-                if (
-                    ROOT / "viewer"
-                ).resolve() not in target.parents or not target.is_file():
+                try:
+                    target = asset(
+                        "viewer/" + ("index.html" if path == "/" else path.lstrip("/"))
+                    )
+                except ValueError:
+                    return self.send(404, {"error": "Not found"})
+                if not target.is_file():
                     return self.send(404, {"error": "Not found"})
                 return self.send(
                     200,
@@ -206,17 +204,26 @@ def make_handler(state):
     return Handler
 
 
-def main():
+def argument_parser():
     parser = argparse.ArgumentParser(
         description="WTF — Wildlife Trial Framework: serve saved RL ecosystem recordings"
     )
-    parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--results", type=Path, default=ROOT / "results")
-    args = parser.parse_args()
-    server = ThreadingHTTPServer(
-        ("127.0.0.1", args.port), make_handler(State(args.results))
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind address; use 0.0.0.0 inside a container",
     )
-    print(f"WTF playback: http://127.0.0.1:{server.server_port}", flush=True)
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--results", type=Path, default=Path.cwd() / "results")
+    return parser
+
+
+def main():
+    args = argument_parser().parse_args()
+    server = ThreadingHTTPServer(
+        (args.host, args.port), make_handler(State(args.results))
+    )
+    print(f"WTF playback: http://{args.host}:{server.server_port}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
