@@ -55,7 +55,7 @@ and **8 identical viewer branding copies**.
 | [Geography, rivers and elevation](geography.md) | [Home](index.md) → [geography](geography.md) |
 | [Get started](getting-started/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Installation and first experiment](getting-started/index.md) |
 | [Wildlife Trial Framework](index.md) | [Home](index.md) |
-| [Install Wildlife Trial Framework](installation.md) | [Home](index.md) → [Installation](installation.md) |
+| [Install Wildlife Trial Framework](installation.md) | [Home](index.md) → [installation](installation.md) |
 | [Learning and behavior](learning/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Inputs, learners, feedback and inheritance](learning/index.md) |
 | [Linux and Ubuntu setup](linux.md) | [Home](index.md) → [Linux/Ubuntu setup](linux.md) |
 | [Mating intent and proximal reproduction](mating-intent.md) | [Home](index.md) → [mating intent](mating-intent.md) |
