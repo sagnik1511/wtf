@@ -211,6 +211,28 @@ class DocumentationSiteTests(unittest.TestCase):
                 style = "".join(e.text or "" for e in svg.findall(".//s:style", ns))
                 self.assertIn("prefers-color-scheme: light", style, str(path))
 
+    def test_theme_styles_are_owned_by_the_outer_svg(self):
+        root = Path(__file__).resolve().parents[1]
+        ns = "{http://www.w3.org/2000/svg}"
+        for path in (root / "docs/assets").rglob("*.svg"):
+            document = ET.parse(path).getroot()
+
+            def visit(element, viewport):
+                if element.tag == ns + "svg":
+                    viewport = element
+                if element.tag == ns + "style" and "prefers-color-scheme" in (
+                    element.text or ""
+                ):
+                    self.assertIs(
+                        viewport,
+                        document,
+                        f"{path}: theme stylesheet is trapped inside a nested SVG viewport",
+                    )
+                for child in element:
+                    visit(child, viewport)
+
+            visit(document, document)
+
     def test_ignored_research_and_symlink_files_are_never_published(self):
         from mkdocs.config.defaults import MkDocsConfig
         from mkdocs.structure.files import File, Files

@@ -252,6 +252,18 @@
   [style*='fill:#3a4b5c'] {
     fill: #6a7d89 !important;
   }
+  [fill='#13212a'] {
+    fill: #e3edf4;
+  }
+  [fill='#1c1019'] {
+    fill: #f6e3ea;
+  }
+  [fill='#102632'] {
+    fill: #dceef7;
+  }
+  [fill='#f0dfba75'] {
+    fill: #f7ead2;
+  }
 }
 </style>
 <title id="title">Meandering River</title>

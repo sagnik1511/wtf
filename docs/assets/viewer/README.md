@@ -39,3 +39,9 @@ previews in ignored `.cache/`, and track only the intended SVG exports here.
 When drawing functions, palette, inspector components or controls change, update
 these specimens and their captions together. The check detects source-rendered
 asset drift; schematic labels and layout still require review against the UI.
+
+Theme CSS must belong to the outer SVG viewport. These sheets contain nested SVG
+components, so appending a stylesheet at the first `</svg>` themes only that
+component. The exporter attaches the palette before the final root closing tag;
+a regression check rejects theme styles scoped to nested viewports. Validate the
+complete sheet in both site palettes, not just a component or the CSS source.

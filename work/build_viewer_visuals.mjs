@@ -342,7 +342,7 @@ const river = geography(['..~..', '..~..', '..~..', '..~..', '..~..'], land);
 const terrainCards = [
   [
     'Flat land',
-    ['Dark board and faint grid.', 'No terrain-specific shading.'],
+    ['Board ground and faint grid.', 'No terrain-specific shading.'],
     { width: 5, height: 5, animals: [animal('prey', 'female', 0, 0, 2, 2)] },
   ],
   [
@@ -913,8 +913,8 @@ for (const [name, original] of Object.entries(outputs)) {
   const contents = ['themes.svg', 'day-night.svg'].includes(name)
     ? original
     : original.replace(
-        '</svg>',
-        `<style>${fs.readFileSync(path.join(outdir, 'theme-palette.css'), 'utf8')}</style></svg>`,
+        /<\/svg>\s*$/,
+        `<style>${fs.readFileSync(path.join(outdir, 'theme-palette.css'), 'utf8')}</style></svg>\n`,
       );
   const target = path.join(outdir, name);
   if (check)
