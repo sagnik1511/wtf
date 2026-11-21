@@ -9,8 +9,8 @@ Commands in this guide run from the project root.
 The `species.<name>.brain` field selects a template in `brains`. Each animal receives its own model, optimizer, random streams and experience storage; referencing a common template never shares live weights between animals. The supplied baseline remains the existing Q-network comparison.
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1
-.venv/bin/python -m ecosystem.cli environments/mixed_brains.json --runs 1
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 1
+.venv/bin/python -m wtf.cli environments/mixed_brains.json --runs 1
 ```
 
 Per-species `learning_rate_multiplier` scales a template's learning rate without
@@ -81,8 +81,8 @@ PPO needs multiple passes over recent data and maintains optimizer moments, so i
 ## A2C and REINFORCE
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/a2c.json --runs 1 --progress
-.venv/bin/python -m ecosystem.cli environments/reinforce.json --runs 1 --progress
+.venv/bin/python -m wtf.cli environments/a2c.json --runs 1 --progress
+.venv/bin/python -m wtf.cli environments/reinforce.json --runs 1 --progress
 ```
 
 A2C uses the same configurable shared policy/value MLP as PPO, with one full-rollout advantage actor-critic update instead of repeated clipped-objective epochs. GAE targets, terminal handling, entropy regularization and gradient clipping are retained. Its structure follows the advantage actor-critic family represented by the [Baselines A2C reference](https://github.com/openai/baselines/blob/master/baselines/a2c/a2c.py), with independent per-animal models rather than shared population weights.
@@ -92,7 +92,7 @@ REINFORCE has no critic. It collects one animal's complete finite episode, compu
 ## Experimental GRPO
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/grpo.json --runs 1 --progress
+.venv/bin/python -m wtf.cli environments/grpo.json --runs 1 --progress
 ```
 
 This is a finite-horizon simulator adaptation of the group-relative clipped policy objective in [DeepSeekMath](https://arxiv.org/html/2402.03300v3), rather than the original language-model training setup. Each focal animal samples `group_size` alternative trajectories from the **same current world state**. Environment RNG and other agents' action RNG streams restart from matching states for every trial. Other policies remain frozen during the group, and no real controller's `choose`/`learn` methods are called inside a trial. Only the focal policy uses different trial action samples. Its observations remain local; rewards come from the ordinary environment rules.

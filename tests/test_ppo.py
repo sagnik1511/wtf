@@ -5,10 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ecosystem.brain import Brain, Experience
-from ecosystem.brains import create_brain, restore_brain
-from ecosystem.config import load, validate
-from ecosystem.ppo import (
+from wtf.learning.brain import Brain, Experience
+from wtf.learning.brains import create_brain, restore_brain
+from wtf.config import load, validate
+from wtf.learning.ppo import (
     MLP,
     PPOBrain,
     RolloutStep,
@@ -16,9 +16,9 @@ from ecosystem.ppo import (
     loss_and_gradient,
     policy_distribution,
 )
-from ecosystem.replay_io import load_chunk
-from ecosystem.recording import Recorder
-from ecosystem.runner import Experiment
+from wtf.storage.replay_io import load_chunk
+from wtf.storage.recording import Recorder
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 ROOT = Path(__file__).resolve().parents[1]

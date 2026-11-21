@@ -6,9 +6,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from ecosystem.brains import model_snapshot
-from ecosystem.config import load, validate
-from ecosystem.library import (
+from wtf.learning.brains import model_snapshot
+from wtf.config import load, validate
+from wtf.storage.library import (
     ChampionBook,
     balanced_policy,
     balanced_rank,
@@ -16,7 +16,7 @@ from ecosystem.library import (
     apply_brain_overrides,
     source_balanced_rank,
 )
-from ecosystem.runner import Experiment
+from wtf.experiment.runner import Experiment
 from tests.test_library import settings
 from tests.test_simulation import config
 

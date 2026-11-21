@@ -153,12 +153,12 @@ select binary by `.bin`, `.bin.gz` or `.bin.xz` extension.
 
 ```sh
 # Replays and exact checkpoints, verified before replacement:
-.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT
+.venv/bin/python -m wtf.storage.optimize_storage results/EXPERIMENT
 # Every completed/interrupted experiment; active recordings are skipped:
-.venv/bin/python -m ecosystem.optimize_storage results --all
+.venv/bin/python -m wtf.storage.optimize_storage results --all
 # Restrict conversion or choose faster compression:
-.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT --only replays
-.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT --only checkpoints --compression gzip
+.venv/bin/python -m wtf.storage.optimize_storage results/EXPERIMENT --only replays
+.venv/bin/python -m wtf.storage.optimize_storage results/EXPERIMENT --only checkpoints --compression gzip
 ```
 
 Conversion processes one chunk or checkpoint at a time. It compares canonical

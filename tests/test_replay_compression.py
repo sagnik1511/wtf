@@ -7,12 +7,12 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.analyze import analyze_recording
-from ecosystem.compress_recordings import compress_recording
-from ecosystem.config import validate
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_io import chunk_path, load_chunk, read_chunk_bytes
-from ecosystem.runner import Experiment
+from wtf.inspection.analyze import analyze_recording
+from wtf.storage.compress_recordings import compress_recording
+from wtf.config import validate
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_io import chunk_path, load_chunk, read_chunk_bytes
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 
@@ -93,7 +93,9 @@ class ReplayCompressionTests(unittest.TestCase):
             originals = {
                 p: p.read_bytes() for p in (folder / "playback").glob("*chunk*.json")
             }
-            with patch("ecosystem.compress_recordings.digest", return_value=b"invalid"):
+            with patch(
+                "wtf.storage.compress_recordings.digest", return_value=b"invalid"
+            ):
                 with self.assertRaisesRegex(ValueError, "verification failed"):
                     compress_recording(folder)
             for path, data in originals.items():

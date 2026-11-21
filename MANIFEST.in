@@ -1,5 +1,5 @@
 include _build_support.py LICENSE README.md PYPI_README.md pyproject.toml setup.py packaging_assets.json
-recursive-include ecosystem *.py *.c *.h
+recursive-include wtf *.py *.c *.h
 include environment.schema.json
 include environments/a2c.json
 include environments/alpine_pass.json

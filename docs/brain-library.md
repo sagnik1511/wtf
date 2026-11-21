@@ -119,7 +119,7 @@ selectors require a matching scoring policy so unlike formulas are not ranked
 together.
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/grpo.json --runs 50 --seed 100 \
+.venv/bin/python -m wtf.cli environments/grpo.json --runs 50 --seed 100 \
   --brains-from results/EXPERIMENT \
   --brain predator=balanced --progress
 ```
@@ -129,7 +129,7 @@ together.
 Use `--champion` to choose later-run winners without loading starting weights:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/meandering_river.json \
+.venv/bin/python -m wtf.cli environments/meandering_river.json \
   --runs 10 --seed 100 --progress \
   --champion prey=lineage --champion predator=lineage
 ```
@@ -211,7 +211,7 @@ lineage loading reports no matching champion instead of guessing.
 To load a new run's archived winners:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/meandering_river.json \
+.venv/bin/python -m wtf.cli environments/meandering_river.json \
   --brains-from results/<experiment-name> \
   --brain prey=lineage --brain predator=lineage --runs 10 --progress
 ```
@@ -223,7 +223,7 @@ does not import the old physical family. Compare ranks across equal episode
 budgets and comparable worlds: a longer episode provides more opportunities.
 Lineage selection changes curation and inheritance, not RL rewards, observations
 or mating decisions. It is a fitness heuristic, not proof of general intelligence
-or a self-sustaining ecosystem.
+or a self-sustaining wtf.
 
 ## Brains belong to their run
 
@@ -255,7 +255,7 @@ one. Results and optional legacy shared libraries remain ignored by Git.
 List the available champions by run name:
 
 ```sh
-.venv/bin/python -m ecosystem.library --run PREVIOUS_RUN_NAME
+.venv/bin/python -m wtf.storage.library --run PREVIOUS_RUN_NAME
 ```
 
 The model snapshots contain weights and provenance, with no replay or optimizer
@@ -268,7 +268,7 @@ the numbered run completes.
 Reuse champions from a specific saved experiment without changing its environment JSON:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 1 \
   --brains-from PREVIOUS_PPO_RUN_NAME \
   --brain prey=lifespan --brain predator=kills
 ```
@@ -295,9 +295,9 @@ Repeat `--brain SPECIES[:SEX]=MODEL` to select a species or a particular sex. `M
 For example, choose different per-run champions or keep one species fresh:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 1 \
   --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=health
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 1 \
   --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=fresh
 ```
 
@@ -317,7 +317,7 @@ one winner across both sexes.
 Choose different criteria or reset just one group:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 10 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 10 \
   --brains-from PREVIOUS_PPO_RUN_NAME \
   --brain prey=lifespan --brain predator=fresh --brain predator:male=kills
 ```
@@ -388,7 +388,7 @@ the generic fallback is `lifespan` for resource eaters and `kills` for prey eate
 Explicit CLI criterion selectors also set that species' chaining criterion. Models transfer in memory even with `--no-library`.
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 3 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 3 \
   --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills
 ```
 
@@ -401,7 +401,7 @@ Archive parent links and recorded run metadata identify the actual source.
 To start every run from the original initialization instead:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 3 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 3 \
   --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills \
   --no-chain-brains
 ```
@@ -428,8 +428,8 @@ that were never saved cannot be reconstructed from a playback recording.
 
 ```sh
 # Train, then use the result folder name printed by the first command.
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1
-.venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 \
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 1
+.venv/bin/python -m wtf.cli environments/ppo.json --runs 1 \
   --brains-from PREVIOUS_PPO_RUN_NAME --brain prey=lifespan --brain predator=kills
 ```
 
@@ -456,7 +456,7 @@ Older run indexes that point into `brain_library/` continue to load. To make one
 self-contained, copy its existing models into the run with:
 
 ```sh
-.venv/bin/python -m ecosystem.library --run PREVIOUS_RUN_NAME --localize
+.venv/bin/python -m wtf.storage.library --run PREVIOUS_RUN_NAME --localize
 ```
 
 This preserves model bytes and artifact identities and keeps the original shared

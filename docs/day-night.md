@@ -13,7 +13,7 @@ all predators or prey have the same biological activity pattern.
 Use `environments/day_night.json` as a complete masked-PPO example:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/day_night.json \
+.venv/bin/python -m wtf.cli environments/day_night.json \
   --runs 1 --seed 100 --progress
 ```
 

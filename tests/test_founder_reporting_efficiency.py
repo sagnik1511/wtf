@@ -8,12 +8,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ecosystem.cli import run_experiment
-from ecosystem.brains import create_brain, load_model_weights, model_snapshot
-from ecosystem.numeric import precision_scope
-from ecosystem.progress import RunProgress
-from ecosystem.recording import Recorder
-from ecosystem.runner import Experiment
+from wtf.cli import run_experiment
+from wtf.learning.brains import create_brain, load_model_weights, model_snapshot
+from wtf.native.numeric import precision_scope
+from wtf.progress import RunProgress
+from wtf.storage.recording import Recorder
+from wtf.experiment.runner import Experiment
 from tests.test_mutation import KINDS, environment
 
 
@@ -26,7 +26,7 @@ class FounderInitializationTests(unittest.TestCase):
                 for spec in c["species"].values():
                     spec["initial_population"] = 8
                 with patch(
-                    "ecosystem.runner.create_brain", wraps=create_brain
+                    "wtf.experiment.runner.create_brain", wraps=create_brain
                 ) as construct:
                     e = Experiment(c)
                 groups = {(a.species, a.sex) for a in e.world.animals.values()}
@@ -74,9 +74,11 @@ class FounderInitializationTests(unittest.TestCase):
             e.step()
         with (
             patch(
-                "ecosystem.runner.load_model_weights", wraps=load_model_weights
+                "wtf.experiment.runner.load_model_weights", wraps=load_model_weights
             ) as load,
-            patch("ecosystem.runner.create_brain", wraps=create_brain) as construct,
+            patch(
+                "wtf.experiment.runner.create_brain", wraps=create_brain
+            ) as construct,
         ):
             e.next_run()
         groups = {(a.species, a.sex) for a in e.world.animals.values()}

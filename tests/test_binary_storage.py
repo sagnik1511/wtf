@@ -17,7 +17,7 @@ from http.server import ThreadingHTTPServer
 from urllib.request import Request, urlopen
 from unittest.mock import patch
 
-from ecosystem.binary_io import (
+from wtf.storage.binary_io import (
     Encoder,
     Decoder,
     RecordWriter,
@@ -25,14 +25,14 @@ from ecosystem.binary_io import (
     replay_payload,
     MAGIC,
 )
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.compress_recordings import frame_digest, compress_recording
-from ecosystem.optimize_storage import optimize_experiment
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_codec import encode_chunk, decode_chunk
-from ecosystem.replay_io import chunk_path, load_chunk, read_chunk_bytes
-from ecosystem.runner import Experiment
-from ecosystem.server import make_handler, State
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.storage.compress_recordings import frame_digest, compress_recording
+from wtf.storage.optimize_storage import optimize_experiment
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_codec import encode_chunk, decode_chunk
+from wtf.storage.replay_io import chunk_path, load_chunk, read_chunk_bytes
+from wtf.experiment.runner import Experiment
+from wtf.server import make_handler, State
 from tests.test_advanced_algorithms import environment
 from tests.test_simulation import config
 from tests.test_replay_compression import record
@@ -290,7 +290,7 @@ class BinaryLifecycleTests(unittest.TestCase):
             a.write_checkpoint(p / "checkpoints/final.json.gz")
             (p / "metrics.csv").write_text("readable metrics")
             state = read_checkpoint(p / "checkpoints/final.json.gz")
-            from ecosystem.analyze import analyze_recording
+            from wtf.inspection.analyze import analyze_recording
 
             report = analyze_recording(p)
             result = optimize_experiment(p)
@@ -316,7 +316,7 @@ class BinaryLifecycleTests(unittest.TestCase):
                     else normal(path)
                 )
 
-            with patch("ecosystem.optimize_storage.load_chunk", side_effect=corrupt):
+            with patch("wtf.storage.optimize_storage.load_chunk", side_effect=corrupt):
                 with self.assertRaisesRegex(ValueError, "verification failed"):
                     optimize_experiment(p)
             self.assertTrue(all(f.read_bytes() == v for f, v in original.items()))
@@ -333,9 +333,9 @@ class BinaryLifecycleTests(unittest.TestCase):
             p = Path(d) / "run"
             recording(p, steps=520)
             store = RecordingStore(d)
-            from ecosystem.recording import load_chunk as reader
+            from wtf.storage.recording import load_chunk as reader
 
-            with patch("ecosystem.recording.load_chunk", wraps=reader) as read:
+            with patch("wtf.storage.recording.load_chunk", wraps=reader) as read:
                 first = store.telemetry("run", 1, 0)
                 count = read.call_count
                 first["points"].clear()

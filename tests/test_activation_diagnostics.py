@@ -6,10 +6,10 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.config import validate
-from ecosystem.recording import Recorder
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
+from wtf.config import validate
+from wtf.storage.recording import Recorder
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
 from tests.test_mutation import KINDS, environment
 
 
@@ -122,7 +122,7 @@ class ActivationDiagnosticsTests(unittest.TestCase):
 
     def test_only_visualization_values_are_rounded_to_fp32(self):
         from array import array
-        from ecosystem.activation_diagnostics import activation_sample
+        from wtf.learning.activation_diagnostics import activation_sample
 
         value = 0.123456789012345
         original = [value]

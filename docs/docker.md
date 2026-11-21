@@ -65,7 +65,7 @@ Direct Compose defaults UID/GID to 1000; customize `WTF_UID` and `WTF_GID` when
 needed, or use the launcher. `WTF_PORT` selects the published viewer port.
 An ordinary `docker compose up` starts only the viewer, not a training campaign.
 The image's default entry point is training; playback uses
-`python -m ecosystem.server --host 0.0.0.0 --results /data/results`.
+`python -m wtf.server --host 0.0.0.0 --results /data/results`.
 
 ## Validation scope
 

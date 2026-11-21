@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from ecosystem.analyze import analyze_recording, analyze_run
+from wtf.inspection.analyze import analyze_recording, analyze_run
 from tests.test_simulation import config
 
 
@@ -260,5 +260,5 @@ class AnalysisTests(unittest.TestCase):
             self.assertGreater(result["window_steps"], 1)
 
     def test_offline_analysis_imports_no_simulation_or_learning_code(self):
-        code = "import sys; import ecosystem.analyze; assert not any(x in sys.modules for x in ('ecosystem.world','ecosystem.runner','ecosystem.brains','ecosystem.policy_gradients'))"
+        code = "import sys; import wtf.inspection.analyze; assert not any(x in sys.modules for x in ('wtf.simulation.world','wtf.experiment.runner','wtf.learning.brains','wtf.learning.policy_gradients'))"
         subprocess.run([sys.executable, "-c", code], check=True, capture_output=True)

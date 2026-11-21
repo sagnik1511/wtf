@@ -7,8 +7,8 @@ import unittest
 import weakref
 from unittest.mock import patch
 
-from ecosystem.brain import Brain, Experience
-from ecosystem.runner import Experiment
+from wtf.learning.brain import Brain, Experience
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 

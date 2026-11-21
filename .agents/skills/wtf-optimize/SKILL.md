@@ -33,7 +33,7 @@ state. Champion warm starts have different requirements; inspect the format.
 
 Do not convert active recordings. If conversion is requested, use the existing
 verified/atomic storage tooling and retain originals on verification failure.
-See `ecosystem.optimize_storage --help` before choosing flags. Confirm logical
+See `wtf.storage.optimize_storage --help` before choosing flags. Confirm logical
 round trips, Python/JS codec parity and playback across a chunk boundary.
 
 Choose relevant suites from development docs (cache, training-loop efficiency,

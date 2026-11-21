@@ -2,9 +2,9 @@ import copy
 import unittest
 from pathlib import Path
 
-from ecosystem.config import load, validate
-from ecosystem.day_night import sunlight, effective_body
-from ecosystem.world import World, Resource
+from wtf.config import load, validate
+from wtf.simulation.day_night import sunlight, effective_body
+from wtf.simulation.world import World, Resource
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -117,7 +117,7 @@ class DayNightTests(unittest.TestCase):
 
         w = World(self.config(), 100)
         a = next(iter(w.animals.values()))
-        with patch("ecosystem.world.sunlight", wraps=sunlight) as light:
+        with patch("wtf.simulation.world.sunlight", wraps=sunlight) as light:
             body = w.body(a)
             specs = w._metabolism_species()
             self.assertIs(specs[a.species]["body"], body)
@@ -133,7 +133,7 @@ class DayNightTests(unittest.TestCase):
 
     def test_native_cycle_metabolism_matches_previous_python_path_exactly(self):
         from unittest.mock import patch
-        from ecosystem import kernels
+        from wtf.native import kernels
         import random
 
         if not kernels.available("flat_metabolism"):
@@ -161,7 +161,7 @@ class DayNightTests(unittest.TestCase):
                 }
                 actual = native.step(actions)
                 with patch(
-                    "ecosystem.kernels.available",
+                    "wtf.native.kernels.available",
                     side_effect=lambda name: name != "flat_metabolism"
                     and available(name),
                 ):

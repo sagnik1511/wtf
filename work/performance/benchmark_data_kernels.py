@@ -20,10 +20,10 @@ CASES = ("binary_encode", "binary_decode", "replay_expand", "dashboard", "groups
 
 
 def prepare():
-    from ecosystem.config import load
-    from ecosystem.runner import Experiment
-    from ecosystem.recording import Recorder, RecordingStore
-    from ecosystem.replay_io import load_chunk
+    from wtf.config import load
+    from wtf.experiment.runner import Experiment
+    from wtf.storage.recording import Recorder, RecordingStore
+    from wtf.storage.replay_io import load_chunk
 
     c = load("environments/ppo.json")
     c["seed"] = 42
@@ -55,9 +55,9 @@ def prepare():
 def worker(args):
     if args.reference:
         sys.path.insert(0, str(args.reference.resolve()))
-    from ecosystem.binary_io import Encoder, Decoder
-    from ecosystem.replay_codec import encode_chunk, decode_chunk
-    from ecosystem.telemetry import summarize, groups
+    from wtf.storage.binary_io import Encoder, Decoder
+    from wtf.storage.replay_codec import encode_chunk, decode_chunk
+    from wtf.inspection.telemetry import summarize, groups
 
     data = json.loads((ROOT / "data-fixtures.json").read_text())
     payload = encode_chunk(data["frames"])

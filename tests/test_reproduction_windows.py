@@ -7,11 +7,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import load, validate
-from ecosystem.replay_codec import encode_chunk, decode_chunk
-from ecosystem.runner import Experiment
-from ecosystem.world import World
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import load, validate
+from wtf.storage.replay_codec import encode_chunk, decode_chunk
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import World
 from tests.test_simulation import animal, config
 from tests.test_reproduction import breeding_world, reproduction
 

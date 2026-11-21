@@ -8,6 +8,7 @@ source using the maintained development workflow.
 
 | Task | Guide |
 | --- | --- |
+| [Navigate the Python package](../package-layout.md) | `wtf` namespace, module ownership and import migration. |
 | [Understand the architecture](../architecture.md) | Simulation phases, data ownership and Python/viewer separation. |
 | [Set up and test development](../development.md) | Checks, formatter commands and contribution workflow. |
 | [Add a policy](../extending-policies.md) | Dispatch, signatures, persistence, inheritance and diagnostics. |

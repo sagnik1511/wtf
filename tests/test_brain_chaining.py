@@ -1,4 +1,4 @@
-from ecosystem.checkpoint_io import read_checkpoint
+from wtf.storage.checkpoint_io import read_checkpoint
 
 """Run-to-run champion transfer and original-initialization controls."""
 import copy
@@ -7,10 +7,10 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from ecosystem.brains import model_snapshot
-from ecosystem.config import validate
-from ecosystem.library import export_champions
-from ecosystem.runner import Experiment
+from wtf.learning.brains import model_snapshot
+from wtf.config import validate
+from wtf.storage.library import export_champions
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config as base_config
 from tests.test_library import settings
 
@@ -152,7 +152,7 @@ class BrainChainingTests(unittest.TestCase):
                 command = [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(environment),
                     "--runs",
                     "3",

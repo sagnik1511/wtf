@@ -37,7 +37,7 @@ only the files changed in that update.
 
 | Source | Formatter | Verification |
 | --- | --- | --- |
-| Python in `ecosystem/`, `tests/`, `work/` | Black | `black --check` on the same source set |
+| Python in `wtf/`, `tests/`, `work/` | Black | `black --check` on the same source set |
 | C/C++ and CPython extension source/headers | clang-format | `clang-format --dry-run --Werror` on the same source set |
 | JavaScript, CSS, HTML and maintained JSON | Prettier | `prettier --check` on the same source set |
 | Shell scripts | shfmt | `shfmt -i 2 -d` on the same source set |

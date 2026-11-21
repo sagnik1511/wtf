@@ -769,13 +769,19 @@ const dayCards = [
 body = dayCards
   .map(([name, tick], i) => {
     const x = 28 + i * 288;
-    const scene = board({
-      day_night: demoCycle,
-      tick,
-      animals: [animal(), animal('predator', 'male', 1, 1, 2, 1)],
-      resources: [{ x: 1, y: 2, quantity: 20 }],
-      obstacles: [[0, 0]],
-    });
+    const scene = ['dark', 'light']
+      .map(
+        (theme) =>
+          `<g class="board-palette-${theme}">${board({
+            theme,
+            day_night: demoCycle,
+            tick,
+            animals: [animal(), animal('predator', 'male', 1, 1, 2, 1)],
+            resources: [{ x: 1, y: 2, quantity: 20 }],
+            obstacles: [[0, 0]],
+          })}</g>`,
+      )
+      .join('');
     return tile(
       x,
       95,
@@ -831,70 +837,81 @@ const themeTokens = (selector) =>
         .matchAll(/--([a-z-]+):\s*([^;]+);/g),
     ].map((m) => [m[1], m[2].trim()]),
   );
-body = ['dark', 'light']
-  .map((theme, i) => {
-    const c = themeTokens(
-        theme === 'dark' ? ':root {' : ":root[data-theme='light']",
-      ),
-      x = 28 + i * 582;
-    return (
-      '<g class="fixed-comparison">' +
-      `<rect x="${x}" y="95" width="560" height="380" rx="12" fill="${c.bg}" stroke="${c.border}"/>` +
-      text(
-        x + 20,
-        128,
-        `${theme === 'dark' ? 'Dark' : 'Light'} interface`,
-        20,
-        c.text,
-        'start',
-        true,
-      ) +
-      `<rect x="${x + 20}" y="149" width="520" height="140" rx="8" fill="${c.panel}" stroke="${c.border}"/>` +
-      text(x + 38, 180, 'Agent inspector', 18, c.text, 'start', true) +
-      text(x + 38, 213, 'Observed inputs · action predictions', 15, c.muted) +
-      `<rect x="${x + 38}" y="235" width="235" height="34" rx="5" fill="${c.surface}" stroke="${c.border}"/>` +
-      text(x + 48, 257, 'Animal ID', 14, c['code-text']) +
-      text(
-        x + 20,
-        324,
-        'Saved locally · applies to all recordings',
-        15,
-        c.muted,
-      ) +
-      text(x + 20, 354, 'Independent of world sunlight and time', 15, c.muted) +
-      `<rect x="${x + 20}" y="380" width="176" height="42" rx="6" fill="${c.panel}" stroke="${c.border}"/>` +
-      text(
-        x + 34,
-        406,
-        theme === 'dark' ? 'Light mode' : 'Dark mode',
-        16,
-        c.text,
-      ) +
-      '</g>'
-    );
-  })
-  .join('');
-body += ['dark', 'light']
-  .flatMap((theme, i) =>
-    [50, 0].map((tick, j) => {
-      const x = 28 + (i * 2 + j) * 288;
-      return tile(
-        x,
-        510,
-        `${theme} · ${tick === 50 ? 'midday' : 'night'}`,
-        ['Theme palette + saved sunlight'],
-        board({
-          theme,
-          day_night: { enabled: true, cycle_steps: 100, start_phase: 0 },
-          tick,
-          animals: [animal(), animal('predator', 'male', 1, 1, 2, 1)],
-          resources: [{ x: 1, y: 2, quantity: 20 }],
-          obstacles: [[0, 0]],
-        }),
+function interfaceComparison(currentTheme) {
+  const order = [currentTheme, currentTheme === 'dark' ? 'light' : 'dark'];
+  let comparison = order
+    .map((theme, i) => {
+      const c = themeTokens(
+          theme === 'dark' ? ':root {' : ":root[data-theme='light']",
+        ),
+        x = 28 + i * 582;
+      return (
+        '<g class="fixed-comparison">' +
+        `<rect x="${x}" y="95" width="560" height="380" rx="12" fill="${c.bg}" stroke="${c.border}"/>` +
+        text(
+          x + 20,
+          128,
+          `${theme === 'dark' ? 'Dark' : 'Light'} interface · ${i === 0 ? 'selected' : 'alternate'}`,
+          20,
+          c.text,
+          'start',
+          true,
+        ) +
+        `<rect x="${x + 20}" y="149" width="520" height="140" rx="8" fill="${c.panel}" stroke="${c.border}"/>` +
+        text(x + 38, 180, 'Agent inspector', 18, c.text, 'start', true) +
+        text(x + 38, 213, 'Observed inputs · action predictions', 15, c.muted) +
+        `<rect x="${x + 38}" y="235" width="235" height="34" rx="5" fill="${c.surface}" stroke="${c.border}"/>` +
+        text(x + 48, 257, 'Animal ID', 14, c['code-text']) +
+        text(
+          x + 20,
+          324,
+          'Saved locally · applies to all recordings',
+          15,
+          c.muted,
+        ) +
+        text(
+          x + 20,
+          354,
+          'Independent of world sunlight and time',
+          15,
+          c.muted,
+        ) +
+        `<rect x="${x + 20}" y="380" width="176" height="42" rx="6" fill="${c.panel}" stroke="${c.border}"/>` +
+        text(
+          x + 34,
+          406,
+          theme === 'dark' ? 'Light mode' : 'Dark mode',
+          16,
+          c.text,
+        ) +
+        '</g>'
       );
-    }),
-  )
-  .join('');
+    })
+    .join('');
+  comparison += order
+    .flatMap((theme, i) =>
+      [50, 0].map((tick, j) => {
+        const x = 28 + (i * 2 + j) * 288;
+        return tile(
+          x,
+          510,
+          `${theme} · ${tick === 50 ? 'midday' : 'night'}`,
+          ['Theme palette + saved sunlight'],
+          board({
+            theme,
+            day_night: { enabled: true, cycle_steps: 100, start_phase: 0 },
+            tick,
+            animals: [animal(), animal('predator', 'male', 1, 1, 2, 1)],
+            resources: [{ x: 1, y: 2, quantity: 20 }],
+            obstacles: [[0, 0]],
+          }),
+        );
+      }),
+    )
+    .join('');
+  return `<g class="comparison-current-${currentTheme}">${comparison}</g>`;
+}
+body = interfaceComparison('dark') + interfaceComparison('light');
 const themes = sheet(
   'Viewer light and dark themes',
   'Schematic interface specimens using current CSS tokens · world lighting remains tied to the recording',

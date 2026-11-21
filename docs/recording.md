@@ -254,19 +254,19 @@ The disk-focused [binary converter](binary-storage.md#convert-existing-completed
 handles replay chunks and exact checkpoints together:
 
 ```sh
-.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT
-.venv/bin/python -m ecosystem.optimize_storage results --all
+.venv/bin/python -m wtf.storage.optimize_storage results/EXPERIMENT
+.venv/bin/python -m wtf.storage.optimize_storage results --all
 ```
 
 The older conversion commands remain available for JSON recordings:
 
 ```sh
 # Upgrade one completed experiment to delta encoding plus gzip:
-.venv/bin/python -m ecosystem.compress_recordings results/EXPERIMENT --delta
+.venv/bin/python -m wtf.storage.compress_recordings results/EXPERIMENT --delta
 # Upgrade all completed/interrupted experiments:
-.venv/bin/python -m ecosystem.compress_recordings results --all --delta
+.venv/bin/python -m wtf.storage.compress_recordings results --all --delta
 # Gzip alone, preserving the existing serialized layout:
-.venv/bin/python -m ecosystem.compress_recordings results --all
+.venv/bin/python -m wtf.storage.compress_recordings results --all
 ```
 
 Conversion handles one committed chunk at a time and retains the smaller
@@ -277,7 +277,7 @@ conversion can be rerun safely. Checkpoints, saved champions, metrics and traini
 configuration are untouched. A single active recording is rejected; finish or
 close training first. Metadata may say `mixed` if some original chunks were smaller.
 
-For programmatic access use `ecosystem.replay_io.load_chunk(path)`: it returns
+For programmatic access use `wtf.storage.replay_io.load_chunk(path)`: it returns
 full frames for either layout/compression. Behavior analysis and fallback
 population history use the same reader. The viewer retains one decoded world
 chunk, so this storage change does not reduce the expanded chunk's memory.

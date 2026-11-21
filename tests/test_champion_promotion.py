@@ -9,11 +9,11 @@ import shutil
 import tempfile
 import unittest
 
-from ecosystem.brains import model_snapshot
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate
-from ecosystem.library import apply_brain_overrides, export_champions, read_artifact
-from ecosystem.runner import Experiment
+from wtf.learning.brains import model_snapshot
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate
+from wtf.storage.library import apply_brain_overrides, export_champions, read_artifact
+from wtf.experiment.runner import Experiment
 from tests.test_mutation import KINDS, environment
 from tests.test_simulation import config
 

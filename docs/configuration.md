@@ -38,7 +38,7 @@ Copy a JSON file, edit its name and values, and pass its path to the Python CLI 
 
 All costs and growth rates are per simulation step. Playback speed changes only the rate of displaying saved frames. Configuration changes apply to the next CLI experiment; they cannot change an existing recording.
 
-`ecosystem/config.py` validates required and unknown fields, numeric ranges, compatible diets and actions, referenced brain templates, replay settings, and world capacity. Invalid configurations are rejected before simulation begins. `environment.schema.json` provides an editor-friendly structural schema; Python validation also enforces cross-field constraints.
+`wtf/config.py` validates required and unknown fields, numeric ranges, compatible diets and actions, referenced brain templates, replay settings, and world capacity. Invalid configurations are rejected before simulation begins. `environment.schema.json` provides an editor-friendly structural schema; Python validation also enforces cross-field constraints.
 
 Use `obstacles.generation = "explicit"` with `explicit_cells = [[x, y], ...]` for hand-designed maps. In this mode `occupied_fraction` is ignored. Animals and resource patches may share cells; two animals cannot occupy one cell. Generation does not guarantee connected free space.
 
@@ -167,7 +167,7 @@ those selection criteria is also necessary to isolate network capacity.
 Start a fresh experiment from the project root:
 
 ```bash
-.venv/bin/python -m ecosystem.cli environments/ppo_large_predator.json \
+.venv/bin/python -m wtf.cli environments/ppo_large_predator.json \
   --runs 20 --seed 100 --progress \
   --brain prey=fresh --brain predator=fresh
 ```

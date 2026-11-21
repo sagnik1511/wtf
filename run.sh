@@ -10,4 +10,4 @@ if [ ! -x .venv/bin/python ]; then
   fi
 fi
 export PYTHONPYCACHEPREFIX="$PWD/.cache/pycache"
-exec .venv/bin/python -m ecosystem.server "$@"
+exec .venv/bin/python -m wtf.server "$@"

@@ -6,9 +6,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 
@@ -172,7 +172,7 @@ class RecordingTests(unittest.TestCase):
                 store.metadata(name)
 
     def test_recording_options_validate(self):
-        from ecosystem.config import validate
+        from wtf.config import validate
 
         for key, value in [
             ("frames_per_chunk", 0),
@@ -196,7 +196,7 @@ class RecordingTests(unittest.TestCase):
                 args = [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     "--no-library",
                     "environments/baseline.json",
                     "--runs",
@@ -231,7 +231,7 @@ class RecordingTests(unittest.TestCase):
                         [
                             sys.executable,
                             "-m",
-                            "ecosystem.cli",
+                            "wtf.cli",
                             "--no-library",
                             "--resume",
                             str(folder / "checkpoints/final.json"),
@@ -251,7 +251,7 @@ class RecordingTests(unittest.TestCase):
             [
                 sys.executable,
                 "-c",
-                "import sys; from ecosystem.server import State; s=State(); assert not hasattr(s, 'experiment'); assert 'ecosystem.brain' not in sys.modules; assert 'ecosystem.world' not in sys.modules; assert 'ecosystem.runner' not in sys.modules",
+                "import sys; from wtf.server import State; s=State(); assert not hasattr(s, 'experiment'); assert 'wtf.learning.brain' not in sys.modules; assert 'wtf.simulation.world' not in sys.modules; assert 'wtf.experiment.runner' not in sys.modules",
             ],
             check=True,
             cwd=Path(__file__).resolve().parents[1],

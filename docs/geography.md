@@ -21,7 +21,7 @@ Ten optional presets cover seven maps, keeping one prey species and one predator
 | [lake_islands.json](../environments/lake_islands.json) | PPO still-water lake, shallow shores, deeper basin and three dry islands |
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/river_crossing.json --runs 10 --progress
+.venv/bin/python -m wtf.cli environments/river_crossing.json --runs 10 --progress
 # Alternatives: environments/highlands.json or environments/enclosed_valleys.json
 ./run.sh
 ```
@@ -52,7 +52,7 @@ match `river_crossing_ppo.json`, including the predator learning-rate multiplier
 of 1.25. See the [observation layout](observations.md).
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/river_crossing_strong_predator_deep.json --runs 1 --seed 100 --progress
+.venv/bin/python -m wtf.cli environments/river_crossing_strong_predator_deep.json --runs 1 --seed 100 --progress
 # Earlier network sizes: environments/river_crossing_strong_predator.json
 ```
 
@@ -87,7 +87,7 @@ or new climate/hydrology models. Terrain is static: there are no tides, seasonal
 flooding, erosion, snow, temperature or vegetation-specific effects.
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/meandering_river.json --runs 1 --seed 100 --progress
+.venv/bin/python -m wtf.cli environments/meandering_river.json --runs 1 --seed 100 --progress
 # Other presets: river_delta.json, alpine_pass.json, lake_islands.json
 ./run.sh
 ```
@@ -189,7 +189,7 @@ rule applies to founders, not permanent confinement.
 ## Use PPO on the river map
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/river_crossing_ppo.json --runs 10 --progress
+.venv/bin/python -m wtf.cli environments/river_crossing_ppo.json --runs 10 --progress
 ```
 
 Both species use small PPO actor-critic networks with 32 terrain inputs. World,

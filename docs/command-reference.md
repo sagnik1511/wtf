@@ -9,13 +9,13 @@ current parser without starting training or a server.
 ## Installed command hub
 
 `wtf run`, `wtf view`, `wtf analyze` dispatch to the parsers below. `wtf presets`
-lists bundled environment names. `python -m ecosystem` offers the same hub;
+lists bundled environment names. `python -m wtf` offers the same hub;
 `wtf-run`, `wtf-view`, `wtf-analyze` are direct aliases. See [packaging](packaging.md).
 
 ## Simulator
 
 ```sh
-.venv/bin/python -m ecosystem.cli ENVIRONMENT.json [OPTIONS]
+.venv/bin/python -m wtf.cli ENVIRONMENT.json [OPTIONS]
 ```
 
 | Argument | Definition |
@@ -53,7 +53,7 @@ See [resume semantics](running.md#resume-an-exact-experiment).
 A complete example of fresh initialization and later-run lineage selection:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/maskable_ppo.json \
+.venv/bin/python -m wtf.cli environments/maskable_ppo.json \
   --runs 3 --seed 100 --brain prey=fresh --brain predator=fresh \
   --champion prey=lineage --champion predator=lineage --progress
 ```
@@ -66,7 +66,7 @@ and `lineage` have different meanings and diet restrictions; see the
 ## Playback server
 
 ```sh
-.venv/bin/python -m ecosystem.server --results results --port 8000
+.venv/bin/python -m wtf.server --results results --port 8000
 ```
 
 | Argument | Definition |
@@ -83,7 +83,7 @@ The server is read-only playback and explanation analysis; it never trains.
 ## Saved-run analyzer
 
 ```sh
-.venv/bin/python -m ecosystem.analyze results/EXPERIMENT --run 1 --window-steps 250
+.venv/bin/python -m wtf.inspection.analyze results/EXPERIMENT --run 1 --window-steps 250
 ```
 
 | Argument | Definition |

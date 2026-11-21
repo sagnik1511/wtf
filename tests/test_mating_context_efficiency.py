@@ -5,10 +5,10 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from ecosystem.config import load
-from ecosystem.contextual_ppo import action_mask
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal, DIRECTIONS, World
+from wtf.config import load
+from wtf.learning.contextual_ppo import action_mask
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal, DIRECTIONS, World
 from tests.test_geography import configuration as terrain_config
 from tests.test_mating_intent import world as breeding_world
 from tests.test_advanced_algorithms import environment as algorithm_config

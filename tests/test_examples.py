@@ -3,11 +3,11 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.recording import RecordingStore
-from ecosystem.replay_io import chunk_path, load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.server import argument_parser
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.storage.recording import RecordingStore
+from wtf.storage.replay_io import chunk_path, load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.server import argument_parser
 from examples.complete_experiment import run_experiment
 
 ROOT = Path(__file__).resolve().parents[1]

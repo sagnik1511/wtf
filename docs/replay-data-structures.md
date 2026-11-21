@@ -279,10 +279,10 @@ current point. See [transport and cache details](binary-storage.md#browser-trans
 
 ## Source and figure provenance
 
-The schemas follow [the recorder](../ecosystem/recording.py),
-[the delta codec](../ecosystem/replay_codec.py),
-[the typed binary codec](../ecosystem/binary_io.py),
-[world snapshots](../ecosystem/world.py) and
+The schemas follow [the recorder](../wtf/storage/recording.py),
+[the delta codec](../wtf/storage/replay_codec.py),
+[the typed binary codec](../wtf/storage/binary_io.py),
+[world snapshots](../wtf/simulation/world.py) and
 [the viewer reader](../viewer/playback.mjs). The [asset catalog](assets/storage/README.md)
 documents the three original SVG illustrations and their validation. None uses
 experiment data, model weights, screenshots or screen recordings.

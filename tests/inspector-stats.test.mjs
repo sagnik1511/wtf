@@ -150,8 +150,8 @@ test('Sight overlay matches Python geometry across maps, species, river banks an
   const root = fileURLToPath(new URL('..', import.meta.url));
   const script = `
 import json
-from ecosystem.config import load
-from ecosystem.world import World
+from wtf.config import load
+from wtf.simulation.world import World
 cases=[]
 for name in ('baseline','river_crossing_strong_predator','highlands','enclosed_valleys','meandering_river','river_delta','alpine_pass','lake_islands'):
     c=load('environments/'+name+'.json')

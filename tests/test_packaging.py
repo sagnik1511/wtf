@@ -10,21 +10,39 @@ import unittest
 from unittest.mock import patch
 from xml.etree import ElementTree as ET
 
-from ecosystem import load_config
-from ecosystem.geography import resolve_map
-from ecosystem.resources import asset, preset_names
-from ecosystem.server import argument_parser
+from wtf import load_config
+from wtf.simulation.geography import resolve_map
+from wtf.resources import asset, preset_names
+from wtf.server import argument_parser
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class PackagingTests(unittest.TestCase):
+    def test_public_namespace_stays_lazy_and_uses_one_module_identity(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import sys, wtf; "
+                "assert 'wtf.experiment.runner' not in sys.modules; "
+                "assert 'wtf.simulation.world' not in sys.modules; "
+                "from wtf import Experiment; "
+                "from wtf.experiment.runner import Experiment as implementation; "
+                "assert Experiment is implementation; "
+                "assert not any(n == 'ecosystem' or n.startswith('ecosystem.') for n in sys.modules)",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_source_checkout_rejects_older_interpreters_clearly(self):
         result = subprocess.run(
             [
                 sys.executable,
                 "-c",
-                "import sys; sys.version_info = (3, 11); import ecosystem",
+                "import sys; sys.version_info = (3, 11); import wtf",
             ],
             capture_output=True,
             text=True,

@@ -83,6 +83,7 @@ rules; the [map gallery](geography.md) shows maintained environments.
 
 ![Board lighting at dawn, midday, dusk and night with the sunlight curve](assets/viewer/day-night.svg)
 
+The example boards use the selected interface palette in both light and dark mode.
 Optional [day–night cycles](day-night.md) dim the board and warm the low-light
 periods. The time label follows saved world steps; night remains legible.
 The sun/moon dial moves with saved frames and freezes on pause. It is hidden
@@ -95,7 +96,8 @@ follow configured light effects.
 
 Use **Light mode / Dark mode** in the header. The preference is saved in the
 browser and applies to controls, panels, dialogs, inspector views, chart axes
-and the board grid/terrain. The comparison includes midday and night in both
+and the board grid/terrain. The selected theme appears first in the comparison; the labeled alternate
+remains visible beside it. The board examples include midday and night in both
 interface palettes.
 Inspector radars, target legends, prediction histories, action bars, neuron
 activations and archived-model sensitivity/route charts use theme-aware colors.

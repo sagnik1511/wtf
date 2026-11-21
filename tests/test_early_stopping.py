@@ -8,10 +8,10 @@ import sys
 import tempfile
 import unittest
 
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate
-from ecosystem.early_stopping import EarlyStopping
-from ecosystem.runner import Experiment
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate
+from wtf.experiment.early_stopping import EarlyStopping
+from wtf.experiment.runner import Experiment
 from tests.test_mutation import KINDS, environment
 from tests.test_simulation import config
 
@@ -206,7 +206,7 @@ class EarlyStoppingTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--early-stop-runs",
                     "2",
@@ -241,7 +241,7 @@ class EarlyStoppingTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     "--resume",
                     str(output / "checkpoints/run_0002.bin.xz"),
                     "--no-progress",
@@ -261,7 +261,7 @@ class EarlyStoppingTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     "--resume",
                     str(output / "checkpoints/final.bin.xz"),
                     "--no-progress",
@@ -285,7 +285,7 @@ class EarlyStoppingTests(unittest.TestCase):
                 (["--resume", "missing", "--early-stop-runs", "2"], "overrides"),
             ):
                 result = subprocess.run(
-                    [sys.executable, "-m", "ecosystem.cli", str(path), *args],
+                    [sys.executable, "-m", "wtf.cli", str(path), *args],
                     capture_output=True,
                     text=True,
                 )

@@ -9,14 +9,14 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from ecosystem import kernels
-from ecosystem.ppo import MLP, policy_distribution, loss_and_gradient, PPOBrain
-from ecosystem.qrdqn import quantile_huber
-from ecosystem.recurrent_ppo import GRUNetwork
-from ecosystem.binary_io import Encoder, Decoder, varint
-from ecosystem.replay_codec import clone, same
-from ecosystem.telemetry import groups
-from ecosystem.world import World, Animal, Resource, Event
+from wtf.native import kernels
+from wtf.learning.ppo import MLP, policy_distribution, loss_and_gradient, PPOBrain
+from wtf.learning.qrdqn import quantile_huber
+from wtf.learning.recurrent_ppo import GRUNetwork
+from wtf.storage.binary_io import Encoder, Decoder, varint
+from wtf.storage.replay_codec import clone, same
+from wtf.inspection.telemetry import groups
+from wtf.simulation.world import World, Animal, Resource, Event
 from tests.test_ppo import ppo_settings
 from tests.test_advanced_algorithms import settings as advanced_settings
 from tests.test_simulation import config

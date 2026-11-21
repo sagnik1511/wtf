@@ -7,8 +7,8 @@
 !pyproject.toml
 !requirements.txt
 !environment.schema.json
-!ecosystem/
-!ecosystem/**
+!wtf/
+!wtf/**
 !viewer/
 !viewer/**
 !environments/

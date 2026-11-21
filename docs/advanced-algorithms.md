@@ -20,10 +20,10 @@ Recurrent PPO adds a GRU before those layers; MAPPO adds a separate critic.
 Run from the project root. Choose one command:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/recurrent_ppo.json --runs 20 --seed 100 --progress
-.venv/bin/python -m ecosystem.cli environments/qrdqn.json --runs 20 --seed 100 --progress
-.venv/bin/python -m ecosystem.cli environments/maskable_ppo.json --runs 20 --seed 100 --progress
-.venv/bin/python -m ecosystem.cli environments/mappo.json --runs 20 --seed 100 --progress
+.venv/bin/python -m wtf.cli environments/recurrent_ppo.json --runs 20 --seed 100 --progress
+.venv/bin/python -m wtf.cli environments/qrdqn.json --runs 20 --seed 100 --progress
+.venv/bin/python -m wtf.cli environments/maskable_ppo.json --runs 20 --seed 100 --progress
+.venv/bin/python -m wtf.cli environments/mappo.json --runs 20 --seed 100 --progress
 ```
 
 These presets start with fresh weights. Add `--brain prey=fresh --brain

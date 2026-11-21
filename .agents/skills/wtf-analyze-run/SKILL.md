@@ -16,12 +16,12 @@ individual runs. Inspect champion provenance/chaining when continuation matters.
 Use the existing analyzer instead of reimplementing replay decoding:
 
 ```sh
-.venv/bin/python -m ecosystem.analyze results/EXPERIMENT --window-steps 250
+.venv/bin/python -m wtf.inspection.analyze results/EXPERIMENT --window-steps 250
 # Add --run N for a single numbered run.
 ```
 
 The CLI writes `analysis.json` inside the ignored experiment folder by default.
-For a read-only investigation call `ecosystem.analyze.analyze_recording` directly
+For a read-only investigation call `wtf.inspection.analyze.analyze_recording` directly
 or use the existing read-only API; see the analysis guide. Stream committed chunks
 and report partial coverage for writing/sampled recordings. Never load every
 frame or restore all model weights merely to summarize behavior.

@@ -20,7 +20,7 @@ From the repository root, with a C compiler and Python development headers:
 
 ```sh
 .venv/bin/python -m work.build_native
-.venv/bin/python -c 'from ecosystem.kernels import status; print(status())'
+.venv/bin/python -c 'from wtf.native.kernels import status; print(status())'
 ```
 
 The current build command targets Clang/GCC toolchains. It uses the existing
@@ -46,9 +46,9 @@ fresh clone works with the Python fallback before building.
 
 ```sh
 # Require native kernels for an ordinary training invocation:
-WTF_KERNELS=native .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 --progress
+WTF_KERNELS=native .venv/bin/python -m wtf.cli environments/ppo.json --runs 1 --progress
 # Reference implementation for comparison:
-WTF_KERNELS=python .venv/bin/python -m ecosystem.cli environments/ppo.json --runs 1 --progress
+WTF_KERNELS=python .venv/bin/python -m wtf.cli environments/ppo.json --runs 1 --progress
 ```
 
 Acceleration supports CPython 3.12–3.13. Native reductions corresponding to
@@ -106,7 +106,7 @@ publication or persistent experiment result directory is used.
 
 Raw reports default to ignored `.cache/native-build/benchmark.json`. Use
 `--cases ppo dqn` to narrow the workload, or `--reference /path/to/source-tree`
-to include an earlier implementation containing `ecosystem/`. Source snapshots,
+to include an earlier implementation containing `wtf/`. Source snapshots,
 raw samples and compiler outputs stay ignored. The measured rollout report is
 linked from [performance](performance.md).
 

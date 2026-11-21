@@ -16,7 +16,7 @@ On Ubuntu 24.04 (Python 3.12), install the interpreter's venv support if absent:
 sudo apt-get update
 sudo apt-get install python3-venv python3-pip
 python3 -m venv .venv
-.venv/bin/python -m pip install /path/to/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl
+.venv/bin/python -m pip install /path/to/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
 .venv/bin/wtf run maskable_ppo --runs 1 --steps 200 --seed 100 --progress
 .venv/bin/wtf view --results results
 ```

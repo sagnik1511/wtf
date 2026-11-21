@@ -14,7 +14,7 @@ available separately. Opening a raw file leaves the site's theme controls.
 | Asset kind | Preview behavior |
 | --- | --- |
 | Structural, physics, map and inspector SVGs | Adaptive palettes follow the site toggle |
-| Theme/daylight comparison sheets | Outer labels/backgrounds adapt; explicit comparison samples keep their colors |
+| Theme/daylight comparison sheets | Day/night boards use the selected palette; interface comparison puts the selected theme first, alongside the labeled alternate |
 | Playback GIFs and light WebP variants | Select the matching recorded export, without color inversion |
 | Logo SVG/PNG variants | Select the matching light/dark artwork; favicon PNG has a contrasting presentation surface |
 | Full physics explorer / editable fragment | Embed the complete interactive explorer with inherited light/dark mode; the fragment remains an editable-source download |

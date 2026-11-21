@@ -8,9 +8,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.checkpoint_io import Encoder, Decoder, read_checkpoint
-from ecosystem.optimize_checkpoints import optimize_experiment, state_digest
-from ecosystem.runner import Experiment
+from wtf.storage.checkpoint_io import Encoder, Decoder, read_checkpoint
+from wtf.storage.optimize_checkpoints import optimize_experiment, state_digest
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment
@@ -156,7 +156,8 @@ class CheckpointStorageTests(unittest.TestCase):
             raw = root / "checkpoints/final.json"
             original = raw.read_bytes()
             with patch(
-                "ecosystem.optimize_checkpoints.state_digest", side_effect=[b"a", b"b"]
+                "wtf.storage.optimize_checkpoints.state_digest",
+                side_effect=[b"a", b"b"],
             ):
                 with self.assertRaisesRegex(ValueError, "verification failed"):
                     optimize_experiment(root)

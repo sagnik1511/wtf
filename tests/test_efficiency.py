@@ -6,10 +6,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ecosystem.ppo import MLP
-from ecosystem.brain import Brain
-from ecosystem.runner import Experiment
-from ecosystem.world import DIRECTIONS, World, Resource
+from wtf.learning.ppo import MLP
+from wtf.learning.brain import Brain
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import DIRECTIONS, World, Resource
 from tests.test_simulation import config
 
 

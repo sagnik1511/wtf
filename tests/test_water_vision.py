@@ -3,9 +3,9 @@ import json
 import unittest
 from unittest.mock import patch
 
-from ecosystem.config import validate, load
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal, Resource, World
+from wtf.config import validate, load
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal, Resource, World
 from tests.test_geography import configuration
 
 
@@ -83,7 +83,7 @@ class WaterVisionTests(unittest.TestCase):
         with patch.object(w.geography, "depth", wraps=w.geography.depth) as depth:
             self.assertEqual(w._water_sight_cells((1, 3), (6, 3)), 3)
             self.assertEqual(depth.call_count, 0)
-        with patch("ecosystem.world.VISIBILITY_CACHE_LIMIT", 4):
+        with patch("wtf.simulation.world.VISIBILITY_CACHE_LIMIT", 4):
             for x in range(6, 12):
                 w._water_sight_cells((1, 3), (x, 3))
             self.assertEqual(len(w._water_sight_cache), 4)

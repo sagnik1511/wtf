@@ -24,8 +24,8 @@ For example, from the checkout root:
 mkdir -p environments/local
 cp environments/maskable_ppo.json environments/local/my_world.json
 # Edit name and settings in the copied file, then validate:
-.venv/bin/python -c 'import sys; from ecosystem.config import load; load(sys.argv[1]); print("Configuration valid")' environments/local/my_world.json
-.venv/bin/python -m ecosystem.cli environments/local/my_world.json --runs 1 --steps 200 --seed 100 --progress
+.venv/bin/python -c 'import sys; from wtf.config import load; load(sys.argv[1]); print("Configuration valid")' environments/local/my_world.json
+.venv/bin/python -m wtf.cli environments/local/my_world.json --runs 1 --steps 200 --seed 100 --progress
 ```
 
 A replay contains the configuration captured when training ran. Editing a preset
@@ -129,8 +129,8 @@ signatures, diagnostics and tests; adding a string to JSON is insufficient.
 CLI overrides such as `--runs`, `--steps`, `--seed`, `--mode`, `--brain`,
 `--champion`, `--chain-brains` and `--early-stop-runs` belong to execution, not
 arbitrary new JSON fields. The complete current flag list is available without
-training via `.venv/bin/python -m ecosystem.cli --help`; viewing uses
-`.venv/bin/python -m ecosystem.server --help`.
+training via `.venv/bin/python -m wtf.cli --help`; viewing uses
+`.venv/bin/python -m wtf.server --help`.
 
 ## Developer extension boundaries
 
@@ -138,7 +138,7 @@ Existing species, algorithms, architecture sizes and supported map symbols are
 configuration choices. A new ecological diet/food-web rule, action, observation
 layout, algorithm or file encoding is a source-code extension. Follow this chain:
 
-1. Define the public configuration and validation in `ecosystem/config.py` and
+1. Define the public configuration and validation in `wtf/config.py` and
    `environment.schema.json`. Every schema field needs a definition.
 2. Implement physics in `world.py`/`geography.py`, learning in controller modules,
    orchestration in `runner.py`; do not put training into viewer code.

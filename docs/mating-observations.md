@@ -89,7 +89,7 @@ retain their observation versions and learning cadence; version 3 is opt-in.
 Start fresh with lineage selection:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/meandering_river.json \
+.venv/bin/python -m wtf.cli environments/meandering_river.json \
   --runs 10 --seed 100 --progress \
   --champion prey=lineage --champion predator=lineage
 ```

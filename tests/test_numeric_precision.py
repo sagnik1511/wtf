@@ -9,18 +9,18 @@ import sys
 import tempfile
 import unittest
 
-from ecosystem.binary_io import Encoder, Decoder
-from ecosystem.brain import Experience
-from ecosystem.brains import (
+from wtf.storage.binary_io import Encoder, Decoder
+from wtf.learning.brain import Experience
+from wtf.learning.brains import (
     create_brain,
     restore_brain,
     model_snapshot,
     load_model_weights,
     mix_parent_brains,
 )
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.numeric import Float32, packed, plain, precision_scope, precision_of
-from ecosystem.runner import Experiment
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.native.numeric import Float32, packed, plain, precision_scope, precision_of
+from wtf.experiment.runner import Experiment
 from tests.test_advanced_algorithms import settings as advanced_settings
 from tests.test_policy_algorithms import settings as policy_settings
 from tests.test_ppo import ppo_settings

@@ -1,7 +1,7 @@
 """Separate-process CPU-kernel benchmarks with exact complete-state comparison.
 
 Example: .venv/bin/python -m work.performance.benchmark_kernels --steps 180
-Optional --reference points to an earlier source tree containing ecosystem/.
+Optional --reference points to an earlier source tree containing wtf/.
 No profiler, champion publication or persistent simulation output is produced.
 """
 
@@ -37,12 +37,12 @@ CASES = {
 def worker(args):
     if args.reference:
         sys.path.insert(0, str(args.reference.resolve()))
-    from ecosystem.config import load
-    from ecosystem.runner import Experiment
-    from ecosystem.recording import Recorder
+    from wtf.config import load
+    from wtf.experiment.runner import Experiment
+    from wtf.storage.recording import Recorder
 
     try:
-        from ecosystem.kernels import status
+        from wtf.native.kernels import status
 
         backend = status()
     except ImportError:

@@ -8,17 +8,17 @@ import sys
 import tempfile
 import unittest
 
-from ecosystem.brains import model_snapshot
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate
-from ecosystem.library import (
+from wtf.learning.brains import model_snapshot
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate
+from wtf.storage.library import (
     ChampionBook,
     apply_brain_overrides,
     catalog,
     export_champions,
     read_artifact,
 )
-from ecosystem.runner import Experiment
+from wtf.experiment.runner import Experiment
 from tests.test_mutation import KINDS, environment
 
 
@@ -348,7 +348,7 @@ class SexChampionTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--runs",
                     "1",

@@ -4,13 +4,13 @@ import copy
 from pathlib import Path
 import unittest
 
-from ecosystem.brain import observation_inputs
-from ecosystem.brains import create_brain, load_model_weights, model_snapshot
-from ecosystem.config import load
-from ecosystem.library import selection_criterion
-from ecosystem.lineage import LineageBook
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal, World
+from wtf.learning.brain import observation_inputs
+from wtf.learning.brains import create_brain, load_model_weights, model_snapshot
+from wtf.config import load
+from wtf.storage.library import selection_criterion
+from wtf.experiment.lineage import LineageBook
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal, World
 
 
 PRESET = Path("tests/fixtures/mating_v3.json")

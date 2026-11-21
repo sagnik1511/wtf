@@ -1,7 +1,7 @@
 import io
 import unittest
-from ecosystem.progress import RunProgress
-from ecosystem.runner import Experiment
+from wtf.progress import RunProgress
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 
@@ -75,7 +75,7 @@ class ProgressCLITests(unittest.TestCase):
                     [
                         sys.executable,
                         "-m",
-                        "ecosystem.cli",
+                        "wtf.cli",
                         "--no-library",
                         "environments/baseline.json",
                         "--runs",

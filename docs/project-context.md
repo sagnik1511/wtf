@@ -13,6 +13,8 @@ behavior and actual playback.
 
 ## Customizing or extending the setup
 
+The Python namespace is `wtf`, organized by [package ownership](package-layout.md). Use `from wtf import Experiment, load_config` for the small public API; implementations live under `simulation`, `learning`, `experiment`, `storage`, `inspection` and `native`.
+
 Start with the [customization handbook](customization.md) and [command definitions](command-reference.md) to distinguish JSON,
 CLI, viewer preferences and source-code extensions. The
 [complete field reference](configuration-reference.md) defines every schema
@@ -80,17 +82,17 @@ preset and metadata captured with the experiment.
 
 | Area | Entry points | Read when changing |
 | --- | --- | --- |
-| Physical world, birth/death | `ecosystem/world.py`, `mutation.py` | [Architecture](architecture.md), [mutation](mutation.md) |
-| Current observations/caches | `ecosystem/perception.py`, visibility helpers in `world.py` | [Performance](performance.md) |
-| Experiments and configuration | `ecosystem/cli.py`, `config.py`, `runner.py`, `environments/`, schema | [Running](running.md), [configuration](configuration.md) |
+| Physical world, birth/death | `wtf/simulation/world.py`, `mutation.py` | [Architecture](architecture.md), [mutation](mutation.md) |
+| Current observations/caches | `wtf/simulation/perception.py`, visibility helpers in `world.py` | [Performance](performance.md) |
+| Experiments and configuration | `wtf/cli.py`, `config.py`, `runner.py`, `environments/`, schema | [Running](running.md), [configuration](configuration.md) |
 | Learning | `brains.py`, `brain.py`, `ppo.py`, `policy_gradients.py`, `grouped_rollouts.py`, `recurrent_ppo.py`, `qrdqn.py`, `contextual_ppo.py` | [Algorithms](algorithms.md), [advanced variants](advanced-algorithms.md) |
-| Optional native compute | `ecosystem/_kernels.c`, `_kernels_*.h`, `kernels.py`, `work/build_native.py` | [CPU kernels](native-kernels.md) |
-| Brain inheritance/archive | `ecosystem/library.py`, `runner.py` | [Saved brains](brain-library.md) |
-| Replay/checkpoint formats | `recording.py`, `replay_codec.py`, `replay_io.py`, `binary_io.py`, `checkpoint_io.py` in `ecosystem/` | [Binary storage](binary-storage.md), [recordings](recording.md) |
-| Read-only playback | `ecosystem/server.py`, `viewer/api.mjs`, `playback.mjs`, `binary-codec.mjs`, `app.js` | [Recordings](recording.md) |
+| Optional native compute | `wtf/native/_kernels.c`, `_kernels_*.h`, `kernels.py`, `work/build_native.py` | [CPU kernels](native-kernels.md) |
+| Brain inheritance/archive | `wtf/storage/library.py`, `runner.py` | [Saved brains](brain-library.md) |
+| Replay/checkpoint formats | `recording.py`, `replay_codec.py`, `replay_io.py`, `binary_io.py`, `checkpoint_io.py` in `wtf/` | [Binary storage](binary-storage.md), [recordings](recording.md) |
+| Read-only playback | `wtf/server.py`, `viewer/api.mjs`, `playback.mjs`, `binary-codec.mjs`, `app.js` | [Recordings](recording.md) |
 | Actual sampled animal activity | `activation_diagnostics.py`, per-brain diagnostics, `viewer/brain-activations.mjs` | [Recorded animal activations](explainability.md#recorded-animal-activations) |
-| Archived-model explanation | `ecosystem/explanations.py`, `explainability.py`, `viewer/explainability.mjs` | [Brain explanations](explainability.md) |
-| Metrics and interpretation | `ecosystem/telemetry.py`, `analyze.py`, viewer dashboard modules | [Analysis](analysis.md) |
+| Archived-model explanation | `wtf/inspection/explanations.py`, `explainability.py`, `viewer/explainability.mjs` | [Brain explanations](explainability.md) |
+| Metrics and interpretation | `wtf/inspection/telemetry.py`, `analyze.py`, viewer dashboard modules | [Analysis](analysis.md) |
 
 The [feedback review](feedback-review.md) describes the shared physical reward
 contract across environments and algorithms. Keep reward coefficients in species
@@ -136,7 +138,7 @@ for moved/dead/newborn animals and changed food, even when the observer stays pu
 Optional `placement` selects founder inside/outside zones and exact boundary-food
 quotas; it never confines later movement or resamples checkpoint bodies. See the
 [layout guide](geography.md#enclosed-valley-starting-layout) and
-`ecosystem/placement.py`. Existing configs without it preserve seeded layouts.
+`wtf/simulation/placement.py`. Existing configs without it preserve seeded layouts.
 
 Optional `body.water_vision_bonus` extends only rays crossing water, with wall
 occlusion intact. Cache static ray counts per world and key dynamic results by
@@ -226,7 +228,7 @@ log. Running or analyzing an experiment alone does not create a release.
 
 ## Python distribution boundary
 
-`pyproject.toml` and `setup.py` build an explicit `ecosystem` package;
+`pyproject.toml` and `setup.py` build an `wtf` package and its responsibility-based subpackages;
 `packaging_assets.json` whitelists maintained presets/maps/viewer/schema data.
 `resources.py` resolves installed assets via importlib.resources with a checkout
 fallback. Writable results and library paths belong to the current working

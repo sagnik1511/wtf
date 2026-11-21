@@ -18,19 +18,21 @@ See [archived-model explanation](explainability.md#what-is-being-explained).
 
 ## Components
 
+The [package layout guide](package-layout.md) maps every former import to its current subpackage and explains the public API.
+
 | Location | Responsibility |
 | --- | --- |
-| `ecosystem/geography.py` | Map validation, sparse immutable terrain and local terrain features |
-| `ecosystem/world.py` | Bodies, resources, movement, combat, rewards and reproduction |
-| `ecosystem/perception.py` | Incremental spatial windows and cache invalidation |
-| `ecosystem/brain.py`, `ppo.py`, `policy_gradients.py` | Independent learned models |
-| `ecosystem/grouped_rollouts.py` | Matched GRPO trial worlds |
-| `ecosystem/runner.py` | Run lifecycle, feedback, checkpoints and champion selection |
-| `ecosystem/library.py` | Compact model artifacts, compatibility and model ancestry |
-| `ecosystem/recording.py` | Frame streaming and read-only recording access |
-| `ecosystem/analyze.py` | Offline behavior analysis from saved frames |
-| `ecosystem/server.py` | Read-only playback HTTP server |
-| `ecosystem/explanations.py`, `explainability.py` | Bounded archived-weight analysis without live controllers |
+| `wtf/simulation/geography.py` | Map validation, sparse immutable terrain and local terrain features |
+| `wtf/simulation/world.py` | Bodies, resources, movement, combat, rewards and reproduction |
+| `wtf/simulation/perception.py` | Incremental spatial windows and cache invalidation |
+| `wtf/learning/brain.py`, `ppo.py`, `policy_gradients.py` | Independent learned models |
+| `wtf/learning/grouped_rollouts.py` | Matched GRPO trial worlds |
+| `wtf/experiment/runner.py` | Run lifecycle, feedback, checkpoints and champion selection |
+| `wtf/storage/library.py` | Compact model artifacts, compatibility and model ancestry |
+| `wtf/storage/recording.py` | Frame streaming and read-only recording access |
+| `wtf/inspection/analyze.py` | Offline behavior analysis from saved frames |
+| `wtf/server.py` | Read-only playback HTTP server |
+| `wtf/inspection/explanations.py`, `explainability.py` | Bounded archived-weight analysis without live controllers |
 | `viewer/` | JavaScript canvas playback and inspection |
 | `environments/` | JSON experiment presets |
 
@@ -123,7 +125,7 @@ is separate from the optional stateless archived-weight analysis.
 ## Installed runtime resources
 
 The Python wheel retains the same simulation/playback boundary. Viewer files,
-maintained presets, maps and schema are bundled under `ecosystem/assets/` through
+maintained presets, maps and schema are bundled under `wtf/assets/` through
 an explicit allowlist; `resources.py` locates them without requiring a checkout.
 Writable results and shared model-library paths use the working directory or
 explicit paths. See [package structure and isolated checks](packaging.md).

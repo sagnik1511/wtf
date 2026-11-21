@@ -20,7 +20,7 @@ brain inputs and swimming actions already match the world:
 ```python
 import json
 from pathlib import Path
-from ecosystem.config import load, validate
+from wtf.config import load, validate
 
 config = load("environments/river_crossing.json")
 config["name"] = "my_river"
@@ -49,7 +49,7 @@ output.write_text(json.dumps(config, indent=2) + "\n")
 ```
 
 Run it with `wtf run environments/local/my_river.json --runs 1 --seed 100`, or
-use `python -m ecosystem.cli` from the checkout. Inline maps are portable with the
+use `python -m wtf.cli` from the checkout. Inline maps are portable with the
 configuration. A `map_file` reference is also supported; relative references
 first look in the working directory and then in packaged/project assets. Keep
 world/map dimensions equal, enough dry/unblocked founder cells, compatible

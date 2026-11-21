@@ -9,11 +9,11 @@ import json
 from pathlib import Path
 import uuid
 
-from ecosystem.analyze import analyze_recording
-from ecosystem.config import load
-from ecosystem.library import export_champions
-from ecosystem.recording import Recorder
-from ecosystem.runner import Experiment
+from wtf.inspection.analyze import analyze_recording
+from wtf.config import load
+from wtf.storage.library import export_champions
+from wtf.storage.recording import Recorder
+from wtf.experiment.runner import Experiment
 
 
 def write_json(path, value):

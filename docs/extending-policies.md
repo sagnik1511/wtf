@@ -21,14 +21,14 @@ There is currently **no dynamic plugin registry or arbitrary class import in
 JSON**. Adding a new `type` requires explicit source integration. The following
 is a contributor recipe, not a model already supported by the released dispatcher.
 
-Prefer a small module under `ecosystem/`. Reuse an existing base class only if
+Prefer a small module under `wtf/`. Reuse an existing base class only if
 its experience semantics and parameter layout match. For example, this complete
 PPO-derived class changes only the entropy schedule while retaining PPO rollout,
 optimizer, RNG, diagnostic and checkpoint machinery:
 
 <!-- policy-example:start -->
 ```python
-from ecosystem.ppo import PPOBrain, loss_and_gradient
+from wtf.learning.ppo import PPOBrain, loss_and_gradient
 
 
 class ScheduledPPOBrain(PPOBrain):
@@ -48,7 +48,7 @@ class ScheduledPPOBrain(PPOBrain):
 ```
 <!-- policy-example:end -->
 
-Save it as `ecosystem/scheduled_ppo.py` when implementing the recipe. Its counter
+Save it as `wtf/scheduled_ppo.py` when implementing the recipe. Its counter
 is already saved/restored by PPO. A real extension with additional mutable state
 must serialize/restore that state itself. This class is illustrative: the current
 validator and dispatcher deliberately do not accept `scheduled_ppo` until the

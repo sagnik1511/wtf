@@ -116,6 +116,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Brain explanation flow (SVG)](visual-previews/structures/brain-explanation-flow-svg.md) | [brain-explanation-flow.svg](assets/structures/brain-explanation-flow.svg) |
 | [Founder family membership (SVG)](visual-previews/structures/founder-family-membership-svg.md) | [founder-family-membership.svg](assets/structures/founder-family-membership.svg) |
 | [Observation vector layout (SVG)](visual-previews/structures/observation-vector-layout-svg.md) | [observation-vector-layout.svg](assets/structures/observation-vector-layout.svg) |
+| [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) | [package-layout.svg](assets/structures/package-layout.svg) |
 | [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) | [spatial-window-cache.svg](assets/structures/spatial-window-cache.svg) |
 
 ## Terrain playback clips

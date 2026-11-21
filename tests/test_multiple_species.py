@@ -9,16 +9,16 @@ import sys
 import tempfile
 import unittest
 
-from ecosystem.analyze import analyze_recording
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate, load
-from ecosystem.contextual_ppo import action_mask, central_contexts
-from ecosystem.library import apply_brain_overrides, export_champions
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.telemetry import summarize
-from ecosystem.world import Animal, World
+from wtf.inspection.analyze import analyze_recording
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate, load
+from wtf.learning.contextual_ppo import action_mask, central_contexts
+from wtf.storage.library import apply_brain_overrides, export_champions
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.inspection.telemetry import summarize
+from wtf.simulation.world import Animal, World
 from tests.test_efficiency import reference_observation
 from tests.test_mutation import KINDS, environment
 
@@ -224,7 +224,7 @@ class MultipleSpeciesTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--runs",
                     "1",

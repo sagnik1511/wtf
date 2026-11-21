@@ -6,14 +6,14 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brain import Experience
-from ecosystem.brains import inherit_brain
-from ecosystem.config import validate
-from ecosystem.grouped_rollouts import collect_group
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.world import World
+from wtf.learning.brain import Experience
+from wtf.learning.brains import inherit_brain
+from wtf.config import validate
+from wtf.learning.grouped_rollouts import collect_group
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import World
 from tests.test_simulation import config, empty_world, animal
 from tests.reproduction_support import force_reproduction
 from tests.test_ppo import ppo_environment

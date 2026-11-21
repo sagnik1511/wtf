@@ -97,6 +97,7 @@ narrow screens. The top tabs open the same section pages.
 
 | Guide | What it covers |
 | --- | --- |
+| [Package layout and import migration](package-layout.md) | Public API, subpackage ownership and the complete old-to-new import map. |
 | [Architecture](architecture.md) | Python/JavaScript ownership, simulation phases and runtime data flow. |
 | [Development and testing](development.md) | Development setup, test suites and mandatory source formatting. |
 | [Add policy models](extending-policies.md) | Implement and integrate a new learning algorithm. |

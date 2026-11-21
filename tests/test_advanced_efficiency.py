@@ -4,11 +4,11 @@ import copy
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brain import Experience, INPUTS
-from ecosystem.brains import create_brain
-from ecosystem.ppo import MLP
-from ecosystem.runner import Experiment
-from ecosystem.contextual_ppo import central_contexts
+from wtf.learning.brain import Experience, INPUTS
+from wtf.learning.brains import create_brain
+from wtf.learning.ppo import MLP
+from wtf.experiment.runner import Experiment
+from wtf.learning.contextual_ppo import central_contexts
 from tests.test_advanced_algorithms import settings, environment
 
 
@@ -127,7 +127,7 @@ class AdvancedEfficiencyTests(unittest.TestCase):
     def test_mappo_post_step_context_built_once_and_shared(self):
         e = Experiment(environment("mappo"))
         with patch(
-            "ecosystem.contextual_ppo.central_contexts", wraps=central_contexts
+            "wtf.learning.contextual_ppo.central_contexts", wraps=central_contexts
         ) as contexts:
             e.step()
             contexts.assert_called_once_with(e.world)
@@ -153,8 +153,8 @@ class AdvancedEfficiencyTests(unittest.TestCase):
         self.assertEqual(before, b.checkpoint())
 
     def test_grpo_masked_agents_share_trial_occupancy_without_brain_proxies(self):
-        from ecosystem.contextual_ppo import action_mask
-        from ecosystem.grouped_rollouts import collect_group
+        from wtf.learning.contextual_ppo import action_mask
+        from wtf.learning.grouped_rollouts import collect_group
         from tests.test_policy_algorithms import GRPOTests
         from tests.test_simulation import animal
 
@@ -164,7 +164,9 @@ class AdvancedEfficiencyTests(unittest.TestCase):
             brains[i] = create_brain(settings("maskable_ppo"), ["rest"], 3, 4)
         before = {i: b.checkpoint() for i, b in brains.items() if i != 1}
         with (
-            patch("ecosystem.contextual_ppo.action_mask", wraps=action_mask) as masks,
+            patch(
+                "wtf.learning.contextual_ppo.action_mask", wraps=action_mask
+            ) as masks,
             patch("copy.copy", side_effect=AssertionError("temporary controller copy")),
         ):
             collect_group(world, brains, 1)

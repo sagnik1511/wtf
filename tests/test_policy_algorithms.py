@@ -6,12 +6,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ecosystem.brain import Brain, Experience
-from ecosystem.brains import create_brain
-from ecosystem.config import load, validate
-from ecosystem.grouped_rollouts import collect_group
-from ecosystem.policy_gradients import GRPOBrain, PolicyStep, actor_loss_gradient
-from ecosystem.runner import Experiment
+from wtf.learning.brain import Brain, Experience
+from wtf.learning.brains import create_brain
+from wtf.config import load, validate
+from wtf.learning.grouped_rollouts import collect_group
+from wtf.learning.policy_gradients import GRPOBrain, PolicyStep, actor_loss_gradient
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config, empty_world, animal
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -209,7 +209,9 @@ class GRPOTests(unittest.TestCase):
             o = world.observe(world.animals[focal_id])
             return [[PolicyStep(o, 0, 0.0, 0.0, False, True)]] * 2
 
-        with patch("ecosystem.grouped_rollouts.collect_group", side_effect=fake_group):
+        with patch(
+            "wtf.learning.grouped_rollouts.collect_group", side_effect=fake_group
+        ):
             for _ in range(4):
                 before_tick = e.world.tick
                 e.step()

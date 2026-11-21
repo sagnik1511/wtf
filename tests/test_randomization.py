@@ -7,8 +7,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ecosystem.config import validate
-from ecosystem.runner import Experiment
+from wtf.config import validate
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 
@@ -22,7 +22,9 @@ class RandomizationTests(unittest.TestCase):
     def test_same_config_new_invocations_have_different_worlds_and_brains(self):
         c = self.random_config()
         original = copy.deepcopy(c)
-        with patch("ecosystem.runner.secrets.randbits", side_effect=[12345, 67890]):
+        with patch(
+            "wtf.experiment.runner.secrets.randbits", side_effect=[12345, 67890]
+        ):
             a, b = Experiment(c), Experiment(c)
         self.assertEqual(c, original)
         self.assertEqual(a.config, b.config)
@@ -82,7 +84,7 @@ class RandomizationTests(unittest.TestCase):
                 a.step()
                 saved = json.loads(json.dumps(a.checkpoint()))
                 with patch(
-                    "ecosystem.runner.secrets.randbits",
+                    "wtf.experiment.runner.secrets.randbits",
                     side_effect=AssertionError("Resume must not choose fresh entropy"),
                 ):
                     b = Experiment.restore(saved)
@@ -123,7 +125,7 @@ class RandomizationTests(unittest.TestCase):
                 args = [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     "--no-library",
                     "environments/baseline.json",
                     "--runs",

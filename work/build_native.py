@@ -29,12 +29,12 @@ def main():
     setup(
         name="wtf-native-kernels",
         version="0.0.0",
-        packages=["ecosystem"],
+        packages=["wtf", "wtf.native"],
         ext_modules=[
             Extension(
-                "ecosystem._kernels",
-                ["ecosystem/_kernels.c"],
-                depends=[str(p) for p in Path("ecosystem").glob("_kernels*.h")],
+                "wtf.native._kernels",
+                ["wtf/native/_kernels.c"],
+                depends=[str(p) for p in Path("wtf/native").glob("_kernels*.h")],
                 extra_compile_args=[
                     "-O3",
                     "-fno-fast-math",
@@ -52,10 +52,10 @@ def main():
             ".cache/native-build/lib",
         ],
     )
-    artifact = Path(".cache/native-build/lib/ecosystem") / (
+    artifact = Path(".cache/native-build/lib/wtf/native") / (
         "_kernels" + sysconfig.get_config_var("EXT_SUFFIX")
     )
-    target = Path("ecosystem") / artifact.name
+    target = Path("wtf/native") / artifact.name
     # Publishing by rename preserves mappings in already-running processes.
     fd, name = tempfile.mkstemp(prefix="._kernels-", suffix=".so", dir=target.parent)
     os.close(fd)

@@ -92,8 +92,8 @@ FLOWS = {
 
 def inspector_example():
     """Controlled geometry and actual top-k inputs; invented, labelled scores."""
-    from ecosystem.config import load
-    from ecosystem.world import Animal, Resource, World
+    from wtf.config import load
+    from wtf.simulation.world import Animal, Resource, World
 
     c = load(ROOT / "environments/river_crossing_strong_predator.json")
     rows = [

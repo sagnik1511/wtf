@@ -5,7 +5,9 @@
 Choose a built Python wheel, a source checkout or Docker. Rollout **0.0.1.30**
 adds package builds. TestPyPI trial uploads and production PyPI publication are
 separate steps; see the [trial release procedure](docs/packaging.md#testpypi-trial-release). The distribution name is
-`wtf-wildlife-trial-framework`, and the import remains `ecosystem`.
+`wtf-wildlife-trial-framework`, and the Python import is `wtf`.
+
+For renamed imports and module locations, see [package layout and migration](docs/package-layout.md).
 
 ## Install the built wheel
 
@@ -14,10 +16,10 @@ into a fresh environment:
 
 ```sh
 .venv/bin/python -m pip install build twine
-.venv/bin/python -m build
-.venv/bin/python -m twine check dist/*
+.venv/bin/python -m build --outdir dist/0.0.2.0
+.venv/bin/python -m twine check dist/0.0.2.0/*
 python3.12 -m venv /path/to/test-env
-/path/to/test-env/bin/python -m pip install dist/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl
+/path/to/test-env/bin/python -m pip install dist/0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
 ```
 
 From any writable working directory, use `wtf presets`,
@@ -40,7 +42,7 @@ On macOS or Linux:
 cd /path/to/wtf
 python3.12 -m venv .venv
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
-.venv/bin/python -m ecosystem.cli --help
+.venv/bin/python -m wtf.cli --help
 ```
 
 Keep subsequent Python packages inside `.venv`. The only current runtime
@@ -49,7 +51,7 @@ dependency is `tqdm`; a compiler is unnecessary for the Python fallback.
 Run one short experiment, then start the offline viewer:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/maskable_ppo.json \
+.venv/bin/python -m wtf.cli environments/maskable_ppo.json \
   --runs 1 --steps 200 --seed 100 --progress
 ./run.sh
 ```
@@ -64,7 +66,7 @@ The launcher can create `.venv` but does not install `requirements.txt` for you.
 You can also start playback directly:
 
 ```sh
-.venv/bin/python -m ecosystem.server --results results --port 8000
+.venv/bin/python -m wtf.server --results results --port 8000
 ```
 
 On Windows PowerShell, use the same CLI with the virtual environment executable:
@@ -73,8 +75,8 @@ On Windows PowerShell, use the same CLI with the virtual environment executable:
 cd C:\path\to\wtf
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m ecosystem.cli environments/maskable_ppo.json --runs 1 --steps 200 --seed 100 --progress
-.\.venv\Scripts\python.exe -m ecosystem.server --results results --port 8000
+.\.venv\Scripts\python.exe -m wtf.cli environments/maskable_ppo.json --runs 1 --steps 200 --seed 100 --progress
+.\.venv\Scripts\python.exe -m wtf.server --results results --port 8000
 ```
 
 Use the Python fallback where a native build is unavailable; the shell launchers
@@ -88,7 +90,7 @@ and build from the checkout root:
 ```sh
 .venv/bin/python -m pip install setuptools
 .venv/bin/python -m work.build_native
-.venv/bin/python -c "from ecosystem.kernels import status; print(status())"
+.venv/bin/python -c "from wtf.native.kernels import status; print(status())"
 ```
 
 Current native dispatch supports CPython 3.12–3.13. Other supported Python

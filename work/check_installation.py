@@ -6,6 +6,7 @@ restore. It never builds, publishes, or starts a Docker container.
 """
 
 import json
+import importlib.util
 import os
 import sysconfig
 from pathlib import Path
@@ -16,22 +17,26 @@ from http.server import ThreadingHTTPServer
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
-import ecosystem
-from ecosystem import Experiment, load_config
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.recording import RecordingStore
-from ecosystem.replay_io import load_chunk, chunk_path
-from ecosystem.resources import asset, preset_names
-from ecosystem.server import make_handler, State
+import wtf
+from wtf import Experiment
+from wtf import load_config
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.storage.recording import RecordingStore
+from wtf.storage.replay_io import load_chunk, chunk_path
+from wtf.resources import asset, preset_names
+from wtf.server import make_handler, State
 
 
 def main():
     workspace = Path.cwd()
     assert (
-        "site-packages" in Path(ecosystem.__file__).parts
+        importlib.util.find_spec("ecosystem") is None
+    ), "Legacy namespace leaked into installation"
+    assert (
+        "site-packages" in Path(wtf.__file__).parts
     ), "Expected a fresh installed package"
     assert (
-        workspace not in Path(ecosystem.__file__).resolve().parents
+        workspace not in Path(wtf.__file__).resolve().parents
     ), "Run outside the source/package directory"
     executable = Path(sysconfig.get_path("scripts")) / (
         "wtf.exe" if os.name == "nt" else "wtf"
@@ -55,7 +60,7 @@ def main():
         [
             sys.executable,
             "-m",
-            "ecosystem",
+            "wtf",
             "run",
             "maskable_ppo",
             "--runs",
@@ -124,12 +129,12 @@ def main():
         server.shutdown()
         server.server_close()
         worker.join()
-    from ecosystem.kernels import status
+    from wtf.native.kernels import status
 
     if os.environ.get("WTF_KERNELS") == "native":
         assert status()["backend"] == "native"
     report = {
-        "package": str(Path(ecosystem.__file__).resolve()),
+        "package": str(Path(wtf.__file__).resolve()),
         "presets": len(names),
         "frames": len(frames),
         "viewer": "HTTP assets/catalog/chunk passed",

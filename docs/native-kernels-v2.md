@@ -26,7 +26,7 @@ recording compression are unchanged.
 ## Numerical and compatibility boundaries
 
 The implementation uses the existing C extension with three included source
-headers: `ecosystem/_kernels_math.h`, `_kernels_spatial.h`, and `_kernels_data.h`.
+headers: `wtf/native/_kernels_math.h`, `_kernels_spatial.h`, and `_kernels_data.h`.
 There is no C++/ML-framework dependency or change to model/checkpoint/replay formats.
 All arithmetic/storage boundaries remain the same as the first native rollout.
 

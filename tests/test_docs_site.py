@@ -27,12 +27,12 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertEqual(
             self.render(
                 "[Install](../../INSTALL.md#local-python-installation) "
-                "[Home](../../README.md) [Code](../../ecosystem/world.py#L12) "
+                "[Home](../../README.md) [Code](../../wtf/simulation/world.py#L12) "
                 "![Figure](../assets/viewer/brain-views.svg)"
             ),
             "[Install](../installation.md#local-python-installation) "
             "[Home](../index.md) "
-            "[Code](https://github.com/example/project/blob/main/ecosystem/world.py#L12) "
+            "[Code](https://github.com/example/project/blob/main/wtf/simulation/world.py#L12) "
             "![Figure](../assets/viewer/brain-views.svg)",
         )
 
@@ -364,6 +364,36 @@ class DocumentationSiteTests(unittest.TestCase):
                 svg = ET.parse(path).getroot()
                 style = "".join(e.text or "" for e in svg.findall(".//s:style", ns))
                 self.assertIn("prefers-color-scheme: light", style, str(path))
+
+    def test_daylight_boards_and_comparison_samples_select_real_palettes(self):
+        root = Path(__file__).resolve().parents[1] / "docs/assets/viewer"
+        ns = {"s": "http://www.w3.org/2000/svg"}
+        day = ET.parse(root / "day-night.svg").getroot()
+        dark = day.findall(".//s:g[@class='board-palette-dark']", ns)
+        light = day.findall(".//s:g[@class='board-palette-light']", ns)
+        self.assertEqual(len(dark), 4)
+        self.assertEqual(len(light), 4)
+        for dark_board, light_board in zip(dark, light):
+            dark_paints = [n.get("fill") for n in dark_board.iter() if n.get("fill")]
+            light_paints = [n.get("fill") for n in light_board.iter() if n.get("fill")]
+            self.assertNotEqual(dark_paints, light_paints)
+        comparison = ET.parse(root / "themes.svg").getroot()
+        for theme in ("dark", "light"):
+            group = comparison.find(f"s:g[@class='comparison-current-{theme}']", ns)
+            self.assertIsNotNone(group)
+            self.assertEqual(
+                len(group.findall("s:g[@class='fixed-comparison']", ns)), 2
+            )
+            first_label = group.find("s:g/s:text", ns).text
+            self.assertEqual(first_label, f"{theme.title()} interface · selected")
+        css = (root / "comparison-palette.css").read_text()
+        for selector in (
+            ".board-palette-light",
+            ".board-palette-dark",
+            ".comparison-current-light",
+            ".comparison-current-dark",
+        ):
+            self.assertIn(selector, css)
 
     def test_theme_styles_are_owned_by_the_outer_svg(self):
         root = Path(__file__).resolve().parents[1]

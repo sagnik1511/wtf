@@ -7,22 +7,22 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem import kernels
-from ecosystem.analyze import analyze_run
-from ecosystem.brain import observation_inputs
-from ecosystem.brains import (
+from wtf.native import kernels
+from wtf.inspection.analyze import analyze_run
+from wtf.learning.brain import observation_inputs
+from wtf.learning.brains import (
     model_signature,
     model_snapshot,
     load_model_weights,
     create_brain,
 )
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import load, validate
-from ecosystem.contextual_ppo import action_mask
-from ecosystem.recording import Recorder
-from ecosystem.replay_io import chunk_path, load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal, World
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import load, validate
+from wtf.learning.contextual_ppo import action_mask
+from wtf.storage.recording import Recorder
+from wtf.storage.replay_io import chunk_path, load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal, World
 from tests.test_mating_intent import world as breeding_world, choose
 from tests.test_mutation import environment, KINDS
 from tests.test_geography import configuration as terrain_config

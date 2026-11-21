@@ -6,17 +6,17 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from ecosystem.brains import load_model_weights, model_snapshot
-from ecosystem.config import validate
-from ecosystem.library import (
+from wtf.learning.brains import load_model_weights, model_snapshot
+from wtf.config import validate
+from wtf.storage.library import (
     ChampionBook,
     catalog,
     export_champions,
     apply_brain_overrides,
     localize_champions,
 )
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal, World
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal, World
 from tests.test_simulation import config
 from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment
@@ -398,7 +398,7 @@ class LibraryTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--runs",
                     "1",
@@ -433,7 +433,7 @@ class LibraryTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     "--resume",
                     str(folder / "checkpoints/final.json"),
                     "--brain",
@@ -515,7 +515,7 @@ class LibraryTests(unittest.TestCase):
 
     def test_source_run_name_resolves_under_working_directory_results(self):
         from unittest.mock import patch
-        from ecosystem import library
+        from wtf.storage import library
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -541,7 +541,7 @@ class LibraryTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--runs",
                     "1",

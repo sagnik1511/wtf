@@ -4,10 +4,10 @@ import copy
 import json
 import unittest
 
-from ecosystem.brain import observation_inputs
-from ecosystem.brains import model_snapshot, load_model_weights
-from ecosystem.config import load, validate
-from ecosystem.runner import Experiment
+from wtf.learning.brain import observation_inputs
+from wtf.learning.brains import model_snapshot, load_model_weights
+from wtf.config import load, validate
+from wtf.experiment.runner import Experiment
 from tests.test_reproduction import breeding_world
 from tests.test_mutation import KINDS, environment
 from tests.test_lineage_champions import configured
@@ -133,7 +133,7 @@ class MatingObservationTests(unittest.TestCase):
             validate(c)
 
     def test_mate_sight_obeys_directional_water_bonus_and_walls(self):
-        from ecosystem.geography import Geography
+        from wtf.simulation.geography import Geography
 
         w = self.world()
         definition = dict(
@@ -158,7 +158,7 @@ class MatingObservationTests(unittest.TestCase):
         self.assertEqual(w.observe_all()[0][39], 0)
 
     def test_longer_grpo_trials_keep_v3_inputs_and_isolate_real_world(self):
-        from ecosystem.grouped_rollouts import collect_group
+        from wtf.learning.grouped_rollouts import collect_group
 
         c = load("environments/meandering_river.json")
         c["experiment"].update(runs=1, world_seed_policy="increment")
@@ -181,7 +181,7 @@ class PromotionGuardTests(unittest.TestCase):
     def test_loaded_qualified_model_is_protected_without_cross_sex_fallback(self):
         import tempfile
         from pathlib import Path
-        from ecosystem.library import export_champions, apply_brain_overrides
+        from wtf.storage.library import export_champions, apply_brain_overrides
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

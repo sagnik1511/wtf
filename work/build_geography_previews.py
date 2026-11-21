@@ -3,7 +3,7 @@
 from html import escape
 from pathlib import Path
 
-from ecosystem.config import load
+from wtf.config import load
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ("meandering_river", "river_delta", "alpine_pass", "lake_islands")

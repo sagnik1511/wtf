@@ -16,28 +16,33 @@ ASSETS = json.loads((ROOT / "packaging_assets.json").read_text())
 
 class BuildPy(build_py):
     def run(self):
-        target_package = Path(self.build_lib) / "ecosystem"
-        if target_package.resolve() == (ROOT / "ecosystem").resolve():
+        target_package = Path(self.build_lib) / "wtf"
+        if target_package.resolve() == (ROOT / "wtf").resolve():
             raise ValueError("Build directory must not be the source package")
         if (target_package / "assets").exists():
             shutil.rmtree(target_package / "assets")
         if not self.distribution.ext_modules:
             for pattern in ("_kernels*.so", "_kernels*.pyd"):
-                for stale in target_package.glob(pattern):
+                for stale in target_package.rglob(pattern):
                     stale.unlink()
+        # An existing checkout may contain build output from the former namespace.
+        legacy = Path(self.build_lib) / "ecosystem"
+        if legacy.exists():
+            if legacy.resolve() == (ROOT / "ecosystem").resolve():
+                raise ValueError("Build directory must not be the source checkout")
+            shutil.rmtree(legacy)
         super().run()
         for relative in ASSETS:
             source = (ROOT / relative).resolve()
             if ROOT not in source.parents or not source.is_file():
                 raise ValueError(f"Invalid packaged asset: {relative}")
-            target = Path(self.build_lib) / "ecosystem/assets" / relative
+            target = Path(self.build_lib) / "wtf/assets" / relative
             self.mkpath(str(target.parent))
             self.copy_file(str(source), str(target))
 
     def get_outputs(self, include_bytecode=1):
         return super().get_outputs(include_bytecode) + [
-            str(Path(self.build_lib) / "ecosystem/assets" / relative)
-            for relative in ASSETS
+            str(Path(self.build_lib) / "wtf/assets" / relative) for relative in ASSETS
         ]
 
 
@@ -56,11 +61,11 @@ if mode == "1":
     runpy.run_path(str(ROOT / "_build_support.py"))["configure_compiler"]()
     extensions = [
         Extension(
-            "ecosystem._kernels",
-            ["ecosystem/_kernels.c"],
+            "wtf.native._kernels",
+            ["wtf/native/_kernels.c"],
             depends=[
                 str(p.relative_to(ROOT))
-                for p in (ROOT / "ecosystem").glob("_kernels*.h")
+                for p in (ROOT / "wtf/native").glob("_kernels*.h")
             ],
             extra_compile_args=(
                 ["-O3", "-fno-fast-math", "-ffp-contract=off", "-fno-builtin-pow"]

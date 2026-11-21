@@ -6,12 +6,12 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from ecosystem.brains import mix_parent_brains, model_snapshot
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import load
-from ecosystem.runner import Experiment
+from wtf.learning.brains import mix_parent_brains, model_snapshot
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import load
+from wtf.experiment.runner import Experiment
 from tests.reproduction_support import force_reproduction
-from ecosystem.world import Animal, World
+from wtf.simulation.world import Animal, World
 from tests.test_mutation import KINDS, environment
 from tests.test_reproduction import breeding_world
 
@@ -165,7 +165,7 @@ class PairedGeneticsTests(unittest.TestCase):
         restored.step()
 
     def test_analysis_counts_both_parents_cost_but_keeps_old_recording_semantics(self):
-        from ecosystem.analyze import Statistics
+        from wtf.inspection.analyze import Statistics
 
         w = breeding_world()
         r = w.step({i: "reproduce" for i in w.animals})

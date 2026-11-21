@@ -8,11 +8,11 @@ from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from ecosystem.brain import Brain, Experience, INPUTS
-from ecosystem.config import load, validate
-from ecosystem.runner import Experiment
-from ecosystem.server import State, make_handler
-from ecosystem.world import Animal, Resource, World
+from wtf.learning.brain import Brain, Experience, INPUTS
+from wtf.config import load, validate
+from wtf.experiment.runner import Experiment
+from wtf.server import State, make_handler
+from wtf.simulation.world import Animal, Resource, World
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -241,7 +241,7 @@ class ExperimentTests(unittest.TestCase):
         self.assertEqual(a.checkpoint(), b.checkpoint())
 
     def test_next_run_uses_champion_or_original_weights(self):
-        from ecosystem.brains import model_snapshot
+        from wtf.learning.brains import model_snapshot
 
         for chain in (True, False):
             c = config()
@@ -279,7 +279,7 @@ class ExperimentTests(unittest.TestCase):
 class ServerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        from ecosystem.recording import Recorder
+        from wtf.storage.recording import Recorder
 
         cls.directory = tempfile.TemporaryDirectory()
         cls.folder = Path(cls.directory.name) / "recorded_test"
@@ -350,7 +350,7 @@ class ServerTests(unittest.TestCase):
             )
             frames = json.loads(gzip.decompress(response.read()))
         self.assertEqual(len(frames), 4)
-        from ecosystem.replay_codec import decode_chunk
+        from wtf.storage.replay_codec import decode_chunk
 
         req = Request(
             path, headers={"Accept-Encoding": "gzip", "X-WTF-Replay": "delta-v1"}
@@ -397,7 +397,7 @@ class ServerTests(unittest.TestCase):
 
     def test_traversal_and_missing_chunks(self):
         for path in (
-            "/../ecosystem/config.py",
+            "/../wtf/config.py",
             "/api/recordings/recorded_test/runs/1/chunks/9999",
         ):
             with self.subTest(path=path), self.assertRaises(HTTPError) as raised:

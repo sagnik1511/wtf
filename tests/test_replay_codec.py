@@ -9,11 +9,11 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.replay_codec import encode_chunk, decode_chunk
-from ecosystem.replay_io import load_chunk, load_chunk_payload
-from ecosystem.compress_recordings import compress_recording, frame_digest
-from ecosystem.recording import Recorder
-from ecosystem.runner import Experiment
+from wtf.storage.replay_codec import encode_chunk, decode_chunk
+from wtf.storage.replay_io import load_chunk, load_chunk_payload
+from wtf.storage.compress_recordings import compress_recording, frame_digest
+from wtf.storage.recording import Recorder
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 
@@ -202,7 +202,7 @@ class CodecTests(unittest.TestCase):
                 )
             )
             with patch(
-                "ecosystem.compress_recordings.frame_digest", side_effect=[b"a", b"b"]
+                "wtf.storage.compress_recordings.frame_digest", side_effect=[b"a", b"b"]
             ):
                 with self.assertRaisesRegex(ValueError, "verification failed"):
                     compress_recording(root, delta=True)

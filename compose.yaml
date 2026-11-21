@@ -23,7 +23,7 @@ services:
       args:
         BUILD_NATIVE: '${WTF_BUILD_NATIVE:-1}'
     user: '${WTF_UID:-1000}:${WTF_GID:-1000}'
-    entrypoint: [python, -m, ecosystem.server]
+    entrypoint: [python, -m, wtf.server]
     command: [--host, 0.0.0.0, --port, '8000', --results, /data/results]
     ports:
       - '127.0.0.1:${WTF_PORT:-8000}:8000'

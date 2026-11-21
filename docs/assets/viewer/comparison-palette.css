@@ -1,13 +1,27 @@
-/* Theme the comparison sheet chrome while retaining the actual sample colors. */
+/* Use actual viewer palettes for daylight boards and select the primary comparison. */
+.board-palette-light,
+.comparison-current-light {
+  display: none;
+}
 @media (prefers-color-scheme: light) {
+  .board-palette-dark,
+  .comparison-current-dark {
+    display: none;
+  }
+  .board-palette-light,
+  .comparison-current-light {
+    display: inline;
+  }
   svg > .sheet-background {
     fill: #f4f7fa;
   }
   svg > .sheet-heading text,
-  svg > text {
+  svg > text,
+  .comparison-current-light > text {
     fill: #172c3c;
   }
-  svg > rect[fill='#111c27'] {
+  svg > rect[fill='#111c27'],
+  .comparison-current-light > rect[fill='#111c27'] {
     fill: #fff;
     stroke: #b7c8d7;
   }

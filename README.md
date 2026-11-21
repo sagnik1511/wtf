@@ -25,6 +25,9 @@ A short replay of a saved experiment. See the [live species charts](docs/recordi
 for population, energy, births and hunting trends.
 
 For Python and Docker setup, see [INSTALL.md](INSTALL.md).
+The Python import is `wtf`; the distribution is `wtf-wildlife-trial-framework`.
+See [package layout and import migration](docs/package-layout.md) for the
+responsibility-based modules and the 0.0.2.0 import changes.
 
 ## Tech stack
 
@@ -68,7 +71,7 @@ Requires Python 3.12+. Run from the project directory:
 cd /path/to/wtf
 python3.12 -m venv .venv
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
-.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1
+.venv/bin/python -m wtf.cli environments/baseline.json --runs 1
 ./run.sh
 ```
 
@@ -83,7 +86,7 @@ for each species/sex group inside `results/<run-name>/champions/`. Models keep t
 Use the longest-lived prey champions and predator hunting champions to start a new generation:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 1 \
+.venv/bin/python -m wtf.cli environments/baseline.json --runs 1 \
   --brains-from PREVIOUS_RUN_NAME --brain prey=lifespan --brain predator=kills
 ```
 
@@ -112,7 +115,7 @@ initial theme follows your system preference.
 ## Project layout
 
 ```text
-ecosystem/     Python simulation, learning, archives and analysis
+wtf/     Python simulation, learning, archives and analysis
 viewer/        JavaScript playback engine
 environments/  JSON experiment presets
 maps/          Editable river, highland and valley layouts

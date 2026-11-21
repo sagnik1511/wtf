@@ -9,8 +9,8 @@ Replace `EXPERIMENT` with the directory printed by the example:
 ```python
 import json
 from pathlib import Path
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.runner import Experiment
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.experiment.runner import Experiment
 
 folder = Path("results/EXPERIMENT")
 summary = json.loads((folder / "summary.json").read_text())[0]
@@ -31,7 +31,7 @@ do not hand-decode binary arrays or confuse file-envelope and logical versions.
 An exact resume and a new world with saved weights are different operations:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/maskable_ppo.json \
+.venv/bin/python -m wtf.cli environments/maskable_ppo.json \
   --runs 1 --seed 101 --brains-from results/EXPERIMENT
 ```
 

@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **244 public documentation pages**, **95 visual files**
+Coverage: **247 public documentation pages**, **96 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -65,6 +65,7 @@ and **8 identical viewer branding copies**.
 | [Optional CPU kernels](native-kernels.md) | [Home](index.md) → [native kernels](native-kernels.md) |
 | [Native kernels and runtime data widths](native-performance-review.md) | [Home](index.md) → [native performance review](native-performance-review.md) |
 | [Animal observations](observations.md) | [Home](index.md) → [observations](observations.md) |
+| [Package layout and import migration](package-layout.md) | [Home](index.md) → [package layout and import migration](package-layout.md) |
 | [Building and verifying the Python distribution](packaging.md) | [Home](index.md) → [Package builds](packaging.md) |
 | [Performance and benchmarking](performance.md) | [Home](index.md) → [Performance](performance.md) |
 | [Physics and visibility, illustrated](physics.md) | [Home](index.md) → [Physics illustrated](physics.md) |
@@ -161,6 +162,7 @@ and **8 identical viewer branding copies**.
 | [Brain explanation flow (SVG)](visual-previews/structures/brain-explanation-flow-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Brain explanation flow (SVG)](visual-previews/structures/brain-explanation-flow-svg.md) |
 | [Founder family membership (SVG)](visual-previews/structures/founder-family-membership-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Founder family membership (SVG)](visual-previews/structures/founder-family-membership-svg.md) |
 | [Observation vector layout (SVG)](visual-previews/structures/observation-vector-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation vector layout (SVG)](visual-previews/structures/observation-vector-layout-svg.md) |
+| [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) |
 | [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) |
 | [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) |
 | [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) |
@@ -257,6 +259,7 @@ and **8 identical viewer branding copies**.
 | [0.0.1.7 Configurable top-k visible target inputs](releases/0.0.1.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.7](releases/0.0.1.7.md) |
 | [0.0.1.8 Best-so-far promotion and compact champion weights](releases/0.0.1.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.8](releases/0.0.1.8.md) |
 | [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
+| [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -365,6 +368,7 @@ and **8 identical viewer branding copies**.
 | `assets/structures/brain-explanation-flow.svg` | [Home](index.md) → [All visuals](visuals.md) → [brain-explanation-flow.svg](assets/structures/brain-explanation-flow.svg) |
 | `assets/structures/founder-family-membership.svg` | [Home](index.md) → [All visuals](visuals.md) → [founder-family-membership.svg](assets/structures/founder-family-membership.svg) |
 | `assets/structures/observation-vector-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-vector-layout.svg](assets/structures/observation-vector-layout.svg) |
+| `assets/structures/package-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [package-layout.svg](assets/structures/package-layout.svg) |
 | `assets/structures/spatial-window-cache.svg` | [Home](index.md) → [All visuals](visuals.md) → [spatial-window-cache.svg](assets/structures/spatial-window-cache.svg) |
 
 ## Terrain playback clips

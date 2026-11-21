@@ -213,7 +213,7 @@ def visual_previews(names, root=ROOT):
             if name.endswith(("viewer/themes.svg", "viewer/day-night.svg")):
                 body.extend(
                     [
-                        "Surrounding labels and panels follow the site palette. Explicit theme/daylight samples retain their comparison colors.",
+                        "Daylight boards use the selected viewer palette. Interface comparisons put the selected palette first, with a labeled alternate.",
                         "",
                     ]
                 )

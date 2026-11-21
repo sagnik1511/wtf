@@ -30,11 +30,11 @@ import json
 from pathlib import Path
 import uuid
 
-from ecosystem.analyze import analyze_recording
-from ecosystem.config import load
-from ecosystem.library import export_champions
-from ecosystem.recording import Recorder
-from ecosystem.runner import Experiment
+from wtf.inspection.analyze import analyze_recording
+from wtf.config import load
+from wtf.storage.library import export_champions
+from wtf.storage.recording import Recorder
+from wtf.experiment.runner import Experiment
 
 
 def write_json(path, value):
@@ -118,7 +118,7 @@ handles multiple runs, tqdm progress, interruption checkpoints and additional
 campaign controls. Use it for longer work:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/day_night.json \
+.venv/bin/python -m wtf.cli environments/day_night.json \
   --runs 1 --steps 1000 --seed 100 --progress
 ```
 

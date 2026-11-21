@@ -11,7 +11,7 @@
   <img src="assets/branding/wtf-lockup-dark.png" width="260" alt="WTF — Wildlife Trial Framework" />
 </picture>
 
-WTF is a configurable reinforcement learning ecosystem. Animals have private
+WTF is a configurable reinforcement learning wtf. Animals have private
 brains, observe their surroundings, choose actions, learn from feedback and can
 produce descendants. Python simulates and records; JavaScript plays the saved
 world later, independently of training.
@@ -78,6 +78,8 @@ and [binary storage](binary-storage.md) explain saved artifacts, compression,
 restoration and memory boundaries.
 
 ## Development
+
+See [package layout and import migration](package-layout.md) for the `wtf` namespace and module ownership.
 
 Use [architecture](architecture.md), [development and testing](development.md)
 and [contributor context](project-context.md) to navigate the implementation.

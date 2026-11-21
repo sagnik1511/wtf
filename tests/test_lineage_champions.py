@@ -8,18 +8,18 @@ import sys
 import tempfile
 import unittest
 
-from ecosystem.brains import model_snapshot
-from ecosystem.config import validate
-from ecosystem.library import (
+from wtf.learning.brains import model_snapshot
+from wtf.config import validate
+from wtf.storage.library import (
     ChampionBook,
     apply_brain_overrides,
     apply_champion_overrides,
     export_champions,
     load_initial_models,
 )
-from ecosystem.lineage import LineageBook
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal
+from wtf.experiment.lineage import LineageBook
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal
 from tests.test_library import settings
 from tests.test_simulation import config
 
@@ -330,7 +330,7 @@ class LineageTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--runs",
                     "2",

@@ -10,7 +10,7 @@ RUN if [ "$BUILD_NATIVE" = "1" ]; then \
       && python -m pip install --no-cache-dir 'setuptools>=77' wheel; \
     elif [ "$BUILD_NATIVE" != "0" ]; then echo 'BUILD_NATIVE must be 0 or 1' >&2; exit 2; fi
 COPY pyproject.toml LICENSE PYPI_README.md _build_support.py ./
-COPY ecosystem/ ./ecosystem/
+COPY wtf/ ./wtf/
 COPY work/build_native.py ./work/build_native.py
 RUN if [ "$BUILD_NATIVE" = "1" ]; then python -m work.build_native; \
     elif [ "$BUILD_NATIVE" != "0" ]; then echo 'BUILD_NATIVE must be 0 or 1' >&2; exit 2; fi
@@ -23,7 +23,7 @@ RUN python -m pip install --no-cache-dir -r requirements.txt \
     && useradd --create-home --uid 10001 wtf \
     && mkdir -p /data/results \
     && chown -R wtf:wtf /data
-COPY --from=builder /build/ecosystem/ ./ecosystem/
+COPY --from=builder /build/wtf/ ./wtf/
 COPY viewer/ ./viewer/
 COPY environments/ ./environments/
 COPY maps/ ./maps/
@@ -31,5 +31,5 @@ COPY environment.schema.json ./
 COPY examples/ ./examples/
 USER wtf
 EXPOSE 8000
-ENTRYPOINT ["python", "-m", "ecosystem.cli"]
+ENTRYPOINT ["python", "-m", "wtf.cli"]
 CMD ["environments/baseline.json", "--runs", "1", "--progress", "--output", "/data/results"]

@@ -7,8 +7,8 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from ecosystem.config import load, validate
-from ecosystem.brain import Experience
+from wtf.config import load, validate
+from wtf.learning.brain import Experience
 from work.build_config_reference import render_reference
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,10 +44,10 @@ class DocumentationContractsTests(unittest.TestCase):
             "server.py": reference.split("## Playback server")[1].split(
                 "## Saved-run analyzer"
             )[0],
-            "analyze.py": reference.split("## Saved-run analyzer")[1],
+            "inspection/analyze.py": reference.split("## Saved-run analyzer")[1],
         }
         for filename, section in sections.items():
-            tree = ast.parse((ROOT / "ecosystem" / filename).read_text())
+            tree = ast.parse((ROOT / "wtf" / filename).read_text())
             for node in ast.walk(tree):
                 if (
                     isinstance(node, ast.Call)

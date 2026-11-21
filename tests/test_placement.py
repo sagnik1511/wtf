@@ -3,10 +3,10 @@ import json
 import unittest
 from collections import Counter, deque
 
-from ecosystem.config import load, validate
-from ecosystem.placement import zone, resource_pools
-from ecosystem.runner import Experiment
-from ecosystem.world import World, DIRECTIONS
+from wtf.config import load, validate
+from wtf.simulation.placement import zone, resource_pools
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import World, DIRECTIONS
 
 
 class PlacementTests(unittest.TestCase):

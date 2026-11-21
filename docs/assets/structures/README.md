@@ -4,6 +4,7 @@
 
 | Maintained SVG source | Guide | Structure explained |
 | --- | --- | --- |
+| [Package boundaries](package-layout.svg) | [Package layout](../../package-layout.md) | Root API and six responsibility-based subpackages, separate from JavaScript and writable artifacts |
 | [Observation vector](observation-vector-layout.svg) | [Input layout](../../observations.md#input-layout) | Contiguous offsets and four-field slots, with optional appended sections |
 | [Founder families](founder-family-membership.svg) | [Lineage credit](../../brain-library.md#founder-membership-and-family-credit) | Parent relationships, set union and separate overlapping ledgers |
 | [Actual animal activation replay](animal-activation-replay.svg) | [Recorded animal activity](../../explainability.md#recorded-animal-activations) | Current animal state, compact diagnostic arrays and selected-only replay display |

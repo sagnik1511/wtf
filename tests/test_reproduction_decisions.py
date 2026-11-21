@@ -8,15 +8,15 @@ import unittest
 from contextlib import ExitStack
 from unittest.mock import patch
 
-from ecosystem.analyze import analyze_run, analyze_recording
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate, load
-from ecosystem.contextual_ppo import action_mask
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.telemetry import summarize
-from ecosystem.world import World
+from wtf.inspection.analyze import analyze_run, analyze_recording
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate, load
+from wtf.learning.contextual_ppo import action_mask
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.inspection.telemetry import summarize
+from wtf.simulation.world import World
 from tests.test_reproduction import breeding_world
 from tests.test_mutation import KINDS, environment
 from tests.test_geography import configuration as terrain_configuration, animal

@@ -122,6 +122,7 @@ nav:
   - Development:
       - contributing/index.md
       - Architecture: architecture.md
+      - Package layout and import migration: package-layout.md
       - Development and testing: development.md
       - Add policy models: extending-policies.md
       - Add geography and actions: extending-worlds-and-actions.md

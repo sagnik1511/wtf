@@ -6,11 +6,11 @@ import random
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brains import create_brain, model_snapshot
-from ecosystem.library import ChampionBook, balanced_policy, balanced_rank, ranks
-from ecosystem.lineage import lineage_policy
-from ecosystem.runner import Experiment
-from ecosystem.world import World, VISIBILITY_CACHE_LIMIT
+from wtf.learning.brains import create_brain, model_snapshot
+from wtf.storage.library import ChampionBook, balanced_policy, balanced_rank, ranks
+from wtf.experiment.lineage import lineage_policy
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import World, VISIBILITY_CACHE_LIMIT
 from tests.test_simulation import config, animal, empty_world
 from tests.test_efficiency import reference_observation
 from tests.test_advanced_algorithms import environment
@@ -79,7 +79,7 @@ class SimulationCacheTests(unittest.TestCase):
     ):
         w = empty_world()
         a = animal(0, "prey", 2, 2)
-        from ecosystem.world import Resource
+        from wtf.simulation.world import Resource
 
         w.animals = {0: a}
         w.resources = {(4, 2): Resource(4, 2, 10)}
@@ -99,7 +99,7 @@ class SimulationCacheTests(unittest.TestCase):
     def test_obstacle_edits_invalidate_visibility_and_nearest_results(self):
         w = empty_world()
         a = animal(0, "prey", 2, 2)
-        from ecosystem.world import Resource
+        from wtf.simulation.world import Resource
 
         w.animals = {0: a}
         w.resources = {(4, 2): Resource(4, 2, 10)}
@@ -183,7 +183,7 @@ class SimulationCacheTests(unittest.TestCase):
             brains[i] = create_brain(c["brains"]["small_q"], ["rest", "eat"], i, 2)
         book = ChampionBook(c)
         with patch(
-            "ecosystem.library.model_snapshot", wraps=model_snapshot
+            "wtf.storage.library.model_snapshot", wraps=model_snapshot
         ) as snapshot:
             book.consider(animals, brains, {"tick": 40})
             snapshot.assert_called_once_with(brains[39])

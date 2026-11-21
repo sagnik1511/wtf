@@ -9,8 +9,8 @@ from pathlib import Path
 from statistics import median
 
 from tqdm import tqdm
-from ecosystem.config import load, validate
-from ecosystem.runner import Experiment
+from wtf.config import load, validate
+from wtf.experiment.runner import Experiment
 
 VARIANTS = (
     "baseline",

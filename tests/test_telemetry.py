@@ -5,9 +5,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.runner import Experiment
-from ecosystem.telemetry import summarize, groups
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.experiment.runner import Experiment
+from wtf.inspection.telemetry import summarize, groups
 from tests.test_analysis import fixture
 from tests.test_simulation import config
 

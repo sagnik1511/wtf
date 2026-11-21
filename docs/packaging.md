@@ -3,7 +3,7 @@
 [Installation](../INSTALL.md) · [Compatibility](compatibility.md) · [Linux setup](linux.md) · [Customization](customization.md)
 
 The distribution is named `wtf-wildlife-trial-framework`; the Python import is
-`ecosystem`. Version `0.1.0` is configured locally. Building and checking it does
+`wtf`. Version `0.0.2.0` is configured locally. Building and checking it does
 not publish it or reserve the name on PyPI. The trial-release target is
 **TestPyPI**, which has separate accounts, tokens and projects from production
 PyPI. See [the upload procedure](#testpypi-trial-release).
@@ -14,17 +14,17 @@ From a source checkout, install build tools into the project environment:
 
 ```sh
 .venv/bin/python -m pip install build twine
-.venv/bin/python -m build
-.venv/bin/python -m twine check dist/*
+.venv/bin/python -m build --outdir dist/0.0.2.0
+.venv/bin/python -m twine check dist/0.0.2.0/*
 ```
 
 The build backend is isolated setuptools with explicit package discovery and an
 MIT SPDX license declaration. The default artifacts are:
 
 ```text
-dist/
-├── wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl
-└── wtf_wildlife_trial_framework-0.1.0.tar.gz
+dist/0.0.2.0/
+├── wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
+└── wtf_wildlife_trial_framework-0.0.2.0.tar.gz
 ```
 
 The default wheel is pure Python, portable across supported runtimes and needs
@@ -35,10 +35,12 @@ on checkout-relative image/doc links resolving on a package index.
 
 ## What is included
 
+All `wtf` subpackages are discovered explicitly with the `wtf.*` package pattern; the native source/headers belong to `wtf.native`. See [package layout](package-layout.md).
+
 [`packaging_assets.json`](../packaging_assets.json) is the explicit runtime asset
 allowlist: maintained environment presets, terrain maps, viewer HTML/JS/CSS and
 the configuration schema. The build hook copies these under
-`ecosystem/assets/` in the wheel. Source files stay in their existing checkout
+`wtf/assets/` in the wheel. Source files stay in their existing checkout
 locations; asset lookup uses `importlib.resources` with a checkout fallback.
 
 No experiment output, learned models, paper, personal/local JSONs, caches,
@@ -55,7 +57,7 @@ writable experiment directory:
 
 ```sh
 python3 -m venv /path/to/test-env
-/path/to/test-env/bin/python -m pip install /path/to/wtf/dist/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl
+/path/to/test-env/bin/python -m pip install /path/to/wtf/dist/0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
 mkdir -p /path/to/experiments
 cd /path/to/experiments
 /path/to/test-env/bin/wtf presets
@@ -64,7 +66,7 @@ cd /path/to/experiments
 ```
 
 `wtf run`, `wtf view`, `wtf analyze` dispatch to the existing parsers. Aliases
-`wtf-run`, `wtf-view`, `wtf-analyze` and `python -m ecosystem` are also provided.
+`wtf-run`, `wtf-view`, `wtf-analyze` and `python -m wtf` are also provided.
 A simulator environment can be a bundled name (`ppo`), its historical
 `environments/ppo.json` spelling, or an existing custom JSON path. Existing
 local files take precedence. Relative external map paths resolve in the current
@@ -74,7 +76,7 @@ library paths are relative to the working directory, never site-packages.
 In Python:
 
 ```python
-from ecosystem import Experiment, load_config
+from wtf import Experiment, load_config
 
 config = load_config("maskable_ppo")
 config["world"]["max_steps"] = 100
@@ -94,7 +96,7 @@ On supported CPython 3.12–3.13 with a compiler and matching headers:
 
 ```sh
 WTF_BUILD_NATIVE=1 python -m pip install --no-cache-dir --force-reinstall \
-  /path/to/wtf_wildlife_trial_framework-0.1.0.tar.gz
+  /path/to/wtf_wildlife_trial_framework-0.0.2.0.tar.gz
 ```
 
 Opt-in compilation uses the same strict floating-point flags as the reference
@@ -154,8 +156,8 @@ Build and validate a dedicated artifact directory so a trial upload cannot pick
 up stale/native distributions from another build:
 
 ```sh
-WTF_BUILD_NATIVE=0 .venv/bin/python -m build --outdir dist/testpypi-0.1.0
-.venv/bin/python -m twine check --strict dist/testpypi-0.1.0/*
+WTF_BUILD_NATIVE=0 .venv/bin/python -m build --outdir dist/testpypi-0.0.2.0
+.venv/bin/python -m twine check --strict dist/testpypi-0.0.2.0/*
 ```
 
 Inspect the wheel and source archive, test each in a fresh environment with
@@ -165,8 +167,8 @@ archives. Publish only the named version's two reviewed artifacts:
 
 ```sh
 .venv/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ \
-  dist/testpypi-0.1.0/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl \
-  dist/testpypi-0.1.0/wtf_wildlife_trial_framework-0.1.0.tar.gz
+  dist/testpypi-0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl \
+  dist/testpypi-0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0.tar.gz
 ```
 
 Authenticate to TestPyPI with the `__token__` username and a TestPyPI API token
@@ -182,7 +184,7 @@ in another fresh Python 3.12+ environment:
 ```sh
 python -m pip install "tqdm>=4.66,<5"
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps \
-  wtf-wildlife-trial-framework==0.1.0
+  wtf-wildlife-trial-framework==0.0.2.0
 ```
 
 Install dependencies from PyPI separately rather than using `--extra-index-url`.

@@ -22,7 +22,7 @@ PyPI, then install the trial package from TestPyPI without mixing package indexe
 python -m venv .venv
 # Activate .venv using your platform's shell command.
 python -m pip install "tqdm>=4.66,<5"
-python -m pip install --index-url https://test.pypi.org/simple/ --no-deps wtf-wildlife-trial-framework==0.1.0
+python -m pip install --index-url https://test.pypi.org/simple/ --no-deps wtf-wildlife-trial-framework==0.0.2.0
 ```
 
 TestPyPI is a separate trial index. Availability there does not mean the package
@@ -35,7 +35,7 @@ For an unpublished checkout, build distributions and install the resulting wheel
 ```sh
 python -m pip install build
 python -m build
-python -m pip install dist/wtf_wildlife_trial_framework-0.1.0-py3-none-any.whl
+python -m pip install dist/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
 ```
 
 Run from any writable working directory:
@@ -53,7 +53,7 @@ The default wheel is pure Python. Native CPU kernels are an optional source-buil
 choice for supported CPython versions; they are not required to install or run.
 
 Use `wtf --help`, `wtf run --help`, `wtf view --help` and `wtf analyze --help`
-for commands. `python -m ecosystem` provides the same command hub.
+for commands. `python -m wtf` provides the same command hub.
 
 See the [documentation](https://sagnik1511.github.io/wtf/) and
 [source repository](https://github.com/sagnik1511/wtf) for

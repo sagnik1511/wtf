@@ -9,18 +9,18 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.analyze import analyze_recording
-from ecosystem.brains import model_signature, load_model_weights, model_snapshot
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate, load
-from ecosystem.contextual_ppo import action_mask
-from ecosystem.geography import Geography
-from ecosystem.grouped_rollouts import collect_group
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.telemetry import summarize
-from ecosystem.world import World, Animal
+from wtf.inspection.analyze import analyze_recording
+from wtf.learning.brains import model_signature, load_model_weights, model_snapshot
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate, load
+from wtf.learning.contextual_ppo import action_mask
+from wtf.simulation.geography import Geography
+from wtf.learning.grouped_rollouts import collect_group
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.inspection.telemetry import summarize
+from wtf.simulation.world import World, Animal
 from tests.test_mutation import KINDS, environment
 from tests.reproduction_support import force_reproduction
 
@@ -369,9 +369,9 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
             self.assertNotEqual(a, b, kind)
 
     def test_all_algorithms_update_weights_connected_to_the_last_terrain_input(self):
-        from ecosystem.brain import Experience
-        from ecosystem.policy_gradients import PolicyStep
-        from ecosystem.ppo import policy_distribution
+        from wtf.learning.brain import Experience
+        from wtf.learning.policy_gradients import PolicyStep
+        from wtf.learning.ppo import policy_distribution
 
         def input_weights(b):
             if b.config["type"] == "q_network":
@@ -478,7 +478,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
             self.assertEqual(report["swim_attempts"], 2)
             self.assertEqual(report["terrain_energy"], 2)
             self.assertEqual(report["swim_success"], 0.5)
-            from ecosystem.replay_io import read_chunk_bytes
+            from wtf.storage.replay_io import read_chunk_bytes
             import base64
 
             script = """import assert from 'node:assert/strict';
@@ -517,7 +517,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
                     [
                         sys.executable,
                         "-m",
-                        "ecosystem.cli",
+                        "wtf.cli",
                         "environments/" + name + ".json",
                         "--steps",
                         "4",

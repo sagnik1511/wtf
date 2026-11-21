@@ -1,7 +1,7 @@
 """Controlled neural choices for tests; never bypass physical reproduction gates."""
 
 import copy
-from ecosystem.library import ChampionBook
+from wtf.storage.library import ChampionBook
 
 
 def force_action(b, action):

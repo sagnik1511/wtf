@@ -7,8 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.library import export_champions, read_artifact
-from ecosystem.runner import Experiment
+from wtf.storage.library import export_champions, read_artifact
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 
 
@@ -36,7 +36,7 @@ class ExportEfficiencyTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as folder:
             for run in (1, 2):
-                with patch("ecosystem.library.json.dumps", side_effect=counted):
+                with patch("wtf.storage.library.json.dumps", side_effect=counted):
                     archive = export_champions(
                         experiment, Path(folder) / f"champions/run_{run:04d}.json"
                     )

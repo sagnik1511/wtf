@@ -10,22 +10,22 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ecosystem.brain import Experience, INPUTS
-from ecosystem.brains import (
+from wtf.learning.brain import Experience, INPUTS
+from wtf.learning.brains import (
     create_brain,
     inherit_brain,
     restore_brain,
     model_snapshot,
     load_model_weights,
 )
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import load, validate
-from ecosystem.contextual_ppo import action_mask, central_contexts
-from ecosystem.ppo import policy_distribution
-from ecosystem.qrdqn import quantile_huber
-from ecosystem.recording import Recorder
-from ecosystem.replay_io import load_chunk, chunk_path
-from ecosystem.runner import Experiment
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import load, validate
+from wtf.learning.contextual_ppo import action_mask, central_contexts
+from wtf.learning.ppo import policy_distribution
+from wtf.learning.qrdqn import quantile_huber
+from wtf.storage.recording import Recorder
+from wtf.storage.replay_io import load_chunk, chunk_path
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config, empty_world, animal
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -129,7 +129,7 @@ class AdvancedMathTests(unittest.TestCase):
         )
         b.mask = (True, False, True)
         observation = b._pack((0.0,) * INPUTS)
-        from ecosystem.ppo import RolloutStep
+        from wtf.learning.ppo import RolloutStep
 
         outputs = [0.3, 100.0, -0.2, 0.5]
         old = b.distribution(outputs, observation)[1][0]
@@ -181,7 +181,7 @@ class MaskAndMemoryTests(unittest.TestCase):
         self.assertEqual(action_mask(w, pred, actions), (False, True, True, True, True))
         prey.x = 6
         self.assertEqual(action_mask(w, pred, actions), (True, True, True, True, False))
-        from ecosystem.world import Resource
+        from wtf.simulation.world import Resource
 
         w.resources = {(4, 3): Resource(4, 3, 3)}
         self.assertTrue(action_mask(w, pred, ["rest", "move_forward"])[1])
@@ -271,7 +271,7 @@ class MaskAndMemoryTests(unittest.TestCase):
             with (
                 patch.object(b, "values", return_value=[2, 1]),
                 patch.object(b.target_network, "predict_range", return_value=[3, 4, 5]),
-                patch("ecosystem.qrdqn.quantile_huber", side_effect=capture),
+                patch("wtf.learning.qrdqn.quantile_huber", side_effect=capture),
             ):
                 b.learn(
                     Experience(
@@ -360,7 +360,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
         def record(brain, experience):
             captured[id(brain)] = experience
 
-        from ecosystem.contextual_ppo import MAPPOBrain
+        from wtf.learning.contextual_ppo import MAPPOBrain
 
         with patch.object(MAPPOBrain, "learn", record):
             e.step()
@@ -471,7 +471,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
                 command = [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(config_path),
                     "--output",
                     str(root / "results"),
@@ -501,7 +501,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
                 command = [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(config_path),
                     "--output",
                     str(root / "warm"),
@@ -543,7 +543,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
             validate(c)
 
     def test_grpo_trials_keep_other_algorithms_unchanged(self):
-        from ecosystem.grouped_rollouts import collect_group
+        from wtf.learning.grouped_rollouts import collect_group
         from tests.test_policy_algorithms import GRPOTests
 
         for kind in KINDS:

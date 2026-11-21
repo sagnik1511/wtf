@@ -6,9 +6,11 @@ rather than loading every document or result into context.
 
 ## Project boundaries
 
+- The Python namespace is `wtf`. Keep implementations in the responsibility-based subpackages documented in [package layout](docs/package-layout.md). Preserve the lazy root API and use current imports in public commands, tutorials and extension examples.
+
 - Python owns simulation and learning; plain JavaScript owns saved-run playback.
   Keep training independent of the read-only viewer/server.
-- Environments belong in `environments/*.json`, validated by `ecosystem/config.py`
+- Environments belong in `environments/*.json`, validated by `wtf/config.py`
   and `environment.schema.json`. Prefer CLI selectors for run-specific brain
   initialization; avoid hardcoding a result path into Python.
 - Keep exploratory JSON variants under ignored `environments/local/` or results.

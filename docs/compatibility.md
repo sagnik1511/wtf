@@ -3,13 +3,15 @@
 [Saved brains](brain-library.md) · [Checkpoint structure](checkpoint-data-structures.md) · [Replay structure](replay-data-structures.md)
 
 Package releases, internal rollout numbers and file-format versions describe
-different contracts. `pyproject.toml` currently declares package version `0.1.0`;
+different contracts. `pyproject.toml` currently declares package version `0.0.2.0`;
 that declaration does not establish that it has been published to PyPI.
 Four-component records under `docs/releases/` track implementation rollouts,
 not importable-package versions. Binary magic, checkpoint envelopes, logical
 state and observation versions each have their own version identifiers.
 
 ## Python runtime
+
+The `ecosystem` → `wtf` import migration changes Python paths, not artifact formats. See the [complete import map](package-layout.md#migrate-existing-imports); old namespace aliases are not shipped.
 
 The minimum is Python 3.12. Native CPU kernels support CPython 3.12–3.13 and must
 be rebuilt for each interpreter/OS/architecture. Newer Python versions use the
@@ -27,7 +29,7 @@ historical continuation is required.
 ## Current reader capabilities
 
 This table describes the current source readers, not an untested historical
-package-version matrix. The locally built 0.1.0 wheel/source archive carry these capabilities. Their
+package-version matrix. The locally built 0.0.2.0 wheel/source archive carry these capabilities. Their
 installation checks do not establish that any version has been published or that
 every operating system has executed the tests. See [package verification](packaging.md).
 
@@ -47,8 +49,8 @@ Species/sex champion compatibility rules apply independently of file format.
 For example, restore a checkpoint through the normal decoder:
 
 ```python
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.runner import Experiment
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.experiment.runner import Experiment
 
 experiment = Experiment.restore(read_checkpoint("results/EXPERIMENT/checkpoints/final.bin.xz"))
 ```

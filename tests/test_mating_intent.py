@@ -6,12 +6,12 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ecosystem.config import load, validate
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.replay_codec import DeltaEncoder, decode_chunk
-from ecosystem.telemetry import summarize
-from ecosystem.world import World
-from ecosystem.runner import Experiment
+from wtf.config import load, validate
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.storage.replay_codec import DeltaEncoder, decode_chunk
+from wtf.inspection.telemetry import summarize
+from wtf.simulation.world import World
+from wtf.experiment.runner import Experiment
 from tests.test_reproduction import breeding_world
 from tests.test_reproduction_decisions import choose, feedback
 from tests.reproduction_support import force_action

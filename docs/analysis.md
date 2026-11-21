@@ -14,8 +14,8 @@ when a run is opened in the viewer. Existing recordings work immediately.
 To save a reusable JSON report (all runs by default):
 
 ```sh
-.venv/bin/python -m ecosystem.analyze results/EXPERIMENT
-.venv/bin/python -m ecosystem.analyze results/EXPERIMENT --run 1 --window-steps 250
+.venv/bin/python -m wtf.inspection.analyze results/EXPERIMENT
+.venv/bin/python -m wtf.inspection.analyze results/EXPERIMENT --run 1 --window-steps 250
 ```
 
 The default output is `analysis.json` inside that ignored results folder.

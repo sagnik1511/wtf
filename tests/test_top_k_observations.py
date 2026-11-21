@@ -9,14 +9,14 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brain import observation_inputs
-from ecosystem.brains import load_model_weights, model_signature, model_snapshot
-from ecosystem.config import load, validate
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.recording import Recorder
-from ecosystem.replay_io import load_chunk
-from ecosystem.runner import Experiment
-from ecosystem.world import Animal, Resource, World
+from wtf.learning.brain import observation_inputs
+from wtf.learning.brains import load_model_weights, model_signature, model_snapshot
+from wtf.config import load, validate
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.storage.recording import Recorder
+from wtf.storage.replay_io import load_chunk
+from wtf.experiment.runner import Experiment
+from wtf.simulation.world import Animal, Resource, World
 from tests.test_mutation import KINDS, environment
 from tests.reproduction_support import force_reproduction
 from tests.test_simulation import config

@@ -9,7 +9,7 @@ installation from PyPI is not yet part of this workflow.
 Load a complete preset instead of constructing partial configuration dictionaries:
 
 ```python
-from ecosystem.config import load, validate
+from wtf.config import load, validate
 
 config = load("environments/maskable_ppo.json")
 config["seed"] = 100

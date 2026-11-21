@@ -4,15 +4,15 @@ import copy
 import json
 import unittest
 
-from ecosystem.brain import Experience
-from ecosystem.brains import (
+from wtf.learning.brain import Experience
+from wtf.learning.brains import (
     create_brain,
     inherit_brain,
     model_snapshot,
     load_model_weights,
 )
-from ecosystem.config import validate
-from ecosystem.runner import Experiment
+from wtf.config import validate
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import config
 from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment

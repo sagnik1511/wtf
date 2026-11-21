@@ -3,8 +3,8 @@
 import copy, json, html, math, re
 from xml.etree import ElementTree as ET
 from pathlib import Path
-from ecosystem.config import load, validate
-from ecosystem.world import World, Animal
+from wtf.config import load, validate
+from wtf.simulation.world import World, Animal
 
 OUT = Path("docs/assets/physics")
 OUT.mkdir(parents=True, exist_ok=True)

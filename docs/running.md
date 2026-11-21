@@ -58,9 +58,9 @@ when reverting learning code.
 ## Train and save a recording
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/baseline.json
-.venv/bin/python -m ecosystem.cli environments/scarce_food.json --runs 3 --steps 1000 --seed 42
-.venv/bin/python -m ecosystem.cli environments/baseline.json --mode random --runs 3
+.venv/bin/python -m wtf.cli environments/baseline.json
+.venv/bin/python -m wtf.cli environments/scarce_food.json --runs 3 --steps 1000 --seed 42
+.venv/bin/python -m wtf.cli environments/baseline.json --mode random --runs 3
 ```
 
 Training displays a tqdm bar automatically in a terminal, showing run/step progress, elapsed time, ETA, step rate, populations, kills and food. `--progress` forces display in redirected/IDE output; `--no-progress` disables it. Evaluation/random runs and redirected logs omit the bar by default. Resume starts at the saved step, and early extinction completes the bar at the actual final step. Progress is throttled to avoid rendering overhead.
@@ -99,14 +99,14 @@ The three policies are:
 Run normally to randomize:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 3
+.venv/bin/python -m wtf.cli environments/baseline.json --runs 3
 ```
 
 For reproducible comparisons, `--seed 42` automatically selects `increment` unless you explicitly choose `--seed-policy fixed`. `--seed-policy random` explicitly enables randomization for an older fixed configuration. Combining `--seed` with `--seed-policy random` is rejected to avoid silently ignoring an explicit seed.
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 3 --seed 42
-.venv/bin/python -m ecosystem.cli environments/baseline.json --runs 3 --seed 42 --seed-policy fixed
+.venv/bin/python -m wtf.cli environments/baseline.json --runs 3 --seed 42
+.venv/bin/python -m wtf.cli environments/baseline.json --runs 3 --seed 42 --seed-policy fixed
 ```
 
 Actual world seeds are printed, written to `run_seeds.json` as runs start, and stored with recordings and summaries. `manifest.json` also records the experiment's randomization seed. The viewer's run selector displays each recorded world seed. Checkpoints preserve the seed generator state, so restoring continues the same future seed sequence and learning trajectory, rather than starting a fresh random sequence. Old deterministic checkpoints remain supported. To compare configurations, use the same explicit base seed and policy and repeat with several seeds. Layouts differ when obstacle or population settings differ, even with the same seed.
@@ -121,13 +121,13 @@ monitored champion's **full existing rank**, including tie-breakers.
 
 ```sh
 # Stop after 10 runs without predator progress (maximum 100 runs).
-.venv/bin/python -m ecosystem.cli environments/river_crossing_strong_predator_deep.json \
+.venv/bin/python -m wtf.cli environments/river_crossing_strong_predator_deep.json \
   --runs 100 --seed 100 --progress \
   --early-stop-runs 10 --early-stop-species predator
 
 # Watch prey instead: --early-stop-species prey
 # With no species restriction, any species' selected champion can reset patience.
-.venv/bin/python -m ecosystem.cli environments/river_crossing_strong_predator_deep.json \
+.venv/bin/python -m wtf.cli environments/river_crossing_strong_predator_deep.json \
   --runs 100 --seed 100 --progress --early-stop-runs 10
 ```
 
@@ -177,7 +177,7 @@ optimizer/RNG/buffer blocks and how the restored training loop accesses them.
 Resume a checkpoint:
 
 ```sh
-.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.bin.xz
+.venv/bin/python -m wtf.cli --resume results/EXPERIMENT/checkpoints/run_0001.bin.xz
 ```
 
 New CLI checkpoints use `run_0001.bin.xz` and `final.bin.xz`. The binary
@@ -192,7 +192,7 @@ Use `--checkpoint-format compact` for the previous `.json.gz` format, or
 `.bin.xz`, compact JSON for `.json.gz`, and legacy output for `.json`.
 
 Older plain/compact JSON checkpoints remain readable.
-`ecosystem.checkpoint_io.read_checkpoint(path)` returns the original state for
+`wtf.storage.checkpoint_io.read_checkpoint(path)` returns the original state for
 `Experiment.restore(...)`; do not pass a serialized envelope directly to restore.
 Old `.json` and `.json.gz` paths also resolve a converted binary counterpart
 when the original is absent. Loading still decodes a complete state in memory.
@@ -209,15 +209,15 @@ Checkpoints include the world, counters, private replay buffers, online/target w
 For the smallest lossless binary format:
 
 ```sh
-.venv/bin/python -m ecosystem.optimize_storage results/EXPERIMENT --only checkpoints
-.venv/bin/python -m ecosystem.optimize_storage results --all
+.venv/bin/python -m wtf.storage.optimize_storage results/EXPERIMENT --only checkpoints
+.venv/bin/python -m wtf.storage.optimize_storage results --all
 ```
 
 The older compact-JSON conversion remains available:
 
 ```sh
-.venv/bin/python -m ecosystem.optimize_checkpoints results/EXPERIMENT
-.venv/bin/python -m ecosystem.optimize_checkpoints results --all
+.venv/bin/python -m wtf.storage.optimize_checkpoints results/EXPERIMENT
+.venv/bin/python -m wtf.storage.optimize_checkpoints results --all
 ```
 
 Conversion handles one checkpoint at a time, verifies SHA-256 of canonical
@@ -237,7 +237,7 @@ JSON and another 20% less than gzip. Sizes depend on model and buffer contents.
 Evaluate saved brains by restoring a checkpoint in evaluation mode:
 
 ```sh
-.venv/bin/python -m ecosystem.cli --resume results/EXPERIMENT/checkpoints/run_0001.bin.xz --mode evaluate
+.venv/bin/python -m wtf.cli --resume results/EXPERIMENT/checkpoints/run_0001.bin.xz --mode evaluate
 ```
 
 Use an intermediate checkpoint with remaining runs to evaluate future runs. Checkpoint restore is a CLI operation; the playback viewer reads frame recordings only.

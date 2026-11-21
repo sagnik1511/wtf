@@ -12,9 +12,9 @@ import resource
 import tempfile
 import time
 from pathlib import Path
-from ecosystem.config import load
-from ecosystem.runner import Experiment
-from ecosystem.recording import Recorder
+from wtf.config import load
+from wtf.experiment.runner import Experiment
+from wtf.storage.recording import Recorder
 
 
 def main():

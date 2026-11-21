@@ -44,7 +44,7 @@ and the existing food/physics settings, and writes only an ignored local preset:
 import copy
 import json
 from pathlib import Path
-from ecosystem.config import load, validate
+from wtf.config import load, validate
 
 config = load("environments/maskable_ppo.json")
 config["name"] = "two_prey_species"
@@ -74,7 +74,7 @@ Run the Python block from the checkout root (for example in
 `.venv/bin/python`), then:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/local/two_prey_species.json \
+.venv/bin/python -m wtf.cli environments/local/two_prey_species.json \
   --runs 1 --steps 200 --seed 100 --progress
 ```
 
@@ -104,7 +104,7 @@ champions; predator sexes also have balanced champions. Archives and CLI
 selectors use the exact configured name:
 
 ```sh
-.venv/bin/python -m ecosystem.cli environments/local/two_prey_species.json --runs 5 \
+.venv/bin/python -m wtf.cli environments/local/two_prey_species.json --runs 5 \
   --brains-from PREVIOUS_RUN_NAME --brain deer=lifespan --brain predator:male=kills
 ```
 

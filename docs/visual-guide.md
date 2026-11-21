@@ -113,9 +113,10 @@ the page embedding them.
 
 Geography and inspector/viewer SVG specimens have light/dark presentation
 palettes too. Terrain values, node activities, action scores and sign/category
-meanings are preserved. The sheets explicitly comparing both interface themes
-or daylight phases retain their sample colors while their outer labels, card
-surfaces and backgrounds adapt to the selected palette. The standalone physics explorer
+meanings are preserved. Daylight-phase boards render the selected viewer palette as well as the
+corresponding sunlight. The interface comparison puts the selected palette
+first and labels the alternate; both retain their actual viewer colors.
+Outer labels, card surfaces and backgrounds adapt with them. The standalone physics explorer
 adapts to system light/dark preference. The live viewer has its own theme toggle,
 separate from simulated sunlight.
 

@@ -180,11 +180,11 @@ which loads bounded playback chunks and never restores optimizer state.
 
 ## Sources and verification
 
-The structures follow [checkpoint I/O](../ecosystem/checkpoint_io.py),
-[experiment restore](../ecosystem/runner.py), [world restore](../ecosystem/world.py),
-[controller dispatch](../ecosystem/brains.py), [Q learning](../ecosystem/brain.py),
-[PPO](../ecosystem/ppo.py), [policy gradients](../ecosystem/policy_gradients.py),
-[Adam](../ecosystem/optimization.py) and the algorithm extensions.
+The structures follow [checkpoint I/O](../wtf/storage/checkpoint_io.py),
+[experiment restore](../wtf/experiment/runner.py), [world restore](../wtf/simulation/world.py),
+[controller dispatch](../wtf/learning/brains.py), [Q learning](../wtf/learning/brain.py),
+[PPO](../wtf/learning/ppo.py), [policy gradients](../wtf/learning/policy_gradients.py),
+[Adam](../wtf/learning/optimization.py) and the algorithm extensions.
 The [storage asset catalog](assets/storage/README.md) records diagram provenance.
 
 Record order, shared-value detachment, nonempty Q replay and PPO rollout, nonzero

@@ -6,8 +6,8 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from ecosystem.config import load
-from ecosystem.runner import Experiment
+from wtf.config import load
+from wtf.experiment.runner import Experiment
 from tests.reproduction_support import force_action
 from tests.test_mutation import KINDS, environment
 

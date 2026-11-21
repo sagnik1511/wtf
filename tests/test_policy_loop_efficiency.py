@@ -7,17 +7,17 @@ import random
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brain import Experience
-from ecosystem.ppo import MLP, PPOBrain, policy_distribution
-from ecosystem.policy_gradients import (
+from wtf.learning.brain import Experience
+from wtf.learning.ppo import MLP, PPOBrain, policy_distribution
+from wtf.learning.policy_gradients import (
     A2CBrain,
     ReinforceBrain,
     GRPOBrain,
     PolicyStep,
     normalized,
 )
-from ecosystem.grouped_rollouts import collect_group
-from ecosystem.world import World
+from wtf.learning.grouped_rollouts import collect_group
+from wtf.simulation.world import World
 from tests.test_ppo import ppo_settings
 from tests.test_policy_algorithms import settings
 from tests import test_policy_algorithms as policy_fixtures

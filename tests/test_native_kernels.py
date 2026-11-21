@@ -13,15 +13,15 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem import kernels
-from ecosystem.numeric import Float32, precision_scope
-from ecosystem.ppo import MLP
-from ecosystem.runner import Experiment
+from wtf.native import kernels
+from wtf.native.numeric import Float32, precision_scope
+from wtf.learning.ppo import MLP
+from wtf.experiment.runner import Experiment
 from tests.test_numeric_precision import KINDS, settings
 from tests.test_simulation import config
 
 try:
-    from ecosystem import _kernels
+    from wtf.native import _kernels
 except ImportError:
     _kernels = None
 
@@ -123,7 +123,7 @@ class NativeKernelTests(unittest.TestCase):
                         b = Experiment.restore(json.loads(json.dumps(b.checkpoint())))
 
     def test_adam_and_sgd_match_reference_with_nonzero_momentum_and_clipping(self):
-        from ecosystem.brains import create_brain
+        from wtf.learning.brains import create_brain
 
         rng = random.Random(39)
         for magnitude in (0.001, 50.0):
@@ -184,8 +184,8 @@ class NativeKernelTests(unittest.TestCase):
             self.assertEqual(d, array("d", [0.0] * 4))
 
     def test_recorded_binary_frames_match_through_chunk_boundaries(self):
-        from ecosystem.recording import Recorder, RecordingStore
-        from ecosystem.replay_io import load_chunk
+        from wtf.storage.recording import Recorder, RecordingStore
+        from wtf.storage.replay_io import load_chunk
 
         c = config()
         c["world"]["max_steps"] = 9
@@ -234,7 +234,7 @@ class BackendSelectionTests(unittest.TestCase):
     def test_future_interpreter_falls_back_until_native_is_validated(self):
         code = """import sys
 sys.version_info = (3, 14)
-from ecosystem.kernels import status
+from wtf.native.kernels import status
 assert status()['backend'] == 'python'
 assert '3.12–3.13' in status()['fallback_reason']
 """
@@ -252,7 +252,7 @@ assert '3.12–3.13' in status()['fallback_reason']
                 self.assertIn("3.12–3.13", result.stderr)
 
     def test_explicit_python_backend_never_imports_extension(self):
-        code = 'import sys;from ecosystem.kernels import status;assert status()["backend"]=="python";assert "ecosystem._kernels" not in sys.modules'
+        code = 'import sys;from wtf.native.kernels import status;assert status()["backend"]=="python";assert "wtf.native._kernels" not in sys.modules'
         p = subprocess.run(
             [sys.executable, "-c", code],
             env=dict(os.environ, WTF_KERNELS="python"),
@@ -278,9 +278,9 @@ assert '3.12–3.13' in status()['fallback_reason']
 from importlib.abc import MetaPathFinder
 class Missing(MetaPathFinder):
  def find_spec(self,fullname,path,target=None):
-  if fullname=='ecosystem._kernels':raise ImportError('hidden for fallback test')
+  if fullname=='wtf.native._kernels':raise ImportError('hidden for fallback test')
 sys.meta_path.insert(0,Missing())
-from ecosystem.kernels import status
+from wtf.native.kernels import status
 assert status()['backend']=='python'
 """
         p = subprocess.run(

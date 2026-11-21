@@ -2,8 +2,8 @@ import json
 import unittest
 from pathlib import Path
 
-from ecosystem.config import validate
-from ecosystem.runner import Experiment
+from wtf.config import validate
+from wtf.experiment.runner import Experiment
 from tests.test_simulation import animal, config, empty_world
 
 

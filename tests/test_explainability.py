@@ -7,13 +7,13 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brains import create_brain, model_snapshot
-from ecosystem.config import validate
-from ecosystem.explainability import prepare_model, explain_model, feature_names
-from ecosystem.explanations import ExplanationStore
-from ecosystem.library import export_champions
-from ecosystem.recording import Recorder, RecordingStore
-from ecosystem.runner import Experiment
+from wtf.learning.brains import create_brain, model_snapshot
+from wtf.config import validate
+from wtf.inspection.explainability import prepare_model, explain_model, feature_names
+from wtf.inspection.explanations import ExplanationStore
+from wtf.storage.library import export_champions
+from wtf.storage.recording import Recorder, RecordingStore
+from wtf.experiment.runner import Experiment
 from tests.test_mutation import KINDS, environment
 
 
@@ -158,11 +158,15 @@ class ExplanationStoreTests(unittest.TestCase):
                 if p.is_file()
             }
             store = ExplanationStore(RecordingStore(root))
-            from ecosystem.explanations import load_chunk, read_model
+            from wtf.inspection.explanations import load_chunk, read_model
 
             with (
-                patch("ecosystem.explanations.load_chunk", wraps=load_chunk) as chunks,
-                patch("ecosystem.explanations.read_model", wraps=read_model) as models,
+                patch(
+                    "wtf.inspection.explanations.load_chunk", wraps=load_chunk
+                ) as chunks,
+                patch(
+                    "wtf.inspection.explanations.read_model", wraps=read_model
+                ) as models,
             ):
                 first = store.explain("saved", 1, 0, animal, criterion="health")
                 again = store.explain(
@@ -228,7 +232,7 @@ class ExplanationAPITests(unittest.TestCase):
         from http.server import ThreadingHTTPServer
         from urllib.error import HTTPError
         from urllib.request import urlopen
-        from ecosystem.server import State, make_handler
+        from wtf.server import State, make_handler
 
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -265,7 +269,7 @@ class ExplanationAPITests(unittest.TestCase):
             [
                 sys.executable,
                 "-c",
-                "import ecosystem.server, sys; assert not {'ecosystem.runner','ecosystem.brains','ecosystem.brain','ecosystem.world','ecosystem.ppo'} & set(sys.modules)",
+                "import wtf.server, sys; assert not {'wtf.experiment.runner','wtf.learning.brains','wtf.learning.brain','wtf.simulation.world','wtf.learning.ppo'} & set(sys.modules)",
             ],
             check=True,
         )
@@ -274,7 +278,7 @@ class ExplanationAPITests(unittest.TestCase):
 class ExplanationCacheContractTests(unittest.TestCase):
     def test_blob_dedup_freshness_and_legacy_inline_weights(self):
         import os
-        from ecosystem.model_io import read_model, model_path
+        from wtf.storage.model_io import read_model, model_path
 
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -288,7 +292,9 @@ class ExplanationCacheContractTests(unittest.TestCase):
             other = json.loads(food.read_text())
             other["model"] = artifact["model"]
             food.write_text(json.dumps(other))
-            with patch("ecosystem.explanations.read_model", wraps=read_model) as read:
+            with patch(
+                "wtf.inspection.explanations.read_model", wraps=read_model
+            ) as read:
                 store.explain("saved", 1, 0, animal, criterion="food")
                 self.assertEqual(read.call_count, 0)
                 blob = model_path(health, artifact["model"])

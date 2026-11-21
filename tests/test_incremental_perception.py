@@ -4,9 +4,9 @@ import random
 import unittest
 from unittest.mock import patch
 
-from ecosystem import perception
-from ecosystem.perception import SpatialIndex
-from ecosystem.world import Animal, Resource, World
+from wtf.simulation import perception
+from wtf.simulation.perception import SpatialIndex
+from wtf.simulation.world import Animal, Resource, World
 from tests.test_efficiency import reference_observation
 from tests.test_simulation import config
 

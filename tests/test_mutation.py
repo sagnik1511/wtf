@@ -12,17 +12,17 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ecosystem.brains import create_brain, inherit_brain, model_snapshot
-from ecosystem.checkpoint_io import read_checkpoint
-from ecosystem.config import validate, load
-from ecosystem.mutation import mutation_trial, mutate_weights, mutate_birth
-from ecosystem.recording import Recorder
-from ecosystem.replay_io import chunk_path, load_chunk, read_chunk_bytes
-from ecosystem.runner import Experiment
+from wtf.learning.brains import create_brain, inherit_brain, model_snapshot
+from wtf.storage.checkpoint_io import read_checkpoint
+from wtf.config import validate, load
+from wtf.learning.mutation import mutation_trial, mutate_weights, mutate_birth
+from wtf.storage.recording import Recorder
+from wtf.storage.replay_io import chunk_path, load_chunk, read_chunk_bytes
+from wtf.experiment.runner import Experiment
 from tests.reproduction_support import force_reproduction
-from ecosystem.telemetry import summarize
-from ecosystem.analyze import analyze_recording
-from ecosystem.library import export_champions
+from wtf.inspection.telemetry import summarize
+from wtf.inspection.analyze import analyze_recording
+from wtf.storage.library import export_champions
 from tests.test_simulation import config
 from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment as policy_environment
@@ -156,7 +156,7 @@ class MutationMathTests(unittest.TestCase):
             {"noise_std": 0},
         ):
             with patch(
-                "ecosystem.mutation.random.Random",
+                "wtf.learning.mutation.random.Random",
                 side_effect=AssertionError("unexpected RNG"),
             ):
                 self.assertIsNone(mutation_trial(dict(SETTINGS, **change), 2))
@@ -189,7 +189,7 @@ class MutationMathTests(unittest.TestCase):
     def test_nontrigger_does_not_traverse_weights(self):
         settings = dict(SETTINGS, probability_per_birth=0.0001)
         with patch(
-            "ecosystem.mutation.mutate_weights",
+            "wtf.learning.mutation.mutate_weights",
             side_effect=AssertionError("model traversal"),
         ):
             e = force_reproduction(Experiment(environment("ppo", probability=0)))
@@ -273,7 +273,7 @@ class MutationLifecycleTests(unittest.TestCase):
             for child in e.world.animals.values():
                 if child.parent_id >= 0:
                     self.assertFalse(child.mutated)
-                    from ecosystem.brains import mix_parent_brains, offspring_seed
+                    from wtf.learning.brains import mix_parent_brains, offspring_seed
 
                     expected = mix_parent_brains(
                         e.brains[child.parent_id],
@@ -318,7 +318,7 @@ class MutationLifecycleTests(unittest.TestCase):
             )
 
     def test_trial_birth_mutations_do_not_change_real_world_or_other_policies(self):
-        from ecosystem.grouped_rollouts import collect_group
+        from wtf.learning.grouped_rollouts import collect_group
 
         e = force_reproduction(Experiment(environment("grpo")))
         focal = next(i for i, a in e.world.animals.items() if a.species == "predator")
@@ -332,7 +332,7 @@ class MutationLifecycleTests(unittest.TestCase):
                 observed.append((world.animals[birth.target].mutated, event.amount))
             return policy, event
 
-        with patch("ecosystem.mutation.mutate_birth", side_effect=capture):
+        with patch("wtf.learning.mutation.mutate_birth", side_effect=capture):
             collect_group(e.world, e.brains, focal)
         self.assertTrue(observed)
         self.assertTrue(all(flag and 1 <= n <= 3 for flag, n in observed))
@@ -411,7 +411,7 @@ class MutationLifecycleTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "ecosystem.cli",
+                    "wtf.cli",
                     str(path),
                     "--runs",
                     "1",
