@@ -6,9 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.32](0.0.1.32.md), `1b6b5ca`.
-**Latest committed runtime implementation:** [0.0.1.31](0.0.1.31.md), `8a4d8c5`.
-**Pending rollout:** [0.0.2.0](0.0.2.0.md), `wtf` namespace and responsibility-based package layout.
+**Latest committed rollout:** [0.0.2.0](0.0.2.0.md), `18ca6f0`.
+**Latest committed runtime implementation:** [0.0.2.0](0.0.2.0.md), `18ca6f0`.
+**Published package:** [0.0.2.0 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/).
+**Pending rollout:** None.
 
 ## Rollout index
 
@@ -19,7 +20,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.0](0.0.2.0.md) | Pending | Prepared 2026-11-21 | — | Rename the Python namespace to `wtf`, group modules by responsibility and preserve artifact compatibility |
+| [0.0.2.0](0.0.2.0.md) | Committed | 2026-11-22 | `18ca6f0` | Rename the Python namespace to `wtf`, group modules by responsibility and preserve artifact compatibility |
 | [0.0.1.32](0.0.1.32.md) | Committed | 2026-11-21 | `1b6b5ca` | Theme-aware inspector/XAI, paired replay previews and TestPyPI trial preparation |
 | [0.0.1.31](0.0.1.31.md) | Committed | 2026-11-21 | `8a4d8c5` | Require Python 3.12+, port native arithmetic to 3.12/3.13 and pin Ubuntu packaging CI |
 | [0.0.1.30](0.0.1.30.md) | Committed | 2026-11-21 | `18126f4` | Portable wheel/sdist, installed runtime assets/commands and isolated installation/Ubuntu CI checks |

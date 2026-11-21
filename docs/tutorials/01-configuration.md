@@ -2,9 +2,11 @@
 
 [Tutorial hub](../tutorial.md) · [Next: run and record](02-run-record-analyze.md)
 
-Run commands from the checkout root after installing `requirements.txt` into
-`.venv`, as in [setup](../running.md). The examples use current source APIs;
-installation from PyPI is not yet part of this workflow.
+Use Python 3.12+ in an isolated `.venv`, following [installation](../../INSTALL.md).
+Install `wtf-wildlife-trial-framework==0.0.2.0` from PyPI, or use a source checkout
+with its runtime dependencies. The imports and bundled preset names below work
+with either installation. Run checkout-only example-module commands from the
+repository root; installed-package users can save the complete script in Tutorial 2.
 
 Load a complete preset instead of constructing partial configuration dictionaries:
 

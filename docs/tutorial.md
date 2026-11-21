@@ -2,9 +2,10 @@
 
 [Project overview](../README.md) · [Runnable Python example](../examples/complete_experiment.py) · [Docker](docker.md)
 
-Work through these guides from a checkout using its `.venv`. No notebook or
-Jupyter installation is needed. All example code is included in Markdown;
-the complete training script also lives under `examples/`.
+Use the [PyPI release](../INSTALL.md#install-from-pypi) or a source checkout in an
+isolated `.venv`. No notebook or Jupyter installation is needed. All example code
+is included in Markdown; installed-package users can save the Tutorial 2 code as
+`complete_experiment.py`. The checkout also provides it under `examples/`.
 
 | Guide | What you will do |
 | --- | --- |
@@ -12,11 +13,12 @@ the complete training script also lives under `examples/`.
 | [2. Run, record and analyze](tutorials/02-run-record-analyze.md) | Use the complete Python script to save replay, champions, metrics and checkpoints |
 | [3. Restore and view](tutorials/03-restore-and-view.md) | Load exact state, understand champion warm starts and open offline playback |
 
-Quick run from the checkout root:
+Quick run from the checkout root (for an installed package, save the Tutorial 2
+script and run `.venv/bin/python complete_experiment.py --steps 200 --seed 100`):
 
 ```sh
 .venv/bin/python -m examples.complete_experiment --steps 200 --seed 100
-./run.sh
+.venv/bin/python -m wtf.server
 ```
 
 The example creates a new folder under ignored `results/`. It never overwrites a

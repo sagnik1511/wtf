@@ -43,13 +43,13 @@ old world, optimizer, replay buffers or RNG state. See the
 ## Open the offline viewer
 
 ```sh
-./run.sh
+.venv/bin/python -m wtf.server
 ```
 
 Open <http://127.0.0.1:8000>, refresh the saved-recording list, choose your example
 and click **Load recording**. Python training has already finished. The viewer
 loads one replay chunk at a time; selecting another run or seeking does not
-restore learning checkpoints. Use `./run.sh --results PATH` for a different root.
+restore learning checkpoints. Use `.venv/bin/python -m wtf.server --results PATH` for a different root.
 
 Click an animal to inspect its recorded observations, action scores and sampled
 brain activity. **Explain saved brain** is a separate evaluation of the archived

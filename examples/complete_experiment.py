@@ -65,7 +65,10 @@ def main():
     args = parser.parse_args()
     folder = run_experiment(args.environment, args.output, args.steps, args.seed)
     print(f"Saved experiment: {folder.resolve()}")
-    print("Playback: ./run.sh --results " + str(Path(args.output).resolve()))
+    print(
+        "Playback: .venv/bin/python -m wtf.server --results "
+        + str(Path(args.output).resolve())
+    )
 
 
 if __name__ == "__main__":

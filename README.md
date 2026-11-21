@@ -65,15 +65,18 @@ required. [Installation](INSTALL.md) covers commands and platform details;
 
 ## Quick start
 
-Requires Python 3.12+. Run from the project directory:
+Requires Python 3.12+. Install the [published package](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+in a fresh writable working directory:
 
 ```sh
-cd /path/to/wtf
 python3.12 -m venv .venv
-.venv/bin/python -m pip install --cache-dir .cache/pip -r requirements.txt
-.venv/bin/python -m wtf.cli environments/baseline.json --runs 1
-./run.sh
+.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+.venv/bin/wtf run baseline --runs 1 --steps 200 --seed 100 --progress
+.venv/bin/wtf view --results results
 ```
+
+Presets, terrain maps and viewer assets are included; a checkout is optional.
+For source development or Docker, follow [installation](INSTALL.md).
 
 Open <http://127.0.0.1:8000>, select the saved experiment and click **Play recording**.
 You can close the simulator before starting playback. Python packages stay in
@@ -98,8 +101,7 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 ## Documentation
 
 Browse the [documentation hub](docs/index.md) for a reading path, or use the
-[GitHub Pages documentation](https://sagnik1511.github.io/wtf/) once its deployment
-is enabled. The site adds search, grouped navigation and **light/dark modes** to these same
+[GitHub Pages documentation](https://sagnik1511.github.io/wtf/) for the published guides. The site adds search, grouped navigation and **light/dark modes** to these same
 guides. Use the sun/moon icon in the top-right header to switch appearance; the
 initial theme follows your system preference.
 

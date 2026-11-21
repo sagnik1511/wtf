@@ -9,6 +9,22 @@ separate steps; see the [trial release procedure](docs/packaging.md#testpypi-tri
 
 For renamed imports and module locations, see [package layout and migration](docs/package-layout.md).
 
+## Install from PyPI
+
+Version [0.0.2.0](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/) is available from production PyPI.
+In a fresh working directory:
+
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+.venv/bin/wtf presets
+.venv/bin/wtf run baseline --runs 1 --steps 200 --seed 100 --progress
+.venv/bin/wtf view --results results
+```
+
+The portable wheel includes presets, maps and viewer assets; no compiler is needed.
+For the optional native extension, use the [native build instructions](docs/packaging.md#optional-native-source-build).
+
 ## Install the built wheel
 
 Build from the checkout in its development environment, then install the wheel

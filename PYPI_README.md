@@ -13,29 +13,29 @@ biological realism or established policy improvement.
 Requires Python **3.12 or newer**. Optional native kernels support CPython
 3.12–3.13; newer interpreters use the Python backend.
 
-## TestPyPI trial installation
+## Install from PyPI
 
-Use Python 3.12+ in a virtual environment. Install the runtime dependency from
-PyPI, then install the trial package from TestPyPI without mixing package indexes:
+Use Python 3.12+ in a virtual environment:
 
 ```sh
-python -m venv .venv
+python3.12 -m venv .venv
 # Activate .venv using your platform's shell command.
-python -m pip install "tqdm>=4.66,<5"
-python -m pip install --index-url https://test.pypi.org/simple/ --no-deps wtf-wildlife-trial-framework==0.0.2.0
+python -m pip install wtf-wildlife-trial-framework==0.0.2.0
 ```
 
-TestPyPI is a separate trial index. Availability there does not mean the package
-has been published on the production PyPI index.
+The distribution name is `wtf-wildlife-trial-framework`; the Python import is
+`wtf`. Version [0.0.2.0](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+is published with a portable wheel and source archive. The default wheel needs
+no compiler and includes presets, terrain maps, schema and viewer assets.
 
 ## Local package installation
 
-For an unpublished checkout, build distributions and install the resulting wheel:
+To install your own checkout build instead, build and install its wheel:
 
 ```sh
 python -m pip install build
-python -m build
-python -m pip install dist/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
+python -m build --outdir dist/0.0.2.0
+python -m pip install dist/0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
 ```
 
 Run from any writable working directory:

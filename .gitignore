@@ -89,3 +89,6 @@ Thumbs.db
 
 # Future exploratory configurations; promote adopted settings to common presets.
 /environments/local/
+
+# Local Python package-index credentials.
+.pypirc

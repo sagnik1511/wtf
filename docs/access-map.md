@@ -251,7 +251,7 @@ and **8 identical viewer branding copies**.
 | [0.0.1.29 Docker workflows, compatibility policy and tutorial](releases/0.0.1.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.29](releases/0.0.1.29.md) |
 | [0.0.1.3 Generic feedback contract review](releases/0.0.1.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.3](releases/0.0.1.3.md) |
 | [0.0.1.30 Installable Python distributions and Ubuntu checks](releases/0.0.1.30.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.30](releases/0.0.1.30.md) |
-| [0.0.1.31 Python 3.12 minimum and native reduction port](releases/0.0.1.31.md) | [Home](index.md) → [Installation](installation.md) → [Python 3.12 rollout](releases/0.0.1.31.md) |
+| [0.0.1.31 Python 3.12 minimum and native reduction port](releases/0.0.1.31.md) | [Home](index.md) → [installation](installation.md) → [Python 3.12 rollout](releases/0.0.1.31.md) |
 | [0.0.1.32 Theme-aware inspector and replay previews; TestPyPI preparation](releases/0.0.1.32.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.32](releases/0.0.1.32.md) |
 | [0.0.1.4 Guarded promotion and mating observations](releases/0.0.1.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.4](releases/0.0.1.4.md) |
 | [0.0.1.5 Fewer lineage ranking allocations](releases/0.0.1.5.md) | [Home](index.md) → [Performance](performance.md) → [rollout 0.0.1.5](releases/0.0.1.5.md) |

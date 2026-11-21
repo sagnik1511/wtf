@@ -3,8 +3,8 @@
 [Saved brains](brain-library.md) · [Checkpoint structure](checkpoint-data-structures.md) · [Replay structure](replay-data-structures.md)
 
 Package releases, internal rollout numbers and file-format versions describe
-different contracts. `pyproject.toml` currently declares package version `0.0.2.0`;
-that declaration does not establish that it has been published to PyPI.
+different contracts. Package version [0.0.2.0 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+with a portable wheel and source archive.
 Four-component records under `docs/releases/` track implementation rollouts,
 not importable-package versions. Binary magic, checkpoint envelopes, logical
 state and observation versions each have their own version identifiers.
@@ -29,9 +29,10 @@ historical continuation is required.
 ## Current reader capabilities
 
 This table describes the current source readers, not an untested historical
-package-version matrix. The locally built 0.0.2.0 wheel/source archive carry these capabilities. Their
-installation checks do not establish that any version has been published or that
-every operating system has executed the tests. See [package verification](packaging.md).
+package-version matrix. The published 0.0.2.0 wheel/source archive carry these
+capabilities; the production-download smoke check covers all maintained presets,
+recording, checkpoint restoration and viewer assets. Platform coverage remains
+limited to the runtimes actually tested. See [package verification](packaging.md).
 
 | Artifact | Current source can read | Compatibility boundary |
 | --- | --- | --- |

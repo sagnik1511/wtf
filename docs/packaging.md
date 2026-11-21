@@ -3,10 +3,10 @@
 [Installation](../INSTALL.md) · [Compatibility](compatibility.md) · [Linux setup](linux.md) · [Customization](customization.md)
 
 The distribution is named `wtf-wildlife-trial-framework`; the Python import is
-`wtf`. Version `0.0.2.0` is configured locally. Building and checking it does
-not publish it or reserve the name on PyPI. The trial-release target is
-**TestPyPI**, which has separate accounts, tokens and projects from production
-PyPI. See [the upload procedure](#testpypi-trial-release).
+`wtf`. Version [0.0.2.0 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+with a portable wheel and source archive, after a matching TestPyPI trial.
+Future builds/checks do not publish automatically. **TestPyPI** has separate
+accounts, tokens and projects; see [the upload procedure](#testpypi-trial-release).
 
 ## Build a wheel and source archive
 

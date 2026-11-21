@@ -4,11 +4,14 @@
 
 The complete script below is also available as
 [`examples/complete_experiment.py`](../../examples/complete_experiment.py).
-Run it as a module from the checkout root so imports resolve consistently:
+With a checkout, run it as a module from the repository root:
 
 ```sh
 .venv/bin/python -m examples.complete_experiment --steps 200 --seed 100
 ```
+
+Installed-package users can instead save the complete code below as
+`complete_experiment.py` and run `.venv/bin/python complete_experiment.py --steps 200 --seed 100`.
 
 ## Complete Python code
 
@@ -86,7 +89,10 @@ def main():
     args = parser.parse_args()
     folder = run_experiment(args.environment, args.output, args.steps, args.seed)
     print(f"Saved experiment: {folder.resolve()}")
-    print("Playback: ./run.sh --results " + str(Path(args.output).resolve()))
+    print(
+        "Playback: .venv/bin/python -m wtf.server --results "
+        + str(Path(args.output).resolve())
+    )
 
 
 if __name__ == "__main__":
