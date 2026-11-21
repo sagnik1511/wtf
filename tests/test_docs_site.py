@@ -101,6 +101,81 @@ class DocumentationSiteTests(unittest.TestCase):
                 self.assertIn("var(--", path.read_text(), str(path))
                 self.assertEqual(svg.findall(".//s:script", ns), [])
 
+    def test_legacy_source_urls_redirect_to_directory_pages(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = SimpleNamespace(
+                site_dir=temporary, site_url="https://example.com/wtf/"
+            )
+            cases = (
+                (
+                    "configuration.md",
+                    "configuration/",
+                    "configuration/index.html",
+                    "docs/configuration.html",
+                    "../configuration/",
+                ),
+                (
+                    "tutorials/01-configuration.md",
+                    "tutorials/01-configuration/",
+                    "tutorials/01-configuration/index.html",
+                    "docs/tutorials/01-configuration.html",
+                    "../../tutorials/01-configuration/",
+                ),
+                (
+                    "installation.md",
+                    "installation/",
+                    "installation/index.html",
+                    "INSTALL.html",
+                    "installation/",
+                ),
+                ("index.md", "", "index.html", "README.html", "./"),
+                (
+                    "assets/README.md",
+                    "assets/",
+                    "assets/index.html",
+                    "docs/assets/index.html",
+                    "../../assets/",
+                ),
+            )
+            for source, url, destination, alias, target in cases:
+                page = SimpleNamespace(
+                    file=SimpleNamespace(src_uri=source, dest_uri=destination), url=url
+                )
+                canonical = Path(temporary) / destination
+                canonical.parent.mkdir(parents=True, exist_ok=True)
+                canonical.write_text("Canonical page")
+                self.assertEqual(
+                    self.site.on_post_page("Canonical page", page, config),
+                    "Canonical page",
+                )
+                text = (Path(temporary) / alias).read_text()
+                self.assertIn(f'href="{target}"', text)
+                self.assertIn("location.search + location.hash", text)
+                self.assertIn('name="robots" content="noindex"', text)
+                self.assertEqual(canonical.read_text(), "Canonical page")
+
+    def test_built_link_audit_checks_prefix_anchors_and_picture_sources(self):
+        from work.check_docs_links import check_site
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "guide").mkdir()
+            (root / "guide/index.html").write_text('<h1 id="section">Guide</h1>')
+            (root / "logo.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+            (root / "index.html").write_text(
+                '<a href="guide/#section">Guide</a><source srcset="logo.svg">'
+            )
+            report = check_site(root, "https://example.com/wtf/")
+            self.assertEqual(report["errors"], [])
+            (root / "index.html").write_text(
+                '<a href="/guide/">Wrong prefix</a><a href="guide/#missing">Bad section</a><source srcset="missing.svg">'
+            )
+            report = check_site(root, "https://example.com/wtf/")
+            self.assertEqual(len(report["errors"]), 3)
+            self.assertTrue(any("escapes site prefix" in e for e in report["errors"]))
+            self.assertTrue(any("missing section" in e for e in report["errors"]))
+            self.assertTrue(any("missing target" in e for e in report["errors"]))
+
     def test_ignored_research_and_symlink_files_are_never_published(self):
         from mkdocs.config.defaults import MkDocsConfig
         from mkdocs.structure.files import File, Files

@@ -1,6 +1,8 @@
 """Build public docs from existing guides without copying local research output."""
 
 from pathlib import Path
+import html
+import json
 import posixpath
 import re
 import subprocess
@@ -117,3 +119,45 @@ def on_page_markdown(markdown, page, config, files):
     if destination in EXTRA_PAGES:
         page.edit_url = config.repo_url.rstrip("/") + "/edit/main/" + origin
     return "".join(part for index, part in enumerate(sections) if index % 3 != 2)
+
+
+def legacy_page_paths(page):
+    """Previous source/Jekyll URLs remain usable after the MkDocs migration."""
+    source = page.file.src_uri
+    if not source.endswith(".md"):
+        return set()
+    aliases = {source[:-3] + ".html", "docs/" + source[:-3] + ".html"}
+    if source in EXTRA_PAGES:
+        aliases.add(EXTRA_PAGES[source][:-3] + ".html")
+    if source == "index.md":
+        aliases.add("README.html")
+    if source.endswith("/README.md"):
+        aliases.add("docs/" + source[:-9] + "index.html")
+    return aliases - {page.file.dest_uri}
+
+
+def on_post_page(output, page, config):
+    """Write lightweight redirects, preserving query strings and section links."""
+    for alias in legacy_page_paths(page):
+        target = posixpath.relpath(page.url or ".", posixpath.dirname(alias) or ".")
+        if not page.url or page.url.endswith("/"):
+            target += "/"
+        escaped = html.escape(target, quote=True)
+        canonical = config.site_url.rstrip("/") + "/" + page.url
+        redirect = (
+            '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<meta name="robots" content="noindex">'
+            f'<link rel="canonical" href="{html.escape(canonical, quote=True)}">'
+            f'<meta http-equiv="refresh" content="0;url={escaped}">'
+            "<title>Documentation moved</title>"
+            "<script>location.replace("
+            + json.dumps(target)
+            + " + location.search + location.hash);</script></head><body>"
+            f'<p>This documentation moved. <a href="{escaped}">Open the current page</a>.</p>'
+            "</body></html>\n"
+        )
+        destination = Path(config.site_dir) / alias
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(redirect)
+    return output

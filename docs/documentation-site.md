@@ -24,6 +24,7 @@ From the checkout root, install documentation tools into the development venv:
 ```sh
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements-docs.txt
 .venv/bin/python -m mkdocs build --strict
+.venv/bin/python -m work.check_docs_links
 .venv/bin/python -m mkdocs serve --dev-addr 127.0.0.1:8002
 ```
 
@@ -116,3 +117,20 @@ requirements and run:
 The site is unversioned and follows `main`. Historical implementation records
 remain in the existing release hub; they are separate from experiment history
 and documentation deployment status.
+
+## Legacy documentation addresses
+
+The current site uses directory URLs, such as `/wtf/configuration/`. Older
+source/Jekyll addresses such as `/wtf/docs/configuration.html` redirect to the
+matching MkDocs page. The build creates these small redirect pages for public
+Markdown guides, nested pages, asset catalogs and the original installation/
+example entry points. Query strings and section fragments are preserved when
+JavaScript is available; a meta refresh and ordinary link provide a fallback.
+Ignored research sources and theme partials never receive public redirects.
+
+The Documentation workflow runs `work.check_docs_links` after building. This
+checks actual generated HTML links, section anchors, image sources (including
+`picture` variants), CSS asset URLs and redirect destinations under the configured
+project prefix. It does not fetch third-party websites. A successful local build
+only changes the checkout; commit and push the source changes to `main` for the
+Pages workflow to deploy the updated site and redirects.
