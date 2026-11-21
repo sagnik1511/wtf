@@ -86,3 +86,6 @@ Thumbs.db
 # Superseded exploratory presets; maintained settings live under common names.
 /environments/escape_intent_*.json
 /environments/mating_intent_ppo.json
+
+# Future exploratory configurations; promote adopted settings to common presets.
+/environments/local/

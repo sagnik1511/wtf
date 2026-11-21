@@ -109,4 +109,7 @@ The maintained masked-PPO profile uses version-4 observations, prey k=3 and
 predator k=10, with prey escape actions. Old nearest-only/version-1 weight banks
 are incompatible with those signatures. Start fresh or load compatible weights;
 exact checkpoints and recordings continue using their captured configurations.
-The common name is stable, while its current supported defaults can improve.
+The preset starts fresh unless compatible saved brains are requested. Evidence
+for this recommendation used trained banks; fresh initialization can produce
+different outcomes. The common name is stable, while its supported defaults
+can improve.

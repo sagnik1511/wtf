@@ -11,6 +11,9 @@ rather than loading every document or result into context.
 - Environments belong in `environments/*.json`, validated by `ecosystem/config.py`
   and `environment.schema.json`. Prefer CLI selectors for run-specific brain
   initialization; avoid hardcoding a result path into Python.
+- Keep exploratory JSON variants under ignored `environments/local/` or results.
+  Promote adopted, supported settings into common maintained preset names, with
+  compatibility notes and checks. Preserve unrelated controller/terrain contracts.
 - Species names are arbitrary configuration keys. Use diet for prey/predator
   behavior and exact species identity for mating, metrics and champions; avoid
   hardcoded `prey`/`predator` names in generic paths.
