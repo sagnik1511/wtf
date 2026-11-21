@@ -68,7 +68,7 @@ and **8 identical viewer branding copies**.
 | [Package layout and import migration](package-layout.md) | [Home](index.md) → [package layout and import migration](package-layout.md) |
 | [Building and verifying the Python distribution](packaging.md) | [Home](index.md) → [Package builds](packaging.md) |
 | [Performance and benchmarking](performance.md) | [Home](index.md) → [Performance](performance.md) |
-| [Physics and visibility, illustrated](physics.md) | [Home](index.md) → [Physics illustrated](physics.md) |
+| [Physics and simulation rules, illustrated](physics.md) | [Home](index.md) → [Physics and simulation rules](physics.md) |
 | [Project context for contributors and coding agents](project-context.md) | [Home](index.md) → [contributor context](project-context.md) |
 | [Playback, recording format and memory](recording.md) | [Home](index.md) → [Playback and metrics](recording.md) |
 | [Reference](reference/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Definitions, commands, visuals and history](reference/index.md) |

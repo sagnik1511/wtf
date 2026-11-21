@@ -90,7 +90,7 @@ nav:
       - Environment configuration: configuration.md
       - Species: species.md
       - Geography and maps: geography.md
-      - Movement and visibility: physics.md
+      - Physics and simulation rules: physics.md
       - Day and night: day-night.md
       - Current calibration: calibration.md
   - Learning and behavior:

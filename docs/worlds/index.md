@@ -11,6 +11,6 @@ The guides below separate map geometry, animal capabilities and learning setting
 | [Configure the environment](../configuration.md) | Populations, resources, energy, actions and reproduction. |
 | [Add or configure a species](../species.md) | Named species, brains, body settings and sex colors. |
 | [Choose or edit a map](../geography.md) | Terrain definitions, maintained maps and playback previews. |
-| [Explore movement and visibility](../physics.md) | Interactive water/current, elevation, sight and mating cases. |
+| [Understand physics and simulation rules](../physics.md) | Step order, collisions, water/current, elevation, sight, energy, birth and daylight. |
 | [Enable day and night](../day-night.md) | Optional sunlight cycle and species effects. |
 | [Review calibration guidance](../calibration.md) | Supported tuning choices and their limits. |
