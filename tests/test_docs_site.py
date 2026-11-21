@@ -181,6 +181,7 @@ class DocumentationSiteTests(unittest.TestCase):
 
         root = Path(__file__).resolve().parents[1]
         config = load_config(str(root / "mkdocs.yml"))
+        self.assertIn("navigation.indexes", config.theme["features"])
 
         def destinations(entries):
             for entry in entries:
@@ -189,6 +190,11 @@ class DocumentationSiteTests(unittest.TestCase):
                 else:
                     for value in entry.values():
                         if isinstance(value, list):
+                            self.assertTrue(
+                                value, "Navigation groups need a landing page"
+                            )
+                            self.assertIsInstance(value[0], str)
+                            self.assertEqual(Path(value[0]).name, "index.md")
                             yield from destinations(value)
                         else:
                             yield value

@@ -1,5 +1,7 @@
 # Animal brain activity and archived-model explanations
 
+[Playback and inspection](viewer/playback/index.md) · [Viewer and storage](viewer/index.md)
+
 [Playback](recording.md#visual-agent-inspector) · [Saved brains](brain-library.md) · [Performance](performance.md#sampled-animal-activations)
 
 Select an animal on the board, or enter its **Animal ID** and click **Inspect**.

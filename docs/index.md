@@ -68,6 +68,9 @@ and [controlled evaluation](evaluation.md) to interpret outcomes.
 
 ## Viewer and storage
 
+Start with [Playback and inspection](viewer/playback/index.md) for the viewer
+workflow, or [Stored artifacts](viewer/storage/index.md) for saved data and restoration.
+
 [Playback and metrics](recording.md), the [board objects and viewer guide](viewer-visual-reference.md)
 and [explainability](explainability.md) cover the viewer and agent inspector.
 [Replay structures](replay-data-structures.md), [checkpoint structures](checkpoint-data-structures.md)

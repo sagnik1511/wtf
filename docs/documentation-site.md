@@ -75,6 +75,12 @@ filters and source-link branch in [the build hook](../work/docs_site.py).
 | Development | Architecture, tests, extensions, packaging, performance and site upkeep |
 | Reference | Complete field/command definitions, compatibility, visual index and existing release history |
 
+Every navigation group has an `index.md` landing page and Material
+`navigation.indexes` is enabled. Section labels are links, not empty headings;
+top tabs and the narrow-screen menu open the same landing pages. Keep a group
+index first in its navigation list, link to its child guides, and provide return
+links from those guides. The tests reject groups without an index.
+
 Keep the detailed guides in their current locations so GitHub links remain
 useful. Use the [complete directory](directory.md) for all guides, feature shortcuts and
 supporting visual catalogs. Edit [the home page](index.md) for reader routes and `nav` in

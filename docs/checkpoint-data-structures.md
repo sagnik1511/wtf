@@ -1,5 +1,7 @@
 # Checkpoint storage, restoration and runtime access
 
+[Stored artifacts](viewer/storage/index.md) · [Viewer and storage](viewer/index.md)
+
 [Artifact map](replay-data-structures.md) · [Binary layout](binary-storage.md) · [Exact resume](running.md#resume-an-exact-experiment) · [Champion weights](replay-data-structures.md#champion-weight-records)
 
 A checkpoint stores the complete serialized experiment needed for continuation:

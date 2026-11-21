@@ -1,5 +1,7 @@
 # Board objects and viewer guide
 
+[Playback and inspection](viewer/playback/index.md) · [Viewer and storage](viewer/index.md)
+
 [Playback guide](recording.md) · [Visual guide](visual-guide.md) · [Asset sources](assets/viewer/README.md)
 
 Use this catalog to identify board objects, overlays and inspector graphics.

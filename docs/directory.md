@@ -7,6 +7,23 @@ The navigation uses the same subject groups. Topic sections below also link
 straight to frequently inspected visuals. This site documents the package;
 training and the replay viewer run locally.
 
+## Section landing pages
+
+Each navigation group opens its own page. Click the section name to open its
+landing page; use the adjacent arrow to expand or collapse its child links on
+narrow screens. The top tabs open the same section pages.
+
+| Section | Start here |
+| --- | --- |
+| Get started | [Installation and first experiment](getting-started/index.md) |
+| Worlds and species | [Configuration, maps and animals](worlds/index.md) |
+| Learning and behavior | [Inputs, learners, feedback and inheritance](learning/index.md) |
+| Viewer and storage | [Viewer and artifact overview](viewer/index.md) |
+| Playback and inspection | [Recording, board pieces, inspector and metrics](viewer/playback/index.md) |
+| Stored artifacts | [Replay, weights, checkpoints and restoration](viewer/storage/index.md) |
+| Development | [Architecture, extensions and checks](contributing/index.md) |
+| Reference | [Definitions, commands, visuals and history](reference/index.md) |
+
 ## Jump to a feature or visual
 
 | Looking for | Open |

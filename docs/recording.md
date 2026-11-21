@@ -1,5 +1,7 @@
 # Playback, recording format and memory
 
+[Playback and inspection](viewer/playback/index.md) · [Viewer and storage](viewer/index.md)
+
 [Project overview](../README.md) · [Setup and runs](running.md) · [Analysis](analysis.md)
 
 For file trees, record layouts, entity schemas and a worked field-mask example,

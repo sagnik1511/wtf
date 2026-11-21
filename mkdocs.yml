@@ -28,6 +28,7 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - navigation.footer
     - search.suggest
@@ -73,6 +74,7 @@ extra_css:
 nav:
   - Home: index.md
   - Get started:
+      - getting-started/index.md
       - Installation: installation.md
       - Linux and Ubuntu: linux.md
       - Docker: docker.md
@@ -83,6 +85,7 @@ nav:
       - 'Tutorial 3: Restore and view': tutorials/03-restore-and-view.md
       - Python example: examples.md
   - Worlds and species:
+      - worlds/index.md
       - Customization handbook: customization.md
       - Environment configuration: configuration.md
       - Species: species.md
@@ -91,6 +94,7 @@ nav:
       - Day and night: day-night.md
       - Current calibration: calibration.md
   - Learning and behavior:
+      - learning/index.md
       - Algorithms and networks: algorithms.md
       - Advanced algorithms: advanced-algorithms.md
       - Brain inputs and observations: observations.md
@@ -104,15 +108,19 @@ nav:
       - Behavior analysis: analysis.md
       - Evaluation: evaluation.md
   - Viewer and storage:
+      - viewer/index.md
       - Playback and inspection:
+          - viewer/playback/index.md
           - Playback controls and metrics: recording.md
           - Board objects and viewer guide: viewer-visual-reference.md
           - Agent inspector and brain explanations: explainability.md
       - Stored artifacts:
+          - viewer/storage/index.md
           - Replay files and data structures: replay-data-structures.md
           - Checkpoint state and restoration: checkpoint-data-structures.md
           - Binary formats and compression: binary-storage.md
   - Development:
+      - contributing/index.md
       - Architecture: architecture.md
       - Development and testing: development.md
       - Add policy models: extending-policies.md
@@ -125,6 +133,7 @@ nav:
       - Contributor context: project-context.md
       - Documentation website: documentation-site.md
   - Reference:
+      - reference/index.md
       - Complete documentation directory: directory.md
       - Visual assets and sources: assets/README.md
       - Configuration fields: configuration-reference.md

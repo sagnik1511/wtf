@@ -1,5 +1,7 @@
 # Binary replay and checkpoint storage
 
+[Stored artifacts](viewer/storage/index.md) · [Viewer and storage](viewer/index.md)
+
 [Playback](recording.md) · [Runs and checkpoints](running.md) · [Performance](performance.md)
 
 For file trees, record layouts, entity schemas and a worked field-mask example,

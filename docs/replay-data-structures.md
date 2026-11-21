@@ -1,5 +1,7 @@
 # Playback data structures and artifact map
 
+[Stored artifacts](viewer/storage/index.md) · [Viewer and storage](viewer/index.md)
+
 [Playback guide](recording.md) · [Binary format](binary-storage.md) · [Saved brains](brain-library.md) · [Visual guide](visual-guide.md)
 
 This guide describes the current default binary/XZ layout. The figures show
