@@ -1,5 +1,7 @@
 # Documentation assets
 
+[All visual files](../visuals.md) · [Homepage click paths](../access-map.md)
+
 These intentional documentation assets are tracked in Git; experiment results
 remain ignored and original videos stay outside the repository.
 
@@ -19,11 +21,11 @@ main playback clip selects an animal to show its sight and inspector.
 
 | Asset | View | Encoding |
 | --- | --- | --- |
-| `simulation-playback.gif` | Playback with selected-animal inspector | 3.5 s, 14 frames, 4 fps, 128 colors |
-| `species-metrics.gif` | Per-species dashboard following the replay position | 3.5 s, 14 frames, 4 fps, 128 colors |
-| `day-night.gif` | Sunlight transitions and moving time dial | 3.5 s, 14 frames, 4 fps, 128 colors |
-| `animal-brain.gif` | Selected animal’s actual sampled inputs, outputs and network activity | 3.5 s, 14 frames, 4 fps, 128 colors |
-| `archived-brain.gif` | Fixed archived brain evaluated on changing replay observations | 3.5 s, 14 frames, 4 fps, 128 colors |
+| [simulation-playback.gif](simulation-playback.gif) | Playback with selected-animal inspector | 3.5 s, 14 frames, 4 fps, 128 colors |
+| [species-metrics.gif](species-metrics.gif) | Per-species dashboard following the replay position | 3.5 s, 14 frames, 4 fps, 128 colors |
+| [day-night.gif](day-night.gif) | Sunlight transitions and moving time dial | 3.5 s, 14 frames, 4 fps, 128 colors |
+| [animal-brain.gif](animal-brain.gif) | Selected animal’s actual sampled inputs, outputs and network activity | 3.5 s, 14 frames, 4 fps, 128 colors |
+| [archived-brain.gif](archived-brain.gif) | Fixed archived brain evaluated on changing replay observations | 3.5 s, 14 frames, 4 fps, 128 colors |
 
 Ten simulation steps separate exported frames (20 for day–night), so these are time-compressed
 previews rather than real-time screen recordings. Chart history stops at the

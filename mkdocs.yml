@@ -135,6 +135,8 @@ nav:
   - Reference:
       - reference/index.md
       - Complete documentation directory: directory.md
+      - All visuals: visuals.md
+      - Homepage click paths: access-map.md
       - Visual assets and sources: assets/README.md
       - Configuration fields: configuration-reference.md
       - Command reference: command-reference.md

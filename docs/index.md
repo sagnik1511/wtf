@@ -1,6 +1,6 @@
 # Wildlife Trial Framework
 
-[Complete documentation directory](directory.md) · [Visual guide](visual-guide.md)
+[Complete documentation directory](directory.md) · [All visuals](visuals.md) · [Homepage click paths](access-map.md)
 
 <picture class="brand-lockup brand-on-light">
   <source srcset="assets/branding/wtf-lockup-motion-light.svg" type="image/svg+xml" />

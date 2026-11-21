@@ -215,6 +215,94 @@ class DocumentationSiteTests(unittest.TestCase):
         for source in (root / "docs/tutorials").glob("*.md"):
             self.assertIn(source.relative_to(root / "docs").as_posix(), navigation)
 
+    def test_click_routes_exclude_navigation_images_and_proof_page_links(self):
+        from work.docs_access import content_routes
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            generator = '<meta name="generator" content="mkdocs-1.6.1">'
+            for folder in ("guide", "access-map"):
+                (root / folder).mkdir()
+            (root / "index.html").write_text(
+                generator + '<nav><a href="guide/">Hidden in navigation</a></nav>'
+                '<article><img src="figure.svg"><a href="access-map/">Proof</a></article>'
+            )
+            (root / "access-map/index.html").write_text(
+                generator
+                + '<article><a href="../guide/">Only the proof links here</a></article>'
+            )
+            (root / "guide/index.html").write_text(
+                generator + "<article><h1>Guide</h1></article>"
+            )
+            with self.assertRaisesRegex(ValueError, "guide/index.html"):
+                content_routes(root, "https://example.com/wtf/")
+            (root / "index.html").write_text(
+                generator + '<article><a href="guide/">Read the guide</a>'
+                '<img src="figure.svg"><a href="access-map/">Proof</a></article>'
+            )
+            pages, parents = content_routes(root, "https://example.com/wtf/")
+            self.assertEqual(len(pages), 3)
+            self.assertEqual(
+                parents["guide/index.html"], ("index.html", "Read the guide")
+            )
+            self.assertNotIn("figure.svg", parents)
+
+    def test_visual_catalog_covers_variants_and_checks_runtime_copies(self):
+        from work.docs_access import visual_catalog, label
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            names = [
+                "docs/assets/branding/favicon.png",
+                "docs/assets/branding/favicon.svg",
+                "viewer/branding/favicon.svg",
+            ]
+            for name in names:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"same artwork")
+            text = visual_catalog(names, root)
+            for name in names[:2]:
+                self.assertIn(f"]({name.removeprefix('docs/')})", text)
+            self.assertIn("viewer/branding/favicon.svg", text)
+            self.assertNotEqual(label(names[0]), label(names[1]))
+            (root / names[-1]).write_bytes(b"different artwork")
+            with self.assertRaisesRegex(ValueError, "byte-identical"):
+                visual_catalog(names, root)
+
+    def test_generated_visual_previews_use_pairs_and_real_edit_source(self):
+        from work.docs_access import visual_previews, preview_source
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            names = [
+                "docs/assets/example.gif",
+                "docs/assets/themed/example-light.webp",
+                "docs/assets/branding/wtf-symbol-light.svg",
+                "docs/assets/branding/wtf-symbol-dark.svg",
+            ]
+            for name in names:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"fixture")
+            previews = visual_previews(names, root)
+            gif_source = preview_source(names[0])
+            page = SimpleNamespace(
+                file=SimpleNamespace(
+                    src_uri=gif_source, dest_uri=gif_source[:-3] + "/index.html"
+                )
+            )
+            rendered = self.site.on_page_markdown(
+                previews[gif_source], page, self.config, None
+            )
+            self.assertIn('class="replay-theme-light"', rendered)
+            self.assertIn('class="replay-theme-dark"', rendered)
+            self.assertTrue(page.edit_url.endswith("/edit/main/work/docs_access.py"))
+            logo = previews[preview_source(names[2])]
+            self.assertIn("brand-on-light", logo)
+            self.assertIn("brand-on-dark", logo)
+            self.assertIn("Open original file", logo)
+
     def test_built_link_audit_rejects_orphan_pages_and_follows_index_hubs(self):
         from work.check_docs_links import check_site
 
@@ -273,8 +361,6 @@ class DocumentationSiteTests(unittest.TestCase):
         ns = {"s": "http://www.w3.org/2000/svg"}
         for folder in ("inspector", "geography", "viewer"):
             for path in (root / "docs/assets" / folder).glob("*.svg"):
-                if path.name in ("themes.svg", "day-night.svg"):
-                    continue
                 svg = ET.parse(path).getroot()
                 style = "".join(e.text or "" for e in svg.findall(".//s:style", ns))
                 self.assertIn("prefers-color-scheme: light", style, str(path))

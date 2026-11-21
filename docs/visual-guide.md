@@ -1,5 +1,7 @@
 # Visual guide to the documentation
 
+[All visual files](visuals.md) · [Verified homepage click paths](access-map.md)
+
 [Documentation directory](directory.md) · [Project overview](../README.md) · [Project context](project-context.md) · [Release history](releases/README.md)
 
 Use the diagrams in the guide that matches your question. They describe the
@@ -88,6 +90,13 @@ figure from the feedback review and linked mating inputs to the vector layout.
 
 ## Light and dark appearance
 
+Open **Home → All visuals → the visual name** for a preview with the site's
+light/dark toggle. The adjacent original-file link opens the exact saved asset;
+a standalone SVG follows the browser/OS preference and a raster file keeps its
+saved pixels. The preview keeps theme selection inside MkDocs, pairs animation
+exports and logo variants, and embeds the full physics explorer.
+
+
 Structural flow, storage, checkpoint and runtime diagrams use self-contained SVG
 palettes for both light and dark surfaces. Physics diagrams adapt in the same
 way. On GitHub Pages, embedded SVGs follow the site's sun/moon toggle through
@@ -105,7 +114,8 @@ the page embedding them.
 Geography and inspector/viewer SVG specimens have light/dark presentation
 palettes too. Terrain values, node activities, action scores and sign/category
 meanings are preserved. The sheets explicitly comparing both interface themes
-or daylight phases remain fixed comparisons. The standalone physics explorer
+or daylight phases retain their sample colors while their outer labels, card
+surfaces and backgrounds adapt to the selected palette. The standalone physics explorer
 adapts to system light/dark preference. The live viewer has its own theme toggle,
 separate from simulated sunlight.
 

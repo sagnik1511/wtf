@@ -7,6 +7,8 @@ a specific setting, command, visual or compatibility question.
 
 | Task | Guide |
 | --- | --- |
+| [All visuals](../visuals.md) | Every visual file and its theme/fallback variants. |
+| [Homepage click paths](../access-map.md) | Verified content-link sequences to every page and visual. |
 | [Complete documentation directory](../directory.md) | All guides, feature shortcuts, supporting catalogs and history. |
 | [Configuration field definitions](../configuration-reference.md) | Schema descriptions, ranges, defaults and choices. |
 | [Command reference](../command-reference.md) | Simulator, server and analyzer flags. |

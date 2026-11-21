@@ -1,0 +1,23 @@
+/* Theme the comparison sheet chrome while retaining the actual sample colors. */
+@media (prefers-color-scheme: light) {
+  svg > .sheet-background {
+    fill: #f4f7fa;
+  }
+  svg > .sheet-heading text,
+  svg > text {
+    fill: #172c3c;
+  }
+  svg > rect[fill='#111c27'] {
+    fill: #fff;
+    stroke: #b7c8d7;
+  }
+  .clock-specimen text {
+    fill: #172c3c;
+  }
+  .clock-specimen [data-crescent] {
+    fill: #f4f7fa;
+  }
+  svg > path[stroke='#f6d365'] {
+    stroke: #936f08;
+  }
+}

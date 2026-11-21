@@ -97,3 +97,15 @@
 [data-md-color-scheme='slate'] .md-typeset .replay-theme-dark {
   display: block;
 }
+
+/* Visual previews keep the documentation palette instead of leaving the site. */
+.md-typeset .visual-brand-preview {
+  max-width: 360px;
+}
+.visual-explorer {
+  width: 100%;
+  height: 850px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.35rem;
+  color-scheme: inherit;
+}

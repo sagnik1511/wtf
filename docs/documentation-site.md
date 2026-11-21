@@ -26,6 +26,7 @@ From the checkout root, install documentation tools into the development venv:
 .venv/bin/python -m pip install --cache-dir .cache/pip -r requirements-docs.txt
 .venv/bin/python -m mkdocs build --strict
 .venv/bin/python -m work.check_docs_links
+.venv/bin/python -m work.docs_access --check
 .venv/bin/python -m mkdocs serve --dev-addr 127.0.0.1:8002
 ```
 
@@ -165,3 +166,31 @@ anchors against the destination HTML. Include picture sources and nested paths.
 A local link audit cannot detect another publishing workflow replacing the site.
 Keep detailed URL/status audit reports local; report exact checked counts and
 any HTTP failures or rate-limited external destinations when sharing results.
+
+
+## Click-only access to every page and visual
+
+The homepage links directly to [All visuals](visuals.md) and
+[Homepage click paths](access-map.md). The latter lists a verified sequence of
+content links for every public guide, catalog, historical release, visual file,
+theme variant and identical viewer-branding copy. It does not rely on search,
+sidebar state or an image loading automatically. Its own outgoing links are
+excluded from the proof, so the index cannot hide an otherwise isolated page.
+
+After adding/removing a guide, changing link text or adding a public visual, run:
+
+```sh
+.venv/bin/python -m work.docs_access
+.venv/bin/python -m work.check_docs_links
+.venv/bin/python -m work.docs_access --check
+```
+
+The generator updates the two Markdown catalogs and rebuilds the site. The build
+hook also generates small visual-preview pages from the same inventory, so
+opening a visual retains MkDocs theme controls without duplicating media files.
+SVG comparison-sheet chrome is adaptive while comparison samples stay fixed. It keeps
+visuals as links rather than embedding every animation on one page. CI rejects
+stale catalogs, unreachable content and mismatched runtime branding copies.
+Detailed machine-readable routes stay in ignored `.cache/docs-access-routes.json`.
+Private/ignored paper figures, experimental output, source videos and local
+Mermaid authoring files remain outside the public inventory.

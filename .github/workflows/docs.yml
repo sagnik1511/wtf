@@ -10,6 +10,7 @@ on:
       - 'requirements-docs.txt'
       - 'work/docs_site.py'
       - 'work/check_docs_links.py'
+      - 'work/docs_access.py'
       - 'tests/test_docs_site.py'
       - '.github/workflows/docs.yml'
       - '.gitignore'
@@ -22,6 +23,7 @@ on:
       - 'requirements-docs.txt'
       - 'work/docs_site.py'
       - 'work/check_docs_links.py'
+      - 'work/docs_access.py'
       - 'tests/test_docs_site.py'
       - '.github/workflows/docs.yml'
       - '.gitignore'
@@ -46,6 +48,7 @@ jobs:
           python -m unittest tests.test_docs_site
           python -m mkdocs build --strict
           python -m work.check_docs_links
+          python -m work.docs_access --check
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v4

@@ -72,6 +72,11 @@ def on_files(files, config):
         files.append(
             File.generated(config, target, content=(ROOT / source).read_text())
         )
+    if (ROOT / "docs/assets").is_dir():
+        from work.docs_access import inventory, visual_previews
+
+        for target, content in visual_previews(inventory(ROOT), ROOT).items():
+            files.append(File.generated(config, target, content=content))
     return files
 
 
@@ -154,6 +159,8 @@ def on_page_markdown(markdown, page, config, files):
         )
     if destination in EXTRA_PAGES:
         page.edit_url = config.repo_url.rstrip("/") + "/edit/main/" + origin
+    elif destination.startswith("visual-previews/"):
+        page.edit_url = config.repo_url.rstrip("/") + "/edit/main/work/docs_access.py"
     return "".join(part for index, part in enumerate(sections) if index % 3 != 2)
 
 

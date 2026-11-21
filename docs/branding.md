@@ -64,6 +64,13 @@ Keep the README, documentation headers/navigation, favicons and other guide
 pages unanimated. Do not apply a global spinning-logo rule. Preserve the fixed opening
 and diagonal joins when maintaining the home-page animation.
 
+## GitHub banner
+
+The [GitHub social-preview banner](assets/github-banner.png) is a fixed screenshot
+asset, separate from the transparent logos and interface theme variants. The
+[complete visual catalog](visuals.md) also lists the viewer’s identical branding
+copies and every fallback format.
+
 ## Maintain and export
 
 Editable source SVGs and PNG fallbacks live under `docs/assets/branding/`.

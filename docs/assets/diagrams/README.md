@@ -38,7 +38,6 @@ light/dark styles and an opaque light fallback for simpler image renderers.
 | [From recorded behavior to an assessment](from-recorded-behavior-to-an-assessment.svg) | [Guide](../../analysis.md#from-recorded-behavior-to-an-assessment) | `from-recorded-behavior-to-an-assessment.mmd` |
 | [Choose checks for the change](choose-checks-for-the-change.svg) | [Guide](../../development.md#choose-checks-for-the-change) | `choose-checks-for-the-change.mmd` |
 | [Rollout record lifecycle](rollout-record-lifecycle.svg) | [Guide](../../releases/README.md#rollout-record-lifecycle) | `rollout-record-lifecycle.mmd` |
-
 | [Top-k observation pipeline](top-k-observation-pipeline.svg) | [Guide](../../observations.md#visible-target-slots) | `top-k-observation-pipeline.mmd` |
 | [Inspector: current and sampled state](inspector-current-and-sampled.svg) | [Guide](../../recording.md#visual-agent-inspector) | `inspector-current-and-sampled.mmd` |
 | [Shared champion weight storage](shared-champion-weights.svg) | [Guide](../../binary-storage.md#champion-storage-measurement) | `shared-champion-weights.mmd` |

@@ -47,7 +47,7 @@ const box = (x, y, w, h) =>
 const lines = (x, y, values, size = 14) =>
   values.map((v, i) => text(x, y + i * 20, v, size, '#a9bacc')).join('');
 const sheet = (title, description, height, body) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${height}" viewBox="0 0 1200 ${height}" role="img" aria-labelledby="title desc"><title id="title">${esc(title)}</title><desc id="desc">${esc(description)}</desc><style>.viewer-component text{font:12px system-ui,sans-serif;fill:#a9bacc}</style><rect width="1200" height="${height}" rx="14" fill="#0b1118"/>${text(28, 38, title, 25, '#e6edf3', 'start', true)}${text(28, 67, description, 14, '#a9bacc')}${body}</svg>\n`;
+  `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${height}" viewBox="0 0 1200 ${height}" role="img" aria-labelledby="title desc"><title id="title">${esc(title)}</title><desc id="desc">${esc(description)}</desc><style>.viewer-component text{font:12px system-ui,sans-serif;fill:#a9bacc}</style><rect class="sheet-background" width="1200" height="${height}" rx="14" fill="#0b1118"/><g class="sheet-heading">${text(28, 38, title, 25, '#e6edf3', 'start', true)}${text(28, 67, description, 14, '#a9bacc')}</g>${body}</svg>\n`;
 
 class SVGCanvas {
   constructor(width, height) {
@@ -811,7 +811,7 @@ body += text(
 body += dayCards
   .map(
     ([name, tick], i) =>
-      `<g transform="translate(${80 + i * 288} 643)">${clockMarkup(clockState(demoCycle, tick))}</g>` +
+      `<g class="clock-specimen" transform="translate(${80 + i * 288} 643)">${clockMarkup(clockState(demoCycle, tick))}</g>` +
       text(80 + i * 288, 738, name, 14),
   )
   .join('');
@@ -838,6 +838,7 @@ body = ['dark', 'light']
       ),
       x = 28 + i * 582;
     return (
+      '<g class="fixed-comparison">' +
       `<rect x="${x}" y="95" width="560" height="380" rx="12" fill="${c.bg}" stroke="${c.border}"/>` +
       text(
         x + 20,
@@ -868,7 +869,8 @@ body = ['dark', 'light']
         theme === 'dark' ? 'Light mode' : 'Dark mode',
         16,
         c.text,
-      )
+      ) +
+      '</g>'
     );
   })
   .join('');
@@ -911,7 +913,10 @@ const check = process.argv.includes('--check');
 if (!check) fs.mkdirSync(outdir, { recursive: true });
 for (const [name, original] of Object.entries(outputs)) {
   const contents = ['themes.svg', 'day-night.svg'].includes(name)
-    ? original
+    ? original.replace(
+        /<\/svg>\s*$/,
+        `<style>${fs.readFileSync(path.join(outdir, 'comparison-palette.css'), 'utf8')}</style></svg>\n`,
+      )
     : original.replace(
         /<\/svg>\s*$/,
         `<style>${fs.readFileSync(path.join(outdir, 'theme-palette.css'), 'utf8')}</style></svg>\n`,

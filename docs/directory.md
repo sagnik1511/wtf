@@ -1,6 +1,6 @@
 # Complete documentation directory
 
-[Documentation home](index.md) · [Visual guide](visual-guide.md)
+[Documentation home](index.md) · [All visuals](visuals.md) · [Homepage click paths](access-map.md) · [Visual guide](visual-guide.md)
 
 Use this directory to find every maintained guide without guessing a page name.
 The navigation uses the same subject groups. Topic sections below also link
@@ -113,6 +113,8 @@ narrow screens. The top tabs open the same section pages.
 
 | Guide | What it covers |
 | --- | --- |
+| [All visuals](visuals.md) | Every tracked public visual, theme variant, fallback and runtime branding copy. |
+| [Homepage click paths](access-map.md) | Verified click sequences from Home to every guide and visual file. |
 | [Visual assets and sources](assets/README.md) | Catalog of tracked visual assets, source provenance and regeneration guides. |
 | [Configuration fields](configuration-reference.md) | Complete generated schema definitions, types, ranges and defaults. |
 | [Command reference](command-reference.md) | Simulator, viewer/server and analyzer flags. |
