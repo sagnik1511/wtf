@@ -1,5 +1,14 @@
 # Wildlife Trial Framework
 
+<picture class="brand-lockup brand-on-light">
+  <source srcset="assets/branding/wtf-lockup-motion-light.svg" type="image/svg+xml" />
+  <img src="assets/branding/wtf-lockup-light.png" width="260" alt="WTF — Wildlife Trial Framework" />
+</picture>
+<picture class="brand-lockup brand-on-dark">
+  <source srcset="assets/branding/wtf-lockup-motion-dark.svg" type="image/svg+xml" />
+  <img src="assets/branding/wtf-lockup-dark.png" width="260" alt="WTF — Wildlife Trial Framework" />
+</picture>
+
 WTF is a configurable reinforcement learning ecosystem. Animals have private
 brains, observe their surroundings, choose actions, learn from feedback and can
 produce descendants. Python simulates and records; JavaScript plays the saved
@@ -79,6 +88,7 @@ explains site maintenance and publishing.
 - [All commands and overrides](command-reference.md)
 - [Artifact and runtime compatibility](compatibility.md)
 - [Visual documentation catalog](visual-guide.md)
+- [Logo assets and usage](branding.md)
 - [Existing release history](releases/README.md)
 
 Documentation describes the package and reusable workflows. Local experiments,

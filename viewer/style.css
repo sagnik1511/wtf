@@ -1384,3 +1384,38 @@ footer {
 :root[data-theme='light'] .day-night-clock [data-crescent] {
   fill: var(--bg);
 }
+
+/* Compact identity; interface theme controls these assets, not simulated sunlight. */
+.viewer-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.brand-symbol {
+  flex: 0 0 auto;
+}
+.brand-symbol img {
+  display: block;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+.brand-on-light {
+  display: none;
+}
+:root[data-theme='light'] .brand-on-light {
+  display: block;
+}
+:root[data-theme='light'] .brand-on-dark {
+  display: none;
+}
+@media (max-width: 600px) {
+  .viewer-brand {
+    gap: 10px;
+  }
+  .brand-symbol img {
+    width: 40px;
+    height: 40px;
+  }
+}

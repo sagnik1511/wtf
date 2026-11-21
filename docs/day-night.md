@@ -65,6 +65,14 @@ initialize these worlds, but suitability requires evaluation under the cycle.
 
 ## Playback and storage
 
+![Current viewer progressing from dawn through midday and dusk into night, with its moving time dial](assets/day-night.gif)
+
+This 3.5-second full-viewer preview samples the maintained day–night preset
+at 20-step intervals. It compresses world time to show the sunlight cycle and
+time dial together. [Clip sources and refresh workflow](assets/terrains/README.md#refresh-the-clips)
+are documented separately; it is a UI demonstration rather than a learning evaluation.
+
+
 The ground brightens gradually toward midday, before animal/resource glyphs
 are drawn. The board darkens gradually with a warm dawn/dusk tint, and stays legible at
 night. Event highlights and surrounding controls remain readable. A status label

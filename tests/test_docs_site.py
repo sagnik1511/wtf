@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import tempfile
 import unittest
+from xml.etree import ElementTree as ET
 from unittest.mock import patch
 
 
@@ -35,6 +36,12 @@ class DocumentationSiteTests(unittest.TestCase):
             "![Figure](../assets/viewer/brain-views.svg)",
         )
 
+    def test_theme_source_links_do_not_point_into_excluded_site_content(self):
+        self.assertEqual(
+            self.render("[Partial](../overrides/partials/logo.html)"),
+            "[Partial](https://github.com/example/project/blob/main/docs/overrides/partials/logo.html)",
+        )
+
     def test_generated_installation_resolves_links_from_original_source(self):
         page = SimpleNamespace(file=SimpleNamespace(src_uri="installation.md"))
         self.assertEqual(
@@ -53,6 +60,34 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertEqual(self.render(text), text)
         text = "[Web](https://example.com/a?q=1#anchor) [Section](#section)"
         self.assertEqual(self.render(text), text)
+
+    def test_logo_motion_is_limited_to_home_hero(self):
+        root = Path(__file__).resolve().parents[1]
+        home = (root / "docs/index.md").read_text()
+        ns = {"s": "http://www.w3.org/2000/svg"}
+        for theme, ink in (("light", "#163b2a"), ("dark", "#def3e5")):
+            name = f"wtf-lockup-motion-{theme}.svg"
+            self.assertIn(name, home)
+            svg = ET.parse(root / "docs/assets/branding" / name).getroot()
+            style = svg.find("s:style", ns).text
+            self.assertIn(ink, style)
+            self.assertIn("prefers-reduced-motion:no-preference", style)
+            self.assertNotIn("prefers-color-scheme", style)
+            self.assertIsNotNone(svg.find("s:g[@class='ribbon-static']", ns))
+            self.assertEqual(len(svg.findall(".//s:use", ns)), 4)
+            animation = svg.find(".//s:animate", ns)
+            self.assertEqual(animation.get("attributeName"), "d")
+            self.assertEqual(animation.get("dur"), "12s")
+            frames = animation.get("values").split(";")
+            self.assertEqual(frames[0], frames[-1])
+            for tag in ("script", "image", "animateTransform", "clipPath", "mask"):
+                self.assertEqual(svg.findall(f".//s:{tag}", ns), [])
+        for name in (
+            "README.md",
+            "docs/overrides/partials/logo.html",
+            "viewer/index.html",
+        ):
+            self.assertNotIn("wtf-lockup-motion", (root / name).read_text())
 
     def test_ignored_research_and_symlink_files_are_never_published(self):
         from mkdocs.config.defaults import MkDocsConfig

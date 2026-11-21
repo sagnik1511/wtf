@@ -84,9 +84,27 @@ def main():
     worker.start()
     base = f"http://127.0.0.1:{server.server_port}"
     try:
-        for path in ("/", "/app.js", "/theme.mjs", "/style.css", "/day-night.mjs"):
+        for path in (
+            "/",
+            "/app.js",
+            "/theme.mjs",
+            "/style.css",
+            "/day-night.mjs",
+            "/branding/wtf-symbol-light.svg",
+            "/branding/wtf-symbol-dark.svg",
+            "/branding/wtf-symbol-light.png",
+            "/branding/wtf-symbol-dark.png",
+            "/branding/favicon.svg",
+            "/branding/favicon.png",
+            "/branding/wtf-symbol-motion-light.svg",
+            "/branding/wtf-symbol-motion-dark.svg",
+        ):
             with urlopen(base + path) as response:
                 assert response.status == 200 and response.read()
+                if path.endswith(".svg"):
+                    assert response.headers.get_content_type() == "image/svg+xml"
+                elif path.endswith(".png"):
+                    assert response.headers.get_content_type() == "image/png"
         with urlopen(base + "/api/recordings") as response:
             assert any(r["id"] == folder.name for r in json.load(response))
         with urlopen(base + f"/api/recordings/{folder.name}") as response:

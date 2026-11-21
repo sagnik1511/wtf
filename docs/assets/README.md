@@ -3,20 +3,34 @@
 These intentional documentation assets are tracked in Git; experiment results
 remain ignored and original videos stay outside the repository.
 
-## Original demonstration clips
+## Project identity
 
-These two clips come from the project screen recording captured on
-2026-11-17 at 11:48:02. The original MOV remains outside the repository.
+The [branding guide](../branding.md) links the transparent SVG symbols, full
+lockups and PNG fallbacks, including light/dark variants and usage rules.
 
-| Asset | Source interval | Output |
+## Current playback clips
+
+The playback GIFs are exported from the current viewer using saved replay
+frames, rather than trimmed from an older desktop video. Each preserves the
+whole viewer window (1280 × 720, or 1280 × 1440 for the taller XAI dialogs),
+including its header and controls; there is no
+board-only crop. The metrics clip opens the **Metrics dashboard**, while the
+main playback clip selects an animal to show its sight and inspector.
+
+| Asset | View | Encoding |
 | --- | --- | --- |
-| `simulation-playback.gif` | 00:08–00:11.5 | 960 px wide, 12 fps, 96 colors, looping |
-| `species-metrics.gif` | 00:26–00:29.5 | 880 px wide, 10 fps, 96 colors, looping |
+| `simulation-playback.gif` | Playback with selected-animal inspector | 3.5 s, 14 frames, 4 fps, 128 colors |
+| `species-metrics.gif` | Per-species dashboard following the replay position | 3.5 s, 14 frames, 4 fps, 128 colors |
+| `day-night.gif` | Sunlight transitions and moving time dial | 3.5 s, 14 frames, 4 fps, 128 colors |
+| `animal-brain.gif` | Selected animal’s actual sampled inputs, outputs and network activity | 3.5 s, 14 frames, 4 fps, 128 colors |
+| `archived-brain.gif` | Fixed archived brain evaluated on changing replay observations | 3.5 s, 14 frames, 4 fps, 128 colors |
 
-Crops focus on the simulation board and metrics panel respectively. FFmpeg
-palette generation and differential palette rendering keep the pair around
-3 MB combined. GIF timing rounds the first clip to 3.58 seconds. These are viewer
-demonstrations, not evidence of learning quality.
+Ten simulation steps separate exported frames (20 for day–night), so these are time-compressed
+previews rather than real-time screen recordings. Chart history stops at the
+playhead. The small demonstration replays illustrate the interface and do not
+establish learning quality. Source frames and temporary replays stay outside
+Git; only optimized GIFs and [the provenance manifest](playback-manifest.json)
+are tracked. See [the export workflow](terrains/README.md#refresh-the-clips).
 
 ## Physics diagrams and interactive explorer
 
@@ -25,17 +39,16 @@ standalone explorer, with provenance and regeneration commands. The
 [illustrated guide](../physics.md) presents the cases in context. These contain
 controlled physics snapshots and no training results or model weights.
 
-## Full-viewer terrain recordings
+## Full-viewer terrain previews
 
 [Landscape map diagrams](geography/README.md) show four additional maps directly
 from their JSON: a meandering river, delta, alpine passes and lake islands. These
 small vector diagrams have a separate provenance from the recorded GIFs below.
 
-[Recorded terrain previews](terrains/README.md) documents the three new
-3.5-second GIFs, preserving the entire captured viewer screen. The
-[geography gallery](../geography.md#recorded-terrain-previews) embeds them, and
-[the manifest](terrains/manifest.json) records source timestamps, hashes and sizes.
-Unlike the original board/metrics crops above, these have no spatial crop.
+[Terrain previews](terrains/README.md) documents three 3.5-second GIFs exported
+from the current viewer. The [geography gallery](../geography.md#recorded-terrain-previews)
+embeds them. Like the main clips, these retain the full viewer window and are
+sampled from replay steps rather than captured desktop video.
 
 ## Software and learning flows
 

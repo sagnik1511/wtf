@@ -12,3 +12,65 @@
 .md-typeset img {
   height: auto;
 }
+
+/* Transparent brand artwork follows the chosen site theme, including manual toggles. */
+.brand-on-dark {
+  display: none;
+}
+[data-md-color-scheme='slate'] .brand-on-light {
+  display: none;
+}
+[data-md-color-scheme='slate'] .brand-on-dark {
+  display: inline-block;
+}
+.brand-lockup {
+  display: block;
+  max-width: 260px;
+  margin: 1.2rem 0 1.8rem;
+}
+.md-typeset .brand-lockup img {
+  width: 100%;
+  background: transparent;
+  border-radius: 0;
+}
+.md-logo .brand-symbol img {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.md-header,
+.md-tabs {
+  color: var(--md-default-fg-color);
+  background-color: var(--md-default-bg-color);
+}
+.md-tabs {
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+[data-md-color-scheme='default'] {
+  --md-primary-fg-color: #163b2a;
+  --md-accent-fg-color: #426813;
+}
+[data-md-color-scheme='slate'] {
+  --md-primary-fg-color: #a3d936;
+  --md-accent-fg-color: #b8e56c;
+}
+
+.brand-lockup.brand-on-dark {
+  display: none;
+}
+[data-md-color-scheme='slate'] .brand-lockup.brand-on-dark {
+  display: block;
+}
+.md-typeset img.brand-sample-light,
+.md-typeset img.brand-sample-dark {
+  box-sizing: content-box;
+  padding: 24px;
+  margin: 0 16px 16px 0;
+  border-radius: 8px;
+  border: 1px solid #8b9cad55;
+}
+.md-typeset img.brand-sample-light {
+  background: #f6faf5;
+}
+.md-typeset img.brand-sample-dark {
+  background: #101d19;
+}

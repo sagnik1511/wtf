@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="321 132 614 608" role="img" aria-labelledby="title desc">
+  <title id="title">WTF — Wildlife Trial Framework</title>
+  <desc id="desc">Four segments form an open environment loop; the lime segment marks a changing state.</desc>
+  <g fill="#def3e5">
+    <path d="M449 152H673L579 260H482Q449 260 449 293V466L341 387V260Q341 152 449 152Z" />
+    <path d="M704 152H807Q915 152 915 260V460L804 380V293Q804 260 771 260H610Z" fill="#a3d936" />
+    <path d="M341 417L449 497V581Q449 614 482 614H646L551 720H449Q341 720 341 612Z" />
+    <path d="M915 491V612Q915 720 807 720H584L677 614H771Q804 614 804 581V410Z" />
+  </g>
+</svg>

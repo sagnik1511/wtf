@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from xml.etree import ElementTree as ET
 
 from ecosystem import load_config
 from ecosystem.geography import resolve_map
@@ -73,6 +74,37 @@ class PackagingTests(unittest.TestCase):
                     and "map_file" in config["terrain"]
                 ):
                     self.assertIn(config["terrain"]["map_file"], paths)
+
+    def test_branding_is_vector_based_and_ships_with_viewer(self):
+        paths = json.loads((ROOT / "packaging_assets.json").read_text())
+        for source in (ROOT / "viewer/branding").iterdir():
+            self.assertIn(source.relative_to(ROOT).as_posix(), paths)
+            self.assertEqual(
+                source.read_bytes(),
+                (ROOT / "docs/assets/branding" / source.name).read_bytes(),
+            )
+        for form in ("symbol", "lockup"):
+            geometry = []
+            for theme in ("light", "dark"):
+                root = ET.parse(
+                    ROOT / "docs/assets/branding" / f"wtf-{form}-{theme}.svg"
+                ).getroot()
+                self.assertIsNotNone(root.get("viewBox"))
+                self.assertFalse(
+                    any(
+                        node.tag.rsplit("}", 1)[-1]
+                        in ("image", "text", "script", "rect")
+                        for node in root.iter()
+                    )
+                )
+                geometry.append(
+                    [
+                        (p.get("d"), p.get("transform"))
+                        for p in root.iter("{http://www.w3.org/2000/svg}path")
+                    ]
+                )
+            self.assertTrue(geometry[0])
+            self.assertEqual(*geometry)
 
     def test_linux_build_support_leaves_system_compiler_configuration_unchanged(self):
         from _build_support import configure_compiler

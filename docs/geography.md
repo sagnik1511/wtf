@@ -152,10 +152,11 @@ long-term population balance and reproduction have not been calibrated.
 
 ## Recorded terrain previews
 
-These **3.5-second full-viewer recordings** retain the controls, counters, board
-and sidebar. They show saved run playback, not a live backend simulation.
-[Source recordings, intervals and regeneration](assets/terrains/README.md) are
-recorded alongside the GIFs. The separate [physics diagrams](physics.md) explain
+These **3.5-second full-viewer previews** retain the current header, controls,
+counters, board and sidebar. They are assembled directly from saved replay
+frames, with no desktop screen recording. Simulation time is compressed between
+sampled frames. [Sources, sampling and regeneration](assets/terrains/README.md)
+are documented alongside the GIFs. The separate [physics diagrams](physics.md) explain
 the rules; these clips show the actual viewer UI.
 
 ### River crossing

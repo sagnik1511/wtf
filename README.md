@@ -1,4 +1,11 @@
-# WTF — Wildlife Trial Framework
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/branding/wtf-lockup-dark.svg" type="image/svg+xml" />
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/branding/wtf-lockup-light.svg" type="image/svg+xml" />
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/branding/wtf-lockup-dark.png" />
+    <img src="docs/assets/branding/wtf-lockup-light.png" width="280" alt="WTF — Wildlife Trial Framework" />
+  </picture>
+</h1>
 
 A Python reinforcement-learning ecosystem with independently learning prey and
 predators, growing resources, obstacles and paired male/female reproduction. Environments are JSON;

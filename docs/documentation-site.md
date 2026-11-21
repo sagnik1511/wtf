@@ -78,6 +78,13 @@ are never included. Source links do not copy those files into the website.
 Asset README pages and historical release details remain reachable through their
 indexes without crowding the main sidebar.
 
+## Project identity
+
+Use the [branding guide](branding.md) for transparent SVG masters, PNG fallbacks
+and symbol/full-lockup placement. Header and home-page assets follow the site
+theme toggle. `docs/overrides/` contains the small theme partial overrides and
+is excluded from published document content.
+
 ## Updating documentation
 
 1. Edit the relevant guide; update existing visual exports only when they clarify

@@ -10,6 +10,15 @@ archive or explanation API request.
 
 ## Recorded animal activations
 
+![Selected animal’s recorded input summaries, action estimates and small-network activations updating through replay](assets/animal-brain.gif)
+
+This time-compressed current-viewer clip follows one selected animal through
+saved samples. Colors and scores update only when its recorded diagnostic sample
+changes. It shows observed activity and connectivity, not causal importance.
+[Clip provenance and refresh workflow](assets/terrains/README.md#refresh-the-clips)
+are maintained with the other playback assets.
+
+
 The [inspector appearance sheet](viewer-visual-reference.md#inspector-and-brain-views) shows the radar, output bars and rank-based network display.
 
 ![Actual animal activity is sampled into compact diagnostic arrays and displayed for the selected animal during playback](assets/structures/animal-activation-replay.svg)
@@ -63,6 +72,15 @@ new recording for this field, then refresh the viewer. The window also works for
 new recordings that saved no champion archives.
 
 ## Archived comparison
+
+![Archived brain explanation following changing replay observations, with input sensitivities, action-score comparisons and network activations](assets/archived-brain.gif)
+
+Here the archive stays fixed while the selected animal's replay observations
+change. The changing input sensitivities, predicted returns and activation
+colors belong to that archived model evaluated on each sample. Gray action bars
+show the animal's separate recorded scores. Local sensitivity is not causal
+importance; the animated comparison is not a reconstruction of historical weights.
+
 
 The remaining sections describe **Explain saved brain**, which analyzes a chosen
 archived species/sex champion. **Follow replay samples** is enabled by default:

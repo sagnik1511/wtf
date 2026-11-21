@@ -77,7 +77,7 @@ test('actual app theme handler repaints a loaded paused board and events without
     'utf8',
   );
   const start = source.lastIndexOf('installTheme({');
-  const end = source.indexOf('operation(refreshCatalog);', start);
+  const end = source.indexOf('operation(refreshCatalog', start);
   assert.ok(start >= 0 && end > start);
   const root = { dataset: {} },
     button = { setAttribute() {} };

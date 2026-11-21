@@ -4,18 +4,57 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>WTF — Wildlife Trial Framework · RL Playback</title>
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/branding/favicon.png"
+    />
+    <link rel="icon" type="image/svg+xml" href="/branding/favicon.svg" />
     <link rel="stylesheet" href="/style.css" />
     <script type="module" src="/app.js"></script>
   </head>
   <body>
     <header>
-      <div>
-        <span class="eyebrow">REINFORCEMENT LEARNING ECOSYSTEM SIMULATOR</span>
-        <h1>WTF <span>Wildlife Trial Framework</span></h1>
+      <div class="viewer-brand">
+        <picture class="brand-symbol brand-on-light" aria-hidden="true">
+          <source
+            id="brand-source-light"
+            srcset="/branding/wtf-symbol-light.svg"
+            type="image/svg+xml"
+          />
+          <img
+            src="/branding/wtf-symbol-light.png"
+            width="52"
+            height="52"
+            alt=""
+          />
+        </picture>
+        <picture class="brand-symbol brand-on-dark" aria-hidden="true">
+          <source
+            id="brand-source-dark"
+            srcset="/branding/wtf-symbol-dark.svg"
+            type="image/svg+xml"
+          />
+          <img
+            src="/branding/wtf-symbol-dark.png"
+            width="52"
+            height="52"
+            alt=""
+          />
+        </picture>
+        <div>
+          <span class="eyebrow"
+            >REINFORCEMENT LEARNING ECOSYSTEM SIMULATOR</span
+          >
+          <h1>WTF <span>Wildlife Trial Framework</span></h1>
+        </div>
       </div>
       <div class="header-controls">
         <button id="theme-toggle" type="button">Light mode</button>
-        <div id="connection" class="badge">Loading recordings</div>
+        <div id="connection" class="badge" role="status">
+          Loading recordings
+        </div>
       </div>
     </header>
     <main>

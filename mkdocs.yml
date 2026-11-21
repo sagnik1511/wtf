@@ -17,8 +17,12 @@ watch:
 exclude_docs: |
   /paper/
   /experiments/
+  /overrides/
 theme:
   name: material
+  custom_dir: docs/overrides
+  logo: assets/branding/wtf-symbol-light.svg
+  favicon: assets/branding/favicon.svg
   language: en
   font: false
   features:
@@ -123,4 +127,5 @@ nav:
       - Command reference: command-reference.md
       - Compatibility policy: compatibility.md
       - Visual guide: visual-guide.md
+      - Project identity: branding.md
       - Release history: releases/README.md

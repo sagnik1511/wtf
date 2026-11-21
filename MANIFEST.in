@@ -66,3 +66,12 @@ prune results
 prune brain_library
 prune .cache
 prune .venv
+
+include viewer/branding/favicon.png
+include viewer/branding/favicon.svg
+include viewer/branding/wtf-symbol-dark.png
+include viewer/branding/wtf-symbol-dark.svg
+include viewer/branding/wtf-symbol-light.png
+include viewer/branding/wtf-symbol-light.svg
+include viewer/branding/wtf-symbol-motion-light.svg
+include viewer/branding/wtf-symbol-motion-dark.svg

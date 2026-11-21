@@ -139,9 +139,22 @@ function pause() {
   $('explain-play').textContent = 'Play replay';
   $('dashboard-play').textContent = 'Play recording';
 }
-async function operation(fn) {
+function setRecordingLoading(active) {
+  for (const theme of ['light', 'dark'])
+    $(`brand-source-${theme}`).setAttribute(
+      'srcset',
+      `/branding/wtf-symbol-${active ? 'motion-' : ''}${theme}.svg`,
+    );
+  $('world').setAttribute('aria-busy', String(active));
+}
+async function operation(fn, { recording = false } = {}) {
   if (busy) return;
   busy = true;
+  const previousConnection = $('connection').textContent;
+  if (recording) {
+    setRecordingLoading(true);
+    $('connection').textContent = 'Loading recording…';
+  }
   for (const id of [
     'step',
     'back',
@@ -166,6 +179,11 @@ async function operation(fn) {
     pause();
     showError(e);
   } finally {
+    if (recording) {
+      setRecordingLoading(false);
+      if ($('connection').textContent === 'Loading recording…')
+        $('connection').textContent = previousConnection;
+    }
     busy = false;
     for (const id of [
       'step',
@@ -931,13 +949,16 @@ function syncRunMenu() {
 }
 async function changeRunBy(offset) {
   pause();
-  await operation(async () => {
-    const index = player.runs.findIndex((run) => run.run === state?.run),
-      target = player.runs[index + offset];
-    if (!target) return;
-    selected = null;
-    render(await player.changeRun(target.run));
-  });
+  await operation(
+    async () => {
+      const index = player.runs.findIndex((run) => run.run === state?.run),
+        target = player.runs[index + offset];
+      if (!target) return;
+      selected = null;
+      render(await player.changeRun(target.run));
+    },
+    { recording: true },
+  );
 }
 function render(snapshot = null) {
   const previousRun = state?.run;
@@ -1096,7 +1117,7 @@ $('play').onclick = () => {
     pause();
     return;
   }
-  if (!state || state.done) return;
+  if (busy || !state || state.done) return;
   playing = true;
   $('play').textContent = 'Pause';
   loop();
@@ -1117,11 +1138,11 @@ $('back').onclick = () => {
 };
 $('load').onclick = () => {
   pause();
-  operation(openRecording);
+  operation(openRecording, { recording: true });
 };
 $('refresh').onclick = () => {
   pause();
-  operation(refreshCatalog);
+  operation(refreshCatalog, { recording: true });
 };
 $('previous-run').onclick = () => {
   if (state) changeRunBy(-1);
@@ -1132,10 +1153,13 @@ $('next-run').onclick = () => {
 $('recorded-run').onchange = () => {
   pause();
   if (state)
-    operation(async () => {
-      selected = null;
-      render(await player.changeRun($('recorded-run').value, selected));
-    });
+    operation(
+      async () => {
+        selected = null;
+        render(await player.changeRun($('recorded-run').value, selected));
+      },
+      { recording: true },
+    );
 };
 $('timeline').onchange = () => {
   pause();
@@ -1190,7 +1214,7 @@ installTheme({
     if ($('metrics-dialog').open) dashboard.draw();
   },
 });
-operation(refreshCatalog);
+operation(refreshCatalog, { recording: true });
 
 $('show-observation').onchange = () => {
   if (state) render();

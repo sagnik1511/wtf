@@ -1,80 +1,122 @@
 [
   {
     "asset": "river-crossing.gif",
-    "source_file": "Screen Recording 2026-11-17 at 17.38.51.mov",
-    "source_sha256": "4f95b581799dba28926c3d3e2828095a81b43a26645cf219ed60356d9c111e15",
-    "source_interval_seconds": [
-      10.0,
-      13.5
+    "source": "current viewer replay frame exports; no desktop video recording",
+    "preset": "environments/river_crossing.json",
+    "preset_sha256": "d4ced4ffcc5315d113c028dbe677ca7e51c7f762e23a7f8482152117297aa80d",
+    "viewer_sha256": "fc1a37c66ca463c6df134236d6cb1194beca5396e780c1ae35a1e715716f20f8",
+    "frame_sequence_sha256": "68adc0d3257c5534784be46b64b2e6bba61155f23a64b7554aa6a94a262f6e55",
+    "seed": 100,
+    "runs": 1,
+    "steps": 300,
+    "mode": "train",
+    "sampled_steps": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130
     ],
-    "recording": "river_crossing_20261117T120742Z_bb0e94",
-    "run": 1,
-    "source_dimensions": [
-      3400,
-      1906
-    ],
+    "theme": "dark",
     "dimensions": [
       1280,
-      718
+      720
     ],
-    "fps": 12,
-    "frames": 42,
+    "frames": 14,
+    "fps": 4.0,
     "duration_seconds": 3.5,
     "palette_colors": 128,
     "loop": true,
     "crop": null,
-    "bytes": 614429
+    "bytes": 775056
   },
   {
     "asset": "highlands.gif",
-    "source_file": "Screen Recording 2026-11-17 at 17.40.05.mov",
-    "source_sha256": "a5e262bc0dd8213c78b90a91d832c300d85709e66e3636cc518853aecac3d630",
-    "source_interval_seconds": [
-      18.0,
-      21.5
+    "source": "current viewer replay frame exports; no desktop video recording",
+    "preset": "environments/highlands.json",
+    "preset_sha256": "6054710324d17dfbded1bc9bc492f466e7b56e69cc3da0c742b0dc57957a5e80",
+    "viewer_sha256": "fc1a37c66ca463c6df134236d6cb1194beca5396e780c1ae35a1e715716f20f8",
+    "frame_sequence_sha256": "da09ad1874cc60ad918878cfb19a2b91e4da866dcd2fd326cc3bdedbdfb66429",
+    "seed": 100,
+    "runs": 1,
+    "steps": 300,
+    "mode": "train",
+    "sampled_steps": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130
     ],
-    "recording": "highlands_20261117T120742Z_a3668d",
-    "run": 1,
-    "source_dimensions": [
-      3400,
-      1906
-    ],
+    "theme": "dark",
     "dimensions": [
       1280,
-      718
+      720
     ],
-    "fps": 12,
-    "frames": 42,
+    "frames": 14,
+    "fps": 4.0,
     "duration_seconds": 3.5,
     "palette_colors": 128,
     "loop": true,
     "crop": null,
-    "bytes": 637676
+    "bytes": 756322
   },
   {
     "asset": "enclosed-valleys.gif",
-    "source_file": "Screen Recording 2026-11-17 at 17.41.08.mov",
-    "source_sha256": "a80debfce498119aeb19159139cde562a07005cd5e233769ec055f2a931e42c2",
-    "source_interval_seconds": [
-      10.0,
-      13.5
+    "source": "current viewer replay frame exports; no desktop video recording",
+    "preset": "environments/enclosed_valleys.json",
+    "preset_sha256": "9a81ab1b3c008ca50adffb9a2914c41a5dc80a4545e9727fe29a6c2f65ffa081",
+    "viewer_sha256": "fc1a37c66ca463c6df134236d6cb1194beca5396e780c1ae35a1e715716f20f8",
+    "frame_sequence_sha256": "40dea303c7bd63da36f021ff290b36d3eeb52fd123cee36658c0b28898e8354a",
+    "seed": 100,
+    "runs": 1,
+    "steps": 300,
+    "mode": "train",
+    "sampled_steps": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130
     ],
-    "recording": "enclosed_valleys_20261117T120742Z_1cfefe",
-    "run": 1,
-    "source_dimensions": [
-      3400,
-      1906
-    ],
+    "theme": "dark",
     "dimensions": [
       1280,
-      718
+      720
     ],
-    "fps": 12,
-    "frames": 42,
+    "frames": 14,
+    "fps": 4.0,
     "duration_seconds": 3.5,
     "palette_colors": 128,
     "loop": true,
     "crop": null,
-    "bytes": 686696
+    "bytes": 704893
   }
 ]

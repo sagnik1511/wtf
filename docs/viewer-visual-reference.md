@@ -8,6 +8,19 @@ The workspace map is schematic; chart values are illustrative, not experiment
 results. Existing [full-viewer clips](geography.md#recorded-terrain-previews)
 show the interface in motion.
 
+## Project header
+
+The header uses the [project symbol](branding.md) beside readable project text.
+It switches between forest/lime and pale-mint/lime with the interface theme.
+The SVG is primary, with transparent PNG fallbacks; simulated day/night does
+not affect header branding.
+
+While opening a recording or selecting a run, the four sections circulate around
+the fixed window and the status badge says **Loading recording…**. The symbol
+returns to its static form when loading completes or fails, and remains static
+through playback and frame buffering. Reduced-motion preferences disable the
+ribbon animation. See [motion assets and behavior](branding.md#motion-policy).
+
 ## Animals, resources and event markers
 
 ![Sixteen examples of animal shapes and sex colors, resources, obstacles, selection, birth, kill, natural death and heading](assets/viewer/board-objects.svg)
@@ -108,5 +121,6 @@ Deeper brains show a summary, with detailed maps/routes under **Advanced**.
 Here rank means hidden-stage count, separate from observation top-k. Green/pink
 units show positive/negative activations; gray units mean unavailable activity.
 Structure links show connectivity, not causal importance or weight strength.
-The [brain guide](explainability.md) explains recurrent memory, weighted routes,
+The [brain guide](explainability.md) includes current-viewer clips of both data
+sources and explains recurrent memory, weighted routes,
 local input sensitivity, what-if inputs and unavailable data.

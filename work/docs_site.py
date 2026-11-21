@@ -82,7 +82,7 @@ def _site_link(href, origin, destination, config):
     aliases = {"README.md": "index.md", **{v: k for k, v in EXTRA_PAGES.items()}}
     if source in aliases:
         target = aliases[source]
-    elif source.startswith("docs/"):
+    elif source.startswith("docs/") and not source.startswith("docs/overrides/"):
         target = source[5:]
     else:
         # Code/config/agent links open their canonical source instead of shipping
