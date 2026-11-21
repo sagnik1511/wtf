@@ -369,6 +369,12 @@ Learning rates and other training settings can be changed without changing the
 architecture. Exact checkpoints embed the selected weights and champion book,
 so resuming does not need the original files or newer archive versions.
 
+Initialization validates and loads a selected model once per populated
+species/sex, then makes independent founder controllers from that pristine
+state. This construction reuse does not share live weights, optimizer state or
+random streams, and templates do not survive into learning. See the
+[initialization implementation](performance.md#founder-initialization-and-shared-reporting).
+
 ## Automatically chain runs
 
 `experiment.chain_best_brains` defaults to `true`. When `--runs` is greater than

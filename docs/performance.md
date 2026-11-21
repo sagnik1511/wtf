@@ -307,3 +307,109 @@ cover cache hits/eviction, geometry invalidation, transient final-winner copies,
 former ranking behavior and current population counts. The full suite passes
 274 Python tests. No profiler or timing benchmark was run, so fewer calculations
 and copies are verified without claiming a measured overall speedup or RAM drop.
+
+## Decision-phase mating data and birth availability
+
+Observation production builds one occupied-cell mapping and passes it into the
+mating context. Population counts, sex/spatial buckets and personal readiness are
+prepared once for that phase. Masked-PPO context refresh receives this data
+explicitly instead of rebuilding the mapping/counts and repeating each mate's
+health, energy and timing checks. GRPO's masked opponents reuse their own trial
+world's phase data; real and hypothetical worlds never share it.
+
+This is phase-local reuse, not a persistent LRU or a cache keyed only by position
+or tick. The context is replaced during observation production and is bounded by
+living animals. It is valid only while the observed physical state is unchanged.
+Standalone mask/availability calls read current state; standalone runner refresh
+prepares new data, so direct same-tick health, population or configuration edits
+remain visible. Contexts are not serialized, and restore creates independent
+ones. The post-movement/combat/cost birth phase rechecks actual eligibility.
+
+Observation pair flags are not substituted for action-mask results. Mating
+observations apply the configured observation range, whereas mask availability
+keeps its existing radius/line-of-sight rules. Sharing personal readiness does
+not merge these different contracts or predict another animal's consent.
+
+Birth-cell predicates use a common ordered candidate iterator. Boolean
+availability checks stop at the first valid cell without allocating a list or a
+deduplication dictionary. Actual births still materialize the complete unique
+sequence in the original parent/direction order, preserving seeded cell choice.
+Terrain dryness, elevation, occupancy and boundaries use the same conditions.
+
+[Regression tests](../tests/test_mating_context_efficiency.py) cover one readiness
+preparation per masked phase, early exit, same-tick edits, RNG/state transparency,
+water/cliffs, empty/full birth space, ordering, visibility differences and fresh
+post-cost eligibility. Pre-change reference comparisons cover all supported
+learners, consent versions, mixed GRPO/masked opponents, terrain, forced births
+and mutation; checkpoint/observation values and recorded replay bytes match on
+both automatic/native and Python-only paths. These checks establish removed
+work and equivalence, not a measured throughput or peak-memory improvement.
+
+## Founder initialization and shared reporting
+
+Run initialization constructs one fresh controller per populated species/sex
+rather than generating the same seeded network for every founder. A selected
+warm-start model is validated and loaded once for that group. Remaining founders
+clone that pristine template with their original individual seeds. Templates are
+local to initialization and discarded before actions or learning; they never
+hold a trained animal's optimizer or experiences. Each animal owns its parameters,
+configuration, target/reference networks, optimizer, buffers, recurrent state and
+independent action/training/GRPO RNGs. No controller state is pooled across animals,
+sexes, species or runs. Existing legacy controller-retention behavior is preserved.
+
+Completed-step metrics are produced after learning and birth mutation. When the
+metrics and replay schedules coincide, CLI recording uses that existing report;
+CSV, progress and final terminal output read it too. The final summary takes a
+detached copy instead of rescanning the world. Initial CLI reporting similarly
+shares one fresh report among CSV, recording and progress. Skipped replay samples
+still return before computing metrics or building a frame; a replay-only step
+computes its own current metrics.
+
+This sharing uses explicit optional `metrics` arguments to `World.snapshot`,
+`Recorder.begin_run`/`capture` and `RunProgress.start`, valid only while the reported
+physical state is unchanged. There is no persistent reporting cache or tick-only
+key. Standalone calls without a report calculate fresh values, including after
+same-tick edits. Snapshots own copies of supplied metric maps; summaries remain
+independent of history. Reporting templates and metrics add no checkpoint fields,
+format changes, diagnostic samples or viewer requirements.
+
+[Regression checks](../tests/test_founder_reporting_efficiency.py) count founder
+construction/model loads, verify original seeded states and independent mutable
+state across all nine learners, and check report scan counts, detached maps,
+sampling and fresh standalone reads. Short pre-change reference comparisons
+verify exact observations, checkpoints and replay bytes. Two-run workflow checks
+also cover resume, champion chaining, disabled chaining and randomized worlds,
+including identical CSV, summary, checkpoint and recording artifacts. These
+checks demonstrate removed work without claiming a measured throughput gain.
+
+### Measured initialization and reporting cost
+
+A paired native-backend benchmark on macOS ARM64 with CPython 3.9.6 compares
+0.0.1.24 against the saved pre-change implementation. Both versions include the
+preceding mating-context optimization. The workload uses `maskable_ppo.json`,
+48 prey/6 predators, seed 100, one fixed world and a 32-step limit; network sizes,
+learning settings, metric/frame/diagnostic intervals and binary/XZ recording
+settings retain the preset values. Each timed sample runs in a separate process,
+after an untimed warmup, with alternating before/after order. Values below are
+medians of five uninstrumented samples per version. Training/recording includes
+initialization and chunk closure, but excludes checkpoint/champion exports,
+post-run state hashing and process/import startup.
+
+| Measurement | Before | After | Interpretation |
+| --- | --- | --- | --- |
+| Initialization | 179.7 ms | 71.1 ms | 60.5% less elapsed time; 2.53× speedup |
+| Initialization plus 32 training/recording steps | 860.9 ms | 748.4 ms | 13.1% less elapsed time |
+| Initialization peak traced Python allocation | 4.70 MiB | 4.69 MiB | Effectively unchanged |
+| Training/recording peak traced Python allocation | 22.09 MiB | 22.07 MiB | Effectively unchanged |
+
+Memory values are separate single-sample `tracemalloc` measurements; they exclude
+untraced native/compressor allocations and are not total process RAM. Independent
+per-animal weights, buffers and optimizer state remain necessary. The full-run
+time reduction is approximately the initialization saving; these measurements
+do not establish a sustained per-step throughput improvement or material memory
+reduction. Do not extrapolate the short-run percentage to long episodes.
+
+Both versions perform 432 optimizer updates and produce 53,297 bytes of playback
+artifacts. Complete state and replay artifact hashes match for every timed pair.
+Temporary recordings are deleted after each sample; measurements and the local
+benchmark helper remain under ignored `.cache/`, outside `results/`.

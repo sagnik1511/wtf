@@ -400,11 +400,11 @@ class World:
         return count
 
     def _observation_context(self):
-        occupied, food, prey, predators = set(), [], [], []
+        occupied, food, prey, predators = {}, [], [], []
         species = self.config["species"]
         for i, animal in self.animals.items():
             position = animal.position
-            occupied.add(position)
+            occupied[position] = animal
             (
                 prey if species[animal.species]["diet"] == "resource" else predators
             ).append((i, position))
@@ -456,13 +456,18 @@ class World:
                 points, self.animals.keys(), obstacles_changed or visibility_changed
             )
         if any(
-            b.get("observation_version", 1) >= 3 for b in self.config["brains"].values()
+            b.get("observation_version", 1) >= 3 or b["type"] == "maskable_ppo"
+            for b in self.config["brains"].values()
         ):
-            self._prepare_mating_context()
+            self._prepare_mating_context(occupied)
+        else:
+            self._mate_context = None
         return occupied, *self._perception
 
-    def _prepare_mating_context(self):
-        occupied = {a.position: a for a in self.animals.values()}
+    def _prepare_mating_context(self, occupied=None):
+        """Fresh decision-phase data; never implicitly reuse it after state edits."""
+        if occupied is None:
+            occupied = {a.position: a for a in self.animals.values()}
         populations, buckets, status = Counter(), defaultdict(list), {}
         for a in self.animals.values():
             populations[a.species] += 1
@@ -496,6 +501,7 @@ class World:
                 float(self._reproduction_eligible(a, rules)),
             )
         self._mate_context = occupied, populations, buckets, status
+        return self._mate_context
 
     def _mating_features(self, a, include_intent=False):
         occupied, populations, buckets, status = self._mate_context
@@ -541,7 +547,7 @@ class World:
                         and self._mating_land_route(
                             a, mate, rules.get("mate_radius", 2)
                         )
-                        and self._birth_cells(a, mate, occupied)
+                        and self._has_birth_space(a, mate, occupied)
                     ):
                         pair = True
                         consenting_pair = (
@@ -1031,27 +1037,37 @@ class World:
                 queue.append((q, hops + 1))
         return False
 
-    def _birth_cells(self, mother, father, occupied):
+    def _birth_cell_candidates(self, mother, father, occupied):
+        """Yield placeable cells in the established parent/direction order."""
         spec = self.config["species"][mother.species]
-        return list(
-            dict.fromkeys(
-                (parent.x + dx, parent.y + dy)
-                for parent in (mother, father)
-                for dx, dy in DIRECTIONS
-                if not self.blocked((parent.x + dx, parent.y + dy))
-                and not (
-                    self.geography
-                    and (
-                        self.geography.depth((parent.x + dx, parent.y + dy))
-                        or abs(
-                            self.geography.elevation((parent.x + dx, parent.y + dy))
-                            - self.geography.elevation(parent.position)
-                        )
-                        > spec.get("locomotion", {}).get("max_climb", 1.0)
+        for parent in (mother, father):
+            for dx, dy in DIRECTIONS:
+                position = parent.x + dx, parent.y + dy
+                if self.blocked(position):
+                    continue
+                if self.geography and (
+                    self.geography.depth(position)
+                    or abs(
+                        self.geography.elevation(position)
+                        - self.geography.elevation(parent.position)
                     )
-                )
-                and (parent.x + dx, parent.y + dy) not in occupied
-            )
+                    > spec.get("locomotion", {}).get("max_climb", 1.0)
+                ):
+                    continue
+                if position not in occupied:
+                    yield position
+
+    def _birth_cells(self, mother, father, occupied):
+        # Actual births require the complete ordered, unique choice sequence.
+        return list(
+            dict.fromkeys(self._birth_cell_candidates(mother, father, occupied))
+        )
+
+    def _has_birth_space(self, mother, father, occupied):
+        # Availability needs neither deduplication nor a materialized list.
+        return (
+            next(self._birth_cell_candidates(mother, father, occupied), None)
+            is not None
         )
 
     def _reproduction_due(self, a, rules):
@@ -1129,11 +1145,15 @@ class World:
             return "awaiting_consent"
         return "no_birth_space"
 
-    def reproduction_available(self, animal, occupied=None, populations=None):
+    def reproduction_available(
+        self, animal, occupied=None, populations=None, mating_context=None
+    ):
         """Decision-time mask, without RNG/clock mutation or assuming consent.
 
         Current masks cannot predict combat or the other animal's next choice;
         final physical gates and mutual choices are checked again after actions.
+        An explicit context is valid only in its unchanged decision phase; calls
+        without one always read current state, including same-tick edits.
         """
         spec = self.config["species"][animal.species]
         rules = spec.get("reproduction")
@@ -1144,7 +1164,11 @@ class World:
         ):
             return False
 
-        eligible = lambda a: self._reproduction_eligible(a, rules)
+        if mating_context is None:
+            eligible = lambda a: self._reproduction_eligible(a, rules)
+        else:
+            occupied, populations, _, status = mating_context
+            eligible = lambda a: status[a.id][2]
 
         if not eligible(animal):
             return False
@@ -1171,7 +1195,7 @@ class World:
                 if (
                     self.visible(animal.position, mate.position)
                     and self._mating_land_route(animal, mate, radius)
-                    and self._birth_cells(animal, mate, occupied)
+                    and self._has_birth_space(animal, mate, occupied)
                 ):
                     return True
         return False
@@ -1318,13 +1342,15 @@ class World:
             mutations=dict(self.mutations),
         )
 
-    def snapshot(self, include_static=True):
+    def snapshot(self, include_static=True, metrics=None):
+        # Explicit report reuse is valid only within an unchanged-state phase.
+        # Standalone snapshots always read current state; outputs own their maps.
         data = dict(
             tick=self.tick,
             resources=[vars(r).copy() for r in self.resources.values()],
             animals=[vars(a).copy() for a in self.animals.values()],
             events=[vars(e).copy() for e in self.events],
-            metrics=self.metrics(),
+            metrics=self.metrics() if metrics is None else copy.deepcopy(metrics),
         )
         if include_static:
             return dict(

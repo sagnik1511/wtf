@@ -6,11 +6,9 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.1.17](0.0.1.17.md), `e62e0ad`.
-**Latest committed runtime implementation:** [0.0.1.14](0.0.1.14.md), `91697aa`.
-**Pending configuration:** [0.0.1.22](0.0.1.22.md), consolidated masked-PPO defaults and local exploratory presets.
-**Pending runtime:** [0.0.1.20](0.0.1.20.md), learned escape actions and visible mating consent.
-**Pending maintenance:** [0.0.1.21](0.0.1.21.md), generated-file tracking hygiene.
+**Latest committed rollout:** [0.0.1.22](0.0.1.22.md), `9152756`.
+**Latest committed runtime implementation:** [0.0.1.20](0.0.1.20.md), `9152756`.
+**Pending runtime:** [0.0.1.24](0.0.1.24.md), founder templates and shared step reporting; [0.0.1.23](0.0.1.23.md), phase-local mating data reuse and boolean birth-space checks.
 
 ## Rollout index
 
@@ -21,10 +19,12 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.1.22](0.0.1.22.md) | Pending | Prepared 2026-11-21 | — | Promote supported masked-PPO defaults under the common name; localize superseded variants |
-| [0.0.1.21](0.0.1.21.md) | Pending | Prepared 2026-11-21 | — | Ignore local experiment output, developer artifacts and LaTeX intermediates |
-| [0.0.1.20](0.0.1.20.md) | Pending | Prepared 2026-11-21 | — | Learned escape actions, version-4 consent signals and compatible readers |
-| [0.0.1.19](0.0.1.19.md) | Pending | Prepared 2026-11-21 | — | Proximal consent, prey survival, lineage selection and mating diagnostics |
+| [0.0.1.24](0.0.1.24.md) | Pending | Prepared 2026-11-21 | — | Initialize founder networks once per species/sex and share unchanged-state reports |
+| [0.0.1.23](0.0.1.23.md) | Pending | Prepared 2026-11-21 | — | Share mating phase data and stop birth-availability scans early without changing behavior |
+| [0.0.1.22](0.0.1.22.md) | Committed | 2026-11-21 | `9152756` | Promote supported masked-PPO defaults under the common name; localize superseded variants |
+| [0.0.1.21](0.0.1.21.md) | Committed | 2026-11-21 | `9152756` | Ignore local experiment output, developer artifacts and LaTeX intermediates |
+| [0.0.1.20](0.0.1.20.md) | Committed | 2026-11-21 | `9152756` | Learned escape actions, version-4 consent signals and compatible readers |
+| [0.0.1.19](0.0.1.19.md) | Committed | 2026-11-21 | `9152756` | Proximal consent, prey survival, lineage selection and mating diagnostics |
 | [0.0.1.17](0.0.1.17.md) | Committed | 2026-11-19 | `e62e0ad` | Nature Machine Intelligence paper source, method citations and editable future-observation tables |
 | [0.0.1.16](0.0.1.16.md) | Committed | 2026-11-19 | `6e354d3` | Checkpoint state/access blocks, observation packing, founder families and spatial-window references |
 | [0.0.1.15](0.0.1.15.md) | Committed | 2026-11-19 | `f3d5a1a` | Playback/model artifacts, binary records, entity columns, layer arrays and field masks |

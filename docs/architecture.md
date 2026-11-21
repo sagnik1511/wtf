@@ -76,8 +76,27 @@ Distances use a circular base radius, with optional directional water credit and
 
 Q-learning brains use one small tanh hidden layer and linear action-value outputs, independent replay buffers, uniformly sampled mini-batches, Huber-loss gradients, plain SGD, target networks, and epsilon-greedy exploration. PPO uses the [actor-critic implementation](algorithms.md), including its own Adam state. A2C, REINFORCE and GRPO share the small-network/optimizer infrastructure described in the [algorithm guide](algorithms.md). No learning algorithm requires a third-party ML framework. Fresh founders start from sex-specific copied base weights but have separate policy and learning randomness. Target networks synchronize after the configured number of training updates.
 
-The same brain template can be referenced by multiple species without sharing live weights. Learning updates occur at the configured cadence. Death is terminal. Time-limit truncations retain bootstrapped future value for Q/PPO/A2C; actor-only REINFORCE and GRPO use their finite returns. Resetting a body can preserve its learned weights, exploration state and experience buffer, or reinitialize its brain according to configuration. Species base weights are reproducible across resets.
+The same brain template can be referenced by multiple species without sharing live weights. Learning updates occur at the configured cadence. Death is terminal. Time-limit truncations retain bootstrapped future value for Q/PPO/A2C; actor-only REINFORCE and GRPO use their finite returns. Modern run-to-run chaining imports matching species/sex champion weights into
+fresh controllers with empty experience buffers, new optimizer state and the
+configured exploration settings. Disabling chaining restores the original
+starting models. Exact checkpoint resume preserves full controller state;
+legacy controller retention remains supported for older checkpoints. See
+[saved-brain initialization and chaining](brain-library.md#automatically-chain-runs).
+
+Founder construction uses one pristine template per populated species/sex during
+run initialization. Each founder receives detached controller state and its own
+original seeded RNGs. Templates are discarded before learning; they do not create
+a shared policy. This optimization also loads each selected starting model once
+per group. See [founder initialization](performance.md#founder-initialization-and-shared-reporting)
+for ownership and compatibility guarantees.
 
 `train` explores and learns; `evaluate` chooses greedily and does not learn; `random` chooses random allowed actions and does not learn. A population that survives longer is not by itself evidence of learning. Compare frozen trained brains with fresh and random policies across multiple held-out seeds. The initial settings are experimental, not calibrated for stable coexistence. Independent simultaneous learners can be unstable. Each new CLI invocation starts fresh controllers, optionally with saved weights selected through `initial_brain`. Exact continuation uses `--resume`; see [saved models](brain-library.md). With `--seed` or a deterministic seed policy, repeating a single run reproduces its outcome; it does not continue learning from a previous invocation. Randomized mode varies fresh runs but is not a substitute for retaining or resuming learned brains. Use multiple runs with champion chaining or resume an intermediate checkpoint to continue training. Making successful attacks lethal increases predation opportunities; it is a physical rule change, not evidence that the model learned to hunt.
 
 The standard-library implementation prioritizes inspectability and small populations. Large worlds and many private networks will be slower than a vectorized implementation. CLI metrics stream to disk, and playback charts retain the current run’s lightweight history across world-chunk changes. The simulation runner retains at most 2,000 sampled metric points per current run for checkpoint compatibility; this is separate from playback recording.
+
+Completed-state reporting shares metrics explicitly between CLI recording, CSV,
+progress and terminal output when their schedules coincide. Summaries and
+snapshots own detached metric maps. Standalone world/recorder calls still read
+fresh state, including after direct edits within a tick. This removes repeated
+scans without changing sampling schedules, replay contents or playback; see
+[shared reporting](performance.md#founder-initialization-and-shared-reporting).

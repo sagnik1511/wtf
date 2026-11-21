@@ -1,13 +1,13 @@
 """Experiment lifecycle, training, evaluation and exact JSON checkpoints."""
 
 import copy
-from collections import Counter
 import random
 import secrets
 from .numeric import precision_scope
 from .brain import Experience
 from .brains import (
     create_brain,
+    inherit_brain,
     restore_brain,
     mix_parent_brains,
     offspring_seed,
@@ -199,14 +199,23 @@ class Experiment:
                 if multiplier != 1.0:
                     brain_config["learning_rate"] *= multiplier
                 base_seed = brain_seed + 1000003 * (species_index + 1)
+                # Templates live only during initialization, before any learning.
+                # Every founder owns detached parameters, buffers and RNGs.
+                templates = {}
                 for i, a in self.world.animals.items():
                     if a.species == species:
+                        individual_seed = brain_seed + i * 7919 + 13
+                        if a.sex in templates:
+                            self.brains[i] = inherit_brain(
+                                templates[a.sex], individual_seed
+                            )
+                            continue
                         with precision_scope(self.brain_precision):
                             self.brains[i] = create_brain(
                                 brain_config,
                                 spec["allowed_actions"],
                                 base_seed ^ (0x4D414C45 if a.sex == "male" else 0),
-                                brain_seed + i * 7919 + 13,
+                                individual_seed,
                             )
                         if a.sex in self.run_initial_models.get(species, {}):
                             load_model_weights(
@@ -226,6 +235,7 @@ class Experiment:
                                 self.initial_weights[species][a.sex] = model_snapshot(
                                     self.brains[i]
                                 )
+                        templates[a.sex] = self.brains[i]
         self.champions = ChampionBook(c, best_entries)
         if self.run_index == 0 and self.early_stopping.active:
             self.early_stopping.seed(
@@ -238,12 +248,12 @@ class Experiment:
                 self.world.animals.values(), self.brains, self._champion_source()
             )
         self.observations = self.world.observe_all()
-        self._refresh_context()
+        self._refresh_context(mating_context=self.world._mate_context)
         self.finished_run = False
         self.history = [self.world.metrics()]
         self.last_record = None
 
-    def _refresh_context(self, contexts=None):
+    def _refresh_context(self, contexts=None, mating_context=None):
         contextual = [
             i
             for i in self.world.animals
@@ -262,21 +272,23 @@ class Experiment:
         has_masks = any(
             self.brains[i].config["type"] == "maskable_ppo" for i in contextual
         )
-        occupied = (
-            {a.position: a for a in self.world.animals.values()} if has_masks else None
-        )
-        populations = (
-            Counter(a.species for a in self.world.animals.values())
-            if has_masks
-            else None
-        )
+        # Observation production has just built these same physical indexes.
+        # Standalone refreshes rebuild them, so direct same-tick edits stay visible.
+        if has_masks and mating_context is None:
+            mating_context = self.world._prepare_mating_context()
+        occupied, populations = mating_context[:2] if has_masks else (None, None)
         for i in contextual:
             brain, animal = self.brains[i], self.world.animals[i]
             if brain.config["type"] == "mappo":
                 brain.context = brain.next_context = contexts[animal.species]
             else:
                 brain.mask = action_mask(
-                    self.world, animal, brain.actions, occupied, populations
+                    self.world,
+                    animal,
+                    brain.actions,
+                    occupied,
+                    populations,
+                    mating_context,
                 )
 
     @property
@@ -394,7 +406,7 @@ class Experiment:
         result.events.extend(mutation_events)
         self._release_dead_brains(result.dead_ids)
         self.observations = result.observations
-        self._refresh_context(contexts)
+        self._refresh_context(contexts, self.world._mate_context)
         self.last_record = None
         self.finished_run = limit or not self.world.animals
         if (
@@ -415,7 +427,7 @@ class Experiment:
                         s: {sex: m["provenance"] for sex, m in groups.items()}
                         for s, groups in self.run_initial_models.items()
                     },
-                    **self.world.metrics(),
+                    **copy.deepcopy(self.last_record),
                     lifespans=copy.deepcopy(self.world.lifespans),
                     survivors=[
                         dict(id=a.id, species=a.species, age=a.age)
@@ -628,6 +640,6 @@ class Experiment:
                 e.world.animals.values(), e.brains, e._champion_source()
             )
         e.observations = e.world.observe_all()
-        e._refresh_context()
+        e._refresh_context(mating_context=e.world._mate_context)
         e.last_record = None
         return e

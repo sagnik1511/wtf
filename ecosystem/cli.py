@@ -310,30 +310,36 @@ def run_experiment(
                 )
             writer.writerow(row)
 
-        record(experiment.world.metrics())
+        metrics = experiment.world.metrics()
+        record(metrics)
         if recorder is not None and (
             not experiment.finished_run
             or (experiment.done and not experiment.early_stopping.stopped)
         ):
             # Retain the legacy final-frame view for ordinary completed resumes,
             # while skipping already-finished episodes before the next run.
-            recorder.begin_run(experiment)
+            recorder.begin_run(experiment, metrics=metrics)
         if progress is not None and not experiment.finished_run:
-            progress.start(experiment)
+            progress.start(experiment, metrics=metrics)
         while not experiment.done:
             if experiment.finished_run:
                 experiment.next_run()
                 save("run_seeds.json", experiment.run_seeds)
-                record(experiment.world.metrics())
+                metrics = experiment.world.metrics()
+                record(metrics)
                 if recorder is not None:
-                    recorder.begin_run(experiment)
+                    recorder.begin_run(experiment, metrics=metrics)
                 if progress is not None:
-                    progress.start(experiment)
+                    progress.start(experiment, metrics=metrics)
             experiment.step()
             if progress is not None:
                 progress.tick(experiment)
             if recorder is not None:
-                recorder.capture(experiment, force=experiment.finished_run)
+                recorder.capture(
+                    experiment,
+                    force=experiment.finished_run,
+                    metrics=experiment.last_record,
+                )
             if experiment.last_record:
                 record(experiment.last_record)
             if experiment.finished_run:
@@ -361,7 +367,7 @@ def run_experiment(
                         )
                         raise
                 print(
-                    f"Run {run} (seed {experiment.world.seed}): {experiment.world.metrics()}",
+                    f"Run {run} (seed {experiment.world.seed}): {experiment.last_record}",
                     flush=True,
                 )
                 if experiment.early_stopping.stopped:

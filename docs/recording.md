@@ -175,6 +175,12 @@ Replay storage separates the data layout (`encoding`) from compression:
   Levels 1–9 are accepted. JSON layouts retain `.json` before their compression
   suffix. XZ costs more compression work than gzip.
 
+When metric and frame schedules coincide, CLI recording reuses the completed-step
+report already used for history/CSV/progress. The recorder copies its metric maps;
+report sharing does not add frames, change diagnostic sampling or change encoded
+values. Replay-only steps and standalone captures still obtain current metrics.
+See [report ownership and freshness](performance.md#founder-initialization-and-shared-reporting).
+
 All layouts preserve every recorded frame, full-precision number, event and
 sampled diagnostic. Updates store absolute values, avoiding cumulative rounding.
 Every chunk has its own keyframe and field table: seeking reconstructs at most

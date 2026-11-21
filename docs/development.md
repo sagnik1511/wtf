@@ -285,3 +285,17 @@ them to import the package or collect the maintained test suite. Source recordin
 learned models and generated measurements are also local. A study-only pending
 note is not a package rollout. Intentional documentation GIFs, the banner and
 reusable diagram sources/exports remain shared assets.
+
+`tests/test_mating_context_efficiency.py` verifies phase-local mating reuse and
+short-circuit birth-space checks. It checks fresh standalone behavior after
+same-tick edits, independent restored contexts, unchanged RNG/checkpoint state,
+ordered birth choices across terrain and the distinction between visibility
+features and reproduction masks. Final birth eligibility must always be checked
+after costs/combat rather than inherited from a decision-phase context.
+
+`tests/test_founder_reporting_efficiency.py` guards founder-template construction
+and model-load counts, original seeded state across all nine controllers, and
+independent weights/configuration/RNGs. It also checks shared report scan counts
+through the CLI, detached summary/snapshot maps, unsampled captures and fresh
+standalone reads after same-tick edits. Keep report reuse explicit and confined
+to the unchanged completed state; never infer freshness from tick alone.

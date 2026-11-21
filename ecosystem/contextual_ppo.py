@@ -8,13 +8,17 @@ from .ppo import MLP, PPOBrain, loss_and_gradient, policy_distribution
 CENTRAL_INPUTS = 16
 
 
-def action_mask(world, animal, actions, occupied=None, populations=None):
+def action_mask(
+    world, animal, actions, occupied=None, populations=None, mating_context=None
+):
     """Immediate conditions only, before simultaneous movement/combat resolution.
 
     Turning/rest remain possible. An approaching target can still move into an
     unmasked attack's range only on a later decision; this changes the task.
     """
     front = world.front(animal)
+    if mating_context is not None:
+        occupied, populations = mating_context[:2]
     if occupied is None:
         occupied = {a.position: a for a in world.animals.values()}
     body = world.body(animal)
@@ -26,7 +30,13 @@ def action_mask(world, animal, actions, occupied=None, populations=None):
                 animal, world.movement_destination(animal, action), action, occupied
             )
         elif action == "reproduce":
-            valid = world.reproduction_available(animal, occupied, populations)
+            valid = (
+                world.reproduction_available(
+                    animal, occupied, populations, mating_context=mating_context
+                )
+                if mating_context is not None
+                else world.reproduction_available(animal, occupied, populations)
+            )
         elif action == "swim":
             valid = not world.movement_block_reason(animal, front, "swim", occupied)
         elif action == "eat":

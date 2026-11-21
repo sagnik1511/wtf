@@ -13,7 +13,7 @@ class RunProgress:
         )
         self.bar = None
 
-    def start(self, experiment):
+    def start(self, experiment, metrics=None):
         self.close()
         if not self.enabled or experiment.finished_run:
             return
@@ -30,7 +30,7 @@ class RunProgress:
             mininterval=0.2,
             file=self.stream,
         )
-        self._metrics(experiment.world.metrics())
+        self._metrics(experiment.world.metrics() if metrics is None else metrics)
 
     def _metrics(self, metrics):
         self.bar.set_postfix(

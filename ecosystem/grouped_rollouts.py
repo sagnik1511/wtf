@@ -1,7 +1,6 @@
 """Matched GRPO trials: sequential world clones, read-only other policies."""
 
 import random
-from collections import Counter
 from .policy_gradients import PolicyStep
 from .ppo import policy_distribution
 from .world import World
@@ -26,6 +25,7 @@ def other_action(
     memories=None,
     occupied=None,
     populations=None,
+    mating_context=None,
 ):
     kind = brain.config["type"]
     if kind == "recurrent_ppo":
@@ -38,7 +38,12 @@ def other_action(
         from .contextual_ppo import action_mask
 
         mask = action_mask(
-            world, world.animals[animal_id], brain.actions, occupied, populations
+            world,
+            world.animals[animal_id],
+            brain.actions,
+            occupied,
+            populations,
+            mating_context,
         )
         outputs = brain.network.predict(observation)
         probabilities = brain.distribution(outputs, tuple(observation) + mask)[0]
@@ -103,14 +108,10 @@ def collect_group(world, brains, focal_id):
                 focal.network.predict(observation)
             )
             index = sample_index(probabilities, generators[focal_id])
-            occupied = (
-                {a.position: a for a in trial.animals.values()} if has_masks else None
-            )
-            populations = (
-                Counter(a.species for a in trial.animals.values())
-                if has_masks
-                else None
-            )
+            mating_context = trial._mate_context if has_masks else None
+            if has_masks and mating_context is None:
+                mating_context = trial._prepare_mating_context()
+            occupied, populations = mating_context[:2] if has_masks else (None, None)
             actions = {
                 i: (
                     focal.actions[index]
@@ -124,6 +125,7 @@ def collect_group(world, brains, focal_id):
                         memories,
                         occupied,
                         populations,
+                        mating_context,
                     )
                 )
                 for i, o in observations.items()

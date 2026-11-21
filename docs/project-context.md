@@ -81,6 +81,15 @@ newborns get independent mixed weights. All newborn training state resets after
 paired crossover; the mutation guide describes the additional rare changes.
 None of these features imply a shared species policy.
 
+Founder initialization can reuse a pristine species/sex template only while
+constructing the run. Every animal must retain detached model/training state and
+its original individual RNG seed; templates are discarded before learning.
+Completed-step reporting may pass metrics explicitly between consumers while the
+physical state is unchanged. Standalone reads stay fresh; neither observation
+nor reporting reuse may assume that an unchanged tick means unchanged state.
+See [initialization and reporting ownership](performance.md#founder-initialization-and-shared-reporting)
+and the [phase-local mating context](performance.md#decision-phase-mating-data-and-birth-availability).
+
 A fresh invocation, a warm start and exact resume are different operations:
 
 - A fresh start initializes controllers using the selected config/CLI. To ensure

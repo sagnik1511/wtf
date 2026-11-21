@@ -64,7 +64,7 @@ class Recorder:
     def _publish(self):
         write_json(self.folder / "recording.json", self.manifest)
 
-    def begin_run(self, experiment):
+    def begin_run(self, experiment, metrics=None):
         if self.run is not None:
             self.end_run(experiment=None)
         world = experiment.world
@@ -86,7 +86,7 @@ class Recorder:
         self.manifest["runs"].append(self.run)
         self.last_tick = self.last_diagnostic_tick = None
         self._publish()
-        self.capture(experiment, force=True)
+        self.capture(experiment, force=True, metrics=metrics)
 
     def _open_chunk(self):
         binary = self.options["encoding"] == "binary"
@@ -180,7 +180,7 @@ class Recorder:
         self.run["last_tick"] = self.last_tick
         self._publish()
 
-    def capture(self, experiment, force=False):
+    def capture(self, experiment, force=False, metrics=None):
         tick = experiment.world.tick
         if tick == self.last_tick or (
             not force and tick % self.options["frame_every_steps"]
@@ -188,7 +188,7 @@ class Recorder:
             return False
         if self.stream is None:
             self._open_chunk()
-        frame = experiment.world.snapshot(include_static=False)
+        frame = experiment.world.snapshot(include_static=False, metrics=metrics)
         frame["total_updates"] = experiment.total_updates
         frame["finished_run"] = experiment.finished_run
         diagnostic_interval = self.options["diagnostics_every_steps"]
