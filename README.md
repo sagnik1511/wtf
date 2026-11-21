@@ -22,6 +22,40 @@ for population, energy, births and hunting trends.
 
 For Python and Docker setup, see [INSTALL.md](INSTALL.md).
 
+## Tech stack
+
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![JavaScript ES modules](https://img.shields.io/badge/JavaScript-ES_modules-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
+[![HTML5 Canvas](https://img.shields.io/badge/HTML5-Canvas-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+[![CSS interface](https://img.shields.io/badge/CSS-interface-663399?logo=css&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![C optional kernels](https://img.shields.io/badge/C-optional_kernels-A8B9CC?logo=c&logoColor=black)](docs/native-kernels.md)
+[![JSON environment presets](https://img.shields.io/badge/JSON-environment_presets-292929?logo=json&logoColor=white)](docs/configuration.md)
+[![Docker optional installation](https://img.shields.io/badge/Docker-optional-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/get-started/get-docker/)
+[![Material for MkDocs documentation](https://img.shields.io/badge/Material_for_MkDocs-documentation-526CFE?logo=materialformkdocs&logoColor=white)](https://squidfunk.github.io/mkdocs-material/)
+
+Python owns simulation, custom RL models, learning and artifact storage. Optional
+CPython C kernels accelerate CPU hot paths. Plain JavaScript, HTML, CSS, Canvas
+and SVG provide the replay viewer; JSON defines worlds, species and policies.
+MkDocs with Material builds the documentation website.
+
+### Software and requirements
+
+| Software | When you need it |
+| --- | --- |
+| [Python 3.12+](https://www.python.org/downloads/) and [tqdm](https://tqdm.github.io/) | Required for simulation and the local playback server. `tqdm` is the only Python runtime dependency; install it through [requirements.txt](requirements.txt). |
+| Modern browser with [JavaScript modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules), [Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) and [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG) | Required to use the viewer. |
+| [Git](https://git-scm.com/downloads) | Clone the source checkout; documentation builds also use Git to filter published files. |
+| [Docker](https://docs.docker.com/get-started/get-docker/) and [Compose](https://docs.docker.com/compose/install/) | Optional container-based installation. |
+| [GCC](https://gcc.gnu.org/) or [Clang](https://clang.llvm.org/), Python development headers and [setuptools](https://setuptools.pypa.io/en/latest/) | Optional native CPU kernels, validated on CPython 3.12–3.13. See [native setup](INSTALL.md#optional-native-cpu-kernels). |
+| [Node.js 20+](https://nodejs.org/en/download) | Optional JavaScript tests and viewer illustration tooling. |
+| [MkDocs](https://www.mkdocs.org/) and [Material](https://squidfunk.github.io/mkdocs-material/) | Optional local documentation builds; pinned versions are in [requirements-docs.txt](requirements-docs.txt). |
+| [FFmpeg and ffprobe](https://ffmpeg.org/download.html) | Optional documentation GIF exports. |
+
+The viewer runs directly in the browser without npm packages or a frontend build.
+Models use the project's own implementations; NumPy, PyTorch and a GPU are not
+required. [Installation](INSTALL.md) covers commands and platform details;
+[development setup](docs/development.md#mandatory-formatting) covers formatter tools.
+
 ## Quick start
 
 Requires Python 3.12+. Run from the project directory:
@@ -58,7 +92,9 @@ With multiple runs, each group’s champion seeds the next run by default; add `
 
 Browse the [documentation hub](docs/index.md) for a reading path, or use the
 [GitHub Pages documentation](https://sagnik1511.github.io/wtf/) once its deployment
-is enabled. The site adds search and grouped navigation to these same guides.
+is enabled. The site adds search, grouped navigation and **light/dark modes** to these same
+guides. Use the sun/moon icon in the top-right header to switch appearance; the
+initial theme follows your system preference.
 
 | Area | Entry points |
 | --- | --- |

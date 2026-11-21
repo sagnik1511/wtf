@@ -1,78 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 910" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 910" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Model weights: references, binary record and layer arrays</title><desc id="desc">Champion warm-start storage. Identical encoded models share one blob; algorithm-specific parameter trees vary.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
-<rect width="1040" height="910" fill="#101720"/>
-<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Model weights: references, binary record and layer arrays</text>
-<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Champion warm-start storage. Identical encoded models share one blob; algorithm-specific parameter trees vary.</text>
-<rect x="24" y="96" width="480" height="128" rx="7" fill="#192532" stroke="#486077"/>
-<text x="264.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">run_0001/&lt;species&gt;/&lt;sex&gt;/kills.json</text>
-<text x="264.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">criterion + rank + source + artifact ID</text>
-<text x="264.0" y="170" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">model: {signature, precision,</text>
-<text x="264.0" y="192" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">weights_file, sha256}</text>
-<rect x="536" y="96" width="480" height="128" rx="7" fill="#192532" stroke="#486077"/>
-<text x="776.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">run_0001/&lt;species&gt;/&lt;sex&gt;/lifespan.json</text>
-<text x="776.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">separate champion metadata</text>
-<text x="776.0" y="170" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">may reference the same exact model</text>
-<text x="776.0" y="192" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">training config is a separate JSON file</text>
-<path d="M264 224V246H520V276" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M776 224V246H520" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="532" y="270" font-size="13" fill="#acbfd1" style="fill:#acbfd1">shared content-addressed reference</text>
-<rect x="24" y="277" width="992" height="345" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="42" y="308" font-size="19" fill="#8ac8ff" style="fill:#8ac8ff" class="mono" xml:space="preserve">champions/models/&lt;sha256&gt;.bin.xz  [XZ-compressed container]</text>
-<rect x="42" y="330" width="128" height="74" rx="7" fill="#192532" stroke="#486077"/>
-<text x="106.0" y="357" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Prefix</text>
-<text x="106.0" y="382" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">WTFB + 01</text>
-<path d="M170 366H187" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="188" y="330" width="164" height="74" rx="7" fill="#192532" stroke="#486077"/>
-<text x="270.0" y="357" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Length</text>
-<text x="270.0" y="382" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">uint32_le</text>
-<path d="M352 366H369" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="370" y="330" width="628" height="74" rx="7" fill="#192532" stroke="#486077"/>
-<text x="684.0" y="357" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">One typed record</text>
-<text x="684.0" y="382" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">{kind: &quot;champion_model&quot;, model: {...}}</text>
-<path d="M684 404V423H190V445" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M684 423H520V445" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M684 423H850V445" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="42" y="446" width="296" height="153" rx="7" fill="#192532" stroke="#486077"/>
-<text x="190.0" y="473" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">signature</text>
-<text x="190.0" y="498" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">algorithm / observations</text>
-<text x="190.0" y="520" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">input count + top-k</text>
-<text x="190.0" y="542" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">layers + action order</text>
-<text x="190.0" y="564" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">extra algorithm contracts</text>
-<rect x="372" y="446" width="296" height="153" rx="7" fill="#192532" stroke="#486077"/>
-<text x="520.0" y="473" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">precision</text>
-<text x="520.0" y="498" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">float32 for new models</text>
-<text x="520.0" y="520" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">legacy float64 retained</text>
-<text x="520.0" y="542" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">no lossy quantization</text>
-<text x="520.0" y="564" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">stored with the model</text>
-<rect x="702" y="446" width="296" height="153" rx="7" fill="#192532" stroke="#486077"/>
-<text x="850.0" y="473" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">parameters</text>
-<text x="850.0" y="498" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">network parameter tree</text>
-<text x="850.0" y="520" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">weights + biases</text>
-<text x="850.0" y="542" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">flat numeric arrays</text>
-<text x="850.0" y="564" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">example layers below</text>
-<path d="M850 599V662" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="663" width="992" height="162" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="42" y="693" font-size="18" fill="#8ac8ff" style="fill:#8ac8ff">Example PPO MLP: 68 inputs -&gt; hidden 16 -&gt; 7 action logits + 1 value</text>
-<rect x="42" y="714" width="122" height="87" rx="7" fill="#192532" stroke="#486077"/>
-<text x="103.0" y="741" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Inputs</text>
-<text x="103.0" y="766" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">68 features</text>
-<path d="M164 759H187" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="188" y="714" width="278" height="87" rx="7" fill="#192532" stroke="#486077"/>
-<text x="327.0" y="741" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Layer 0</text>
-<text x="327.0" y="766" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">weights [16 x 68] = 1088</text>
-<text x="327.0" y="788" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">bias [16]</text>
-<path d="M466 759H489" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="490" y="714" width="278" height="87" rx="7" fill="#192532" stroke="#486077"/>
-<text x="629.0" y="741" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Layer 1</text>
-<text x="629.0" y="766" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">weights [8 x 16] = 128</text>
-<text x="629.0" y="788" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">bias [8]</text>
-<path d="M768 759H791" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="792" y="714" width="206" height="87" rx="7" fill="#192532" stroke="#486077"/>
-<text x="895.0" y="741" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Outputs</text>
-<text x="895.0" y="766" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">7 policy logits</text>
-<text x="895.0" y="788" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">1 critic value</text>
-<text x="26" y="856" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Hash = SHA-256 of the complete uncompressed WTFB bytes (including signature and precision).</text>
-<text x="26" y="884" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Warm start restores compatible parameters into private brains; exact checkpoints also retain optimizer/RNG/buffers.</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
+<rect width="1040" height="910" fill="var(--figure-101720)"/>
+<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Model weights: references, binary record and layer arrays</text>
+<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Champion warm-start storage. Identical encoded models share one blob; algorithm-specific parameter trees vary.</text>
+<rect x="24" y="96" width="480" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="264.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">run_0001/&lt;species&gt;/&lt;sex&gt;/kills.json</text>
+<text x="264.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">criterion + rank + source + artifact ID</text>
+<text x="264.0" y="170" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">model: {signature, precision,</text>
+<text x="264.0" y="192" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights_file, sha256}</text>
+<rect x="536" y="96" width="480" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="776.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">run_0001/&lt;species&gt;/&lt;sex&gt;/lifespan.json</text>
+<text x="776.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">separate champion metadata</text>
+<text x="776.0" y="170" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">may reference the same exact model</text>
+<text x="776.0" y="192" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">training config is a separate JSON file</text>
+<path d="M264 224V246H520V276" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M776 224V246H520" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="532" y="270" font-size="13" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">shared content-addressed reference</text>
+<rect x="24" y="277" width="992" height="345" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="42" y="308" font-size="19" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" class="mono" xml:space="preserve">champions/models/&lt;sha256&gt;.bin.xz  [XZ-compressed container]</text>
+<rect x="42" y="330" width="128" height="74" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="106.0" y="357" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Prefix</text>
+<text x="106.0" y="382" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">WTFB + 01</text>
+<path d="M170 366H187" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="188" y="330" width="164" height="74" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="270.0" y="357" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Length</text>
+<text x="270.0" y="382" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">uint32_le</text>
+<path d="M352 366H369" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="370" y="330" width="628" height="74" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="684.0" y="357" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">One typed record</text>
+<text x="684.0" y="382" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">{kind: &quot;champion_model&quot;, model: {...}}</text>
+<path d="M684 404V423H190V445" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M684 423H520V445" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M684 423H850V445" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="42" y="446" width="296" height="153" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="190.0" y="473" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">signature</text>
+<text x="190.0" y="498" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">algorithm / observations</text>
+<text x="190.0" y="520" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">input count + top-k</text>
+<text x="190.0" y="542" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">layers + action order</text>
+<text x="190.0" y="564" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">extra algorithm contracts</text>
+<rect x="372" y="446" width="296" height="153" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="520.0" y="473" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">precision</text>
+<text x="520.0" y="498" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">float32 for new models</text>
+<text x="520.0" y="520" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">legacy float64 retained</text>
+<text x="520.0" y="542" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">no lossy quantization</text>
+<text x="520.0" y="564" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">stored with the model</text>
+<rect x="702" y="446" width="296" height="153" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="850.0" y="473" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">parameters</text>
+<text x="850.0" y="498" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">network parameter tree</text>
+<text x="850.0" y="520" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights + biases</text>
+<text x="850.0" y="542" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">flat numeric arrays</text>
+<text x="850.0" y="564" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">example layers below</text>
+<path d="M850 599V662" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="663" width="992" height="162" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="42" y="693" font-size="18" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Example PPO MLP: 68 inputs -&gt; hidden 16 -&gt; 7 action logits + 1 value</text>
+<rect x="42" y="714" width="122" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="103.0" y="741" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Inputs</text>
+<text x="103.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">68 features</text>
+<path d="M164 759H187" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="188" y="714" width="278" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="327.0" y="741" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Layer 0</text>
+<text x="327.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights [16 x 68] = 1088</text>
+<text x="327.0" y="788" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">bias [16]</text>
+<path d="M466 759H489" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="490" y="714" width="278" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="629.0" y="741" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Layer 1</text>
+<text x="629.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights [8 x 16] = 128</text>
+<text x="629.0" y="788" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">bias [8]</text>
+<path d="M768 759H791" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="792" y="714" width="206" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="895.0" y="741" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Outputs</text>
+<text x="895.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">7 policy logits</text>
+<text x="895.0" y="788" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">1 critic value</text>
+<text x="26" y="856" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Hash = SHA-256 of the complete uncompressed WTFB bytes (including signature and precision).</text>
+<text x="26" y="884" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Warm start restores compatible parameters into private brains; exact checkpoints also retain optimizer/RNG/buffers.</text>
 </svg>

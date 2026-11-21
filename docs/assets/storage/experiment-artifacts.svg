@@ -1,78 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 780" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 780" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Experiment directory: containers and references</title><desc id="desc">Solid arrows link folders to contents; dashed arrows show file references.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
-<rect width="1040" height="780" fill="#101720"/>
-<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Experiment directory: containers and references</text>
-<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Solid arrows link folders to contents; dashed arrows show file references.</text>
-<rect x="330" y="94" width="380" height="70" rx="7" fill="#192532" stroke="#486077"/>
-<text x="520.0" y="121" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">results/&lt;experiment&gt;/</text>
-<text x="520.0" y="146" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">one invocation / multiple numbered runs</text>
-<path d="M520 164V195H136V224" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M520 164V195H392V224" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M520 164V195H648V224" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M520 164V195H904V224" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="225" width="224" height="80" rx="7" fill="#192532" stroke="#486077"/>
-<text x="136.0" y="252" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">playback/</text>
-<text x="136.0" y="277" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">viewer input</text>
-<rect x="280" y="225" width="224" height="80" rx="7" fill="#192532" stroke="#486077"/>
-<text x="392.0" y="252" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Readable reports</text>
-<text x="392.0" y="277" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">experiment-level files</text>
-<rect x="536" y="225" width="224" height="80" rx="7" fill="#192532" stroke="#486077"/>
-<text x="648.0" y="252" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">checkpoints/</text>
-<text x="648.0" y="277" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">exact continuation</text>
-<rect x="792" y="225" width="224" height="80" rx="7" fill="#192532" stroke="#486077"/>
-<text x="904.0" y="252" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">champions/</text>
-<text x="904.0" y="277" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">warm-start models</text>
-<path d="M136 305V344" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="345" width="224" height="90" rx="7" fill="#192532" stroke="#486077"/>
-<text x="136.0" y="372" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">recording.json</text>
-<text x="136.0" y="397" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">config + options</text>
-<text x="136.0" y="419" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">runs[] + committed counts</text>
-<path d="M136 435V474" stroke-dasharray="5 4" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="475" width="224" height="90" rx="7" fill="#192532" stroke="#486077"/>
-<text x="136.0" y="502" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">run_0001_chunk_*</text>
-<text x="136.0" y="527" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">keyframe + deltas</text>
-<text x="136.0" y="549" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">.bin.xz files</text>
-<path d="M392 305V344" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="280" y="345" width="224" height="220" rx="7" fill="#192532" stroke="#486077"/>
-<text x="392.0" y="372" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Metadata / outcomes</text>
-<text x="392.0" y="397" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">environment.json</text>
-<text x="392.0" y="419" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">manifest.json</text>
-<text x="392.0" y="441" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">run_seeds.json</text>
-<text x="392.0" y="463" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">metrics.csv</text>
-<text x="392.0" y="485" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">summary.json</text>
-<text x="392.0" y="507" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">optional reports</text>
-<path d="M648 305V344" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="536" y="345" width="224" height="90" rx="7" fill="#192532" stroke="#486077"/>
-<text x="648.0" y="372" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">final.bin.xz</text>
-<text x="648.0" y="397" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">world + RNG + models</text>
-<text x="648.0" y="419" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">optimizers + buffers</text>
-<path d="M648 305V326H524V520H535" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="536" y="475" width="224" height="90" rx="7" fill="#192532" stroke="#486077"/>
-<text x="648.0" y="502" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">run_0001.bin.xz</text>
-<text x="648.0" y="527" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">when scheduled</text>
-<text x="648.0" y="549" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">separate from replay</text>
-<path d="M904 305V344" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="792" y="345" width="224" height="90" rx="7" fill="#192532" stroke="#486077"/>
-<text x="904.0" y="372" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">run_0001.json</text>
-<text x="904.0" y="397" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">index -&gt; run_0001/</text>
-<text x="904.0" y="419" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">generation manifest</text>
-<path d="M904 435V474" stroke-dasharray="5 4" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="792" y="475" width="224" height="90" rx="7" fill="#192532" stroke="#486077"/>
-<text x="904.0" y="502" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Artifact metadata</text>
-<text x="904.0" y="527" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">&lt;species&gt;/&lt;sex&gt;/</text>
-<text x="904.0" y="549" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">&lt;criterion&gt;.json</text>
-<path d="M904 565V595H700V629" stroke-dasharray="5 4" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M904 565V629" stroke-dasharray="5 4" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="900" y="612" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle">references</text>
-<rect x="590" y="630" width="220" height="89" rx="7" fill="#192532" stroke="#486077"/>
-<text x="700.0" y="657" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Training config</text>
-<text x="700.0" y="682" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">run_0001/configs/</text>
-<text x="700.0" y="704" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">&lt;sha&gt;.json</text>
-<rect x="830" y="630" width="186" height="89" rx="7" fill="#192532" stroke="#486077"/>
-<text x="923.0" y="657" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Weight blob</text>
-<text x="923.0" y="682" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">models/&lt;sha&gt;.bin.xz</text>
-<text x="923.0" y="704" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">shared across runs</text>
-<text x="26" y="754" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Charts use metrics.csv when available, otherwise committed chunks. The viewer never loads training weights.</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
+<rect width="1040" height="780" fill="var(--figure-101720)"/>
+<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Experiment directory: containers and references</text>
+<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Solid arrows link folders to contents; dashed arrows show file references.</text>
+<rect x="330" y="94" width="380" height="70" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="520.0" y="121" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">results/&lt;experiment&gt;/</text>
+<text x="520.0" y="146" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">one invocation / multiple numbered runs</text>
+<path d="M520 164V195H136V224" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M520 164V195H392V224" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M520 164V195H648V224" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M520 164V195H904V224" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="225" width="224" height="80" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="136.0" y="252" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">playback/</text>
+<text x="136.0" y="277" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">viewer input</text>
+<rect x="280" y="225" width="224" height="80" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="392.0" y="252" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Readable reports</text>
+<text x="392.0" y="277" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">experiment-level files</text>
+<rect x="536" y="225" width="224" height="80" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="648.0" y="252" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">checkpoints/</text>
+<text x="648.0" y="277" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">exact continuation</text>
+<rect x="792" y="225" width="224" height="80" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="904.0" y="252" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">champions/</text>
+<text x="904.0" y="277" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">warm-start models</text>
+<path d="M136 305V344" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="345" width="224" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="136.0" y="372" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">recording.json</text>
+<text x="136.0" y="397" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">config + options</text>
+<text x="136.0" y="419" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">runs[] + committed counts</text>
+<path d="M136 435V474" stroke-dasharray="5 4" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="475" width="224" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="136.0" y="502" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">run_0001_chunk_*</text>
+<text x="136.0" y="527" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">keyframe + deltas</text>
+<text x="136.0" y="549" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">.bin.xz files</text>
+<path d="M392 305V344" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="280" y="345" width="224" height="220" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="392.0" y="372" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Metadata / outcomes</text>
+<text x="392.0" y="397" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">environment.json</text>
+<text x="392.0" y="419" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">manifest.json</text>
+<text x="392.0" y="441" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">run_seeds.json</text>
+<text x="392.0" y="463" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">metrics.csv</text>
+<text x="392.0" y="485" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">summary.json</text>
+<text x="392.0" y="507" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">optional reports</text>
+<path d="M648 305V344" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="536" y="345" width="224" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="648.0" y="372" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">final.bin.xz</text>
+<text x="648.0" y="397" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">world + RNG + models</text>
+<text x="648.0" y="419" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">optimizers + buffers</text>
+<path d="M648 305V326H524V520H535" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="536" y="475" width="224" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="648.0" y="502" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">run_0001.bin.xz</text>
+<text x="648.0" y="527" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">when scheduled</text>
+<text x="648.0" y="549" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">separate from replay</text>
+<path d="M904 305V344" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="792" y="345" width="224" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="904.0" y="372" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">run_0001.json</text>
+<text x="904.0" y="397" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">index -&gt; run_0001/</text>
+<text x="904.0" y="419" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">generation manifest</text>
+<path d="M904 435V474" stroke-dasharray="5 4" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="792" y="475" width="224" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="904.0" y="502" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Artifact metadata</text>
+<text x="904.0" y="527" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">&lt;species&gt;/&lt;sex&gt;/</text>
+<text x="904.0" y="549" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">&lt;criterion&gt;.json</text>
+<path d="M904 565V595H700V629" stroke-dasharray="5 4" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M904 565V629" stroke-dasharray="5 4" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="900" y="612" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle">references</text>
+<rect x="590" y="630" width="220" height="89" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="700.0" y="657" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Training config</text>
+<text x="700.0" y="682" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">run_0001/configs/</text>
+<text x="700.0" y="704" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">&lt;sha&gt;.json</text>
+<rect x="830" y="630" width="186" height="89" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="923.0" y="657" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Weight blob</text>
+<text x="923.0" y="682" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">models/&lt;sha&gt;.bin.xz</text>
+<text x="923.0" y="704" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">shared across runs</text>
+<text x="26" y="754" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Charts use metrics.csv when available, otherwise committed chunks. The viewer never loads training weights.</text>
 </svg>

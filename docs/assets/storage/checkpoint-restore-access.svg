@@ -1,77 +1,77 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 870" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 870" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Restoring state and accessing it during training</title><desc id="desc">Read the checkpoint once; subsequent decisions and updates access the restored in-memory objects.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
-<rect width="1040" height="870" fill="#101720"/>
-<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Restoring state and accessing it during training</text>
-<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Read the checkpoint once; subsequent decisions and updates access the restored in-memory objects.</text>
-<rect x="24" y="96" width="205" height="96" rx="7" fill="#192532" stroke="#486077"/>
-<text x="126.5" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Checkpoint file</text>
-<text x="126.5" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">.bin.xz</text>
-<text x="126.5" y="170" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">complete learning state</text>
-<path d="M229 144H255" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="256" y="96" width="230" height="96" rx="7" fill="#192532" stroke="#486077"/>
-<text x="371.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">read_checkpoint</text>
-<text x="371.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">decompress + typed decode</text>
-<text x="371.0" y="170" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">resolve shared references</text>
-<path d="M486 144H512" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="513" y="96" width="232" height="96" rx="7" fill="#192532" stroke="#486077"/>
-<text x="629.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Version-1 state map</text>
-<text x="629.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">world + metadata</text>
-<text x="629.0" y="170" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">brains: {&quot;7&quot;: state, ...}</text>
-<path d="M745 144H771" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="772" y="96" width="244" height="96" rx="7" fill="#192532" stroke="#486077"/>
-<text x="894.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Experiment.restore</text>
-<text x="894.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">World.restore</text>
-<text x="894.0" y="170" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">restore_brain per ID</text>
-<path d="M894 192V223H520V252" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="253" width="992" height="306" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="42" y="284" font-size="20" fill="#8ac8ff" style="fill:#8ac8ff">Restored Experiment: ordinary mutable Python runtime objects</text>
-<rect x="42" y="307" width="270" height="144" rx="7" fill="#192532" stroke="#486077"/>
-<text x="177.0" y="334" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">experiment.world</text>
-<text x="177.0" y="359" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">animals[id] / resources</text>
-<text x="177.0" y="381" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">world.rng.setstate(...)</text>
-<text x="177.0" y="403" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">geography reconstructed</text>
-<text x="177.0" y="425" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">body + event state</text>
-<rect x="330" y="307" width="362" height="225" rx="7" fill="#192532" stroke="#486077"/>
-<text x="511.0" y="334" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">experiment.brains[id]</text>
-<text x="511.0" y="359" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">network + target/reference</text>
-<text x="511.0" y="381" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">moments / variances / counters</text>
-<text x="511.0" y="403" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">replay / rollout / trajectory</text>
-<text x="511.0" y="425" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">pending / hidden / contexts</text>
-<text x="511.0" y="447" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">rng + training_rng (+ group_rng)</text>
-<rect x="710" y="307" width="288" height="144" rx="7" fill="#192532" stroke="#486077"/>
-<text x="854.0" y="334" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Experiment metadata</text>
-<text x="854.0" y="359" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">seed_rng + run progress</text>
-<text x="854.0" y="381" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">champions + lineage</text>
-<text x="854.0" y="403" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">plateau monitor / summaries</text>
-<rect x="42" y="469" width="270" height="63" rx="7" fill="#192532" stroke="#486077"/>
-<text x="177.0" y="496" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Rebuild observations</text>
-<text x="177.0" y="521" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">derived caches are recreated</text>
-<rect x="710" y="469" width="288" height="63" rx="7" fill="#192532" stroke="#486077"/>
-<text x="854.0" y="496" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Attach current context</text>
-<text x="854.0" y="521" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">then resume normal steps</text>
-<path d="M177 532V603" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M510 532V603" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M510 532V581H854V603" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="604" width="310" height="167" rx="7" fill="#192532" stroke="#486077"/>
-<text x="179.0" y="631" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">world.step(actions)</text>
-<text x="179.0" y="656" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">world bodies + resources</text>
-<text x="179.0" y="678" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">world RNG draws</text>
-<text x="179.0" y="700" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">movement / food / births</text>
-<text x="179.0" y="722" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">fresh rewards and observations</text>
-<rect x="360" y="604" width="310" height="167" rx="7" fill="#192532" stroke="#486077"/>
-<text x="515.0" y="631" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">brain.choose(observation)</text>
-<text x="515.0" y="656" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">read network + hidden/mask</text>
-<text x="515.0" y="678" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">consume action RNG</text>
-<text x="515.0" y="700" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">prepare pending decision</text>
-<text x="515.0" y="722" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">choose this animal action</text>
-<rect x="696" y="604" width="320" height="167" rx="7" fill="#192532" stroke="#486077"/>
-<text x="856.0" y="631" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">learn / update / GRPO trials</text>
-<text x="856.0" y="656" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">append or sample buffer</text>
-<text x="856.0" y="678" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">training RNG / group RNG</text>
-<text x="856.0" y="700" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">optimizer reads m, v, updates</text>
-<text x="856.0" y="722" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">write updated network weights</text>
-<text x="26" y="811" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Branches group responsibilities; world, decision and update calls are coordinated by the existing step order.</text>
-<text x="26" y="839" font-size="14" fill="#acbfd1" style="fill:#acbfd1">No lazy disk reads for buffers. No viewer dependency. Resume does not reset optimizer moments or RNG progress.</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
+<rect width="1040" height="870" fill="var(--figure-101720)"/>
+<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Restoring state and accessing it during training</text>
+<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Read the checkpoint once; subsequent decisions and updates access the restored in-memory objects.</text>
+<rect x="24" y="96" width="205" height="96" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="126.5" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Checkpoint file</text>
+<text x="126.5" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">.bin.xz</text>
+<text x="126.5" y="170" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">complete learning state</text>
+<path d="M229 144H255" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="256" y="96" width="230" height="96" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="371.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">read_checkpoint</text>
+<text x="371.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">decompress + typed decode</text>
+<text x="371.0" y="170" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">resolve shared references</text>
+<path d="M486 144H512" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="513" y="96" width="232" height="96" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="629.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Version-1 state map</text>
+<text x="629.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">world + metadata</text>
+<text x="629.0" y="170" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">brains: {&quot;7&quot;: state, ...}</text>
+<path d="M745 144H771" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="772" y="96" width="244" height="96" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="894.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Experiment.restore</text>
+<text x="894.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">World.restore</text>
+<text x="894.0" y="170" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">restore_brain per ID</text>
+<path d="M894 192V223H520V252" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="253" width="992" height="306" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="42" y="284" font-size="20" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Restored Experiment: ordinary mutable Python runtime objects</text>
+<rect x="42" y="307" width="270" height="144" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="177.0" y="334" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">experiment.world</text>
+<text x="177.0" y="359" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">animals[id] / resources</text>
+<text x="177.0" y="381" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">world.rng.setstate(...)</text>
+<text x="177.0" y="403" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">geography reconstructed</text>
+<text x="177.0" y="425" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">body + event state</text>
+<rect x="330" y="307" width="362" height="225" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="511.0" y="334" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">experiment.brains[id]</text>
+<text x="511.0" y="359" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">network + target/reference</text>
+<text x="511.0" y="381" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">moments / variances / counters</text>
+<text x="511.0" y="403" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">replay / rollout / trajectory</text>
+<text x="511.0" y="425" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">pending / hidden / contexts</text>
+<text x="511.0" y="447" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">rng + training_rng (+ group_rng)</text>
+<rect x="710" y="307" width="288" height="144" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="854.0" y="334" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Experiment metadata</text>
+<text x="854.0" y="359" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">seed_rng + run progress</text>
+<text x="854.0" y="381" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">champions + lineage</text>
+<text x="854.0" y="403" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">plateau monitor / summaries</text>
+<rect x="42" y="469" width="270" height="63" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="177.0" y="496" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Rebuild observations</text>
+<text x="177.0" y="521" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">derived caches are recreated</text>
+<rect x="710" y="469" width="288" height="63" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="854.0" y="496" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Attach current context</text>
+<text x="854.0" y="521" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">then resume normal steps</text>
+<path d="M177 532V603" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M510 532V603" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M510 532V581H854V603" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="604" width="310" height="167" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="179.0" y="631" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">world.step(actions)</text>
+<text x="179.0" y="656" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">world bodies + resources</text>
+<text x="179.0" y="678" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">world RNG draws</text>
+<text x="179.0" y="700" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">movement / food / births</text>
+<text x="179.0" y="722" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">fresh rewards and observations</text>
+<rect x="360" y="604" width="310" height="167" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="515.0" y="631" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">brain.choose(observation)</text>
+<text x="515.0" y="656" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">read network + hidden/mask</text>
+<text x="515.0" y="678" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">consume action RNG</text>
+<text x="515.0" y="700" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">prepare pending decision</text>
+<text x="515.0" y="722" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">choose this animal action</text>
+<rect x="696" y="604" width="320" height="167" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="856.0" y="631" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">learn / update / GRPO trials</text>
+<text x="856.0" y="656" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">append or sample buffer</text>
+<text x="856.0" y="678" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">training RNG / group RNG</text>
+<text x="856.0" y="700" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">optimizer reads m, v, updates</text>
+<text x="856.0" y="722" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">write updated network weights</text>
+<text x="26" y="811" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Branches group responsibilities; world, decision and update calls are coordinated by the existing step order.</text>
+<text x="26" y="839" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">No lazy disk reads for buffers. No viewer dependency. Resume does not reset optimizer moments or RNG progress.</text>
 </svg>

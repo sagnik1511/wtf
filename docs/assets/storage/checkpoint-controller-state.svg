@@ -1,85 +1,85 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 920" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 920" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Inside one private brain checkpoint</title><desc id="desc">Algorithm-specific state is grouped here by responsibility; not every controller contains every block.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
-<rect width="1040" height="920" fill="#101720"/>
-<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Inside one private brain checkpoint</text>
-<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Algorithm-specific state is grouped here by responsibility; not every controller contains every block.</text>
-<rect x="24" y="96" width="992" height="770" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="42" y="128" font-size="20" fill="#8ac8ff" style="fill:#8ac8ff" class="mono" xml:space="preserve">brain record  -&gt;  id: &quot;7&quot;  -&gt;  state</text>
-<rect x="42" y="154" width="466" height="181" rx="7" fill="#192532" stroke="#486077"/>
-<text x="275.0" y="181" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Learned and auxiliary networks</text>
-<rect x="58" y="198" width="213" height="108" rx="7" fill="#192532" stroke="#486077"/>
-<text x="164.5" y="225" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Online network</text>
-<text x="164.5" y="250" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">weights / network</text>
-<text x="164.5" y="272" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">weight + bias arrays</text>
-<rect x="287" y="198" width="205" height="108" rx="7" fill="#192532" stroke="#486077"/>
-<text x="389.5" y="225" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Target / reference</text>
-<text x="389.5" y="250" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">Q target network</text>
-<text x="389.5" y="272" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">GRPO reference model</text>
-<rect x="532" y="154" width="466" height="181" rx="7" fill="#192532" stroke="#486077"/>
-<text x="765.0" y="181" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Optimizer state (Adam algorithms)</text>
-<rect x="548" y="198" width="135" height="108" rx="7" fill="#192532" stroke="#486077"/>
-<text x="615.5" y="225" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">moments</text>
-<text x="615.5" y="250" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">m arrays</text>
-<text x="615.5" y="272" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">same shapes</text>
-<rect x="699" y="198" width="135" height="108" rx="7" fill="#192532" stroke="#486077"/>
-<text x="766.5" y="225" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">variances</text>
-<text x="766.5" y="250" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">v arrays</text>
-<text x="766.5" y="272" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">same shapes</text>
-<rect x="850" y="198" width="132" height="108" rx="7" fill="#192532" stroke="#486077"/>
-<text x="916.0" y="225" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">updates</text>
-<text x="916.0" y="250" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">step count</text>
-<text x="916.0" y="272" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">bias correction</text>
-<rect x="42" y="357" width="466" height="258" rx="7" fill="#192532" stroke="#486077"/>
-<text x="275.0" y="384" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Experience and decision buffers</text>
-<rect x="58" y="401" width="213" height="179" rx="7" fill="#192532" stroke="#486077"/>
-<text x="164.5" y="428" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Q / QR-DQN</text>
-<text x="164.5" y="453" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">replay[]</text>
-<text x="164.5" y="475" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">o, a, r, next_o</text>
-<text x="164.5" y="497" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">terminated / truncated</text>
-<text x="164.5" y="519" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">cursor -&gt; ring slot</text>
-<rect x="287" y="401" width="205" height="179" rx="7" fill="#192532" stroke="#486077"/>
-<text x="389.5" y="428" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Policy methods</text>
-<text x="389.5" y="453" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">rollout[] or</text>
-<text x="389.5" y="475" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">trajectory[]</text>
-<text x="389.5" y="497" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">saved action/value data</text>
-<text x="389.5" y="519" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">pending decision</text>
-<text x="389.5" y="541" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">algorithm-specific rows</text>
-<rect x="532" y="357" width="466" height="258" rx="7" fill="#192532" stroke="#486077"/>
-<text x="765.0" y="384" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Random generator states</text>
-<rect x="548" y="401" width="213" height="81" rx="7" fill="#192532" stroke="#486077"/>
-<text x="654.5" y="428" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">rng_state</text>
-<text x="654.5" y="453" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">action sampling</text>
-<rect x="777" y="401" width="205" height="81" rx="7" fill="#192532" stroke="#486077"/>
-<text x="879.5" y="428" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">training_rng_state</text>
-<text x="879.5" y="453" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">sampling / shuffling</text>
-<rect x="548" y="501" width="434" height="79" rx="7" fill="#192532" stroke="#486077"/>
-<text x="765.0" y="528" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">group_rng_state [GRPO]</text>
-<text x="765.0" y="553" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">trial-group random stream</text>
-<rect x="42" y="637" width="466" height="198" rx="7" fill="#192532" stroke="#486077"/>
-<text x="275.0" y="664" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Counters and learning settings</text>
-<rect x="58" y="681" width="213" height="124" rx="7" fill="#192532" stroke="#486077"/>
-<text x="164.5" y="708" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Progress</text>
-<text x="164.5" y="733" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">steps / updates</text>
-<text x="164.5" y="755" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">rollout_updates</text>
-<text x="164.5" y="777" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">epsilon / baseline</text>
-<rect x="287" y="681" width="205" height="124" rx="7" fill="#192532" stroke="#486077"/>
-<text x="389.5" y="708" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Contract</text>
-<text x="389.5" y="733" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">config + actions</text>
-<text x="389.5" y="755" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">precision</text>
-<text x="389.5" y="777" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">last metrics</text>
-<rect x="532" y="637" width="466" height="198" rx="7" fill="#192532" stroke="#486077"/>
-<text x="765.0" y="664" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Algorithm-specific working state</text>
-<rect x="548" y="681" width="213" height="124" rx="7" fill="#192532" stroke="#486077"/>
-<text x="654.5" y="708" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Recurrent / masked</text>
-<text x="654.5" y="733" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">hidden state</text>
-<text x="654.5" y="755" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">sequence hidden inputs</text>
-<text x="654.5" y="777" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">action mask</text>
-<rect x="777" y="681" width="205" height="124" rx="7" fill="#192532" stroke="#486077"/>
-<text x="879.5" y="708" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Centralized / group</text>
-<text x="879.5" y="733" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">MAPPO contexts</text>
-<text x="879.5" y="755" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">GRPO last_group_step</text>
-<text x="879.5" y="777" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">additional pending data</text>
-<text x="26" y="895" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Q-network SGD has no Adam moments. Neural parameters, buffers and RNG objects remain private after restoration.</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
+<rect width="1040" height="920" fill="var(--figure-101720)"/>
+<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Inside one private brain checkpoint</text>
+<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Algorithm-specific state is grouped here by responsibility; not every controller contains every block.</text>
+<rect x="24" y="96" width="992" height="770" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="42" y="128" font-size="20" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" class="mono" xml:space="preserve">brain record  -&gt;  id: &quot;7&quot;  -&gt;  state</text>
+<rect x="42" y="154" width="466" height="181" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="275.0" y="181" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Learned and auxiliary networks</text>
+<rect x="58" y="198" width="213" height="108" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="164.5" y="225" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Online network</text>
+<text x="164.5" y="250" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights / network</text>
+<text x="164.5" y="272" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weight + bias arrays</text>
+<rect x="287" y="198" width="205" height="108" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="389.5" y="225" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Target / reference</text>
+<text x="389.5" y="250" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">Q target network</text>
+<text x="389.5" y="272" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">GRPO reference model</text>
+<rect x="532" y="154" width="466" height="181" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="765.0" y="181" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Optimizer state (Adam algorithms)</text>
+<rect x="548" y="198" width="135" height="108" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="615.5" y="225" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">moments</text>
+<text x="615.5" y="250" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">m arrays</text>
+<text x="615.5" y="272" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">same shapes</text>
+<rect x="699" y="198" width="135" height="108" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="766.5" y="225" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">variances</text>
+<text x="766.5" y="250" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">v arrays</text>
+<text x="766.5" y="272" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">same shapes</text>
+<rect x="850" y="198" width="132" height="108" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="916.0" y="225" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">updates</text>
+<text x="916.0" y="250" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">step count</text>
+<text x="916.0" y="272" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">bias correction</text>
+<rect x="42" y="357" width="466" height="258" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="275.0" y="384" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Experience and decision buffers</text>
+<rect x="58" y="401" width="213" height="179" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="164.5" y="428" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Q / QR-DQN</text>
+<text x="164.5" y="453" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">replay[]</text>
+<text x="164.5" y="475" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">o, a, r, next_o</text>
+<text x="164.5" y="497" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">terminated / truncated</text>
+<text x="164.5" y="519" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">cursor -&gt; ring slot</text>
+<rect x="287" y="401" width="205" height="179" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="389.5" y="428" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Policy methods</text>
+<text x="389.5" y="453" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">rollout[] or</text>
+<text x="389.5" y="475" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">trajectory[]</text>
+<text x="389.5" y="497" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">saved action/value data</text>
+<text x="389.5" y="519" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">pending decision</text>
+<text x="389.5" y="541" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">algorithm-specific rows</text>
+<rect x="532" y="357" width="466" height="258" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="765.0" y="384" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Random generator states</text>
+<rect x="548" y="401" width="213" height="81" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="654.5" y="428" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">rng_state</text>
+<text x="654.5" y="453" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">action sampling</text>
+<rect x="777" y="401" width="205" height="81" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="879.5" y="428" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">training_rng_state</text>
+<text x="879.5" y="453" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">sampling / shuffling</text>
+<rect x="548" y="501" width="434" height="79" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="765.0" y="528" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">group_rng_state [GRPO]</text>
+<text x="765.0" y="553" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">trial-group random stream</text>
+<rect x="42" y="637" width="466" height="198" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="275.0" y="664" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Counters and learning settings</text>
+<rect x="58" y="681" width="213" height="124" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="164.5" y="708" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Progress</text>
+<text x="164.5" y="733" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">steps / updates</text>
+<text x="164.5" y="755" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">rollout_updates</text>
+<text x="164.5" y="777" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">epsilon / baseline</text>
+<rect x="287" y="681" width="205" height="124" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="389.5" y="708" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Contract</text>
+<text x="389.5" y="733" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">config + actions</text>
+<text x="389.5" y="755" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">precision</text>
+<text x="389.5" y="777" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">last metrics</text>
+<rect x="532" y="637" width="466" height="198" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="765.0" y="664" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Algorithm-specific working state</text>
+<rect x="548" y="681" width="213" height="124" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="654.5" y="708" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Recurrent / masked</text>
+<text x="654.5" y="733" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">hidden state</text>
+<text x="654.5" y="755" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">sequence hidden inputs</text>
+<text x="654.5" y="777" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">action mask</text>
+<rect x="777" y="681" width="205" height="124" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="879.5" y="708" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Centralized / group</text>
+<text x="879.5" y="733" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">MAPPO contexts</text>
+<text x="879.5" y="755" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">GRPO last_group_step</text>
+<text x="879.5" y="777" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">additional pending data</text>
+<text x="26" y="895" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Q-network SGD has no Adam moments. Neural parameters, buffers and RNG objects remain private after restoration.</text>
 </svg>

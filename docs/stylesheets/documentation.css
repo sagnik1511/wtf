@@ -6,7 +6,7 @@
   font-size: 0.75rem;
 }
 .md-typeset img[src$='.svg'] {
-  background: #fff;
+  background: var(--md-default-bg-color);
   border-radius: 0.35rem;
 }
 .md-typeset img {
@@ -46,10 +46,12 @@
   border-bottom: 1px solid var(--md-default-fg-color--lightest);
 }
 [data-md-color-scheme='default'] {
+  color-scheme: light;
   --md-primary-fg-color: #163b2a;
   --md-accent-fg-color: #426813;
 }
 [data-md-color-scheme='slate'] {
+  color-scheme: dark;
   --md-primary-fg-color: #a3d936;
   --md-accent-fg-color: #b8e56c;
 }
@@ -73,4 +75,11 @@
 }
 .md-typeset img.brand-sample-dark {
   background: #101d19;
+}
+
+/* Keep the project symbol beside the title at desktop and mobile breakpoints. */
+.md-header .md-header__button.md-logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }

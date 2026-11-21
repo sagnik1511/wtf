@@ -8,6 +8,15 @@ The expected project URL is <https://sagnik1511.github.io/wtf/> once deployed.
 It is a static documentation site; it does not train animals or host the
 Python-backed replay server.
 
+Use the **sun/moon icon at the top right** to switch between light and dark
+appearance. The initial palette follows the operating system preference, and a
+manual choice is remembered in that browser. Page surfaces, navigation, text and
+project logos follow the selected site theme. The project symbol remains visible
+beside the title on every page and at mobile widths. Adaptive SVG diagrams follow
+the same toggle; [visual theme rules](visual-guide.md#light-and-dark-appearance)
+explain why recorded clips and fixed scene specimens retain their source colors. The standalone viewer has its own
+separate theme control; its simulated day–night lighting is another setting.
+
 ## Build or preview locally
 
 From the checkout root, install documentation tools into the development venv:

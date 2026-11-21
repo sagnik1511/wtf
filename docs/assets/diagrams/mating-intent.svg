@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="940" height="380" viewBox="0 0 940 380" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="380" viewBox="0 0 940 380" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-172b45:#172b45;--figure-52657b:#52657b;--figure-8ca0b7:#8ca0b7;--figure-f8fafc:#f8fafc;--figure-fff:#fff;}@media(prefers-color-scheme:dark){svg{--figure-172b45:#e5eaf1;--figure-52657b:#b2bfce;--figure-8ca0b7:#879db4;--figure-f8fafc:#171b22;--figure-fff:#26313e;}}</style>
 <title id="title">Mating consent and physical gates</title>
 <desc id="desc">Reproduce creates short consent. Rest preserves it; other actions or expiration cancel it. Two consenting eligible nearby parents can produce a child and consume both consents.</desc>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#52657b"/></marker></defs>
-<rect width="940" height="380" fill="#f8fafc"/>
-<g font-family="system-ui,sans-serif" fill="#172b45" text-anchor="middle">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--figure-52657b)"/></marker></defs>
+<rect width="940" height="380" fill="var(--figure-f8fafc)"/>
+<g font-family="system-ui,sans-serif" fill="var(--figure-172b45)" text-anchor="middle">
 <text x="470" y="32" font-size="21" font-weight="600">Explicit consent stays local and expires</text>
-<g fill="#fff" stroke="#8ca0b7" stroke-width="1.5"><rect x="30" y="95" width="155" height="75" rx="8"/><rect x="285" y="95" width="210" height="75" rx="8"/><rect x="585" y="80" width="315" height="110" rx="8"/><rect x="620" y="270" width="245" height="65" rx="8"/><rect x="65" y="270" width="215" height="65" rx="8"/></g>
-<g fill="none" stroke="#52657b" stroke-width="2" marker-end="url(#arrow)"><path d="M185 132H285"/><path d="M495 132H585"/><path d="M390 95V58H460V95"/><path d="M742 190V270"/><path d="M325 170L210 270"/><path d="M65 300H20V170H107"/></g>
+<g fill="var(--figure-fff)" stroke="var(--figure-8ca0b7)" stroke-width="1.5"><rect x="30" y="95" width="155" height="75" rx="8"/><rect x="285" y="95" width="210" height="75" rx="8"/><rect x="585" y="80" width="315" height="110" rx="8"/><rect x="620" y="270" width="245" height="65" rx="8"/><rect x="65" y="270" width="215" height="65" rx="8"/></g>
+<g fill="none" stroke="var(--figure-52657b)" stroke-width="2" marker-end="url(#arrow)"><path d="M185 132H285"/><path d="M495 132H585"/><path d="M390 95V58H460V95"/><path d="M742 190V270"/><path d="M325 170L210 270"/><path d="M65 300H20V170H107"/></g>
 <text x="108" y="127" font-size="17">No consent</text><text x="108" y="151" font-size="13">Rest cannot create it</text>
 <text x="235" y="118" font-size="13">reproduce</text>
 <text x="390" y="126" font-size="17">Active intent</text><text x="390" y="151" font-size="13">5 steps, including this step</text>

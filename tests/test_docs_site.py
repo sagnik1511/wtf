@@ -89,6 +89,18 @@ class DocumentationSiteTests(unittest.TestCase):
         ):
             self.assertNotIn("wtf-lockup-motion", (root / name).read_text())
 
+    def test_structural_figures_have_embedded_theme_palettes(self):
+        root = Path(__file__).resolve().parents[1]
+        folders = ("storage", "structures", "diagrams", "physics")
+        ns = {"s": "http://www.w3.org/2000/svg"}
+        for folder in folders:
+            for path in (root / "docs/assets" / folder).glob("*.svg"):
+                svg = ET.parse(path).getroot()
+                style = "".join(e.text or "" for e in svg.findall(".//s:style", ns))
+                self.assertIn("prefers-color-scheme:", style, str(path))
+                self.assertIn("var(--", path.read_text(), str(path))
+                self.assertEqual(svg.findall(".//s:script", ns), [])
+
     def test_ignored_research_and_symlink_files_are_never_published(self):
         from mkdocs.config.defaults import MkDocsConfig
         from mkdocs.structure.files import File, Files

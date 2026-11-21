@@ -1,48 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 864" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 864" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Lineage: shared ancestry without duplicated family credit</title><desc id="desc">Controlled same-species pedigree. Parent links illustrate repeated ancestry; physical mating gates are handled separately.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
-<rect width="1040" height="864" fill="#101720"/>
-<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Lineage: shared ancestry without duplicated family credit</text>
-<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Controlled same-species pedigree. Parent links illustrate repeated ancestry; physical mating gates are handled separately.</text>
-<rect x="116" y="96" width="290" height="88" rx="7" fill="#192532" stroke="#486077"/>
-<text x="261.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Founder A / generation 0</text>
-<text x="261.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">roots = {A}</text>
-<rect x="634" y="96" width="290" height="88" rx="7" fill="#192532" stroke="#486077"/>
-<text x="779.0" y="123" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Founder B / generation 0</text>
-<text x="779.0" y="148" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">roots = {B}</text>
-<path d="M261 184V217H261V249" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M261 184V217H779V249" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M779 184V217H261V249" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M779 184V217H779V249" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="116" y="250" width="290" height="88" rx="7" fill="#192532" stroke="#486077"/>
-<text x="261.0" y="277" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Child C / generation 1</text>
-<text x="261.0" y="302" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">parents A + B -&gt; roots {A,B}</text>
-<rect x="634" y="250" width="290" height="88" rx="7" fill="#192532" stroke="#486077"/>
-<text x="779.0" y="277" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Child D / generation 1</text>
-<text x="779.0" y="302" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">parents A + B -&gt; roots {A,B}</text>
-<path d="M261 338V370H520V402" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M779 338V370H520" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="310" y="403" width="420" height="103" rx="7" fill="#192532" stroke="#486077"/>
-<text x="520.0" y="430" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Descendant E / generation 2</text>
-<text x="520.0" y="455" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">parents C + D</text>
-<text x="520.0" y="477" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">union({A,B}, {A,B}) = {A,B}</text>
-<path d="M520 506V536H267V566" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M520 536H773V566" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="567" width="486" height="120" rx="7" fill="#192532" stroke="#486077"/>
-<text x="267.0" y="594" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Founder A family</text>
-<text x="267.0" y="619" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">members: A, C, D, E</text>
-<text x="267.0" y="641" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">E gains 2 kills -&gt; this family receives +2</text>
-<text x="267.0" y="663" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">E is counted once, not once per ancestry path</text>
-<rect x="530" y="567" width="486" height="120" rx="7" fill="#192532" stroke="#486077"/>
-<text x="773.0" y="594" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Founder B family</text>
-<text x="773.0" y="619" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">members: B, C, D, E</text>
-<text x="773.0" y="641" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">E gains 2 kills -&gt; this family receives +2</text>
-<text x="773.0" y="663" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">overlap across families is intentional</text>
-<path d="M267 687V713H520V739" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M773 687V713H520" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="148" y="740" width="744" height="77" rx="7" fill="#192532" stroke="#486077"/>
-<text x="520.0" y="767" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Candidate selection uses its strongest single family</text>
-<text x="520.0" y="792" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">do not sum overlapping family totals; compare the existing full rank tuple</text>
-<text x="26" y="846" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Generation advantage also requires maturity and personal hunting/feeding success. Model-generation depth is separate.</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
+<rect width="1040" height="864" fill="var(--figure-101720)"/>
+<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Lineage: shared ancestry without duplicated family credit</text>
+<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Controlled same-species pedigree. Parent links illustrate repeated ancestry; physical mating gates are handled separately.</text>
+<rect x="116" y="96" width="290" height="88" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="261.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Founder A / generation 0</text>
+<text x="261.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">roots = {A}</text>
+<rect x="634" y="96" width="290" height="88" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="779.0" y="123" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Founder B / generation 0</text>
+<text x="779.0" y="148" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">roots = {B}</text>
+<path d="M261 184V217H261V249" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M261 184V217H779V249" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M779 184V217H261V249" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M779 184V217H779V249" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="116" y="250" width="290" height="88" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="261.0" y="277" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Child C / generation 1</text>
+<text x="261.0" y="302" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">parents A + B -&gt; roots {A,B}</text>
+<rect x="634" y="250" width="290" height="88" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="779.0" y="277" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Child D / generation 1</text>
+<text x="779.0" y="302" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">parents A + B -&gt; roots {A,B}</text>
+<path d="M261 338V370H520V402" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M779 338V370H520" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="310" y="403" width="420" height="103" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="520.0" y="430" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Descendant E / generation 2</text>
+<text x="520.0" y="455" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">parents C + D</text>
+<text x="520.0" y="477" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">union({A,B}, {A,B}) = {A,B}</text>
+<path d="M520 506V536H267V566" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M520 536H773V566" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="567" width="486" height="120" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="267.0" y="594" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Founder A family</text>
+<text x="267.0" y="619" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">members: A, C, D, E</text>
+<text x="267.0" y="641" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">E gains 2 kills -&gt; this family receives +2</text>
+<text x="267.0" y="663" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">E is counted once, not once per ancestry path</text>
+<rect x="530" y="567" width="486" height="120" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="773.0" y="594" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Founder B family</text>
+<text x="773.0" y="619" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">members: B, C, D, E</text>
+<text x="773.0" y="641" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">E gains 2 kills -&gt; this family receives +2</text>
+<text x="773.0" y="663" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">overlap across families is intentional</text>
+<path d="M267 687V713H520V739" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M773 687V713H520" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="148" y="740" width="744" height="77" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="520.0" y="767" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Candidate selection uses its strongest single family</text>
+<text x="520.0" y="792" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">do not sum overlapping family totals; compare the existing full rank tuple</text>
+<text x="26" y="846" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Generation advantage also requires maturity and personal hunting/feeding success. Model-generation depth is separate.</text>
 </svg>

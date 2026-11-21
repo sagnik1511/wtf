@@ -1,97 +1,97 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 800" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 800" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-1b2b3c:#1b2b3c;--figure-234b45:#234b45;--figure-486077:#486077;--figure-58728c:#58728c;--figure-7de2bd:#7de2bd;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-1b2b3c:#e7eef5;--figure-234b45:#dcefe8;--figure-486077:#a2b5c7;--figure-58728c:#8299ae;--figure-7de2bd:#19714f;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Frame delta: field cells, mask bits and reconstruction</title><desc id="desc">Controlled codec example. Green cells change; unmarked cells are inherited from the previous state.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9bb5ce"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:#e6edf3}.mono{font-family:monospace}</style>
-<rect width="1040" height="800" fill="#101720"/>
-<text x="26" y="39" font-size="25" fill="#e6edf3" style="fill:#e6edf3">Frame delta: field cells, mask bits and reconstruction</text>
-<text x="26" y="68" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Controlled codec example. Green cells change; unmarked cells are inherited from the previous state.</text>
-<rect x="24" y="94" width="486" height="128" rx="7" fill="#192532" stroke="#486077"/>
-<text x="267.0" y="121" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Previous keyframe / tick 10</text>
-<rect x="42" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="83.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">id</text>
-<text x="83.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">7</text>
-<rect x="127" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="168.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">species</text>
-<text x="168.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">prey</text>
-<rect x="212" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="253.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">x</text>
-<text x="253.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">3</text>
-<rect x="297" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="338.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">y</text>
-<text x="338.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">5</text>
-<rect x="382" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="423.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">heading</text>
-<text x="423.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0</text>
-<rect x="530" y="94" width="486" height="128" rx="7" fill="#192532" stroke="#486077"/>
-<text x="773.0" y="121" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Next frame / tick 11</text>
-<rect x="548" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="589.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">id</text>
-<text x="589.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">7</text>
-<rect x="633" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="674.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">species</text>
-<text x="674.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">prey</text>
-<rect x="718" y="143" width="83" height="62" rx="2" fill="#234b45" stroke="#7de2bd"/>
-<text x="759.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">x</text>
-<text x="759.5" y="188" font-size="17" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle" class="mono" xml:space="preserve">8</text>
-<rect x="803" y="143" width="83" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="844.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">y</text>
-<text x="844.5" y="188" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">5</text>
-<rect x="888" y="143" width="83" height="62" rx="2" fill="#234b45" stroke="#7de2bd"/>
-<text x="929.5" y="163" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">heading</text>
-<text x="929.5" y="188" font-size="17" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle" class="mono" xml:space="preserve">1</text>
-<path d="M267 222V254H520V294" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M773 222V254H520" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="537" y="282" font-size="14" fill="#acbfd1" style="fill:#acbfd1">encode only changed fields</text>
-<rect x="176" y="295" width="688" height="149" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="194" y="324" font-size="18" fill="#8ac8ff" style="fill:#8ac8ff">animals.update[] entry</text>
-<rect x="194" y="343" width="150" height="81" rx="7" fill="#192532" stroke="#486077"/>
-<text x="269.0" y="370" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Entity key</text>
-<text x="269.0" y="395" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">7</text>
-<rect x="364" y="343" width="150" height="81" rx="7" fill="#192532" stroke="#486077"/>
-<text x="439.0" y="370" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Field mask</text>
-<text x="439.0" y="395" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">20</text>
-<rect x="534" y="343" width="312" height="81" rx="7" fill="#192532" stroke="#486077"/>
-<text x="690.0" y="370" font-size="17" fill="#8ac8ff" style="fill:#8ac8ff" text-anchor="middle">Replacement values</text>
-<text x="690.0" y="395" font-size="13" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">[8, 1] -&gt; x, heading</text>
-<text x="26" y="285" font-size="13" fill="#acbfd1" style="fill:#acbfd1" class="mono" xml:space="preserve">top-level set: tick = 11</text>
-<path d="M439 444V474H241V512" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M690 444V512" fill="none" stroke="#9bb5ce" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="513" width="434" height="175" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="42" y="543" font-size="18" fill="#8ac8ff" style="fill:#8ac8ff">Mask bits (low five bits shown)</text>
-<rect x="42" y="560" width="78" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="81.0" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">id / b0</text>
-<text x="81.0" y="605" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0</text>
-<rect x="122" y="560" width="78" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="161.0" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">sp / b1</text>
-<text x="161.0" y="605" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0</text>
-<rect x="202" y="560" width="78" height="62" rx="2" fill="#234b45" stroke="#7de2bd"/>
-<text x="241.0" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">x / b2</text>
-<text x="241.0" y="605" font-size="17" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle" class="mono" xml:space="preserve">1</text>
-<rect x="282" y="560" width="78" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="321.0" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">y / b3</text>
-<text x="321.0" y="605" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">0</text>
-<rect x="362" y="560" width="78" height="62" rx="2" fill="#234b45" stroke="#7de2bd"/>
-<text x="401.0" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">hd / b4</text>
-<text x="401.0" y="605" font-size="17" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle" class="mono" xml:space="preserve">1</text>
-<text x="42" y="658" font-size="16" fill="#acbfd1" style="fill:#acbfd1" class="mono" xml:space="preserve">20 = (1 &lt;&lt; 2) | (1 &lt;&lt; 4)</text>
-<rect x="482" y="513" width="534" height="175" rx="7" fill="#14202d" stroke="#486077"/>
-<text x="500" y="543" font-size="18" fill="#8ac8ff" style="fill:#8ac8ff">Apply to the previous animal with ID 7</text>
-<rect x="500" y="560" width="97" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="548.5" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">id</text>
-<text x="548.5" y="605" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">7</text>
-<rect x="599" y="560" width="97" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="647.5" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">species</text>
-<text x="647.5" y="605" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">prey</text>
-<rect x="698" y="560" width="97" height="62" rx="2" fill="#234b45" stroke="#7de2bd"/>
-<text x="746.5" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">x</text>
-<text x="746.5" y="605" font-size="17" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle" class="mono" xml:space="preserve">8</text>
-<rect x="797" y="560" width="97" height="62" rx="2" fill="#1b2b3c" stroke="#58728c"/>
-<text x="845.5" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">y</text>
-<text x="845.5" y="605" font-size="17" fill="#e6edf3" style="fill:#e6edf3" text-anchor="middle" class="mono" xml:space="preserve">5</text>
-<rect x="896" y="560" width="97" height="62" rx="2" fill="#234b45" stroke="#7de2bd"/>
-<text x="944.5" y="580" font-size="12" fill="#acbfd1" style="fill:#acbfd1" text-anchor="middle" class="mono" xml:space="preserve">heading</text>
-<text x="944.5" y="605" font-size="17" fill="#7de2bd" style="fill:#7de2bd" text-anchor="middle" class="mono" xml:space="preserve">1</text>
-<text x="500" y="658" font-size="15" fill="#7de2bd" style="fill:#7de2bd">Reconstructed animal = next-frame animal</text>
-<text x="26" y="733" font-size="14" fill="#acbfd1" style="fill:#acbfd1">The tuple is [entity key, mask, absolute values]. Values follow ascending set-bit order; no numeric differences.</text>
-<text x="26" y="762" font-size="14" fill="#acbfd1" style="fill:#acbfd1">Other operations: add / replace / drop / order. The next chunk resets to a complete keyframe.</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
+<rect width="1040" height="800" fill="var(--figure-101720)"/>
+<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Frame delta: field cells, mask bits and reconstruction</text>
+<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Controlled codec example. Green cells change; unmarked cells are inherited from the previous state.</text>
+<rect x="24" y="94" width="486" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="267.0" y="121" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Previous keyframe / tick 10</text>
+<rect x="42" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="83.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">id</text>
+<text x="83.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">7</text>
+<rect x="127" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="168.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">species</text>
+<text x="168.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">prey</text>
+<rect x="212" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="253.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">x</text>
+<text x="253.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">3</text>
+<rect x="297" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="338.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">y</text>
+<text x="338.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">5</text>
+<rect x="382" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="423.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">heading</text>
+<text x="423.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">0</text>
+<rect x="530" y="94" width="486" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="773.0" y="121" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Next frame / tick 11</text>
+<rect x="548" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="589.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">id</text>
+<text x="589.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">7</text>
+<rect x="633" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="674.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">species</text>
+<text x="674.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">prey</text>
+<rect x="718" y="143" width="83" height="62" rx="2" fill="var(--figure-234b45)" stroke="var(--figure-7de2bd)"/>
+<text x="759.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">x</text>
+<text x="759.5" y="188" font-size="17" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)" text-anchor="middle" class="mono" xml:space="preserve">8</text>
+<rect x="803" y="143" width="83" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="844.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">y</text>
+<text x="844.5" y="188" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">5</text>
+<rect x="888" y="143" width="83" height="62" rx="2" fill="var(--figure-234b45)" stroke="var(--figure-7de2bd)"/>
+<text x="929.5" y="163" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">heading</text>
+<text x="929.5" y="188" font-size="17" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)" text-anchor="middle" class="mono" xml:space="preserve">1</text>
+<path d="M267 222V254H520V294" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M773 222V254H520" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="537" y="282" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">encode only changed fields</text>
+<rect x="176" y="295" width="688" height="149" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="194" y="324" font-size="18" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">animals.update[] entry</text>
+<rect x="194" y="343" width="150" height="81" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="269.0" y="370" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Entity key</text>
+<text x="269.0" y="395" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">7</text>
+<rect x="364" y="343" width="150" height="81" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="439.0" y="370" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Field mask</text>
+<text x="439.0" y="395" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">20</text>
+<rect x="534" y="343" width="312" height="81" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="690.0" y="370" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Replacement values</text>
+<text x="690.0" y="395" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">[8, 1] -&gt; x, heading</text>
+<text x="26" y="285" font-size="13" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" class="mono" xml:space="preserve">top-level set: tick = 11</text>
+<path d="M439 444V474H241V512" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<path d="M690 444V512" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="24" y="513" width="434" height="175" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="42" y="543" font-size="18" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Mask bits (low five bits shown)</text>
+<rect x="42" y="560" width="78" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="81.0" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">id / b0</text>
+<text x="81.0" y="605" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">0</text>
+<rect x="122" y="560" width="78" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="161.0" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">sp / b1</text>
+<text x="161.0" y="605" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">0</text>
+<rect x="202" y="560" width="78" height="62" rx="2" fill="var(--figure-234b45)" stroke="var(--figure-7de2bd)"/>
+<text x="241.0" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">x / b2</text>
+<text x="241.0" y="605" font-size="17" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)" text-anchor="middle" class="mono" xml:space="preserve">1</text>
+<rect x="282" y="560" width="78" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="321.0" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">y / b3</text>
+<text x="321.0" y="605" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">0</text>
+<rect x="362" y="560" width="78" height="62" rx="2" fill="var(--figure-234b45)" stroke="var(--figure-7de2bd)"/>
+<text x="401.0" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">hd / b4</text>
+<text x="401.0" y="605" font-size="17" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)" text-anchor="middle" class="mono" xml:space="preserve">1</text>
+<text x="42" y="658" font-size="16" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" class="mono" xml:space="preserve">20 = (1 &lt;&lt; 2) | (1 &lt;&lt; 4)</text>
+<rect x="482" y="513" width="534" height="175" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
+<text x="500" y="543" font-size="18" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Apply to the previous animal with ID 7</text>
+<rect x="500" y="560" width="97" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="548.5" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">id</text>
+<text x="548.5" y="605" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">7</text>
+<rect x="599" y="560" width="97" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="647.5" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">species</text>
+<text x="647.5" y="605" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">prey</text>
+<rect x="698" y="560" width="97" height="62" rx="2" fill="var(--figure-234b45)" stroke="var(--figure-7de2bd)"/>
+<text x="746.5" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">x</text>
+<text x="746.5" y="605" font-size="17" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)" text-anchor="middle" class="mono" xml:space="preserve">8</text>
+<rect x="797" y="560" width="97" height="62" rx="2" fill="var(--figure-1b2b3c)" stroke="var(--figure-58728c)"/>
+<text x="845.5" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">y</text>
+<text x="845.5" y="605" font-size="17" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">5</text>
+<rect x="896" y="560" width="97" height="62" rx="2" fill="var(--figure-234b45)" stroke="var(--figure-7de2bd)"/>
+<text x="944.5" y="580" font-size="12" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">heading</text>
+<text x="944.5" y="605" font-size="17" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)" text-anchor="middle" class="mono" xml:space="preserve">1</text>
+<text x="500" y="658" font-size="15" fill="var(--figure-7de2bd)" style="fill:var(--figure-7de2bd)">Reconstructed animal = next-frame animal</text>
+<text x="26" y="733" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">The tuple is [entity key, mask, absolute values]. Values follow ascending set-bit order; no numeric differences.</text>
+<text x="26" y="762" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Other operations: add / replace / drop / order. The next chunk resets to a complete keyframe.</text>
 </svg>

@@ -1,78 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-0b1118:#0b1118;--figure-111c27:#111c27;--figure-1d3442:#1d3442;--figure-263341:#263341;--figure-415569:#415569;--figure-7de2bd:#7de2bd;--figure-8ac8ff:#8ac8ff;--figure-a9bacc:#a9bacc;--figure-e6edf3:#e6edf3;--figure-ff9aab:#ff9aab;}@media(prefers-color-scheme:light){svg{--figure-0b1118:#ffffff;--figure-111c27:#ffffff;--figure-1d3442:#e0edf4;--figure-263341:#b7c8d7;--figure-415569:#a2b5c7;--figure-7de2bd:#19714f;--figure-8ac8ff:#1f639c;--figure-a9bacc:#4b6073;--figure-e6edf3:#172c3c;--figure-ff9aab:#b33352;}}</style>
 <title id="title">Worked activation and sensitivity example</title><desc id="desc">An illustrative policy slice with energy and predator presence flows through two tanh units to two action logits and softmax probabilities. A reverse pass gives signed local input influence for move backward. Numbers are verified using production archived inference, not measurements from a simulation.</desc>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8ac8ff"/></marker></defs>
-<rect width="1200" height="680" rx="14" fill="#0b1118"/><g font-family="system-ui,sans-serif">
-<text x="30" y="38" font-size="24" fill="#e6edf3" text-anchor="start" font-weight="600">How weighted inputs become a prediction</text>
-<text x="30" y="68" font-size="15" fill="#a9bacc" text-anchor="start" font-weight="normal">Controlled math example · two active inputs; inactive columns and value head omitted · not a captured animal brain</text>
-<rect x="30" y="105" width="245" height="355" rx="10" fill="#111c27" stroke="#415569"/>
-<rect x="280" y="105" width="285" height="355" rx="10" fill="#111c27" stroke="#415569"/>
-<rect x="570" y="105" width="235" height="355" rx="10" fill="#111c27" stroke="#415569"/>
-<rect x="845" y="105" width="325" height="355" rx="10" fill="#111c27" stroke="#415569"/>
-<text x="150" y="139" font-size="17" fill="#e6edf3" text-anchor="middle" font-weight="600">Input slice</text>
-<text x="420" y="139" font-size="17" fill="#e6edf3" text-anchor="middle" font-weight="600">Hidden layer · tanh</text>
-<text x="690" y="139" font-size="17" fill="#e6edf3" text-anchor="middle" font-weight="600">Linear logits</text>
-<text x="1008" y="139" font-size="17" fill="#e6edf3" text-anchor="middle" font-weight="600">Softmax probabilities</text>
-<line x1="180" y1="220" x2="390" y2="220" stroke="#7de2bd" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="257" y="191" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="280" y="207" font-size="14" fill="#7de2bd" text-anchor="middle" font-weight="normal">+0.8</text>
-<line x1="180" y1="370" x2="390" y2="370" stroke="#7de2bd" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="257" y="379" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="280" y="395" font-size="14" fill="#7de2bd" text-anchor="middle" font-weight="normal">+0.9</text>
-<line x1="172" y1="239" x2="396" y2="350" stroke="#ff9aab" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="212" y="268" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="235" y="284" font-size="14" fill="#ff9aab" text-anchor="middle" font-weight="normal">-0.4</text>
-<line x1="172" y1="350" x2="396" y2="240" stroke="#ff9aab" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="318" y="268" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="341" y="284" font-size="14" fill="#ff9aab" text-anchor="middle" font-weight="normal">-0.5</text>
-<line x1="450" y1="220" x2="660" y2="220" stroke="#7de2bd" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="532" y="191" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="555" y="207" font-size="14" fill="#7de2bd" text-anchor="middle" font-weight="normal">+0.5</text>
-<line x1="450" y1="370" x2="660" y2="370" stroke="#7de2bd" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="532" y="379" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="555" y="395" font-size="14" fill="#7de2bd" text-anchor="middle" font-weight="normal">+0.7</text>
-<line x1="442" y1="239" x2="666" y2="350" stroke="#ff9aab" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="480" y="268" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="503" y="284" font-size="14" fill="#ff9aab" text-anchor="middle" font-weight="normal">-0.2</text>
-<line x1="442" y1="350" x2="666" y2="240" stroke="#ff9aab" stroke-width="2.2" marker-end="url(#arrow)"/>
-<rect x="587" y="268" width="46" height="24" rx="5" fill="#111c27"/>
-<text x="610" y="284" font-size="14" fill="#ff9aab" text-anchor="middle" font-weight="normal">-0.3</text>
-<circle cx="150" cy="220" r="30" fill="#1d3442" stroke="#8ac8ff" stroke-width="2"/>
-<text x="150" y="225" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="normal">0.600</text>
-<text x="150" y="174" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="600">Energy</text>
-<circle cx="150" cy="370" r="30" fill="#1d3442" stroke="#8ac8ff" stroke-width="2"/>
-<text x="150" y="375" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="normal">1.000</text>
-<text x="150" y="324" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="600">Predator present</text>
-<circle cx="420" cy="220" r="30" fill="#1d3442" stroke="#8ac8ff" stroke-width="2"/>
-<text x="420" y="225" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="normal">0.080</text>
-<text x="420" y="174" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="600">Unit 0</text>
-<text x="420" y="277" font-size="14" fill="#a9bacc" text-anchor="middle" font-weight="normal">bias +0.10</text>
-<circle cx="420" cy="370" r="30" fill="#1d3442" stroke="#8ac8ff" stroke-width="2"/>
-<text x="420" y="375" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="normal">0.430</text>
-<text x="420" y="324" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="600">Unit 1</text>
-<text x="420" y="427" font-size="14" fill="#a9bacc" text-anchor="middle" font-weight="normal">bias -0.20</text>
-<circle cx="690" cy="220" r="30" fill="#1d3442" stroke="#8ac8ff" stroke-width="2"/>
-<text x="690" y="225" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="normal">-0.039</text>
-<text x="690" y="174" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="600">rest</text>
-<text x="690" y="277" font-size="14" fill="#a9bacc" text-anchor="middle" font-weight="normal">bias +0.05</text>
-<circle cx="690" cy="370" r="30" fill="#1d3442" stroke="#8ac8ff" stroke-width="2"/>
-<text x="690" y="375" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="normal">0.185</text>
-<text x="690" y="324" font-size="16" fill="#e6edf3" text-anchor="middle" font-weight="600">move backward</text>
-<text x="690" y="427" font-size="14" fill="#a9bacc" text-anchor="middle" font-weight="normal">bias -0.10</text>
-<path d="M722 220 H858" fill="none" stroke="#8ac8ff" stroke-width="2" marker-end="url(#arrow)"/>
-<text x="878" y="200" font-size="16" fill="#e6edf3" text-anchor="start" font-weight="600">rest</text>
-<rect x="878" y="214" width="255" height="24" rx="4" fill="#263341"/><rect x="878" y="214" width="113.27" height="24" rx="4" fill="#8ac8ff"/>
-<text x="1138" y="234" font-size="16" fill="#e6edf3" text-anchor="end" font-weight="normal">44.4%</text>
-<path d="M722 370 H858" fill="none" stroke="#8ac8ff" stroke-width="2" marker-end="url(#arrow)"/>
-<text x="878" y="350" font-size="16" fill="#e6edf3" text-anchor="start" font-weight="600">move backward</text>
-<rect x="878" y="364" width="255" height="24" rx="4" fill="#263341"/><rect x="878" y="364" width="141.73" height="24" rx="4" fill="#7de2bd"/>
-<text x="1138" y="384" font-size="16" fill="#e6edf3" text-anchor="end" font-weight="normal">55.6%</text>
-<text x="30" y="493" font-size="20" fill="#e6edf3" text-anchor="start" font-weight="600">Reverse pass · target = probability of move backward</text>
-<text x="30" y="520" font-size="15" fill="#a9bacc" text-anchor="start" font-weight="normal">Input influence = input × local gradient. Positive and negative signs are local effects, not causal shares.</text>
-<rect x="30" y="542" width="555" height="80" rx="9" fill="#111c27" stroke="#415569"/>
-<text x="46" y="569" font-size="16" fill="#e6edf3" text-anchor="start" font-weight="600">Energy</text>
-<text x="46" y="599" font-size="18" fill="#ff9aab" text-anchor="start" font-weight="normal">0.6 × gradient -0.218 = -0.131</text>
-<rect x="615" y="542" width="555" height="80" rx="9" fill="#111c27" stroke="#415569"/>
-<text x="631" y="569" font-size="16" fill="#e6edf3" text-anchor="start" font-weight="600">Predator presence</text>
-<text x="631" y="599" font-size="18" fill="#7de2bd" text-anchor="start" font-weight="normal">1.0 × gradient +0.267 = +0.267</text>
-<text x="30" y="654" font-size="15" fill="#a9bacc" text-anchor="start" font-weight="normal">Full inference uses every input and connection. A route graph is a bounded display; omitted links still participate.</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--figure-8ac8ff)"/></marker></defs>
+<rect width="1200" height="680" rx="14" fill="var(--figure-0b1118)"/><g font-family="system-ui,sans-serif">
+<text x="30" y="38" font-size="24" fill="var(--figure-e6edf3)" text-anchor="start" font-weight="600">How weighted inputs become a prediction</text>
+<text x="30" y="68" font-size="15" fill="var(--figure-a9bacc)" text-anchor="start" font-weight="normal">Controlled math example · two active inputs; inactive columns and value head omitted · not a captured animal brain</text>
+<rect x="30" y="105" width="245" height="355" rx="10" fill="var(--figure-111c27)" stroke="var(--figure-415569)"/>
+<rect x="280" y="105" width="285" height="355" rx="10" fill="var(--figure-111c27)" stroke="var(--figure-415569)"/>
+<rect x="570" y="105" width="235" height="355" rx="10" fill="var(--figure-111c27)" stroke="var(--figure-415569)"/>
+<rect x="845" y="105" width="325" height="355" rx="10" fill="var(--figure-111c27)" stroke="var(--figure-415569)"/>
+<text x="150" y="139" font-size="17" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Input slice</text>
+<text x="420" y="139" font-size="17" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Hidden layer · tanh</text>
+<text x="690" y="139" font-size="17" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Linear logits</text>
+<text x="1008" y="139" font-size="17" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Softmax probabilities</text>
+<line x1="180" y1="220" x2="390" y2="220" stroke="var(--figure-7de2bd)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="257" y="191" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="280" y="207" font-size="14" fill="var(--figure-7de2bd)" text-anchor="middle" font-weight="normal">+0.8</text>
+<line x1="180" y1="370" x2="390" y2="370" stroke="var(--figure-7de2bd)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="257" y="379" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="280" y="395" font-size="14" fill="var(--figure-7de2bd)" text-anchor="middle" font-weight="normal">+0.9</text>
+<line x1="172" y1="239" x2="396" y2="350" stroke="var(--figure-ff9aab)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="212" y="268" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="235" y="284" font-size="14" fill="var(--figure-ff9aab)" text-anchor="middle" font-weight="normal">-0.4</text>
+<line x1="172" y1="350" x2="396" y2="240" stroke="var(--figure-ff9aab)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="318" y="268" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="341" y="284" font-size="14" fill="var(--figure-ff9aab)" text-anchor="middle" font-weight="normal">-0.5</text>
+<line x1="450" y1="220" x2="660" y2="220" stroke="var(--figure-7de2bd)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="532" y="191" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="555" y="207" font-size="14" fill="var(--figure-7de2bd)" text-anchor="middle" font-weight="normal">+0.5</text>
+<line x1="450" y1="370" x2="660" y2="370" stroke="var(--figure-7de2bd)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="532" y="379" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="555" y="395" font-size="14" fill="var(--figure-7de2bd)" text-anchor="middle" font-weight="normal">+0.7</text>
+<line x1="442" y1="239" x2="666" y2="350" stroke="var(--figure-ff9aab)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="480" y="268" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="503" y="284" font-size="14" fill="var(--figure-ff9aab)" text-anchor="middle" font-weight="normal">-0.2</text>
+<line x1="442" y1="350" x2="666" y2="240" stroke="var(--figure-ff9aab)" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="587" y="268" width="46" height="24" rx="5" fill="var(--figure-111c27)"/>
+<text x="610" y="284" font-size="14" fill="var(--figure-ff9aab)" text-anchor="middle" font-weight="normal">-0.3</text>
+<circle cx="150" cy="220" r="30" fill="var(--figure-1d3442)" stroke="var(--figure-8ac8ff)" stroke-width="2"/>
+<text x="150" y="225" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="normal">0.600</text>
+<text x="150" y="174" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Energy</text>
+<circle cx="150" cy="370" r="30" fill="var(--figure-1d3442)" stroke="var(--figure-8ac8ff)" stroke-width="2"/>
+<text x="150" y="375" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="normal">1.000</text>
+<text x="150" y="324" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Predator present</text>
+<circle cx="420" cy="220" r="30" fill="var(--figure-1d3442)" stroke="var(--figure-8ac8ff)" stroke-width="2"/>
+<text x="420" y="225" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="normal">0.080</text>
+<text x="420" y="174" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Unit 0</text>
+<text x="420" y="277" font-size="14" fill="var(--figure-a9bacc)" text-anchor="middle" font-weight="normal">bias +0.10</text>
+<circle cx="420" cy="370" r="30" fill="var(--figure-1d3442)" stroke="var(--figure-8ac8ff)" stroke-width="2"/>
+<text x="420" y="375" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="normal">0.430</text>
+<text x="420" y="324" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">Unit 1</text>
+<text x="420" y="427" font-size="14" fill="var(--figure-a9bacc)" text-anchor="middle" font-weight="normal">bias -0.20</text>
+<circle cx="690" cy="220" r="30" fill="var(--figure-1d3442)" stroke="var(--figure-8ac8ff)" stroke-width="2"/>
+<text x="690" y="225" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="normal">-0.039</text>
+<text x="690" y="174" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">rest</text>
+<text x="690" y="277" font-size="14" fill="var(--figure-a9bacc)" text-anchor="middle" font-weight="normal">bias +0.05</text>
+<circle cx="690" cy="370" r="30" fill="var(--figure-1d3442)" stroke="var(--figure-8ac8ff)" stroke-width="2"/>
+<text x="690" y="375" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="normal">0.185</text>
+<text x="690" y="324" font-size="16" fill="var(--figure-e6edf3)" text-anchor="middle" font-weight="600">move backward</text>
+<text x="690" y="427" font-size="14" fill="var(--figure-a9bacc)" text-anchor="middle" font-weight="normal">bias -0.10</text>
+<path d="M722 220 H858" fill="none" stroke="var(--figure-8ac8ff)" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="878" y="200" font-size="16" fill="var(--figure-e6edf3)" text-anchor="start" font-weight="600">rest</text>
+<rect x="878" y="214" width="255" height="24" rx="4" fill="var(--figure-263341)"/><rect x="878" y="214" width="113.27" height="24" rx="4" fill="var(--figure-8ac8ff)"/>
+<text x="1138" y="234" font-size="16" fill="var(--figure-e6edf3)" text-anchor="end" font-weight="normal">44.4%</text>
+<path d="M722 370 H858" fill="none" stroke="var(--figure-8ac8ff)" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="878" y="350" font-size="16" fill="var(--figure-e6edf3)" text-anchor="start" font-weight="600">move backward</text>
+<rect x="878" y="364" width="255" height="24" rx="4" fill="var(--figure-263341)"/><rect x="878" y="364" width="141.73" height="24" rx="4" fill="var(--figure-7de2bd)"/>
+<text x="1138" y="384" font-size="16" fill="var(--figure-e6edf3)" text-anchor="end" font-weight="normal">55.6%</text>
+<text x="30" y="493" font-size="20" fill="var(--figure-e6edf3)" text-anchor="start" font-weight="600">Reverse pass · target = probability of move backward</text>
+<text x="30" y="520" font-size="15" fill="var(--figure-a9bacc)" text-anchor="start" font-weight="normal">Input influence = input × local gradient. Positive and negative signs are local effects, not causal shares.</text>
+<rect x="30" y="542" width="555" height="80" rx="9" fill="var(--figure-111c27)" stroke="var(--figure-415569)"/>
+<text x="46" y="569" font-size="16" fill="var(--figure-e6edf3)" text-anchor="start" font-weight="600">Energy</text>
+<text x="46" y="599" font-size="18" fill="var(--figure-ff9aab)" text-anchor="start" font-weight="normal">0.6 × gradient -0.218 = -0.131</text>
+<rect x="615" y="542" width="555" height="80" rx="9" fill="var(--figure-111c27)" stroke="var(--figure-415569)"/>
+<text x="631" y="569" font-size="16" fill="var(--figure-e6edf3)" text-anchor="start" font-weight="600">Predator presence</text>
+<text x="631" y="599" font-size="18" fill="var(--figure-7de2bd)" text-anchor="start" font-weight="normal">1.0 × gradient +0.267 = +0.267</text>
+<text x="30" y="654" font-size="15" fill="var(--figure-a9bacc)" text-anchor="start" font-weight="normal">Full inference uses every input and connection. A route graph is a bounded display; omitted links still participate.</text>
 </g></svg>

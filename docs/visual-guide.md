@@ -84,3 +84,24 @@ figure from the feedback review and linked mating inputs to the vector layout.
 | Native kernels, dtypes and performance reports | Keep coverage/benchmark tables and architecture links | Comparisons and measured values are already clear |
 | Physics, maps, inheritance and algorithm information boundaries | Keep existing figures/explorer and add links where needed | Existing visuals cover these relationships |
 | Configuration flags, setup commands, calibration records and release history | Keep prose/tables and existing navigation | No new structural question warrants another diagram |
+
+## Light and dark appearance
+
+Structural flow, storage, checkpoint and runtime diagrams use self-contained SVG
+palettes for both light and dark surfaces. Physics diagrams adapt in the same
+way. On GitHub Pages, embedded SVGs follow the site's sun/moon toggle through
+CSS `color-scheme`, even when the operating-system theme differs. Opened on
+their own, these SVGs follow the browser's system preference. Logo variants are
+selected explicitly by the site theme.
+
+Recorded GIFs, geographic map exports and viewer/inspector specimen sheets keep
+their source colors. They illustrate a particular rendered scene or compare both
+palettes; recoloring them would change the example. Their opaque surfaces retain
+contrast in either surrounding page theme. The standalone physics explorer
+adapts to system light/dark preference. The live viewer has its own theme toggle
+for controls, board, charts and inspector graphics, separate from simulated
+sunlight.
+
+The project symbol stays to the left of the shared documentation header title
+on every page, including narrow layouts. It is a home link and uses the matching
+light/dark logo; only the home-page hero has the ribbon animation.
