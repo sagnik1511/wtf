@@ -288,7 +288,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `exploration` | Epsilon-greedy action-exploration schedule for value-based learners. | object | Required; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (q_network).exploration`
 
@@ -302,9 +302,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (ppo)`
 
@@ -327,7 +328,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `target_kl` | Optional KL early-stop threshold during repeated policy optimization. | number; min: `0`; max: `1` | Optional; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (ppo).network`
 
@@ -341,9 +342,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (a2c)`
 
@@ -362,7 +364,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `normalize_advantages` | Whether the supported learner normalizes its collected advantages. | boolean | Required; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (a2c).network`
 
@@ -376,9 +378,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (reinforce)`
 
@@ -396,7 +399,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `normalize_advantages` | Whether the supported learner normalizes its collected advantages. | boolean | Required; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (reinforce).network`
 
@@ -410,9 +413,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (grpo)`
 
@@ -435,7 +439,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `target_kl` | Optional KL early-stop threshold during repeated policy optimization. | number; min: `0`; max: `1` | Optional; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (grpo).network`
 
@@ -449,9 +453,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (recurrent_ppo)`
 
@@ -476,7 +481,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `sequence_length` | Maximum recurrent training sequence length. | integer; min: `1`; max: `128` | Required; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (recurrent_ppo).network`
 
@@ -490,9 +495,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (maskable_ppo)`
 
@@ -515,7 +521,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `target_kl` | Optional KL early-stop threshold during repeated policy optimization. | number; min: `0`; max: `1` | Optional; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (maskable_ppo).network`
 
@@ -529,9 +535,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (mappo)`
 
@@ -555,7 +562,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `critic_hidden_layers` | MAPPO centralized critic widths; the local actor remains a separate route. | array; min items: `1`; max items: `4`; items: integer; min: `1`; max: `256` | Required; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (mappo).network`
 
@@ -569,9 +576,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.brains.<name> (qrdqn)`
 
@@ -593,7 +601,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `max_grad_norm` | Global gradient-norm clipping threshold before optimizer updates. | number; min: `1e-05`; max: `100` | Required; — |
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
-| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 
 ## `config.brains.<name> (qrdqn).exploration`
 
@@ -615,9 +623,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
-| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Required; — |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
 ## `config.experiment`
 
@@ -685,4 +694,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `enabled` | Deposit anonymous species/sex ground traces. Omission or false disables scent storage and sensing. | boolean | Required; `false` |
 | `lifetime_steps` | Ground-trace lifetime in simulation steps; freshness decreases linearly to zero, and revisiting a cell refreshes its group trace. | integer; min: `2`; max: `256` | Required; — |
 
-Field entries documented: **372**.
+Field entries documented: **381**.

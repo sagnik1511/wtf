@@ -120,3 +120,19 @@ test('Board tracks use the sampled observer position and reject unavailable or f
   );
   assert.equal(sample.origin.x, 2);
 });
+
+test('Blended scent exposes one anonymous nine-sector field and rejects ambiguous modes', () => {
+  const t = { scent_observation: { mode: 'blended', radius: 2 } };
+  assert.equal(trackingLayout(t).width, 9);
+  const view = trackingView(Array(9).fill(0.4), t, 0);
+  assert.deepEqual(view.scent, [
+    { blended: true, strengths: Array(9).fill(0.4) },
+  ]);
+  assert.equal(trackingLabels(t)[0], 'Scent blended here');
+  for (const scent_observation of [
+    { mode: 'invalid' },
+    { mode: 'blended', species: ['prey'] },
+    { mode: 'blended', separate_sexes: false },
+  ])
+    assert.equal(trackingLayout({ scent_observation }), null);
+});

@@ -98,3 +98,11 @@ observation versions. Enabled checkpoints require sensory state version 1 and a
 runtime supporting those senses; older releases cannot resume these runs. Legacy
 checkpoints without the options retain their existing restore path. Replays use
 the current binary format; updated inspectors decode the optional input blocks.
+
+Blended scent uses an explicit `scent_observation.mode: "blended"` signature
+and nine inputs for all animals. Omitted mode retains the original separated
+species/sex layout and canonical signature; old brains, exact checkpoints and
+recordings retain their original behavior. Switching scent mode requires a
+compatible brain, even when both layouts happen to have nine inputs. The
+maintained tracking preset now selects blended mode; use an old run's recorded
+configuration to resume its separated-scent checkpoint.

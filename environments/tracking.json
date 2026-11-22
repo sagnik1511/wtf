@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "tracking",
-  "description": "Optional personal movement history and anonymous species/sex scent trails with masked PPO",
+  "description": "Optional personal movement history and blended anonymous scent trails with masked PPO",
   "seed": 42,
   "world": {
     "width": 40,
@@ -162,9 +162,8 @@
       "observation_top_k": 3,
       "movement_history_steps": 3,
       "scent_observation": {
-        "species": ["prey", "predator"],
-        "radius": 2,
-        "separate_sexes": true
+        "mode": "blended",
+        "radius": 2
       }
     },
     "predator_maskable_ppo": {
@@ -190,9 +189,8 @@
       "observation_top_k": 10,
       "movement_history_steps": 3,
       "scent_observation": {
-        "species": ["prey", "predator"],
-        "radius": 2,
-        "separate_sexes": true
+        "mode": "blended",
+        "radius": 2
       }
     }
   },

@@ -1022,7 +1022,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -1047,9 +1046,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -1193,7 +1225,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -1218,9 +1249,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -1342,7 +1406,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -1367,9 +1430,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -1482,7 +1578,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -1507,9 +1602,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -1653,7 +1781,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -1678,9 +1805,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -1838,7 +1998,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -1863,9 +2022,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -2013,7 +2205,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -2038,9 +2229,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -2197,7 +2421,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -2222,9 +2445,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [
@@ -2386,7 +2642,6 @@
               "scent_observation": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["species"],
                 "properties": {
                   "species": {
                     "type": "array",
@@ -2411,9 +2666,42 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
                 },
-                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
               }
             },
             "required": [

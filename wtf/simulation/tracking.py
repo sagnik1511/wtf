@@ -20,6 +20,8 @@ def scent_contract(template):
     spec = template.get("scent_observation")
     if spec is None:
         return None
+    if spec.get("mode", "separated") == "blended":
+        return dict(mode="blended", radius=spec.get("radius", 2))
     return dict(
         species=list(spec["species"]),
         radius=spec.get("radius", 2),
@@ -31,6 +33,8 @@ def scent_channels(template):
     spec = scent_contract(template)
     if spec is None:
         return []
+    if spec.get("mode") == "blended":
+        return [("blended", "any")]
     return [
         (name, sex)
         for name in spec["species"]
@@ -69,7 +73,13 @@ def tracking_names(template):
                         f"{prefix} lag {lag} {part}" for part in ("dx", "dy", "seen")
                     )
     for species, sex in scent_channels(template):
-        names.extend(f"Scent {species} {sex} {side}" for side in SECTOR_NAMES)
+        prefix = (
+            "Scent blended"
+            if species == "blended"
+            and scent_contract(template).get("mode") == "blended"
+            else f"Scent {species} {sex}"
+        )
+        names.extend(f"{prefix} {side}" for side in SECTOR_NAMES)
     return names
 
 
@@ -196,19 +206,27 @@ class ScentField:
         spec = template.get("scent_observation")
         if spec is None:
             return []
+        blended = spec.get("mode", "separated") == "blended"
         key = (
-            tuple(spec["species"]),
+            tuple(spec.get("species", ())),
             spec.get("separate_sexes", True),
             spec.get("radius", 2),
+            blended,
         )
         plan = self._plans.get(key)
         if plan is None:
-            plan = tuple(
-                tuple(
-                    self.groups[name, group_sex]
-                    for group_sex in (("female", "male") if sex == "any" else (sex,))
+            plan = (
+                (tuple(range(self.channels)),)
+                if blended
+                else tuple(
+                    tuple(
+                        self.groups[name, group_sex]
+                        for group_sex in (
+                            ("female", "male") if sex == "any" else (sex,)
+                        )
+                    )
+                    for name, sex in scent_channels(template)
                 )
-                for name, sex in scent_channels(template)
             )
             self._plans[key] = plan
             if len(self._plans) > 16:
@@ -230,12 +248,18 @@ class ScentField:
             sector = SECTORS.index(((dx > 0) - (dx < 0), (dy > 0) - (dy < 0)))
             cell = (y * self.width + x) * self.channels
             for index, groups in enumerate(plan):
+                combined = 0.0
                 for group in groups:
                     when = self.cells.get(cell + group)
                     if when is not None:
                         strength = max(0.0, 1 - (world.tick - when) / self.lifetime)
-                        offset = index * 9 + sector
-                        features[offset] = max(features[offset], strength)
+                        combined = (
+                            min(1.0, combined + strength)
+                            if blended
+                            else max(combined, strength)
+                        )
+                offset = index * 9 + sector
+                features[offset] = max(features[offset], combined)
             if distance < key[2]:
                 for p in ((x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)):
                     if p not in seen:

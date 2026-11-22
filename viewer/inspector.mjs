@@ -141,8 +141,8 @@ function trackingPanel(tracking) {
     panel.append(
       el(
         'p',
-        `${tracking.steps} previous steps · personal sightings only · hollow markers are last-seen memories`,
-        'muted',
+        `Visual memory · ${tracking.steps} steps`,
+        'muted inspector-note',
       ),
     );
     const chart = svg('svg', {
@@ -246,36 +246,20 @@ function trackingPanel(tracking) {
       panel.append(
         el('p', 'No recent animal sightings in this sample.', 'muted'),
       );
-    for (const t of tracking.tracks)
-      panel.append(
-        el(
-          'p',
-          `${t.category} track ${t.slot} · ${t.visible ? 'visible' : `last seen ${t.age} steps ago`} · ${(t.confidence * 100).toFixed(0)}% confidence`,
-          'muted',
-        ),
-      );
   }
   if (tracking.scent.length) {
-    panel.append(
-      el(
-        'p',
-        `Anonymous ground scent · radius ${tracking.radius} dry-cell steps · each grid is a species/sex group, not one animal`,
-        'muted',
-      ),
-    );
+    panel.append(el('p', `Local scent · radius ${tracking.radius}`, 'muted'));
     const grids = el('div', undefined, 'scent-grids');
     for (const channel of tracking.scent) {
+      const label = channel.blended
+        ? 'Blended scent'
+        : `${channel.species} · ${channel.sex === 'any' ? 'all sexes' : channel.sex}`;
       const tile = el('div', undefined, 'scent-channel');
-      tile.append(
-        el(
-          'h4',
-          `${channel.species} · ${channel.sex === 'any' ? 'all sexes' : channel.sex}`,
-        ),
-      );
+      tile.append(el('h4', label));
       const chart = svg('svg', {
         viewBox: '0 0 126 138',
         role: 'img',
-        'aria-label': `${channel.species} ${channel.sex} local scent pattern; north is up.`,
+        'aria-label': `${label} local scent pattern; north is up.`,
         class: 'scent-grid',
       });
       chart.append(svg('text', { x: 63, y: 11, 'text-anchor': 'middle' }, 'N'));
@@ -310,7 +294,7 @@ function trackingPanel(tracking) {
           svg(
             'title',
             {},
-            `${SCENT_SECTORS[i]} · ${(strength * 100).toFixed(0)}% freshness${i === 0 ? ' · own cell; own scent may be included' : ''}`,
+            `${SCENT_SECTORS[i]} · ${(strength * 100).toFixed(0)}% ${channel.blended ? 'blended strength' : 'freshness'}${i === 0 ? ' · own cell; own scent may be included' : ''}`,
           ),
         );
         chart.append(number);

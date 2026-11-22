@@ -156,20 +156,31 @@ def validate(c):
         if "scent_observation" in b:
             scent = b["scent_observation"]
             sp = p + ".scent_observation"
-            obj(scent, sp, ("species",), optional=("radius", "separate_sexes"))
-            names = scent["species"]
-            if (
-                not isinstance(names, list)
-                or not 1 <= len(names) <= 8
-                or any(not isinstance(n, str) for n in names)
-                or len(set(names)) != len(names)
-            ):
-                fail(sp + ".species", "must contain 1–8 unique species names")
-            if any(n not in c["species"] for n in names):
-                fail(sp + ".species", "unknown species")
+            mode = scent.get("mode", "separated") if isinstance(scent, dict) else None
+            if mode not in ("separated", "blended"):
+                fail(sp + ".mode", "must be separated or blended")
+            if mode == "blended":
+                obj(scent, sp, (), optional=("mode", "radius"))
+            else:
+                obj(
+                    scent,
+                    sp,
+                    ("species",),
+                    optional=("mode", "radius", "separate_sexes"),
+                )
+                names = scent["species"]
+                if (
+                    not isinstance(names, list)
+                    or not 1 <= len(names) <= 8
+                    or any(not isinstance(n, str) for n in names)
+                    or len(set(names)) != len(names)
+                ):
+                    fail(sp + ".species", "must contain 1–8 unique species names")
+                if any(n not in c["species"] for n in names):
+                    fail(sp + ".species", "unknown species")
+                if type(scent.get("separate_sexes", True)) is not bool:
+                    fail(sp + ".separate_sexes", "must be boolean")
             num(scent.get("radius", 2), sp + ".radius", 1, 8, True)
-            if type(scent.get("separate_sexes", True)) is not bool:
-                fail(sp + ".separate_sexes", "must be boolean")
             if not c.get("scent_trails", {}).get("enabled", False):
                 fail(sp, "requires scent_trails.enabled")
             b = {k: v for k, v in b.items() if k != "scent_observation"}

@@ -742,7 +742,7 @@ const sensoryTemplate = {
   type: 'ppo',
   observation_version: 1,
   movement_history_steps: 3,
-  scent_observation: { species: ['prey', 'predator'], radius: 2 },
+  scent_observation: { mode: 'blended', radius: 2 },
 };
 const sensoryFeatures = [
   ...features,
@@ -778,41 +778,14 @@ const sensoryFeatures = [
   -0.2,
   0.2,
   1,
-  0.2,
-  0.7,
-  0.4,
+  0.5,
+  0.9,
+  0.6,
   1,
-  0.3,
-  0.1,
-  0,
-  0.1,
-  0.2,
-  0.1,
-  0.2,
   0.7,
-  0.6,
-  0.2,
-  0,
-  0,
-  0,
-  0.1,
-  0,
-  0,
-  0,
-  0.1,
-  0.3,
-  0.6,
-  0.8,
   0.5,
   0.2,
-  0.3,
-  0.2,
-  0,
-  0,
-  0,
-  0.1,
-  0.2,
-  0.6,
+  0.4,
   0.8,
 ];
 const sensoryInspector = inspectorGraphs({
@@ -828,7 +801,7 @@ const sensoryInspector = inspectorGraphs({
 const sensoryPlots = walk(sensoryInspector).filter((n) =>
   ['movement-history', 'scent-grid'].includes(n.attributes?.class),
 );
-assert.equal(sensoryPlots.length, 5, 'Sensory inspector specimens missing');
+assert.equal(sensoryPlots.length, 2, 'Sensory inspector specimens missing');
 let sensoryBody =
   box(28, 95, 500, 475) +
   text(46, 126, 'Personal visual memory', 21, '#e6edf3', 'start', true) +
@@ -842,27 +815,15 @@ let sensoryBody =
     ],
     15,
   );
-for (let i = 0; i < 4; i++) {
-  const x = 552 + (i % 2) * 310,
-    y = 95 + Math.floor(i / 2) * 245;
-  sensoryBody +=
-    box(x, y, 296, 230) +
-    text(
-      x + 16,
-      y + 30,
-      `${i < 2 ? 'prey' : 'predator'} · ${i % 2 ? 'male' : 'female'}`,
-      18,
-      '#e6edf3',
-      'start',
-      true,
-    ) +
-    component(sensoryPlots[i + 1], x + 67, y + 42, 168, 182);
-}
+sensoryBody +=
+  box(552, 95, 606, 475) +
+  text(575, 126, 'Blended scent · all animals', 21, '#e6edf3', 'start', true) +
+  component(sensoryPlots[1], 690, 155, 300, 330);
 sensoryBody += lines(
   40,
   610,
   [
-    'Nine sectors per group: local freshness, not one target or a complete route.',
+    'One nine-sector field: blended strength, no species, sex or individual identity.',
     'Ground scent cannot cross a sealed wall or wet cells. Gaps in sight remain unknown.',
     'These panels update at recorded diagnostic samples, using existing replay input vectors.',
   ],

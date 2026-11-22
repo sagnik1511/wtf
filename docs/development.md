@@ -97,6 +97,13 @@ Use the focused checks described below. Documentation/media work does not requir
 
 ![Choose checks for the change](assets/diagrams/choose-checks-for-the-change.svg)
 
+The viewer suite includes `tests/theme-contrast.test.mjs`: it checks semantic
+CSS text/background pairs in both palettes and executes the canvas birth/death
+renderers to verify their badge contrast. When changing labels, also inspect
+normal, disabled, loading, empty, error and event states in both themes. Check
+selected-animal diagrams and dialogs; numeric contrast tests do not detect
+clipping or excess layout text.
+
 ## Local server
 
 The server binds only to `127.0.0.1`. Use `--port 8001` if the default port is occupied. Close the terminal process or press Ctrl-C to stop it.

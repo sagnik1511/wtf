@@ -239,10 +239,18 @@ test('Movement and scent inspector plots use sampled history and anonymous speci
   });
   const labels = text(root);
   assert(labels.includes('Movement memory & scent'));
-  assert(labels.includes('last seen 1 steps ago'));
+  assert(labels.includes('1 steps since seen'));
+  assert(labels.includes('67% confidence'));
+  assert.equal(
+    walk(root).filter(
+      (n) => n.tagName === 'p' && /track \d/.test(n.textContent),
+    ).length,
+    0,
+  );
   assert(labels.includes('prey · female'));
   assert(labels.includes('prey · male'));
-  assert(labels.includes('not one animal'));
+  assert(labels.includes('Local scent · radius 2'));
+  assert(!labels.includes('not one animal'));
   assert.equal(
     walk(root).filter((n) => n.attributes.class === 'scent-grid').length,
     2,
@@ -255,4 +263,24 @@ test('Movement and scent inspector plots use sampled history and anonymous speci
   assert(
     walk(root).some((n) => n.textContent.includes('own scent may be included')),
   );
+});
+
+test('Blended scent renders exactly one anonymous heatmap', () => {
+  const root = inspectorGraphs({
+    diagnostic: {
+      tick: 1,
+      features: [...features, ...Array(9).fill(0.4)],
+      action_probabilities: { rest: 1 },
+    },
+    template: { scent_observation: { mode: 'blended' } },
+    spec: { body },
+    hasWater: false,
+  });
+  assert.equal(
+    walk(root).filter((n) => n.attributes.class === 'scent-grid').length,
+    1,
+  );
+  assert(text(root).includes('Blended scent'));
+  assert(!text(root).includes('all sexes'));
+  assert(text(root).includes('40% blended strength'));
 });

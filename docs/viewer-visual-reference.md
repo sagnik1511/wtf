@@ -119,6 +119,12 @@ activations and archived-model sensitivity/route charts use theme-aware colors.
 Cached or expanded charts recolor immediately on a theme toggle without seeking
 or waiting for another diagnostic sample.
 
+Event banners, canvas birth/death badges, end-of-recording messages, errors,
+disabled controls and explanation notices use explicit foreground/background
+pairs in both themes. Species legends retain colored marker symbols with neutral
+text so bright species colors do not make their names difficult to read.
+Movement-memory panels use compact headings; per-target details remain on hover.
+
 It is independent of simulated sunlight; daylight lights the ground and night
 dims it in either interface theme.
 
@@ -172,7 +178,7 @@ ribbon animation. See [motion assets and behavior](branding.md#motion-policy).
 
 ## Movement memory and scent
 
-![Current inspector movement-memory and species/sex scent components](assets/viewer/tracking.svg)
+![Current inspector movement-memory and blended scent components](assets/viewer/tracking.svg)
 
 With the optional [tracking senses](tracking.md) enabled, select an animal to see
 its sampled movement history and anonymous local scent patterns. **Tracks & scent
@@ -180,6 +186,7 @@ charts** jumps to those panels. A selected-only board overlay shows personal
 visual tracks, while **Run movement heatmap** opens arrival counts through the current replay step
 in Behavior & learning. Scent itself stays off the main board. Hollow markers
 are last-seen memories; dashed inspector lines are velocity estimates, and gaps remain
-unknown. Each labeled scent grid belongs to a species/sex channel rather than
+unknown. Blended mode shows one heatmap for all animals; legacy separated mode retains
+its named species/sex grids. A scent field is not
 one animal. These controlled SVG specimens come from the actual inspector
 renderers and adapt to interface light/dark palettes.

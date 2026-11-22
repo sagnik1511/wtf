@@ -34,25 +34,29 @@ On each brain template that should use these senses:
 ```json
 "movement_history_steps": 3,
 "scent_observation": {
-  "species": ["prey", "predator"],
-  "radius": 2,
-  "separate_sexes": true
+  "mode": "blended",
+  "radius": 2
 }
 ```
 
 `movement_history_steps` accepts 0–16 and defaults to zero. It counts previous
 simulation steps, independently of the number of targets in
 `observation_top_k`. Omit `scent_observation` to disable that brain's scent
-inputs. Its ordered species list accepts 1–8 exact configured names. Radius
-accepts 1–8 and defaults to two orthogonal dry-cell path steps. Sex separation
-defaults to true; false merges female/male scent into one channel per species.
+inputs. Blended mode senses all configured species and sexes through one
+anonymous field; omit `species` and `separate_sexes`. Radius accepts 1–8 and
+defaults to two orthogonal dry-cell path steps.
+
+For old saved brains, omission of `mode` retains `separated` behavior. In that
+mode, the ordered `species` list accepts 1–8 exact configured names, and
+`separate_sexes` defaults to true; false merges sexes within each species.
+Explicit `"mode": "separated"` is equivalent to the old omitted-mode contract.
 Scent input configuration requires `scent_trails.enabled: true`. To disable the
 field entirely, remove those brain input blocks before disabling the root flag.
 Trail lifetime accepts 2–256 steps. These are simulation controls, not calibrated
 biological timescales.
 
-Different brain templates may use different history lengths, sensed species,
-sex separation and smell radii. Animals of every configured species leave traces
+Different brain templates may use different history lengths, scent modes and
+smell radii; separated mode also chooses species and sex channels. Animals of every configured species leave traces
 while the world field is enabled, including species that do not sense scent.
 
 ## Personal visual history
@@ -85,17 +89,25 @@ birth. It does not inherit either parent's movement memories.
 
 Each occupied dry cell records the most recent deposit time for each species/sex
 group. Multiple animals in the same group refresh one merged trace; they do not
-create identifiable trails or additive concentrations. Standing still also
+create identifiable trails or per-animal concentrations. Standing still also
 refreshes a trace. Scent can persist after its maker moves away or dies.
 An animal's own scent is included in its group: the field does not secretly
 subtract it using individual identity.
 
 Freshness decreases linearly from one to zero over `lifetime_steps`. Detection
 samples reachable dry cells within the configured path radius. For each sensed
-group the brain receives the strongest remaining freshness in **each** of nine
-sectors: here, N, NE, E, SE, S, SW, W, NW. Two intersecting trails can therefore
+group in legacy separated mode, the brain receives the strongest remaining
+freshness in **each** of nine sectors: here, N, NE, E, SE, S, SW, W, NW. Two intersecting trails can therefore
 produce several directional signals; there is no chosen prey or destination.
 These are sector summaries, not a full local image or a complete historical path.
+
+In blended mode, freshness from all species/sex groups is summed **at each
+reachable cell**, capped at one. Each sector reports its strongest blended
+cell, producing nine values total. This reuses the same bounded sparse deposits
+without creating another world map. Repeated deposits within one group refresh
+its timestamp, so strength is a bounded trace signal, not an animal count or a
+physical concentration. The brain cannot identify a species, sex or individual
+from a channel label. Own scent remains included.
 
 Sealed obstacles and wet cells stop ground-scent sampling; no traces are
 deposited in water. This is a deliberately simple ground-trace model, without
@@ -114,14 +126,14 @@ category and `H > 0` history steps, movement adds `2 * K * (7 + 3 * H)` values:
 | 7 summary values | Last-seen dx/dy, estimated velocity x/y per step, normalized age, confidence, currently-visible flag |
 | 3 values per previous step | Historical dx/dy and observed flag, newest lag first; zeros mark unknown steps |
 
-Scent adds nine values per channel: one channel per sensed species, or female
-then male channels per species with sex separation enabled. Channel order follows
-`scent_observation.species`. Version 1, K=1, H=3 and two sex-separated species has
+Blended scent adds nine values total. Separated scent adds nine values per
+channel: one channel per sensed species, or female then male channels per species
+with sex separation enabled. Legacy channel order follows `scent_observation.species`. Version 1, K=1, H=3 and two sex-separated species has
 `20 + 32 + 36 = 88` inputs. The tracking preset's version-4 prey K=3 and predator
-K=10 have 201 and 509 inputs respectively.
+K=10 now have 174 and 482 inputs respectively with blended scent.
 
 Model signatures include history length and the ordered scent contract. Changing
-those fields requires fresh compatible weights; equal input width alone is not
+those fields, including scent mode, requires fresh compatible weights; equal input width alone is not
 sufficient. Explicit history zero retains the legacy signature. Old recordings
 and configurations remain readable and keep their original input layouts.
 
@@ -136,9 +148,12 @@ its recorded sensory inputs. Movement
 dots are personal sightings; missing steps break the connecting line. Hollow
 markers and fading opacity identify remembered targets. Dashed line segments in the inspector show the
 last velocity estimate, not confirmed future movement. Prey/predator colors
-refer to the existing diet categories. Separate named scent grids show the local
-freshness pattern for each configured species/sex group, with north upwards and
-the observer's current cell in the center.
+refer to the existing diet categories. The scent panel shows the local
+blended strength pattern in a single heatmap (or the original species/sex grids
+for separated recordings), with north upwards and
+the observer's current cell in the center. Compact headings keep the diagrams
+stable; hover a movement marker for its slot, visibility, age and confidence
+instead of repeating those details in paragraphs below the chart.
 
 Panels update at diagnostic samples as playback advances, rather than inventing
 intermediate data. Use a nonzero `recording.diagnostics_every_steps`; lower

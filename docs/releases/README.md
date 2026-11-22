@@ -20,7 +20,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.7](0.0.2.7.md) | Pending | 2026-11-22 | Not committed; base `5da3504` | Personal movement history, anonymous species/sex ground scent and inspector plots |
+| [0.0.2.7](0.0.2.7.md) | Pending | 2026-11-22 | Not committed; base `5da3504` | Personal movement history, blended/legacy separated ground scent and inspector plots |
 | [0.0.2.6](0.0.2.6.md) | Committed | 2026-11-22 | `5da3504` | Overlay competition labels without resizing the board |
 | [0.0.2.5](0.0.2.5.md) | Committed | 2026-11-22 | `882c155` | One runtime asset allowlist for source archives and wheels |
 | [0.0.2.4](0.0.2.4.md) | Committed | 2026-11-22 | `b47a2b0` | Reuse private GRPO trial state and batch independent dense actors |

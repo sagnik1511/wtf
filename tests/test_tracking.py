@@ -13,7 +13,12 @@ from wtf.experiment.runner import Experiment
 from wtf.inspection.explainability import feature_names, prepare_model
 from wtf.learning.brain import observation_inputs
 from wtf.learning.brains import model_snapshot, load_model_weights
-from wtf.simulation.tracking import Tracking, tracking_names, tracking_width
+from wtf.simulation.tracking import (
+    Tracking,
+    scent_contract,
+    tracking_names,
+    tracking_width,
+)
 from wtf.simulation.world import Animal, World
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.storage.recording import Recorder
@@ -122,6 +127,30 @@ class MovementTests(unittest.TestCase):
 
 
 class ScentTests(unittest.TestCase):
+    def test_blended_field_sums_groups_per_cell_without_identity_and_fades(self):
+        w = scene(scent=True)
+        field = w._tracking.scent
+        field.cells.clear()
+        w.tick = 6
+        cell = (2 * field.width + 3) * field.channels
+        field.cells[cell + field.groups["prey", "female"]] = 0
+        field.cells[cell + field.groups["predator", "male"]] = 1
+        template = dict(scent_observation=dict(mode="blended", radius=2))
+        values = field.sample(w, w.animals[0], template)
+        self.assertEqual(len(values), 9)
+        self.assertEqual(values[3], 0.625)
+        self.assertEqual(sum(values), 0.625)
+        before = list(field.cells.items())
+        self.assertEqual(field.sample(w, w.animals[0], template), values)
+        self.assertEqual(list(field.cells.items()), before)
+        w.tick = 2
+        self.assertEqual(field.sample(w, w.animals[0], template)[3], 1)
+        w.tick = 9
+        self.assertEqual(field.sample(w, w.animals[0], template), [0] * 9)
+        w.tick = 6
+        w.obstacles.add((3, 2))
+        self.assertEqual(field.sample(w, w.animals[0], template), [0] * 9)
+
     def test_anonymous_trails_merge_and_preserve_multiple_directions_and_sexes(self):
         w = scene(0, True)
         w.animals[1].x = 1
@@ -172,6 +201,58 @@ class ScentTests(unittest.TestCase):
 
 
 class TrackingIntegrationTests(unittest.TestCase):
+    def test_blended_contract_all_policies_resume_and_legacy_weights(self):
+        for kind in KINDS:
+            with self.subTest(kind=kind):
+                c = tracked(environment(kind, 0), 2)
+                legacy = Experiment(copy.deepcopy(c))
+                old = model_snapshot(legacy.brains[0])
+                # Explicit separated mode preserves the old canonical signature.
+                for b in c["brains"].values():
+                    b["scent_observation"]["mode"] = "separated"
+                separated = Experiment(copy.deepcopy(c))
+                load_model_weights(separated.brains[0], old)
+                self.assertEqual(
+                    scent_contract(legacy.brains[0].config),
+                    scent_contract(separated.brains[0].config),
+                )
+                for b in c["brains"].values():
+                    b["scent_observation"] = dict(mode="blended", radius=2)
+                validate(c)
+                e = force_reproduction(Experiment(c))
+                with self.assertRaisesRegex(ValueError, "incompatible"):
+                    load_model_weights(e.brains[0], old)
+                e.step()
+                self.assertTrue(any(a.generation > 0 for a in e.world.animals.values()))
+                for brain in e.brains.values():
+                    model = model_snapshot(brain)
+                    prepare_model(model)
+                    self.assertEqual(
+                        feature_names(model["signature"])[-9:],
+                        [
+                            f"Scent blended {side}"
+                            for side in (
+                                "here",
+                                "north",
+                                "northeast",
+                                "east",
+                                "southeast",
+                                "south",
+                                "southwest",
+                                "west",
+                                "northwest",
+                            )
+                        ],
+                    )
+                with tempfile.TemporaryDirectory() as folder:
+                    path = Path(folder) / "checkpoint.bin.xz"
+                    e.write_checkpoint(path)
+                    restored = Experiment.restore(read_checkpoint(path))
+                for _ in range(3):
+                    self.assertEqual(e.checkpoint(), restored.checkpoint())
+                    e.step()
+                    restored.step()
+
     def test_disabled_layout_signatures_and_state_are_legacy_compatible(self):
         c = config()
         e = Experiment(c)
@@ -239,6 +320,22 @@ class TrackingIntegrationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 prepare_model(invalid)
 
+    def test_equal_width_scent_modes_cannot_silently_reuse_weights(self):
+        c = tracked(environment("ppo", 0), 0)
+        for template in c["brains"].values():
+            template["scent_observation"] = dict(species=["prey"], separate_sexes=False)
+        e = Experiment(c)
+        model = model_snapshot(e.brains[0])
+        for template in c["brains"].values():
+            template["scent_observation"] = dict(mode="blended")
+        other = Experiment(c)
+        self.assertEqual(
+            observation_inputs(e.brains[0].config),
+            observation_inputs(other.brains[0].config),
+        )
+        with self.assertRaisesRegex(ValueError, "incompatible"):
+            load_model_weights(other.brains[0], model)
+
     def test_grpo_reset_owns_its_sensory_state(self):
         w = scene(3, True)
         w.observe_all()
@@ -254,32 +351,41 @@ class TrackingIntegrationTests(unittest.TestCase):
     def test_binary_replay_reuses_sampled_features_without_world_scent_or_histories(
         self,
     ):
-        c = tracked(environment("ppo", 0), 2)
-        c["recording"].update(
-            encoding="binary",
-            compression="xz",
-            frames_per_chunk=2,
-            diagnostics_every_steps=2,
-        )
-        expected, e = Experiment(c), Experiment(c)
-        with tempfile.TemporaryDirectory() as folder:
-            writer = Recorder(folder, c, "train")
-            writer.begin_run(e)
-            while not e.finished_run:
-                expected.step()
-                e.step()
-                writer.capture(e, force=e.finished_run)
-            writer.end_run(e)
-            writer.close()
-            paths = sorted(Path(folder).rglob("*.bin.xz"))
-            self.assertGreater(len(paths), 1)
-            for path in paths:
-                for frame in load_chunk(path):
-                    self.assertNotIn("sensory_state", frame)
-                    self.assertNotIn("scent", frame)
-                    for d in frame.get("diagnostics", {}).values():
-                        self.assertTrue(d["features"])
-        self.assertEqual(e.checkpoint(), expected.checkpoint())
+        for mode in ("separated", "blended"):
+            with self.subTest(mode=mode):
+                c = tracked(environment("ppo", 0), 2)
+                if mode == "blended":
+                    for template in c["brains"].values():
+                        template["scent_observation"] = dict(mode="blended")
+                c["recording"].update(
+                    encoding="binary",
+                    compression="xz",
+                    frames_per_chunk=2,
+                    diagnostics_every_steps=2,
+                )
+                expected, e = Experiment(c), Experiment(c)
+                with tempfile.TemporaryDirectory() as folder:
+                    writer = Recorder(folder, c, "train")
+                    writer.begin_run(e)
+                    while not e.finished_run:
+                        expected.step()
+                        e.step()
+                        writer.capture(e, force=e.finished_run)
+                    writer.end_run(e)
+                    writer.close()
+                    paths = sorted(Path(folder).rglob("*.bin.xz"))
+                    self.assertGreater(len(paths), 1)
+                    for path in paths:
+                        for frame in load_chunk(path):
+                            self.assertNotIn("sensory_state", frame)
+                            self.assertNotIn("scent", frame)
+                            for d in frame.get("diagnostics", {}).values():
+                                self.assertTrue(d["features"])
+                                if mode == "blended":
+                                    self.assertEqual(
+                                        len(d["features"]), 20 + 2 * (7 + 3 * 2) + 9
+                                    )
+                self.assertEqual(e.checkpoint(), expected.checkpoint())
 
     def test_json_key_reordering_and_trial_reset_preserve_scent_channel_identity(self):
         w = scene(3, True)
@@ -314,6 +420,9 @@ class TrackingIntegrationTests(unittest.TestCase):
             ("movement_history_steps", -1),
             ("movement_history_steps", 17),
             ("movement_history_steps", True),
+            ("scent_observation", dict(mode="wrong")),
+            ("scent_observation", dict(mode="blended", species=["prey"])),
+            ("scent_observation", dict(mode="blended", separate_sexes=False)),
             ("scent_observation", dict(species=["missing"])),
             ("scent_observation", dict(species=["prey", "prey"])),
             ("scent_observation", dict(species=["prey"], radius=9)),

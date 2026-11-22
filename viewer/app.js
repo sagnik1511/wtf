@@ -302,8 +302,10 @@ function syncSpeciesLegend() {
       ['female', '♀'],
       ['male', '♂'],
     ]) {
-      const item = text('span', `${style.symbol} ${name} ${symbol}`);
-      item.style.color = style[sex];
+      const item = text('span', '', 'legend-key'),
+        marker = text('span', style.symbol, 'legend-symbol');
+      marker.style.color = style[sex];
+      item.append(marker, text('span', `${name} ${symbol}`));
       item.title = `${name} · ${sex}${sex === 'male' ? ' · light outline' : ''}`;
       item.setAttribute('aria-label', `${name} ${sex}`);
       nodes.push(item);
@@ -487,6 +489,7 @@ function drawDeathHighlights() {
     ctx = canvas.getContext('2d');
   const cw = canvas.width / state.width,
     ch = canvas.height / state.height;
+  const light = document.documentElement.dataset.theme === 'light';
   const markers = [
     ...state.natural_death_highlights.map((e) => ({ ...e, natural: true })),
     ...state.kill_highlights,
@@ -502,9 +505,15 @@ function drawDeathHighlights() {
       kill.natural && state.species[kill.species]?.diet === 'resource';
     const color = kill.natural
       ? preyDeath
-        ? '#7de2bd'
-        : '#f1c36b'
-      : '#ff5268';
+        ? light
+          ? '#19714f'
+          : '#7de2bd'
+        : light
+          ? '#846118'
+          : '#f1c36b'
+      : light
+        ? '#b52b42'
+        : '#ff5268';
     ctx.fillStyle = kill.natural
       ? preyDeath
         ? '#7de2bd25'
@@ -519,11 +528,13 @@ function drawDeathHighlights() {
     ctx.fill();
     ctx.stroke();
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = kill.natural
-      ? preyDeath
-        ? '#d4fff0'
-        : '#fff0cb'
-      : '#ffe3df';
+    ctx.strokeStyle = light
+      ? color
+      : kill.natural
+        ? preyDeath
+          ? '#d4fff0'
+          : '#fff0cb'
+        : '#ffe3df';
     ctx.lineWidth = 3;
     const cross = cw * 0.22;
     ctx.beginPath();
@@ -536,19 +547,27 @@ function drawDeathHighlights() {
     ctx.textAlign = 'center';
     const labelX = Math.max(30, Math.min(canvas.width - 30, x)),
       labelY = y < 50 ? y + radius + 19 : y - radius - 8;
-    ctx.fillStyle = '#1c1019';
+    ctx.fillStyle = light
+      ? kill.natural
+        ? preyDeath
+          ? '#e8f5ee'
+          : '#fff3d6'
+        : '#fff0f2'
+      : '#1c1019';
     ctx.fillRect(labelX - 25, labelY - 16, 50, 21);
-    ctx.fillStyle = kill.natural
-      ? preyDeath
-        ? '#a4f2d6'
-        : '#f7d99e'
-      : '#ffadad';
+    ctx.fillStyle = light
+      ? color
+      : kill.natural
+        ? preyDeath
+          ? '#a4f2d6'
+          : '#f7d99e'
+        : '#ffadad';
     ctx.fillText(kill.natural ? 'DIED' : 'KILL', labelX, labelY);
     const hunter = kill.natural
       ? null
       : state.animals.find((a) => a.id === kill.actor);
     if (hunter) {
-      ctx.strokeStyle = '#ffd18a';
+      ctx.strokeStyle = light ? '#846118' : '#ffd18a';
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(
@@ -568,6 +587,7 @@ function drawBirthHighlights() {
     ctx = canvas.getContext('2d');
   const cw = canvas.width / state.width,
     ch = canvas.height / state.height;
+  const light = document.documentElement.dataset.theme === 'light';
   for (const birth of state.birth_highlights) {
     if (!birth.position) continue;
     const child = state.animals.find((a) => a.id === birth.target);
@@ -576,10 +596,10 @@ function drawBirthHighlights() {
     const radius = cw * (0.52 + birth.age * 0.035);
     ctx.save();
     ctx.globalAlpha = Math.max(0.25, 1 - birth.age / 14);
-    ctx.strokeStyle = '#6edbff';
-    ctx.fillStyle = '#6edbff20';
+    ctx.strokeStyle = light ? '#176b95' : '#6edbff';
+    ctx.fillStyle = light ? '#176b9520' : '#6edbff20';
     ctx.lineWidth = 3;
-    ctx.shadowColor = '#6edbff';
+    ctx.shadowColor = light ? '#176b95' : '#6edbff';
     ctx.shadowBlur = 14;
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -590,7 +610,7 @@ function drawBirthHighlights() {
     const plusX = x + cw * 0.38,
       plusY = y - cw * 0.38,
       size = cw * 0.13;
-    ctx.strokeStyle = '#d9f6ff';
+    ctx.strokeStyle = light ? '#145574' : '#d9f6ff';
     ctx.beginPath();
     ctx.moveTo(plusX - size, plusY);
     ctx.lineTo(plusX + size, plusY);
@@ -601,9 +621,9 @@ function drawBirthHighlights() {
     const labelY = y < 50 ? y + radius + 19 : y - radius - 8;
     ctx.font = 'bold 15px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#102632';
+    ctx.fillStyle = light ? '#e8f4fa' : '#102632';
     ctx.fillRect(labelX - 35, labelY - 16, 70, 21);
-    ctx.fillStyle = '#b6eeff';
+    ctx.fillStyle = light ? '#145574' : '#b6eeff';
     ctx.fillText('BORN', labelX, labelY);
     ctx.restore();
   }

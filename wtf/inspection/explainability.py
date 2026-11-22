@@ -78,18 +78,29 @@ def prepare_model(model):
     if type(history) is not int or not 0 <= history <= 16:
         raise ValueError("Unsupported explanation movement history")
     if scent is not None:
-        if not isinstance(scent, dict) or not isinstance(scent.get("species"), list):
-            raise ValueError("Unsupported explanation scent layout")
-        names = scent["species"]
-        if (
-            not 1 <= len(names) <= 8
-            or any(not isinstance(n, str) or not n for n in names)
-            or len(set(names)) != len(names)
-            or type(scent.get("radius", 2)) is not int
-            or not 1 <= scent.get("radius", 2) <= 8
-            or type(scent.get("separate_sexes", True)) is not bool
+        if not isinstance(scent, dict) or scent.get("mode", "separated") not in (
+            "separated",
+            "blended",
         ):
             raise ValueError("Unsupported explanation scent layout")
+        if (
+            type(scent.get("radius", 2)) is not int
+            or not 1 <= scent.get("radius", 2) <= 8
+        ):
+            raise ValueError("Unsupported explanation scent layout")
+        if scent.get("mode") == "blended":
+            if set(scent) - {"mode", "radius"}:
+                raise ValueError("Unsupported explanation scent layout")
+        else:
+            names = scent.get("species")
+            if (
+                not isinstance(names, list)
+                or not 1 <= len(names) <= 8
+                or any(not isinstance(n, str) or not n for n in names)
+                or len(set(names)) != len(names)
+                or type(scent.get("separate_sexes", True)) is not bool
+            ):
+                raise ValueError("Unsupported explanation scent layout")
     if len(feature_names(sig)) != inputs:
         raise ValueError("Unsupported explanation observation layout")
     count = 0

@@ -257,7 +257,9 @@ the setup; [Ubuntu coverage](linux.md) must distinguish configured CI from passe
 `movement_history_steps` retains only personally selected sightings, with
 identity matching, missing-step masks and fading last-seen estimates. Root
 `scent_trails` owns sparse merged cell/species/sex deposits; per-brain
-`scent_observation` chooses ordered channels and a dry-path smell radius. Neither
+`scent_observation` chooses a blended all-animal field or legacy ordered channels,
+plus a dry-path smell radius. Omitted mode preserves separated saved-brain
+signatures; the tracking preset explicitly selects blended inputs. Neither
 sense provides individual scent targets or hidden world trajectories. Append
 layouts participate in model signatures and inspector/XAI labels. Preserve
 versioned `world.sensory_state` for exact resume and independent GRPO trials;

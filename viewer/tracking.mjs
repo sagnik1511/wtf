@@ -39,22 +39,31 @@ export function trackingLayout(template = {}) {
   if (spec !== undefined) {
     if (
       !spec ||
-      !Array.isArray(spec.species) ||
-      spec.species.length < 1 ||
-      spec.species.length > 8 ||
-      new Set(spec.species).size !== spec.species.length ||
-      !spec.species.every((n) => typeof n === 'string' && n.length) ||
+      !['separated', 'blended'].includes(spec.mode ?? 'separated') ||
       !Number.isInteger(spec.radius ?? 2) ||
       (spec.radius ?? 2) < 1 ||
-      (spec.radius ?? 2) > 8 ||
-      typeof (spec.separate_sexes ?? true) !== 'boolean'
+      (spec.radius ?? 2) > 8
     )
       return null;
-    for (const species of spec.species)
-      for (const sex of (spec.separate_sexes ?? true)
-        ? ['female', 'male']
-        : ['any'])
-        channels.push({ species, sex });
+    if (spec.mode === 'blended') {
+      if ('species' in spec || 'separate_sexes' in spec) return null;
+      channels.push({ blended: true });
+    } else {
+      if (
+        !Array.isArray(spec.species) ||
+        spec.species.length < 1 ||
+        spec.species.length > 8 ||
+        new Set(spec.species).size !== spec.species.length ||
+        !spec.species.every((n) => typeof n === 'string' && n.length) ||
+        typeof (spec.separate_sexes ?? true) !== 'boolean'
+      )
+        return null;
+      for (const species of spec.species)
+        for (const sex of (spec.separate_sexes ?? true)
+          ? ['female', 'male']
+          : ['any'])
+          channels.push({ species, sex });
+    }
   }
   return {
     steps,
@@ -87,9 +96,11 @@ export function trackingLabels(template) {
           for (const part of ['dx', 'dy', 'seen'])
             names.push(`${prefix} lag ${lag} ${part}`);
       }
-  for (const { species, sex } of layout.channels)
+  for (const { species, sex, blended } of layout.channels)
     for (const side of SCENT_SECTORS)
-      names.push(`Scent ${species} ${sex} ${side}`);
+      names.push(
+        blended ? `Scent blended ${side}` : `Scent ${species} ${sex} ${side}`,
+      );
   return names;
 }
 

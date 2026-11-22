@@ -24,13 +24,13 @@
 <text x="578" y="190" class="small">Overlapping group trails merge; old entries expire.</text>
 <path class="arrow" d="M777 203V224"/>
 <rect class="box" x="562" y="228" width="430" height="80" rx="6"/>
-<text x="578" y="253">Local dry-path sampling → nine sectors per group</text>
+<text x="578" y="253">Local sampling → blended or separated sectors</text>
 <text x="578" y="276" class="small">Several directions can be fresh simultaneously.</text>
 <text x="578" y="297" class="small">No individual destination, full route or consent signal.</text>
 <path class="arrow" d="M263 334V354H420V372"/><path class="arrow" d="M777 334V354H620V372"/>
 <rect class="box" x="220" y="376" width="600" height="73" rx="8"/>
 <text x="244" y="403" class="head">Per-animal observation → independent policy</text>
-<text x="244" y="429" class="small">Existing blocks → movement block → species/sex scent blocks</text>
+<text x="244" y="429" class="small">Existing blocks → movement block → chosen scent layout</text>
 <path class="arrow" d="M350 449V478"/><path class="arrow" d="M690 449V478"/>
 <rect class="box" x="28" y="482" width="470" height="130" rx="8"/>
 <text x="48" y="511" class="head">Exact checkpoint</text>
@@ -40,7 +40,7 @@
 <rect class="box" x="542" y="482" width="470" height="130" rx="8"/>
 <text x="562" y="511" class="head">Sampled replay → selected inspector</text>
 <text x="562" y="538">Existing input vectors in binary/compressed chunks</text>
-<text x="562" y="562" class="small">Observed movement dots + anonymous scent grids.</text>
+<text x="562" y="562" class="small">Movement dots + blended heatmap or legacy grids.</text>
 <text x="562" y="586" class="small">No per-frame scent maps; no extra trajectory archive.</text>
 <text x="28" y="647" class="small">Both off by default. Learning decisions, mating proximity and physical challenge gates remain separate.</text>
 </svg>

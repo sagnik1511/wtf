@@ -132,8 +132,10 @@ export class Dashboard {
       );
     $('dashboard-legend').replaceChildren(
       ...names.map((name) => {
-        const item = element('span', `● ${name}`);
-        item.style.color = this.color(name);
+        const item = element('span', '', 'legend-key'),
+          marker = element('span', '●', 'legend-symbol');
+        marker.style.color = this.color(name);
+        item.append(marker, element('span', name));
         return item;
       }),
     );
@@ -144,8 +146,8 @@ export class Dashboard {
       const s = point?.species[name];
       if (!s) continue;
       const card = element('article', undefined, 'species-card'),
-        heading = element('strong', name);
-      heading.style.color = this.color(name);
+        heading = element('strong', name, 'series-heading');
+      heading.style.borderLeftColor = this.color(name);
       card.append(heading);
       const rows = [
         ['Population', number(s.population)],
@@ -280,7 +282,7 @@ export class Dashboard {
         }
     }
     if (!values.length) {
-      ctx.fillStyle = '#8b9cad';
+      ctx.fillStyle = style.getPropertyValue('--muted').trim() || '#8b9cad';
       ctx.textAlign = 'center';
       ctx.fillText('No samples in this time window', left + w / 2, top + h / 2);
     }
