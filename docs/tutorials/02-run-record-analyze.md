@@ -13,6 +13,12 @@ With a checkout, run it as a module from the repository root:
 Installed-package users can instead save the complete code below as
 `complete_experiment.py` and run `.venv/bin/python complete_experiment.py --steps 200 --seed 100`.
 
+This example requires replay-enabled recording (`full` or `compact`, with
+`recording.enabled: true`) because it always constructs a recorder and analyzes
+its playback. Use [Tutorial 4](04-training-and-inference.md) for training-only
+capture; passing that profile to this deliberately small replay example raises
+before a playback folder is created.
+
 ## Complete Python code
 
 The recorder commits bounded replay chunks instead of accumulating all frames.

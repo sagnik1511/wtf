@@ -84,6 +84,8 @@ Home = "index.md"
     { "Tutorial 1: Configure" = "tutorials/01-configuration.md" },
     { "Tutorial 2: Run and analyze" = "tutorials/02-run-record-analyze.md" },
     { "Tutorial 3: Restore and view" = "tutorials/03-restore-and-view.md" },
+    { "Tutorial 4: Training and inference" = "tutorials/04-training-and-inference.md" },
+    { "Tutorial 5: Compare saved policies" = "tutorials/05-compare-saved-policies.md" },
     { "Python example" = "examples.md" },
 ]
 

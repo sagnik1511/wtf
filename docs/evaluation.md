@@ -7,6 +7,8 @@ from changes caused by placement, starting reserves, population or opponent
 behavior. This guide describes the method; experiment observations and run
 histories do not belong in package documentation or release notes.
 
+For an executable walkthrough, follow [Tutorial 5: compare saved policy banks](tutorials/05-compare-saved-policies.md).
+
 ## Match the starting conditions
 
 Capture the effective environment and select compatible species/sex brain banks.
@@ -29,8 +31,10 @@ unchanged parameters throughout each animal's life.
 
 Reproduction can remain active during frozen evaluation. Ordinary crossover
 creates a new child parameter set even when each individual never learns.
-Describe an opponent as a fixed starting bank unless every descendant is also
-forced to use the same template. Do not imply unchanged descendant policies.
+Use `--mode evaluate --freeze-brains` to copy same-sex parent weights at birth
+without crossover. Ordinary evaluation without the flag retains crossover.
+Describe an opponent as a fixed starting bank unless descendants also preserve
+those weights; do not imply unchanged descendant policies otherwise.
 
 Training comparisons keep the learning budget, optimizer resets, inheritance and
 mutation settings consistent except for the chosen intervention. Keep initial

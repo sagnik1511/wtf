@@ -51,6 +51,8 @@ narrow screens. The top tabs open the same section pages.
 | [Tutorial 1: Configure](tutorials/01-configuration.md) | Choose and validate an environment before running. |
 | [Tutorial 2: Run and analyze](tutorials/02-run-record-analyze.md) | Run a complete experiment and inspect saved metrics. |
 | [Tutorial 3: Restore and view](tutorials/03-restore-and-view.md) | Restore checkpoints, initialize champions and open playback. |
+| [Tutorial 4: Training and inference](tutorials/04-training-and-inference.md) | Recording profiles, recovery artifacts, saved brains and fresh frozen-policy playback. |
+| [Tutorial 5: Compare saved policies](tutorials/05-compare-saved-policies.md) | Complete matched-seed bank comparison with paired endpoint metrics. |
 | [Python example](examples.md) | Runnable Python example and its output contract. |
 
 ## Worlds and species

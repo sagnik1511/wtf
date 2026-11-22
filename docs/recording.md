@@ -177,6 +177,9 @@ On a cache miss, moving the playhead loads the selected world chunk. Chart histo
 
 ![Seeking and charts use separate data](assets/diagrams/seeking-and-charts-use-separate-data.svg)
 
+Follow [Tutorial 4](tutorials/04-training-and-inference.md) for a complete
+training-only → saved brains → recorded inference workflow.
+
 ## Training recording profiles
 
 The optional `recording.profile` field, or `--recording-profile`, controls capture

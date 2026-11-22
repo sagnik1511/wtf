@@ -1,6 +1,6 @@
 # 3. Restore state and view the recording
 
-[Tutorial hub](../tutorial.md) · [Previous: run and record](02-run-record-analyze.md) · [Compatibility](../compatibility.md)
+[Tutorial hub](../tutorial.md) · [Previous: run and record](02-run-record-analyze.md) · [Next: training and inference](04-training-and-inference.md) · [Compatibility](../compatibility.md)
 
 ## Read metrics and restore a checkpoint
 

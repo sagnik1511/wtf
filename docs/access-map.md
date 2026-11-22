@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **269 public documentation pages**, **103 visual files**
+Coverage: **271 public documentation pages**, **103 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -86,6 +86,8 @@ and **8 identical viewer branding copies**.
 | [1. Configure a small world](tutorials/01-configuration.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Tutorial 1: Configure](tutorials/01-configuration.md) |
 | [2. Run, record and analyze](tutorials/02-run-record-analyze.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Tutorial 2: Run and analyze](tutorials/02-run-record-analyze.md) |
 | [3. Restore state and view the recording](tutorials/03-restore-and-view.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Tutorial 3: Restore and view](tutorials/03-restore-and-view.md) |
+| [4. Train with less output, then record inference](tutorials/04-training-and-inference.md) | [Home](index.md) → [Training and inference tutorial](tutorials/04-training-and-inference.md) |
+| [5. Compare saved policy banks on matched worlds](tutorials/05-compare-saved-policies.md) | [Home](index.md) → [Policy-bank comparison tutorial](tutorials/05-compare-saved-policies.md) |
 | [Board objects and viewer guide](viewer-visual-reference.md) | [Home](index.md) → [Board-piece legend](viewer-visual-reference.md) |
 | [Viewer and storage](viewer/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Viewer and artifact overview](viewer/index.md) |
 | [Playback and inspection](viewer/playback/index.md) | [Home](index.md) → [Playback and inspection](viewer/playback/index.md) |

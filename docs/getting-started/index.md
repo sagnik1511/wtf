@@ -12,4 +12,6 @@ are separate processes; the documentation website itself runs neither.
 | [Use Docker](../docker.md) | Build and launch with persistent result storage. |
 | [Run, resume or initialize brains](../running.md) | CLI workflow, seeds, champions and exact checkpoints. |
 | [Follow the Python tutorial](../tutorial.md) | Configure → run and analyze → restore and view. |
+| [Train without replay, then record inference](../tutorials/04-training-and-inference.md) | Save training metrics/models, then inspect fresh frozen-policy worlds. |
+| [Compare saved brains](../tutorials/05-compare-saved-policies.md) | Matched-seed evaluation with paired metrics and playback. |
 | [Use the complete example](../examples.md) | Runnable Python experiment with output explanations. |

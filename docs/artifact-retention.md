@@ -2,7 +2,11 @@
 
 [Run and resume](running.md) · [Binary storage](binary-storage.md) · [Champion selection](brain-library.md)
 
-Large experiments keep **every replay chunk, metrics row and numbered run champion archive**.
+With recording enabled, large experiments keep **every replay chunk, metrics row
+and numbered run champion archive**. Training-only profiles skip replay creation;
+retention does not delete existing playback. Follow the
+[training/inference tutorial](tutorials/04-training-and-inference.md) to choose
+capture and retention independently.
 Retention affects only new recovery files and periodic best-brain milestones owned
 by the current invocation. Existing experiments are not scanned, converted or pruned.
 

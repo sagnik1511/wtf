@@ -42,6 +42,8 @@ for creating the environment, source builds and Docker.
 | --- | --- |
 | Install and run a first world | [Installation](../INSTALL.md), then [run and resume](running.md) |
 | Use Python directly | [Complete tutorial](tutorial.md) and [example script](../examples/README.md) |
+| Train without replay and watch inference later | [Training and inference tutorial](tutorials/04-training-and-inference.md) |
+| Compare saved policies on matched seeds | [Policy-bank comparison tutorial](tutorials/05-compare-saved-policies.md) |
 | Change populations, maps, policies or actions | [Customization handbook](customization.md) |
 | Understand movement, rivers, collisions, energy and births | [Physics and simulation rules](physics.md) |
 | Identify animal pointers and board markers | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
