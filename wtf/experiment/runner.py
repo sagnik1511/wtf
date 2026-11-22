@@ -513,16 +513,19 @@ class Experiment:
             data["selected"] = dict(id=selected, **brain.diagnostics(o))
         return data
 
-    def checkpoint(self, include_brains=True):
+    def _checkpoint_metadata(self, *, detached):
+        # The file writer consumes this borrowed view synchronously, before any
+        # further simulation step. Public snapshots retain their detached contract.
+        clone = copy.deepcopy if detached else lambda value: value
         state = dict(
             checkpoint_version=1,
             brain_precision=self.brain_precision,
-            initial_models=copy.deepcopy(self.initial_models),
-            initial_weights=copy.deepcopy(self.initial_weights),
-            run_initial_models=copy.deepcopy(self.run_initial_models),
-            champion_artifacts=copy.deepcopy(self.champion_artifacts),
+            initial_models=clone(self.initial_models),
+            initial_weights=clone(self.initial_weights),
+            run_initial_models=clone(self.run_initial_models),
+            champion_artifacts=clone(self.champion_artifacts),
             legacy_brain_retention=self.legacy_brain_retention,
-            champions=copy.deepcopy(self.champions.entries),
+            champions=clone(self.champions.entries),
             lineage=self.champions.lineage.checkpoint(),
             guard_lineage_chaining=self.guard_lineage_chaining,
             improvement_only=self.improvement_only,
@@ -531,30 +534,42 @@ class Experiment:
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
             randomization_seed=self.randomization_seed,
             seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None,
-            config=copy.deepcopy(self.config),
+            config=clone(self.config),
             mode=self.mode,
             run_index=self.run_index,
             world=self.world.checkpoint(),
-            history=copy.deepcopy(self.history),
-            summaries=copy.deepcopy(self.summaries),
+            history=clone(self.history),
+            summaries=clone(self.summaries),
             run_seeds=self.run_seeds[:],
             finished_run=self.finished_run,
         )
+        return state
+
+    def checkpoint(self, include_brains=True):
+        state = self._checkpoint_metadata(detached=True)
         if include_brains:
             state["brains"] = {str(i): b.checkpoint() for i, b in self.brains.items()}
         return state
 
-    def write_checkpoint(self, path):
+    def write_checkpoint(self, path, *, shared_metadata=False):
         """Atomic streamed checkpoint; .gz selects the compact lossless format."""
         from wtf.storage.checkpoint_io import write_checkpoint
 
+        # Preserve subclass/instance checkpoint hooks; only the stock snapshot
+        # builder supports the private synchronous borrowed-metadata contract.
+        metadata = (
+            self._checkpoint_metadata(detached=False)
+            if getattr(self.checkpoint, "__func__", None) is Experiment.checkpoint
+            else self.checkpoint(include_brains=False)
+        )
         write_checkpoint(
             path,
-            self.checkpoint(include_brains=False),
+            metadata,
             (
                 (animal_id, brain.checkpoint())
                 for animal_id, brain in self.brains.items()
             ),
+            shared_metadata=shared_metadata,
         )
 
     @classmethod

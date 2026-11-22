@@ -42,6 +42,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | How does a saved brain respond to an animal’s observation? | [Selected inputs, archived weights and explanation views](explainability.md#what-is-being-explained) |
 | When is a whole network shown versus a summary? | [Input/output first and hidden-rank threshold](explainability.md#inputoutput-first-and-the-rank-threshold) |
 | What do weighted links, activations and local input influence mean? | [Worked forward and reverse pass](explainability.md#worked-activation-example) |
+| How do model-save checks and exports share work? | [Encoding cache ownership and lifetime](artifact-retention.md#save-time-memory-and-repeated-work) |
 | How do checkpoints restore optimizer, RNG and buffers? | [File records, private controller state and access paths](checkpoint-data-structures.md) |
 | What is inside a stored model? | [References, binary model record and layer arrays](replay-data-structures.md#champion-weight-records) |
 | How do archives avoid repeating model weights? | [Shared champion blobs](binary-storage.md#champion-storage-measurement) |

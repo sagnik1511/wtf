@@ -2797,6 +2797,45 @@
           "required": ["patience_runs"],
           "additionalProperties": false,
           "description": "Optional consecutive-run stagnation limit and monitored species."
+        },
+        "checkpoint_keep_last": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "default": 2,
+          "description": "Retain the latest N recovery checkpoints created by this invocation, including final; zero retains all. Existing artifacts are never pruned."
+        },
+        "checkpoint_every_steps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "default": 500,
+          "description": "Periodic full exact-resume checkpoint cadence within each run; zero disables. Run-end checkpoint cadence still applies."
+        },
+        "brain_save_every_steps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "default": 250,
+          "description": "Check best-so-far champions every K steps and persist only strict rank improvements with changed weights; zero disables periodic saves. Run-end archives remain unchanged."
+        },
+        "brain_save_min_score_delta": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Minimum absolute increase in the primary ranking coordinate since the last periodic save; strict lexicographic improvement and changed weights are also required. Uniform abstract score units; does not affect selection or run-end archives."
+        },
+        "checkpoint_shared_metadata": {
+          "type": "boolean",
+          "default": false,
+          "description": "Binary CLI checkpoints share immutable configuration, action order and signatures in checksummed run-local metadata blobs. Keep the _metadata directory with checkpoint files; false writes self-contained v3 files."
+        },
+        "brain_keep_last": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "default": 2,
+          "description": "Retain N most recent qualifying improvement-only periodic best-brain milestones, not arbitrary timed snapshots. Zero retains all. Numbered end-of-run champion archives and all playback chunks remain untouched."
         }
       },
       "required": [

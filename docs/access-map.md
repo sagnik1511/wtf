@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **264 public documentation pages**, **101 visual files**
+Coverage: **268 public documentation pages**, **103 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -20,6 +20,7 @@ and **8 identical viewer branding copies**.
 | [Learning algorithms and networks](algorithms.md) | [Home](index.md) → [Algorithms and networks](algorithms.md) |
 | [Behavior and learning analysis](analysis.md) | [Home](index.md) → [behavior analysis](analysis.md) |
 | [Architecture and simulation rules](architecture.md) | [Home](index.md) → [architecture](architecture.md) |
+| [Best-brain milestones and rolling recovery](artifact-retention.md) | [Home](index.md) → [run and resume](running.md) → [artifact retention](artifact-retention.md) |
 | [Documentation assets](assets/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Visual assets and sources](assets/README.md) |
 | [Flow diagram sources and SVG exports](assets/diagrams/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Flow diagrams](assets/diagrams/README.md) |
 | [Landscape map diagrams](assets/geography/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Map diagrams](assets/geography/README.md) |
@@ -158,12 +159,14 @@ and **8 identical viewer branding copies**.
 | [Visibility water (SVG)](visual-previews/physics/visibility-water-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Visibility water (SVG)](visual-previews/physics/visibility-water-svg.md) |
 | [Simulation playback (GIF)](visual-previews/simulation-playback-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Simulation playback (GIF)](visual-previews/simulation-playback-gif.md) |
 | [Species metrics (GIF)](visual-previews/species-metrics-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Species metrics (GIF)](visual-previews/species-metrics-gif.md) |
+| [Artifact retention (SVG)](visual-previews/storage/artifact-retention-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Artifact retention (SVG)](visual-previews/storage/artifact-retention-svg.md) |
 | [Binary chunk layout (SVG)](visual-previews/storage/binary-chunk-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Binary chunk layout (SVG)](visual-previews/storage/binary-chunk-layout-svg.md) |
 | [Checkpoint controller state (SVG)](visual-previews/storage/checkpoint-controller-state-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Checkpoint controller state (SVG)](visual-previews/storage/checkpoint-controller-state-svg.md) |
 | [Checkpoint record layout (SVG)](visual-previews/storage/checkpoint-record-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Checkpoint record layout (SVG)](visual-previews/storage/checkpoint-record-layout-svg.md) |
 | [Checkpoint restore access (SVG)](visual-previews/storage/checkpoint-restore-access-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Checkpoint restore access (SVG)](visual-previews/storage/checkpoint-restore-access-svg.md) |
 | [Experiment artifacts (SVG)](visual-previews/storage/experiment-artifacts-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Experiment artifacts (SVG)](visual-previews/storage/experiment-artifacts-svg.md) |
 | [Frame delta example (SVG)](visual-previews/storage/frame-delta-example-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Frame delta example (SVG)](visual-previews/storage/frame-delta-example-svg.md) |
+| [Model encoding cache (SVG)](visual-previews/storage/model-encoding-cache-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Model encoding cache (SVG)](visual-previews/storage/model-encoding-cache-svg.md) |
 | [Model weight storage (SVG)](visual-previews/storage/model-weight-storage-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Model weight storage (SVG)](visual-previews/storage/model-weight-storage-svg.md) |
 | [Animal activation replay (SVG)](visual-previews/structures/animal-activation-replay-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animal activation replay (SVG)](visual-previews/structures/animal-activation-replay-svg.md) |
 | [Brain activation example (SVG)](visual-previews/structures/brain-activation-example-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Brain activation example (SVG)](visual-previews/structures/brain-activation-example-svg.md) |
@@ -276,7 +279,8 @@ and **8 identical viewer branding copies**.
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
-| [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7 — Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) |
+| [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7](releases/0.0.2.7.md) |
+| [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.8 — Bounded artifacts and native masked-PPO batches](releases/0.0.2.8.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -371,12 +375,14 @@ and **8 identical viewer branding copies**.
 
 | Visual file | Click sequence from Home |
 | --- | --- |
+| `assets/storage/artifact-retention.svg` | [Home](index.md) → [All visuals](visuals.md) → [artifact-retention.svg](assets/storage/artifact-retention.svg) |
 | `assets/storage/binary-chunk-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [binary-chunk-layout.svg](assets/storage/binary-chunk-layout.svg) |
 | `assets/storage/checkpoint-controller-state.svg` | [Home](index.md) → [All visuals](visuals.md) → [checkpoint-controller-state.svg](assets/storage/checkpoint-controller-state.svg) |
 | `assets/storage/checkpoint-record-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [checkpoint-record-layout.svg](assets/storage/checkpoint-record-layout.svg) |
 | `assets/storage/checkpoint-restore-access.svg` | [Home](index.md) → [All visuals](visuals.md) → [checkpoint-restore-access.svg](assets/storage/checkpoint-restore-access.svg) |
 | `assets/storage/experiment-artifacts.svg` | [Home](index.md) → [All visuals](visuals.md) → [experiment-artifacts.svg](assets/storage/experiment-artifacts.svg) |
 | `assets/storage/frame-delta-example.svg` | [Home](index.md) → [All visuals](visuals.md) → [frame-delta-example.svg](assets/storage/frame-delta-example.svg) |
+| `assets/storage/model-encoding-cache.svg` | [Home](index.md) → [All visuals](visuals.md) → [model-encoding-cache.svg](assets/storage/model-encoding-cache.svg) |
 | `assets/storage/model-weight-storage.svg` | [Home](index.md) → [All visuals](visuals.md) → [model-weight-storage.svg](assets/storage/model-weight-storage.svg) |
 
 ## Runtime and brain structures

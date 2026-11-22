@@ -642,6 +642,12 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `guard_lineage_chaining` | Retain the previous qualified matching-sex lineage brain when a new episode only provides an unqualified fallback. | boolean | Optional; `true` |
 | `promote_only_improved` | Retain best-so-far species/sex/criterion champions; ties keep the incumbent. | boolean | Optional; `true` |
 | `early_stopping` | Optional consecutive-run stagnation limit and monitored species. | object | Optional; — |
+| `checkpoint_keep_last` | Retain the latest N recovery checkpoints created by this invocation, including final; zero retains all. Existing artifacts are never pruned. | integer; min: `0`; max: `1000000` | Optional; `2` |
+| `checkpoint_every_steps` | Periodic full exact-resume checkpoint cadence within each run; zero disables. Run-end checkpoint cadence still applies. | integer; min: `0`; max: `1000000` | Optional; `500` |
+| `brain_save_every_steps` | Check best-so-far champions every K steps and persist only strict rank improvements with changed weights; zero disables periodic saves. Run-end archives remain unchanged. | integer; min: `0`; max: `1000000` | Optional; `250` |
+| `brain_save_min_score_delta` | Minimum absolute increase in the primary ranking coordinate since the last periodic save; strict lexicographic improvement and changed weights are also required. Uniform abstract score units; does not affect selection or run-end archives. | number; min: `0` | Optional; `0` |
+| `checkpoint_shared_metadata` | Binary CLI checkpoints share immutable configuration, action order and signatures in checksummed run-local metadata blobs. Keep the _metadata directory with checkpoint files; false writes self-contained v3 files. | boolean | Optional; `false` |
+| `brain_keep_last` | Retain N most recent qualifying improvement-only periodic best-brain milestones, not arbitrary timed snapshots. Zero retains all. Numbered end-of-run champion archives and all playback chunks remain untouched. | integer; min: `0`; max: `1000000` | Optional; `2` |
 
 ## `config.experiment.early_stopping`
 
@@ -694,4 +700,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `enabled` | Deposit anonymous species/sex ground traces. Omission or false disables scent storage and sensing. | boolean | Required; `false` |
 | `lifetime_steps` | Ground-trace lifetime in simulation steps; freshness decreases linearly to zero, and revisiting a cell refreshes its group trace. | integer; min: `2`; max: `256` | Required; — |
 
-Field entries documented: **381**.
+Field entries documented: **387**.

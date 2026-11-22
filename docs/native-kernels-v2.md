@@ -8,6 +8,11 @@ not against the older Python-only or pre-float32 implementations. Configurations
 precision, observations, action cadence, diagnostics, learning schedules and
 recording compression are unchanged.
 
+The later [masked-PPO batch extension](performance.md#rolling-artifacts-and-masked-ppo-batches)
+adds an optional `masked_ppo_batch` entry point under API v2. It preserves the
+stored per-sample masks and scalar training state; older modules missing that
+entry point fall back. This later extension has its own matched benchmarks.
+
 ## Implemented paths
 
 | Path | Change and ownership |

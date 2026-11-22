@@ -578,7 +578,7 @@ done:
     Py_DECREF(sequence);
     return result;
 }
-static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
+static PyObject *ppo_batch_impl(PyObject *args, int masked) {
     PyObject *layers, *grads, *samples;
     double clip, ec, vc;
     if (!PyArg_ParseTuple(args, "OOOddd", &layers, &grads, &samples, &clip, &ec,
@@ -589,7 +589,7 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
         return NULL;
     }
     PyObject *first = PyList_GET_ITEM(samples, 0);
-    if (!PyTuple_Check(first) || PyTuple_GET_SIZE(first) != 5) {
+    if (!PyTuple_Check(first) || PyTuple_GET_SIZE(first) != (masked ? 6 : 5)) {
         PyErr_SetString(PyExc_ValueError, "Invalid PPO sample");
         return NULL;
     }
@@ -607,7 +607,8 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
     /* Validate the entire sample shape before writing any gradient. */
     for (Py_ssize_t s = 0; s < PyList_GET_SIZE(samples); s++) {
         PyObject *sample = PyList_GET_ITEM(samples, s);
-        if (!PyTuple_Check(sample) || PyTuple_GET_SIZE(sample) != 5 ||
+        if (!PyTuple_Check(sample) ||
+            PyTuple_GET_SIZE(sample) != (masked ? 6 : 5) ||
             PySequence_Size(PyTuple_GET_ITEM(sample, 0)) != n) {
             PyErr_SetString(PyExc_ValueError, "Invalid PPO sample shape");
             goto done;
@@ -618,6 +619,27 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
         if (action < 0 || action >= m - 1) {
             PyErr_SetString(PyExc_ValueError, "Invalid PPO action");
             goto done;
+        }
+        if (masked) {
+            PyObject *mask = PyTuple_GET_ITEM(sample, 5);
+            if (!PyTuple_Check(mask) || PyTuple_GET_SIZE(mask) != m - 1) {
+                PyErr_SetString(PyExc_ValueError, "Invalid PPO mask shape");
+                goto done;
+            }
+            int valid = 0;
+            for (Py_ssize_t k = 0; k < m - 1; k++) {
+                PyObject *flag = PyTuple_GET_ITEM(mask, k);
+                if (!PyBool_Check(flag)) {
+                    PyErr_SetString(PyExc_ValueError,
+                                    "PPO mask must contain booleans");
+                    goto done;
+                }
+                valid |= flag == Py_True;
+            }
+            if (!valid) {
+                PyErr_SetString(PyExc_ValueError, "Empty PPO action mask");
+                goto done;
+            }
         }
     }
     tape = PyMem_Calloc(total, sizeof(double));
@@ -639,10 +661,22 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
         if (PyErr_Occurred())
             goto done;
         dense_forward(rows, count, tape, 0, m);
+        if (masked) {
+            PyObject *mask = PyTuple_GET_ITEM(sample, 5);
+            for (Py_ssize_t k = 0; k < m - 1; k++)
+                if (PyTuple_GET_ITEM(mask, k) != Py_True)
+                    tape[total - m + k] = -1e30;
+        }
         double info[5], loss;
         if (!ppo_derivative(tape + total - m, m, action, old, adv, target, clip,
                             ec, vc, delta, info, scratch, &loss))
             goto done;
+        if (masked) {
+            PyObject *mask = PyTuple_GET_ITEM(sample, 5);
+            for (Py_ssize_t k = 0; k < m - 1; k++)
+                if (PyTuple_GET_ITEM(mask, k) != Py_True)
+                    delta[k] = 0.0;
+        }
         for (Py_ssize_t j = count; j-- > 0;) {
             DenseRow *r = rows + j;
             double *x = tape + r->offset, *dw = r->dw.buf, *db = r->db.buf;
@@ -671,4 +705,11 @@ done:
     PyMem_Free(scratch);
     dense_release(rows, count);
     return result;
+}
+
+static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
+    return ppo_batch_impl(args, 0);
+}
+static PyObject *masked_ppo_batch_native(PyObject *self, PyObject *args) {
+    return ppo_batch_impl(args, 1);
 }

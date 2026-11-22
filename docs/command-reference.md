@@ -34,8 +34,15 @@ lists bundled environment names. `python -m wtf` offers the same hub;
 | `--output DIR` | Parent output directory; a new experiment subfolder is created, default `results/` |
 | `--library-dir DIR` | Optional shared champion library for selectors and extra copies; run-local archives remain separate |
 | `--checkpoint-format binary\|compact\|json` | Binary/XZ `.bin.xz` (default), compact gzip `.json.gz`, or legacy `.json`; not a replay encoding setting |
+| `--checkpoint-keep-last N` | Retain latest N newly written exact recovery checkpoints including final; default 2, zero retains all |
+| `--checkpoint-every-steps K` | Full recovery checkpoint cadence within a run; default 500, zero disables periodic writes |
+| `--brain-save-every-steps K` | Check periodically for strict rank improvement with changed weights; default 250, zero disables |
+| `--brain-keep-last N` | Retain N most recent qualifying best-brain collections; default 2, zero retains all; all run-end archives/playbacks remain |
+| `--brain-save-min-score-delta D` | Require absolute primary-score gain D for periodic saves; default zero; does not change champion selection |
+| `--shared-checkpoint-metadata` | Opt in to shared, checksummed static metadata for v4 binary recovery files; keep the metadata folder with checkpoints |
+| `--self-contained-checkpoints` | Override a shared-metadata JSON setting and embed metadata in standalone v3 binary output (the default) |
 | `--no-library` | Disable saving new champion models; does not remove existing artifacts or disable exact checkpoints |
-| `--brains-from RUN_NAME_OR_PATH` | Select an experiment's run-local champion archive as initial weights; defaults to its latest archived numbered run |
+| `--brains-from RUN_NAME_OR_PATH` | Select an experiment's run-local champion archive or an explicit periodic index; directories default to their latest archived numbered run |
 | `--brain-run N` | Choose an archived numbered run within `--brains-from` |
 | `--brain SPECIES[:SEX]=MODEL` | Repeatable initial-model choice: criterion from the source experiment, artifact path, supported shared-library selector, or `fresh` |
 | `--champion SPECIES[:SEX]=CRITERION` | Repeatable champion choice for subsequent chaining; does not load initial weights |

@@ -132,6 +132,7 @@ Home = "index.md"
     { "Replay files and data structures" = "replay-data-structures.md" },
     { "Checkpoint state and restoration" = "checkpoint-data-structures.md" },
     { "Binary formats and compression" = "binary-storage.md" },
+    { "Artifact retention" = "artifact-retention.md" },
 ] },
 ]
 

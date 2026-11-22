@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import math
 import platform
 import sys
 import uuid
@@ -126,6 +127,42 @@ def main():
         metavar="SPECIES",
         help="Monitor this species (repeat to monitor several); default: any configured species",
     )
+    parser.add_argument(
+        "--checkpoint-keep-last",
+        type=int,
+        help="Keep latest N new recovery checkpoints, including final; 0 keeps all (default 2)",
+    )
+    parser.add_argument(
+        "--checkpoint-every-steps",
+        type=int,
+        help="Periodic full recovery interval; 0 disables (default 500)",
+    )
+    parser.add_argument(
+        "--brain-keep-last",
+        type=int,
+        help="Keep N recent qualifying best-brain milestones; 0 keeps all (default 2)",
+    )
+    parser.add_argument(
+        "--brain-save-every-steps",
+        type=int,
+        help="Persist improved changed-weight champions every K steps; 0 disables (default 250)",
+    )
+    parser.add_argument(
+        "--brain-save-min-score-delta",
+        type=float,
+        help="Minimum primary-score gain for periodic brain saves (default 0)",
+    )
+    checkpoint_metadata = parser.add_mutually_exclusive_group()
+    checkpoint_metadata.add_argument(
+        "--shared-checkpoint-metadata",
+        action="store_true",
+        help="Opt in to run-local shared metadata for binary recovery checkpoints",
+    )
+    checkpoint_metadata.add_argument(
+        "--self-contained-checkpoints",
+        action="store_true",
+        help="Embed metadata instead of using the run-local binary checkpoint pool",
+    )
     args = parser.parse_args()
     if args.resume:
         if (
@@ -199,6 +236,25 @@ def main():
     def save(name, data):
         (folder / name).write_text(json.dumps(data, indent=2, allow_nan=False) + "\n")
 
+    storage_options = dict(experiment.config["experiment"])
+    for name in (
+        "checkpoint_keep_last",
+        "checkpoint_every_steps",
+        "brain_keep_last",
+        "brain_save_every_steps",
+        "brain_save_min_score_delta",
+    ):
+        value = getattr(args, name)
+        if value is not None:
+            if value < 0 or (
+                name == "brain_save_min_score_delta" and not math.isfinite(value)
+            ):
+                parser.error(name.replace("_", "-") + " must be nonnegative and finite")
+            storage_options[name] = value
+    if args.self_contained_checkpoints:
+        storage_options["checkpoint_shared_metadata"] = False
+    elif args.shared_checkpoint_metadata:
+        storage_options["checkpoint_shared_metadata"] = True
     save("environment.json", experiment.config)
     save(
         "manifest.json",
@@ -212,9 +268,13 @@ def main():
                 for species, groups in experiment.initial_models.items()
             },
             "randomization_seed": experiment.randomization_seed,
-            "checkpoint_version": {"json": 1, "compact": 2, "binary": 3}[
-                args.checkpoint_format
-            ],
+            "checkpoint_version": (
+                4
+                if args.checkpoint_format == "binary"
+                and storage_options.get("checkpoint_shared_metadata", False)
+                else {"json": 1, "compact": 2, "binary": 3}[args.checkpoint_format]
+            ),
+            "storage_policy": storage_options,
             "checkpoint_format": args.checkpoint_format,
             "observation_version": max(
                 experiment.config["brains"][spec["brain"]].get("observation_version", 1)
@@ -245,6 +305,7 @@ def main():
             library_root=args.library_dir,
             save_brains=not args.no_library,
             checkpoint_format=args.checkpoint_format,
+            storage_options=storage_options,
         )
         completed = True
     finally:
@@ -263,10 +324,19 @@ def run_experiment(
     library_root=None,
     save_brains=True,
     checkpoint_format="compact",
+    storage_options=None,
 ):
     suffix = {"binary": ".bin.xz", "compact": ".json.gz", "json": ".json"}[
         checkpoint_format
     ]
+    from wtf.storage.retention import ArtifactRetention
+
+    storage_options = (
+        dict(experiment.config["experiment"])
+        if storage_options is None
+        else storage_options
+    )
+    retention = ArtifactRetention(folder, storage_options, checkpoint_format)
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
         fields = (
@@ -342,6 +412,18 @@ def run_experiment(
                 )
             if experiment.last_record:
                 record(experiment.last_record)
+            if not experiment.finished_run:
+                checkpoint_interval = storage_options.get("checkpoint_every_steps", 500)
+                if (
+                    checkpoint_interval
+                    and experiment.world.tick % checkpoint_interval == 0
+                ):
+                    retention.checkpoint(
+                        experiment,
+                        f"run_{experiment.run_index + 1:04d}_step_{experiment.world.tick:09d}",
+                    )
+                if save_brains and experiment.mode == "train":
+                    retention.step_brains(experiment)
             if experiment.finished_run:
                 if recorder is not None:
                     recorder.end_run(experiment)
@@ -381,16 +463,14 @@ def run_experiment(
                     and run % experiment.config["experiment"]["checkpoint_every_runs"]
                     == 0
                 ):
-                    experiment.write_checkpoint(
-                        folder / f"checkpoints/run_{run:04d}{suffix}"
-                    )
+                    retention.checkpoint(experiment, f"run_{run:04d}")
             if experiment.last_record is not None or experiment.finished_run:
                 handle.flush()
     save("run_seeds.json", experiment.run_seeds)
     save("summary.json", experiment.summaries)
     if experiment.early_stopping.patience:
         save("early_stopping.json", experiment.early_stopping.checkpoint())
-    experiment.write_checkpoint(folder / ("checkpoints/final" + suffix))
+    retention.checkpoint(experiment, "final")
 
 
 if __name__ == "__main__":

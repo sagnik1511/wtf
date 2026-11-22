@@ -659,3 +659,125 @@ trial resets, immutable initial-observation reuse and independent dense-model
 inference batches. It includes matched timing/RSS tables, component controls and
 limits: recurrent/Q-learning decisions remain scalar, actor weights are never
 merged, and native scratch exists only during a batch call.
+
+## Rolling artifacts and masked-PPO batches
+
+[Artifact retention](artifact-retention.md) documents separate policies for exact
+recovery and recent qualifying best-brain milestones. All replay chunks remain.
+The native masked-PPO batch handles local-input networks and stored masks in one
+call, retaining the scalar path's floating-point order and per-animal learning
+state. Invalid actions receive the same masked logit and zero derivative. FP64
+models, subclasses or overridden objectives use the existing fallback; no GPU,
+new dependency, shared policy or changed learning schedule is introduced.
+
+Reproduce the bounded before/after measurements with a copy of the pre-change
+package (including its built native module) outside the import path:
+
+```sh
+.venv/bin/python work/benchmark_artifact_retention.py \
+  --baseline /path/to/baseline-package-root --repeats 3
+```
+
+The measured baseline package matches runtime commit `19085c5`; the comparison
+includes the pending masked-PPO batch extension. The script uses fresh processes,
+alternating order, matching seed 100, CPython
+3.12 and native kernels. It compares full state hashes and restore round trips.
+Temporary outputs are isolated from `results/`. The update workload applies 12
+64-sample masked-PPO updates (four epochs, minibatches of 16) to the tracking
+preset's 482-input, 64/32-hidden-unit predator network. Training covers one
+160-step tracking world, 48 prey and six predators, including initialization and
+champion selection but excluding recording and disk writes. Storage writes eight
+successive states of that setup and times the writers separately from stepping
+and restore verification. Peak RSS includes imports/initialization; storage RSS
+also includes explicit restore checks. Timings are local medians, not universal
+speedup guarantees or process-independent RAM estimates.
+
+
+| Workload | Before | After | Result |
+| --- | ---: | ---: | --- |
+| 12 masked-PPO rollout updates | 433.32 ms | 374.34 ms | 13.6% less elapsed time |
+| 160-step tracking training | 2.629 s | 2.284 s | 13.1% less elapsed time |
+| Eight self-contained recovery saves, retained disk | 5,707,800 B (eight files) | 1,455,864 B (latest two) | 74.5% less retained disk; older recovery points intentionally unavailable |
+| Rolling two, optional shared static metadata | 1,455,864 B | 1,456,236 B including pool | 372 B larger; pooling is opt-in, not a claimed improvement |
+
+The writer-only medians for eight saves were 7.969 s before, 8.096 s with rolling
+retention and 8.014 s with shared metadata. Retention reduces disk, not compression
+work: all eight snapshots were still serialized. This fixture does not establish
+a faster checkpoint writer. Native batching improves learning, not checkpoint I/O.
+
+Peak RSS medians were 39.95→37.33 MiB for update-only processes,
+152.05→149.94 MiB for training, and 183.28/183.72/190.31 MiB for
+legacy/rolling/shared storage probes. These are workload-specific process peaks,
+including explicit restore verification in storage probes; they do not establish
+a general RAM reduction. Most checkpoint bytes are dynamic numeric state, not
+repeated static definitions. The three variants produced identical final state
+hashes, and each stored checkpoint restored exactly. A separate regression test
+checks identical decoded playback across enabled/disabled retention, including
+chunk boundaries and multiple runs. No replay retention or recording-cadence
+changes were used to obtain these savings.
+
+
+## Shared model encoding and checkpoint copy reduction
+
+See the [cache ownership and lifetime diagram](artifact-retention.md#save-time-memory-and-repeated-work)
+and [checkpoint copy paths and file layout](checkpoint-data-structures.md#file-records-and-shared-values).
+
+Periodic champion gates and exports now use one save-scoped model encoding
+cache. A snapshot shared by several criteria is encoded once, and the same
+canonical bytes/hash feed both the unchanged-weight gate and the weight writer.
+A small PPO fixture with 16 criteria referencing three distinct snapshots needed
+19 model encodings on first publication before this change and three afterward;
+an unchanged-weight check with higher ranks needed 16 before and three afterward.
+These are operation counts, not whole-training speedup factors.
+
+The cache owns strong model references for one synchronous save, preventing
+object-ID reuse. Its payload LRU is bounded to 4 MiB, in addition to one active
+encoding and the writer's normal workspace; oversized or evicted payloads are
+re-encoded and checked when needed. All cache data expires when the save returns,
+including skipped saves. Later weight changes cannot reuse a previous save's
+hash. No cache is added to a checkpoint or replay. Standalone model writes keep
+their existing behavior and exact record bytes/checksums.
+
+Synchronous checkpoint writing borrows existing retained-model/configuration/
+report metadata instead of deep-copying those trees before deduplication. It
+still constructs the world snapshot and streams one detached controller at a
+time. The public `checkpoint()` API stays detached. The borrowed view is internal
+to the blocking writer: simulation does not advance while it is consumed. This
+is not a background checkpoint implementation or support for concurrent mutation.
+Both standalone and optional shared-metadata file layouts remain unchanged.
+
+Measurements below compare a saved copy of the pre-change **pending 0.0.2.8**
+runtime against this implementation, on CPython 3.12/macOS with native kernels.
+They use three alternating fresh-process samples per variant and report medians.
+Reproduce with:
+
+```sh
+.venv/bin/python work/benchmark_encoding.py \
+  --baseline /path/to/pre-change-package-root --repeats 3
+```
+
+| Workload | Before | After | Observed change |
+| --- | ---: | ---: | --- |
+| 20 checkpoint-metadata preparations | 660.80 ms | 11.56 ms | 98.3% less component time |
+| One metadata preparation, peak traced Python allocations | 1,452,264 B | 126,464 B | 91.3% less component allocation |
+| First periodic publication plus nine higher-rank/unchanged-weight checks | 831.41 ms | 188.06 ms | 77.4% less save/check time |
+| Training + recording + periodic saves + recovery writes, 32 steps | 4.047 s | 3.703 s | 8.5% less complete workflow time |
+| Complete workflow process peak RSS | 118.64 MiB | 99.23 MiB | 16.4% lower measured process peak |
+
+The seed-100 fixture uses the tracking preset: 48 prey, six predators, the blended
+scent layout and a 32-step limit. Metadata timing excludes `tracemalloc`; the
+allocation row is one separately traced preparation. The periodic component's
+higher-rank checks are controlled persistence probes; they do not simulate
+learning improvements. Complete workflow timing includes founder initialization,
+all simulation steps and diagnostic frames, brain checks every eight steps,
+recording finalization and recovery writes at steps 16 and 32. Restore verification
+and result hashing occur after the workflow timer/RSS measurement. No unbounded
+run is loaded into memory; replay hashes are accumulated chunk by chunk.
+
+Final state and decoded-replay hashes matched in every before/after sample.
+Both variants retained exactly **3,777,620 checkpoint bytes** and **87,292 replay
+bytes** in that workload. This change removes repeated work and transient copies;
+it does not reduce recording detail, checkpoint contents or retained file counts.
+The figures are local short-workload measurements, not guarantees for every
+population, model depth or algorithm. They are separate from the earlier native
+masked-PPO and rolling-retention benchmarks; do not add their percentages.

@@ -36,7 +36,7 @@ limited to the runtimes actually tested. See [package verification](packaging.md
 
 | Artifact | Current source can read | Compatibility boundary |
 | --- | --- | --- |
-| Experiment checkpoint | Legacy logical state v1 JSON; compact `wtf-checkpoint-v2` envelope; binary checkpoint envelope v3, inside supported plain/gzip/XZ transport | Decoders normalize to logical state v1; controllers/configuration must still be supported |
+| Experiment checkpoint | Legacy logical state v1 JSON; compact `wtf-checkpoint-v2` envelope; binary checkpoint envelopes v3 (standalone) and v4 (optional shared metadata), inside supported plain/gzip/XZ transport | Decoders normalize to logical state v1; controllers/configuration must still be supported |
 | Champion brain | `brain_artifact_version` 1, 2 and 3; library manifests 1 and 2 | v3 metadata references binary/XZ weights; older readers do not necessarily support it |
 | Replay | `recording_version: 1`, legacy full JSON chunks, `wtf-delta-v1` chunks and current structured binary chunks, with supported none/gzip/XZ compression | Current binary magic is `WTFB` codec v1; keep the recording manifest, chunks and run metadata together |
 | Brain inputs | Supported observation versions 1–4 with configured top-k | Algorithm, architecture, action order, observation version/top-k, optional movement/scent layout and other signature fields must match |
@@ -106,3 +106,7 @@ recordings retain their original behavior. Switching scent mode requires a
 compatible brain, even when both layouts happen to have nine inputs. The
 maintained tracking preset now selects blended mode; use an old run's recorded
 configuration to resume its separated-scent checkpoint.
+
+Binary checkpoint header version 4 requires its run-local `checkpoints/_metadata/`
+pool and a runtime with shared-metadata support. Version 3 and older checkpoint
+loaders remain supported by new runtimes. See [retention and portability](artifact-retention.md#common-metadata-and-portability). Replay formats and saved model signatures are unchanged.

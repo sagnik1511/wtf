@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 930" role="img" aria-labelledby="title desc">
+<title id="title">One save: model encoding ownership and lifetime</title><desc id="desc">Several champion criteria may refer to the same detached model. One synchronous save deduplicates encoding, shares payloads and hashes between its gate and exporter, and releases its bounded cache before another save.</desc>
+<style id="figure-palette">svg{--figure-bg:#101720;--figure-panel:#14202d;--figure-node:#192532;--figure-edge:#73899f;--figure-accent:#8ac8ff;--figure-muted:#acbfd1;--figure-ink:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-bg:#f5f8fb;--figure-panel:#ffffff;--figure-node:#edf3f8;--figure-edge:#637b91;--figure-accent:#1f639c;--figure-muted:#41566b;--figure-ink:#172c3c;}}</style><style>text{font-family:Arial,sans-serif;fill:var(--figure-ink)}.title{font-size:25px;font-weight:650}.head{font-size:19px;font-weight:650;fill:var(--figure-accent)}.body{font-size:16px}.small{font-size:14px;fill:var(--figure-muted)}.mono{font-family:monospace;font-size:14px}.box{fill:var(--figure-node);stroke:var(--figure-edge);stroke-width:1.5}.panel{fill:var(--figure-panel);stroke:var(--figure-edge);stroke-width:1.5}.flow{fill:none;stroke:var(--figure-accent);stroke-width:2;marker-end:url(#arrow)}</style><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-accent)"/></marker></defs><rect width="1120" height="930" fill="var(--figure-bg)"/>
+<text x="28" y="40" class="title" text-anchor="start">One save: shared model encoding</text>
+<text x="28" y="68" class="small" text-anchor="start">Canonical bytes and hashes are reused; simulation decisions and retained model choices stay the same.</text>
+<rect x="25" y="93" width="1070" height="770" rx="12" class="panel" stroke-dasharray="7 5"/><text x="45" y="121" class="small" text-anchor="start">Synchronous save scope · detached model snapshots remain unchanged</text>
+<rect x="50" y="148" width="280" height="74" rx="9" class="box"/>
+<text x="68" y="178" class="head" text-anchor="start">Lifespan criterion</text>
+<text x="68" y="206" class="body" text-anchor="start">Reference to a model snapshot</text>
+<rect x="420" y="148" width="280" height="74" rx="9" class="box"/>
+<text x="438" y="178" class="head" text-anchor="start">Health criterion</text>
+<text x="438" y="206" class="body" text-anchor="start">Reference to a model snapshot</text>
+<rect x="790" y="148" width="280" height="74" rx="9" class="box"/>
+<text x="808" y="178" class="head" text-anchor="start">Lineage criterion</text>
+<text x="808" y="206" class="body" text-anchor="start">Reference to a model snapshot</text>
+<path d="M190 222V248H930V222" class="flow" style="marker-end:none"/><path d="M560 222V272" class="flow"/><rect x="330" y="280" width="460" height="81" rx="9" class="box"/>
+<text x="348" y="310" class="head" text-anchor="start">Unique snapshot identities</text>
+<text x="348" y="338" class="body" text-anchor="start">Several criteria can share one model.</text>
+<path d="M560 361V395" class="flow"/><rect x="190" y="403" width="740" height="142" rx="9" class="box"/>
+<text x="208" y="433" class="head" text-anchor="start">ModelEncodings · one local transaction</text>
+<text x="208" y="461" class="body" text-anchor="start">Canonical binary payload + SHA-256 hash</text>
+<text x="208" y="485" class="small" text-anchor="start">Payload LRU: at most 4 MiB; strong model references prevent ID reuse.</text>
+<text x="208" y="509" class="small" text-anchor="start">Evicted or oversized payloads are re-encoded and checked when needed.</text>
+<path d="M360 545V565H270V593" class="flow"/><path d="M760 545V565H850V593" class="flow"/><rect x="50" y="601" width="440" height="98" rx="9" class="box"/>
+<text x="68" y="631" class="head" text-anchor="start">Improvement and weight-change gate</text>
+<text x="68" y="659" class="body" text-anchor="start">Reuse the same snapshot hash.</text>
+<text x="68" y="683" class="small" text-anchor="start">Publish only qualifying changed models.</text>
+<rect x="630" y="601" width="440" height="98" rx="9" class="box"/>
+<text x="648" y="631" class="head" text-anchor="start">Lossless model exporter</text>
+<text x="648" y="659" class="body" text-anchor="start">Reuse the same canonical payload + hash.</text>
+<text x="648" y="683" class="small" text-anchor="start">Keep existing on-disk validation and format.</text>
+<path d="M490 651H630" class="flow" stroke-dasharray="6 5"/><text x="560" y="640" class="small" text-anchor="middle">qualifies</text>
+<path d="M850 699V761" class="flow"/><path d="M270 699V761" class="flow" stroke-dasharray="6 5"/><text x="282" y="748" class="small" text-anchor="start">skip</text>
+<rect x="630" y="769" width="440" height="88" rx="9" class="box"/>
+<text x="648" y="799" class="head" text-anchor="start">Published model blobs + index</text>
+<text x="648" y="827" class="body" text-anchor="start">Same checksums and lossless weights.</text>
+<rect x="50" y="769" width="440" height="88" rx="9" class="box"/>
+<text x="68" y="799" class="head" text-anchor="start">Save returns · release the cache</text>
+<text x="68" y="827" class="body" text-anchor="start">On publication, skip or failure unwinding.</text>
+<path d="M630 813H490" class="flow"/><text x="28" y="892" class="small" text-anchor="start">Published files persist. Later saves start empty; no cache is serialized into checkpoints or replays.</text>
+<text x="28" y="916" class="small" text-anchor="start">Memory budget: cached payloads plus one active encoding and the writer’s normal workspace.</text>
+</svg>

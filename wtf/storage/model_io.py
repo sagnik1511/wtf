@@ -1,6 +1,7 @@
 """Lossless, content-addressed champion weights; JSON metadata stays readable."""
 
 import hashlib
+from collections import OrderedDict
 import io
 import lzma
 from pathlib import Path
@@ -25,11 +26,56 @@ def model_path(artifact_path, reference):
     return path
 
 
-def write_model(model, staging, pool):
+def encode_model(model):
+    """One canonical lossless model record, shared by gates and file writers."""
     buffer = io.BytesIO()
     RecordWriter(buffer).write(dict(kind="champion_model", model=model))
     payload = buffer.getvalue()
-    digest = hashlib.sha256(payload).hexdigest()
+    return payload, hashlib.sha256(payload).hexdigest()
+
+
+class ModelEncodings:
+    """One synchronous save's immutable snapshots; never retained between saves.
+
+    Strong model references prevent ID reuse. Payload LRU is byte-bounded; an
+    evicted/oversized payload is re-encoded and checked before publication.
+    """
+
+    def __init__(self, max_bytes=4 * 1024 * 1024):
+        self.max_bytes = max_bytes
+        self.models = {}
+        self.payloads = OrderedDict()
+        self.bytes = 0
+
+    def encoded(self, model):
+        key = id(model)
+        previous = self.models.get(key)
+        if key in self.payloads:
+            self.payloads.move_to_end(key)
+            return self.payloads[key], previous[1]
+        payload, digest = encode_model(model)
+        if previous is not None and previous[1] != digest:
+            raise ValueError("Model changed during synchronous export")
+        self.models[key] = model, digest
+        if len(payload) <= self.max_bytes:
+            while self.payloads and self.bytes + len(payload) > self.max_bytes:
+                _, removed = self.payloads.popitem(last=False)
+                self.bytes -= len(removed)
+            self.payloads[key] = payload
+            self.bytes += len(payload)
+        return payload, digest
+
+    def digest(self, model):
+        previous = self.models.get(id(model))
+        return bytes.fromhex(
+            previous[1] if previous is not None else self.encoded(model)[1]
+        )
+
+
+def write_model(model, staging, pool, *, encoding=None):
+    payload, digest = (
+        encode_model(model) if encoding is None else encoding.encoded(model)
+    )
     existing = Path(pool) / f"{digest}.bin.xz"
     target = Path(staging) / "models" / existing.name
     if existing.exists():

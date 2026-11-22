@@ -1,79 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 792" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-2c4056:#2c4056;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-2c4056:#e1eaf3;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
-<title id="title">Checkpoint file: metadata, private brains and shared values</title><desc id="desc">Binary checkpoint envelope v3 inside WTFB codec v1. One complete continuation snapshot, not replay frames.</desc>
-<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
-<style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
-<rect width="1040" height="792" fill="var(--figure-101720)"/>
-<text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Checkpoint file: metadata, private brains and shared values</text>
-<text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Binary checkpoint envelope v3 inside WTFB codec v1. One complete continuation snapshot, not replay frames.</text>
-<rect x="24" y="96" width="992" height="237" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
-<text x="42" y="126" font-size="19" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" class="mono" xml:space="preserve">checkpoints/final.bin.xz  [or a scheduled checkpoint]</text>
-<rect x="42" y="154" width="100" height="110" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="92.0" y="181" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Prefix</text>
-<text x="92.0" y="206" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">WTFB</text>
-<text x="92.0" y="228" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">01</text>
-<text x="92.0" y="250" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">5 bytes</text>
-<rect x="164" y="154" width="214" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<rect x="164" y="154" width="214" height="24" rx="2" fill="var(--figure-2c4056)" stroke="var(--figure-486077)"/>
-<text x="271.0" y="171" font-size="11" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">uint32_le length</text>
-<text x="271.0" y="205" font-size="16" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Metadata</text>
-<text x="271.0" y="228" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">kind: checkpoint</text>
-<text x="271.0" y="249" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">version: 3</text>
-<text x="271.0" y="270" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">metadata: {...}</text>
-<rect x="400" y="154" width="190" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<rect x="400" y="154" width="190" height="24" rx="2" fill="var(--figure-2c4056)" stroke="var(--figure-486077)"/>
-<text x="495.0" y="171" font-size="11" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">uint32_le length</text>
-<text x="495.0" y="205" font-size="16" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Brain record</text>
-<text x="495.0" y="228" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">kind: brain</text>
-<text x="495.0" y="249" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">id: &quot;7&quot;</text>
-<text x="495.0" y="270" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">state: {...}</text>
-<rect x="612" y="154" width="152" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<rect x="612" y="154" width="152" height="24" rx="2" fill="var(--figure-2c4056)" stroke="var(--figure-486077)"/>
-<text x="688.0" y="171" font-size="11" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">uint32_le length</text>
-<text x="688.0" y="205" font-size="16" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">More brains</text>
-<text x="688.0" y="228" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">id: &quot;8&quot;</text>
-<text x="688.0" y="249" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">...</text>
-<rect x="786" y="154" width="212" height="128" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<rect x="786" y="154" width="212" height="24" rx="2" fill="var(--figure-2c4056)" stroke="var(--figure-486077)"/>
-<text x="892.0" y="171" font-size="11" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)" text-anchor="middle" class="mono" xml:space="preserve">uint32_le length</text>
-<text x="892.0" y="205" font-size="16" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Shared table</text>
-<text x="892.0" y="228" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">kind: shared</text>
-<text x="892.0" y="249" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">values: [...]</text>
-<path d="M142 213H163" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M378 213H399" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M590 213H611" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M764 213H785" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
-<text x="790" y="126" font-size="13" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">atomic .tmp -&gt; rename</text>
-<path d="M271 282V368" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
-<path d="M892 282V368" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="24" y="369" width="600" height="298" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
-<text x="42" y="400" font-size="20" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Metadata: experiment-owned state</text>
-<rect x="42" y="420" width="270" height="100" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="177.0" y="447" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">World</text>
-<text x="177.0" y="472" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">animals + resources + terrain</text>
-<text x="177.0" y="494" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">events + metrics + world RNG</text>
-<rect x="330" y="420" width="276" height="100" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="468.0" y="447" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Experiment progress</text>
-<text x="468.0" y="472" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">run index + seeds + seed RNG</text>
-<text x="468.0" y="494" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">history + summaries + mode</text>
-<rect x="42" y="538" width="270" height="100" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="177.0" y="565" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Brain initialization</text>
-<text x="177.0" y="590" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">config + precision</text>
-<text x="177.0" y="612" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">initial / run-start models</text>
-<rect x="330" y="538" width="276" height="100" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="468.0" y="565" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Selection state</text>
-<text x="468.0" y="590" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">champions + lineage + sources</text>
-<text x="468.0" y="612" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">early-stop ranks + patience</text>
-<rect x="650" y="369" width="366" height="298" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
-<text x="668" y="400" font-size="19" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Shared values inside this file</text>
-<rect x="668" y="426" width="330" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="833.0" y="453" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">config / actions</text>
-<text x="833.0" y="478" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">deduplicated by content</text>
-<text x="833.0" y="500" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">referenced using {$ref: index}</text>
-<rect x="668" y="538" width="330" height="90" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
-<text x="833.0" y="565" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">models / signatures</text>
-<text x="833.0" y="590" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">actual indexes depend on content</text>
-<text x="833.0" y="612" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">no external champion pool required</text>
-<text x="26" y="708" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">References may point forward to this final table. Each decoded use gets a detached copy, not shared mutable state.</text>
-<text x="26" y="737" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Binary arrays are lossless typed bytes under XZ; the binary checkpoint stores no base64 wrapper.</text>
-<text x="26" y="766" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Saving streams detached brains one at a time. Loading materializes the complete checkpoint and live controllers.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1020" role="img" aria-labelledby="title desc">
+<title id="title">Checkpoint ownership, file records and shared values</title><desc id="desc">The synchronous stock writer borrows retained metadata without copying it, creates a world snapshot and streams one detached controller at a time. Public checkpoints remain detached. File records and optional external metadata retain their existing formats.</desc>
+<style id="figure-palette">svg{--figure-bg:#101720;--figure-panel:#14202d;--figure-node:#192532;--figure-edge:#73899f;--figure-accent:#8ac8ff;--figure-muted:#acbfd1;--figure-ink:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-bg:#f5f8fb;--figure-panel:#ffffff;--figure-node:#edf3f8;--figure-edge:#637b91;--figure-accent:#1f639c;--figure-muted:#41566b;--figure-ink:#172c3c;}}</style><style>text{font-family:Arial,sans-serif;fill:var(--figure-ink)}.title{font-size:25px;font-weight:650}.head{font-size:19px;font-weight:650;fill:var(--figure-accent)}.body{font-size:16px}.small{font-size:14px;fill:var(--figure-muted)}.mono{font-family:monospace;font-size:14px}.box{fill:var(--figure-node);stroke:var(--figure-edge);stroke-width:1.5}.panel{fill:var(--figure-panel);stroke:var(--figure-edge);stroke-width:1.5}.flow{fill:none;stroke:var(--figure-accent);stroke-width:2;marker-end:url(#arrow)}</style><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-accent)"/></marker></defs><rect width="1120" height="1020" fill="var(--figure-bg)"/>
+<text x="28" y="40" class="title" text-anchor="start">Checkpoint ownership and physical records</text>
+<text x="28" y="68" class="small" text-anchor="start">Synchronous file writing and public snapshots have different copy lifetimes; exact recovery state is preserved.</text>
+<rect x="30" y="94" width="1060" height="88" rx="9" class="panel"/>
+<text x="48" y="124" class="head" text-anchor="start">Live experiment · current state</text>
+<text x="48" y="152" class="body" text-anchor="start">Retained models, configuration, reports, world and private controllers</text>
+<path d="M285 182V222" class="flow"/><path d="M835 182V222" class="flow"/><rect x="30" y="230" width="510" height="168" rx="9" class="box"/>
+<text x="48" y="260" class="head" text-anchor="start">Stock write_checkpoint() · synchronous</text>
+<text x="48" y="288" class="body" text-anchor="start">Borrow retained metadata read-only.</text>
+<text x="48" y="312" class="small" text-anchor="start">Construct the world snapshot.</text>
+<text x="48" y="336" class="small" text-anchor="start">Detach and stream one controller at a time.</text>
+<text x="48" y="360" class="small" text-anchor="start">The simulation stays paused until the write returns.</text>
+<rect x="580" y="230" width="510" height="168" rx="9" class="box"/>
+<text x="598" y="260" class="head" text-anchor="start">Public checkpoint() · detached snapshot</text>
+<text x="598" y="288" class="body" text-anchor="start">Copy retained metadata for the caller.</text>
+<text x="598" y="312" class="small" text-anchor="start">Include the world and private controllers by default.</text>
+<text x="598" y="336" class="small" text-anchor="start">include_brains=False omits controller records.</text>
+<text x="598" y="360" class="small" text-anchor="start">Mutating the result does not change the experiment.</text>
+<path d="M285 398V455" class="flow"/><text x="580" y="427" class="small" text-anchor="start">Custom checkpoint overrides keep their original writer fallback.</text>
+<rect x="30" y="463" width="1060" height="304" rx="10" class="panel"/><text x="50" y="496" class="head" text-anchor="start">checkpoints/final.bin.xz · atomically published after the stream closes</text>
+<rect x="50" y="523" width="120" height="128" rx="9" class="box"/>
+<text x="68" y="553" class="head" text-anchor="start">Prefix</text>
+<text x="68" y="581" class="body" text-anchor="start">WTFB</text>
+<text x="68" y="605" class="small" text-anchor="start">01</text>
+<text x="68" y="629" class="small" text-anchor="start">5 bytes</text>
+<rect x="190" y="523" width="240" height="128" rx="9" class="box"/>
+<text x="208" y="553" class="head" text-anchor="start">Metadata record</text>
+<text x="208" y="581" class="body" text-anchor="start">kind: checkpoint</text>
+<text x="208" y="605" class="small" text-anchor="start">version: 3 or 4</text>
+<text x="208" y="629" class="small" text-anchor="start">encoded experiment metadata</text>
+<rect x="450" y="523" width="280" height="128" rx="9" class="box"/>
+<text x="468" y="553" class="head" text-anchor="start">Private brain records</text>
+<text x="468" y="581" class="body" text-anchor="start">kind: brain · id · state</text>
+<text x="468" y="605" class="small" text-anchor="start">Weights, optimizer, buffers, RNG</text>
+<text x="468" y="629" class="small" text-anchor="start">One record per retained controller</text>
+<rect x="750" y="523" width="320" height="128" rx="9" class="box"/>
+<text x="768" y="553" class="head" text-anchor="start">Final shared-value table</text>
+<text x="768" y="581" class="body" text-anchor="start">kind: shared · values</text>
+<text x="768" y="605" class="small" text-anchor="start">Configs, actions, model values</text>
+<text x="768" y="629" class="small" text-anchor="start">Internal references: {$ref: index}</text>
+<text x="50" y="685" class="small" text-anchor="start">Each record follows uint32_le length + typed payload. Binary codec v1; lossless arrays under XZ.</text>
+<text x="50" y="714" class="small" text-anchor="start">Version 3 is self-contained. Version 4 can reference static config/actions/signatures using {$meta: hash}.</text>
+<text x="50" y="743" class="small" text-anchor="start">The model encoding cache is temporary save-time work; it is not another checkpoint record.</text>
+<path d="M285 767V811" class="flow" stroke-dasharray="6 5"/><path d="M835 767V811" class="flow"/><rect x="30" y="819" width="510" height="124" rx="9" class="box"/>
+<text x="48" y="849" class="head" text-anchor="start">Optional v4 metadata pool</text>
+<text x="48" y="877" class="body" text-anchor="start">checkpoints/_metadata/&lt;sha256&gt;.json.xz</text>
+<text x="48" y="901" class="small" text-anchor="start">Immutable, checksummed static definitions.</text>
+<text x="48" y="925" class="small" text-anchor="start">Keep this directory with shared checkpoints.</text>
+<rect x="580" y="819" width="510" height="124" rx="9" class="box"/>
+<text x="598" y="849" class="head" text-anchor="start">Restore to independent runtime state</text>
+<text x="598" y="877" class="body" text-anchor="start">Resolve references into detached values.</text>
+<text x="598" y="901" class="small" text-anchor="start">Reconstruct world, controllers, buffers and RNGs.</text>
+<text x="598" y="925" class="small" text-anchor="start">No mutable alias to the writing experiment.</text>
+<text x="28" y="972" class="small" text-anchor="start">Checkpoint contents, numeric precision and replay detail are unchanged by copy reduction.</text>
+<text x="28" y="998" class="small" text-anchor="start">All playbacks and numbered end-of-run brain archives remain retained.</text>
 </svg>

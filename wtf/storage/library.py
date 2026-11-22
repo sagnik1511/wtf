@@ -466,6 +466,16 @@ def source_index(source_experiment, source_run=None):
             source_folder = Path.cwd() / "results" / source_folder
         elif not source_folder.is_dir():
             source_folder = Path.cwd() / source_folder
+    if source_folder.is_file():
+        if source_run is not None:
+            raise ValueError(
+                "An explicit champion index cannot be combined with brain-run"
+            )
+        index_path = source_folder.resolve()
+        source = json.loads(index_path.read_text())
+        if source.get("library_version") not in (1, 2):
+            raise ValueError("Unsupported source champion index")
+        return index_path, source
     for path in (source_folder / "champions").glob("run_*.json"):
         match = re.fullmatch(r"run_(\d+)", path.stem)
         if match:
@@ -648,14 +658,24 @@ def apply_champion_overrides(config, requests=()):
     return config
 
 
-def export_champions(experiment, destination, root=None, label=None):
+def export_champions(
+    experiment,
+    destination,
+    root=None,
+    label=None,
+    *,
+    entries=None,
+    update_artifacts=True,
+    _encoding=None,
+):
     """Publish a complete generation atomically; never overwrite old models.
 
     Artifact JSON references deduplicated lossless weights and configuration;
     neither includes replay/optimizer/RNG buffers. By default models live beside their run-local index, making the
     experiment folder self-contained. An explicit root publishes a shared copy.
     """
-    if not experiment.champions.entries:
+    entries = experiment.champions.entries if entries is None else entries
+    if not entries:
         return None
     destination = Path(destination).resolve()
     generation = (
@@ -687,7 +707,7 @@ def export_champions(experiment, destination, root=None, label=None):
     model_references = {}  # Immutable snapshots; bounded to this export call.
     config_references = {}  # Strong references prevent identity reuse during export.
     try:
-        for species, groups in experiment.champions.entries.items():
+        for species, groups in entries.items():
             for sex, champions in groups.items():
                 initial = (
                     experiment.run_initial_models.get(species, {})
@@ -768,7 +788,12 @@ def export_champions(experiment, destination, root=None, label=None):
                     model_key = id(entry["model"])
                     if model_key not in model_references:
                         model_references[model_key] = write_model(
-                            entry["model"], staging, root / "models"
+                            entry["model"],
+                            staging,
+                            root / "models",
+                            **(
+                                {"encoding": _encoding} if _encoding is not None else {}
+                            ),
                         )
                     artifact["model"] = model_references[model_key]
                     artifact_provenance[artifact_id] = {
@@ -828,7 +853,7 @@ def export_champions(experiment, destination, root=None, label=None):
     finally:
         if temporary.exists():
             temporary.unlink()
-    if local_models or not experiment.champion_artifacts:
+    if update_artifacts and (local_models or not experiment.champion_artifacts):
         experiment.champion_artifacts = {}
         for entry in manifest["entries"]:
             experiment.champion_artifacts.setdefault(entry["species"], {}).setdefault(

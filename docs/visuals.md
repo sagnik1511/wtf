@@ -102,12 +102,14 @@ when opened directly. The editable explorer fragment is source, not the full app
 
 | Theme-aware preview | Original file / variant |
 | --- | --- |
+| [Artifact retention (SVG)](visual-previews/storage/artifact-retention-svg.md) | [artifact-retention.svg](assets/storage/artifact-retention.svg) |
 | [Binary chunk layout (SVG)](visual-previews/storage/binary-chunk-layout-svg.md) | [binary-chunk-layout.svg](assets/storage/binary-chunk-layout.svg) |
 | [Checkpoint controller state (SVG)](visual-previews/storage/checkpoint-controller-state-svg.md) | [checkpoint-controller-state.svg](assets/storage/checkpoint-controller-state.svg) |
 | [Checkpoint record layout (SVG)](visual-previews/storage/checkpoint-record-layout-svg.md) | [checkpoint-record-layout.svg](assets/storage/checkpoint-record-layout.svg) |
 | [Checkpoint restore access (SVG)](visual-previews/storage/checkpoint-restore-access-svg.md) | [checkpoint-restore-access.svg](assets/storage/checkpoint-restore-access.svg) |
 | [Experiment artifacts (SVG)](visual-previews/storage/experiment-artifacts-svg.md) | [experiment-artifacts.svg](assets/storage/experiment-artifacts.svg) |
 | [Frame delta example (SVG)](visual-previews/storage/frame-delta-example-svg.md) | [frame-delta-example.svg](assets/storage/frame-delta-example.svg) |
+| [Model encoding cache (SVG)](visual-previews/storage/model-encoding-cache-svg.md) | [model-encoding-cache.svg](assets/storage/model-encoding-cache.svg) |
 | [Model weight storage (SVG)](visual-previews/storage/model-weight-storage-svg.md) | [model-weight-storage.svg](assets/storage/model-weight-storage.svg) |
 
 ## Runtime and brain structures

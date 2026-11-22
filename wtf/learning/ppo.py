@@ -394,6 +394,15 @@ class PPOBrain(AdamOptimizer):
         totals, samples, stopped = {}, 0, False
         gradients = None
         indices = list(range(len(self.rollout)))
+        from wtf.learning.contextual_ppo import LocalMLP, MaskablePPOBrain
+
+        masked_batch = (
+            type(self) is MaskablePPOBrain
+            and type(self.network) is LocalMLP
+            and "forward" not in vars(self.network)
+            and getattr(self.objective, "__func__", None) is MaskablePPOBrain.objective
+            and kernels.available("masked_ppo_batch")
+        )
         for _ in range(c["epochs"]):
             self.training_rng.shuffle(indices)
             for offset in range(0, len(indices), c["batch_size"]):
@@ -404,14 +413,21 @@ class PPOBrain(AdamOptimizer):
                     self.network.clear_gradients(gradients)
                 batch_metrics = {}
                 if (
-                    kernels.available("ppo_batch")
-                    and type(self.network) is MLP
-                    and getattr(self.objective, "__func__", None) is PPOBrain.objective
-                    and isinstance(self.network.layers[0]["weights"], Float32)
-                ):
+                    masked_batch
+                    or (
+                        kernels.available("ppo_batch")
+                        and type(self.network) is MLP
+                        and getattr(self.objective, "__func__", None)
+                        is PPOBrain.objective
+                    )
+                ) and isinstance(self.network.layers[0]["weights"], Float32):
                     samples_for_batch = [
                         (
-                            self.rollout[i].observation,
+                            (
+                                self.rollout[i].observation[: self.network.sizes[0]]
+                                if masked_batch
+                                else self.rollout[i].observation
+                            ),
                             self.rollout[i].action,
                             self.rollout[i].log_probability,
                             advantages[i],
@@ -419,7 +435,22 @@ class PPOBrain(AdamOptimizer):
                         )
                         for i in batch
                     ]
-                    batch_metrics = kernels.native.ppo_batch(
+                    if masked_batch:
+                        samples_for_batch = [
+                            sample
+                            + (
+                                tuple(
+                                    self.rollout[i].observation[self.network.sizes[0] :]
+                                ),
+                            )
+                            for sample, i in zip(samples_for_batch, batch)
+                        ]
+                    batch_kernel = (
+                        kernels.native.masked_ppo_batch
+                        if masked_batch
+                        else kernels.native.ppo_batch
+                    )
+                    batch_metrics = batch_kernel(
                         self.network.layers,
                         gradients,
                         samples_for_batch,

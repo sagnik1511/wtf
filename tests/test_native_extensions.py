@@ -27,6 +27,52 @@ SUPPORTED = NATIVE is not None and getattr(NATIVE, "api_version", 1) == 2
 
 @unittest.skipUnless(SUPPORTED, "Build v2 native kernels first")
 class NativeExtensionTests(unittest.TestCase):
+    def test_masked_ppo_batch_matches_scalar_training_exactly(self):
+        from tests.test_mutation import environment
+        from wtf.experiment.runner import Experiment
+
+        c = environment("maskable_ppo", 0)
+        c["world"]["max_steps"] = 24
+        for template in c["brains"].values():
+            template.update(rollout_steps=4, batch_size=2, epochs=2, target_kl=0)
+        batched, scalar = Experiment(c), Experiment(c)
+        available = kernels.available
+        for _ in range(24):
+            batched.step()
+            with patch.object(
+                kernels,
+                "available",
+                side_effect=lambda name: (
+                    False if name == "masked_ppo_batch" else available(name)
+                ),
+            ):
+                scalar.step()
+            self.assertEqual(batched.checkpoint(), scalar.checkpoint())
+        from wtf.learning.contextual_ppo import MaskablePPOBrain
+
+        brain = next(iter(batched.brains.values()))
+        gradients = brain.network.zeros()
+        baseline = copy.deepcopy(gradients)
+        with self.assertRaises(ValueError):
+            NATIVE.masked_ppo_batch(
+                brain.network.layers,
+                gradients,
+                [
+                    (
+                        tuple([0.0] * brain.network.sizes[0]),
+                        0,
+                        0.0,
+                        1.0,
+                        0.0,
+                        tuple(False for _ in brain.actions),
+                    )
+                ],
+                0.2,
+                0.01,
+                0.5,
+            )
+        self.assertEqual(gradients, baseline)
+
     def test_policy_math_and_fused_batch_gradients_are_exact(self):
         rng = random.Random(987)
         for hidden in ([], [3], [4, 3]):

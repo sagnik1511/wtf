@@ -16,7 +16,7 @@ from pathlib import Path
 import sys
 
 ENCODING = "wtf-checkpoint-v2"
-TAGS = {"$ref", "$literal", "$f64", "$u32"}
+TAGS = {"$ref", "$literal", "$f64", "$u32", "$meta"}
 SHARED = {"config", "actions", "model", "signature"}
 
 
@@ -25,12 +25,19 @@ def dumps(value):
 
 
 class Encoder:
-    def __init__(self, binary=False):
+    def __init__(self, binary=False, metadata_pool=None):
+        self.pool = metadata_pool
         self.binary = binary
         self.shared = []
         self.indices = {}
 
     def encode(self, value, key=None):
+        if (
+            self.pool is not None
+            and key in {"config", "actions", "signature"}
+            and isinstance(value, (dict, list, tuple))
+        ):
+            return {"$meta": self.pool.store(value)}
         if isinstance(value, (dict, list, tuple)) and (
             key in SHARED
             or isinstance(value, dict)
@@ -81,9 +88,10 @@ class Encoder:
 
 
 class Decoder:
-    def __init__(self, shared):
+    def __init__(self, shared, metadata_pool=None):
         if not isinstance(shared, list):
             raise ValueError("Invalid checkpoint shared table")
+        self.pool = metadata_pool
         self.shared, self.decoded, self.resolving = shared, {}, set()
 
     def decode(self, value):
@@ -98,6 +106,10 @@ class Decoder:
             raise ValueError("Invalid checkpoint tag")
         tag = next(iter(tags))
         data = value[tag]
+        if tag == "$meta":
+            if self.pool is None:
+                raise ValueError("Checkpoint requires shared metadata pool")
+            return copy.deepcopy(self.pool.load(data))
         if tag == "$ref":
             if type(data) is not int or not 0 <= data < len(self.shared):
                 raise ValueError("Invalid checkpoint reference")
@@ -129,7 +141,7 @@ class Decoder:
         return packed.tolist()
 
 
-def decode_checkpoint(payload):
+def decode_checkpoint(payload, metadata_pool=None):
     if payload.get("checkpoint_version") == 1:
         return payload
     if (
@@ -137,7 +149,7 @@ def decode_checkpoint(payload):
         or payload.get("checkpoint_encoding") != ENCODING
     ):
         raise ValueError("Unsupported checkpoint encoding")
-    decoder = Decoder(payload["shared"])
+    decoder = Decoder(payload["shared"], metadata_pool)
     state = decoder.decode(payload["metadata"])
     state["brains"] = {
         key: decoder.decode(value) for key, value in payload["brains"].items()
@@ -177,7 +189,7 @@ def read_checkpoint(path):
             if (
                 not isinstance(header, dict)
                 or header.get("kind") != "checkpoint"
-                or header.get("version") != 3
+                or header.get("version") not in (3, 4)
             ):
                 raise ValueError("Unsupported binary checkpoint")
             brains = {}
@@ -194,6 +206,8 @@ def read_checkpoint(path):
                     raise ValueError("Invalid binary checkpoint record")
             if shared is None:
                 raise ValueError("Missing binary checkpoint shared table")
+            from wtf.storage.metadata_pool import MetadataPool
+
             return decode_checkpoint(
                 dict(
                     checkpoint_version=2,
@@ -201,18 +215,28 @@ def read_checkpoint(path):
                     metadata=header["metadata"],
                     brains=brains,
                     shared=shared,
-                )
+                ),
+                (
+                    MetadataPool(path.parent / "_metadata")
+                    if header["version"] == 4
+                    else None
+                ),
             )
         return decode_checkpoint(json.load(handle))
 
 
-def write_checkpoint(path, metadata, brains):
+def write_checkpoint(path, metadata, brains, *, shared_metadata=False):
     """Write metadata and an iterable of (id, detached brain state) atomically."""
     path = Path(path)
     temporary = path.with_suffix(path.suffix + ".tmp")
     binary = ".bin" in path.suffixes
     compact = path.suffix in (".gz", ".xz")
-    encoder = Encoder(binary=binary) if compact or binary else None
+    from wtf.storage.metadata_pool import MetadataPool
+
+    if shared_metadata and not binary:
+        raise ValueError("Shared checkpoint metadata requires binary output")
+    pool = MetadataPool(path.parent / "_metadata") if shared_metadata else None
+    encoder = Encoder(binary=binary, metadata_pool=pool) if compact or binary else None
     try:
         opener = lzma.open if path.suffix == ".xz" else gzip.open if compact else open
         if binary:
@@ -234,7 +258,9 @@ def write_checkpoint(path, metadata, brains):
                 writer = RecordWriter(handle)
                 writer.write(
                     dict(
-                        kind="checkpoint", version=3, metadata=encoder.encode(metadata)
+                        kind="checkpoint",
+                        version=4 if shared_metadata else 3,
+                        metadata=encoder.encode(metadata),
                     )
                 )
                 for animal_id, state in brains:

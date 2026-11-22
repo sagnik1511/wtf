@@ -10,6 +10,7 @@ files required for the operation you intend to perform.
 | --- | --- |
 | [Replay files and data structures](../../replay-data-structures.md) | Artifact map, manifests, chunks, frame deltas and champion weight records. |
 | [Checkpoint state and restoration](../../checkpoint-data-structures.md) | World state, optimizer, RNG, buffers and restore/access paths. |
+| [Retention and save-time work](../../artifact-retention.md) | Best-brain versus recovery retention, encoding-cache ownership and synchronous writing. |
 | [Binary formats and compression](../../binary-storage.md) | Typed arrays, compression, deduplication and legacy encodings. |
 | [Load or select champions](../../brain-library.md) | Archive criteria, species/sex groups and CLI initialization. |
 | [Check format compatibility](../../compatibility.md) | Package/runtime support and restore guarantees. |

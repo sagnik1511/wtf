@@ -1,5 +1,9 @@
 # Checkpoint storage, restoration and runtime access
 
+See [artifact retention](artifact-retention.md) for periodic improvement-only best-brain
+saves, rolling exact recovery and shared cross-checkpoint metadata. All playback
+chunks and numbered run archives remain retained.
+
 [Stored artifacts](viewer/storage/index.md) · [Viewer and storage](viewer/index.md)
 
 [Artifact map](replay-data-structures.md) · [Binary layout](binary-storage.md) · [Exact resume](running.md#resume-an-exact-experiment) · [Champion weights](replay-data-structures.md#champion-weight-records)
@@ -11,14 +15,16 @@ show ownership and access paths, using actual field names where applicable.
 
 ## File records and shared values
 
-![Binary checkpoint container with metadata, private brain records and a final shared-value table](assets/storage/checkpoint-record-layout.svg)
+![Borrowed synchronous metadata versus detached public snapshots, followed by binary records and optional shared metadata](assets/storage/checkpoint-record-layout.svg)
 
-The default `checkpoints/final.bin.xz` decompresses to:
+Shared CLI `checkpoints/final.bin.xz` output decompresses to the following layout.
+Self-contained output retains header version 3. Version 4 additionally resolves
+`$meta` references from the sibling `_metadata/` pool before restoring owners:
 
 ```text
 WTFB + 0x01                              five-byte binary codec prefix
 uint32_le length + {
-  kind: "checkpoint", version: 3,
+  kind: "checkpoint", version: 4,
   metadata: <encoded experiment state without brains>
 }
 uint32_le length + {kind: "brain", id: "7", state: <encoded controller>}
@@ -46,10 +52,14 @@ from it. Binary numeric arrays are lossless typed bytes; the older compact
 JSON/gzip format uses base64 array wrappers. Both remain readable alongside
 legacy plain JSON. See [binary layout details](binary-storage.md#structured-binary-layout).
 
-The writer builds metadata and streams one detached controller at a time into a
+The blocking writer builds lightweight metadata around borrowed retained-model,
+configuration and report trees, then streams one detached controller at a time into a
 compressed `.tmp` file, closes it and atomically renames it. It does not hold a
 second detached copy of every brain simultaneously. The programmatic
 `checkpoint()` method does construct a complete detached snapshot when requested.
+The internal borrowed view is consumed synchronously while the simulation is
+paused; neither the encoder nor the writer mutates it. No model-encoding cache
+is stored in the checkpoint. See [copy-reduction measurements](performance.md#shared-model-encoding-and-checkpoint-copy-reduction).
 
 ## Experiment-owned metadata
 

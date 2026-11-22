@@ -865,6 +865,12 @@ def validate(c):
         ),
         optional=(
             "grpo_updates_per_step",
+            "checkpoint_keep_last",
+            "checkpoint_every_steps",
+            "brain_keep_last",
+            "brain_save_every_steps",
+            "brain_save_min_score_delta",
+            "checkpoint_shared_metadata",
             "chain_best_brains",
             "guard_lineage_chaining",
             "promote_only_improved",
@@ -873,6 +879,21 @@ def validate(c):
     )
     for k in ("runs", "record_metrics_every_steps", "checkpoint_every_runs"):
         num(e[k], f"experiment.{k}", 1, 1000000, True)
+    for name in (
+        "checkpoint_keep_last",
+        "checkpoint_every_steps",
+        "brain_keep_last",
+        "brain_save_every_steps",
+    ):
+        if name in e:
+            num(e[name], "experiment." + name, 0, 1000000, True)
+    if "brain_save_min_score_delta" in e:
+        num(e["brain_save_min_score_delta"], "experiment.brain_save_min_score_delta", 0)
+    if (
+        "checkpoint_shared_metadata" in e
+        and type(e["checkpoint_shared_metadata"]) is not bool
+    ):
+        fail("experiment.checkpoint_shared_metadata", "must be boolean")
     if "early_stopping" in e:
         stop = e["early_stopping"]
         obj(

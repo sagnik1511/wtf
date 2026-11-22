@@ -1,5 +1,9 @@
 # Binary replay and checkpoint storage
 
+See [artifact retention](artifact-retention.md) for periodic improvement-only best-brain
+saves, rolling exact recovery and shared cross-checkpoint metadata. All playback
+chunks and numbered run archives remain retained.
+
 [Stored artifacts](viewer/storage/index.md) · [Viewer and storage](viewer/index.md)
 
 [Playback](recording.md) · [Runs and checkpoints](running.md) · [Performance](performance.md)

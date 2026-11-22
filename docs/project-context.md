@@ -270,3 +270,12 @@ and prior positions. Normal steps and same-chunk rewinds reuse loaded frames;
 large jumps call the read-only movement-prefix endpoint, which streams saved
 chunks and retains no per-frame grids. Keep prefix reconstruction and full-run
 CLI analysis movement rules shared, and keep future frames out of the display.
+
+## Artifact retention ownership
+
+[Artifact retention](artifact-retention.md) separates latest full recovery files
+from recent qualifying best-brain milestones. Periodic exports never mutate
+chaining provenance. Keep all replay chunks and numbered run champion archives;
+prune only newly owned retention files. Shared binary v4 checkpoint metadata
+is immutable and checksummed; keep its `_metadata/` directory with the files.
+Never replace exact optimizer/buffer/RNG state with warm-start weights.

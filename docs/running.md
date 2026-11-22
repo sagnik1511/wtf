@@ -1,5 +1,9 @@
 # Setup, runs and checkpoints
 
+See [artifact retention](artifact-retention.md) for periodic improvement-only best-brain
+saves, rolling exact recovery and shared cross-checkpoint metadata. All playback
+chunks and numbered run archives remain retained.
+
 [Project overview](../README.md) · [Configuration](configuration.md) · [Saved brains](brain-library.md)
 
 Commands in this guide run from the project root.
