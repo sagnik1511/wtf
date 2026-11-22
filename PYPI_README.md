@@ -20,13 +20,29 @@ Use Python 3.12+ in a virtual environment:
 ```sh
 python3.12 -m venv .venv
 # Activate .venv using your platform's shell command.
-python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+python -m pip install wtf-wildlife-trial-framework==0.0.2.9
 ```
 
 The distribution name is `wtf-wildlife-trial-framework`; the Python import is
-`wtf`. Version [0.0.2.0](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+`wtf`. Version [0.0.2.9](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
 is published with a portable wheel and source archive. The default wheel needs
 no compiler and includes presets, terrain maps, schema and viewer assets.
+
+## Training without playback, then recorded inference
+
+```sh
+wtf run ppo --runs 10 --recording-profile training-only --progress
+wtf run results/TRAINING_RUN/environment.json \
+  --brains-from results/TRAINING_RUN --mode evaluate --freeze-brains \
+  --recording-profile full --runs 1 --progress
+```
+
+Replace `TRAINING_RUN` with the training output folder. Training-only retains
+metrics, best brains and recovery checkpoints. Frozen inference disables learning,
+mutation and birth crossover; offspring copy their same-sex parent's model.
+Evaluation recordings describe fresh simulations, not the original training runs.
+Use `--recording-profile compact` to keep training world playback with fewer
+inspector samples and no activations. Full configured capture remains the default.
 
 ## Local package installation
 
@@ -34,8 +50,8 @@ To install your own checkout build instead, build and install its wheel:
 
 ```sh
 python -m pip install build
-python -m build --outdir dist/0.0.2.0
-python -m pip install dist/0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
+python -m build --outdir dist/0.0.2.9
+python -m pip install dist/0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl
 ```
 
 Run from any writable working directory:

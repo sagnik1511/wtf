@@ -24,11 +24,11 @@ world later, independently of training.
 
 ## Install the published package
 
-The [0.0.2.0 release on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+The [0.0.2.9 release on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
 includes the maintained presets, maps and viewer. In a Python 3.12+ virtual environment:
 
 ```sh
-python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+python -m pip install wtf-wildlife-trial-framework==0.0.2.9
 wtf run baseline --runs 1 --steps 200 --seed 100 --progress
 wtf view --results results
 ```

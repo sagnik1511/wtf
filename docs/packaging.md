@@ -3,8 +3,8 @@
 [Installation](../INSTALL.md) · [Compatibility](compatibility.md) · [Linux setup](linux.md) · [Customization](customization.md)
 
 The distribution is named `wtf-wildlife-trial-framework`; the Python import is
-`wtf`. Version [0.0.2.0 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
-with a portable wheel and source archive, after a matching TestPyPI trial.
+`wtf`. Version [0.0.2.9 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
+with a portable wheel and source archive.
 Future builds/checks do not publish automatically. **TestPyPI** has separate
 accounts, tokens and projects; see [the upload procedure](#testpypi-trial-release).
 
@@ -14,17 +14,17 @@ From a source checkout, install build tools into the project environment:
 
 ```sh
 .venv/bin/python -m pip install build twine
-.venv/bin/python -m build --outdir dist/0.0.2.0
-.venv/bin/python -m twine check dist/0.0.2.0/*
+.venv/bin/python -m build --outdir dist/0.0.2.9
+.venv/bin/python -m twine check dist/0.0.2.9/*
 ```
 
 The build backend is isolated setuptools with explicit package discovery and an
 MIT SPDX license declaration. The default artifacts are:
 
 ```text
-dist/0.0.2.0/
-├── wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
-└── wtf_wildlife_trial_framework-0.0.2.0.tar.gz
+dist/0.0.2.9/
+├── wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl
+└── wtf_wildlife_trial_framework-0.0.2.9.tar.gz
 ```
 
 The default wheel is pure Python, portable across supported runtimes and needs
@@ -66,7 +66,7 @@ writable experiment directory:
 
 ```sh
 python3 -m venv /path/to/test-env
-/path/to/test-env/bin/python -m pip install /path/to/wtf/dist/0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
+/path/to/test-env/bin/python -m pip install /path/to/wtf/dist/0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl
 mkdir -p /path/to/experiments
 cd /path/to/experiments
 /path/to/test-env/bin/wtf presets
@@ -105,7 +105,7 @@ On supported CPython 3.12–3.13 with a compiler and matching headers:
 
 ```sh
 WTF_BUILD_NATIVE=1 python -m pip install --no-cache-dir --force-reinstall \
-  /path/to/wtf_wildlife_trial_framework-0.0.2.0.tar.gz
+  /path/to/wtf_wildlife_trial_framework-0.0.2.9.tar.gz
 ```
 
 Opt-in compilation uses the same strict floating-point flags as the reference
@@ -165,8 +165,8 @@ Build and validate a dedicated artifact directory so a trial upload cannot pick
 up stale/native distributions from another build:
 
 ```sh
-WTF_BUILD_NATIVE=0 .venv/bin/python -m build --outdir dist/testpypi-0.0.2.0
-.venv/bin/python -m twine check --strict dist/testpypi-0.0.2.0/*
+WTF_BUILD_NATIVE=0 .venv/bin/python -m build --outdir dist/testpypi-0.0.2.9
+.venv/bin/python -m twine check --strict dist/testpypi-0.0.2.9/*
 ```
 
 Inspect the wheel and source archive, test each in a fresh environment with
@@ -176,8 +176,8 @@ archives. Publish only the named version's two reviewed artifacts:
 
 ```sh
 .venv/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ \
-  dist/testpypi-0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl \
-  dist/testpypi-0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0.tar.gz
+  dist/testpypi-0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl \
+  dist/testpypi-0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9.tar.gz
 ```
 
 Authenticate to TestPyPI with the `__token__` username and a TestPyPI API token
@@ -193,7 +193,7 @@ in another fresh Python 3.12+ environment:
 ```sh
 python -m pip install "tqdm>=4.66,<5"
 python -m pip install --index-url https://test.pypi.org/simple/ --no-deps \
-  wtf-wildlife-trial-framework==0.0.2.0
+  wtf-wildlife-trial-framework==0.0.2.9
 ```
 
 Install dependencies from PyPI separately rather than using `--extra-index-url`.

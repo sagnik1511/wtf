@@ -93,6 +93,7 @@ narrow screens. The top tabs open the same section pages.
 | [Agent inspector and brain explanations](explainability.md) | Selected-animal inputs/outputs/activations and saved-brain comparisons. |
 | [Replay files and data structures](replay-data-structures.md) | Artifact tree, chunk records, frame deltas and champion weight records. |
 | [Checkpoint state and restoration](checkpoint-data-structures.md) | World, optimizer, RNG and replay-buffer state with restore/access diagrams. |
+| [Artifact retention](artifact-retention.md) | Recovery rotation, recent best-brain milestones, shared metadata and encoding-cache ownership. |
 | [Binary formats and compression](binary-storage.md) | Typed binary layouts, compression, deduplication and legacy readers. |
 
 ## Development

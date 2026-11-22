@@ -11,12 +11,12 @@ For renamed imports and module locations, see [package layout and migration](doc
 
 ## Install from PyPI
 
-Version [0.0.2.0](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/) is available from production PyPI.
+Version [0.0.2.9](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/) is available from production PyPI.
 In a fresh working directory:
 
 ```sh
 python3.12 -m venv .venv
-.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.9
 .venv/bin/wtf presets
 .venv/bin/wtf run baseline --runs 1 --steps 200 --seed 100 --progress
 .venv/bin/wtf view --results results
@@ -32,10 +32,10 @@ into a fresh environment:
 
 ```sh
 .venv/bin/python -m pip install build twine
-.venv/bin/python -m build --outdir dist/0.0.2.0
-.venv/bin/python -m twine check dist/0.0.2.0/*
+.venv/bin/python -m build --outdir dist/0.0.2.9
+.venv/bin/python -m twine check dist/0.0.2.9/*
 python3.12 -m venv /path/to/test-env
-/path/to/test-env/bin/python -m pip install dist/0.0.2.0/wtf_wildlife_trial_framework-0.0.2.0-py3-none-any.whl
+/path/to/test-env/bin/python -m pip install dist/0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl
 ```
 
 From any writable working directory, use `wtf presets`,

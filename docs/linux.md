@@ -16,12 +16,12 @@ On Ubuntu 24.04 (Python 3.12), install the interpreter's venv support if absent:
 sudo apt-get update
 sudo apt-get install python3-venv python3-pip
 python3 -m venv .venv
-.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.9
 .venv/bin/wtf run maskable_ppo --runs 1 --steps 200 --seed 100 --progress
 .venv/bin/wtf view --results results
 ```
 
-The portable release is available from [PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/).
+The portable release is available from [PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
 You can also install a locally built wheel using its path. An Ubuntu
 Python newer than the native backend's supported range intentionally uses the
 Python fallback; a compiler is not required for the portable wheel. Python 3.12+

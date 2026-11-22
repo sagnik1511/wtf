@@ -65,12 +65,12 @@ required. [Installation](INSTALL.md) covers commands and platform details;
 
 ## Quick start
 
-Requires Python 3.12+. Install the [published package](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+Requires Python 3.12+. Install the [published package](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
 in a fresh writable working directory:
 
 ```sh
 python3.12 -m venv .venv
-.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.0
+.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.9
 .venv/bin/wtf run baseline --runs 1 --steps 200 --seed 100 --progress
 .venv/bin/wtf view --results results
 ```

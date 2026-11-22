@@ -20,7 +20,7 @@ and **8 identical viewer branding copies**.
 | [Learning algorithms and networks](algorithms.md) | [Home](index.md) → [Algorithms and networks](algorithms.md) |
 | [Behavior and learning analysis](analysis.md) | [Home](index.md) → [behavior analysis](analysis.md) |
 | [Architecture and simulation rules](architecture.md) | [Home](index.md) → [architecture](architecture.md) |
-| [Best-brain milestones and rolling recovery](artifact-retention.md) | [Home](index.md) → [run and resume](running.md) → [artifact retention](artifact-retention.md) |
+| [Best-brain milestones and rolling recovery](artifact-retention.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Artifact retention](artifact-retention.md) |
 | [Documentation assets](assets/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Visual assets and sources](assets/README.md) |
 | [Flow diagram sources and SVG exports](assets/diagrams/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Flow diagrams](assets/diagrams/README.md) |
 | [Landscape map diagrams](assets/geography/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Map diagrams](assets/geography/README.md) |
@@ -281,7 +281,7 @@ and **8 identical viewer branding copies**.
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
 | [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7](releases/0.0.2.7.md) |
 | [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.8](releases/0.0.2.8.md) |
-| [0.0.2.9 Training capture profiles and frozen inference](releases/0.0.2.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.9 — Training capture profiles and frozen inference](releases/0.0.2.9.md) |
+| [0.0.2.9 Training capture profiles and frozen inference](releases/0.0.2.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.9](releases/0.0.2.9.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 

@@ -3,7 +3,7 @@
 [Saved brains](brain-library.md) · [Checkpoint structure](checkpoint-data-structures.md) · [Replay structure](replay-data-structures.md)
 
 Package releases, internal rollout numbers and file-format versions describe
-different contracts. Package version [0.0.2.0 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/)
+different contracts. Package version [0.0.2.9 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
 with a portable wheel and source archive.
 Four-component records under `docs/releases/` track implementation rollouts,
 not importable-package versions. Binary magic, checkpoint envelopes, logical
@@ -11,8 +11,8 @@ state and observation versions each have their own version identifiers.
 
 ## Optional training capture and frozen evaluation
 
-The source checkout supports `recording.profile` and evaluation `--freeze-brains`;
-they are not yet part of published package 0.0.2.0. Replay/champion encodings are
+Package 0.0.2.9 supports `recording.profile` and evaluation `--freeze-brains`;
+they are absent from the older 0.0.2.0 package. Replay/champion encodings are
 unchanged. Old checkpoints restore with the freeze policy disabled; new logical
 checkpoints retain it. Use feature-aware source when restoring profile-configured
 checkpoints: older strict configuration validators reject `recording.profile`,
@@ -40,7 +40,7 @@ historical continuation is required.
 ## Current reader capabilities
 
 This table describes the current source readers, not an untested historical
-package-version matrix. The published 0.0.2.0 wheel/source archive carry these
+package-version matrix. The published 0.0.2.9 wheel/source archive carry these
 capabilities; the production-download smoke check covers all maintained presets,
 recording, checkpoint restoration and viewer assets. Platform coverage remains
 limited to the runtimes actually tested. See [package verification](packaging.md).
