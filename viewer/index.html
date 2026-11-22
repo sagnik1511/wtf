@@ -99,13 +99,22 @@
             height="840"
             aria-label="Recorded ecosystem grid. Click an animal to inspect recorded diagnostics."
           ></canvas>
-          <div
-            id="kill-banner"
-            class="kill-banner"
-            role="status"
-            aria-live="polite"
-            hidden
-          ></div>
+          <div class="event-banners">
+            <div
+              id="kill-banner"
+              class="kill-banner"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></div>
+            <div
+              id="contest-banner"
+              class="contest-banner"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></div>
+          </div>
           <div
             id="birth-banner"
             class="birth-banner"
@@ -115,12 +124,6 @@
           ></div>
           <div id="empty" hidden></div>
         </div>
-        <div
-          id="contest-banner"
-          class="contest-banner"
-          role="status"
-          hidden
-        ></div>
         <div class="world-footer">
           <div class="legend">
             <span

@@ -70,6 +70,9 @@ for older recordings.
 The [competition guide](competition.md) explains the opt-in learned action,
 physical eligibility, costs and outcomes. The contest banner names both animals,
 the context and actual damage; markers persist briefly without pausing playback.
+Contest and kill/death labels share a stacked overlay inside the board, leaving
+its size unchanged when labels appear or disappear. Births retain their lower
+board label.
 Aggression needs no food or path objective and changes only the participating
 animals through effort, health and resulting reward feedback.
 

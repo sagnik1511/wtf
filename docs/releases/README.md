@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.4](0.0.2.4.md), `b47a2b0`.
-**Latest committed runtime implementation:** [0.0.2.4](0.0.2.4.md), `b47a2b0`.
+**Latest committed rollout:** [0.0.2.5](0.0.2.5.md), `882c155`.
+**Latest committed runtime implementation:** [0.0.2.5](0.0.2.5.md), `882c155`.
 **Published package:** [0.0.2.0 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/).
-**Pending rollout:** [0.0.2.5 — Shared wheel and source-archive asset collection](0.0.2.5.md).
+**Pending rollout:** [0.0.2.6 — Stable board event overlays](0.0.2.6.md).
 
 ## Rollout index
 
@@ -20,7 +20,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.5](0.0.2.5.md) | Pending | 2026-11-22 | Not committed; base `b47a2b0` | One runtime asset allowlist for source archives and wheels |
+| [0.0.2.6](0.0.2.6.md) | Pending | 2026-11-22 | Not committed; base `882c155` | Overlay competition labels without resizing the board |
+| [0.0.2.5](0.0.2.5.md) | Committed | 2026-11-22 | `882c155` | One runtime asset allowlist for source archives and wheels |
 | [0.0.2.4](0.0.2.4.md) | Committed | 2026-11-22 | `b47a2b0` | Reuse private GRPO trial state and batch independent dense actors |
 | [0.0.2.3](0.0.2.3.md) | Committed | 2026-11-22 | `47110e9` | Exact optional native top-k perception and matched benchmarks |
 | [0.0.2.2](0.0.2.2.md) | Committed | 2026-11-22 | `47110e9` | Reuse unchanged champion models and phase-local contest occupancy |

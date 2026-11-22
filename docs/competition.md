@@ -118,7 +118,10 @@ hunting kills; the board labels the winner and health damage. Highlights last
 12 recorded frames without pausing playback. They carry across sequential
 chunks and retain at most 32 contests in memory, adding no replay storage.
 The viewer includes `challenge` in action predictions and labels competition
-deaths separately. Overlay colors follow the interface theme. Restart the playback server and
+deaths separately. The compact contest label overlays the board alongside the
+kill/death label instead of adding a layout row, so event changes do not resize
+the grid. Simultaneous top labels stack without covering each other. Overlay
+colors follow the interface theme. Restart the playback server and
 refresh the page after updating its readers and JavaScript.
 
 Per-species behavior analysis and per-step telemetry expose contest attempts,
