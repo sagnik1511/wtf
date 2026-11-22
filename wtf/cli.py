@@ -12,7 +12,12 @@ from pathlib import Path
 from wtf.config import load
 from wtf.experiment.runner import Experiment
 from wtf.storage.checkpoint_io import read_checkpoint
-from wtf.storage.recording import Recorder, settings
+from wtf.storage.recording import (
+    Recorder,
+    settings,
+    DEFAULT_RECORDING,
+    RECORDING_PROFILES,
+)
 from wtf.progress import RunProgress
 from wtf.storage.library import (
     DEFAULT_LIBRARY,
@@ -49,6 +54,16 @@ def main():
         "--no-record",
         action="store_true",
         help="Skip playback recording (metrics and checkpoints still saved)",
+    )
+    parser.add_argument(
+        "--recording-profile",
+        choices=RECORDING_PROFILES,
+        help="Training capture: full (configured cadence), compact (diagnostics >=50 steps, no activations), or training-only (no replay); full also works for evaluation",
+    )
+    parser.add_argument(
+        "--freeze-brains",
+        action="store_true",
+        help="Evaluation only: keep offspring weights identical to the same-sex parent's brain; no crossover or mutation. Saved in recovery checkpoints",
     )
     display = parser.add_mutually_exclusive_group()
     display.add_argument(
@@ -187,6 +202,10 @@ def main():
         experiment = Experiment.restore(read_checkpoint(args.resume), mode=args.mode)
     else:
         config = load(args.environment)
+        if args.recording_profile is not None:
+            config.setdefault("recording", dict(DEFAULT_RECORDING))[
+                "profile"
+            ] = args.recording_profile
         if args.chain_brains is not None:
             config["experiment"]["chain_best_brains"] = args.chain_brains
         else:
@@ -228,6 +247,21 @@ def main():
             )
         except (ValueError, OSError) as error:
             parser.error(str(error))
+    if args.freeze_brains and experiment.mode != "evaluate":
+        parser.error("--freeze-brains requires --mode evaluate")
+    if args.freeze_brains:
+        experiment.freeze_evaluation_brains = True
+    if args.recording_profile is not None:
+        if experiment.mode != "train" and args.recording_profile != "full":
+            parser.error(
+                "compact and training-only recording profiles require train mode"
+            )
+        experiment.config.setdefault("recording", dict(DEFAULT_RECORDING))[
+            "profile"
+        ] = args.recording_profile
+    recording_options = settings(experiment.config, experiment.mode)
+    if args.no_record:
+        recording_options["enabled"] = False
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     folder = args.output / f'{experiment.config["name"]}_{stamp}_{uuid.uuid4().hex[:6]}'
     folder.mkdir(parents=True, exist_ok=False)
@@ -283,14 +317,16 @@ def main():
             "guard_lineage_chaining": experiment.guard_lineage_chaining,
             "promote_only_improved": experiment.improvement_only,
             "early_stopping": experiment.config["experiment"].get("early_stopping"),
-            "playback_recording": not args.no_record
-            and settings(experiment.config)["enabled"],
+            "freeze_evaluation_brains": experiment.freeze_evaluation_brains,
+            "recording_profile": recording_options["profile"],
+            "recording_settings": recording_options,
+            "playback_recording": recording_options["enabled"],
         },
     )
     save("run_seeds.json", experiment.run_seeds)
     recorder = (
         Recorder(folder, experiment.config, experiment.mode)
-        if not args.no_record and settings(experiment.config)["enabled"]
+        if recording_options["enabled"]
         else None
     )
     progress = RunProgress(experiment.mode, enabled=args.progress)

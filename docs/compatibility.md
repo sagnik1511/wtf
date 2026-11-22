@@ -9,6 +9,17 @@ Four-component records under `docs/releases/` track implementation rollouts,
 not importable-package versions. Binary magic, checkpoint envelopes, logical
 state and observation versions each have their own version identifiers.
 
+## Optional training capture and frozen evaluation
+
+The source checkout supports `recording.profile` and evaluation `--freeze-brains`;
+they are not yet part of published package 0.0.2.0. Replay/champion encodings are
+unchanged. Old checkpoints restore with the freeze policy disabled; new logical
+checkpoints retain it. Use feature-aware source when restoring profile-configured
+checkpoints: older strict configuration validators reject `recording.profile`,
+and older runtimes do not preserve the frozen-birth policy. Training-only outputs
+contain no replay to convert; record a fresh evaluation for visualization.
+See [training and inference](running.md#train-without-replay-then-record-inference).
+
 ## Python runtime
 
 The `ecosystem` → `wtf` import migration changes Python paths, not artifact formats. See the [complete import map](package-layout.md#migrate-existing-imports); old namespace aliases are not shipped.

@@ -946,8 +946,11 @@ def validate(c):
                 "compression_level",
                 "encoding",
                 "record_activations",
+                "profile",
             ),
         )
+        if r.get("profile", "full") not in ("full", "compact", "training-only"):
+            fail("recording.profile", "must be full, compact or training-only")
         if "record_activations" in r and type(r["record_activations"]) is not bool:
             fail("recording.record_activations", "must be boolean")
         if r.get("encoding", "delta") not in ("binary", "delta", "snapshot"):

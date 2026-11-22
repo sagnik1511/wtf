@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.7](0.0.2.7.md), `19085c5`.
-**Latest committed runtime implementation:** [0.0.2.7](0.0.2.7.md), `19085c5`.
+**Latest committed rollout:** [0.0.2.8](0.0.2.8.md), `4e18271`.
+**Latest committed runtime implementation:** [0.0.2.8](0.0.2.8.md), `4e18271`.
 **Published package:** [0.0.2.0 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/).
-**Pending rollout:** [0.0.2.8 — Bounded artifacts and native masked-PPO batches](0.0.2.8.md).
+**Pending rollout:** [0.0.2.9 — Training capture profiles and frozen inference](0.0.2.9.md).
 
 ## Rollout index
 
@@ -20,7 +20,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.8](0.0.2.8.md) | Pending | 2026-11-22 | Not committed; base `19085c5` | Rolling recovery, recent best milestones, shared metadata and fused masked-PPO batches |
+| [0.0.2.9](0.0.2.9.md) | Pending | 2026-11-22 | Not committed; base `4e18271` | Optional full/compact/training-only capture and recorded frozen-policy evaluation |
+| [0.0.2.8](0.0.2.8.md) | Committed | 2026-11-22 | `4e18271` | Rolling recovery, recent best milestones, shared metadata and fused masked-PPO batches |
 | [0.0.2.7](0.0.2.7.md) | Committed | 2026-11-22 | `e479c33` through `19085c5` | Personal movement history, blended/legacy separated ground scent and inspector plots |
 | [0.0.2.6](0.0.2.6.md) | Committed | 2026-11-22 | `5da3504` | Overlay competition labels without resizing the board |
 | [0.0.2.5](0.0.2.5.md) | Committed | 2026-11-22 | `882c155` | One runtime asset allowlist for source archives and wheels |

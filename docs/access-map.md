@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **268 public documentation pages**, **103 visual files**
+Coverage: **269 public documentation pages**, **103 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -280,7 +280,8 @@ and **8 identical viewer branding copies**.
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
 | [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7](releases/0.0.2.7.md) |
-| [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.8 — Bounded artifacts and native masked-PPO batches](releases/0.0.2.8.md) |
+| [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.8](releases/0.0.2.8.md) |
+| [0.0.2.9 Training capture profiles and frozen inference](releases/0.0.2.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.9 — Training capture profiles and frozen inference](releases/0.0.2.9.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 

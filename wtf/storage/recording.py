@@ -27,8 +27,27 @@ DEFAULT_RECORDING = dict(
 )
 
 
-def settings(config):
-    return dict(DEFAULT_RECORDING, **config.get("recording", {}))
+RECORDING_PROFILES = ("full", "compact", "training-only")
+
+
+def settings(config, mode="train"):
+    """Resolve training-only presets without modifying the environment config.
+
+    Evaluation/random runs retain the ordinary full recording options. Explicit
+    recording.enabled=False and the CLI --no-record switch still disable capture.
+    """
+    options = dict(DEFAULT_RECORDING, **config.get("recording", {}))
+    profile = options.get("profile", "full")
+    if profile not in RECORDING_PROFILES:
+        raise ValueError("Unknown recording profile")
+    options["profile"] = profile if mode == "train" else "full"
+    if mode == "train" and profile == "training-only":
+        options["enabled"] = False
+    elif mode == "train" and profile == "compact":
+        interval = options["diagnostics_every_steps"]
+        options["diagnostics_every_steps"] = max(interval, 50) if interval else 0
+        options["record_activations"] = False
+    return options
 
 
 def write_json(path, value):
@@ -41,9 +60,11 @@ def write_json(path, value):
 
 class Recorder:
     def __init__(self, folder, config, mode):
+        self.options = settings(config, mode)
+        if not self.options["enabled"]:
+            raise ValueError("Playback recording is disabled by the effective settings")
         self.folder = Path(folder) / "playback"
         self.folder.mkdir(parents=True, exist_ok=False)
-        self.options = settings(config)
         self.manifest = dict(
             recording_version=1,
             name=config["name"],

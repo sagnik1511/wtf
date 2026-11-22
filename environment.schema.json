@@ -2901,6 +2901,11 @@
           "type": "boolean",
           "default": true,
           "description": "Include compact sampled hidden activations for actual-animal playback; does not add weights."
+        },
+        "profile": {
+          "enum": ["full", "compact", "training-only"],
+          "default": "full",
+          "description": "Training recording preset: full preserves configured cadence, compact uses a diagnostic interval of at least 50 steps (plus chunk-start/final samples) and omits activations, training-only omits replay files. Evaluation/random use full configured recording; enabled=false still disables capture."
         }
       },
       "description": "Optional replay cadence, chunk format/compression and sampled brain diagnostics."

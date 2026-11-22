@@ -35,6 +35,18 @@ The [world/action extension guide](extending-worlds-and-actions.md) separates
 new map symbols and action subsets from genuinely new physics/actions, including
 masks, native fallbacks, reward events, replay and viewer integration.
 
+## Training capture and inference
+
+Optional [recording profiles](recording.md#training-recording-profiles) change
+capture only: full is the default, compact retains world playback with sparse
+inspector samples, training-only retains metrics/checkpoints/champions without
+replay. Evaluation uses full configured capture even when the source environment
+has a training-only profile. `--mode evaluate --freeze-brains` disables learning
+and copies same-sex parent weights at birth without mutation/crossover. Ordinary
+evaluation still allows its existing crossover. Frozen policy metadata must
+survive checkpoints; training RNGs and results must not depend on capture profile.
+Discarded storage-format probes remain local and Git-ignored, not runtime codecs.
+
 ## Purpose and decisions
 
 WTF — Wildlife Trial Framework — explores independently learning prey and

@@ -29,14 +29,23 @@ from wtf.storage.library import (
 
 
 class Experiment:
-    def __init__(self, config, mode="train", library_root=None):
+    def __init__(
+        self, config, mode="train", library_root=None, *, freeze_evaluation_brains=False
+    ):
         if mode not in ("train", "evaluate", "random"):
             raise ValueError("mode must be train, evaluate, or random")
+        if type(freeze_evaluation_brains) is not bool or (
+            freeze_evaluation_brains and mode != "evaluate"
+        ):
+            raise ValueError(
+                "Frozen brains require evaluate mode and a boolean setting"
+            )
         self.config = copy.deepcopy(validate(config))
         self.guard_lineage_chaining = self.config["experiment"].get(
             "guard_lineage_chaining", True
         )
         self.mode = mode
+        self.freeze_evaluation_brains = freeze_evaluation_brains
         self.improvement_only = self.config["experiment"].get(
             "promote_only_improved", True
         )
@@ -393,11 +402,23 @@ class Experiment:
         mutation_events = []
         for event in result.events:
             if event.kind == "born":
-                self.brains[event.target] = mix_parent_brains(
-                    self.brains[event.actor],
-                    self.brains[event.mate],
-                    offspring_seed(self.world, event.target),
-                )
+                if self.mode == "evaluate" and self.freeze_evaluation_brains:
+                    # Birth remains physical; the child's model is an exact copy
+                    # of its same-sex parent, with independent transient state.
+                    parent = (
+                        event.actor
+                        if self.world.animals[event.target].sex == "female"
+                        else event.mate
+                    )
+                    self.brains[event.target] = inherit_brain(
+                        self.brains[parent], offspring_seed(self.world, event.target)
+                    )
+                else:
+                    self.brains[event.target] = mix_parent_brains(
+                        self.brains[event.actor],
+                        self.brains[event.mate],
+                        offspring_seed(self.world, event.target),
+                    )
                 if training:
                     from wtf.learning.mutation import mutate_birth
 
@@ -529,6 +550,7 @@ class Experiment:
             lineage=self.champions.lineage.checkpoint(),
             guard_lineage_chaining=self.guard_lineage_chaining,
             improvement_only=self.improvement_only,
+            freeze_evaluation_brains=self.freeze_evaluation_brains,
             early_stopping=self.early_stopping.checkpoint(),
             retired_updates=self.retired_updates,
             inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
@@ -616,6 +638,7 @@ class Experiment:
         e.inherited_updates = {
             int(i): n for i, n in state.get("inherited_updates", {}).items()
         }
+        e.freeze_evaluation_brains = state.get("freeze_evaluation_brains", False)
         e.mode = mode or state["mode"]
         if e.mode not in ("train", "evaluate", "random"):
             raise ValueError("Invalid checkpoint mode")

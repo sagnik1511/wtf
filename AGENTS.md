@@ -30,6 +30,7 @@ rather than loading every document or result into context.
   existing tie-breakers. Keep old-checkpoint resume behavior explicit. Champion
   metadata is JSON; version-3 weights use a shared content-addressed binary/XZ
   pool. Preserve legacy artifact loading and relative-path portability.
+- Optional training recording profiles affect capture only; evaluate/random resolve them to full configured capture. Preserve metrics, champion exports and recovery retention independently. Explicit frozen evaluation copies same-sex parent weights at birth without crossover, mutation or learning; ordinary evaluation retains crossover. Checkpoint the frozen policy and preserve legacy defaults. See [training/inference](docs/running.md#train-without-replay-then-record-inference).
 - Terrain is opt-in. Preserve flat observation version 1 (20 inputs); terrain
   version 2 has 32 inputs and a distinct model contract. Optional version 3 adds
   mating readiness for 42 inputs, with terrain padding on flat maps. These sizes

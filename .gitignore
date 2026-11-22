@@ -94,3 +94,14 @@ Thumbs.db
 
 # Local Python package-index credentials.
 .pypirc
+
+# Local, unadopted replay-storage benchmark prototypes (retain files locally).
+/work/audit_replay_dtypes.py
+/work/benchmark_columnar_playback.mjs
+/work/benchmark_columnar_playback.py
+/work/benchmark_replay_frame_types.py
+/work/benchmark_replay_types.py
+/work/columnar_playback.mjs
+/work/columnar_playback.py
+/tests/test_columnar_playback.py
+/docs/columnar-playback-prototype.md

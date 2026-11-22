@@ -20,3 +20,5 @@ then choose a learner and decide how descendants and champions inherit knowledge
 | [Choose champions and inheritance](../brain-library.md) | Species/sex archives, lineage selection and warm starts. |
 | [Analyze behavior](../analysis.md) | Saved metrics and limits of learning claims. |
 | [Design an evaluation](../evaluation.md) | Matched seeds and controlled comparisons. |
+
+For larger campaigns, use [training-only capture followed by recorded frozen inference](../running.md#train-without-replay-then-record-inference).

@@ -177,12 +177,61 @@ On a cache miss, moving the playhead loads the selected world chunk. Chart histo
 
 ![Seeking and charts use separate data](assets/diagrams/seeking-and-charts-use-separate-data.svg)
 
+## Training recording profiles
+
+The optional `recording.profile` field, or `--recording-profile`, controls capture
+for **training runs**. Missing profiles retain `full`, preserving the existing
+configured recording behavior. Learning, world seeds, rewards, reproduction,
+champion selection and checkpoint retention are independent of the profile.
+
+| Profile | World frames, events and metrics | Inspector samples | Other training artifacts |
+| --- | --- | --- | --- |
+| `full` | Configured frame cadence | Configured diagnostic cadence and activation setting | Unchanged |
+| `compact` | Same configured frame cadence | Diagnostic interval at least 50 steps; activations off | Unchanged |
+| `training-only` | No replay directory | None | Metrics CSV, summaries, seeds, recovery checkpoints and best brains remain |
+
+Compact capture retains chunk-start and final diagnostic samples, so these can
+occur sooner than the regular interval. A configured zero diagnostic interval
+remains disabled; an existing interval above 50 remains unchanged. Compact does
+not lower world-frame cadence or invent missing inspector values. `training-only`
+requires a new evaluation recording to watch behavior; it cannot replay the
+original training episodes. `--no-library` still explicitly disables new brain
+exports, and the existing checkpoint retention policy still applies.
+
+Add the profile to the normal complete `recording` JSON object, or select it per
+invocation:
+
+```sh
+.venv/bin/python -m wtf run ppo --runs 10 --seed 100 \
+  --recording-profile training-only --progress
+# Retain training playback with fewer inspector samples instead:
+.venv/bin/python -m wtf run ppo --runs 10 --seed 100 \
+  --recording-profile compact --progress
+```
+
+The selected profile is persisted in the environment/checkpoint configuration;
+resuming training keeps it unless explicitly overridden with `--recording-profile`.
+The experiment manifest records effective `recording_profile`, `recording_settings`
+and `playback_recording`. The playback manifest records effective capture options.
+Direct Python users should check `settings(config, mode)["enabled"]` before
+constructing `Recorder`; disabled capture raises before creating a replay folder.
+
+Evaluation and random modes resolve a configured training profile to `full`,
+using the original low-level frame/diagnostic/activation settings. Explicit CLI
+`compact`/`training-only` selections require training mode. Configured
+`recording.enabled: false` and CLI `--no-record` still disable capture in any mode.
+This never alters or removes existing saved playbacks.
+
+For recorded inference with fixed learned weights, use the
+[training-to-evaluation workflow](running.md#train-without-replay-then-record-inference).
+
 ## Recording settings
 
 Each environment has a recording section:
 
 ```json
 "recording": {
+  "profile": "full",
   "enabled": true,
   "frame_every_steps": 1,
   "frames_per_chunk": 64,

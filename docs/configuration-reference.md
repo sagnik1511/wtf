@@ -668,6 +668,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `compression_level` | Compression effort level used for the selected replay compressor. | integer; min: `1`; max: `9` | Optional; `6` |
 | `diagnostics_every_steps` | Step interval for sampled brain inputs/outputs/activations, with chunk-start/final capture rules; zero disables all diagnostic capture. | integer; min: `0`; max: `1000000` | Required; — |
 | `record_activations` | Include compact sampled hidden activations for actual-animal playback; does not add weights. | boolean | Optional; `true` |
+| `profile` | Training recording preset: full preserves configured cadence, compact uses a diagnostic interval of at least 50 steps (plus chunk-start/final samples) and omits activations, training-only omits replay files. Evaluation/random use full configured recording; enabled=false still disables capture. | value; choices: `["full", "compact", "training-only"]` | Optional; `"full"` |
 
 ## `config.placement`
 
@@ -700,4 +701,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `enabled` | Deposit anonymous species/sex ground traces. Omission or false disables scent storage and sensing. | boolean | Required; `false` |
 | `lifetime_steps` | Ground-trace lifetime in simulation steps; freshness decreases linearly to zero, and revisiting a cell refreshes its group trace. | integer; min: `2`; max: `256` | Required; — |
 
-Field entries documented: **387**.
+Field entries documented: **388**.

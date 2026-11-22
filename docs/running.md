@@ -250,6 +250,60 @@ To evaluate champion weights in a fresh world, set a species' `initial_brain`
 then use `--mode evaluate`. This is different from `--resume`, which restores the
 saved world and remaining run schedule. See [brain initialization](brain-library.md).
 
+## Train without replay, then record inference
+
+Use the same environment and learning configuration, but skip training playback:
+
+```sh
+.venv/bin/python -m wtf run ppo --runs 10 --seed 100 \
+  --recording-profile training-only --progress
+```
+
+Take the printed result directory and load its saved champions into fresh worlds:
+
+```sh
+.venv/bin/python -m wtf run results/TRAINING_EXPERIMENT/environment.json \
+  --mode evaluate --freeze-brains --brains-from results/TRAINING_EXPERIMENT \
+  --recording-profile full --runs 3 --seed 200 --progress
+.venv/bin/python -m wtf view --results results
+```
+
+Choose the new **evaluation** recording in the viewer. This is a newly simulated
+world, not a reconstruction of the original training history. `--brain-run N`
+selects a numbered source archive; `--brain SPECIES[:SEX]=CRITERION` selects
+criteria using the existing species/sex compatibility rules. Source brain
+artifacts are read-only; evaluation does not replace training champions.
+
+`evaluate` disables exploration-driven training, feedback learning, GRPO update
+trials and birth mutation. `--freeze-brains` additionally prevents birth crossover:
+a child receives an independent copy of its same-sex parent's learned model,
+with fresh transient/recurrent memory. Physical mating eligibility, costs and
+births still operate. Recurrent hidden state advances during decisions; fixed
+weights do not mean fixed memory or identical actions. Ordinary evaluation
+without this flag retains the existing two-parent crossover behavior.
+
+Metrics, checkpoints and full configured playback are saved during evaluation;
+new champion exports remain training-only. The explicit freeze policy survives
+checkpoint resume. Older checkpoints default to ordinary non-frozen evaluation.
+A resumed finished checkpoint cannot start new evaluation episodes; use
+`--brains-from` for a fresh evaluation schedule as shown above.
+
+For Python callers:
+
+```python
+from wtf import Experiment, load_config
+from wtf.storage.library import apply_brain_overrides
+
+config = load_config("results/TRAINING_EXPERIMENT/environment.json")
+apply_brain_overrides(config, source_experiment="results/TRAINING_EXPERIMENT")
+evaluation = Experiment(config, mode="evaluate", freeze_evaluation_brains=True)
+```
+
+The Python constructor uses the supplied brain initialization configuration;
+it does not implicitly locate champions. See [saved-brain loading](brain-library.md)
+and [profile details](recording.md#training-recording-profiles). Compact recording
+is also available when retaining training world playback is useful.
+
 ## Start playback
 
 ```sh
