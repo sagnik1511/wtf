@@ -7,6 +7,9 @@ The Python namespace is **`wtf`**. The installable distribution remains
 installing the same project. Do not install an unrelated registry project named
 only `wtf`. Python 3.12+ is still required.
 
+Use the [source call/caller browser](source-graphs.md) to follow implementation
+relationships and inspect the original source lines for each component.
+
 ## Start with the public API
 
 ```python

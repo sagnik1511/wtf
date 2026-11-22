@@ -118,6 +118,9 @@ def build(root=ROOT):
 
 
 def _build(root):
+    from work.build_source_docs import build as build_source_reference
+
+    source_html = build_source_reference(root)
     staged, config, pages = prepare(root)
     subprocess.run(
         [
@@ -132,6 +135,10 @@ def _build(root):
         cwd=root,
         check=True,
     )
+    destination = Path(config.site_dir) / "source-api"
+    if destination.exists():
+        shutil.rmtree(destination)
+    shutil.copytree(source_html, destination)
     for page in pages:
         docs_site.on_post_page("", page, config)
     print(
@@ -146,10 +153,18 @@ def source_signature(root=ROOT):
     paths = set(docs_site.public_sources(root).values())
     paths.update(root / name for name in docs_site.EXTRA_PAGES.values())
     paths.update(
-        (root / "zensical.toml", root / "requirements-docs.txt", root / ".gitignore")
+        (
+            root / "zensical.toml",
+            root / "requirements-docs.txt",
+            root / ".gitignore",
+            root / "Doxyfile",
+        )
     )
     paths.update((root / "docs/overrides").rglob("*"))
     paths.update((root / "work").glob("*docs*.py"))
+    from work.build_source_docs import source_files
+
+    paths.update(root / name for name in source_files(root))
     return tuple(
         sorted(
             (str(p), p.stat().st_mtime_ns, p.stat().st_size)

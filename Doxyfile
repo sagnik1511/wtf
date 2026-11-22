@@ -1,0 +1,46 @@
+# Generated source documentation; invoke python -m work.build_source_docs.
+# INPUT and OUTPUT_DIRECTORY are supplied from a Git-visible source inventory.
+PROJECT_NAME           = "WTF source reference"
+PROJECT_BRIEF          = "Wildlife Trial Framework — source, callees and callers"
+OUTPUT_LANGUAGE        = English
+RECURSIVE              = NO
+FILE_PATTERNS          = *.py *.js *.mjs *.cjs *.c *.h *.cpp *.hpp
+EXTENSION_MAPPING      = js=JavaScript mjs=JavaScript cjs=JavaScript
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_METHODS  = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = .
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+REFERENCES_RELATION    = YES
+REFERENCED_BY_RELATION = YES
+VERBATIM_HEADERS       = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_PROGRAMLISTING     = NO
+HTML_OUTPUT            = html
+HTML_COLORSTYLE        = TOGGLE
+GENERATE_TREEVIEW      = YES
+SEARCHENGINE           = YES
+HAVE_DOT               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+DIRECTORY_GRAPH        = YES
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+DOT_GRAPH_MAX_NODES    = 40
+MAX_DOT_GRAPH_DEPTH    = 2
+DOT_NUM_THREADS        = 2
+NUM_PROC_THREADS       = 2
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = NO
+WARN_AS_ERROR          = NO
+DOT_CLEANUP            = YES

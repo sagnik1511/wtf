@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **247 public documentation pages**, **96 visual files**
+Coverage: **248 public documentation pages**, **96 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -75,6 +75,7 @@ and **8 identical viewer branding copies**.
 | [Playback data structures and artifact map](replay-data-structures.md) | [Home](index.md) → [Replay structures](replay-data-structures.md) |
 | [Rewards, costs and training loss](rewards.md) | [Home](index.md) → [rewards](rewards.md) |
 | [Setup, runs and checkpoints](running.md) | [Home](index.md) → [run and resume](running.md) |
+| [Source call and caller graphs](source-graphs.md) | [Home](index.md) → [Source graphs and browser](source-graphs.md) |
 | [Adding prey and predator species](species.md) | [Home](index.md) → [species](species.md) |
 | [Complete experiment tutorial](tutorial.md) | [Home](index.md) → [Complete tutorial](tutorial.md) |
 | [1. Configure a small world](tutorials/01-configuration.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Tutorial 1: Configure](tutorials/01-configuration.md) |

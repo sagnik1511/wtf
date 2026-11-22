@@ -47,6 +47,7 @@ for creating the environment, source builds and Docker.
 | Identify animal pointers and board markers | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
 | Inspect animals and their decisions | [Viewer appearance](viewer-visual-reference.md) and [brain explainability](explainability.md) |
 | Understand a diagram or visual | [Visual guide](visual-guide.md) |
+| Explore source calls and callers | [Source graphs and browser](source-graphs.md) |
 | Contribute or extend the simulator | [Development](development.md) and [architecture](architecture.md) |
 
 Python **3.12+** is required. The documentation website is a static guide;

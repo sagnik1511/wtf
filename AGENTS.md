@@ -107,6 +107,10 @@ example content for the website. Keep the publication filter in `work/docs_site.
 and site/navigation checks current. Never publish ignored paper, experiments or
 results through documentation builds. See [website upkeep](docs/documentation-site.md).
 Documentation-only site changes need no release record unless explicitly requested.
+The [source call/caller reference](docs/source-graphs.md) is generated with Doxygen
+and Graphviz through `work.build_source_docs`, then copied by the site wrapper.
+Keep generated HTML/SVG/XML and source inventories under ignored caches; do not
+hand-edit generated graphs or treat static relationships as exhaustive runtime calls.
 
 ## Documentation visuals
 

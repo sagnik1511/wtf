@@ -137,6 +137,7 @@ Home = "index.md"
 Development = [
     "contributing/index.md",
     { Architecture = "architecture.md" },
+    { "Source call and caller graphs" = "source-graphs.md" },
     { "Package layout and import migration" = "package-layout.md" },
     { "Development and testing" = "development.md" },
     { "Add policy models" = "extending-policies.md" },

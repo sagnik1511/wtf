@@ -80,6 +80,12 @@ preset and metadata captured with the experiment.
 
 ## Code navigation
 
+[Source call and caller graphs](source-graphs.md) provide a generated, searchable
+reference for Python, JavaScript and native components. Build with
+`python -m work.build_source_docs`; keep the generated source reference ignored.
+Read the static-analysis limitations before inferring runtime dependencies.
+
+
 | Area | Entry points | Read when changing |
 | --- | --- | --- |
 | Physical world, birth/death | `wtf/simulation/world.py`, `mutation.py` | [Architecture](architecture.md), [mutation](mutation.md) |

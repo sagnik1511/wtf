@@ -342,3 +342,10 @@ unit counts, bundled dense connectivity, deep summaries, recurrent blocks and
 legacy gray-unit topology. Brain-view tests verify lazy Advanced sections,
 input/output priority and threshold redraws without explanation requests. Rank
 is a viewer-only depth limit, separate from observation top-k or matrix rank.
+
+## Source call and caller graphs
+
+The [source reference guide](source-graphs.md) covers Doxygen/Graphviz setup,
+per-component navigation and static-analysis limits. Run
+`python -m work.build_source_docs` to regenerate its ignored output; the website
+build publishes the source browser alongside the guides.

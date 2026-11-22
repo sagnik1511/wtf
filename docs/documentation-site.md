@@ -20,7 +20,9 @@ separate theme control; its simulated day–night lighting is another setting.
 
 ## Build or preview locally
 
-From the checkout root, create a separate documentation environment:
+Install [Doxygen and Graphviz](source-graphs.md#generate-locally) for the
+source reference, then create a separate documentation environment from the
+checkout root:
 
 ```sh
 python3.12 -m venv .venv-docs
@@ -58,7 +60,8 @@ checkout's `docs/` tree directly. The wrapper:
    in version control.
 3. Rewrites source/document links and paired theme media, then runs Zensical in
    strict mode using an ignored derived configuration.
-4. Restores legacy redirects, including fragments/query strings, in the built site.
+4. Copies the cached [source call/caller reference](source-graphs.md) under
+   `source-api/` and restores legacy redirects, including fragments/query strings.
 
 Canonical Markdown and visuals stay in their existing locations. Generated
 staging/configuration, builder caches and HTML are local outputs. Edit the

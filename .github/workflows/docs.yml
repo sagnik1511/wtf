@@ -7,12 +7,19 @@ on:
       - 'INSTALL.md'
       - 'examples/README.md'
       - 'zensical.toml'
+      - 'Doxyfile'
+      - 'wtf/**'
+      - 'viewer/**'
+      - 'work/**'
+      - 'examples/**'
+      - 'setup.py'
       - 'requirements-docs.txt'
       - 'work/docs_site.py'
       - 'work/build_docs.py'
       - 'work/check_docs_links.py'
       - 'work/docs_access.py'
       - 'tests/test_docs_site.py'
+      - 'tests/test_source_docs.py'
       - '.github/workflows/docs.yml'
       - '.gitignore'
   pull_request:
@@ -21,12 +28,19 @@ on:
       - 'INSTALL.md'
       - 'examples/README.md'
       - 'zensical.toml'
+      - 'Doxyfile'
+      - 'wtf/**'
+      - 'viewer/**'
+      - 'work/**'
+      - 'examples/**'
+      - 'setup.py'
       - 'requirements-docs.txt'
       - 'work/docs_site.py'
       - 'work/build_docs.py'
       - 'work/check_docs_links.py'
       - 'work/docs_access.py'
       - 'tests/test_docs_site.py'
+      - 'tests/test_source_docs.py'
       - '.github/workflows/docs.yml'
       - '.gitignore'
   workflow_dispatch:
@@ -43,11 +57,13 @@ jobs:
           architecture: x64
           cache: pip
           cache-dependency-path: requirements-docs.txt
+      - name: Install source graph tools
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
       - name: Install documentation tools
         run: python -m pip install -r requirements-docs.txt
       - name: Build and check documentation
         run: |
-          python -m unittest tests.test_docs_site
+          python -m unittest tests.test_docs_site tests.test_source_docs
           python -m work.build_docs
           python -m work.check_docs_links
           python -m work.docs_access --check

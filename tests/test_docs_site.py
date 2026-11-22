@@ -522,3 +522,28 @@ class DocumentationSiteTests(unittest.TestCase):
                 {"guide.md", "installation.md", "examples.md"},
             )
             self.assertTrue(staged.is_file())
+
+    def test_source_reference_filename_and_css_variable_urls(self):
+        from work.check_docs_links import check_site
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "search").mkdir()
+            marker = '<meta name="generator" content="Doxygen 1.12.0">'
+            (root / "index.html").write_text(
+                marker + '<a href="spatial_index.html#method">Source</a>'
+            )
+            (root / "spatial_index.html").write_text(marker + '<a id="method"></a>')
+            (root / "theme.css").write_text(":root { --search-icon: url(icon.svg); }")
+            (root / "search/search.css").write_text(
+                "input { background: var(--search-icon); }"
+            )
+            (root / "search/icon.svg").write_text("<svg/>")
+            report = check_site(root, "https://example.com/wtf/source-api/")
+            self.assertEqual(report["errors"], [])
+            self.assertEqual(report["documents"], 2)
+            (root / "search/icon.svg").unlink()
+            self.assertEqual(
+                len(check_site(root, "https://example.com/wtf/source-api/")["errors"]),
+                1,
+            )

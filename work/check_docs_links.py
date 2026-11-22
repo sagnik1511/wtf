@@ -19,7 +19,9 @@ class PageLinks(HTMLParser):
         attrs = dict(attributes)
         if tag == "meta" and attrs.get("name") == "generator":
             self.is_document = (
-                attrs.get("content", "").lower().startswith(("mkdocs-", "zensical"))
+                attrs.get("content", "")
+                .lower()
+                .startswith(("mkdocs-", "zensical", "doxygen"))
             )
         if tag == "a" and attrs.get("href"):
             self.destinations.append(attrs["href"])
@@ -54,17 +56,35 @@ def check_site(site_dir, site_url):
         pages[path] = page
         relative = path.relative_to(root).as_posix()
         url = urljoin(
-            base, relative[:-10] if relative.endswith("index.html") else relative
+            base,
+            (
+                relative[:-10]
+                if (relative == "index.html" or relative.endswith("/index.html"))
+                else relative
+            ),
         )
         page_urls[path] = url
         references.extend((relative, urljoin(url, href)) for href in page.links)
     if not pages:
         raise ValueError(f"No built HTML pages found in {root}")
-    for path in root.rglob("*.css"):
+    # Custom-property URLs resolve in the consuming stylesheet, not necessarily
+    # the file declaring the property (Doxygen's search icons use this pattern).
+    css = {path: path.read_text() for path in root.rglob("*.css")}
+    definitions = re.compile(r"(--[\w-]+)\s*:\s*(url\(.*?\))\s*;", re.S)
+    properties = {}
+    for text in css.values():
+        for match in definitions.finditer(text):
+            properties.setdefault(match[1], set()).add(match[2])
+    for path, text in css.items():
         relative = path.relative_to(root).as_posix()
         url = urljoin(base, relative)
-        for href in re.findall(r"url\(\s*[\'\"]?([^\'\"\s)]+)", path.read_text()):
-            references.append((relative, urljoin(url, href)))
+        text = definitions.sub("", text)
+        values = [text]
+        for name in re.findall(r"var\(\s*(--[\w-]+)", text):
+            values.extend(sorted(properties.get(name, ())))
+        for value in values:
+            for href in re.findall(r"url\(\s*[\'\"]?([^\'\"\s)]+)", value):
+                references.append((relative, urljoin(url, href)))
     errors = []
     checked = 0
     for origin, href in references:
