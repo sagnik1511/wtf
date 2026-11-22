@@ -107,6 +107,12 @@ documented species-mean adapter belongs in the learner delivery path.
 
 ## Semantics worth preserving
 
+Optional [same-species competition](competition.md) is initiated by `challenge`
+and stays disabled in existing presets. Contests finish within a step, use
+ordinary damage/cost feedback and explicit displacement events, and do not grant
+predation kills or kill energy. Keep failed-action and hunting metrics distinct.
+
+
 World actions resolve together; death terminates an animal's experience, while
 an episode time limit is a truncation. Different algorithms have different
 bootstrap rules. Evaluation freezes learning and newborn mutation. GRPO trial

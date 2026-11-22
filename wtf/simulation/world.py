@@ -757,10 +757,23 @@ class World:
                 if i != winner
             )
         self._river_drift(events)
+        priority, competition_deaths, challenge_successes = [], set(), set()
+        has_challenges = "challenge" in actions.values()
+        if has_challenges:
+            from wtf.simulation.competition import resolve
+
+            priority, competition_deaths, challenge_successes = resolve(
+                self, actions, events
+            )
         # Feeding uses seeded contention order; resources may share animal cells.
         eaters = [i for i in self.animals if actions[i] == "eat"]
         self.rng.shuffle(eaters)
+        if priority:
+            # A winning challenger gets one normal bite, not an extra feeding turn.
+            eaters = priority + [i for i in eaters if i not in priority]
         for i in eaters:
+            if i in competition_deaths:
+                continue
             a = self.animals[i]
             b = self.body(a)
             candidates = [self.resources.get(p) for p in (a.position, self.front(a))]
@@ -779,14 +792,23 @@ class World:
                 a.energy += gained
                 if gained > 0:
                     events.append(
-                        Event("energy_gained", i, amount=gained, cause="resource")
+                        Event(
+                            "energy_gained",
+                            i,
+                            amount=gained,
+                            cause=(
+                                "resource"
+                                if actions[i] == "eat"
+                                else "competition_food"
+                            ),
+                        )
                     )
         # Attacks are simultaneous. Multiple attackers share actual damage;
         # one seeded attacker receives energy for a kill, never multiple rewards.
-        positions = {a.position: a for a in self.animals.values()}
+        positions = {a.position: a for a in self.animals.values() if a.health > 0}
         attacks = defaultdict(list)
         for i, a in self.animals.items():
-            if actions[i] == "attack":
+            if actions[i] == "attack" and a.health > 0:
                 target = positions.get(self.front(a))
                 if (
                     target is not None
@@ -823,7 +845,11 @@ class World:
                         "kill",
                         killer.id,
                         target_id,
-                        position=list(target.position) if self.geography else None,
+                        position=(
+                            list(target.position)
+                            if self.geography or has_challenges
+                            else None
+                        ),
                     )
                 )
                 events.append(
@@ -833,7 +859,8 @@ class World:
         drowned = set()
         rewards = {i: 0.0 for i in self.animals}
         native_metabolism = (
-            not self.geography
+            not competition_deaths
+            and not self.geography
             and kernels.available("flat_metabolism")
             and (
                 getattr(kernels.native, "escape_movement", False)
@@ -908,27 +935,34 @@ class World:
             cause = (
                 "predation"
                 if i in attack_deaths
-                else "drowning" if i in drowned else "starvation"
+                else (
+                    "competition"
+                    if i in competition_deaths
+                    else "drowning" if i in drowned else "starvation"
+                )
             )
             events.append(
                 Event(
                     "died",
                     i,
                     cause=cause,
-                    position=list(a.position) if self.geography else None,
+                    position=(
+                        list(a.position) if self.geography or has_challenges else None
+                    ),
                 )
             )
             self.deaths[cause] += 1
             self.lifespans.append(
                 {"id": i, "species": a.species, "age": a.age, "cause": cause}
             )
-        successful = set()
+        successful = set(challenge_successes)
         for e in events:
             a = self.animals[e.actor]
             r = self.config["species"][a.species]["rewards"]
             if (
                 e.kind == "moved"
                 or e.kind == "damage_dealt"
+                and e.cause != "competition"
                 and e.amount > 0
                 or e.kind == "energy_gained"
                 and e.cause == "resource"

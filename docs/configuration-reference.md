@@ -90,7 +90,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `initial_brain` | Species-wide champion selector used when a sex-specific initializer does not override it. | variant | Optional; — |
 | `initial_population` | Number of founder animals of this species. | integer; min: `0`; max: `10000` | Required; — |
 | `diet` | Resource-eating animals consume food patches; prey-eating animals hunt resource-eating animals across species. | value; choices: `["resource", "prey"]` | Required; — |
-| `allowed_actions` | Ordered action names available to this species; order is part of saved-model compatibility. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "move_backward", "strafe_left", "strafe_right"]` | Required; — |
+| `allowed_actions` | Ordered action names available to this species; order is part of saved-model compatibility. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "move_backward", "strafe_left", "strafe_right", "challenge"]` | Required; — |
 | `body` | Physical energy, health, sight and diet-specific feeding/combat parameters. | variant | Required; — |
 | `brain` | Key of the brain template used to initialize this species; each animal receives independent live state. | string | Required; — |
 | `champion_selection` | Default criterion and scoring parameters used to curate this species' champions. | object | Optional; — |
@@ -99,6 +99,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `mutation` | Rare newborn-only weight perturbation settings; does not mutate the whole species. | object | Optional; — |
 | `reproduction` | Same-species opposite-sex eligibility, consent window, maturity, cost and population limits. | object | Optional; — |
 | `circadian` | Species-specific night multipliers, used only when the world day_night cycle is enabled. | object | Optional; — |
+| `competition` | Optional same-species challenge contests for shared food and occupied paths; disabled unless enabled explicitly. | object | Optional; — |
 
 ## `config.species.<name>.locomotion`
 
@@ -257,6 +258,17 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `night_vision_radius_multiplier` | Night-time base sight multiplier; blends toward one at midday, then rounds to a valid grid radius. | number; min: `0.05`; max: `4` | Optional; — |
 | `night_living_cost_multiplier` | Night-time living-cost multiplier; blends toward one with sunlight. | number; min: `0.05`; max: `4` | Optional; — |
 | `night_movement_cost_multiplier` | Night-time movement-cost multiplier; blends toward one with sunlight. | number; min: `0.05`; max: `4` | Optional; — |
+
+## `config.species.<name>.competition`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `enabled` | Enable physical contests initiated through the challenge action. | boolean | Optional; `false` |
+| `damage` | Health damage dealt to the losing same-species animal; no hunting kill credit or kill energy. | number; min: `0`; max: `10000` | Optional; `5.0` |
+| `energy_cost` | Energy demand for each explicit challenge attempt, including unavailable or losing attempts. | number; min: `0`; max: `10000` | Optional; `1.0` |
+| `food` | Permit contests over the same reachable food patch when the opponent chooses eat or challenge; the winner receives the first normal bite. | boolean | Optional; `true` |
+| `blocked_path` | Permit challenges against a same-species blocker ahead; a winning challenger advances only if a valid free retreat exists or the blocker dies. | boolean | Optional; `true` |
+| `aggression` | Allow a learned challenge against a cardinally adjacent same-species animal without a food or path objective. Aggression deals damage but grants no feeding or movement priority. | boolean | Optional; `true` |
 
 ## `config.brains.<name> (q_network)`
 
@@ -575,4 +587,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `cycle_steps` | Number of world steps in a full simulated day, independent of playback speed. | integer; min: `4`; max: `10000000` | Required; — |
 | `start_phase` | Initial cycle fraction: zero midnight, 0.25 sunrise, 0.5 midday, 0.75 sunset. | number; min: `0`; max: `1` | Optional; — |
 
-Field entries documented: **317**.
+Field entries documented: **324**.

@@ -103,6 +103,9 @@ test('actual app theme handler repaints a loaded paused board and events without
     drawDeathHighlights() {
       paints.push(['death']);
     },
+    drawContestHighlights() {
+      paints.push(['contest']);
+    },
     drawChart() {
       paints.push(['chart']);
     },
@@ -116,7 +119,7 @@ test('actual app theme handler repaints a loaded paused board and events without
   button.onclick();
   assert.deepEqual(
     paints.map((p) => p[0]),
-    ['board', 'birth', 'death', 'chart'],
+    ['board', 'birth', 'death', 'contest', 'chart'],
   );
   assert.equal(paints[0][1], boardPalette('light').background);
   assert.deepEqual(state, { tick: 123, frame_index: 123, selected: 7 });
@@ -125,7 +128,7 @@ test('actual app theme handler repaints a loaded paused board and events without
   button.onclick();
   assert.deepEqual(
     paints.map((p) => p[0]),
-    ['board', 'birth', 'death', 'chart', 'dashboard'],
+    ['board', 'birth', 'death', 'contest', 'chart', 'dashboard'],
   );
   assert.equal(paints[0][1], boardPalette('dark').background);
   paints.length = 0;

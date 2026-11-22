@@ -93,6 +93,7 @@ Home = "index.md"
     { "Customization handbook" = "customization.md" },
     { "Environment configuration" = "configuration.md" },
     { Species = "species.md" },
+    { "Same-species competition" = "competition.md" },
     { "Geography and maps" = "geography.md" },
     { "Physics and simulation rules" = "physics.md" },
     { "Day and night" = "day-night.md" },

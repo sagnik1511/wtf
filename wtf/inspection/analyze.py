@@ -95,19 +95,29 @@ class Statistics:
             if event.get("cause") == "resource" and amount > 0:
                 c["productive_feeds"] += 1
         elif kind == "damage_dealt":
-            c["hits"] += amount > 0
+            c["hits"] += amount > 0 and event.get("cause") != "competition"
+            if event.get("cause") == "competition":
+                c["competition_damage_dealt"] += amount
             c["reward"] += amount * rewards.get("per_damage_dealt", 0)
         elif kind == "damage_taken":
             c["reward"] += amount * rewards["per_damage_taken"]
         elif kind == "kill":
             c["kills"] += 1
+        elif kind in ("contest_won", "contest_lost"):
+            c[kind] += 1
         elif kind == "moved":
             c["swim_moves" if event.get("cause") == "swim" else "moves"] += 1
         elif kind == "drifted":
             c["drift_moves"] += 1
         elif kind == "energy_spent":
             c["energy_demand"] += amount
-            c["terrain_energy"] += amount
+            c[
+                (
+                    "competition_energy"
+                    if event.get("cause", "").startswith("competition")
+                    else "terrain_energy"
+                )
+            ] += amount
             c["reward"] += amount * rewards.get("per_energy_cost", 0)
         elif kind == "born":
             c["births"] += 1
@@ -165,6 +175,19 @@ class Statistics:
         actions = sum(a.values())
         capacity = self.config["world"]["width"] * self.config["world"]["height"]
         return dict(
+            **(
+                dict(
+                    challenge_attempts=a["challenge"],
+                    contest_wins=c["contest_won"],
+                    contest_losses=c["contest_lost"],
+                    competition_damage_dealt=c["competition_damage_dealt"],
+                    competition_energy_cost=c["competition_energy"],
+                )
+                if self.config["species"][species]
+                .get("competition", {})
+                .get("enabled", False)
+                else {}
+            ),
             diet=self.config["species"][species]["diet"],
             agent_steps=c["agent_steps"],
             observed_actions=actions,
@@ -291,7 +314,9 @@ def analyze_run(config, frames, window_steps=250):
                         actions[i] = "reproduce"
                     elif kind in ("moved", "movement_blocked"):
                         actions[i] = movement_action(event.get("cause", ""))
-                    elif kind == "damage_dealt":
+                    elif kind == "challenge_attempt":
+                        actions[i] = "challenge"
+                    elif kind == "damage_dealt" and event.get("cause") != "competition":
                         actions[i] = "attack"
                     elif kind == "energy_gained" and event.get("cause") == "resource":
                         actions[i] = "eat"
@@ -299,8 +324,9 @@ def analyze_run(config, frames, window_steps=250):
             for event in frame.get("events", []):
                 kind = event["kind"]
                 if (
-                    kind == "moved"
+                    kind in ("moved", "challenge_resolved")
                     or kind == "damage_dealt"
+                    and event.get("cause") != "competition"
                     and event.get("amount", 0) > 0
                     or kind == "energy_gained"
                     and event.get("cause") == "resource"

@@ -33,15 +33,18 @@ world. Physical resolution then proceeds in this order:
    contention and successful swimming/uphill charges.
 2. **Apply currents.** Accumulate fractional flow and resolve permitted drift.
    Subsequent interactions use the resulting positions.
-3. **Feed and attack.** Resource eaters feed; attacks are collected and resolved
+3. **Optional competition.** Resolve explicit same-species challenges, including
+   damage and valid retreat/advance, then order food winners before ordinary eaters.
+   See [competition](competition.md); existing environments leave this disabled.
+4. **Feed and attack.** Resource eaters feed; attacks are collected and resolved
    together. Kill energy goes to one seeded credited attacker. An animal can
    finish feeding in the step it is killed.
-4. **Charge demand and harm.** Spend ordinary living/action energy, advance age,
+5. **Charge demand and harm.** Spend ordinary living/action energy, advance age,
    charge water maintenance and apply drowning/starvation damage where eligible.
-5. **Remove deaths and resolve births.** Only surviving eligible pairs can
+6. **Remove deaths and resolve births.** Only surviving eligible pairs can
    reproduce. Consent, distance, route, capacity and free child space are checked
    at this phase, after movement, combat and energy spending.
-6. **Finish the transition.** Account for rewards/failures, regrow resources up to
+7. **Finish the transition.** Account for rewards/failures, regrow resources up to
    their caps, advance world time and prepare the next observations. The experiment
    updates parent controllers before creating independent inherited child brains.
    A newborn does not receive an experience update on its birth step.

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { drawContests } from '../viewer/competition.mjs';
 import {
   daylight,
   circadianBody,
@@ -63,6 +64,8 @@ class SVGCanvas {
     this.globalAlpha = 1;
     this.font = '14px system-ui';
     this.textAlign = 'left';
+    this.lineDash = [];
+    this.textBaseline = 'alphabetic';
   }
   getContext() {
     return this;
@@ -77,6 +80,8 @@ class SVGCanvas {
           'globalAlpha',
           'font',
           'textAlign',
+          'lineDash',
+          'textBaseline',
           'shadowBlur',
           'shadowColor',
         ].map((k) => [k, this[k]]),
@@ -125,15 +130,26 @@ class SVGCanvas {
       `<path d="${this.d}" fill="${esc(this.fillStyle)}" ${this.attrs()}/>`,
     );
   }
+  setLineDash(values) {
+    this.lineDash = [...values];
+  }
   stroke() {
     this.output.push(
-      `<path d="${this.d}" fill="none" stroke="${esc(this.strokeStyle)}" stroke-width="${this.lineWidth}" ${this.attrs()}/>`,
+      `<path d="${this.d}" fill="none" stroke="${esc(this.strokeStyle)}" stroke-width="${this.lineWidth}"${this.lineDash.length ? ` stroke-dasharray="${this.lineDash.join(' ')}"` : ''} ${this.attrs()}/>`,
+    );
+  }
+  strokeText(value, x, y) {
+    const start = this.output.length;
+    this.fillText(value, x, y);
+    this.output[start] = this.output[start].replace(
+      `fill="${esc(this.fillStyle)}"`,
+      `fill="none" stroke="${esc(this.strokeStyle)}" stroke-width="${this.lineWidth}" stroke-linejoin="round"`,
     );
   }
   fillText(value, x, y) {
     const size = this.font.match(/([\d.]+)px/)?.[1] ?? 14;
     this.output.push(
-      `<text x="${num(x)}" y="${num(y)}" font-family="system-ui,sans-serif" font-size="${size}" font-weight="${this.font.includes('bold') ? '700' : '400'}" text-anchor="${this.textAlign === 'center' ? 'middle' : this.textAlign === 'right' ? 'end' : 'start'}" fill="${esc(this.fillStyle)}" ${this.attrs()}>${esc(value)}</text>`,
+      `<text x="${num(x)}" y="${num(y)}" font-family="system-ui,sans-serif" font-size="${size}" ${this.textBaseline === 'bottom' ? 'dominant-baseline="text-after-edge" ' : ''}font-weight="${this.font.includes('bold') ? '700' : '400'}" text-anchor="${this.textAlign === 'center' ? 'middle' : this.textAlign === 'right' ? 'end' : 'start'}" fill="${esc(this.fillStyle)}" ${this.attrs()}>${esc(value)}</text>`,
     );
   }
 }
@@ -165,6 +181,7 @@ function board({
   births = [],
   kills = [],
   deaths = [],
+  contests = [],
   theme = 'dark',
   day_night = null,
   tick = 0,
@@ -181,6 +198,7 @@ function board({
       obstacles,
       species: baseSpecies,
       resource_capacity: 20,
+      contest_highlights: contests,
       birth_highlights: births,
       kill_highlights: kills,
       natural_death_highlights: deaths,
@@ -198,6 +216,7 @@ function board({
     circadianBody,
     drawDaylight,
     drawSunlitGround,
+    drawContests,
     state,
     selected,
     terrain,
@@ -209,10 +228,15 @@ function board({
       styles.get(a.species)?.[a.sex] ?? styles.get(a.species)?.color,
   });
   vm.runInContext(
-    ['drawWorld', 'drawBirthHighlights', 'drawDeathHighlights']
+    [
+      'drawWorld',
+      'drawBirthHighlights',
+      'drawDeathHighlights',
+      'drawContestHighlights',
+    ]
       .map(sourceFunction)
       .join('\n') +
-      '\ndrawWorld();drawBirthHighlights();drawDeathHighlights();',
+      '\ndrawWorld();drawBirthHighlights();drawDeathHighlights();drawContestHighlights();',
     context,
     { timeout: 1000 },
   );
@@ -310,6 +334,60 @@ const objectCards = [
     ['Automatic palette or JSON colors'],
     { animals: [animal('grazer')] },
   ],
+  ...['prey', 'predator'].map((species) => [
+    `Challenge · ${species}`,
+    ['Paired rings; winner / damage label'],
+    {
+      width: 4,
+      animals: [
+        animal(species, 'female', 1, 0, 1, 1),
+        animal(species, 'male', 3, 1, 2, 1),
+      ],
+      contests: [
+        {
+          actor: 0,
+          target: 1,
+          position: [1, 1],
+          loser_position: [2, 1],
+          amount: 5,
+          cause: 'aggression',
+          age: 0,
+        },
+      ],
+    },
+  ]),
+  [
+    'Challenge · shared food',
+    ['Same marker; banner names context'],
+    {
+      width: 4,
+      resources: [{ x: 2, y: 1, quantity: 20 }],
+      animals: [
+        animal('prey', 'female', 1, 0, 1, 1),
+        animal('prey', 'male', 3, 1, 2, 1),
+      ],
+      contests: [
+        {
+          actor: 0,
+          target: 1,
+          position: [1, 1],
+          loser_position: [2, 1],
+          amount: 5,
+          cause: 'food',
+          age: 0,
+        },
+      ],
+    },
+  ],
+  [
+    'Competition death',
+    ['DIED marker; cause in event banner'],
+    {
+      deaths: [
+        { species: 'prey', position: [1, 1], cause: 'competition', age: 0 },
+      ],
+    },
+  ],
 ];
 let body = objectCards
   .map(([title, caption, options], i) =>
@@ -318,14 +396,14 @@ let body = objectCards
       95 + Math.floor(i / 4) * 236,
       title,
       caption,
-      board(options),
+      board(options).replace('width="192"', 'width="144"'),
     ),
   )
   .join('');
 const objects = sheet(
   'Board objects and event markers',
   'Actual viewer drawing code · enlarged controlled specimens · event age 0 · canvas glow omitted',
-  1060,
+  95 + Math.ceil(objectCards.length / 4) * 236 + 21,
   body,
 );
 function geography(rows, legend) {

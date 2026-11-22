@@ -8,7 +8,7 @@ WALK_OFFSETS = {
 }
 WALK_ACTIONS = tuple(WALK_OFFSETS)
 MOVE_ACTIONS = (*WALK_ACTIONS, "swim")
-ATTEMPT_ACTIONS = (*MOVE_ACTIONS, "attack", "eat", "reproduce")
+ATTEMPT_ACTIONS = (*MOVE_ACTIONS, "attack", "eat", "reproduce", "challenge")
 
 
 def movement_action(cause):

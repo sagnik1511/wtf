@@ -445,7 +445,8 @@
                 "reproduce",
                 "move_backward",
                 "strafe_left",
-                "strafe_right"
+                "strafe_right",
+                "challenge"
               ]
             },
             "description": "Ordered action names available to this species; order is part of saved-model compatibility."
@@ -853,6 +854,47 @@
               }
             },
             "description": "Species-specific night multipliers, used only when the world day_night cycle is enabled."
+          },
+          "competition": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Optional same-species challenge contests for shared food and occupied paths; disabled unless enabled explicitly.",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Enable physical contests initiated through the challenge action."
+              },
+              "damage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000,
+                "default": 5.0,
+                "description": "Health damage dealt to the losing same-species animal; no hunting kill credit or kill energy."
+              },
+              "energy_cost": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000,
+                "default": 1.0,
+                "description": "Energy demand for each explicit challenge attempt, including unavailable or losing attempts."
+              },
+              "food": {
+                "type": "boolean",
+                "default": true,
+                "description": "Permit contests over the same reachable food patch when the opponent chooses eat or challenge; the winner receives the first normal bite."
+              },
+              "blocked_path": {
+                "type": "boolean",
+                "default": true,
+                "description": "Permit challenges against a same-species blocker ahead; a winning challenger advances only if a valid free retreat exists or the blocker dies."
+              },
+              "aggression": {
+                "type": "boolean",
+                "default": true,
+                "description": "Allow a learned challenge against a cardinally adjacent same-species animal without a food or path objective. Aggression deals damage but grants no feeding or movement priority."
+              }
+            }
           }
         },
         "required": [

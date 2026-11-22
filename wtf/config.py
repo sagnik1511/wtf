@@ -17,6 +17,7 @@ ACTIONS = (
     "attack",
     "swim",
     "reproduce",
+    "challenge",
 )
 
 
@@ -441,8 +442,31 @@ def validate(c):
                 "display",
                 "locomotion",
                 "circadian",
+                "competition",
             ),
         )
+        if "competition" in s:
+            rules = s["competition"]
+            obj(
+                rules,
+                p + ".competition",
+                (),
+                optional=(
+                    "enabled",
+                    "damage",
+                    "energy_cost",
+                    "food",
+                    "blocked_path",
+                    "aggression",
+                ),
+            )
+            for key in ("enabled", "food", "blocked_path", "aggression"):
+                if key in rules and type(rules[key]) is not bool:
+                    fail(p + ".competition." + key, "must be boolean")
+            for key, default in (("damage", 5.0), ("energy_cost", 1.0)):
+                num(rules.get(key, default), p + ".competition." + key, 0, 10000)
+            if rules.get("enabled", False) and "challenge" not in s["allowed_actions"]:
+                fail(p + ".allowed_actions", "enabled competition requires challenge")
         if "circadian" in s:
             fields = tuple(
                 "night_" + key + "_multiplier"

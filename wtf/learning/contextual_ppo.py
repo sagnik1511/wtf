@@ -29,6 +29,10 @@ def action_mask(
             valid = not world.movement_block_reason(
                 animal, world.movement_destination(animal, action), action, occupied
             )
+        elif action == "challenge":
+            from wtf.simulation.competition import opportunity
+
+            valid = opportunity(world, animal, occupied)[0] is not None
         elif action == "reproduce":
             valid = (
                 world.reproduction_available(

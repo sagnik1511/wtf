@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<style id="figure-palette">svg{--figure-bg:#f8fafc;--figure-panel:#fff;--figure-ink:#172b45;--figure-muted:#52657b;--figure-line:#8ca0b7;--figure-orange:#9a4100;--figure-animal:#166c61;}@media(prefers-color-scheme:dark){svg{--figure-bg:#171b22;--figure-panel:#26313e;--figure-ink:#e5eaf1;--figure-muted:#b2bfce;--figure-line:#879db4;--figure-orange:#ffd08a;--figure-animal:#70d5bb;}}</style>
+<title id="title">Learned same-species challenges and viewer markers</title><desc id="desc">Three optional contexts share one learned challenge action. Food gives bite priority, a blocked path permits safe displacement, and aggression causes harm without resource or movement priority. The viewer joins both recorded fight locations with amber rings and reports winner and damage.</desc>
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--figure-muted)"/></marker></defs>
+<rect width="960" height="540" rx="12" fill="var(--figure-bg)"/>
+<g font-family="system-ui,sans-serif" text-anchor="middle" fill="var(--figure-ink)">
+<text x="480" y="34" font-size="22" font-weight="700">One learned action, three optional social contexts</text>
+<g fill="var(--figure-panel)" stroke="var(--figure-line)"><rect x="22" y="60" width="294" height="235" rx="10"/><rect x="333" y="60" width="294" height="235" rx="10"/><rect x="644" y="60" width="294" height="235" rx="10"/></g>
+<g font-size="18" font-weight="600"><text x="169" y="91">Shared food</text><text x="480" y="91">Blocked path</text><text x="791" y="91">Aggression</text></g>
+<g stroke="var(--figure-line)" fill="none"><path d="M74 115H264V210H74ZM169 115V210M74 162H264M385 115H575V210H385ZM480 115V210M385 162H575M696 115H886V210H696ZM791 115V210M696 162H886"/></g>
+<g fill="var(--figure-animal)"><circle cx="122" cy="186" r="13"/><circle cx="217" cy="186" r="13"/><circle cx="433" cy="186" r="13"/><circle cx="528" cy="186" r="13"/><circle cx="744" cy="186" r="13"/><circle cx="744" cy="139" r="13"/></g>
+<g fill="none" stroke="var(--figure-orange)" stroke-width="2.5"><circle cx="122" cy="186" r="20"/><circle cx="217" cy="186" r="20"/><path d="M142 186H197" stroke-dasharray="4 3"/><circle cx="744" cy="186" r="20"/><circle cx="744" cy="139" r="20"/><path d="M744 159V166" stroke-dasharray="4 3"/></g>
+<text x="217" y="145" font-size="14">food</text>
+<path d="M450 186H504M528 168V130" stroke="var(--figure-muted)" fill="none" stroke-width="2" marker-end="url(#arrow)"/>
+<g font-size="14"><text x="169" y="241">Winner gets one normal bite first</text><text x="169" y="266">Both can reach the same patch</text><text x="480" y="241">Winning challenger may advance</text><text x="480" y="266">Only with legal retreat / vacant cell</text><text x="791" y="241">Harm without an objective</text><text x="791" y="266">No automatic bite or displacement</text></g>
+<g fill="var(--figure-panel)" stroke="var(--figure-line)"><rect x="22" y="335" width="205" height="74" rx="8"/><rect x="259" y="335" width="205" height="74" rx="8"/><rect x="496" y="335" width="205" height="74" rx="8"/><rect x="733" y="335" width="205" height="74" rx="8"/></g>
+<g font-size="15"><text x="124" y="365">Policy chooses challenge</text><text x="124" y="388">Feature enabled per species</text><text x="361" y="365">Physical eligibility</text><text x="361" y="388">Same species · adjacent · dry</text><text x="598" y="365">Strength → winner</text><text x="598" y="388">Health + energy · damage</text><text x="835" y="365">Recorded events</text><text x="835" y="388">No extra brain / frame data</text></g>
+<g stroke="var(--figure-muted)" stroke-width="2" marker-end="url(#arrow)"><path d="M228 372H257M465 372H494M702 372H731"/></g>
+<text x="480" y="454" font-size="17" fill="var(--figure-orange)" font-weight="600">Viewer: amber rings + connector + winner / damage banner</text>
+<text x="480" y="481" font-size="14">Recorded fight locations remain visible briefly; playback keeps moving.</text>
+<text x="480" y="509" font-size="14" fill="var(--figure-muted)">Opt-in mechanics. Existing environments keep their behavior. Competition deaths earn no hunting kills.</text>
+</g></svg>

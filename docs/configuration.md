@@ -19,6 +19,7 @@ Each JSON file is a complete experiment definition:
 | [ppo_large_predator.json](../environments/ppo_large_predator.json) | 48 | 12 | ppo [16] / ppo [64, 32] |
 | [recurrent_ppo.json](../environments/recurrent_ppo.json) | 48 | 12 | recurrent_ppo / recurrent_ppo |
 | [qrdqn.json](../environments/qrdqn.json) | 48 | 12 | qrdqn / qrdqn |
+| [competition.json](../environments/competition.json) | 48 | 6 | maskable_ppo / maskable_ppo; optional contests enabled |
 | [maskable_ppo.json](../environments/maskable_ppo.json) | 48 | 6 | maskable_ppo / maskable_ppo |
 | [mappo.json](../environments/mappo.json) | 48 | 12 | mappo / mappo |
 | [predator_heavy.json](../environments/predator_heavy.json) | 24 | 14 | q_network / q_network |
@@ -360,3 +361,9 @@ disables it. See [recorded brain activity](explainability.md#recorded-animal-act
 
 See [day–night configuration and playback](day-night.md) for gradual sunlight,
 species-specific night vision/energy modifiers and the maintained example.
+
+## Optional same-species competition
+
+[Competition](competition.md) adds the learned `challenge` action for shared
+food and blocked paths. It is disabled by default; `competition.json` is the
+explicit opt-in example. Adding the action changes saved-model compatibility.

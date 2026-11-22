@@ -10,6 +10,7 @@ The guides below separate map geometry, animal capabilities and learning setting
 | [Choose what to customize](../customization.md) | JSON, CLI, viewer preferences and source extensions. |
 | [Configure the environment](../configuration.md) | Populations, resources, energy, actions and reproduction. |
 | [Add or configure a species](../species.md) | Named species, brains, body settings and sex colors. |
+| [Enable same-species contests](../competition.md) | Learned challenges for shared food or blocked paths, disabled by default. |
 | [Choose or edit a map](../geography.md) | Terrain definitions, maintained maps and playback previews. |
 | [Understand physics and simulation rules](../physics.md) | Step order, collisions, water/current, elevation, sight, energy, birth and daylight. |
 | [Enable day and night](../day-night.md) | Optional sunlight cycle and species effects. |

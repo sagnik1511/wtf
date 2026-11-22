@@ -30,10 +30,11 @@ show several lighting conditions together.
 ## Animals, resources and event markers
 
 This is the board-piece legend: animal pointers, resources, obstacles, selection
-and lifecycle events. [Open the full-size SVG](assets/viewer/board-objects.svg)
-for a closer look.
+and lifecycle/competition events. [Open the full-size SVG](assets/viewer/board-objects.svg)
+for a closer look. The final row shows prey/predator challenges, a shared-food
+contest and a competition death using the current viewer drawing functions.
 
-![Sixteen examples of animal shapes and sex colors, resources, obstacles, selection, birth, kill, natural death and heading](assets/viewer/board-objects.svg)
+![Twenty examples of animal shapes and sex colors, resources, obstacles, selection, birth, kill, natural death, heading and competition](assets/viewer/board-objects.svg)
 
 | Appearance | Meaning |
 | --- | --- |
@@ -47,6 +48,7 @@ for a closer look.
 | Large white ring | Selected animal; selection drives the inspector |
 | Cyan ring, plus and BORN | Birth at the child's recorded position |
 | Red ring, cross and KILL | Killed animal's recorded position; hunter gets a gold ring |
+| Amber paired rings and connector, winner / damage label | Optional same-species challenge at the recorded fight locations; distinct from a hunting kill |
 | Green / amber ring, cross and DIED | Natural death of a resource-eater / prey-eater |
 
 The legend uses configured species names and female/male colors. Extra species
@@ -55,11 +57,21 @@ overrides are described in [species appearance](species.md#viewer-colors-and-met
 Legacy animals without recorded sex use the base species color; that color does
 not establish their sex. Body color identifies species/sex, not remaining health.
 
-Event illustrations freeze age zero and omit the canvas glow. In playback the
-rings expand and fade over recorded frames, while banners identify recent
-events. They do not insert a simulation or playback delay. Marker placement
+Event illustrations freeze age zero and omit the canvas glow. In playback,
+birth/death rings expand and fade, while competition rings fade at their
+recorded fight locations. Banners identify recent events. They do not insert a simulation or playback delay. Marker placement
 requires a recorded position; these examples do not imply inferred positions
 for older recordings.
+
+### Optional social contests
+
+![Food, path and aggression contexts with viewer highlights](assets/diagrams/competition.svg)
+
+The [competition guide](competition.md) explains the opt-in learned action,
+physical eligibility, costs and outcomes. The contest banner names both animals,
+the context and actual damage; markers persist briefly without pausing playback.
+Aggression needs no food or path objective and changes only the participating
+animals through effort, health and resulting reward feedback.
 
 ## Terrain and current sight
 

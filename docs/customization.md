@@ -105,6 +105,7 @@ for ordering and normalization.
 | `eat` | Resource-eater attempts to consume food at its cell/front under existing feeding rules |
 | `attack` | Predator attempts to damage a resource-eating target in front |
 | `swim` | Attempt active forward water movement/entry when terrain and physical eligibility permit; normal walking cannot enter water |
+| `challenge` | Optional same-species contest ahead for shared food or blocked space; see [competition](competition.md) |
 | `reproduce` | Express consent; birth still requires an eligible nearby same-species opposite-sex partner, consent, route and space |
 
 An available action is a choice, not guaranteed success. Movement conflicts,

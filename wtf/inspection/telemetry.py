@@ -64,13 +64,16 @@ def summarize(config, frame, previous=None):
                     observed[i] = "reproduce"
                 elif kind in ("moved", "movement_blocked"):
                     observed[i] = movement_action(event.get("cause", ""))
-                elif kind == "damage_dealt":
+                elif kind == "challenge_attempt":
+                    observed[i] = "challenge"
+                elif kind == "damage_dealt" and event.get("cause") != "competition":
                     observed[i] = "attack"
                 elif kind == "energy_gained" and event.get("cause") == "resource":
                     observed[i] = "eat"
             if (
-                kind == "moved"
+                kind in ("moved", "challenge_resolved")
                 or kind == "damage_dealt"
+                and event.get("cause") != "competition"
                 and event.get("amount", 0) > 0
                 or kind == "energy_gained"
                 and event.get("cause") == "resource"
@@ -82,10 +85,24 @@ def summarize(config, frame, previous=None):
             actor = prior.get(i)
             if actor is not None:
                 counter = events[actor["species"]]
-                if kind in ("born", "kill", "died", "mutated", "drifted"):
+                if kind in (
+                    "born",
+                    "kill",
+                    "died",
+                    "mutated",
+                    "drifted",
+                    "contest_won",
+                    "contest_lost",
+                ):
                     counter[kind] += 1
                 if kind == "energy_spent":
-                    counter["terrain_energy"] += event.get("amount", 0)
+                    counter[
+                        (
+                            "competition_energy"
+                            if event.get("cause", "").startswith("competition")
+                            else "terrain_energy"
+                        )
+                    ] += event.get("amount", 0)
                 if kind == "mating_failed":
                     counter["mating_failed:" + event.get("cause", "unknown")] += 1
                 if kind == "died":
@@ -135,6 +152,19 @@ def summarize(config, frame, previous=None):
         attempts = action["attack"] if spec["diet"] == "prey" else action["eat"]
         success = event["kill"] if spec["diet"] == "prey" else event["productive_feeds"]
         species[name] = dict(
+            **(
+                dict(
+                    challenge_attempts=action["challenge"] if consecutive else None,
+                    contest_wins=event["contest_won"] if consecutive else None,
+                    contest_losses=event["contest_lost"] if consecutive else None,
+                    competition_deaths=event["competition"] if consecutive else None,
+                    competition_energy=(
+                        event["competition_energy"] if consecutive else None
+                    ),
+                )
+                if spec.get("competition", {}).get("enabled", False)
+                else {}
+            ),
             population=len(living),
             health=mean([a["health"] / body["max_health"] for a in living]),
             energy=mean([a["energy"] / body["max_energy"] for a in living]),

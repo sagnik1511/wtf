@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **248 public documentation pages**, **96 visual files**
+Coverage: **251 public documentation pages**, **97 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -36,6 +36,7 @@ and **8 identical viewer branding copies**.
 | [Checkpoint storage, restoration and runtime access](checkpoint-data-structures.md) | [Home](index.md) → [checkpoint structures](checkpoint-data-structures.md) |
 | [Command and override reference](command-reference.md) | [Home](index.md) → [command reference](command-reference.md) |
 | [Package and saved-artifact compatibility](compatibility.md) | [Home](index.md) → [Artifact and runtime compatibility](compatibility.md) |
+| [Optional same-species competition](competition.md) | [Home](index.md) → [Same-species competition](competition.md) |
 | [Configuration field reference](configuration-reference.md) | [Home](index.md) → [All configuration fields](configuration-reference.md) |
 | [Environment configuration and reproduction](configuration.md) | [Home](index.md) → [environment configuration](configuration.md) |
 | [Development](contributing/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Architecture, extensions and checks](contributing/index.md) |
@@ -106,6 +107,7 @@ and **8 identical viewer branding copies**.
 | [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) |
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) |
+| [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Competition (SVG)](visual-previews/diagrams/competition-svg.md) |
 | [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) |
 | [Early stopping patience (SVG)](visual-previews/diagrams/early-stopping-patience-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Early stopping patience (SVG)](visual-previews/diagrams/early-stopping-patience-svg.md) |
 | [Escape and consent (SVG)](visual-previews/diagrams/escape-and-consent-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Escape and consent (SVG)](visual-previews/diagrams/escape-and-consent-svg.md) |
@@ -261,6 +263,7 @@ and **8 identical viewer branding copies**.
 | [0.0.1.8 Best-so-far promotion and compact champion weights](releases/0.0.1.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.8](releases/0.0.1.8.md) |
 | [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
 | [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
+| [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1 — optional same-species competition](releases/0.0.2.1.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -290,6 +293,7 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/champion-chaining-between-runs.svg` | [Home](index.md) → [All visuals](visuals.md) → [champion-chaining-between-runs.svg](assets/diagrams/champion-chaining-between-runs.svg) |
 | `assets/diagrams/child-only-mutation-path.svg` | [Home](index.md) → [All visuals](visuals.md) → [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | `assets/diagrams/choose-checks-for-the-change.svg` | [Home](index.md) → [All visuals](visuals.md) → [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
+| `assets/diagrams/competition.svg` | [Home](index.md) → [All visuals](visuals.md) → [competition.svg](assets/diagrams/competition.svg) |
 | `assets/diagrams/distributional-action-values.svg` | [Home](index.md) → [All visuals](visuals.md) → [distributional-action-values.svg](assets/diagrams/distributional-action-values.svg) |
 | `assets/diagrams/early-stopping-patience.svg` | [Home](index.md) → [All visuals](visuals.md) → [early-stopping-patience.svg](assets/diagrams/early-stopping-patience.svg) |
 | `assets/diagrams/escape-and-consent.svg` | [Home](index.md) → [All visuals](visuals.md) → [escape-and-consent.svg](assets/diagrams/escape-and-consent.svg) |

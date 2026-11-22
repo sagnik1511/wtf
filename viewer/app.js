@@ -1,3 +1,4 @@
+import { drawContests, contestLabel } from './competition.mjs';
 import { installTheme, boardPalette } from './theme.mjs';
 import {
   daylight,
@@ -395,6 +396,16 @@ function drawWorld() {
     canvas.width,
     canvas.height,
     sun,
+  );
+}
+function drawContestHighlights() {
+  const canvas = $('world');
+  drawContests(
+    canvas.getContext('2d'),
+    state.contest_highlights,
+    canvas.width / state.width,
+    canvas.height / state.height,
+    document.documentElement.dataset.theme === 'dark',
   );
 }
 function drawDeathHighlights() {
@@ -1019,6 +1030,11 @@ function render(snapshot = null) {
     'kill-now',
     state.kill_highlights.some((k) => k.frame_index === state.frame_index),
   );
+  const contest = state.contest_highlights.at(-1);
+  $('contest-banner').hidden = !contest;
+  if (contest)
+    $('contest-banner').textContent =
+      `CONTEST · #${contest.actor} beat #${contest.target} · ${contestLabel(contest.cause)} · ${contest.amount} damage · Step ${contest.tick}`;
   const latestEvent = [
     ...state.natural_death_highlights.map((e) => ({ ...e, natural: true })),
     ...state.kill_highlights,
@@ -1043,7 +1059,7 @@ function render(snapshot = null) {
   const banner = !latestEvent
     ? ''
     : latestEvent.natural
-      ? `NATURAL DEATH · ${species} #${latestEvent.actor} · ${latestEvent.cause} · Step ${latestEvent.tick}`
+      ? `${latestEvent.cause === 'competition' ? 'COMPETITION DEATH' : 'NATURAL DEATH'} · ${species} #${latestEvent.actor} · ${latestEvent.cause} · Step ${latestEvent.tick}`
       : `KILL · ${latestEvent.attacker_species ?? 'Predator'} #${latestEvent.actor} → prey #${latestEvent.target} · Step ${latestEvent.tick}`;
   if ($('kill-banner').textContent !== banner)
     $('kill-banner').textContent = banner;
@@ -1066,6 +1082,7 @@ function render(snapshot = null) {
   drawWorld();
   drawBirthHighlights();
   drawDeathHighlights();
+  drawContestHighlights();
   drawChart();
   if (state.done) pause();
   drawInspector();
@@ -1209,6 +1226,7 @@ installTheme({
       drawWorld();
       drawBirthHighlights();
       drawDeathHighlights();
+      drawContestHighlights();
       drawChart();
     }
     if ($('metrics-dialog').open) dashboard.draw();

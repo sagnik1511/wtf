@@ -1436,3 +1436,11 @@ footer {
     height: 40px;
   }
 }
+
+.contest-banner {
+  color: var(--text);
+  border: 1px solid #bb8434;
+  background: var(--panel);
+  padding: 8px 12px;
+  border-radius: 5px;
+}

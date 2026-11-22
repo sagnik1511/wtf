@@ -7,7 +7,7 @@ They contain no run IDs, measurements, recordings or saved model weights.
 | --- | --- |
 | [Interface themes](themes.svg) | Schematic light/dark UI specimens from the actual CSS palette tokens |
 | [Day and night](day-night.svg) | Same objects under actual dawn/midday/dusk/night lighting and a deterministic sunlight curve |
-| [Board objects](board-objects.svg) | Sex/species shapes and colors, resource quantities, obstacles, selection, heading and event markers |
+| [Board objects](board-objects.svg) | Sex/species shapes and colors, resource quantities, obstacles, selection, heading, event markers and same-species competition |
 | [Terrain and sight](terrain-and-sight.svg) | Water depth/current, elevation, occlusion, directional water visibility and gates |
 | [Inspector and brains](brain-views.svg) | Actual radar/output/network SVG components with illustrative data; deep-view summary |
 | [Workspace map](workspace-map.svg) | Schematic panel positions with source-rendered board/radar examples |
@@ -22,7 +22,7 @@ node work/build_viewer_visuals.mjs --check
 ```
 
 The [generator](../../../work/build_viewer_visuals.mjs) executes isolated board,
-birth and death drawing functions from `viewer/app.js` through a minimal SVG
+birth, death and competition drawing functions from `viewer/app.js` through a minimal SVG
 canvas adapter. It uses the actual species palette, terrain renderer and
 observation overlay. The inspector radar, archive output chart and small-brain
 structure come from their actual JavaScript SVG components through a small DOM

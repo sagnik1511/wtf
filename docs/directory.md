@@ -59,6 +59,7 @@ narrow screens. The top tabs open the same section pages.
 | --- | --- |
 | [Customization handbook](customization.md) | Choose JSON, CLI, viewer preferences or source extensions for a change. |
 | [Environment configuration](configuration.md) | World/species settings, action sets and reproduction controls. |
+| [Same-species competition](competition.md) | Optional challenge action, food priority, displacement and rewards. |
 | [Species](species.md) | Add named species and configure body, brain and sex colors. |
 | [Geography and maps](geography.md) | Map presets, editable geography, currents and terrain playback clips. |
 | [Movement and visibility](physics.md) | Interactive explorer and illustrated movement, swimming, sight and mating cases. |

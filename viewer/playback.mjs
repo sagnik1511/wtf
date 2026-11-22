@@ -1,3 +1,4 @@
+import { recentContests } from './competition.mjs';
 import { decodeChunk } from './replay-codec.mjs';
 import { recentNaturalDeaths } from './death-highlights.mjs';
 import { recentBirths } from './birth-highlights.mjs';
@@ -14,6 +15,7 @@ export class Playback {
     this.killCarry = [];
     this.deathCarry = [];
     this.birthCarry = [];
+    this.contestCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
@@ -49,6 +51,7 @@ export class Playback {
     this.killCarry = [];
     this.deathCarry = [];
     this.birthCarry = [];
+    this.contestCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
@@ -68,6 +71,7 @@ export class Playback {
       this.killCarry = previousSnapshot?.kill_highlights ?? [];
       this.deathCarry = previousSnapshot?.natural_death_highlights ?? [];
       this.birthCarry = previousSnapshot?.birth_highlights ?? [];
+      this.contestCarry = previousSnapshot?.contest_highlights ?? [];
       this.previousTick = sequential ? this.frames.at(-1).tick : null;
       this.previousAgents = sequential
         ? this.frames.at(-1).animals.map(({ id, x, y, heading, species }) => ({
@@ -211,6 +215,12 @@ export class Playback {
       done: this.atEnd,
       // Full-run lightweight metrics survive chunk changes; no future points.
       history,
+      contest_highlights: recentContests(
+        this.frames,
+        this.chunkIndex * this.metadata.recording.frames_per_chunk,
+        local,
+        this.contestCarry,
+      ),
       birth_highlights: recentBirths(
         this.frames,
         this.chunkIndex * this.metadata.recording.frames_per_chunk,
