@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "name": "ppo",
-  "description": "Independent PPO policies and value estimates for both prey and predators",
+  "description": "Ordinary PPO cold-start survival/reproduction profile on a denser flat world, with species-specific perception and final-two-episode playback",
   "seed": 42,
   "world": {
-    "width": 40,
-    "height": 28,
+    "width": 32,
+    "height": 24,
     "boundary": "closed",
     "max_steps": 1500
   },
@@ -22,10 +22,13 @@
   },
   "species": {
     "prey": {
-      "initial_population": 48,
+      "initial_population": 64,
       "diet": "resource",
       "allowed_actions": [
         "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
         "turn_left",
         "turn_right",
         "rest",
@@ -35,27 +38,27 @@
       "body": {
         "initial_energy": 60,
         "max_energy": 100,
-        "max_health": 30,
-        "vision_radius": 6,
+        "max_health": 40,
+        "vision_radius": 10,
         "living_cost": 0.1,
-        "movement_cost": 0.15,
+        "movement_cost": 0.1,
         "starvation_damage": 1,
         "bite_size": 4,
         "energy_per_food_unit": 2
       },
-      "brain": "small_ppo",
+      "brain": "prey_ppo",
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
         "death": -10,
         "per_damage_dealt": 0.0,
         "per_energy_cost": -0.01,
-        "failed_action": -0.05,
-        "per_offspring": 1.0
+        "failed_action": -0.01,
+        "per_offspring": 3.0
       },
       "reproduction": {
         "enabled": true,
-        "health_threshold": 24.0,
+        "health_threshold": 32.0,
         "min_age_steps": 300,
         "cooldown_steps": 225,
         "min_energy": 30,
@@ -63,9 +66,13 @@
         "max_population": 96,
         "age_deviation_pct": 10,
         "cooldown_deviation_pct": 10,
-        "mate_radius": 2
+        "mate_radius": 2,
+        "intent_steps": 5
       },
       "learning_rate_multiplier": 1.0,
+      "champion_selection": {
+        "criterion": "lifespan"
+      },
       "mutation": {
         "enabled": true,
         "probability_per_birth": 0.0001,
@@ -74,7 +81,7 @@
       }
     },
     "predator": {
-      "initial_population": 12,
+      "initial_population": 6,
       "diet": "prey",
       "allowed_actions": [
         "move_forward",
@@ -92,33 +99,37 @@
         "living_cost": 0.15,
         "movement_cost": 0.2,
         "starvation_damage": 1,
-        "attack_damage": 30,
-        "attack_cost": 1,
-        "energy_per_kill": 40
+        "attack_damage": 40,
+        "attack_cost": 0.25,
+        "energy_per_kill": 80
       },
-      "brain": "small_ppo",
+      "brain": "predator_ppo",
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
         "death": -10,
         "per_damage_dealt": 0.05,
         "per_energy_cost": -0.01,
-        "failed_action": -0.05,
-        "per_offspring": 1.0
+        "failed_action": -0.01,
+        "per_offspring": 3.0
       },
       "reproduction": {
         "enabled": true,
         "health_threshold": 44.0,
         "min_age_steps": 100,
         "cooldown_steps": 200,
-        "min_energy": 40,
-        "energy_cost": 15,
+        "min_energy": 30,
+        "energy_cost": 10,
         "max_population": 24,
         "age_deviation_pct": 10,
         "cooldown_deviation_pct": 10,
-        "mate_radius": 2
+        "mate_radius": 3,
+        "intent_steps": 5
       },
       "learning_rate_multiplier": 1.25,
+      "champion_selection": {
+        "criterion": "lifespan"
+      },
       "mutation": {
         "enabled": true,
         "probability_per_birth": 0.0001,
@@ -128,7 +139,7 @@
     }
   },
   "brains": {
-    "small_ppo": {
+    "prey_ppo": {
       "type": "ppo",
       "network": {
         "type": "mlp",
@@ -139,14 +150,38 @@
       "discount_factor": 0.98,
       "gae_lambda": 0.95,
       "clip_ratio": 0.2,
-      "entropy_coefficient": 0.01,
+      "entropy_coefficient": 0.03,
       "value_coefficient": 0.5,
       "rollout_steps": 64,
       "epochs": 4,
       "batch_size": 16,
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
-      "target_kl": 0.03
+      "target_kl": 0.03,
+      "observation_version": 4,
+      "observation_top_k": 3
+    },
+    "predator_ppo": {
+      "type": "ppo",
+      "network": {
+        "type": "mlp",
+        "hidden_layers": [64, 32],
+        "activation": "tanh"
+      },
+      "learning_rate": 0.001,
+      "discount_factor": 0.98,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coefficient": 0.03,
+      "value_coefficient": 0.5,
+      "rollout_steps": 64,
+      "epochs": 4,
+      "batch_size": 16,
+      "max_grad_norm": 0.5,
+      "normalize_advantages": true,
+      "target_kl": 0.03,
+      "observation_version": 4,
+      "observation_top_k": 10
     }
   },
   "experiment": {
@@ -155,7 +190,14 @@
     "world_seed_policy": "random",
     "record_metrics_every_steps": 10,
     "checkpoint_every_runs": 1,
-    "chain_best_brains": true
+    "chain_best_brains": true,
+    "checkpoint_every_steps": 500,
+    "checkpoint_keep_last": 2,
+    "checkpoint_shared_metadata": false,
+    "brain_save_every_steps": 250,
+    "brain_keep_last": 2,
+    "brain_save_min_score_delta": 0,
+    "promote_only_improved": true
   },
   "recording": {
     "enabled": true,
@@ -164,6 +206,9 @@
     "diagnostics_every_steps": 10,
     "encoding": "binary",
     "compression": "xz",
-    "compression_level": 6
+    "compression_level": 6,
+    "profile": "full",
+    "record_activations": true,
+    "record_last_episodes": 2
   }
 }

@@ -2906,6 +2906,12 @@
           "enum": ["full", "compact", "training-only"],
           "default": "full",
           "description": "Training recording preset: full preserves configured cadence, compact uses a diagnostic interval of at least 50 steps (plus chunk-start/final samples) and omits activations, training-only omits replay files. Evaluation/random use full configured recording; enabled=false still disables capture."
+        },
+        "record_last_episodes": {
+          "type": "integer",
+          "minimum": -1,
+          "default": -1,
+          "description": "Record only the final K episodes of the configured schedule, capped at its total. -1 records all; 0 disables playback. Original episode numbers and per-episode frame cadence are preserved. Early stopping may end before the selected window; recording profiles/enabled=false can still disable capture."
         }
       },
       "description": "Optional replay cadence, chunk format/compression and sampled brain diagnostics."

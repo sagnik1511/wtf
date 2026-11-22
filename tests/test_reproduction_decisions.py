@@ -240,7 +240,10 @@ class ActionFeedbackTests(unittest.TestCase):
         ):
             for spec in load(path)["species"].values():
                 self.assertIn("reproduce", spec["allowed_actions"])
-                self.assertEqual(spec["rewards"]["failed_action"], -0.05)
+                self.assertEqual(
+                    spec["rewards"]["failed_action"],
+                    -0.01 if path.stem == "ppo" else -0.05,
+                )
 
     def test_every_algorithm_receives_success_and_failed_consent_rewards(self):
         for kind in KINDS:

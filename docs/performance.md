@@ -781,3 +781,84 @@ it does not reduce recording detail, checkpoint contents or retained file counts
 The figures are local short-workload measurements, not guarantees for every
 population, model depth or algorithm. They are separate from the earlier native
 masked-PPO and rolling-retention benchmarks; do not add their percentages.
+
+
+## Checkpoint metadata cache and PPO sample preparation
+
+The synchronous checkpoint encoder now memoizes shared-container identity to the
+already assigned internal `$ref` index during metadata traversal. A 128-entry LRU
+owns strong references to existing metadata containers, not copies of their JSON
+payloads. The key is object identity in this unchanged, synchronous traversal;
+eviction recomputes the normal content hash. The cache clears on success or
+failure **before the controller iterator is advanced**. Public `Encoder.encode`
+remains mutation-sensitive. Separate equal objects still deduplicate by content,
+and optional external `$meta` pooling retains its existing path. No cache survives
+another save, enters a checkpoint, or changes restored ownership. See the
+[checkpoint ownership diagram](checkpoint-data-structures.md#file-records-and-shared-values).
+
+Native PPO prepares immutable observation/action/log-probability/advantage/target
+rows once, when the first native minibatch is used. Masked PPO also prepares its
+local observation and mask slices once. Minibatches gather the same row references
+in their original shuffled order; gradients, current network weights, optimizer
+steps and KL stopping retain their original behavior. The scratch list lives
+only until `_update` returns and is absent from controller checkpoints. Scalar,
+FP64 and customized paths that do not use these native kernels skip preparation.
+For a complete 64-sample/four-epoch update, final sample-row construction falls
+from 256 to 64; masked observation/mask slice construction falls by the same factor.
+A regression fixture with eight references to one metadata object needs one JSON
+fingerprint instead of eight, while keeping identical shared-table contents.
+
+### Measurements and limits
+
+Reproduce against a saved pre-change package root, including its native module:
+
+```sh
+.venv/bin/python work/benchmark_checkpoint_ppo_reuse.py \
+  --baseline /path/to/pre-change-package-root --repeats 5
+```
+
+The baseline is the pending source after the ordinary-PPO calibration correction,
+before these two optimizations, on committed base `2a15e0c`. Both sides use the
+same current preset files. Measurements are five alternating fresh-process samples,
+CPython 3.12/macOS, native kernels, seed 100. Raw reports stay in ignored `.cache/`;
+all temporary model/replay files are removed after each worker. No existing result
+or playback is modified. These are short local benchmarks, not general speedup
+or RAM guarantees.
+
+| Workload | Before median | After median | Observed difference |
+| --- | ---: | ---: | --- |
+| Ten metadata encodings after 16 training steps | 706.57 ms | 225.96 ms | 68.0% less component time |
+| 64 ordinary-PPO rollout updates | 465.55 ms | 461.81 ms | 0.8% less; modest difference |
+| 64 masked-PPO rollout updates | 1,204.12 ms | 1,189.02 ms | 1.3% less; modest difference |
+| 128-step training + full recording + two recovery writes | 1.844 s | 1.772 s | 3.9% less complete workflow time |
+| Complete workflow process peak RSS | 71.31 MiB | 68.50 MiB | 2.81 MiB lower measured peak |
+
+The metadata component encodes the same borrowed metadata ten times with fresh
+encoders, excluding world stepping and compression. Update-only workers use
+64-sample rollouts, four epochs, minibatches of 16 and disabled KL stopping;
+ordinary PPO uses 153 inputs and hidden `[64, 32]`, while masked PPO uses the
+tracking preset's 482 inputs and hidden `[64, 32]`. Synthetic rollout generation
+and a separate traced allocation probe are outside the update timer. Neither
+learning schedule nor production KL settings are changed by the benchmark.
+
+The workflow uses the current ordinary-PPO preset: 32×24 cells, 64 prey and six
+predators, 128 steps, full world capture every step, diagnostics every ten steps,
+64 frames per chunk and binary/XZ recovery at steps 64 and 128. Its timer includes
+initialization, training, recording/finalization and checkpoint writes; restore,
+digest checks and cleanup are afterward. It excludes champion archive publication,
+terminal progress and CLI CSV writing. The checkpoint optimization mainly explains
+the save-heavy workflow gain; the update-only differences are too small to claim
+substantial PPO training acceleration.
+
+Retaining prepared samples reduces allocation churn, **not necessarily peak
+memory**. A separate `tracemalloc` probe of one update measured ordinary PPO at
+182,020→182,532 bytes and masked PPO at 581,252→768,772 bytes (+183.1 KiB).
+One metadata encoding measured 515,700→513,596 bytes. RSS includes imports/native
+allocations and should not be inferred from these Python-only peaks. Early KL
+stopping may use only part of a prepared rollout, so its amortization can be lower.
+
+All repeated workers matched full state hashes. Workflow checkpoint files were
+byte-identical and restored to the exact final experiment state; decoded replay
+hashes also matched across chunk boundaries. Both sides retained **3,055,004
+checkpoint bytes** and **313,744 replay bytes**. These changes save repeated work,
+not disk space or recording detail; retention and all playbacks remain unchanged.

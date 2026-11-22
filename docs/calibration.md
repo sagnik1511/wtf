@@ -50,6 +50,52 @@ branches and potential mates; better individual persistence does not establish
 better reproductive continuity or long-term coexistence. Do not label this the
 best reproductive calibration or extrapolate it to all policies and maps.
 
+## Ordinary PPO adaptation
+
+Current source provides a separately tuned ordinary, unmasked PPO starter in
+[`ppo.json`](../environments/ppo.json). Its objective is cold-start feeding,
+survival to maturity and proximal reproduction over 1,500-step flat-world
+episodes. Do not transfer the masked-PPO outcome claims or weights above to it.
+
+| Setting | Ordinary-PPO recommendation | Purpose |
+| --- | --- | --- |
+| World and founders | 32×24 cells; 64 prey, 6 predators | Increase encounters while retaining a prey buffer |
+| Predator hunting | Damage 40, attack cost 0.25, kill energy 80 (cap 120) | One aligned attack can kill a healthy prey; reduce wasted-attempt costs |
+| Predator breeding energy | Minimum 30; cost 10 per parent | Leave reserves after a successful birth |
+| Both species' rewards | Failed action −0.01; offspring +3 | Reduce repeated early mating penalties and strengthen successful-birth feedback |
+| Both PPO templates | Entropy coefficient 0.03 | Retain more action exploration |
+
+Prey health stays 40, sight 10 and movement cost 0.1, with backward/sideways
+escape actions. Predator health stays 55. Preserve proximal prey/predator mating
+radii 2/3, health gates 32/44, maturity centers 300/100, cooldown centers 225/200,
+10% timing deviations and five-step resting consent. Neither proximity nor
+sufficient energy guarantees a birth: both animals must choose consent and pass
+the physical gates. Reproduction deducts energy, not health directly.
+
+Separate version-4 templates use prey top-k 3 with `[16]` hidden layers and
+predator top-k 10 with `[64, 32]`. Both select lifespan champions; rare child-only
+mutation remains enabled. Other PPO optimizer settings remain unchanged.
+
+Matched-seed checks, including chained episodes from two independent founder
+banks, support this starter over the preceding ordinary-PPO settings for the
+stated horizon. They do not establish indefinite coexistence, reliable births in
+every episode, better descendant policies or optimal settings on unseen seeds.
+The smaller world, larger prey buffer and energy budgets change ecological
+support as well as learning incentives. Keep these factors explicit in comparisons;
+more births or survival alone are not evidence of learning.
+
+The templates have 69 inputs/nine actions for prey and 153 inputs/six actions for
+predators. Stock legacy 20-input PPO banks cannot initialize them. Start fresh or
+load compatible ordinary-PPO weights; changing these body/reward settings does
+not itself change the current signatures. Exact checkpoints and recordings keep
+their captured configuration, so resuming an older campaign does not apply this
+calibration.
+
+The preset makes bounded recovery/best-brain retention explicit. Full-detail
+capture selects the final two scheduled training episodes; the global selector
+default remains -1. Disable that selection with `--record-last-episodes -1` to
+inspect all episodes. See [the current PPO preset](configuration.md#current-ordinary-ppo-preset).
+
 ## Terrain-specific settings
 
 Terrain changes travel costs, accessible food, encounters and water risk. Keep

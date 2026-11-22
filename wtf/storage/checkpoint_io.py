@@ -5,6 +5,7 @@ stream one brain at a time; plain JSON output stays compatible with old readers.
 """
 
 from array import array
+from collections import OrderedDict
 import base64
 import copy
 import gzip
@@ -30,6 +31,19 @@ class Encoder:
         self.binary = binary
         self.shared = []
         self.indices = {}
+        self._identity_refs = None
+
+    def _encode_metadata(self, value):
+        """Borrow stable metadata only for this synchronous traversal.
+
+        Never memoize the streamed brain iterator: it can reuse/mutate yielded
+        containers. Public encode() also keeps its mutation-sensitive behavior.
+        """
+        self._identity_refs = OrderedDict()
+        try:
+            return self.encode(value)
+        finally:
+            self._identity_refs = None
 
     def encode(self, value, key=None):
         if (
@@ -45,6 +59,12 @@ class Encoder:
             <= set(value)
             <= {"signature", "parameters", "precision"}
         ):
+            memo = self._identity_refs
+            identity = id(value)
+            if memo is not None and identity in memo:
+                _, index = memo[identity]
+                memo.move_to_end(identity)
+                return {"$ref": index}
             fingerprint = hashlib.sha256(
                 json.dumps(
                     value, sort_keys=True, separators=(",", ":"), allow_nan=False
@@ -56,7 +76,14 @@ class Encoder:
                 encoded = self.contents(value)
                 self.indices[fingerprint] = len(self.shared)
                 self.shared.append(encoded)
-            return {"$ref": self.indices[fingerprint]}
+            index = self.indices[fingerprint]
+            if memo is not None:
+                # Strong references prevent ID reuse. Metadata already owns the
+                # values; retain at most 128 references, never serialized copies.
+                memo[identity] = value, index
+                if len(memo) > 128:
+                    memo.popitem(last=False)
+            return {"$ref": index}
         return self.contents(value)
 
     def contents(self, value):
@@ -260,7 +287,7 @@ def write_checkpoint(path, metadata, brains, *, shared_metadata=False):
                     dict(
                         kind="checkpoint",
                         version=4 if shared_metadata else 3,
-                        metadata=encoder.encode(metadata),
+                        metadata=encoder._encode_metadata(metadata),
                     )
                 )
                 for animal_id, state in brains:
@@ -285,7 +312,7 @@ def write_checkpoint(path, metadata, brains, *, shared_metadata=False):
                     + dumps(ENCODING)
                     + ',"metadata":'
                 )
-                handle.write(dumps(encoder.encode(metadata)))
+                handle.write(dumps(encoder._encode_metadata(metadata)))
                 handle.write(',"brains":{')
             else:
                 handle.write(dumps(metadata)[:-1] + ',"brains":{')

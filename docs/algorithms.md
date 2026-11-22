@@ -41,7 +41,11 @@ Supported algorithms:
 See the [advanced algorithms guide](advanced-algorithms.md) for presets, commands,
 configuration, memory behavior and the changed action/reward rules of these variants.
 
-A PPO template (placed under `brains.small_ppo`) is:
+The maintained ordinary-PPO preset now uses separate `prey_ppo`/`predator_ppo`
+templates with version-4 inputs; see [current PPO configuration](configuration.md#current-ordinary-ppo-preset).
+The standalone `brains.small_ppo` example below illustrates the base algorithm
+fields and retains its legacy default input contract:
+
 
 ```json
 {

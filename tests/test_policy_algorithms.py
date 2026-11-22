@@ -190,7 +190,8 @@ class GRPOTests(unittest.TestCase):
         for kind in ("ppo", "a2c", "reinforce", "grpo"):
             w, brains = self.encounter()
             if kind == "ppo":
-                c = load(ROOT / "environments/ppo.json")["brains"]["small_ppo"]
+                c = load(ROOT / "environments/ppo.json")["brains"]["prey_ppo"]
+                c.update(observation_version=1, observation_top_k=1)
             else:
                 c = settings(kind)
             brains[0] = create_brain(c, ["rest"], 3, 4)

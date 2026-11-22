@@ -23,6 +23,11 @@ Training-only discards the opportunity to watch the original training episodes.
 Neither profile changes decisions, learning, rewards, world seeds or reproduction.
 See [capture rules](../recording.md#training-recording-profiles) for all overrides.
 
+If you want the final few **original training episodes**, current source also
+supports [last-episode selection](../recording.md#record-only-the-final-scheduled-episodes).
+Use `full` or `compact` with that option; `training-only` disables all playback.
+That is an alternative to the training-only/fresh-inference workflow below.
+
 ## Train and retain recovery data
 
 ```sh
@@ -72,7 +77,7 @@ architecture and species names match the saved brains:
 python -m wtf run results/TRAINING_RUN/environment.json \
   --brains-from results/TRAINING_RUN \
   --mode evaluate --freeze-brains --recording-profile full \
-  --runs 3 --steps 1000 --seed 1000 --progress
+  --runs 2 --steps 1000 --seed 1000 --progress
 ```
 
 Use a different base seed for held-out worlds. `--brains-from` defaults to the
@@ -87,6 +92,12 @@ also disables birth crossover: newborns receive independent copies of their
 same-sex parent's model. Mating decisions and physical births still operate;
 recurrent memory still evolves during inference. Without the flag, ordinary
 evaluation retains crossover and can introduce new child weight combinations.
+
+The refreshed source PPO preset selects its last two episodes; this inference
+example also schedules two episodes, so both are recorded. For more inference
+episodes, current source can reset that inherited selector with
+`--record-last-episodes -1`. Package 0.0.2.9 predates the selector and does not
+need that flag.
 
 The training-only configuration resolves to full configured recording during
 evaluation; the explicit `full` flag makes that choice visible. Existing

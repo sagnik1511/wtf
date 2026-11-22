@@ -250,6 +250,23 @@ To evaluate champion weights in a fresh world, set a species' `initial_brain`
 then use `--mode evaluate`. This is different from `--resume`, which restores the
 saved world and remaining run schedule. See [brain initialization](brain-library.md).
 
+## Train while recording only the final episodes
+
+Current source can train every episode while encoding playback only for the
+scheduled tail:
+
+```sh
+.venv/bin/python -m wtf run ppo --runs 10 --steps 200 \
+  --recording-profile full --record-last-episodes 2 --progress
+```
+
+Episodes 9–10 are recorded while training continues normally. Use `-1` for all
+(default), `0` for none, or a larger positive count capped at the configured total.
+Metrics and normal model/checkpoint retention still cover all episodes. The
+selector is saved for resume and applies to inference too. Early stopping can
+end before the selected tail; see [selection and resume details](recording.md#record-only-the-final-scheduled-episodes).
+This option requires source newer than the published 0.0.2.9 package.
+
 ## Train without replay, then record inference
 
 Use the same environment and learning configuration, but skip training playback:

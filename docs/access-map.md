@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **271 public documentation pages**, **103 visual files**
+Coverage: **274 public documentation pages**, **103 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -276,6 +276,9 @@ and **8 identical viewer branding copies**.
 | [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
 | [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
 | [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1](releases/0.0.2.1.md) |
+| [0.0.2.10 Record only the final scheduled episodes](releases/0.0.2.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.10 — Scheduled-tail episode recording](releases/0.0.2.10.md) |
+| [0.0.2.11 Modern ordinary-PPO preset](releases/0.0.2.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.11 — Modern ordinary-PPO preset](releases/0.0.2.11.md) |
+| [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.12 — Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |

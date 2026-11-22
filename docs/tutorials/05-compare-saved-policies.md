@@ -17,7 +17,7 @@ This tutorial compares the loaded weights, not different model architectures.
 
 Choose one common environment for both conditions. The script uses bank A's
 saved environment, overriding only run count, horizon, seed schedule, mode,
-recording profile and initial brain source. Do not change population, food,
+recording profile/window and initial brain source. Do not change population, food,
 terrain, sight, rewards or mating radius between the two evaluations.
 `--freeze-brains` keeps offspring in their same-sex parent bank; no learning,
 crossover, mutation or adaptive run-to-run champion chaining occurs.
@@ -43,9 +43,14 @@ import sys
 import uuid
 
 banks = {"A": Path("results/BANK_A"), "B": Path("results/BANK_B")}
-environment = banks["A"] / "environment.json"
+source_environment = banks["A"] / "environment.json"
 output = Path("results") / f"comparison_{uuid.uuid4().hex[:8]}"
 output.mkdir(parents=True, exist_ok=False)
+# Use default all-episode capture for comparison, even if training kept a tail.
+common = json.loads(source_environment.read_text())
+common.get("recording", {}).pop("record_last_episodes", None)
+environment = output / "evaluation-environment.json"
+environment.write_text(json.dumps(common, indent=2) + "\n")
 
 runs, steps, base_seed = 3, 1000, 1000
 folders = {}
@@ -140,6 +145,11 @@ Inspect `manifest.json` → `initialized_from` to confirm the selected archive,
 species/sex groups and criteria. The script uses each source directory's latest
 numbered archive. Pin `--brain-run N` in the argument list when a particular
 archive is part of the comparison design.
+
+The copied `evaluation-environment.json` removes only the inherited recording
+window so every comparison episode is captured. All physical/observation/model
+settings remain identical between A/B. Omitting the property works with both
+package 0.0.2.9 and current source; the original bank configurations are untouched.
 
 ## Inspect behavior as well as endpoint counts
 

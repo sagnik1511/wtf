@@ -25,7 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def ppo_settings():
-    p = copy.deepcopy(load(ROOT / "environments/ppo.json")["brains"]["small_ppo"])
+    p = copy.deepcopy(load(ROOT / "environments/ppo.json")["brains"]["prey_ppo"])
+    # Numerical fixtures deliberately retain the original 20-input contract.
+    p.update(observation_version=1, observation_top_k=1, entropy_coefficient=0.01)
     p["network"]["hidden_layers"] = [4, 3]
     p.update(rollout_steps=4, batch_size=2, epochs=2, target_kl=0)
     return p

@@ -15,7 +15,7 @@ Each JSON file is a complete experiment definition:
 | [dense_obstacles.json](../environments/dense_obstacles.json) | 24 | 6 | q_network / q_network |
 | [grpo.json](../environments/grpo.json) | 48 | 12 | q_network / grpo |
 | [mixed_brains.json](../environments/mixed_brains.json) | 48 | 12 | q_network / ppo |
-| [ppo.json](../environments/ppo.json) | 48 | 12 | ppo / ppo |
+| [ppo.json](../environments/ppo.json) | 64 | 6 | ppo [16], k=3 / ppo [64, 32], k=10 |
 | [ppo_large_predator.json](../environments/ppo_large_predator.json) | 48 | 12 | ppo [16] / ppo [64, 32] |
 | [recurrent_ppo.json](../environments/recurrent_ppo.json) | 48 | 12 | recurrent_ppo / recurrent_ppo |
 | [qrdqn.json](../environments/qrdqn.json) | 48 | 12 | qrdqn / qrdqn |
@@ -156,35 +156,64 @@ warm starts and chaining, apply the current environment's multiplier once.
 Exact checkpoint resumes retain the stored controller configuration; editing an
 environment does not retune an already saved checkpoint or recording.
 
-## Larger predator PPO network
+## Current ordinary PPO preset
 
-`environments/ppo_large_predator.json` keeps the world, rewards, prey network
-(`[16]`) and training settings from `ppo.json`, while using two hidden layers
-(`[64, 32]`, tanh) for the predator. Both species use PPO and explicitly select
-`champion_selection.criterion: "lifespan"` for cross-run inheritance. The original
-`ppo.json` defaults to lifespan for prey and kills for predators, so matching
-those selection criteria is also necessary to isolate network capacity.
+Current source `environments/ppo.json` uses ordinary, unmasked PPO on a 32×24
+flat world with 64 prey and six predators. Prey have 40 health, escape actions,
+version-4 consent inputs, top-k 3 and a `[16]` network. Predators use top-k 10
+and a `[64, 32]` network, with attack damage 40, attack cost 0.25 and 80 energy
+per kill. Predator breeding requires 30 energy and spends 10 per parent.
+Both species use failed-action reward −0.01, offspring reward +3 and PPO entropy
+coefficient 0.03. These settings support feeding and reproduction from fresh
+brains without action masking.
 
-Start a fresh experiment from the project root:
+Both keep five-step mating intent, rare birth mutation and lifespan champion
+selection. Proximal mating radii remain prey 2 and predator 3. This is a starter
+for finite-horizon survival and reproduction, with limited matched-seed checks;
+it does not guarantee stable populations. See the
+[calibration scope](calibration.md#ordinary-ppo-adaptation).
 
-```bash
-.venv/bin/python -m wtf.cli environments/ppo_large_predator.json \
-  --runs 20 --seed 100 --progress \
-  --brain prey=fresh --brain predator=fresh
+Templates are `brains.prey_ppo` and `brains.predator_ppo`. Their inputs/actions
+are 69/9 and 153/6 respectively. Richer inputs and the deeper predator network increase per-animal compute/model
+cost; fewer predators do not establish a total runtime or memory improvement.
+Legacy stock 20-input PPO weights are incompatible;
+start fresh or provide matching signatures. Existing exact resumes retain their
+old configurations, and old playback remains unchanged.
+
+The preset retains 1,500 steps per episode and five randomized episodes by
+default. Recovery is periodic every 500 steps, retaining two files; periodic
+best-brain checks run every 250 steps and retain two qualifying collections.
+Run-end champion archives are still kept for every episode. Capture is full
+detail for only the final two scheduled episodes (4–5 at the default run count).
+The published 0.0.2.9 preset predates this update; these settings require current
+source, including its new episode selector.
+
+```sh
+# 200-step episodes; record the actual final two training episodes.
+.venv/bin/python -m wtf run ppo --runs 10 --steps 200 --progress
+# Inspect all training episodes instead:
+.venv/bin/python -m wtf run ppo --runs 3 --record-last-episodes -1 --progress
 ```
 
-`fresh` controls initial weights; it does not select a winner criterion. This
-preset starts with untrained models and later episodes automatically chain the
-previous episode's longest-lived champions for both species. Lifespan means
-individual age in steps, including dead individuals recorded before episode end.
-Add `--no-chain-brains` to restart each episode from fresh weights. The original
-preset remains available as a baseline; align selection criteria as well as
-seeds for a network-size comparison. Old `[16]` predator champions cannot
-initialize the `[64, 32]` network because saved weights require matching
-architectures. This preset increases model and optimizer memory per predator
-and computation per step; more capacity does not guarantee better hunting.
-To tune capacity, edit
-`brains.large_predator_ppo.network.hidden_layers` in the new JSON.
+A 200-step horizon is shorter than prey maturity at 300 steps and cannot assess
+prey reproduction. Use a longer horizon when evaluating multi-generation survival;
+changing the recording window does not change learning or maturity gates.
+
+## Larger predator PPO network
+
+`environments/ppo_large_predator.json` remains the earlier flat-world preset:
+12 predators, legacy nearest-target observations and `[16]` prey / `[64, 32]`
+predator networks. It is no longer a capacity-only variant of the refreshed
+`ppo.json`, which now has the same hidden-layer sizes but different observations,
+actions, population and body settings. Do not compare the two as if only network
+depth changed.
+
+To isolate capacity, copy one complete current environment and change only
+`brains.predator_ppo.network.hidden_layers`; use fresh or compatible starting
+weights and matched seeds. Architecture/input/action changes affect model
+signatures. More capacity costs model/optimizer memory and computation and does
+not guarantee better hunting. [Matched evaluation](evaluation.md) describes
+how to separate those effects.
 
 The [advanced algorithms guide](advanced-algorithms.md) covers GRU memory,
 quantile regression, immediate action masking and centralized critics. All four
@@ -233,9 +262,10 @@ space or capacity checks charge neither and start no cooldown. Normal living
 costs and the configured negative failed-action reward still apply. Newborns cannot mate in their birth step.
 Reproduction spends energy, with no direct health deduction. Presets charge each
 prey parent 10 energy (minimum breeding energy 30, leaving at least 20), and each
-predator parent 15 (minimum 40, leaving at least 25). These reserves are measured
-immediately after reproduction; later living/action costs still apply. This is a
-50% reduction from the former 20/30 costs. Edit `energy_cost` to tune the tradeoff.
+predator parent 15 (minimum 40, leaving at least 25) in most presets. The current
+ordinary-PPO preset instead charges predators 10 (minimum 30, leaving at least 20).
+These reserves are measured
+immediately after reproduction; later living/action costs still apply. Edit `energy_cost` to tune the tradeoff.
 
 There is no single-parent/asexual fallback. Cooldowns use simulation steps, not
 playback time. Existing preset health and age settings are retained, with

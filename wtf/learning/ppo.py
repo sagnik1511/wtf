@@ -102,6 +102,26 @@ def loss_and_gradient(outputs, action, old_log_probability, advantage, target, c
     return loss, gradient, info
 
 
+def _prepare_native_samples(rollout, advantages, targets, masked_inputs=None):
+    """Update-local immutable inputs; weights and shuffle order stay live."""
+    if masked_inputs is None:
+        return [
+            (step.observation, step.action, step.log_probability, advantage, target)
+            for step, advantage, target in zip(rollout, advantages, targets)
+        ]
+    return [
+        (
+            step.observation[:masked_inputs],
+            step.action,
+            step.log_probability,
+            advantage,
+            target,
+            tuple(step.observation[masked_inputs:]),
+        )
+        for step, advantage, target in zip(rollout, advantages, targets)
+    ]
+
+
 class MLP:
     def __init__(self, hidden_layers, actions, seed, value_head=True, inputs=INPUTS):
         self.sizes = [inputs, *hidden_layers, actions + int(value_head)]
@@ -396,6 +416,7 @@ class PPOBrain(AdamOptimizer):
         indices = list(range(len(self.rollout)))
         from wtf.learning.contextual_ppo import LocalMLP, MaskablePPOBrain
 
+        prepared_samples = None
         masked_batch = (
             type(self) is MaskablePPOBrain
             and type(self.network) is LocalMLP
@@ -421,30 +442,14 @@ class PPOBrain(AdamOptimizer):
                         is PPOBrain.objective
                     )
                 ) and isinstance(self.network.layers[0]["weights"], Float32):
-                    samples_for_batch = [
-                        (
-                            (
-                                self.rollout[i].observation[: self.network.sizes[0]]
-                                if masked_batch
-                                else self.rollout[i].observation
-                            ),
-                            self.rollout[i].action,
-                            self.rollout[i].log_probability,
-                            advantages[i],
-                            targets[i],
+                    if prepared_samples is None:
+                        prepared_samples = _prepare_native_samples(
+                            self.rollout,
+                            advantages,
+                            targets,
+                            self.network.sizes[0] if masked_batch else None,
                         )
-                        for i in batch
-                    ]
-                    if masked_batch:
-                        samples_for_batch = [
-                            sample
-                            + (
-                                tuple(
-                                    self.rollout[i].observation[self.network.sizes[0] :]
-                                ),
-                            )
-                            for sample, i in zip(samples_for_batch, batch)
-                        ]
+                    samples_for_batch = [prepared_samples[i] for i in batch]
                     batch_kernel = (
                         kernels.native.masked_ppo_batch
                         if masked_batch

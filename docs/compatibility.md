@@ -20,6 +20,16 @@ and older runtimes do not preserve the frozen-birth policy. Training-only output
 contain no replay to convert; record a fresh evaluation for visualization.
 See [training and inference](running.md#train-without-replay-then-record-inference).
 
+## Scheduled-tail recording in current source
+
+`--record-last-episodes` / `recording.record_last_episodes` is a source feature
+after published package 0.0.2.9. Older CLIs reject the flag and older strict
+configuration readers reject checkpoints containing the optional field. Existing
+checkpoints without it default to recording all episodes. Replay v1 and chunk
+encodings are unchanged: recorded episodes keep their original numbers, and
+existing viewer readers already support that subset. No older replay is deleted.
+See [selection rules](recording.md#record-only-the-final-scheduled-episodes).
+
 ## Python runtime
 
 The `ecosystem` → `wtf` import migration changes Python paths, not artifact formats. See the [complete import map](package-layout.md#migrate-existing-imports); old namespace aliases are not shipped.

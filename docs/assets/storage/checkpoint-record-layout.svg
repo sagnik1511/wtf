@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1020" role="img" aria-labelledby="title desc">
-<title id="title">Checkpoint ownership, file records and shared values</title><desc id="desc">The synchronous stock writer borrows retained metadata without copying it, creates a world snapshot and streams one detached controller at a time. Public checkpoints remain detached. File records and optional external metadata retain their existing formats.</desc>
+<title id="title">Checkpoint ownership, file records and shared values</title><desc id="desc">The synchronous stock writer borrows retained metadata, uses a bounded identity cache during metadata encoding, clears it, then streams one detached controller at a time. Public checkpoints remain detached. File records and optional external metadata retain their existing formats.</desc>
 <style id="figure-palette">svg{--figure-bg:#101720;--figure-panel:#14202d;--figure-node:#192532;--figure-edge:#73899f;--figure-accent:#8ac8ff;--figure-muted:#acbfd1;--figure-ink:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-bg:#f5f8fb;--figure-panel:#ffffff;--figure-node:#edf3f8;--figure-edge:#637b91;--figure-accent:#1f639c;--figure-muted:#41566b;--figure-ink:#172c3c;}}</style><style>text{font-family:Arial,sans-serif;fill:var(--figure-ink)}.title{font-size:25px;font-weight:650}.head{font-size:19px;font-weight:650;fill:var(--figure-accent)}.body{font-size:16px}.small{font-size:14px;fill:var(--figure-muted)}.mono{font-family:monospace;font-size:14px}.box{fill:var(--figure-node);stroke:var(--figure-edge);stroke-width:1.5}.panel{fill:var(--figure-panel);stroke:var(--figure-edge);stroke-width:1.5}.flow{fill:none;stroke:var(--figure-accent);stroke-width:2;marker-end:url(#arrow)}</style><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-accent)"/></marker></defs><rect width="1120" height="1020" fill="var(--figure-bg)"/>
 <text x="28" y="40" class="title" text-anchor="start">Checkpoint ownership and physical records</text>
 <text x="28" y="68" class="small" text-anchor="start">Synchronous file writing and public snapshots have different copy lifetimes; exact recovery state is preserved.</text>
@@ -9,8 +9,8 @@
 <path d="M285 182V222" class="flow"/><path d="M835 182V222" class="flow"/><rect x="30" y="230" width="510" height="168" rx="9" class="box"/>
 <text x="48" y="260" class="head" text-anchor="start">Stock write_checkpoint() · synchronous</text>
 <text x="48" y="288" class="body" text-anchor="start">Borrow retained metadata read-only.</text>
-<text x="48" y="312" class="small" text-anchor="start">Construct the world snapshot.</text>
-<text x="48" y="336" class="small" text-anchor="start">Detach and stream one controller at a time.</text>
+<text x="48" y="312" class="small" text-anchor="start">World snapshot; metadata cache: ≤128 references.</text>
+<text x="48" y="336" class="small" text-anchor="start">Clear cache, then stream one detached controller.</text>
 <text x="48" y="360" class="small" text-anchor="start">The simulation stays paused until the write returns.</text>
 <rect x="580" y="230" width="510" height="168" rx="9" class="box"/>
 <text x="598" y="260" class="head" text-anchor="start">Public checkpoint() · detached snapshot</text>

@@ -29,6 +29,7 @@ lists bundled environment names. `python -m wtf` offers the same hub;
 | `--seed N` | Set reproducible base seed; defaults seed policy to increment unless explicitly fixed |
 | `--seed-policy random\|fixed\|increment` | Override world randomization; explicit `--seed` cannot be combined with random |
 | `--resume PATH` | Restore a supported exact checkpoint; use saved environment/schedule rather than a new JSON |
+| `--record-last-episodes K` | Current source: record final K scheduled episodes, capped at total; -1 records all (default), 0 none. Persists on resume; [early-stop/profile behavior](recording.md#record-only-the-final-scheduled-episodes) |
 | `--recording-profile full\|compact\|training-only` | Training capture preset; evaluation/random resolve a configured training preset to full. Explicit compact/training-only CLI choices require train mode. Persisted on resume; see [profiles](recording.md#training-recording-profiles) |
 | `--freeze-brains` | Evaluation only: offspring copy the same-sex parent’s model without crossover; no learning or mutation. Persisted in checkpoints |
 | `--no-record` | Skip replay recording; metrics and exact checkpoints are still saved |

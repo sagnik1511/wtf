@@ -24,6 +24,7 @@ DEFAULT_RECORDING = dict(
     compression="xz",
     compression_level=6,
     encoding="binary",
+    record_last_episodes=-1,
 )
 
 
@@ -40,6 +41,11 @@ def settings(config, mode="train"):
     profile = options.get("profile", "full")
     if profile not in RECORDING_PROFILES:
         raise ValueError("Unknown recording profile")
+    last = options["record_last_episodes"]
+    if type(last) is not int or last < -1:
+        raise ValueError(
+            "recording.record_last_episodes must be -1 or a nonnegative integer"
+        )
     options["profile"] = profile if mode == "train" else "full"
     if mode == "train" and profile == "training-only":
         options["enabled"] = False
@@ -47,6 +53,8 @@ def settings(config, mode="train"):
         interval = options["diagnostics_every_steps"]
         options["diagnostics_every_steps"] = max(interval, 50) if interval else 0
         options["record_activations"] = False
+    if last == 0:
+        options["enabled"] = False
     return options
 
 
@@ -89,6 +97,10 @@ class Recorder:
     def begin_run(self, experiment, metrics=None):
         if self.run is not None:
             self.end_run(experiment=None)
+        total = experiment.config["experiment"]["runs"]
+        last = self.options["record_last_episodes"]
+        if last != -1 and experiment.run_index + 1 <= total - min(total, last):
+            return False
         world = experiment.world
         self.run = dict(
             run=experiment.run_index + 1,
@@ -203,6 +215,8 @@ class Recorder:
         self._publish()
 
     def capture(self, experiment, force=False, metrics=None):
+        if self.run is None:
+            return False
         tick = experiment.world.tick
         if tick == self.last_tick or (
             not force and tick % self.options["frame_every_steps"]

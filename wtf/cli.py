@@ -61,6 +61,12 @@ def main():
         help="Training capture: full (configured cadence), compact (diagnostics >=50 steps, no activations), or training-only (no replay); full also works for evaluation",
     )
     parser.add_argument(
+        "--record-last-episodes",
+        type=int,
+        metavar="K",
+        help="Record the final K scheduled episodes, capped at total; -1 records all (default), 0 disables playback. Metrics/brains/checkpoints still cover every episode",
+    )
+    parser.add_argument(
         "--freeze-brains",
         action="store_true",
         help="Evaluation only: keep offspring weights identical to the same-sex parent's brain; no crossover or mutation. Saved in recovery checkpoints",
@@ -179,6 +185,8 @@ def main():
         help="Embed metadata instead of using the run-local binary checkpoint pool",
     )
     args = parser.parse_args()
+    if args.record_last_episodes is not None and args.record_last_episodes < -1:
+        parser.error("--record-last-episodes must be -1 or nonnegative")
     if args.resume:
         if (
             any(
@@ -202,6 +210,10 @@ def main():
         experiment = Experiment.restore(read_checkpoint(args.resume), mode=args.mode)
     else:
         config = load(args.environment)
+        if args.record_last_episodes is not None:
+            config.setdefault("recording", dict(DEFAULT_RECORDING))[
+                "record_last_episodes"
+            ] = args.record_last_episodes
         if args.recording_profile is not None:
             config.setdefault("recording", dict(DEFAULT_RECORDING))[
                 "profile"
@@ -259,6 +271,10 @@ def main():
         experiment.config.setdefault("recording", dict(DEFAULT_RECORDING))[
             "profile"
         ] = args.recording_profile
+    if args.record_last_episodes is not None:
+        experiment.config.setdefault("recording", dict(DEFAULT_RECORDING))[
+            "record_last_episodes"
+        ] = args.record_last_episodes
     recording_options = settings(experiment.config, experiment.mode)
     if args.no_record:
         recording_options["enabled"] = False

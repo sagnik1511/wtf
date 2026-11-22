@@ -45,6 +45,10 @@ has a training-only profile. `--mode evaluate --freeze-brains` disables learning
 and copies same-sex parent weights at birth without mutation/crossover. Ordinary
 evaluation still allows its existing crossover. Frozen policy metadata must
 survive checkpoints; training RNGs and results must not depend on capture profile.
+Optional `recording.record_last_episodes` selects the final K episodes of the
+configured schedule before encoding (-1 all, 0 none); preserve original run IDs
+and checkpoint/resume numbering. Disabled capture still wins, and early stopping
+can end before the selected window. No past files are pruned.
 Discarded storage-format probes remain local and Git-ignored, not runtime codecs.
 
 ## Purpose and decisions

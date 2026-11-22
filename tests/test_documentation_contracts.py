@@ -102,7 +102,14 @@ class DocumentationContractsTests(unittest.TestCase):
         cls = namespace["ScheduledPPOBrain"]
         config = load(ROOT / "environments/ppo.json")
         template = copy.deepcopy(next(iter(config["brains"].values())))
-        template.update(type="scheduled_ppo", rollout_steps=2, epochs=1, batch_size=2)
+        template.update(
+            type="scheduled_ppo",
+            rollout_steps=2,
+            epochs=1,
+            batch_size=2,
+            observation_version=1,
+            observation_top_k=1,
+        )
         brain = cls(template, ["rest", "turn_left"], 31, 47)
         obs = (0.0,) * 20
         before = copy.deepcopy(brain.config)

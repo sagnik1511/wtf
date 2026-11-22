@@ -4,7 +4,7 @@
 
 With recording enabled, large experiments keep **every replay chunk, metrics row
 and numbered run champion archive**. Training-only profiles skip replay creation;
-retention does not delete existing playback. Follow the
+retention does not delete existing playback. Optional [scheduled-tail capture](recording.md#record-only-the-final-scheduled-episodes) skips encoding earlier episodes without pruning old files. Follow the
 [training/inference tutorial](tutorials/04-training-and-inference.md) to choose
 capture and retention independently.
 Retention affects only new recovery files and periodic best-brain milestones owned
@@ -132,3 +132,9 @@ encoding it. Public `Experiment.checkpoint()` results remain detached, while
 file writes consume an internal borrowed metadata view before another step can
 run. Controllers are still detached and serialized one at a time. Every replay
 chunk and numbered run archive remains retained.
+
+The recovery encoder separately keeps up to 128 shared-container identities while
+traversing stable metadata, then clears them before streaming brains. It preserves
+content deduplication, reference order and checkpoint bytes. This is distinct from
+the champion writer's 4 MiB payload cache. See [the checkpoint cache and PPO
+sample measurements](performance.md#checkpoint-metadata-cache-and-ppo-sample-preparation).

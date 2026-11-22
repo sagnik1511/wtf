@@ -61,6 +61,16 @@ The internal borrowed view is consumed synchronously while the simulation is
 paused; neither the encoder nor the writer mutates it. No model-encoding cache
 is stored in the checkpoint. See [copy-reduction measurements](performance.md#shared-model-encoding-and-checkpoint-copy-reduction).
 
+During metadata traversal, a 128-entry identity LRU reuses the existing shared-table
+index for repeated `config`/`actions`/`model`/`signature` containers and model-shaped
+snapshots. It holds strong references, not serialized payload copies, and is cleared
+in `finally` before the brain iterator is advanced. Content hashing still deduplicates
+separate equal objects; evicted identities take the original hashing path. Optional
+external `$meta` pooling keeps its existing path. Public encoder calls remain
+mutation-sensitive, and a later save observes changed values. This cache does not
+enter the checkpoint, change reference order or share mutable restored controllers.
+See [measurements and sample reuse](performance.md#checkpoint-metadata-cache-and-ppo-sample-preparation).
+
 ## Experiment-owned metadata
 
 | State group | Representative saved fields | Restored owner / purpose |

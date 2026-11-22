@@ -810,3 +810,50 @@ test('Playback movement follows time without prefix requests for local steps or 
   assert.equal(p.movement.map.frame_index, 0);
   assert.equal(p.movement.map.arrivals, 0);
 });
+
+test('Playback opens and seeks original episode IDs when only the scheduled tail is recorded', async () => {
+  const metadata = {
+    recording_version: 1,
+    status: 'complete',
+    name: 'tail',
+    mode: 'train',
+    config: {
+      world: { width: 8, height: 8 },
+      experiment: { runs: 10 },
+      resources: { capacity_per_patch: 20 },
+      species: { prey: { diet: 'resource' } },
+    },
+    recording: { frames_per_chunk: 64, record_last_episodes: 2 },
+    runs: [9, 10].map((run) => ({
+      run,
+      frame_count: 2,
+      chunk_count: 1,
+      obstacles: [],
+    })),
+  };
+  const calls = [];
+  const player = new Playback(async (path) => {
+    calls.push(path);
+    if (path === '/api/recordings/tail') return metadata;
+    if (path.endsWith('/metrics')) return [];
+    const match = path.match(/\/runs\/(9|10)\/chunks\/0$/);
+    assert.ok(match, path);
+    return [0, 1].map((tick) => ({
+      tick,
+      animals: [],
+      resources: [],
+      metrics: { tick, food: 1, populations: { prey: 0 } },
+    }));
+  });
+  await player.open('tail');
+  assert.equal(player.snapshot().run, 9);
+  assert.equal(player.snapshot().total_runs, 10);
+  await player.seek(1);
+  await player.advance();
+  assert.equal(player.snapshot().run, 10);
+  await player.seek(1);
+  assert.equal(player.atEnd, true);
+  await player.changeRun(9);
+  assert.equal(player.snapshot().tick, 0);
+  assert.ok(calls.every((path) => !path.includes('/runs/1/')));
+});

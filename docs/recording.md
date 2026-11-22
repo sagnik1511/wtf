@@ -228,6 +228,52 @@ This never alters or removes existing saved playbacks.
 For recorded inference with fixed learned weights, use the
 [training-to-evaluation workflow](running.md#train-without-replay-then-record-inference).
 
+## Record only the final scheduled episodes
+
+Current source adds `--record-last-episodes K`, or optional JSON
+`recording.record_last_episodes`. It selects episodes **before** frame capture;
+skipped episodes produce no snapshots, diagnostics or chunk writes. This is
+available in source after package 0.0.2.9, not in that published version.
+
+| Value | Capture selection |
+| --- | --- |
+| `-1` (default) | All scheduled episodes |
+| `0` | No playback; metrics, brains and recovery checkpoints remain |
+| Positive K | Final `min(total episodes, K)` episodes of the configured schedule |
+
+For ten training episodes, each at most 200 steps, record only episodes 9 and 10:
+
+```sh
+.venv/bin/python -m wtf run ppo --runs 10 --steps 200 \
+  --recording-profile full --record-last-episodes 2 --progress
+```
+
+These are the **actual training episodes**, with learning still enabled. They
+are not fresh frozen evaluations. Full and compact profiles control the detail
+inside selected episodes. `training-only`, `enabled: false`, and `--no-record`
+still disable all playback; the last-episode selector never overrides them.
+
+Metrics CSV, summaries, seeds and numbered champion archives still cover every
+episode, under the existing independent checkpoint/brain retention policy.
+Selected episodes preserve their original IDs, seeds, initial/final frames and
+configured cadence. The viewer opens the first recorded episode (9 here), can
+advance to 10, and does not invent recordings for episodes 1–8. Existing artifacts
+are never pruned or re-encoded. An initially empty recording manifest is not
+listed until committed frames exist.
+
+The window is based on the configured total, **not** a rolling tail of completed
+episodes. If early stopping or interruption ends before episode 9, this example
+has no recorded frames. If it ends during episode 9, only the reached part of
+that selected episode is available. Recovery checkpoints cannot recreate skipped
+past frames. Recording the last K episodes of an unpredictable early-stopped
+schedule would require capturing earlier episodes too; that is not this option.
+
+The setting persists in checkpoints. A resume uses original episode numbers and
+records the remaining selected portion; it does not restart the episode or
+recover pre-checkpoint playback. Pass `--record-last-episodes -1` to record all
+remaining episodes instead. The selector applies in evaluation/random modes too;
+reset an inherited selector to `-1` when recording every fresh inference episode.
+
 ## Recording settings
 
 Each environment has a recording section:
@@ -235,6 +281,7 @@ Each environment has a recording section:
 ```json
 "recording": {
   "profile": "full",
+  "record_last_episodes": -1,
   "enabled": true,
   "frame_every_steps": 1,
   "frames_per_chunk": 64,

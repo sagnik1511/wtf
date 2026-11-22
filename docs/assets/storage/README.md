@@ -7,7 +7,7 @@
 | [Experiment artifacts](experiment-artifacts.svg) | Connected directory/file blocks, with dashed references to pooled champion dependencies |
 | [Binary chunk layout](binary-chunk-layout.svg) | Nested prefix/length/payload blocks and physical entity-table columns |
 | [Model-weight structure](model-weight-storage.svg) | Shared artifact references, one-record binary blob, signature/precision and MLP layer arrays |
-| [Checkpoint file layout](checkpoint-record-layout.svg) | Borrowed synchronous metadata versus detached public snapshots; physical records and optional v4 metadata references |
+| [Checkpoint file layout](checkpoint-record-layout.svg) | Borrowed synchronous metadata with a bounded identity cache versus detached public snapshots; physical records and optional v4 metadata references |
 | [Model encoding cache](model-encoding-cache.svg) | Save-local snapshot identities, bounded payload/hash reuse, gate/export consumers and cache release |
 | [Private controller state](checkpoint-controller-state.svg) | Nested network, optimizer, experience, RNG and algorithm-specific state blocks |
 | [Restore and runtime access](checkpoint-restore-access.svg) | Decode/restore stages, object ownership and decision/learning consumers |
