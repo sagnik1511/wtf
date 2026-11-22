@@ -713,3 +713,185 @@ static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
 static PyObject *masked_ppo_batch_native(PyObject *self, PyObject *args) {
     return ppo_batch_impl(args, 1);
 }
+
+/* LSTM cell only. The MLP head, chronological BPTT boundaries, sampling and
+   optimizer cadence remain in Python. Memory is [hidden, cell]. */
+static PyObject *lstm_step_native(PyObject *self, PyObject *args) {
+    PyObject *xo, *ho, *wxo, *who, *bo;
+    int tape;
+    if (!PyArg_ParseTuple(args, "OOOOOp", &xo, &ho, &wxo, &who, &bo, &tape))
+        return NULL;
+    Py_buffer views[3] = {{0}};
+    Py_ssize_t n = 0, memory = 0;
+    double *x = vector(xo, &n), *old = vector(ho, &memory), *scratch = NULL;
+    PyObject *result = NULL, *state = NULL, *parts = NULL;
+    if (!x || !old)
+        goto done;
+    if (!buffer(wxo, &views[0], 'f', 0) || !buffer(who, &views[1], 'f', 0) ||
+        !buffer(bo, &views[2], 'f', 0))
+        goto done;
+    Py_ssize_t h = memory / 2;
+    if (n < 1 || memory % 2 || h < 1 || h > 128 || size(&views[2]) != 4 * h ||
+        size(&views[0]) / n != 4 * h || size(&views[0]) % n ||
+        size(&views[1]) / h != 4 * h || size(&views[1]) % h) {
+        PyErr_SetString(PyExc_ValueError, "Invalid LSTM dimensions");
+        goto done;
+    }
+    scratch = PyMem_Calloc(7 * h, sizeof(double));
+    if (!scratch) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    double *incoming = scratch, *forget = scratch + h,
+           *candidate = scratch + 2 * h, *output = scratch + 3 * h,
+           *cell = scratch + 4 * h, *current = scratch + 5 * h;
+    const float *wx = views[0].buf, *wh = views[1].buf, *bias = views[2].buf;
+    for (int gate = 0; gate < 4; gate++) {
+        for (Py_ssize_t j = 0; j < h; j++) {
+            Py_ssize_t row = gate * h + j;
+            FloatSum sx = {0}, sh = {0};
+            for (Py_ssize_t i = 0; i < n; i++)
+                sum_add(&sx, x[i] * (double)wx[row * n + i]);
+            for (Py_ssize_t i = 0; i < h; i++)
+                sum_add(&sh, old[i] * (double)wh[row * h + i]);
+            double value =
+                ((double)bias[row] + sum_finish(sx)) + sum_finish(sh);
+            scratch[gate * h + j] =
+                gate == 2 ? tanh(value) : stable_sigmoid(value);
+        }
+    }
+    for (Py_ssize_t j = 0; j < h; j++) {
+        cell[j] = forget[j] * old[h + j] + incoming[j] * candidate[j];
+        current[j] = output[j] * tanh(cell[j]);
+        current[h + j] = cell[j];
+    }
+    state = double_list(current, 2 * h);
+    if (!state)
+        goto done;
+    if (tape) {
+        parts = PyTuple_New(5);
+        if (!parts)
+            goto done;
+        for (int k = 0; k < 5; k++) {
+            PyObject *part = double_list(scratch + k * h, h);
+            if (!part)
+                goto done;
+            PyTuple_SET_ITEM(parts, k, part);
+        }
+    } else {
+        parts = Py_None;
+        Py_INCREF(parts);
+    }
+    result = PyTuple_Pack(2, state, parts);
+done:
+    Py_XDECREF(state);
+    Py_XDECREF(parts);
+    PyMem_Free(x);
+    PyMem_Free(old);
+    PyMem_Free(scratch);
+    release(views, 3);
+    return result;
+}
+
+static PyObject *lstm_backward_native(PyObject *self, PyObject *args) {
+    PyObject *seqs, *who, *go;
+    if (!PyArg_ParseTuple(args, "OOO", &seqs, &who, &go))
+        return NULL;
+    Py_buffer views[4] = {{0}};
+    double *parts[9] = {0}, *scratch = NULL;
+    Py_ssize_t sizes[9] = {0};
+    PyObject *result = NULL;
+    if (!PyTuple_Check(seqs) || PyTuple_GET_SIZE(seqs) != 9 ||
+        !PyDict_Check(go)) {
+        PyErr_SetString(PyExc_TypeError, "Invalid LSTM tape");
+        goto done;
+    }
+    for (int k = 0; k < 9; k++) {
+        parts[k] = vector(PyTuple_GET_ITEM(seqs, k), &sizes[k]);
+        if (!parts[k])
+            goto done;
+    }
+    Py_ssize_t n = sizes[0], h = sizes[1] / 2;
+    if (n < 1 || sizes[1] % 2 || h < 1 || h > 128 || sizes[8] != 2 * h) {
+        PyErr_SetString(PyExc_ValueError, "Invalid LSTM memory dimensions");
+        goto done;
+    }
+    for (int k = 2; k < 8; k++)
+        if (sizes[k] != h) {
+            PyErr_SetString(PyExc_ValueError, "Invalid LSTM tape dimensions");
+            goto done;
+        }
+    if (!buffer(who, &views[0], 'f', 0))
+        goto done;
+    const char *keys[3] = {"input_weights", "recurrent_weights", "bias"};
+    for (int k = 0; k < 3; k++) {
+        PyObject *o = PyDict_GetItemString(go, keys[k]);
+        if (!o) {
+            PyErr_SetString(PyExc_ValueError, "Missing LSTM gradient");
+            goto done;
+        }
+        if (!buffer(o, &views[k + 1], 'd', 1))
+            goto done;
+    }
+    if (size(&views[0]) / h != 4 * h || size(&views[0]) % h ||
+        size(&views[1]) / n != 4 * h || size(&views[1]) % n ||
+        size(&views[2]) / h != 4 * h || size(&views[2]) % h ||
+        !length(&views[3], 4 * h)) {
+        if (!PyErr_Occurred())
+            PyErr_SetString(PyExc_ValueError, "Invalid LSTM matrix dimensions");
+        goto done;
+    }
+    scratch = PyMem_Calloc(9 * h, sizeof(double));
+    if (!scratch) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    double *dh = scratch, *tc = scratch + h, *dc = scratch + 2 * h,
+           *delta = scratch + 3 * h, *previous = scratch + 7 * h;
+    const double *x = parts[0], *old = parts[1], *incoming = parts[2],
+                 *forget = parts[3], *candidate = parts[4], *output = parts[5],
+                 *cell = parts[6], *derivative = parts[7], *future = parts[8];
+    const float *wh = views[0].buf;
+    for (Py_ssize_t j = 0; j < h; j++) {
+        dh[j] = derivative[j] + future[j];
+        tc[j] = tanh(cell[j]);
+        /* Python uses ** 2 here; retain libm pow rather than substituting x*x.
+         */
+        dc[j] = future[h + j] + dh[j] * output[j] * (1.0 - pow(tc[j], 2.0));
+        delta[j] = dc[j] * candidate[j] * incoming[j] * (1.0 - incoming[j]);
+        delta[h + j] = dc[j] * old[h + j] * forget[j] * (1.0 - forget[j]);
+        delta[2 * h + j] = dc[j] * incoming[j] * (1.0 - pow(candidate[j], 2.0));
+        delta[3 * h + j] = dh[j] * tc[j] * output[j] * (1.0 - output[j]);
+        previous[h + j] = dc[j] * forget[j];
+    }
+    for (Py_ssize_t i = 0; i < h; i++) {
+        FloatSum sum = {0};
+        for (int gate = 0; gate < 4; gate++)
+            for (Py_ssize_t j = 0; j < h; j++)
+                sum_add(&sum, delta[gate * h + j] *
+                                  (double)wh[(gate * h + j) * h + i]);
+        previous[i] = sum_finish(sum);
+    }
+    result = double_list(previous, 2 * h);
+    if (!result)
+        goto done;
+    /* All conversion, dimension checks and output allocation precede mutation.
+     */
+    double *dwx = views[1].buf, *dwh = views[2].buf, *db = views[3].buf;
+    for (int gate = 0; gate < 4; gate++)
+        for (Py_ssize_t j = 0; j < h; j++) {
+            Py_ssize_t row = gate * h + j;
+            double d = delta[row];
+            db[row] += d;
+            for (Py_ssize_t i = 0; i < n; i++)
+                dwx[row * n + i] += d * x[i];
+            for (Py_ssize_t i = 0; i < h; i++)
+                dwh[row * h + i] += d * old[i];
+        }
+done:
+    for (int k = 0; k < 9; k++)
+        PyMem_Free(parts[k]);
+    PyMem_Free(scratch);
+    release(views, 4);
+    return result;
+}

@@ -131,3 +131,14 @@ configuration to resume its separated-scent checkpoint.
 Binary checkpoint header version 4 requires its run-local `checkpoints/_metadata/`
 pool and a runtime with shared-metadata support. Version 3 and older checkpoint
 loaders remain supported by new runtimes. See [retention and portability](artifact-retention.md#common-metadata-and-portability). Replay formats and saved model signatures are unchanged.
+
+
+## Discrete SAC, TRPO and LSTM PPO
+
+Current source adds distinct `discrete_sac`, `trpo` and `lstm_ppo` model signatures.
+They require readers that dispatch these identifiers; published 0.0.2.9 cannot
+restore them. Existing algorithms and artifact formats remain unchanged. SAC
+champions include both online critics; exact recovery also restores target
+critics and replay. TRPO stores separate actor/value networks and accepted-policy
+counters. LSTM recovery includes both hidden/cell memory and pending sequences;
+GRU signatures are incompatible. See [complete policy contracts](additional-policies.md).

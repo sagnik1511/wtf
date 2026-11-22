@@ -6,7 +6,9 @@ reproduction. A bundled JavaScript viewer replays saved experiments separately
 from training. It requires no Node.js build step.
 
 Supported learners include Q-network/DQN, PPO, A2C, REINFORCE, experimental GRPO,
-recurrent PPO, QR-DQN, masked PPO and MAPPO. Controllers, optimizers and RNGs are
+recurrent PPO, QR-DQN, masked PPO and MAPPO. Current source additionally implements
+Discrete SAC, TRPO and LSTM PPO; these additions are not in published 0.0.2.9.
+Controllers, optimizers and RNGs are
 private to each animal. These are experimental implementations, not claims of
 biological realism or established policy improvement.
 

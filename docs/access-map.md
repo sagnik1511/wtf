@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **274 public documentation pages**, **103 visual files**
+Coverage: **278 public documentation pages**, **104 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -16,6 +16,7 @@ and **8 identical viewer branding copies**.
 | Page | Click sequence from Home |
 | --- | --- |
 | [Homepage click paths](access-map.md) | [Home](index.md) → [Homepage click paths](access-map.md) |
+| [Discrete SAC, TRPO and LSTM PPO](additional-policies.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [SAC, TRPO and LSTM PPO](additional-policies.md) |
 | [Recurrent PPO, QR-DQN, Maskable PPO and MAPPO](advanced-algorithms.md) | [Home](index.md) → [advanced learners](advanced-algorithms.md) |
 | [Learning algorithms and networks](algorithms.md) | [Home](index.md) → [Algorithms and networks](algorithms.md) |
 | [Behavior and learning analysis](analysis.md) | [Home](index.md) → [behavior analysis](analysis.md) |
@@ -110,6 +111,7 @@ and **8 identical viewer branding copies**.
 | [WTF symbol motion dark (SVG)](visual-previews/branding/wtf-symbol-motion-dark-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF symbol motion dark (SVG)](visual-previews/branding/wtf-symbol-motion-dark-svg.md) |
 | [WTF symbol motion light (SVG)](visual-previews/branding/wtf-symbol-motion-light-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF symbol motion light (SVG)](visual-previews/branding/wtf-symbol-motion-light-svg.md) |
 | [Day night (GIF)](visual-previews/day-night-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night (GIF)](visual-previews/day-night-gif.md) |
+| [Additional policy structures (SVG)](visual-previews/diagrams/additional-policy-structures-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Additional policy structures (SVG)](visual-previews/diagrams/additional-policy-structures-svg.md) |
 | [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) |
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) |
@@ -276,9 +278,11 @@ and **8 identical viewer branding copies**.
 | [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
 | [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
 | [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1](releases/0.0.2.1.md) |
-| [0.0.2.10 Record only the final scheduled episodes](releases/0.0.2.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.10 — Scheduled-tail episode recording](releases/0.0.2.10.md) |
-| [0.0.2.11 Modern ordinary-PPO preset](releases/0.0.2.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.11 — Modern ordinary-PPO preset](releases/0.0.2.11.md) |
-| [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.12 — Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) |
+| [0.0.2.10 Record only the final scheduled episodes](releases/0.0.2.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.10](releases/0.0.2.10.md) |
+| [0.0.2.11 Modern ordinary-PPO preset](releases/0.0.2.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.11](releases/0.0.2.11.md) |
+| [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.12](releases/0.0.2.12.md) |
+| [0.0.2.13 Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.13 — Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) |
+| [0.0.2.14 Native LSTM forward and backward](releases/0.0.2.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.14 — Native LSTM forward and backward](releases/0.0.2.14.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
@@ -313,6 +317,7 @@ and **8 identical viewer branding copies**.
 
 | Visual file | Click sequence from Home |
 | --- | --- |
+| `assets/diagrams/additional-policy-structures.svg` | [Home](index.md) → [All visuals](visuals.md) → [additional-policy-structures.svg](assets/diagrams/additional-policy-structures.svg) |
 | `assets/diagrams/champion-chaining-between-runs.svg` | [Home](index.md) → [All visuals](visuals.md) → [champion-chaining-between-runs.svg](assets/diagrams/champion-chaining-between-runs.svg) |
 | `assets/diagrams/child-only-mutation-path.svg` | [Home](index.md) → [All visuals](visuals.md) → [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | `assets/diagrams/choose-checks-for-the-change.svg` | [Home](index.md) → [All visuals](visuals.md) → [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |

@@ -34,6 +34,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 
 | Theme-aware preview | Original file / variant |
 | --- | --- |
+| [Additional policy structures (SVG)](visual-previews/diagrams/additional-policy-structures-svg.md) | [additional-policy-structures.svg](assets/diagrams/additional-policy-structures.svg) |
 | [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) | [champion-chaining-between-runs.svg](assets/diagrams/champion-chaining-between-runs.svg) |
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |

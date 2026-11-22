@@ -37,6 +37,12 @@ Supported algorithms:
 | `qrdqn` | Quantile-regression Double DQN, bounded replay, target network and Adam |
 | `maskable_ppo` | PPO with stored per-decision immediate local action masks |
 | `mappo` | Experimental centralized-critic PPO with independent local actors and species-mean training rewards |
+| `discrete_sac` | Categorical soft actor-critic, private replay, twin online/target Q critics and fixed entropy temperature |
+| `trpo` | Conjugate-gradient natural policy step with empirical KL backtracking and a separate value critic |
+| `lstm_ppo` | PPO with hidden/cell LSTM memory and truncated chronological BPTT |
+
+See [Discrete SAC, TRPO and LSTM PPO](additional-policies.md) for complete templates,
+selection and lifecycle contracts. Existing environment presets remain unchanged.
 
 See the [advanced algorithms guide](advanced-algorithms.md) for presets, commands,
 configuration, memory behavior and the changed action/reward rules of these variants.

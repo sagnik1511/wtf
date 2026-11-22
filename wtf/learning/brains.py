@@ -9,7 +9,15 @@ from wtf.learning.brain import Brain
 def create_brain(config, actions, base_seed, individual_seed):
     if config["type"] == "q_network":
         return Brain(config, actions, base_seed, individual_seed)
-    if config["type"] in ("recurrent_ppo", "qrdqn", "maskable_ppo", "mappo"):
+    if config["type"] in (
+        "recurrent_ppo",
+        "qrdqn",
+        "maskable_ppo",
+        "mappo",
+        "discrete_sac",
+        "trpo",
+        "lstm_ppo",
+    ):
         return advanced_brain(config["type"])(
             config, actions, base_seed, individual_seed
         )
@@ -31,7 +39,14 @@ def advanced_brain(kind):
     from wtf.learning.qrdqn import QRDQNBrain
     from wtf.learning.recurrent_ppo import RecurrentPPOBrain
 
+    from wtf.learning.discrete_sac import DiscreteSACBrain
+    from wtf.learning.trpo import TRPOBrain
+    from wtf.learning.lstm_ppo import LSTMPPOBrain
+
     return {
+        "discrete_sac": DiscreteSACBrain,
+        "trpo": TRPOBrain,
+        "lstm_ppo": LSTMPPOBrain,
         "recurrent_ppo": RecurrentPPOBrain,
         "qrdqn": QRDQNBrain,
         "maskable_ppo": MaskablePPOBrain,
@@ -43,7 +58,15 @@ def restore_brain(state):
     kind = state["config"]["type"]
     if kind == "q_network":
         return Brain.restore(state)
-    if kind in ("recurrent_ppo", "qrdqn", "maskable_ppo", "mappo"):
+    if kind in (
+        "recurrent_ppo",
+        "qrdqn",
+        "maskable_ppo",
+        "mappo",
+        "discrete_sac",
+        "trpo",
+        "lstm_ppo",
+    ):
         return advanced_brain(kind).restore(state)
     if kind == "ppo":
         from wtf.learning.ppo import PPOBrain
@@ -115,7 +138,8 @@ def model_signature(config, actions):
         ),
         activation="tanh",
         actions=list(actions),
-        value_head=kind in ("ppo", "a2c", "recurrent_ppo", "maskable_ppo", "mappo"),
+        value_head=kind
+        in ("ppo", "a2c", "recurrent_ppo", "maskable_ppo", "mappo", "trpo", "lstm_ppo"),
     )
     if config.get("observation_top_k", 1) != 1:
         signature["observation_top_k"] = config["observation_top_k"]
@@ -125,8 +149,15 @@ def model_signature(config, actions):
         from wtf.simulation.tracking import scent_contract
 
         signature["scent_observation"] = scent_contract(config)
-    if kind == "recurrent_ppo":
-        signature.update(recurrent_size=config["recurrent_size"], recurrent_cell="gru")
+    if kind in ("recurrent_ppo", "lstm_ppo"):
+        signature.update(
+            recurrent_size=config["recurrent_size"],
+            recurrent_cell="lstm" if kind == "lstm_ppo" else "gru",
+        )
+    elif kind == "discrete_sac":
+        signature.update(critic_count=2, critic_outputs=len(actions))
+    elif kind == "trpo":
+        signature.update(critic_separate=True)
     elif kind == "qrdqn":
         signature["num_quantiles"] = config["num_quantiles"]
     elif kind == "mappo":
@@ -198,6 +229,9 @@ def load_model_weights(brain, model):
         if hasattr(brain, "reference_network"):
             brain.reference_network.layers = packed(parameters, precision_of(brain))
 
+    if hasattr(brain, "synchronize_targets"):
+        brain.synchronize_targets()
+
 
 def reset_birth_training(brain):
     """New inherited parameters cannot reuse either parent's temporal state."""
@@ -206,7 +240,14 @@ def reset_birth_training(brain):
     for key in ("replay", "rollout", "trajectory"):
         if hasattr(brain, key):
             getattr(brain, key).clear()
-    for key in ("steps", "updates", "rollout_updates", "cursor", "last_group_step"):
+    for key in (
+        "steps",
+        "updates",
+        "rollout_updates",
+        "cursor",
+        "last_group_step",
+        "policy_updates",
+    ):
         if hasattr(brain, key):
             setattr(brain, key, 0)
     if hasattr(brain, "pending"):
@@ -226,6 +267,9 @@ def reset_birth_training(brain):
         brain.target_network.layers = copy.deepcopy(brain.network.layers)
     if hasattr(brain, "reference_network"):
         brain.reference_network.layers = copy.deepcopy(brain.network.layers)
+
+    if hasattr(brain, "synchronize_targets"):
+        brain.synchronize_targets()
 
 
 def mix_parent_brains(mother, father, seed):

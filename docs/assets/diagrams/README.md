@@ -88,3 +88,5 @@ stateless analysis branch into the inspector. Exact checkpoints and live
 controllers remain outside that playback path. The separate
 [explanation flow and worked network](../structures/README.md) provide the
 selected-data ownership and numerical detail without crowding this overview.
+
+[Additional policy structures](additional-policy-structures.svg) compares actor/critic ownership, TRPO trust steps and LSTM hidden/cell memory. Used in [additional learners](../../additional-policies.md).

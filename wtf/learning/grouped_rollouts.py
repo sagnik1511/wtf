@@ -29,7 +29,7 @@ def other_action(
     outputs=None,
 ):
     kind = brain.config["type"]
-    if kind == "recurrent_ppo":
+    if kind in ("recurrent_ppo", "lstm_ppo"):
         hidden = memories[animal_id]
         outputs, memories[animal_id] = brain.network.step(observation, hidden)
         return brain.actions[sample_index(policy_distribution(outputs[:-1])[0], rng)]
@@ -112,7 +112,7 @@ def collect_group(world, brains, focal_id, *, reuse_world=True):
         memories = {
             i: b.hidden[:]
             for i, b in policies.items()
-            if b.config["type"] == "recurrent_ppo"
+            if b.config["type"] in ("recurrent_ppo", "lstm_ppo")
         }
         if initial_observations is None or not reuse_world:
             observations = trial.observe_all()
@@ -175,7 +175,10 @@ def collect_group(world, brains, focal_id, *, reuse_world=True):
                     )
                     if mutation_event is not None:
                         mutation_events.append(mutation_event)
-                    if policies[event.target].config["type"] == "recurrent_ppo":
+                    if policies[event.target].config["type"] in (
+                        "recurrent_ppo",
+                        "lstm_ppo",
+                    ):
                         memories[event.target] = [0.0] * policies[event.target].config[
                             "recurrent_size"
                         ]

@@ -21,6 +21,10 @@ The [independent-actor batch kernel](training-workflow-performance.md) amortizes
 CPU dispatch and activation scratch across separate dense models without sharing
 weights, samplers or optimizer state.
 
+The optional [LSTM cell extension](performance.md#native-lstm-forward-and-backward)
+accelerates four-gate forward and hidden/cell BPTT while retaining the Python
+reference and existing artifact formats.
+
 ## Build and select
 
 From the repository root, with a C compiler and Python development headers:

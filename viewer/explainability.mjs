@@ -89,7 +89,7 @@ export function routeGraph(report) {
       svg(
         'title',
         {},
-        `${e.local ? 'GRU local Jacobian' : 'Weight'} ${signed(e.weight)} · ${e.local ? 'local signal' : 'weighted activation'} ${signed(e.signal)}`,
+        `${e.local ? 'Recurrent local Jacobian' : 'Weight'} ${signed(e.weight)} · ${e.local ? 'local signal' : 'weighted activation'} ${signed(e.signal)}`,
       ),
     );
     graph.append(line);
@@ -312,7 +312,7 @@ export function explanationCharts(
   advanced.append(
     node(
       'summary',
-      'Advanced · weighted routes, individual activations and GRU gates',
+      'Advanced · weighted routes, individual activations and recurrent gates',
     ),
   );
   advanced.open = Boolean(sections.advanced);
@@ -343,8 +343,14 @@ export function explanationCharts(
     if (report.gates)
       for (const [name, values] of Object.entries(report.gates))
         activation.append(
-          node('h4', `GRU ${name}`),
-          heatmap(`GRU ${name}`, values),
+          node(
+            'h4',
+            `${report.algorithm === 'lstm_ppo' ? 'LSTM' : 'GRU'} ${name}`,
+          ),
+          heatmap(
+            `${report.algorithm === 'lstm_ppo' ? 'LSTM' : 'GRU'} ${name}`,
+            values,
+          ),
         );
     advanced.append(activation);
   };
@@ -543,7 +549,7 @@ export class BrainExplanation {
     const source = r.source ?? {},
       body = this.following ? (this.latest?.tick ?? r.tick) : r.tick;
     $('explain-status').textContent =
-      `${this.following ? 'Following replay' : 'Pinned observation'} · ${r.species} ${r.sex} #${r.animal} · run ${r.run}, body step ${body}, explained observation step ${r.diagnostic_tick}. Archived ${r.criterion} champion #${source.animal_id ?? '?'} from run ${source.run ?? '?'}, step ${source.tick ?? '?'}, model generation ${r.model_generation ?? '?'}. ${r.parameters.toLocaleString()} parameters. Target: ${label(r.target)}.${r.recurrent_reset ? ' GRU prior memory is reset to zero; historical memory was not recorded.' : ''}${r.critic_separate ? ' MAPPO shows only its local actor; the separate central critic does not select actions.' : ''}${r.intervention ? ' What-if input override active; geometry, other inputs and recorded masks are held fixed. This is not a feasible-world simulation.' : ''}`;
+      `${this.following ? 'Following replay' : 'Pinned observation'} · ${r.species} ${r.sex} #${r.animal} · run ${r.run}, body step ${body}, explained observation step ${r.diagnostic_tick}. Archived ${r.criterion} champion #${source.animal_id ?? '?'} from run ${source.run ?? '?'}, step ${source.tick ?? '?'}, model generation ${r.model_generation ?? '?'}. ${r.parameters.toLocaleString()} parameters. Target: ${label(r.target)}.${r.recurrent_reset ? ' Archived recurrent explanations use zero prior memory; replay activations remain actual recorded samples.' : ''}${r.critic_separate ? ' Only the actor is shown; separate critics are not action-output routes.' : ''}${r.intervention ? ' What-if input override active; geometry, other inputs and recorded masks are held fixed. This is not a feasible-world simulation.' : ''}`;
   }
   job() {
     const context = { ...this.context },

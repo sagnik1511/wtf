@@ -73,6 +73,7 @@ narrow screens. The top tabs open the same section pages.
 | Guide | What it covers |
 | --- | --- |
 | [Algorithms and networks](algorithms.md) | Available learning rules, private controllers and network depth. |
+| [SAC, TRPO and LSTM PPO](additional-policies.md) | Generic learners, complete JSON templates, lifecycle and viewer contracts. |
 | [Advanced algorithms](advanced-algorithms.md) | Recurrent PPO, QR-DQN, masked PPO and multi-agent PPO contracts. |
 | [Brain inputs and observations](observations.md) | Input ordering, top-k target slots and visibility versus observations. |
 | [Movement memory and scent](tracking.md) | Optional observed movement history, fading anonymous trails, model contracts and inspector plots. |

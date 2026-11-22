@@ -862,3 +862,150 @@ byte-identical and restored to the exact final experiment state; decoded replay
 hashes also matched across chunk boundaries. Both sides retained **3,055,004
 checkpoint bytes** and **313,744 replay bytes**. These changes save repeated work,
 not disk space or recording detail; retention and all playbacks remain unchanged.
+
+## New-policy hotpath review
+
+The generic [Discrete SAC, TRPO and LSTM PPO](additional-policies.md) implementations
+already use existing dense inference/backpropagation and Adam helpers where
+supported. Their new Python control/math paths have not been assigned measured
+speedup claims. The review below identifies actual repeated work and candidates;
+it is not a native-kernel benchmark. The subsequent
+[native LSTM measurements](#native-lstm-forward-and-backward) cover the adopted cell kernels.
+
+Implemented local reuse:
+
+- TRPO partitions each Fisher direction into layer views once per Fisher product,
+  rather than once for every rollout observation. With 64 samples this changes
+  direction-slice preparation from 64 passes to one **per product**, not a 64×
+  training speedup. Forward tapes/probabilities are already retained during the
+  conjugate-gradient solve. Candidate line searches calculate one categorical
+  distribution and skip gradient-vector construction when only the objective
+  value and KL are needed.
+- SAC prepares its actor/twin-critic gradient-list views once per sampled batch
+  and hoists the constant retained-target coefficient out of parameter loops.
+  Its current-state actor/critic and next-state target passes serve distinct
+  mathematical purposes; they cannot all be removed as duplicate inference.
+  Diagnostics reuse their existing policy probabilities/entropy for soft values.
+- LSTM backpropagation computes each current-cell tanh once and slices the prior
+  hidden vector once, rather than repeating them across gate-gradient rows.
+  These values live only for that backward call.
+
+| Priority | Remaining path | Existing/native opportunity | Required safeguards |
+| --- | --- | --- | --- |
+| 1 | SAC sampled-update network dispatch and target Polyak loops | First reuse independent actor/target inference batching; consider a fused discrete-SAC minibatch and target-update helper | Preserve sample/RNG order, terminal versus truncated targets, pre-update Q values, joint clipping and target update timing |
+| 2 | TRPO Fisher-vector products and backtracking evaluation | Batched tangent/Fisher products and actor prediction across rollout states | Preserve damped CG residuals, candidate FP32 rounding, actual KL acceptance and exact actor rollback |
+
+For a fully nonterminal SAC batch of size B, the straightforward implementation
+performs six network traversals per sample: current actor, two current critics,
+next-state actor and two next-state target critics. B=16 therefore has 96
+traversals before backpropagation. This is an operation count, not 96 independent
+Python-only matrix multiplies: existing native dense helpers already handle
+eligible inner arithmetic. Actor decisions for the new separate-network bundles
+currently retain scalar orchestration; they are not registered in the existing
+cross-animal inference batch whitelist.
+
+LSTM gate affine work scales as approximately `4h(I+h)` products per forward
+step, before the head, for input width I and recurrent width h. TRPO repeats
+Fisher products across conjugate-gradient iterations and rollout states. These
+are stronger kernel opportunities than minor container cleanup. LSTM now uses
+validated optional cell kernels; SAC/TRPO remain future candidates. Fallbacks
+remain available without a compiler. Existing environment presets, recording
+frequency and replay fields are unchanged.
+
+Keep any future caches update-local or keyed by the full dependency set. Grid
+position alone cannot cache policy output: energy, health, heading, visible
+animals, LSTM state and learned parameters can all change at that position.
+Training cadence, sequence length, batch size and lower precision are behavioural
+or numerical tradeoffs, not transparent optimizations.
+
+
+## Native LSTM forward and backward
+
+The optional CPU extension now exposes `lstm_step` and `lstm_backward` under
+native API v2. Forward computes all four gates plus hidden/cell updates in one
+call. Backward computes gate derivatives, both recurrent memory gradients and
+parameter-gradient accumulation. The existing native MLP head and Adam remain
+unchanged; Python still owns sampling, chronological sequences, truncation, KL
+stopping, birth/reset rules and optimizer cadence.
+
+The kernels borrow FP32 parameter buffers and writable FP64 gradient buffers,
+copy only observation/memory/tape vectors, and use call-local O(inputs + hidden)
+workspace. No persistent per-animal cache, RNG or global scratch is added.
+All cell-gradient shape/type checks and output allocation precede gradient
+mutation. Forward retains the reference gate order; backward preserves the
+reference left-to-right products, Python `sum` compensation and `** 2` libm
+behaviour. Builds retain disabled fast-math and FMA contraction. Hidden/cell
+values and arithmetic stay FP64; only existing parameter storage is FP32.
+
+Each entry point is feature-detected independently. Existing extensions missing
+them and FP64/list-backed models keep the Python cell. Rebuild and restart the
+trainer to enable the new symbols; rebuilding does not replace already mapped
+libraries in running processes:
+
+```sh
+.venv/bin/python -m work.build_native
+```
+
+The full reference backend remains selectable with `WTF_KERNELS=python`.
+No checkpoint signature, field, replay codec, diagnostic frequency or viewer
+change is needed. See [policy templates and memory ownership](additional-policies.md).
+
+### Matched before/after measurements
+
+Measured on local ARM64 macOS / CPython 3.12 with native kernels enabled on
+**both** sides. The baseline is the pending `0.0.2.13` source before the LSTM
+kernels, including its previous compiled extension, on committed base `1117b6d`.
+Thus existing dense/Adam/world/replay kernels are retained in the baseline;
+these are not comparisons with an entirely Python backend. Five samples per
+variant run in separate fresh processes with alternating order. Reproduce using
+a saved baseline package root containing its matching native module:
+
+```sh
+.venv/bin/python work/benchmark_native_lstm.py \
+  --baseline /path/to/pre-lstm-kernel-package-root --repeats 5
+```
+
+| Workload | Before median | After median | Speedup |
+| --- | ---: | ---: | ---: |
+| 500 LSTM forward calls including MLP head and training tape | 316.63 ms | 11.18 ms | 28.33× |
+| 500 backward calls including MLP head and nonzero recurrent gradients | 466.01 ms | 6.42 ms | 72.55× |
+| Eight 32-sample LSTM-PPO updates | 815.86 ms | 25.32 ms | 32.23× |
+| 32-step initialization + training + recording + two recovery writes | 8.154 s | 2.323 s | 3.51×; 71.5% less elapsed time |
+| Complete workflow process peak RSS | 73.80 MiB | 70.78 MiB | 3.02 MiB lower measured peak |
+
+Forward/backward fixtures use the predator network with 153 inputs, recurrent
+size 16, six actions and an MLP head with hidden `[64, 32]`. Forward evolves
+nonzero initial memory across 500 calls. Backward accumulates gradients over
+500 calls to one fixed tape with nonzero future hidden/cell gradients; it does
+not update weights. The update-only fixture uses 32 samples, sequence length 8,
+two epochs, minibatches of 16 and disabled KL stopping. Synthetic rollout
+construction is outside its timer; a separate ninth update measures traced
+allocation and participates in the final-state equality check.
+
+The workflow uses the current ordinary-PPO world's 32×24 cells, 64 prey and six
+predators, with **both** controllers replaced by LSTM PPO for the benchmark only.
+It retains source observation widths (69/153), head widths (`[16]` / `[64, 32]`)
+and ecology, but sets recurrent size 16, 16-step rollouts, sequence length 8,
+two epochs, minibatches of 16 and disabled KL stopping for a bounded measurement.
+World seed is 100. It captures every frame, uses eight frames per chunk and
+samples diagnostics every ten steps (plus chunk/final boundaries), then writes
+binary/XZ checkpoints at steps 16 and 32. Initialization, stepping, recording
+finalization and synchronous saves are timed. Restore/digest verification and
+cleanup follow the timer. CLI CSV/progress and champion-file publication are
+excluded. Maintained JSON presets are not modified.
+
+Process RSS includes imports and fixture initialization; it is a workload-specific
+peak, not a universal RAM reduction. Separate `tracemalloc` probes found one
+forward call at 5,312→5,640 bytes, one backward call at 3,960→5,376 bytes and one
+rollout update at 255,608→258,952 bytes. Native vector conversion/workspace can
+slightly increase traced peak allocation even while reducing Python work.
+Do not infer zero scratch allocation from the timing improvement.
+
+All workers matched final model/optimizer/RNG/memory hashes. Workflow recovery
+files and replay chunks were **byte-identical**, exact checkpoint restore passed,
+and decoded replay hashes matched across chunk boundaries. Both sides retained
+**7,745,060 checkpoint bytes** and **158,924 replay bytes**. The improvement is CPU
+time, not disk compression or changed recording detail. Temporary artifacts are
+removed after each worker; raw measurements stay in ignored `.cache/`. These
+short controlled fixtures do not establish a speedup for every configuration or
+better learning, and no Ubuntu/CPython 3.13 benchmark was performed locally.

@@ -14,7 +14,11 @@ def force_action(b, action):
         b.weights["b2"][index] = 60.0
         b.target = copy.deepcopy(b.weights)
     else:
-        network = b.network.actor if b.config["type"] == "mappo" else b.network
+        network = (
+            b.network.actor
+            if b.config["type"] in ("mappo", "trpo", "discrete_sac")
+            else b.network
+        )
         bias = network.layers[-1]["bias"]
         count = (
             len(b.actions) * b.quantiles

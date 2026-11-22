@@ -107,7 +107,7 @@ Read the static-analysis limitations before inferring runtime dependencies.
 | Physical world, birth/death | `wtf/simulation/world.py`, `mutation.py` | [Architecture](architecture.md), [mutation](mutation.md) |
 | Current observations/caches | `wtf/simulation/perception.py`, visibility helpers in `world.py` | [Performance](performance.md) |
 | Experiments and configuration | `wtf/cli.py`, `config.py`, `runner.py`, `environments/`, schema | [Running](running.md), [configuration](configuration.md) |
-| Learning | `brains.py`, `brain.py`, `ppo.py`, `policy_gradients.py`, `grouped_rollouts.py`, `recurrent_ppo.py`, `qrdqn.py`, `contextual_ppo.py` | [Algorithms](algorithms.md), [advanced variants](advanced-algorithms.md) |
+| Learning | `brains.py`, `brain.py`, `ppo.py`, `policy_gradients.py`, `grouped_rollouts.py`, `recurrent_ppo.py`, `qrdqn.py`, `contextual_ppo.py`, `discrete_sac.py`, `trpo.py`, `lstm_ppo.py` | [Algorithms](algorithms.md), [advanced variants](advanced-algorithms.md), [additional policies](additional-policies.md) |
 | Optional native compute | `wtf/native/_kernels.c`, `_kernels_*.h`, `kernels.py`, `work/build_native.py` | [CPU kernels](native-kernels.md) |
 | Brain inheritance/archive | `wtf/storage/library.py`, `runner.py` | [Saved brains](brain-library.md) |
 | Replay/checkpoint formats | `recording.py`, `replay_codec.py`, `replay_io.py`, `binary_io.py`, `checkpoint_io.py` in `wtf/` | [Binary storage](binary-storage.md), [recordings](recording.md) |

@@ -15,6 +15,11 @@ observation layouts or action order require compatible saved weights. The
 [field reference](configuration-reference.md) lists all supported type-specific
 fields; do not copy PPO-only fields into a GRPO or Q template.
 
+Existing additional implementations are documented in [Discrete SAC, TRPO and
+LSTM PPO](additional-policies.md); use their complete templates before adding
+another identifier. For multi-network algorithms, integrate target synchronization
+after loading and newborn resets as well as actor/critic archive semantics.
+
 ## Implement a genuinely new algorithm
 
 There is currently **no dynamic plugin registry or arbitrary class import in

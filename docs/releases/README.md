@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.9](0.0.2.9.md), `a1e52c4`.
-**Latest committed runtime implementation:** [0.0.2.9](0.0.2.9.md), `a1e52c4`.
+**Latest committed rollout:** [0.0.2.12](0.0.2.12.md), `1117b6d`.
+**Latest committed runtime implementation:** [0.0.2.12](0.0.2.12.md), `1117b6d`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** [0.0.2.10 — Scheduled-tail episode recording](0.0.2.10.md), [0.0.2.11 — Modern ordinary-PPO preset](0.0.2.11.md), [0.0.2.12 — Checkpoint and PPO preparation reuse](0.0.2.12.md).
+**Pending rollouts:** [0.0.2.13 — Discrete SAC, TRPO and LSTM PPO](0.0.2.13.md), [0.0.2.14 — Native LSTM forward and backward](0.0.2.14.md).
 
 ## Rollout index
 
@@ -20,9 +20,11 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.12](0.0.2.12.md) | Pending | 2026-11-23 | Not committed; base `2a15e0c` | Bounded checkpoint metadata identity reuse and update-local PPO sample preparation |
-| [0.0.2.11](0.0.2.11.md) | Pending | 2026-11-22 | Not committed; base `2a15e0c` | Ordinary-PPO feeding/breeding calibration, species-specific inputs/networks and last-two recording |
-| [0.0.2.10](0.0.2.10.md) | Pending | 2026-11-22 | Not committed; base `2a15e0c` | Select the final scheduled episodes before replay capture; retain all training reports/models |
+| [0.0.2.14](0.0.2.14.md) | Pending | 2026-11-23 | Not committed; base `1117b6d` plus pending `0.0.2.13` | Exact optional native LSTM gates and BPTT, matched state/playback benchmarks |
+| [0.0.2.13](0.0.2.13.md) | Pending | 2026-11-23 | Not committed; base `1117b6d` | Generic Discrete SAC, TRPO, LSTM PPO, complete lifecycle/XAI integration and local hotpath reuse |
+| [0.0.2.12](0.0.2.12.md) | Committed | 2026-11-23 | `1117b6d` | Bounded checkpoint metadata identity reuse and update-local PPO sample preparation |
+| [0.0.2.11](0.0.2.11.md) | Committed | 2026-11-23 | `1117b6d` | Ordinary-PPO feeding/breeding calibration, species-specific inputs/networks and last-two recording |
+| [0.0.2.10](0.0.2.10.md) | Committed | 2026-11-23 | `1117b6d` | Select the final scheduled episodes before replay capture; retain all training reports/models |
 | [0.0.2.9](0.0.2.9.md) | Committed | 2026-11-22 | `a1e52c4`; production packaging follow-up local | Optional full/compact/training-only capture and recorded frozen-policy evaluation |
 | [0.0.2.8](0.0.2.8.md) | Committed | 2026-11-22 | `4e18271` | Rolling recovery, recent best milestones, shared metadata and fused masked-PPO batches |
 | [0.0.2.7](0.0.2.7.md) | Committed | 2026-11-22 | `e479c33` through `19085c5` | Personal movement history, blended/legacy separated ground scent and inspector plots |

@@ -9,7 +9,18 @@ MAX_PARAMETERS = 1_000_000
 MAX_UNITS = 1024
 MAX_LAYERS = 10
 VISIBLE_UNITS = 12
-POLICIES = {"ppo", "a2c", "reinforce", "grpo", "recurrent_ppo", "maskable_ppo", "mappo"}
+POLICIES = {
+    "ppo",
+    "a2c",
+    "reinforce",
+    "grpo",
+    "recurrent_ppo",
+    "maskable_ppo",
+    "mappo",
+    "discrete_sac",
+    "trpo",
+    "lstm_ppo",
+}
 
 
 def feature_names(signature):
@@ -141,20 +152,25 @@ def prepare_model(model):
     else:
         p = list(p)
         width = inputs
-        if kind == "recurrent_ppo":
+        if kind in ("recurrent_ppo", "lstm_ppo"):
             h = sig["recurrent_size"]
             if type(h) is not int or not 1 <= h <= MAX_UNITS:
                 raise ValueError("Invalid recurrent explanation width")
             cell = p.pop(0)
+            gates_count = 4 if kind == "lstm_ppo" else 3
             layers.append(
                 dict(
-                    kind="gru",
+                    kind="lstm" if kind == "lstm_ppo" else "gru",
                     inputs=width,
                     size=h,
-                    input_weights=numbers(cell["input_weights"], width * h * 3),
-                    recurrent_weights=numbers(cell["recurrent_weights"], h * h * 3),
-                    bias=numbers(cell["bias"], h * 3),
-                    activation="gru",
+                    input_weights=numbers(
+                        cell["input_weights"], width * h * gates_count
+                    ),
+                    recurrent_weights=numbers(
+                        cell["recurrent_weights"], h * h * gates_count
+                    ),
+                    bias=numbers(cell["bias"], h * gates_count),
+                    activation="lstm" if kind == "lstm_ppo" else "gru",
                 )
             )
             width = h
@@ -166,6 +182,28 @@ def prepare_model(model):
             if kind == "qrdqn"
             else len(actions) + int(sig.get("value_head", False))
         )
+        if kind in ("discrete_sac", "trpo"):
+            block = len(shapes) + 1
+            auxiliary = 2 if kind == "discrete_sac" else 1
+            if len(p) != (auxiliary + 1) * block:
+                raise ValueError("Invalid explanation layer count")
+            for index in range(auxiliary):
+                auxiliary_width = inputs
+                for i, (layer, outputs) in enumerate(
+                    zip(
+                        p[(index + 1) * block : (index + 2) * block],
+                        shapes + [len(actions) if kind == "discrete_sac" else 1],
+                    )
+                ):
+                    dense(
+                        layer,
+                        auxiliary_width,
+                        outputs,
+                        "tanh" if i < len(shapes) else "linear",
+                    )
+                    auxiliary_width = outputs
+            head = len(actions)
+            p = p[:block]
         if kind == "mappo":
             head = len(actions)
             # Central critic is independent of the local actor and is not an action route.
@@ -221,6 +259,59 @@ def explain_model(model, features, action=None, mask=None):
                 ),
             )
             gates = dict(update=z, reset=r, candidate=n, memory=current)
+        elif layer["kind"] == "lstm":
+            w, bias = layer["input_weights"], layer["bias"]
+
+            def gate(offset, fn):
+                return [
+                    fn(
+                        bias[offset + j]
+                        + sum(
+                            previous[i] * w[(offset + j) * width + i]
+                            for i in range(width)
+                        )
+                    )
+                    for j in range(size)
+                ]
+
+            incoming, forget, candidate, output = (
+                gate(0, _sigmoid),
+                gate(size, _sigmoid),
+                gate(2 * size, math.tanh),
+                gate(3 * size, _sigmoid),
+            )
+            cell = [a * b for a, b in zip(incoming, candidate)]
+            current = [o * math.tanh(c) for o, c in zip(output, cell)]
+            jac = array(
+                "d",
+                (
+                    output[j]
+                    * (1 - math.tanh(cell[j]) ** 2)
+                    * (
+                        candidate[j]
+                        * incoming[j]
+                        * (1 - incoming[j])
+                        * w[j * width + i]
+                        + incoming[j]
+                        * (1 - candidate[j] ** 2)
+                        * w[(2 * size + j) * width + i]
+                    )
+                    + math.tanh(cell[j])
+                    * output[j]
+                    * (1 - output[j])
+                    * w[(3 * size + j) * width + i]
+                    for j in range(size)
+                    for i in range(width)
+                ),
+            )
+            gates = dict(
+                input=incoming,
+                forget=forget,
+                candidate=candidate,
+                output=output,
+                cell=cell,
+                memory=current,
+            )
         else:
             w = layer["weights"]
             current = [
@@ -272,7 +363,7 @@ def explain_model(model, features, action=None, mask=None):
     for index in range(len(layers) - 1, -1, -1):
         layer, current = layers[index], activations[index + 1]
         width, size = layer["inputs"], layer["size"]
-        if layer["kind"] == "gru":
+        if layer["kind"] in ("gru", "lstm"):
             w, local = jacobians[index], gradient
         else:
             w = layer["weights"]
@@ -325,8 +416,10 @@ def explain_model(model, features, action=None, mask=None):
         selected.append(keep)
         if index == 0:
             layer_label = "Observation"
-        elif layers[index - 1]["kind"] == "gru":
-            layer_label = "GRU · zero prior memory"
+        elif layers[index - 1]["kind"] in ("gru", "lstm"):
+            layer_label = (
+                "LSTM" if kind == "lstm_ppo" else "GRU"
+            ) + " · zero prior memory"
         elif index == len(layers):
             layer_label = (
                 "Output logits"
@@ -364,7 +457,7 @@ def explain_model(model, features, action=None, mask=None):
             )
         )
     for index, layer in enumerate(layers):
-        w = jacobians[index] if layer["kind"] == "gru" else layer["weights"]
+        w = jacobians[index] if layer["kind"] in ("gru", "lstm") else layer["weights"]
         width = layer["inputs"]
         for j in selected[index + 1]:
             best = sorted(
@@ -380,7 +473,7 @@ def explain_model(model, features, action=None, mask=None):
                         target=j,
                         weight=w[j * width + i],
                         signal=activations[index][i] * w[j * width + i],
-                        local=layer["kind"] == "gru",
+                        local=layer["kind"] in ("gru", "lstm"),
                     )
                 )
     return dict(
@@ -396,8 +489,8 @@ def explain_model(model, features, action=None, mask=None):
         layers=graph,
         edges=edges,
         gates=gates,
-        recurrent_reset=kind == "recurrent_ppo",
-        critic_separate=kind == "mappo",
+        recurrent_reset=kind in ("recurrent_ppo", "lstm_ppo"),
+        critic_separate=kind in ("mappo", "trpo", "discrete_sac"),
         parameters=model["parameters"],
         method=(
             "input × local gradient of action probability"

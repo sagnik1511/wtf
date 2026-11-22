@@ -107,6 +107,7 @@ Home = "index.md"
     "learning/index.md",
     { "Algorithms and networks" = "algorithms.md" },
     { "Advanced algorithms" = "advanced-algorithms.md" },
+    { "SAC, TRPO and LSTM PPO" = "additional-policies.md" },
     { "Brain inputs and observations" = "observations.md" },
     { "Movement memory and scent" = "tracking.md" },
     { "Rewards and costs" = "rewards.md" },

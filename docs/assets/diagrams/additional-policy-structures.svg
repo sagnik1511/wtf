@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
+<title id="title">Three independent policy structures</title><desc id="desc">Discrete SAC uses a categorical actor, twin online and target critics and replay. TRPO uses a Fisher solve and constrained actor search independent of value fitting. LSTM PPO retains hidden and cell state and trains chronological sequences.</desc>
+<style id="figure-palette">svg{--figure-bg:#101720;--figure-panel:#14202d;--figure-node:#192532;--figure-edge:#73899f;--figure-accent:#8ac8ff;--figure-muted:#acbfd1;--figure-ink:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-bg:#f5f8fb;--figure-panel:#ffffff;--figure-node:#edf3f8;--figure-edge:#637b91;--figure-accent:#1f639c;--figure-muted:#41566b;--figure-ink:#172c3c;}}</style>
+<style>text{font-family:Arial,sans-serif;fill:var(--figure-ink)}.head{font-size:21px;font-weight:650;fill:var(--figure-accent)}.body{font-size:16px}.small{font-size:14px;fill:var(--figure-muted)}.box{fill:var(--figure-node);stroke:var(--figure-edge);stroke-width:1.5}.panel{fill:var(--figure-panel);stroke:var(--figure-edge)}.flow{fill:none;stroke:var(--figure-accent);stroke-width:2;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-accent)"/></marker></defs>
+<rect width="1200" height="780" fill="var(--figure-bg)"/>
+<text x="25" y="38" class="head">Private controllers · shared interfaces, different learning mechanisms</text>
+<text x="25" y="66" class="small">One animal owns every block in its column; another animal receives independent state.</text>
+<rect x="22" y="90" width="370" height="615" rx="12" class="panel"/><text x="37" y="123" class="head">Discrete SAC</text>
+<rect x="37" y="145" width="340" height="78" rx="8" class="box"/><text x="50" y="173" class="body">Current observation</text><text x="50" y="199" class="small">Categorical actor → action</text>
+<path d="M207 223V249" class="flow"/>
+<rect x="37" y="253" width="340" height="78" rx="8" class="box"/><text x="50" y="281" class="body">Replay experiences</text><text x="50" y="307" class="small">Bounded ring + private sampling</text>
+<path d="M207 331V357" class="flow"/>
+<rect x="37" y="361" width="340" height="78" rx="8" class="box"/><text x="50" y="389" class="body">Twin online Q critics</text><text x="50" y="415" class="small">Critic targets: reward + soft value</text>
+<path d="M207 439V465" class="flow"/>
+<rect x="37" y="469" width="340" height="78" rx="8" class="box"/><text x="50" y="497" class="body">Twin target Q critics</text><text x="50" y="523" class="small">Slow Polyak updates from online Q</text>
+<path d="M207 547V573" class="flow"/>
+<rect x="37" y="577" width="340" height="78" rx="8" class="box"/><text x="50" y="605" class="body">Actor &amp; critic Adam step</text><text x="50" y="631" class="small">Exact sum over configured actions</text>
+<rect x="419" y="90" width="370" height="615" rx="12" class="panel"/><text x="434" y="123" class="head">TRPO</text>
+<rect x="434" y="145" width="340" height="78" rx="8" class="box"/><text x="447" y="173" class="body">On-policy rollout</text><text x="447" y="199" class="small">Observations + old log π + GAE</text>
+<path d="M604 223V249" class="flow"/>
+<rect x="434" y="253" width="340" height="78" rx="8" class="box"/><text x="447" y="281" class="body">Actor gradient &amp; Fisher product</text><text x="447" y="307" class="small">Conjugate-gradient direction</text>
+<path d="M604 331V357" class="flow"/>
+<rect x="434" y="361" width="340" height="78" rx="8" class="box"/><text x="447" y="389" class="body">Backtracking policy step</text><text x="447" y="415" class="small">Accept improvement within KL bound</text>
+<path d="M604 439V465" class="flow"/>
+<rect x="434" y="469" width="340" height="78" rx="8" class="box"/><text x="447" y="497" class="body">Independent value critic</text><text x="447" y="523" class="small">Adam fitting cannot move the actor</text>
+<path d="M604 547V573" class="flow"/>
+<rect x="434" y="577" width="340" height="78" rx="8" class="box"/><text x="447" y="605" class="body">Separate online parameters</text><text x="447" y="631" class="small">Actor + critic in warm-start weights</text>
+<rect x="816" y="90" width="370" height="615" rx="12" class="panel"/><text x="831" y="123" class="head">LSTM PPO</text>
+<rect x="831" y="145" width="340" height="78" rx="8" class="box"/><text x="844" y="173" class="body">Observation + prior memory</text><text x="844" y="199" class="small">Hidden h and cell c are private</text>
+<path d="M1001 223V249" class="flow"/>
+<rect x="831" y="253" width="340" height="78" rx="8" class="box"/><text x="844" y="281" class="body">Four-gate LSTM cell</text><text x="844" y="307" class="small">Native gates → hidden → MLP head</text>
+<path d="M1001 331V357" class="flow"/>
+<rect x="831" y="361" width="340" height="78" rx="8" class="box"/><text x="844" y="389" class="body">Chronological sequences</text><text x="844" y="415" class="small">Native BPTT through both states</text>
+<path d="M1001 439V465" class="flow"/>
+<rect x="831" y="469" width="340" height="78" rx="8" class="box"/><text x="844" y="497" class="body">Clipped PPO + GAE</text><text x="844" y="523" class="small">Shuffle sequences, not their interiors</text>
+<path d="M1001 547V573" class="flow"/>
+<rect x="831" y="577" width="340" height="78" rx="8" class="box"/><text x="844" y="605" class="body">Checkpoint both h and c</text><text x="844" y="631" class="small">Reset both on birth and episode end</text>
+<text x="25" y="743" class="body">Champions: online weights. Recovery: weights + optimizer/RNG/buffers + algorithm-specific state.</text></svg>

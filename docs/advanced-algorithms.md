@@ -2,6 +2,9 @@
 
 [Algorithms](algorithms.md) · [Configuration](configuration.md) · [Saved brains](brain-library.md) · [Analysis](analysis.md)
 
+For the additional generic `discrete_sac`, `trpo` and `lstm_ppo` types, see
+[complete templates and lifecycle contracts](additional-policies.md).
+
 These are small standard-library implementations integrated with the existing
 Python trainer. They require no additional packages. The JavaScript viewer
 continues to replay saved data independently of training.

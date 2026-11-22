@@ -280,7 +280,7 @@ class RecurrentPPOBrain(PPOBrain):
                         for key, value in info.items():
                             batch_metrics[key] = batch_metrics.get(key, 0.0) + value
                         count += 1
-                    future = [0.0] * self.config["recurrent_size"]
+                    future = [0.0] * len(self.rollout[indices[0]].hidden)
                     for tape, derivative in reversed(tapes):
                         future = self.network.backward(
                             tape, derivative, future, gradients

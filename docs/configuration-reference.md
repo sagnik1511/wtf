@@ -628,6 +628,130 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
+## `config.brains.<name> (lstm_ppo)`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"lstm_ppo"` | Required; — |
+| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
+| `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
+| `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
+| `gae_lambda` | Lambda controlling the temporal bias/variance balance of generalized advantage estimates. | number; min: `0`; max: `1` | Required; — |
+| `clip_ratio` | PPO/GRPO policy-ratio clipping width around one. | number; min: `0.001`; max: `1` | Required; — |
+| `entropy_coefficient` | Weight of the entropy term encouraging action diversity in the policy objective. | number; min: `0`; max: `1` | Required; — |
+| `value_coefficient` | Weight of the value-prediction loss for actor-critic methods. | number; min: `0`; max: `10` | Required; — |
+| `rollout_steps` | Collected transition count at which an on-policy rollout update is triggered. | integer; min: `1`; max: `4096` | Required; — |
+| `epochs` | Optimizer passes over a collected PPO/GRPO rollout or trial group. | integer; min: `1`; max: `20` | Required; — |
+| `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `4096` | Required; — |
+| `max_grad_norm` | Global gradient-norm clipping threshold before optimizer updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `normalize_advantages` | Whether the supported learner normalizes its collected advantages. | boolean | Required; — |
+| `target_kl` | Optional KL early-stop threshold during repeated policy optimization. | number; min: `0`; max: `1` | Optional; — |
+| `recurrent_size` | GRU memory width for recurrent PPO; part of model compatibility. | integer; min: `1`; max: `128` | Required; — |
+| `sequence_length` | Maximum recurrent training sequence length. | integer; min: `1`; max: `128` | Required; — |
+| `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
+| `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+
+## `config.brains.<name> (lstm_ppo).network`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"mlp"` | Required; — |
+| `hidden_layers` | Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates. | array; min items: `1`; max items: `4`; items: integer; min: `1`; max: `256` | Required; — |
+| `activation` | Hidden-layer activation function; current supported architecture uses tanh. | value; exact: `"tanh"` | Optional; — |
+
+## `config.brains.<name> (lstm_ppo).scent_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
+| `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
+| `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (trpo)`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"trpo"` | Required; — |
+| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
+| `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
+| `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
+| `gae_lambda` | Lambda controlling the temporal bias/variance balance of generalized advantage estimates. | number; min: `0`; max: `1` | Required; — |
+| `entropy_coefficient` | Weight of the entropy term encouraging action diversity in the policy objective. | number; min: `0`; max: `1` | Required; — |
+| `value_coefficient` | Weight of the value-prediction loss for actor-critic methods. | number; min: `0`; max: `10` | Required; — |
+| `rollout_steps` | Collected transition count at which an on-policy rollout update is triggered. | integer; min: `1`; max: `4096` | Required; — |
+| `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `4096` | Required; — |
+| `max_grad_norm` | Global gradient-norm clipping threshold before optimizer updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `normalize_advantages` | Whether the supported learner normalizes its collected advantages. | boolean | Required; — |
+| `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
+| `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `value_epochs` | Number of independent critic fitting epochs per TRPO rollout. | integer; min: `1`; max: `20` | Required; — |
+| `max_kl` | Maximum empirical old-to-new categorical policy KL accepted by TRPO backtracking. | number; min: `1e-06`; max: `1` | Required; — |
+| `cg_iterations` | Maximum conjugate-gradient iterations for the TRPO natural-gradient direction. | integer; min: `1`; max: `50` | Required; — |
+| `cg_damping` | Positive diagonal damping added to the TRPO Fisher-vector product. | number; min: `1e-06`; max: `10` | Required; — |
+| `cg_tolerance` | Squared residual tolerance for the TRPO conjugate-gradient solve. | number; min: `1e-16`; max: `1` | Required; — |
+| `backtrack_steps` | Maximum tested fractions of the TRPO policy step. | integer; min: `1`; max: `30` | Required; — |
+| `backtrack_coefficient` | Multiplicative step shrinkage between TRPO backtracking candidates. | number; min: `0.01`; max: `0.99` | Required; — |
+| `accept_ratio` | Minimum actual-to-predicted surrogate improvement ratio for a TRPO candidate. | number; min: `0`; max: `1` | Required; — |
+
+## `config.brains.<name> (trpo).network`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"mlp"` | Required; — |
+| `hidden_layers` | Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates. | array; min items: `1`; max items: `4`; items: integer; min: `1`; max: `256` | Required; — |
+| `activation` | Hidden-layer activation function; current supported architecture uses tanh. | value; exact: `"tanh"` | Optional; — |
+
+## `config.brains.<name> (trpo).scent_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
+| `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
+| `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (discrete_sac)`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"discrete_sac"` | Required; — |
+| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
+| `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
+| `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
+| `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `4096` | Required; — |
+| `max_grad_norm` | Global gradient-norm clipping threshold before optimizer updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
+| `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `replay_capacity` | Maximum private replay experiences retained by one Discrete SAC animal. | integer; min: `1`; max: `1000000` | Required; — |
+| `learning_starts_after` | Minimum replay size before Discrete SAC updates; must fit replay capacity. | integer; min: `1`; max: `1000000` | Required; — |
+| `train_every_steps` | Animal decision interval between eligible Discrete SAC updates. | integer; min: `1`; max: `1000000` | Required; — |
+| `temperature` | Fixed positive entropy temperature for Discrete SAC actor and soft value targets. | number; min: `1e-06`; max: `10` | Required; — |
+| `target_tau` | Polyak fraction of current critic parameters copied into target critics after each update. | number; min: `1e-06`; max: `1` | Required; — |
+
+## `config.brains.<name> (discrete_sac).network`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"mlp"` | Required; — |
+| `hidden_layers` | Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates. | array; min items: `1`; max items: `4`; items: integer; min: `1`; max: `256` | Required; — |
+| `activation` | Hidden-layer activation function; current supported architecture uses tanh. | value; exact: `"tanh"` | Optional; — |
+
+## `config.brains.<name> (discrete_sac).scent_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
+| `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
+| `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
 ## `config.experiment`
 
 | Field | Definition | Type and constraints | Required / schema default |
@@ -702,4 +826,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `enabled` | Deposit anonymous species/sex ground traces. Omission or false disables scent storage and sensing. | boolean | Required; `false` |
 | `lifetime_steps` | Ground-trace lifetime in simulation steps; freshness decreases linearly to zero, and revisiting a cell refreshes its group trace. | integer; min: `2`; max: `256` | Required; — |
 
-Field entries documented: **389**.
+Field entries documented: **468**.

@@ -21,7 +21,7 @@ class ActivationDiagnosticsTests(unittest.TestCase):
                 i = next(iter(e.brains))
                 b = e.brains[i]
                 o = e.observations[i]
-                if kind == "recurrent_ppo":
+                if kind in ("recurrent_ppo", "lstm_ppo"):
                     b.hidden = [(j + 1) / 100 for j in range(len(b.hidden))]
                 before = copy.deepcopy(b.checkpoint())
                 old = b.diagnostics(o)
@@ -35,14 +35,16 @@ class ActivationDiagnosticsTests(unittest.TestCase):
                     if kind == "q_network"
                     else b.config["network"]["hidden_layers"]
                 )
-                if kind == "recurrent_ppo":
+                if kind in ("recurrent_ppo", "lstm_ppo"):
                     widths = [b.config["recurrent_size"]] + widths
                     for actual, expected in zip(
                         sample["recurrent_prior"], before["hidden"]
                     ):
                         self.assertAlmostEqual(actual, expected, places=7)
                     _, current = b.network.step(o, b.hidden)
-                    for actual, expected in zip(sample["layers"][0], current):
+                    for actual, expected in zip(
+                        sample["layers"][0], current[: b.config["recurrent_size"]]
+                    ):
                         self.assertAlmostEqual(actual, expected, places=7)
                 self.assertEqual([len(layer) for layer in sample["layers"]], widths)
                 self.assertNotIn("weights", sample)
@@ -58,7 +60,7 @@ class ActivationDiagnosticsTests(unittest.TestCase):
                 o = e.observations[i]
                 if kind == "q_network":
                     owner, name = b, "forward"
-                elif kind == "recurrent_ppo":
+                elif kind in ("recurrent_ppo", "lstm_ppo"):
                     owner, name = b.network, "step"
                 elif kind == "mappo":
                     owner, name = b.network.actor, "forward"

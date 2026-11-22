@@ -163,12 +163,14 @@ export function activationPanel(
     rendered = true;
     sample.layers.forEach((values, index) => {
       const layer = el('section', undefined, 'brain-layer'),
-        recurrent = diagnostic.algorithm === 'recurrent_ppo';
+        recurrent = ['recurrent_ppo', 'lstm_ppo'].includes(
+          diagnostic.algorithm,
+        );
       layer.append(
         el(
           'h4',
           recurrent && index === 0
-            ? 'GRU current activation'
+            ? `${diagnostic.algorithm === 'lstm_ppo' ? 'LSTM' : 'GRU'} current activation`
             : `Hidden layer ${index + (recurrent ? 0 : 1)} · ${values.length} units`,
         ),
         activationMap(
@@ -187,7 +189,12 @@ export function activationPanel(
     ) {
       const prior = el('section', undefined, 'brain-layer');
       prior.append(
-        el('h4', 'Actual prior recurrent memory'),
+        el(
+          'h4',
+          diagnostic.algorithm === 'lstm_ppo'
+            ? 'Actual prior LSTM memory · hidden then cell'
+            : 'Actual prior recurrent memory',
+        ),
         el(
           'p',
           'The sampled forward pass uses this animal’s existing memory without advancing or resetting it.',

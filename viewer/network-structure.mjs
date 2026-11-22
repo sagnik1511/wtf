@@ -127,7 +127,11 @@ export function animalStructure(
     !layers.every((a) => Array.isArray(a) && a.every(Number.isFinite))
   )
     layers = undefined;
-  const recurrent = (diagnostic.algorithm ?? template.type) === 'recurrent_ppo';
+  const recurrent = ['recurrent_ppo', 'lstm_ppo'].includes(
+    diagnostic.algorithm ?? template.type,
+  );
+  const cell =
+    (diagnostic.algorithm ?? template.type) === 'lstm_ppo' ? 'LSTM' : 'GRU';
   const widths = layers?.map((a) => a.length) ?? [
     ...(recurrent ? [template.recurrent_size] : []),
     ...(template.type === 'q_network'
@@ -147,7 +151,7 @@ export function animalStructure(
   if (
     !diagnostic.return_quantiles &&
     Number.isFinite(diagnostic.state_value) &&
-    diagnostic.algorithm !== 'mappo'
+    !['mappo', 'trpo', 'discrete_sac'].includes(diagnostic.algorithm)
   )
     output.push({ label: 'Value', value: diagnostic.state_value });
   return {
@@ -155,7 +159,8 @@ export function animalStructure(
     stages: [
       { label: 'Observation', values: diagnostic.features, labels },
       ...widths.map((size, i) => ({
-        label: recurrent && i === 0 ? 'GRU memory block' : `Hidden ${i + 1}`,
+        label:
+          recurrent && i === 0 ? `${cell} memory block` : `Hidden ${i + 1}`,
         values: layers?.[i] ?? Array(size).fill(null),
         recurrent: recurrent && i === 0,
       })),
@@ -277,7 +282,7 @@ export function networkStructure(description, k = DEFAULT_NETWORK_RANK) {
     svg(
       'title',
       {},
-      `All ${plan.nodes} units; ${plan.connections} dense inter-stage connections. Internal GRU gates are collapsed into a memory block.`,
+      `All ${plan.nodes} units; ${plan.connections} dense inter-stage connections. Internal recurrent gates are collapsed into a memory block.`,
     ),
   );
   const bundled = plan.connections > 1024;
@@ -376,7 +381,7 @@ export function networkStructure(description, k = DEFAULT_NETWORK_RANK) {
   root.append(
     el(
       'p',
-      `${plan.nodes} units and complete dense inter-stage connectivity${bundled ? ' represented with bundles' : ''}. ${description.available ? 'Colors show available activations/scores.' : 'Hidden values were not recorded; gray units show declared architecture only.'} GRU gates are collapsed into a memory block. This is structure, not a causal explanation.`,
+      `${plan.nodes} units and complete dense inter-stage connectivity${bundled ? ' represented with bundles' : ''}. ${description.available ? 'Colors show available activations/scores.' : 'Hidden values were not recorded; gray units show declared architecture only.'} Recurrent gates are collapsed into a memory block. This is structure, not a causal explanation.`,
       'muted',
     ),
   );

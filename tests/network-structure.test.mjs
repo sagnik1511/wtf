@@ -169,3 +169,37 @@ test('Archived topology uses full activation arrays rather than the pruned weigh
     62,
   );
 });
+
+test('LSTM and separate actor critics use honest network routes', () => {
+  const diagnostic = {
+    algorithm: 'lstm_ppo',
+    features: Array(20).fill(0),
+    action_probabilities: { rest: 0.4, attack: 0.6 },
+    state_value: 0.2,
+    activations: {
+      version: 1,
+      layers: [
+        [0.1, 0.2],
+        [0.3, 0.4, 0.5],
+      ],
+    },
+  };
+  const template = {
+    type: 'lstm_ppo',
+    recurrent_size: 2,
+    network: { hidden_layers: [3] },
+  };
+  const recurrent = animalStructure(diagnostic, template);
+  assert.equal(recurrent.stages[1].label, 'LSTM memory block');
+  for (const algorithm of ['trpo', 'discrete_sac']) {
+    const actor = animalStructure(
+      {
+        ...diagnostic,
+        algorithm,
+        activations: { version: 1, layers: [[0.1, 0.2, 0.3]] },
+      },
+      { ...template, type: algorithm },
+    );
+    assert.equal(actor.stages.at(-1).values.length, 2);
+  }
+});

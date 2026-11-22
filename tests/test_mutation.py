@@ -28,6 +28,7 @@ from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment as policy_environment
 from tests.test_advanced_algorithms import environment as advanced_environment
 from tests.test_reproduction import reproduction
+from tests.new_policy_support import environment as new_policy_environment
 
 KINDS = (
     "q_network",
@@ -39,6 +40,9 @@ KINDS = (
     "qrdqn",
     "maskable_ppo",
     "mappo",
+    "discrete_sac",
+    "trpo",
+    "lstm_ppo",
 )
 SETTINGS = dict(
     enabled=True, probability_per_birth=1.0, max_changed_weights=3, noise_std=0.005
@@ -55,7 +59,11 @@ def environment(kind, probability=1.0):
             else (
                 policy_environment(kind)
                 if kind in ("a2c", "reinforce", "grpo")
-                else advanced_environment(kind)
+                else (
+                    new_policy_environment(kind)
+                    if kind in ("discrete_sac", "trpo", "lstm_ppo")
+                    else advanced_environment(kind)
+                )
             )
         )
     )

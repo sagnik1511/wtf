@@ -13,6 +13,11 @@ adds an optional `masked_ppo_batch` entry point under API v2. It preserves the
 stored per-sample masks and scalar training state; older modules missing that
 entry point fall back. This later extension has its own matched benchmarks.
 
+The later [LSTM forward/backward extension](performance.md#native-lstm-forward-and-backward)
+adds optional `lstm_step` and `lstm_backward` entry points under the same API v2.
+Its before/after measurements use the preceding native-enabled implementation;
+older modules without these symbols retain the Python cell.
+
 ## Implemented paths
 
 | Path | Change and ownership |

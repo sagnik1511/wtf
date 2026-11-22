@@ -2720,6 +2720,653 @@
               "max_grad_norm"
             ],
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "lstm_ppo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+              },
+              "observation_version": {
+                "enum": [1, 2, 3, 4],
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "hidden_layers"],
+                "properties": {
+                  "type": {
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
+                  },
+                  "activation": {
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
+                  }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
+              },
+              "clip_ratio": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 1,
+                "description": "PPO/GRPO policy-ratio clipping width around one."
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
+              },
+              "epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20,
+                "description": "Optimizer passes over a collected PPO/GRPO rollout or trial group."
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
+              },
+              "normalize_advantages": {
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
+              },
+              "target_kl": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Optional KL early-stop threshold during repeated policy optimization."
+              },
+              "recurrent_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128,
+                "description": "GRU memory width for recurrent PPO; part of model compatibility."
+              },
+              "sequence_length": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128,
+                "description": "Maximum recurrent training sequence length."
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "gae_lambda",
+              "clip_ratio",
+              "entropy_coefficient",
+              "value_coefficient",
+              "rollout_steps",
+              "epochs",
+              "batch_size",
+              "max_grad_norm",
+              "normalize_advantages",
+              "recurrent_size",
+              "sequence_length"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "trpo",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+              },
+              "observation_version": {
+                "enum": [1, 2, 3, 4],
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "hidden_layers"],
+                "properties": {
+                  "type": {
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
+                  },
+                  "activation": {
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
+                  }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
+              },
+              "gae_lambda": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Lambda controlling the temporal bias/variance balance of generalized advantage estimates."
+              },
+              "entropy_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Weight of the entropy term encouraging action diversity in the policy objective."
+              },
+              "value_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Weight of the value-prediction loss for actor-critic methods."
+              },
+              "rollout_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096,
+                "description": "Collected transition count at which an on-policy rollout update is triggered."
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
+              },
+              "normalize_advantages": {
+                "type": "boolean",
+                "description": "Whether the supported learner normalizes its collected advantages."
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
+              },
+              "value_epochs": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20,
+                "description": "Number of independent critic fitting epochs per TRPO rollout."
+              },
+              "max_kl": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 1,
+                "description": "Maximum empirical old-to-new categorical policy KL accepted by TRPO backtracking."
+              },
+              "cg_iterations": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50,
+                "description": "Maximum conjugate-gradient iterations for the TRPO natural-gradient direction."
+              },
+              "cg_damping": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 10,
+                "description": "Positive diagonal damping added to the TRPO Fisher-vector product."
+              },
+              "cg_tolerance": {
+                "type": "number",
+                "minimum": 1e-16,
+                "maximum": 1,
+                "description": "Squared residual tolerance for the TRPO conjugate-gradient solve."
+              },
+              "backtrack_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30,
+                "description": "Maximum tested fractions of the TRPO policy step."
+              },
+              "backtrack_coefficient": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 0.99,
+                "description": "Multiplicative step shrinkage between TRPO backtracking candidates."
+              },
+              "accept_ratio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Minimum actual-to-predicted surrogate improvement ratio for a TRPO candidate."
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "gae_lambda",
+              "entropy_coefficient",
+              "value_coefficient",
+              "rollout_steps",
+              "batch_size",
+              "max_grad_norm",
+              "normalize_advantages",
+              "value_epochs",
+              "max_kl",
+              "cg_iterations",
+              "cg_damping",
+              "cg_tolerance",
+              "backtrack_steps",
+              "backtrack_coefficient",
+              "accept_ratio"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "discrete_sac",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+              },
+              "observation_version": {
+                "enum": [1, 2, 3, 4],
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "hidden_layers"],
+                "properties": {
+                  "type": {
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
+                  },
+                  "activation": {
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
+                  }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
+              },
+              "replay_capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Maximum private replay experiences retained by one Discrete SAC animal."
+              },
+              "learning_starts_after": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Minimum replay size before Discrete SAC updates; must fit replay capacity."
+              },
+              "train_every_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Animal decision interval between eligible Discrete SAC updates."
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 10,
+                "description": "Fixed positive entropy temperature for Discrete SAC actor and soft value targets."
+              },
+              "target_tau": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 1,
+                "description": "Polyak fraction of current critic parameters copied into target critics after each update."
+              }
+            },
+            "required": [
+              "type",
+              "network",
+              "learning_rate",
+              "discount_factor",
+              "max_grad_norm",
+              "batch_size",
+              "replay_capacity",
+              "learning_starts_after",
+              "train_every_steps",
+              "temperature",
+              "target_tau"
+            ]
           }
         ]
       },

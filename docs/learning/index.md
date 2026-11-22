@@ -8,6 +8,7 @@ then choose a learner and decide how descendants and champions inherit knowledge
 | Task | Guide |
 | --- | --- |
 | [Choose algorithms and network depth](../algorithms.md) | Private learning, architectures and supported algorithms. |
+| [Use SAC, TRPO or LSTM PPO](../additional-policies.md) | Replay-based soft control, trust regions and hidden/cell memory. |
 | [Use advanced algorithms](../advanced-algorithms.md) | Recurrent, distributional, masked and multi-agent variants. |
 | [Track observed movement and nearby scent](../tracking.md) | Optional personal memory, blended or legacy separated scent and inspector plots. |
 | [Understand brain inputs](../observations.md) | Top-k target slots, input layouts and visibility. |

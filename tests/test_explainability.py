@@ -66,8 +66,12 @@ class InferenceExplanationTests(unittest.TestCase):
                     self.assertTrue(
                         any(n["target"] for n in actual["layers"][-1]["nodes"])
                     )
-                self.assertEqual(actual["recurrent_reset"], kind == "recurrent_ppo")
-                self.assertEqual(actual["critic_separate"], kind == "mappo")
+                self.assertEqual(
+                    actual["recurrent_reset"], kind in ("recurrent_ppo", "lstm_ppo")
+                )
+                self.assertEqual(
+                    actual["critic_separate"], kind in ("mappo", "trpo", "discrete_sac")
+                )
 
     def test_gradients_match_finite_differences_for_all_algorithms(self):
         for kind in KINDS:
