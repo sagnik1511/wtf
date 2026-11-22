@@ -62,6 +62,53 @@ class SourceReferenceTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Install doxygen"):
                 source.build()
 
+    def test_every_source_page_is_reachable_with_or_without_internal_crawler(self):
+        from work.check_docs_links import check_site
+
+        for has_crawler in (False, True):
+            with (
+                self.subTest(has_crawler=has_crawler),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                root = Path(temporary)
+                api = root / "source-api"
+                api.mkdir()
+                (root / "index.html").write_text(
+                    '<meta name="generator" content="zensical-0.1.3">'
+                    '<a href="source-api/index.html">Source browser</a>'
+                )
+                (root / "source-graphs").mkdir()
+                (root / "source-graphs/index.html").write_text("<h1>Source guide</h1>")
+                marker = '<meta name="generator" content="Doxygen 1.9.8">'
+                (api / "index.html").write_text(
+                    marker
+                    + '<title>Source home</title><a href="source-index.html">Complete source page index</a>'
+                    + ('<a href="doxygen_crawl.html"></a>' if has_crawler else "")
+                )
+                (api / "class_component.html").write_text(
+                    marker + "<title>Component &amp; helpers</title>"
+                )
+                (api / "component_source.html").write_text(
+                    marker + "<title>Source listing</title>"
+                )
+                (api / "nested").mkdir()
+                (api / "nested/members.html").write_text(
+                    marker + "<title>Members</title>"
+                )
+                if has_crawler:
+                    (api / "doxygen_crawl.html").write_text(
+                        '<a href="missing.html#incorrect">Broken internal link</a>'
+                    )
+                before = check_site(root, "https://example.com/wtf/")
+                self.assertTrue(before["errors"])
+                source.write_page_index(api)
+                report = check_site(root, "https://example.com/wtf/")
+                self.assertEqual(report["errors"], [])
+                self.assertEqual(report["reachable_documents"], report["documents"])
+                index = (api / "source-index.html").read_text()
+                self.assertIn('href="nested/members.html"', index)
+                self.assertIn("Component &amp; helpers", index)
+
     @unittest.skipUnless(
         shutil.which("doxygen") and shutil.which("dot"), "Install Doxygen and Graphviz"
     )

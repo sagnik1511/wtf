@@ -10,7 +10,9 @@ it is separate from the animal-brain explanation interface.
 ## Find a component
 
 1. Open the source browser, then **Files → File List**. Choose a Python module,
-   JavaScript module, native source/header, developer tool or example.
+   JavaScript module, native source/header, developer tool or example. The
+   **Complete source page index** on the source-browser homepage also links
+   every generated page, including member lists and source listings.
 2. Follow a class or function to its detailed documentation. Use the source-line
    link to inspect its implementation.
 3. Read **call graph** for outgoing callees and **caller graph** for incoming
@@ -106,7 +108,8 @@ workflow builds and publishes the reference alongside the normal guides.
 
 [`Doxyfile`](../Doxyfile) owns parser mappings, extraction, graph direction/depth
 and source-browser appearance. [`work/build_source_docs.py`](../work/build_source_docs.py)
-selects Git-visible sources, excludes ignored files/symlinks, validates that every
+selects Git-visible sources, excludes ignored files/symlinks, generates the
+complete page index independently of Doxygen’s optional crawler index, validates that every
 selected source file appears in the parsed XML, and caches by source content,
 configuration and tool versions. It reads source; it never imports controllers,
 runs training or needs a C compiler/native extension to document the kernels.

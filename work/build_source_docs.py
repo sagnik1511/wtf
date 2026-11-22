@@ -77,6 +77,48 @@ def summarize(xml_dir, names):
     }
 
 
+def write_page_index(directory):
+    """Publish a visible index independent of Doxygen's optional crawler output."""
+    directory = Path(directory)
+    rows = []
+    for path in sorted(directory.rglob("*.html")):
+        relative = path.relative_to(directory).as_posix()
+        if relative in {"source-index.html", "doxygen_crawl.html"}:
+            continue
+        match = re.search(r"<title>(.*?)</title>", path.read_text(), re.I | re.S)
+        title = html.unescape(re.sub(r"<[^>]*>", "", match[1])) if match else relative
+        rows.append(
+            f'<li><a href="{html.escape(relative, quote=True)}">{html.escape(title)}</a>'
+            f" <small>{html.escape(relative)}</small></li>"
+        )
+    (directory / "source-index.html").write_text(
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<meta name="generator" content="Doxygen source page index">'
+        "<title>Complete source page index — WTF</title>"
+        "<style>:root{color-scheme:light dark}body{font:1rem/1.6 system-ui,sans-serif;"
+        "max-width:85rem;margin:2rem auto;padding:0 1rem}li{margin:.5rem 0;overflow-wrap:anywhere}"
+        "small{opacity:.7}a{color:LinkText}</style></head><body><main>"
+        '<p><a href="index.html">Source browser home</a> · '
+        '<a href="../source-graphs/">Project documentation</a></p>'
+        "<h1>Complete source page index</h1>"
+        "<p>Every generated source page is linked here, including class members, "
+        "namespaces, files and source listings. Use your browser’s Find command "
+        "to locate a component.</p><ul>\n"
+        + "\n".join(rows)
+        + "\n</ul></main></body></html>\n"
+    )
+    # Some Doxygen versions emit an internal index with incorrect namespace
+    # anchors. Preserve its incoming links but route it through the visible index.
+    crawler = directory / "doxygen_crawl.html"
+    if crawler.is_file():
+        crawler.write_text(
+            '<!doctype html><html lang="en"><head><title>Source reference index</title>'
+            '</head><body><a href="source-index.html">Complete source page index</a>'
+            "</body></html>\n"
+        )
+
+
 def build(root=ROOT, force=False):
     for program in ("doxygen", "dot"):
         if not shutil.which(program):
@@ -114,6 +156,8 @@ def build(root=ROOT, force=False):
 [Project documentation](https://sagnik1511.github.io/wtf/source-graphs/)
 
 [All source files](files.html) · [Classes](annotated.html) · [Namespaces](namespaces.html)
+
+[Complete source page index](source-index.html)
 
 Use **Files → File List** for modules, **Classes** for class methods, or search
 for a symbol. Open a function's detailed documentation for its **call graph**
@@ -163,21 +207,7 @@ dependencies and ignored research scripts are excluded.
             )
         generated = temporary / "output"
         report = summarize(generated / "xml", names)
-        # Doxygen 1.12's hidden crawler index can point Python namespace members
-        # at their file pages. Rebuild it from actual HTML destinations instead.
-        # The browser's search index is independent and remains untouched.
-        crawler = generated / "html/doxygen_crawl.html"
-        if crawler.is_file():
-            links = [
-                f'<a href="{html.escape(path.name, quote=True)}">{html.escape(path.stem)}</a>'
-                for path in sorted((generated / "html").glob("*.html"))
-                if path != crawler
-            ]
-            crawler.write_text(
-                "<!doctype html><html><head><title>Source reference index</title></head><body>\n"
-                + "\n".join(links)
-                + "\n</body></html>\n"
-            )
+        write_page_index(generated / "html")
         report.update(
             fingerprint=fingerprint,
             doxygen=version,
