@@ -145,6 +145,7 @@ Development = [
     { "Add geography and actions" = "extending-worlds-and-actions.md" },
     { "Package builds" = "packaging.md" },
     { Performance = "performance.md" },
+    { "GRPO trials and actor batches" = "training-workflow-performance.md" },
     { "Native kernels" = "native-kernels.md" },
     { "Extended native kernels" = "native-kernels-v2.md" },
     { "Native top-k perception" = "native-top-k.md" },

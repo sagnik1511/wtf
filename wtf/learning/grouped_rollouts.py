@@ -26,11 +26,10 @@ def other_action(
     occupied=None,
     populations=None,
     mating_context=None,
+    outputs=None,
 ):
     kind = brain.config["type"]
     if kind == "recurrent_ppo":
-        from wtf.learning.ppo import policy_distribution
-
         hidden = memories[animal_id]
         outputs, memories[animal_id] = brain.network.step(observation, hidden)
         return brain.actions[sample_index(policy_distribution(outputs[:-1])[0], rng)]
@@ -45,7 +44,7 @@ def other_action(
             populations,
             mating_context,
         )
-        outputs = brain.network.predict(observation)
+        outputs = brain.network.predict(observation) if outputs is None else outputs
         probabilities = brain.distribution(outputs, tuple(observation) + mask)[0]
         return brain.actions[sample_index(probabilities, rng)]
     if kind in ("q_network", "qrdqn"):
@@ -57,10 +56,16 @@ def other_action(
             else brain.values(observation)
         )
         return brain.actions[max(range(len(values)), key=values.__getitem__)]
-    return brain.actions[sample_index(brain.action_probabilities(observation), rng)]
+    if outputs is None:
+        probabilities = brain.action_probabilities(observation)
+    elif kind in ("ppo", "a2c"):
+        probabilities = brain.distribution(outputs, observation)[0]
+    else:
+        probabilities = policy_distribution(outputs)[0]
+    return brain.actions[sample_index(probabilities, rng)]
 
 
-def collect_group(world, brains, focal_id):
+def collect_group(world, brains, focal_id, *, reuse_world=True):
     """Never call choose()/learn() on real controllers inside trial worlds.
 
     Environment and other-agent RNG streams restart identically per trial.
@@ -80,35 +85,53 @@ def collect_group(world, brains, focal_id):
     )
     if horizon < 1:
         raise ValueError("No simulation steps remain for a GRPO trial")
+    from wtf.learning.batched import policy_plan, predict_policies
+
+    initial_prediction_plan = policy_plan({i: brains[i] for i in world.animals})
     group = []
     has_masks = any(brains[i].config["type"] == "maskable_ppo" for i in world.animals)
     reusable_generators = {i: random.Random(0) for i in states if i != focal_id}
+    trial = None
+    initial_observations = None
     for _ in range(focal.config["group_size"]):
-        trial = (
-            World.restore(initial_world, static_geography=world.geography)
-            if world.geography
-            else World.restore(initial_world)
-        )
+        if trial is not None and reuse_world:
+            trial._reset_trial(initial_world)
+        else:
+            trial = (
+                World.restore(initial_world, static_geography=world.geography)
+                if world.geography
+                else World.restore(initial_world)
+            )
         generators = {}
         for i, generator in reusable_generators.items():
             generator.setstate(states[i])
             generators[i] = generator
         generators[focal_id] = random.Random(focal.group_rng.getrandbits(64))
         policies = {i: brains[i] for i in trial.animals}
+        prediction_plan = initial_prediction_plan.copy()
         memories = {
             i: b.hidden[:]
             for i, b in policies.items()
             if b.config["type"] == "recurrent_ppo"
         }
-        observations = trial.observe_all()
+        if initial_observations is None or not reuse_world:
+            observations = trial.observe_all()
+            if reuse_world:
+                initial_observations = observations
+        else:
+            observations = initial_observations
         trajectory = []
         for step in range(horizon):
             observation = observations[focal_id]
+            predictions = predict_policies(policies, observations, prediction_plan)
+            outputs = predictions.get(focal_id)
             probabilities, logs = policy_distribution(
-                focal.network.predict(observation)
+                focal.network.predict(observation) if outputs is None else outputs
             )
             index = sample_index(probabilities, generators[focal_id])
-            mating_context = trial._mate_context if has_masks else None
+            mating_context = (
+                getattr(trial, "_mate_context", None) if has_masks else None
+            )
             if has_masks and mating_context is None:
                 mating_context = trial._prepare_mating_context()
             occupied, populations = mating_context[:2] if has_masks else (None, None)
@@ -126,10 +149,12 @@ def collect_group(world, brains, focal_id):
                         occupied,
                         populations,
                         mating_context,
+                        predictions.get(i),
                     )
                 )
                 for i, o in observations.items()
             }
+            del predictions, outputs
             result = trial.step(actions)
             mutation_events = []
             for event in result.events:
@@ -145,6 +170,9 @@ def collect_group(world, brains, focal_id):
                     policies[event.target], mutation_event = mutate_birth(
                         trial, event, policies[event.actor], child_policy
                     )
+                    prediction_plan.update(
+                        policy_plan({event.target: policies[event.target]})
+                    )
                     if mutation_event is not None:
                         mutation_events.append(mutation_event)
                     if policies[event.target].config["type"] == "recurrent_ppo":
@@ -157,6 +185,7 @@ def collect_group(world, brains, focal_id):
             result.events.extend(mutation_events)
             for animal_id in result.dead_ids:
                 policies.pop(animal_id, None)
+                prediction_plan.pop(animal_id, None)
                 generators.pop(animal_id, None)
                 memories.pop(animal_id, None)
             died = focal_id in result.dead_ids
@@ -174,5 +203,7 @@ def collect_group(world, brains, focal_id):
                 break
             observations = result.observations
         group.append(trajectory)
-        del trial, observations, result, generators, policies, memories
+        del observations, result, generators, policies, memories, prediction_plan
+        if not reuse_world:
+            trial = None
     return group

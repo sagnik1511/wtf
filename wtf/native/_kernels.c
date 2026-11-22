@@ -345,6 +345,8 @@ static PyMethodDef methods[] = {
     {"gru_step", gru_step_native, METH_VARARGS, "GRU gates and hidden update."},
     {"gru_backward", gru_backward_native, METH_VARARGS,
      "GRU BPTT accumulation."},
+    {"mlp_predict_many", mlp_predict_many_native, METH_O,
+     "Independent dense models with shared query-local scratch."},
     {"mlp_predict", mlp_predict_native, METH_VARARGS, "Fused dense inference."},
     {"ppo_batch", ppo_batch_native, METH_VARARGS,
      "Fused PPO batch gradients and metrics."},

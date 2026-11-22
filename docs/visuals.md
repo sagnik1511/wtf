@@ -62,6 +62,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) | [seeking-and-charts-use-separate-data.svg](assets/diagrams/seeking-and-charts-use-separate-data.svg) |
 | [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) | [shared-champion-weights.svg](assets/diagrams/shared-champion-weights.svg) |
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |
+| [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) | [trial-actor-batching.svg](assets/diagrams/trial-actor-batching.svg) |
 | [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) | [two-payloads-one-bounded-file-at-a-time.svg](assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg) |
 | [Weights versus exact state (SVG)](visual-previews/diagrams/weights-versus-exact-state-svg.md) | [weights-versus-exact-state.svg](assets/diagrams/weights-versus-exact-state.svg) |
 

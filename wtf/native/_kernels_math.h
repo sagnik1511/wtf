@@ -509,6 +509,75 @@ done:
     dense_release(rows, count);
     return result;
 }
+/* Independent dense models share only one query-local activation workspace.
+   Each layer keeps the scalar kernel's ordered reductions and private buffers.
+ */
+static PyObject *mlp_predict_many_native(PyObject *self, PyObject *jobs) {
+    PyObject *sequence = PySequence_Fast(jobs, "Expected dense inference jobs");
+    if (!sequence)
+        return NULL;
+    Py_ssize_t length = PySequence_Fast_GET_SIZE(sequence), capacity = 0;
+    PyObject *result = PyList_New(length);
+    double *tape = NULL;
+    if (!result)
+        goto done;
+    for (Py_ssize_t i = 0; i < length; i++) {
+        PyObject *job = PySequence_Fast_GET_ITEM(sequence, i);
+        if (!PyTuple_Check(job) || PyTuple_GET_SIZE(job) != 2) {
+            PyErr_SetString(PyExc_ValueError, "Invalid dense inference job");
+            Py_CLEAR(result);
+            goto done;
+        }
+        PyObject *layers = PyTuple_GET_ITEM(job, 0),
+                 *observation = PyTuple_GET_ITEM(job, 1);
+        Py_ssize_t n = PySequence_Size(observation), count = 0, total = 0,
+                   maximum = 0;
+        if (n < 0) {
+            Py_CLEAR(result);
+            goto done;
+        }
+        DenseRow *rows = dense_rows(layers, NULL, n, &count, &total, &maximum);
+        if (!rows) {
+            Py_CLEAR(result);
+            goto done;
+        }
+        if (total > capacity) {
+            if (total > PY_SSIZE_T_MAX / sizeof(double)) {
+                PyErr_NoMemory();
+                dense_release(rows, count);
+                Py_CLEAR(result);
+                goto done;
+            }
+            double *grown = PyMem_Realloc(tape, total * sizeof(double));
+            if (!grown) {
+                PyErr_NoMemory();
+                dense_release(rows, count);
+                Py_CLEAR(result);
+                goto done;
+            }
+            tape = grown;
+            capacity = total;
+        }
+        Py_ssize_t m = rows[count - 1].m;
+        if (!fill_sequence(observation, tape, n)) {
+            dense_release(rows, count);
+            Py_CLEAR(result);
+            goto done;
+        }
+        dense_forward(rows, count, tape, 0, m);
+        PyObject *outputs = double_list(tape + total - m, m);
+        dense_release(rows, count);
+        if (!outputs) {
+            Py_CLEAR(result);
+            goto done;
+        }
+        PyList_SET_ITEM(result, i, outputs);
+    }
+done:
+    PyMem_Free(tape);
+    Py_DECREF(sequence);
+    return result;
+}
 static PyObject *ppo_batch_native(PyObject *self, PyObject *args) {
     PyObject *layers, *grads, *samples;
     double clip, ec, vc;

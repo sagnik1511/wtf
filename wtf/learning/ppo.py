@@ -321,6 +321,9 @@ class PPOBrain(AdamOptimizer):
         if random_baseline:
             return self.rng.choice(self.actions)
         outputs = self.network.predict(observation)
+        return self._choose_outputs(observation, outputs, explore)
+
+    def _choose_outputs(self, observation, outputs, explore):
         probabilities, logs = self.distribution(outputs, observation)
         if not explore:
             return self.actions[

@@ -650,3 +650,12 @@ optimizers, visibility rays and spatial group metrics.
 Top-k perception is implemented separately in the optional
 [native selector](native-top-k.md). Its benchmark and exact-parity checks are
 independent of the champion/competition optimization above.
+
+
+## GRPO trial reuse and independent actor batches
+
+The [workflow guide](training-workflow-performance.md) documents group-private
+trial resets, immutable initial-observation reuse and independent dense-model
+inference batches. It includes matched timing/RSS tables, component controls and
+limits: recurrent/Q-learning decisions remain scalar, actor weights are never
+merged, and native scratch exists only during a batch call.

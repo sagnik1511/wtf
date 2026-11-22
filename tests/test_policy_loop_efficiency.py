@@ -177,7 +177,7 @@ class PolicyLoopEfficiencyTests(unittest.TestCase):
 
         with patch.object(World, "restore", side_effect=compact_restore):
             actual = collect_group(world, brains, 1)
-        self.assertEqual(lengths, [0] * focal.config["group_size"])
+        self.assertEqual(lengths, [0])  # One private world is reset between trials.
         focal.group_rng.setstate(group_rng)
 
         def history_restore(state):

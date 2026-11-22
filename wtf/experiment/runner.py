@@ -325,12 +325,19 @@ class Experiment:
                         if not budget:
                             break
         tracked_animals = tuple(self.world.animals.values()) if training else ()
-        actions = {
-            i: self.brains[i].choose(
-                o, explore=training, random_baseline=self.mode == "random"
-            )
-            for i, o in self.observations.items()
-        }
+        from wtf.learning.batched import choose_actions
+
+        actions = choose_actions(
+            self.brains,
+            self.observations,
+            explore=training,
+            random_baseline=self.mode == "random",
+            allow_batch=any(
+                self.config["brains"][spec["brain"]]["type"]
+                in ("ppo", "a2c", "reinforce", "grpo", "maskable_ppo", "mappo")
+                for spec in self.config["species"].values()
+            ),
+        )
         result = self.world.step(actions)
         limit = self.world.tick >= self.config["world"]["max_steps"]
         contexts = None

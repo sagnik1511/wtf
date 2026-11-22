@@ -17,6 +17,10 @@ the historical first rollout's comparison against FP32 Python code.
 The [top-k perception extension](native-top-k.md) adds exact multi-target
 selection with independent before/after measurements and ownership details.
 
+The [independent-actor batch kernel](training-workflow-performance.md) amortizes
+CPU dispatch and activation scratch across separate dense models without sharing
+weights, samplers or optimizer state.
+
 ## Build and select
 
 From the repository root, with a C compiler and Python development headers:

@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.1](0.0.2.1.md), `4558cef`.
-**Latest committed runtime implementation:** [0.0.2.1](0.0.2.1.md), `4558cef`.
+**Latest committed rollout:** [0.0.2.3](0.0.2.3.md), `47110e9`.
+**Latest committed runtime implementation:** [0.0.2.3](0.0.2.3.md), `47110e9`.
 **Published package:** [0.0.2.0 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.0/).
-**Pending rollouts:** [0.0.2.2 — champion and competition reuse](0.0.2.2.md); [0.0.2.3 — native top-k perception](0.0.2.3.md).
+**Pending rollout:** [0.0.2.4 — GRPO trial reuse and independent actor batches](0.0.2.4.md).
 
 ## Rollout index
 
@@ -20,8 +20,9 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.3](0.0.2.3.md) | Pending | 2026-11-22 | Not committed; base `4558cef` | Exact optional native top-k perception and matched benchmarks |
-| [0.0.2.2](0.0.2.2.md) | Pending | 2026-11-22 | Not committed; base `4558cef` | Reuse unchanged champion models and phase-local contest occupancy |
+| [0.0.2.4](0.0.2.4.md) | Pending | 2026-11-22 | Not committed; base `47110e9` | Reuse private GRPO trial state and batch independent dense actors |
+| [0.0.2.3](0.0.2.3.md) | Committed | 2026-11-22 | `47110e9` | Exact optional native top-k perception and matched benchmarks |
+| [0.0.2.2](0.0.2.2.md) | Committed | 2026-11-22 | `47110e9` | Reuse unchanged champion models and phase-local contest occupancy |
 | [0.0.2.1](0.0.2.1.md) | Committed | 2026-11-22 | `4558cef` | Opt-in learned same-species contests for food/path priority |
 | [0.0.2.0](0.0.2.0.md) | Committed | 2026-11-22 | `18ca6f0` | Rename the Python namespace to `wtf`, group modules by responsibility and preserve artifact compatibility |
 | [0.0.1.32](0.0.1.32.md) | Committed | 2026-11-21 | `1b6b5ca` | Theme-aware inspector/XAI, paired replay previews and TestPyPI trial preparation |

@@ -49,6 +49,7 @@ work/performance/*
 !work/performance/benchmark_kernels.py
 !work/performance/benchmark_data_kernels.py
 !work/performance/top_k.py
+!work/performance/brain_workflow.py
 
 # Local diagram authoring sources; publish intentional SVG exports instead.
 *.mmd

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="545" viewBox="0 0 1040 545" role="img" aria-labelledby="title desc">
+<style>svg{--figure-bg:#f8fafc;--figure-panel:#fff;--figure-ink:#172b45;--figure-muted:#52657b;--figure-border:#8ca0b7;--figure-owned:#e4f2ee;}@media(prefers-color-scheme:dark){svg{--figure-bg:#171b22;--figure-panel:#26313e;--figure-ink:#e5eaf1;--figure-muted:#b2bfce;--figure-border:#879db4;--figure-owned:#183c35;}}</style>
+<title id="title">GRPO world reuse and independent inference batches</title><desc id="desc">A GRPO group restores one private world, resets its dynamic state between trials, and returns independent trajectories. Separately, independent models borrow one native activation workspace; Python samples each animal's action in the original order. Weights, optimizers and real-world state are not shared or modified by these operations.</desc>
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--figure-muted)"/></marker></defs>
+<rect width="1040" height="545" rx="12" fill="var(--figure-bg)"/>
+<g font-family="system-ui,sans-serif" text-anchor="middle" fill="var(--figure-ink)">
+<text x="520" y="34" font-size="22" font-weight="700">Reuse construction and scratch, retain independent behavior</text>
+<rect x="240" y="60" width="530" height="165" rx="12" fill="var(--figure-owned)"/>
+<text x="505" y="81" font-size="13">One group-private world · private read-only configuration</text>
+<g fill="var(--figure-panel)" stroke="var(--figure-border)" stroke-width="1.5"><rect x="20" y="96" width="190" height="100" rx="8"/><rect x="260" y="96" width="220" height="100" rx="8"/><rect x="530" y="96" width="220" height="100" rx="8"/><rect x="810" y="96" width="210" height="100" rx="8"/></g>
+<g font-size="17" font-weight="600"><text x="115" y="125">Real world snapshot</text><text x="370" y="125">One private world</text><text x="640" y="125">Reset next trial</text><text x="915" y="125">Trajectory group</text></g>
+<g font-size="13"><text x="115" y="153">Bodies, counters, RNG state</text><text x="115" y="177">Real world stays unchanged</text><text x="370" y="153">Restore once; initial observations</text><text x="370" y="177">Separate trial action streams</text><text x="640" y="153">Fresh dynamic records + RNG</text><text x="640" y="177">Clear all derived caches</text><text x="915" y="153">Focal observations / rewards</text><text x="915" y="177">Frozen other-agent policies</text></g>
+<g fill="none" stroke="var(--figure-muted)" stroke-width="2" marker-end="url(#arrow)"><path d="M212 145H257"/><path d="M482 145H527"/><path d="M752 145H807"/><path d="M640 197V213H370V198"/></g>
+<text x="520" y="260" font-size="14" fill="var(--figure-muted)">Identical starting observations are immutable; masks and physical contexts use current trial bodies.</text>
+<rect x="300" y="298" width="440" height="145" rx="12" fill="var(--figure-owned)"/>
+<text x="520" y="321" font-size="14" font-weight="600">One optional native inference call</text>
+<g fill="var(--figure-panel)" stroke="var(--figure-border)" stroke-width="1.5"><rect x="20" y="337" width="230" height="92" rx="8"/><rect x="320" y="337" width="400" height="92" rx="8"/><rect x="790" y="337" width="230" height="92" rx="8"/></g>
+<g font-size="17" font-weight="600"><text x="135" y="364">Independent dense models</text><text x="520" y="364">Borrow weights · reuse activation scratch</text><text x="905" y="364">Ordered Python sampling</text></g>
+<g font-size="13"><text x="135" y="390">Separate weights / observations</text><text x="135" y="413">Shapes and masks remain distinct</text><text x="520" y="390">Same scalar reductions for every model</text><text x="520" y="413">Return private output vectors; release all buffer views</text><text x="905" y="390">Each animal keeps its own RNG</text><text x="905" y="413">Then world step and learning</text></g>
+<g fill="none" stroke="var(--figure-muted)" stroke-width="2" marker-end="url(#arrow)"><path d="M252 384H317"/><path d="M722 384H787"/></g>
+<text x="520" y="481" font-size="15">Q-learning, recurrent, random and unsupported/custom models keep scalar decisions.</text>
+<text x="520" y="514" font-size="14" fill="var(--figure-muted)">No shared policy / optimizer · no changed action order · no persistent native scratch · no replay format change</text>
+</g></svg>

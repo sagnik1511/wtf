@@ -146,6 +146,9 @@ class ActorBrain(AdamOptimizer):
         if random_baseline:
             return self.rng.choice(self.actions)
         logits = self.network.predict(observation)
+        return self._choose_outputs(observation, logits, explore)
+
+    def _choose_outputs(self, observation, logits, explore):
         probabilities, logs = policy_distribution(logits)
         if not explore:
             return self.actions[

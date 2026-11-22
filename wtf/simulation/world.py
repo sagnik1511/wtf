@@ -20,6 +20,28 @@ from wtf.simulation.day_night import sunlight, effective_body
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 VISIBILITY_CACHE_LIMIT = 2048
+_TRIAL_STATE_FIELDS = frozenset(
+    (
+        "config",
+        "seed",
+        "width",
+        "height",
+        "tick",
+        "rng",
+        "obstacles",
+        "geography",
+        "animals",
+        "resources",
+        "events",
+        "deaths",
+        "total_energy_gained",
+        "kills",
+        "lifespans",
+        "births",
+        "mutations",
+        "next_animal_id",
+    )
+)
 
 
 @dataclass
@@ -1449,6 +1471,24 @@ class World:
         # Construct directly: restoration must not depend on a new layout draw.
         w = cls.__new__(cls)
         w.config = copy.deepcopy(state["config"])
+        return w._restore_state(state, static_geography)
+
+    def _reset_trial(self, state):
+        """Reset a sequential GRPO trial; retain only its private config/RNG."""
+        geography = self.geography
+        # Preserve authoritative attribute slots/hints; dict.clear() loses the
+        # compact key-sharing layout and slows later world attribute access.
+        for name in tuple(vars(self)):
+            if name not in _TRIAL_STATE_FIELDS:
+                delattr(self, name)
+        # Release the large old collections before constructing their replacements.
+        self.animals = self.resources = self.events = self.lifespans = (
+            self.obstacles
+        ) = None
+        return self._restore_state(state, geography, _trial=True)
+
+    def _restore_state(self, state, static_geography=None, _trial=False):
+        w = self
         w.seed = state["seed"]
         s = state["snapshot"]
         w.width, w.height, w.tick = s["width"], s["height"], s["tick"]
@@ -1465,6 +1505,12 @@ class World:
             )
         w.animals = {}
         for original in s["animals"]:
+            if _trial:
+                # Current trial records need no legacy/default-field adaptation.
+                # Preserve normal instance layout for hot attribute reads.
+                animal = Animal(**original)
+                w.animals[animal.id] = animal
+                continue
             animal = dict(original)
             if "kills" not in animal:
                 animal["statistics_since_age"] = animal["age"]
@@ -1493,6 +1539,7 @@ class World:
         def tuples(v):
             return tuple(tuples(x) for x in v) if isinstance(v, (list, tuple)) else v
 
-        w.rng = random.Random()
-        w.rng.setstate(tuples(state["rng_state"]))
+        if not hasattr(w, "rng"):
+            w.rng = random.Random()
+        w.rng.setstate(state["rng_state"] if _trial else tuples(state["rng_state"]))
         return w

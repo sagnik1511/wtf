@@ -119,7 +119,10 @@ bootstrap rules. Evaluation freezes learning and newborn mutation. GRPO trial
 worlds must not change real-world controllers, RNGs or event counts. Mutated
 newborns get independent mixed weights. All newborn training state resets after
 paired crossover; the mutation guide describes the additional rare changes.
-None of these features imply a shared species policy.
+None of these features imply a shared species policy. See
+[trial resets and independent inference batches](training-workflow-performance.md)
+for group-private state, frozen model qualification, scalar fallbacks and native
+workspace ownership; batching must never merge weights or action RNG streams.
 
 Founder initialization can reuse a pristine species/sex template only while
 constructing the run. Every animal must retain detached model/training state and

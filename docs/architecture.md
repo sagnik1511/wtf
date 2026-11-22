@@ -5,6 +5,8 @@
 Commands in this guide run from the project root.
 
 
+For trial and inference ownership, see [GRPO resets and actor batches](training-workflow-performance.md).
+
 ## Runtime boundaries
 
 Python owns simulation and learning. Playback reads saved artifacts; it does not call a live world or load controllers.
@@ -26,7 +28,8 @@ The [package layout guide](package-layout.md) maps every former import to its cu
 | `wtf/simulation/world.py` | Bodies, resources, movement, combat, rewards and reproduction |
 | `wtf/simulation/perception.py` | Incremental spatial windows and cache invalidation |
 | `wtf/learning/brain.py`, `ppo.py`, `policy_gradients.py` | Independent learned models |
-| `wtf/learning/grouped_rollouts.py` | Matched GRPO trial worlds |
+| `wtf/learning/grouped_rollouts.py` | Matched, resettable group-private GRPO trial worlds |
+| `wtf/learning/batched.py` | Independent dense-policy inference jobs and ordered per-animal sampling |
 | `wtf/experiment/runner.py` | Run lifecycle, feedback, checkpoints and champion selection |
 | `wtf/storage/library.py` | Compact model artifacts, compatibility and model ancestry |
 | `wtf/storage/recording.py` | Frame streaming and read-only recording access |
