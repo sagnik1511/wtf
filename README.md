@@ -38,12 +38,12 @@ responsibility-based modules and the 0.0.2.0 import changes.
 [![C optional kernels](https://img.shields.io/badge/C-optional_kernels-A8B9CC?logo=c&logoColor=black)](docs/native-kernels.md)
 [![JSON environment presets](https://img.shields.io/badge/JSON-environment_presets-292929?logo=json&logoColor=white)](docs/configuration.md)
 [![Docker optional installation](https://img.shields.io/badge/Docker-optional-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/get-started/get-docker/)
-[![Material for MkDocs documentation](https://img.shields.io/badge/Material_for_MkDocs-documentation-526CFE?logo=materialformkdocs&logoColor=white)](https://squidfunk.github.io/mkdocs-material/)
+[![Zensical documentation](https://img.shields.io/badge/Zensical-documentation-526CFE)](https://zensical.org/)
 
 Python owns simulation, custom RL models, learning and artifact storage. Optional
 CPython C kernels accelerate CPU hot paths. Plain JavaScript, HTML, CSS, Canvas
 and SVG provide the replay viewer; JSON defines worlds, species and policies.
-MkDocs with Material builds the documentation website.
+Zensical builds the documentation website.
 
 ### Software and requirements
 
@@ -55,7 +55,7 @@ MkDocs with Material builds the documentation website.
 | [Docker](https://docs.docker.com/get-started/get-docker/) and [Compose](https://docs.docker.com/compose/install/) | Optional container-based installation. |
 | [GCC](https://gcc.gnu.org/) or [Clang](https://clang.llvm.org/), Python development headers and [setuptools](https://setuptools.pypa.io/en/latest/) | Optional native CPU kernels, validated on CPython 3.12–3.13. See [native setup](INSTALL.md#optional-native-cpu-kernels). |
 | [Node.js 20+](https://nodejs.org/en/download) | Optional JavaScript tests and viewer illustration tooling. |
-| [MkDocs](https://www.mkdocs.org/) and [Material](https://squidfunk.github.io/mkdocs-material/) | Optional local documentation builds; pinned versions are in [requirements-docs.txt](requirements-docs.txt). |
+| [Zensical](https://zensical.org/) | Optional local documentation builds; pinned versions are in [requirements-docs.txt](requirements-docs.txt). |
 | [FFmpeg and ffprobe](https://ffmpeg.org/download.html) | Optional documentation GIF exports. |
 
 The viewer runs directly in the browser without npm packages or a frontend build.

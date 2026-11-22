@@ -6,9 +6,10 @@ on:
       - 'docs/**'
       - 'INSTALL.md'
       - 'examples/README.md'
-      - 'mkdocs.yml'
+      - 'zensical.toml'
       - 'requirements-docs.txt'
       - 'work/docs_site.py'
+      - 'work/build_docs.py'
       - 'work/check_docs_links.py'
       - 'work/docs_access.py'
       - 'tests/test_docs_site.py'
@@ -19,9 +20,10 @@ on:
       - 'docs/**'
       - 'INSTALL.md'
       - 'examples/README.md'
-      - 'mkdocs.yml'
+      - 'zensical.toml'
       - 'requirements-docs.txt'
       - 'work/docs_site.py'
+      - 'work/build_docs.py'
       - 'work/check_docs_links.py'
       - 'work/docs_access.py'
       - 'tests/test_docs_site.py'
@@ -46,7 +48,7 @@ jobs:
       - name: Build and check documentation
         run: |
           python -m unittest tests.test_docs_site
-          python -m mkdocs build --strict
+          python -m work.build_docs
           python -m work.check_docs_links
           python -m work.docs_access --check
       - name: Upload Pages artifact
@@ -77,12 +79,12 @@ jobs:
               repo: context.repo.repo,
             });
             if (data.build_type !== 'workflow') {
-              core.setFailed('Set Settings → Pages → Source to GitHub Actions. Branch/Jekyll publishing can overwrite the MkDocs deployment.');
+              core.setFailed('Set Settings → Pages → Source to GitHub Actions. Branch/Jekyll publishing can overwrite the Zensical deployment.');
             }
       - name: Deploy documentation
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify deployed MkDocs homepage
+      - name: Verify deployed Zensical homepage
         uses: actions/github-script@v8
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
@@ -93,10 +95,10 @@ jobs:
             for (let attempt = 0; attempt < 6; attempt++) {
               const response = await fetch(url);
               const html = await response.text();
-              if (response.ok && /name=["']generator["']\s+content=["']mkdocs-/i.test(html)) {
-                core.info('Live homepage is served by MkDocs.');
+              if (response.ok && /name=["']generator["']\s+content=["']zensical-/i.test(html)) {
+                core.info('Live homepage is served by Zensical.');
                 return;
               }
               if (attempt < 5) await new Promise(resolve => setTimeout(resolve, 5000));
             }
-            core.setFailed('The deployed homepage is not MkDocs. Check Pages Source and competing branch/Jekyll deployments.');
+            core.setFailed('The deployed homepage is not Zensical. Check Pages Source and competing branch/Jekyll deployments.');

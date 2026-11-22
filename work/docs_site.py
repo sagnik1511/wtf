@@ -9,7 +9,6 @@ import subprocess
 from xml.etree import ElementTree as ET
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
-from mkdocs.structure.files import File
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTRA_PAGES = {"installation.md": "INSTALL.md", "examples.md": "examples/README.md"}
@@ -17,67 +16,38 @@ FENCES = re.compile(r"(^(`{3,}|~{3,})[^\n]*\n.*?^\2[^\n]*(?:\n|$))", re.M | re.S
 LINKS = re.compile(r'(!?\[[^\]\n]*\]\()([^\s)]+)((?:\s+"[^"\n]*")?\))')
 
 
-def on_files(files, config):
-    """Git-ignored files never enter the build, even when previewing locally."""
-    visible = set(
-        subprocess.check_output(
-            [
-                "git",
-                "ls-files",
-                "-z",
-                "--cached",
-                "--others",
-                "--exclude-standard",
-                "--",
-                "docs",
-            ],
-            cwd=ROOT,
-        )
-        .decode()
-        .split("\0")
-    )
-    ignored = set(
-        subprocess.check_output(
-            [
-                "git",
-                "ls-files",
-                "-z",
-                "--cached",
-                "--ignored",
-                "--exclude-standard",
-                "--",
-                "docs",
-            ],
-            cwd=ROOT,
-        )
-        .decode()
-        .split("\0")
-    )
-    visible -= ignored
-    for file in list(files):
-        # MkDocs has already added trusted theme CSS/JS/icons. Publication
-        # filtering applies to repository docs, not installed theme resources.
-        if file.src_dir is None or Path(file.src_dir).resolve() != ROOT / "docs":
-            continue
-        source = "docs/" + file.src_uri
-        path = ROOT / source
-        if (
-            source not in visible
-            or file.src_uri.startswith(("paper/", "experiments/"))
-            or not path.resolve().is_relative_to(ROOT / "docs")
-            or path.is_symlink()
-        ):
-            files.remove(file)
-    for target, source in EXTRA_PAGES.items():
-        files.append(
-            File.generated(config, target, content=(ROOT / source).read_text())
-        )
-    if (ROOT / "docs/assets").is_dir():
-        from work.docs_access import inventory, visual_previews
+def public_sources(root=ROOT):
+    """Only Git-visible public docs; private research and symlinks stay local."""
 
-        for target, content in visual_previews(inventory(ROOT), ROOT).items():
-            files.append(File.generated(config, target, content=content))
-    return files
+    def listed(*options):
+        return set(
+            subprocess.check_output(
+                ["git", "ls-files", "-z", *options, "--exclude-standard", "--", "docs"],
+                cwd=root,
+            )
+            .decode()
+            .split("\0")
+        )
+
+    visible = listed("--cached", "--others") - listed("--cached", "--ignored")
+    docs = (root / "docs").resolve()
+    result = {}
+    for source in sorted(visible - {""}):
+        path = root / source
+        relative = path.relative_to(root / "docs").as_posix()
+        if (
+            relative.startswith(("paper/", "experiments/", "overrides/"))
+            or path.is_symlink()
+            or any(
+                (root / "docs" / parent).is_symlink()
+                for parent in Path(relative).parents
+            )
+            or not path.is_file()
+            or not path.resolve().is_relative_to(docs)
+        ):
+            continue
+        result[relative] = path
+    return result
 
 
 def _site_link(href, origin, destination, config):
@@ -148,7 +118,7 @@ def on_page_markdown(markdown, page, config, files):
     for index in range(0, len(sections), 3):
         if REPLAY_PICTURES.search(sections[index]):
             sections[index] = REPLAY_PICTURES.sub(
-                lambda match: _replay_picture(match, origin, page.file.dest_uri),
+                lambda match: _replay_picture(match, origin, destination),
                 sections[index],
             )
         sections[index] = LINKS.sub(

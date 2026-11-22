@@ -108,7 +108,7 @@ narrow screens. The top tabs open the same section pages.
 | [Extended native kernels](native-kernels-v2.md) | Additional compiled paths and equivalence boundaries. |
 | [Native performance review](native-performance-review.md) | Kernel coverage, numeric types and measured performance tradeoffs. |
 | [Contributor context](project-context.md) | Contributor/agent context and implementation boundaries. |
-| [Documentation website](documentation-site.md) | MkDocs publication, link/theme handling and Pages maintenance. |
+| [Documentation website](documentation-site.md) | Zensical publication, link/theme handling and Pages maintenance. |
 
 ## Reference
 

@@ -18,7 +18,9 @@ class PageLinks(HTMLParser):
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
         if tag == "meta" and attrs.get("name") == "generator":
-            self.is_document = attrs.get("content", "").startswith("mkdocs-")
+            self.is_document = (
+                attrs.get("content", "").lower().startswith(("mkdocs-", "zensical"))
+            )
         if tag == "a" and attrs.get("href"):
             self.destinations.append(attrs["href"])
         for key in ("id", "name" if tag == "a" else "id"):
@@ -132,9 +134,9 @@ def check_site(site_dir, site_url):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", default="mkdocs.yml")
+    parser.add_argument("--config", default="zensical.toml")
     args = parser.parse_args()
-    from mkdocs.config import load_config
+    from work.build_docs import load_config
 
     config = load_config(args.config)
     report = check_site(config.site_dir, config.site_url)

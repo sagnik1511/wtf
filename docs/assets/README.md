@@ -8,7 +8,7 @@ remain ignored and original videos stay outside the repository.
 ## Light/dark preview behavior
 
 Start at **Home → All visuals → visual name** for an embedded preview with the
-MkDocs palette toggle. The original-file column keeps the exact source asset
+Zensical palette toggle. The original-file column keeps the exact source asset
 available separately. Opening a raw file leaves the site's theme controls.
 
 | Asset kind | Preview behavior |
@@ -20,7 +20,7 @@ available separately. Opening a raw file leaves the site's theme controls.
 | Full physics explorer / editable fragment | Embed the complete interactive explorer with inherited light/dark mode; the fragment remains an editable-source download |
 | GitHub banner PNG | Fixed screenshot shown unchanged, with its purpose stated explicitly |
 
-Preview pages are generated during the MkDocs build and reuse the original media.
+Preview pages are generated during the Zensical build and reuse the original media.
 The catalog does not eagerly embed every image or animation. See the
 [complete click sequences](../access-map.md) for each page, file and runtime copy.
 

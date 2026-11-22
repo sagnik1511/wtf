@@ -430,5 +430,5 @@ and **8 identical viewer branding copies**.
 ## Maintain this index
 
 Regenerate with `python -m work.docs_access`. CI runs the checker after
-the strict MkDocs build and rejects stale inventories, missing routes or
+the strict Zensical build and rejects stale inventories, missing routes or
 viewer branding copies that diverge from their documentation masters.

@@ -117,7 +117,7 @@ def preview_source(name):
 
 
 def visual_previews(names, root=ROOT):
-    """Small generated MkDocs wrappers retain the selected site palette."""
+    """Small generated Zensical wrappers retain the selected site palette."""
     pages = {}
     for name in names:
         if not name.startswith("docs/"):
@@ -177,7 +177,7 @@ def visual_previews(names, root=ROOT):
                     "-dark.", f"-{theme}."
                 )
                 body.append(
-                    f'<img class="brand-on-{theme} visual-brand-preview" src="../{href(variant)}" alt="{html.escape(title, quote=True)}" />'
+                    f'<img class="brand-on-{theme} visual-brand-preview" src="{href(variant)}" alt="{html.escape(title, quote=True)}" />'
                 )
             body.extend(
                 [
@@ -190,7 +190,7 @@ def visual_previews(names, root=ROOT):
             standalone = "docs/assets/physics/explorer.html"
             body.extend(
                 [
-                    f'<iframe class="visual-explorer" src="../{href(standalone)}" title="Interactive physics explorer" loading="lazy"></iframe>',
+                    f'<iframe class="visual-explorer" src="{href(standalone)}" title="Interactive physics explorer" loading="lazy"></iframe>',
                     "",
                     "The full explorer runs inside this preview. The fragment file is editable source.",
                     "",
@@ -315,7 +315,9 @@ class ArticleLinks(HTMLParser):
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
         if tag == "meta" and attrs.get("name") == "generator":
-            self.document = attrs.get("content", "").startswith("mkdocs-")
+            self.document = (
+                attrs.get("content", "").lower().startswith(("mkdocs-", "zensical"))
+            )
         if tag == "article":
             self.article = True
         if self.article and tag == "h1":
@@ -365,7 +367,7 @@ def content_routes(site_dir, site_url):
         if page.document and path.name != "404.html":
             pages[path.relative_to(site_dir).as_posix()] = page
     if "index.html" not in pages:
-        raise ValueError("Build the MkDocs homepage before auditing click routes")
+        raise ValueError("Build the Zensical homepage before auditing click routes")
     parents = {"index.html": None}
     pending = deque(parents)
     while pending:
@@ -499,7 +501,7 @@ def access_map(names, site_dir, site_url, root=ROOT):
             "## Maintain this index",
             "",
             "Regenerate with `python -m work.docs_access`. CI runs the checker after",
-            "the strict MkDocs build and rejects stale inventories, missing routes or",
+            "the strict Zensical build and rejects stale inventories, missing routes or",
             "viewer branding copies that diverge from their documentation masters.",
             "",
         ]
@@ -518,9 +520,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    from mkdocs.config import load_config
+    from work.build_docs import load_config
 
-    config = load_config(str(ROOT / "mkdocs.yml"))
+    config = load_config(str(ROOT / "zensical.toml"))
     names = inventory()
     catalog = visual_catalog(names)
     if not args.check:
@@ -528,9 +530,7 @@ def main():
         placeholder = ROOT / "docs" / ACCESS_MAP
         if not placeholder.exists():
             placeholder.write_text("# Homepage click paths\n\n[Home](index.md)\n")
-        subprocess.run(
-            [sys.executable, "-m", "mkdocs", "build", "--strict"], cwd=ROOT, check=True
-        )
+        subprocess.run([sys.executable, "-m", "work.build_docs"], cwd=ROOT, check=True)
     click_map, report = access_map(names, config.site_dir, config.site_url)
     expected = {CATALOG: catalog, ACCESS_MAP: click_map}
     stale = [
@@ -543,9 +543,7 @@ def main():
     if not args.check:
         for name, text in expected.items():
             (ROOT / "docs" / name).write_text(text)
-        subprocess.run(
-            [sys.executable, "-m", "mkdocs", "build", "--strict"], cwd=ROOT, check=True
-        )
+        subprocess.run([sys.executable, "-m", "work.build_docs"], cwd=ROOT, check=True)
         # Recheck against the final output, not the placeholder/proof links.
         final_map, report = access_map(names, config.site_dir, config.site_url)
         if final_map != click_map:

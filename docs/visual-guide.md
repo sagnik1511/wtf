@@ -93,7 +93,7 @@ figure from the feedback review and linked mating inputs to the vector layout.
 Open **Home → All visuals → the visual name** for a preview with the site's
 light/dark toggle. The adjacent original-file link opens the exact saved asset;
 a standalone SVG follows the browser/OS preference and a raster file keeps its
-saved pixels. The preview keeps theme selection inside MkDocs, pairs animation
+saved pixels. The preview keeps theme selection inside Zensical, pairs animation
 exports and logo variants, and embeds the full physics explorer.
 
 

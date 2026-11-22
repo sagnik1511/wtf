@@ -19,4 +19,4 @@ source using the maintained development workflow.
 | [Review extended native kernels](../native-kernels-v2.md) | Additional native coverage and equivalence boundaries. |
 | [Review native performance](../native-performance-review.md) | Coverage, dtypes and benchmark evidence. |
 | [Read contributor context](../project-context.md) | Project rules and generic extension contracts. |
-| [Maintain this documentation site](../documentation-site.md) | MkDocs structure, link/theme checks and Pages deployment. |
+| [Maintain this documentation site](../documentation-site.md) | Zensical structure, link/theme checks and Pages deployment. |

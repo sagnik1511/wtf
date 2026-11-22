@@ -101,7 +101,7 @@ release and must not create/extend a rollout record. Release notes cover actual
 implementation, interface or adopted configuration changes and their validation.
 Keep existing version/commit history accurate without recording experiment outcomes.
 
-The [documentation hub](docs/index.md) and `mkdocs.yml` organize the public
+The [documentation hub](docs/index.md) and `zensical.toml` organize the public
 GitHub Pages site. Reuse maintained guides; do not duplicate installation or
 example content for the website. Keep the publication filter in `work/docs_site.py`
 and site/navigation checks current. Never publish ignored paper, experiments or

@@ -20,23 +20,53 @@ separate theme control; its simulated day–night lighting is another setting.
 
 ## Build or preview locally
 
-From the checkout root, install documentation tools into the development venv:
+From the checkout root, create a separate documentation environment:
 
 ```sh
-.venv/bin/python -m pip install --cache-dir .cache/pip -r requirements-docs.txt
-.venv/bin/python -m mkdocs build --strict
-.venv/bin/python -m work.check_docs_links
-.venv/bin/python -m work.docs_access --check
-.venv/bin/python -m mkdocs serve --dev-addr 127.0.0.1:8002
+python3.12 -m venv .venv-docs
+.venv-docs/bin/python -m pip install --cache-dir .cache/pip -r requirements-docs.txt
+.venv-docs/bin/python -m work.build_docs
+.venv-docs/bin/python -m work.check_docs_links
+.venv-docs/bin/python -m work.docs_access --check
+.venv-docs/bin/python -m work.build_docs serve --dev-addr 127.0.0.1:8002
 ```
 
 Open <http://127.0.0.1:8002/wtf/>. Stop the preview with Ctrl+C. Restart the
-server after editing Python build hooks or their imported helpers so cached
-Python modules are reloaded. Markdown and media changes reload automatically. Documentation tools
+server after editing Python build helpers so cached modules are reloaded.
+Markdown, media, configuration and template changes trigger a rebuild; refresh
+the browser after the rebuild completes. Documentation tools
 are separate from `requirements.txt` and are not simulator dependencies.
 The generated site lives under ignored `.cache/docs-site/` and is rebuilt from
 source. Do not commit generated HTML, a second copy of the guides or a `gh-pages`
 branch. Site builds require a Git checkout to enforce ignored-file exclusions.
+
+## Generator and publication pipeline
+
+[Zensical](https://zensical.org/) builds the site from native
+[zensical.toml](../zensical.toml). Its `classic` variant retains the familiar
+navigation and appearance while removing the Material for MkDocs dependency.
+The simulator and saved-run viewer do not depend on documentation tools.
+
+Zensical does not execute the former Python MkDocs hooks. Always use
+`python -m work.build_docs`, including for preview, rather than building the
+checkout's `docs/` tree directly. The wrapper:
+
+1. Selects Git-visible, non-ignored public sources and rejects private research,
+   experiments, symlinks and template files as content.
+2. Stages sources under ignored `.cache/docs-build/docs/`, reuses the installation
+   and example guides, and generates visual-preview pages without duplicating media
+   in version control.
+3. Rewrites source/document links and paired theme media, then runs Zensical in
+   strict mode using an ignored derived configuration.
+4. Restores legacy redirects, including fragments/query strings, in the built site.
+
+Canonical Markdown and visuals stay in their existing locations. Generated
+staging/configuration, builder caches and HTML are local outputs. Edit the
+original files, not staged copies. [The publication helpers](../work/docs_site.py)
+remain the common source for link rewriting and privacy rules; the
+[build wrapper](../work/build_docs.py) owns staging, building and preview.
+The link auditor recognizes Zensical pages explicitly, so a generator change
+cannot silently reduce the audited document count to zero.
 
 ## Enable GitHub Pages
 
@@ -48,11 +78,11 @@ branch. Site builds require a Git checkout to enforce ignored-file exclusions.
 4. Open the URL shown by the `github-pages` deployment environment.
 
 Select **GitHub Actions**, not **Deploy from a branch**. A branch-source Jekyll
-build can overwrite a successful custom MkDocs deployment at the same URL.
-The resulting source-rendered site uses different paths and bypasses the MkDocs
-link/visual-theme hooks. A successful Documentation workflow alone does not
+build can overwrite a successful custom Zensical deployment at the same URL.
+The resulting source-rendered site uses different paths and bypasses the Zensical
+link/visual-theme preprocessing. A successful Documentation workflow alone does not
 prove the live homepage is its output. The deployment checks Pages build type
-before publishing and verifies the live homepage identifies itself as MkDocs
+before publishing and verifies the live homepage identifies itself as Zensical
 after deployment. Check this again when repository Pages settings change.
 
 The workflow builds on documentation pull requests and deploys only from `main`.
@@ -63,9 +93,9 @@ require approval. No repository setting is changed by a local build.
 
 See [GitHub's custom Pages workflow guide](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 for the repository-side requirements. If the owner/repository name changes,
-update `site_url`, `repo_url` and `repo_name` in [mkdocs.yml](../mkdocs.yml).
+update `site_url`, `repo_url` and `repo_name` in [zensical.toml](../zensical.toml).
 A default-branch rename also requires updating `edit_uri`, the workflow branch
-filters and source-link branch in [the build hook](../work/docs_site.py).
+filters and source-link branch in [the publication helpers](../work/docs_site.py).
 
 ## Content structure
 
@@ -78,7 +108,7 @@ filters and source-link branch in [the build hook](../work/docs_site.py).
 | Development | Architecture, tests, extensions, packaging, performance and site upkeep |
 | Reference | Complete field/command definitions, compatibility, visual index and existing release history |
 
-Every navigation group has an `index.md` landing page and Material
+Every navigation group has an `index.md` landing page and Zensical
 `navigation.indexes` is enabled. Section labels are links, not empty headings;
 top tabs and the narrow-screen menu open the same landing pages. Keep a group
 index first in its navigation list, link to its child guides, and provide return
@@ -87,20 +117,20 @@ links from those guides. The tests reject groups without an index.
 Keep the detailed guides in their current locations so GitHub links remain
 useful. Use the [complete directory](directory.md) for all guides, feature shortcuts and
 supporting visual catalogs. Edit [the home page](index.md) for reader routes and `nav` in
-[mkdocs.yml](../mkdocs.yml) for the website hierarchy. This setup does not create
+[zensical.toml](../zensical.toml) for the website hierarchy. This setup does not create
 or require a new software release.
 
 ## Reuse sources and exclude local work
 
 [INSTALL.md](../INSTALL.md) and [examples/README.md](../examples/README.md) are
 rendered as website pages directly from their original content. They remain the
-single maintained copies. The build hook rewrites cross-boundary Markdown links
+single maintained copies. The preprocessing step rewrites cross-boundary Markdown links
 in memory: documentation stays inside the site, code/config/agent links open
 GitHub, and fenced code examples retain their literal text. Existing SVGs, GIFs
 and the self-contained physics explorer are served from `docs/assets/`.
 
 Only Git-visible, non-ignored documentation files are considered for local
-preview; published Actions checkouts contain committed files. The hook also
+preview; published Actions checkouts contain committed files. The preprocessor also
 blocks `docs/paper/`, `docs/experiments/` and symlinks even if accidentally tracked.
 Results, model archives, virtual environments and caches are outside `docs/` and
 are never included. Source links do not copy those files into the website.
@@ -121,7 +151,8 @@ is excluded from published document content.
 2. For a new guide, update the [complete directory](directory.md), add a useful
    home-page route and a navigation entry. Generated
    field references still come from the schema via `work.build_config_reference`.
-3. Build with `--strict`; fix missing targets and anchors instead of hiding them.
+3. Run `python -m work.build_docs`, then the link and access checks below.
+   The wrapper invokes Zensical strict mode; fix missing targets and anchors.
 4. Check the rendered page, search and links, including under the `/wtf/` project
    prefix. Format source/config changes according to the development guide.
 5. Commit the source changes. CI validates pull requests; deployment follows a
@@ -131,7 +162,7 @@ To check the publication filter and link handling, install the documentation
 requirements and run:
 
 ```sh
-.venv/bin/python -m unittest tests.test_docs_site
+.venv-docs/bin/python -m unittest tests.test_docs_site
 ```
 
 The site is unversioned and follows `main`. Historical implementation records
@@ -142,7 +173,7 @@ and documentation deployment status.
 
 The current site uses directory URLs, such as `/wtf/configuration/`. Older
 source/Jekyll addresses such as `/wtf/docs/configuration.html` redirect to the
-matching MkDocs page. The build creates these small redirect pages for public
+matching Zensical page. The build creates these small redirect pages for public
 Markdown guides, nested pages, asset catalogs and the original installation/
 example entry points. Query strings and section fragments are preserved when
 JavaScript is available; a meta refresh and ordinary link provide a fallback.
@@ -152,7 +183,7 @@ The Documentation workflow runs `work.check_docs_links` after building. This
 checks actual generated HTML links, section anchors, image sources (including
 `picture` variants), CSS asset URLs and redirect destinations under the configured
 project prefix. It also traverses document links from the homepage and rejects
-public MkDocs pages that have become unreachable; the generated 404 page is
+public Zensical pages that have become unreachable; the generated 404 page is
 excluded. Asset catalogs and release details must remain reachable through their
 indexes. The documentation tests also require every primary guide to appear in
 navigation and every navigation destination to appear in the complete directory.
@@ -163,7 +194,7 @@ Pages workflow to deploy the updated site and redirects.
 ## Verify the deployed site, not only the build
 
 After deployment, start at the public home URL. Confirm its HTML generator is
-MkDocs, follow every same-site document/asset destination, and validate section
+Zensical, follow every same-site document/asset destination, and validate section
 anchors against the destination HTML. Include picture sources and nested paths.
 A local link audit cannot detect another publishing workflow replacing the site.
 Keep detailed URL/status audit reports local; report exact checked counts and
@@ -182,14 +213,13 @@ excluded from the proof, so the index cannot hide an otherwise isolated page.
 After adding/removing a guide, changing link text or adding a public visual, run:
 
 ```sh
-.venv/bin/python -m work.docs_access
-.venv/bin/python -m work.check_docs_links
-.venv/bin/python -m work.docs_access --check
+.venv-docs/bin/python -m work.docs_access
+.venv-docs/bin/python -m work.check_docs_links
+.venv-docs/bin/python -m work.docs_access --check
 ```
 
-The generator updates the two Markdown catalogs and rebuilds the site. The build
-hook also generates small visual-preview pages from the same inventory, so
-opening a visual retains MkDocs theme controls without duplicating media files.
+The generator updates the two Markdown catalogs and rebuilds the site. The preprocessor also generates small visual-preview pages from the same inventory, so
+opening a visual retains Zensical theme controls without duplicating media files.
 SVG comparison-sheet chrome is adaptive while comparison samples stay fixed. It keeps
 visuals as links rather than embedding every animation on one page. CI rejects
 stale catalogs, unreachable content and mismatched runtime branding copies.

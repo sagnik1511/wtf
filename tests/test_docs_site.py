@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 
 @unittest.skipUnless(
-    importlib.util.find_spec("mkdocs"), "Install requirements-docs.txt"
+    importlib.util.find_spec("zensical"), "Install requirements-docs.txt"
 )
 class DocumentationSiteTests(unittest.TestCase):
     def setUp(self):
@@ -177,10 +177,10 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertTrue(any("missing target" in e for e in report["errors"]))
 
     def test_navigation_and_directory_cover_all_primary_guides(self):
-        from mkdocs.config import load_config
+        from work.build_docs import load_config
 
         root = Path(__file__).resolve().parents[1]
-        config = load_config(str(root / "mkdocs.yml"))
+        config = load_config(str(root / "zensical.toml"))
         self.assertIn("navigation.indexes", config.theme["features"])
 
         def destinations(entries):
@@ -348,7 +348,7 @@ class DocumentationSiteTests(unittest.TestCase):
         rendered = self.site.on_page_markdown(picture, page, self.config, None)
         self.assertIn('class="replay-theme-light"', rendered)
         self.assertIn('class="replay-theme-dark"', rendered)
-        self.assertIn('src="../../assets/themed/demo-light.webp"', rendered)
+        self.assertIn('src="../assets/themed/demo-light.webp"', rendered)
         self.assertIn('alt="Replay &amp; charts"', rendered)
         self.assertNotIn("prefers-color-scheme", rendered)
         fenced = "```html\n" + picture + "\n```\n"
@@ -418,44 +418,107 @@ class DocumentationSiteTests(unittest.TestCase):
             visit(document, document)
 
     def test_ignored_research_and_symlink_files_are_never_published(self):
-        from mkdocs.config.defaults import MkDocsConfig
-        from mkdocs.structure.files import File, Files
-
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
             docs = root / "docs"
             docs.mkdir()
             (root / "INSTALL.md").write_text("# Install")
-            (root / "examples").mkdir()
-            (root / "examples/README.md").write_text("# Example")
-            paths = ["guide.md", "ignored.md", "paper/draft.md", "experiments/raw.csv"]
+            paths = [
+                "guide.md",
+                "ignored.md",
+                "paper/draft.md",
+                "experiments/raw.csv",
+                "overrides/main.html",
+            ]
             for name in paths:
                 path = docs / name
                 path.parent.mkdir(exist_ok=True)
                 path.write_text("local or public")
             (docs / "linked.md").symlink_to(root / "INSTALL.md")
             paths.append("linked.md")
-            files = Files([File(p, str(docs), str(root / "site"), True) for p in paths])
-            files.append(
-                File("theme.css", str(root / "theme"), str(root / "site"), True)
-            )
-            config = MkDocsConfig()
-            config.site_dir = str(root / "site")
-            config.plugins = SimpleNamespace(_current_plugin=None)
+            (docs / "linked_dir").symlink_to(docs / "paper", target_is_directory=True)
+            paths.append("linked_dir/draft.md")
             visible = "\0".join("docs/" + p for p in paths).encode()
-            with (
-                patch.object(self.site, "ROOT", root),
-                patch.object(
-                    self.site.subprocess,
-                    "check_output",
-                    side_effect=[visible, b"docs/ignored.md\0"],
-                ),
+            with patch.object(
+                self.site.subprocess,
+                "check_output",
+                side_effect=[visible, b"docs/ignored.md\0"],
             ):
-                result = self.site.on_files(files, config)
+                result = self.site.public_sources(root)
+            self.assertEqual(result, {"guide.md": docs / "guide.md"})
+
+    def test_zensical_pages_and_readme_urls_preserve_legacy_destinations(self):
+        from work.build_docs import page_for
+
+        for source, url in (
+            ("index.md", ""),
+            ("configuration.md", "configuration/"),
+            ("viewer/playback/index.md", "viewer/playback/"),
+            ("releases/README.md", "releases/"),
+            ("spatial-index.md", "spatial-index/"),
+        ):
+            page = page_for(source)
+            self.assertEqual(page.url, url)
+            self.assertEqual(page.file.dest_uri, url + "index.html")
+
+    def test_zensical_output_is_included_in_link_and_route_audits(self):
+        from work.check_docs_links import check_site
+        from work.docs_access import content_routes
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "guide").mkdir()
+            marker = '<meta name="generator" content="zensical-0.1.3">'
+            (root / "index.html").write_text(
+                marker + '<article><h1>Home</h1><a href="guide/">Guide</a></article>'
+            )
+            (root / "guide/index.html").write_text(
+                marker + "<article><h1>Guide</h1></article>"
+            )
+            report = check_site(root, "https://example.com/wtf/")
+            self.assertEqual(report["documents"], 2)
+            self.assertEqual(report["errors"], [])
             self.assertEqual(
-                {file.src_uri for file in result},
-                {"guide.md", "theme.css", "installation.md", "examples.md"},
+                len(content_routes(root, "https://example.com/wtf/")[0]), 2
+            )
+            (root / "index.html").write_text(
+                marker + "<article><h1>Home</h1></article>"
+            )
+            self.assertTrue(check_site(root, "https://example.com/wtf/")["errors"])
+            with self.assertRaisesRegex(ValueError, "No content-link route"):
+                content_routes(root, "https://example.com/wtf/")
+
+    def test_staging_reuses_original_guides_and_preserves_edit_provenance(self):
+        from work.build_docs import prepare
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "docs/overrides").mkdir(parents=True)
+            (root / "examples").mkdir()
+            (root / "docs/guide.md").write_text("# Guide\n[Install](../INSTALL.md)\n")
+            (root / "docs/private.md").write_text("must not publish")
+            (root / "INSTALL.md").write_text("# Install\n")
+            (root / "examples/README.md").write_text("# Example\n")
+            (root / "zensical.toml").write_text(
+                '[project]\ndocs_dir="docs"\nsite_dir=".cache/site"\nrepo_url="https://github.com/example/project"\nsite_url="https://example.com/wtf/"\n[project.theme]\ncustom_dir="docs/overrides"\n'
+            )
+            with (
+                patch.object(
+                    self.site,
+                    "public_sources",
+                    return_value={"guide.md": root / "docs/guide.md"},
+                ),
+                patch("work.docs_access.inventory", return_value=[]),
+            ):
+                staged, config, pages = prepare(root)
+            docs = root / ".cache/docs-build/docs"
+            self.assertFalse((docs / "private.md").exists())
+            self.assertIn("[Install](installation.md)", (docs / "guide.md").read_text())
+            self.assertIn(
+                "/edit/main/INSTALL.md", (docs / "installation.md").read_text()
             )
             self.assertEqual(
-                result.get_file_from_path("installation.md").content_string, "# Install"
+                {p.file.src_uri for p in pages},
+                {"guide.md", "installation.md", "examples.md"},
             )
+            self.assertTrue(staged.is_file())

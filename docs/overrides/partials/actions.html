@@ -1,0 +1,11 @@
+{% if "content.action.edit" in config.theme.features %} {% set edit_url =
+page.meta.wtf_edit_url | default(page.edit_url, true) %} {% if edit_url %}
+<a
+  href="{{ edit_url }}"
+  title="Edit this page"
+  class="md-content__button md-icon"
+  rel="edit"
+>
+  {% include ".icons/material/file-edit-outline.svg" %}
+</a>
+{% endif %} {% endif %}

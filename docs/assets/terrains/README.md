@@ -84,5 +84,5 @@ The original `.gif` files remain dark-theme fallbacks and keep existing direct
 asset URLs working. Light-theme clips use animated WebP after the same 128-color
 quantization, avoiding another full set of GIFs. Both carry the same frame count,
 step samples and duration. Page markup uses `<picture class="replay-preview">`:
-GitHub selects its media source, while the MkDocs hook resolves nested paths and
+GitHub selects its media source, while the Zensical preprocessor resolves nested paths and
 emits image variants controlled by the site's explicit palette toggle.

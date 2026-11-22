@@ -54,7 +54,7 @@ apply another movement, attack or energy charge.
 
 The [interactive physics explorer](assets/physics/explorer.html) contains all four
 views—visibility, swimming/current, elevation and reproduction—with both prey
-and predator settings. On the MkDocs website, follow the link to open the interactive page directly.
+and predator settings. On the Zensical website, follow the link to open the interactive page directly.
 When browsing the repository on GitHub, HTML is shown as source; download/open
 the file locally instead. The SVG figures below render in both places.
 The explorer needs no ChatGPT session, Python backend or network libraries.
