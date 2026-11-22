@@ -1,6 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Match CPython 3.12/3.13 builtin sum() for float reductions. Only use
@@ -330,6 +331,8 @@ static PyMethodDef methods[] = {
     {"flat_metabolism", metabolism_native, METH_VARARGS,
      "Batch flat-body costs/age/starvation."},
     {"ray", ray_native, METH_VARARGS, "Fused visibility and water ray."},
+    {"nearest_many", nearest_many_native, METH_VARARGS,
+     "Ordered native top-k visible targets."},
     {"nearest", nearest_native, METH_VARARGS,
      "Ordered native nearest visible target."},
     {"group_pairs", group_pairs_native, METH_VARARGS,

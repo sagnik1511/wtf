@@ -49,6 +49,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Masked decisions (SVG)](visual-previews/diagrams/masked-decisions-svg.md) | [masked-decisions.svg](assets/diagrams/masked-decisions.svg) |
 | [Mating intent (SVG)](visual-previews/diagrams/mating-intent-svg.md) | [mating-intent.svg](assets/diagrams/mating-intent.svg) |
 | [Names roles and private brains (SVG)](visual-previews/diagrams/names-roles-and-private-brains-svg.md) | [names-roles-and-private-brains.svg](assets/diagrams/names-roles-and-private-brains.svg) |
+| [Native top k (SVG)](visual-previews/diagrams/native-top-k-svg.md) | [native-top-k.svg](assets/diagrams/native-top-k.svg) |
 | [Observation cache dependencies (SVG)](visual-previews/diagrams/observation-cache-dependencies-svg.md) | [observation-cache-dependencies.svg](assets/diagrams/observation-cache-dependencies.svg) |
 | [One simulation step (SVG)](visual-previews/diagrams/one-simulation-step-svg.md) | [one-simulation-step.svg](assets/diagrams/one-simulation-step.svg) |
 | [Physical costs and learning feedback (SVG)](visual-previews/diagrams/physical-costs-and-learning-feedback-svg.md) | [physical-costs-and-learning-feedback.svg](assets/diagrams/physical-costs-and-learning-feedback.svg) |

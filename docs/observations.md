@@ -83,7 +83,10 @@ setting k=1 is compatible too. Exact checkpoints retain their saved setting.
 Multi-target selection reuses the world's spatial buckets and visibility cache.
 Candidates inside the maximum radius are distance-sorted; sight checks stop
 when k visible targets have been found. The original native nearest-target path
-remains available for k=1; multi-target ranking currently uses Python.
+remains available for k=1; the optional [native top-k selector](native-top-k.md)
+fuses multi-target ranking and sight filtering for recognized world callbacks.
+Final feature arithmetic remains Python, and custom callbacks or older/missing
+extensions use the reference selector.
 
 One result per observer and category is retained, keyed by position, target
 bucket revisions, radius, k and directional range settings. Moves, births,
@@ -91,7 +94,7 @@ deaths, food-presence changes, obstacle edits and visibility implementation
 changes invalidate relevant results. Derived caches are world-local, omitted
 from checkpoints and rebuilt on restore. They are not shared mutably by GRPO
 trial worlds. Higher k increases inputs, training memory and observation work;
-no performance improvement is claimed.
+workload-specific measurements are in the native selector guide.
 
 Replays still store world frames/events/diagnostics in the existing binary chunk
 format. They do not store a separate observation vector for every animal per

@@ -138,6 +138,122 @@ done:
     Py_DECREF(iterator);
     return result;
 }
+/* Query-local POD candidates preserve Python's (distance, order, x, y) sort.
+   Feature arithmetic stays in Python, including math.hypot and zero padding. */
+typedef struct {
+    Py_ssize_t squared, order, x, y;
+} SightCandidate;
+static int sight_candidate_compare(const void *left, const void *right) {
+    const SightCandidate *a = left, *b = right;
+#define SIGHT_COMPARE(field)                                                   \
+    if (a->field != b->field)                                                  \
+    return a->field < b->field ? -1 : 1
+    SIGHT_COMPARE(squared);
+    SIGHT_COMPARE(order);
+    SIGHT_COMPARE(x);
+    SIGHT_COMPARE(y);
+#undef SIGHT_COMPARE
+    return 0;
+}
+static PyObject *nearest_many_native(PyObject *self, PyObject *args) {
+    PyObject *points, *id, *blocked, *water;
+    Py_ssize_t x, y, radius, k, width, height, base, bonus;
+    if (!PyArg_ParseTuple(args, "OnnOnnOOnnnn", &points, &x, &y, &id, &radius,
+                          &k, &blocked, &water, &width, &height, &base, &bonus))
+        return NULL;
+    if (!maps_valid(blocked, water, width, height))
+        return NULL;
+    if (x < 0 || x >= width || y < 0 || y >= height || radius < 1 ||
+        radius > 4096 || k < 1 || k > 16 || base < 0 || base > 4096 ||
+        bonus < 0 || bonus > 4096) {
+        PyErr_SetString(PyExc_ValueError, "Invalid top-k sight range");
+        return NULL;
+    }
+    PyObject *iterator = PyObject_GetIter(points), *point, *result = NULL;
+    SightCandidate *items = NULL;
+    Py_ssize_t count = 0, capacity = 0;
+    if (!iterator)
+        return NULL;
+    while ((point = PyIter_Next(iterator))) {
+        if (!PyTuple_Check(point) || PyTuple_GET_SIZE(point) != 4) {
+            Py_DECREF(point);
+            PyErr_SetString(PyExc_ValueError, "Invalid spatial point");
+            goto done;
+        }
+        int same =
+            PyObject_RichCompareBool(PyTuple_GET_ITEM(point, 1), id, Py_EQ);
+        if (same < 0) {
+            Py_DECREF(point);
+            goto done;
+        }
+        if (same) {
+            Py_DECREF(point);
+            continue;
+        }
+        Py_ssize_t order = PyLong_AsSsize_t(PyTuple_GET_ITEM(point, 0)),
+                   tx = PyLong_AsSsize_t(PyTuple_GET_ITEM(point, 2)),
+                   ty = PyLong_AsSsize_t(PyTuple_GET_ITEM(point, 3));
+        Py_DECREF(point);
+        if (PyErr_Occurred())
+            goto done;
+        if (tx < 0 || tx >= width || ty < 0 || ty >= height) {
+            PyErr_SetString(PyExc_ValueError, "Spatial target outside map");
+            goto done;
+        }
+        Py_ssize_t dx = tx - x, dy = ty - y, squared = dx * dx + dy * dy;
+        if (squared > radius * radius)
+            continue;
+        if (count == capacity) {
+            Py_ssize_t maximum = PY_SSIZE_T_MAX / sizeof(SightCandidate);
+            if (capacity > maximum / 2) {
+                PyErr_NoMemory();
+                goto done;
+            }
+            Py_ssize_t next = capacity ? capacity * 2 : 64;
+            SightCandidate *grown =
+                PyMem_Realloc(items, next * sizeof(SightCandidate));
+            if (!grown) {
+                PyErr_NoMemory();
+                goto done;
+            }
+            items = grown;
+            capacity = next;
+        }
+        items[count++] = (SightCandidate){squared, order, tx, ty};
+    }
+    if (PyErr_Occurred())
+        goto done;
+    if (count > 1)
+        qsort(items, count, sizeof(SightCandidate), sight_candidate_compare);
+    result = PyList_New(0);
+    if (!result)
+        goto done;
+    for (Py_ssize_t i = 0; i < count && PyList_GET_SIZE(result) < k; i++) {
+        SightCandidate *candidate = items + i;
+        int visible;
+        Py_ssize_t wet;
+        trace_ray(x, y, candidate->x, candidate->y,
+                  (unsigned char *)PyBytes_AS_STRING(blocked),
+                  (unsigned char *)PyBytes_AS_STRING(water), width, height,
+                  &visible, &wet);
+        Py_ssize_t allowed = base + (wet < bonus ? wet : bonus);
+        if (!visible || (bonus && candidate->squared > base * base &&
+                         candidate->squared > allowed * allowed))
+            continue;
+        PyObject *offset =
+            Py_BuildValue("(nn)", candidate->x - x, candidate->y - y);
+        if (!offset || PyList_Append(result, offset) < 0) {
+            Py_XDECREF(offset);
+            Py_CLEAR(result);
+            goto done;
+        }
+        Py_DECREF(offset);
+    }
+done:
+    PyMem_Free(items);
+    Py_DECREF(iterator);
+    return result;
+}
 /* Union-find on the same candidate pairs as the Python 3x3 bucket scan.
    Bucket construction remains sparse; no O(map-size) scratch for group metrics.
  */

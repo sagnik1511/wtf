@@ -106,6 +106,7 @@ narrow screens. The top tabs open the same section pages.
 | [Package builds](packaging.md) | Wheel/sdist resources, isolated installation and release checks. |
 | [Performance](performance.md) | Shared work, bounded caches, allocation reductions and invalidation. |
 | [Native kernels](native-kernels.md) | Optional native learning kernels and portable fallback behavior. |
+| [Native top-k perception](native-top-k.md) | Exact selector behavior, cache ownership and matched benchmarks. |
 | [Extended native kernels](native-kernels-v2.md) | Additional compiled paths and equivalence boundaries. |
 | [Native performance review](native-performance-review.md) | Kernel coverage, numeric types and measured performance tradeoffs. |
 | [Contributor context](project-context.md) | Contributor/agent context and implementation boundaries. |

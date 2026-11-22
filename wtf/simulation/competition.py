@@ -67,13 +67,16 @@ def opportunity(world, animal, positions):
     return None, None
 
 
-def _advance(world, winner, loser, events, Event):
+def _advance(world, winner, loser, events, Event, occupied):
     """Advance only the challenger; never swap or push through terrain/occupants."""
     destination = loser.position
-    occupied = {a.position for a in world.animals.values() if a.health > 0}
-    if world.movement_block_reason(
-        winner, destination, "move_forward", occupied - {destination}
-    ):
+    # The destination is the opponent's cell; exclude it without copying the set.
+    present = destination in occupied
+    occupied.discard(destination)
+    reason = world.movement_block_reason(winner, destination, "move_forward", occupied)
+    if present:
+        occupied.add(destination)
+    if reason:
         return
     retreat = None
     if loser.health > 0:
@@ -104,7 +107,9 @@ def _advance(world, winner, loser, events, Event):
             animal, target, "move_forward"
         )
         world._terrain_charge(animal, cost, events, "competition_movement")
+        occupied.discard(animal.position)
         animal.x, animal.y = target
+        occupied.add(target)
         events.append(
             Event(kind, animal.id, position=list(target), cause="competition")
         )
@@ -147,6 +152,7 @@ def resolve(world, actions, events):
             )
         )
     engaged, successful, deaths, priority = set(), set(), set(), []
+    occupied = None
     for animal in challengers:
         target, kind = candidates[animal.id]
         if target is None or animal.id in engaged or target.id in engaged:
@@ -216,8 +222,12 @@ def resolve(world, actions, events):
             )
         if loser.health <= 0:
             deaths.add(loser.id)
+            if occupied is not None:
+                occupied.discard(loser.position)
         if kind == "food":
             priority.append(winner.id)
         elif kind == "blocked_path" and winner is animal:
-            _advance(world, winner, loser, events, Event)
+            if occupied is None:
+                occupied = {a.position for a in world.animals.values() if a.health > 0}
+            _advance(world, winner, loser, events, Event, occupied)
     return priority, deaths, successful

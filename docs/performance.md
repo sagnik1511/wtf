@@ -37,11 +37,10 @@ checks cover deferred rendering, one score pass, reopen reuse, mixed score types
 and signed/zero scales. No profiling or throughput/peak-RAM benchmark was run,
 so these are removed operations rather than measured speedup percentages.
 
-A remaining training candidate is `SpatialIndex.nearest_many(k>1)`: candidate
-filtering/sorting runs in Python rather than the fused native nearest-target
-selector used for k=1. Visibility rays can already use native code. A future
-top-k kernel needs exact distance/insertion ties, wall/water filtering and cache
-invalidation parity; it is not part of this optimization.
+The optional [native top-k selector](native-top-k.md) now handles candidate
+collection, tuple ordering and visibility/range filtering for k > 1. Python still
+owns invalidation and exact final feature arithmetic. Its matched measurements
+compare against the reference selector with all other kernels already enabled.
 
 ## Earlier optimizations and measurements
 
@@ -553,3 +552,101 @@ event and reward equality across 120 steps, one sunlight computation per tick,
 restore isolation, explicit frame-value reuse and byte-identical regeneration
 of the viewer appearance sheets. These remove repeated operations; no measured
 end-to-end speedup or RAM reduction is claimed.
+
+## Champion capture and competition occupancy
+
+Champion ranking and source metadata still update on each record improvement.
+The champion book can reuse the detached model payload when its signature and
+all packed FP32 parameter bytes match the previous capture for that controller.
+Comparison is lazy: a changed optimizer counter forces a fresh snapshot without
+building comparison buffers. An unchanged counter alone never permits reuse;
+the cache compares `array.tobytes()` against the prior snapshot's packed values,
+so direct edits, native optimizer writes, loading and signed-zero changes are
+detected. The first reuse packs the old detached list once; subsequent reuses
+retain its comparison bytes. Changes to recurrent memory or optimizer state alone do not alter
+a warm-start model payload; exact resume checkpoints still retain that state.
+
+The cache belongs to one champion book and retains only controllers that won a
+criterion in the latest consideration pass. Its key includes controller identity
+(verified through a weak reference), model signature and every parameter-buffer
+byte in layer/field order. It holds immutable comparison bytes and detached
+snapshots, never live model buffers. Non-winners are removed on the next pass;
+restoration starts with an empty cache. Legacy FP64/list models use the existing
+uncached capture path. Snapshot payloads shared among criteria remain immutable
+by convention. No cache field enters checkpoints, brain artifacts or replays.
+
+This replaces repeated Python float/list materialization with byte copying and
+comparison; it is not a zero-copy cache. Retained comparison bytes cost four
+bytes per cached FP32 parameter after reuse, plus small structure/weak-reference
+overhead. Controllers updated between every capture retain no comparison bytes.
+Existing champion records already retain the shared model snapshots. The cache
+has no additional lifetime ownership of controllers, optimizers or replay buffers.
+
+Within an enabled competition phase, live occupied positions are built lazily
+on the first winning path challenge and then updated after every displacement
+or contest death. Later contests see current occupancy without another full
+population scan. The shared set is discarded when resolution returns; opportunity
+targets remain selected from the original phase positions. Retreat order, seeded
+ties, damage, movement effort and recorded event positions are unchanged.
+
+Two controlled operation-count probes demonstrate the removed work. A 20-step
+PPO fixture with reproduction disabled and rollout length 64, including founder
+initialization, made 63 detached model captures before reuse and six afterward.
+A six-animal phase resolving three path contests made five full animal-list
+passes before reuse and three afterward (targets, challengers and one live set).
+These are fixture-specific counts, not measured training speedups or peak-RAM
+reductions. Exact state and replay comparisons are separate compatibility checks.
+
+### Local timing and memory measurements
+
+The following comparison uses CPython 3.12 on local macOS with the optional native
+backend enabled. The baseline is the implementation before champion snapshot and
+contest occupancy reuse (`4558cef`); the optimized version includes both changes.
+Each workload used five fresh processes per version, alternating before/after
+order. Values are medians. Complete-state hashes matched between versions.
+
+| Workload | Before | After | Observed change |
+| --- | ---: | ---: | --- |
+| 1,000 champion-ranking passes over one unchanged 3,655-parameter predator brain from `ppo_large_predator.json` | 48.76 ms | 10.57 ms | 4.61× faster; 78.3% less elapsed time |
+| PPO simulation, 60 founders, 120 steps | 199.00 ms | 197.78 ms | Essentially unchanged; 0.6% less elapsed time |
+| Competition simulation, 54 founders, 120 steps | 716.08 ms | 682.37 ms | 4.7% less elapsed time |
+
+The isolated champion probe increments the animal's age and source tick for each
+consideration while retaining its weights; ranking, lineage and metadata handling
+remain included. The simulation probes use [`ppo.json`](../environments/ppo.json)
+and [`competition.json`](../environments/competition.json), seed 100, one fixed-seed
+training run and a 120-step limit. Both reached step 120. Their timers include
+experiment initialization and training, excluding imports, recording, rendering
+and the final comparison digest. Other preset settings are unchanged.
+
+The simulations are short: the small timing differences need longer measurements
+before treating them as dependable gains. The 4.61× figure describes unchanged
+champion capture, not whole-training acceleration or controllers that update
+between every capture.
+
+| Process peak RSS | Before | After |
+| --- | ---: | ---: |
+| Champion-ranking probe | 28.41 MiB | 28.25 MiB |
+| PPO simulation | 30.83 MiB | 30.77 MiB |
+| Competition simulation | 40.48 MiB | 40.50 MiB |
+
+Peak RSS uses `resource.getrusage(RUSAGE_SELF).ru_maxrss`, sampled after the
+workload and before building its comparison digest. It includes process imports
+and initialization. These small differences do not establish a memory reduction;
+peak RAM is effectively unchanged. The tested champion retains about **14.3 KiB**
+of comparison bytes after reuse (3,655 × 4 bytes), plus container overhead.
+The benefit is fewer repeated snapshot allocations rather than lower steady-state
+memory in every workload. Legacy FP64 and Python-fallback timings were not
+measured here; their compatibility was checked separately.
+
+### Kernel assessment
+
+Neither change requires a new native kernel: packed-byte extraction/comparison
+and set membership already execute in CPython's compiled implementations. The
+removed work was repeated object construction or full-world lookup preparation.
+The existing optional kernels continue to cover numerical inference, gradients,
+optimizers, visibility rays and spatial group metrics.
+
+Top-k perception is implemented separately in the optional
+[native selector](native-top-k.md). Its benchmark and exact-parity checks are
+independent of the champion/competition optimization above.

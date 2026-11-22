@@ -14,6 +14,9 @@ PPO minibatch, perception, world, replay and dashboard extensions, with benchmar
 against the preceding native setup. The benchmark table later in this guide is
 the historical first rollout's comparison against FP32 Python code.
 
+The [top-k perception extension](native-top-k.md) adds exact multi-target
+selection with independent before/after measurements and ownership details.
+
 ## Build and select
 
 From the repository root, with a C compiler and Python development headers:

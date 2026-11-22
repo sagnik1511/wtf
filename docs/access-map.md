@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **251 public documentation pages**, **97 visual files**
+Coverage: **255 public documentation pages**, **98 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -65,6 +65,7 @@ and **8 identical viewer branding copies**.
 | [Second native-kernel rollout](native-kernels-v2.md) | [Home](index.md) → [extended kernels](native-kernels-v2.md) |
 | [Optional CPU kernels](native-kernels.md) | [Home](index.md) → [native kernels](native-kernels.md) |
 | [Native kernels and runtime data widths](native-performance-review.md) | [Home](index.md) → [native performance review](native-performance-review.md) |
+| [Native top-k perception](native-top-k.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Native top-k perception](native-top-k.md) |
 | [Animal observations](observations.md) | [Home](index.md) → [observations](observations.md) |
 | [Package layout and import migration](package-layout.md) | [Home](index.md) → [package layout and import migration](package-layout.md) |
 | [Building and verifying the Python distribution](packaging.md) | [Home](index.md) → [Package builds](packaging.md) |
@@ -119,6 +120,7 @@ and **8 identical viewer branding copies**.
 | [Masked decisions (SVG)](visual-previews/diagrams/masked-decisions-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Masked decisions (SVG)](visual-previews/diagrams/masked-decisions-svg.md) |
 | [Mating intent (SVG)](visual-previews/diagrams/mating-intent-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Mating intent (SVG)](visual-previews/diagrams/mating-intent-svg.md) |
 | [Names roles and private brains (SVG)](visual-previews/diagrams/names-roles-and-private-brains-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Names roles and private brains (SVG)](visual-previews/diagrams/names-roles-and-private-brains-svg.md) |
+| [Native top k (SVG)](visual-previews/diagrams/native-top-k-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Native top k (SVG)](visual-previews/diagrams/native-top-k-svg.md) |
 | [Observation cache dependencies (SVG)](visual-previews/diagrams/observation-cache-dependencies-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation cache dependencies (SVG)](visual-previews/diagrams/observation-cache-dependencies-svg.md) |
 | [One simulation step (SVG)](visual-previews/diagrams/one-simulation-step-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [One simulation step (SVG)](visual-previews/diagrams/one-simulation-step-svg.md) |
 | [Physical costs and learning feedback (SVG)](visual-previews/diagrams/physical-costs-and-learning-feedback-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Physical costs and learning feedback (SVG)](visual-previews/diagrams/physical-costs-and-learning-feedback-svg.md) |
@@ -263,7 +265,9 @@ and **8 identical viewer branding copies**.
 | [0.0.1.8 Best-so-far promotion and compact champion weights](releases/0.0.1.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.8](releases/0.0.1.8.md) |
 | [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
 | [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
-| [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1 — optional same-species competition](releases/0.0.2.1.md) |
+| [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1](releases/0.0.2.1.md) |
+| [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2 — champion and competition reuse](releases/0.0.2.2.md) |
+| [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3 — native top-k perception](releases/0.0.2.3.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -305,6 +309,7 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/masked-decisions.svg` | [Home](index.md) → [All visuals](visuals.md) → [masked-decisions.svg](assets/diagrams/masked-decisions.svg) |
 | `assets/diagrams/mating-intent.svg` | [Home](index.md) → [All visuals](visuals.md) → [mating-intent.svg](assets/diagrams/mating-intent.svg) |
 | `assets/diagrams/names-roles-and-private-brains.svg` | [Home](index.md) → [All visuals](visuals.md) → [names-roles-and-private-brains.svg](assets/diagrams/names-roles-and-private-brains.svg) |
+| `assets/diagrams/native-top-k.svg` | [Home](index.md) → [All visuals](visuals.md) → [native-top-k.svg](assets/diagrams/native-top-k.svg) |
 | `assets/diagrams/observation-cache-dependencies.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-cache-dependencies.svg](assets/diagrams/observation-cache-dependencies.svg) |
 | `assets/diagrams/one-simulation-step.svg` | [Home](index.md) → [All visuals](visuals.md) → [one-simulation-step.svg](assets/diagrams/one-simulation-step.svg) |
 | `assets/diagrams/physical-costs-and-learning-feedback.svg` | [Home](index.md) → [All visuals](visuals.md) → [physical-costs-and-learning-feedback.svg](assets/diagrams/physical-costs-and-learning-feedback.svg) |

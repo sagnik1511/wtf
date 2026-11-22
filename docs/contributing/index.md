@@ -17,6 +17,7 @@ source using the maintained development workflow.
 | [Build installable packages](../packaging.md) | Wheel/sdist resources and isolated installation checks. |
 | [Review shared performance paths](../performance.md) | Caches, repeated work and bounded memory. |
 | [Use optional native kernels](../native-kernels.md) | Compiled paths and portable fallbacks. |
+| [Review native top-k perception](../native-top-k.md) | Selection boundary, parity checks and reproducible benchmarks. |
 | [Review extended native kernels](../native-kernels-v2.md) | Additional native coverage and equivalence boundaries. |
 | [Review native performance](../native-performance-review.md) | Coverage, dtypes and benchmark evidence. |
 | [Read contributor context](../project-context.md) | Project rules and generic extension contracts. |

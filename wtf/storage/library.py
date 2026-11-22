@@ -1,6 +1,7 @@
 """Compact per-species/sex champions and immutable, compatible model generations."""
 
 import argparse
+from array import array
 import copy
 from datetime import datetime, timezone
 import hashlib
@@ -9,6 +10,9 @@ from pathlib import Path
 import re
 import shutil
 import uuid
+import weakref
+
+from wtf.native.numeric import Float32
 
 from wtf.learning.brains import model_signature, model_snapshot
 from wtf.experiment.lineage import LineageBook, lineage_policy
@@ -72,6 +76,7 @@ class ChampionBook:
         self.config = config
         self.lineage = LineageBook(config, lineage_state)
         self.entries = {}
+        self._snapshot_cache = {}
         for species, groups in (entries or {}).items():
             if any(k in CRITERIA for k in groups):
                 # Legacy archives only establish a sex winner when recorded.
@@ -83,6 +88,71 @@ class ChampionBook:
                         ] = copy.deepcopy(entry)
             else:
                 self.entries[species] = copy.deepcopy(groups)
+
+    def _snapshot(self, brain, retained):
+        """Lazily validate packed weights; never trust unchanged counters alone."""
+        layers = (
+            (brain.weights,)
+            if brain.config["type"] == "q_network"
+            else brain.network.layers
+        )
+        previous = self._snapshot_cache.get(id(brain))
+        # Counter changes conservatively force a fresh capture without constructing
+        # comparison bytes. Equal counters still require exact parameter checks.
+        unchanged = (
+            previous is not None
+            and previous[0]() is brain
+            and previous[4] == brain.updates
+        )
+        parameters = None
+        signature = None
+        if unchanged:
+            signature = model_signature(brain.config, brain.actions)
+            if previous[1] == signature:
+                buffers = []
+                for layer in layers:
+                    parts = []
+                    for name, values in layer.items():
+                        if not isinstance(values, Float32):
+                            return model_snapshot(brain)
+                        parts.append((name, values.tobytes()))
+                    buffers.append(tuple(parts))
+                parameters = tuple(buffers)
+                expected = previous[2]
+                if expected is None:
+                    saved = previous[3]["parameters"]
+                    saved_layers = (
+                        (saved,) if brain.config["type"] == "q_network" else saved
+                    )
+                    expected = tuple(
+                        tuple(
+                            (name, array("f", values).tobytes())
+                            for name, values in layer.items()
+                        )
+                        for layer in saved_layers
+                    )
+                if parameters == expected:
+                    retained[id(brain)] = (
+                        previous[0],
+                        signature,
+                        parameters,
+                        previous[3],
+                        brain.updates,
+                    )
+                    return previous[3]
+        # Packed-byte caching is deliberately unavailable for legacy FP64 models.
+        model = model_snapshot(brain)
+        if all(
+            isinstance(values, Float32) for layer in layers for values in layer.values()
+        ):
+            retained[id(brain)] = (
+                weakref.ref(brain),
+                signature or model["signature"],
+                parameters,
+                model,
+                brain.updates,
+            )
+        return model
 
     def consider(self, animals, brains, source, newborns=()):
         animals = tuple(animals)
@@ -117,12 +187,13 @@ class ChampionBook:
                 )
                 if previous is None or rank > previous:
                     selected[key] = rank, animal
+        retained = {}
         for (species, sex), selected in winners.items():
             snapshots, metadata = {}, {}
             for key, (rank, animal) in selected.items():
                 if animal.id not in snapshots:
                     brain = brains[animal.id]
-                    snapshots[animal.id] = model_snapshot(brain)
+                    snapshots[animal.id] = self._snapshot(brain, retained)
                     metadata[animal.id] = dict(
                         source,
                         animal_id=animal.id,
@@ -158,6 +229,7 @@ class ChampionBook:
                     entry["selection_policy"] = lineage_policy(self.config, species)
                     entry["lineage"] = self.lineage.rank(animal)[1]
                 self.entries[species][sex][key] = entry
+        self._snapshot_cache = retained
 
 
 def _component(value):

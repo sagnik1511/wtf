@@ -225,6 +225,38 @@ class SpatialIndex:
         previous = self.results.get(animal_id)
         if previous is not None and previous[0] == key:
             return previous[1]
+        owner = getattr(visible, "__self__", None)
+        maps = getattr(owner, "_native_sight", None)
+        native_range = getattr(range_check, "_native_sight_range", None)
+        if (
+            maps is not None
+            and kernels.available("nearest_many")
+            and getattr(visible, "__func__", None)
+            is getattr(owner, "_native_sight_callback", None)
+            and (range_check is None or native_range is not None)
+        ):
+            base, bonus = native_range if native_range is not None else (radius, 0)
+            offsets = kernels.native.nearest_many(
+                points,
+                ax,
+                ay,
+                animal_id,
+                radius,
+                k,
+                *maps,
+                owner.width,
+                owner.height,
+                base,
+                bonus,
+            )
+            features = []
+            for dx, dy in offsets:
+                features.extend(
+                    (dx / radius, dy / radius, math.hypot(dx, dy) / radius, 1.0)
+                )
+            features.extend([0.0] * (4 * k - len(features)))
+            self.results[animal_id] = key, features
+            return features
         radius_squared = radius * radius
         candidates = []
         for order, other_id, x, y in points:

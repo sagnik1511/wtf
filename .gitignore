@@ -48,6 +48,7 @@ work/performance/*
 !work/performance/repeat.py
 !work/performance/benchmark_kernels.py
 !work/performance/benchmark_data_kernels.py
+!work/performance/top_k.py
 
 # Local diagram authoring sources; publish intentional SVG exports instead.
 *.mmd
