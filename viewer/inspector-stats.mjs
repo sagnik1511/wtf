@@ -1,3 +1,4 @@
+import { trackingLayout, trackingView } from './tracking.mjs';
 import { visualColor } from './theme.mjs';
 import { circadianBody } from './day-night.mjs';
 // Read recorded inputs only. No inference, model weights or simulation updates.
@@ -25,12 +26,14 @@ export function observationView(features, template) {
     ? (template.observation_version ?? 1)
     : { 20: 1, 32: 2, 42: 3, 45: 4 }[features.length];
   const k = template?.observation_top_k ?? 1;
+  const tracking = trackingLayout(template ?? {});
   if (
     !WIDTHS[version] ||
     !Number.isInteger(k) ||
     k < 1 ||
     k > 16 ||
-    features.length !== WIDTHS[version] + 12 * (k - 1)
+    !tracking ||
+    features.length !== WIDTHS[version] + 12 * (k - 1) + tracking.width
   )
     return null;
   let offset = 8;
@@ -94,6 +97,12 @@ export function observationView(features, template) {
       Object.assign(result.mating, { selfIntent, mateIntent, consentingPair });
     }
   }
+  if (tracking.width)
+    result.tracking = trackingView(
+      features,
+      template,
+      WIDTHS[version] + 12 * (k - 1),
+    );
   return result;
 }
 

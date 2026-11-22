@@ -1,3 +1,4 @@
+import { MovementHistory } from './movement-history.mjs';
 import { recentContests } from './competition.mjs';
 import { decodeChunk } from './replay-codec.mjs';
 import { recentNaturalDeaths } from './death-highlights.mjs';
@@ -6,8 +7,9 @@ import { recentKills } from './kill-highlights.mjs';
 // File-format reader only: no simulation, model weights, or learning code.
 // One decoded chunk is retained, regardless of total recording duration.
 export class Playback {
-  constructor(loadJSON, now = () => Date.now()) {
+  constructor(loadJSON, now = () => Date.now(), { movement = false } = {}) {
     this.loadJSON = loadJSON;
+    this.movement = movement ? new MovementHistory() : null;
     this.now = now;
     this.lastMetadataRefresh = -Infinity;
     this.frames = [];
@@ -40,6 +42,10 @@ export class Playback {
     const entry = this.runs.find((entry) => entry.run === Number(run));
     if (!entry) throw new Error('Recorded run not found');
     this.run = entry;
+    this.movement?.reset(
+      this.metadata.config.world.width,
+      this.metadata.config.world.height,
+    );
     this.metrics = [];
     const metrics = await this.loadJSON(
       `/api/recordings/${encodeURIComponent(this.id)}/runs/${entry.run}/metrics`,
@@ -119,6 +125,12 @@ export class Playback {
       this.frames = frames;
       this.chunkIndex = chunkIndex;
     }
+    if (this.movement)
+      await this.movement.move(this.frames, chunkIndex * size, index, (frame) =>
+        this.loadJSON(
+          `/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/movement/${frame}`,
+        ),
+      );
     this.frameIndex = index;
     return this.snapshot(selected);
   }

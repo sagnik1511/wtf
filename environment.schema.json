@@ -1011,6 +1011,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1143,6 +1182,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1253,6 +1331,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1354,6 +1471,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1486,6 +1642,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1632,6 +1827,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1768,6 +2002,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -1913,6 +2186,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -2063,6 +2375,45 @@
                 "maximum": 16,
                 "default": 1,
                 "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["species"],
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per configured group, not individual destinations. Requires scent_trails.enabled; omission disables this brain's scent inputs."
               }
             },
             "required": [
@@ -2306,6 +2657,25 @@
         }
       },
       "description": "Optional repeating sunlight cycle; omitted or disabled leaves static body values and lighting."
+    },
+    "scent_trails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "lifetime_steps"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Deposit anonymous species/sex ground traces. Omission or false disables scent storage and sensing."
+        },
+        "lifetime_steps": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 256,
+          "description": "Ground-trace lifetime in simulation steps; freshness decreases linearly to zero, and revisiting a cell refreshes its group trace."
+        }
+      },
+      "description": "Optional anonymous ground-scent field. Traces persist after their maker leaves or dies, merge per cell/species/sex, and do not cross water or sealed obstacles."
     }
   },
   "required": [

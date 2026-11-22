@@ -1,3 +1,4 @@
+import { trackingLabels } from './tracking.mjs';
 import { visualColor } from './theme.mjs';
 // Display-only topology from existing observations and layer arrays. No weight requests.
 import { observationView, predictionView } from './inspector-stats.mjs';
@@ -56,6 +57,7 @@ export function inputLabels(template = {}, length = 20) {
     );
   if ((template.observation_version ?? 1) >= 4)
     names.push('Self consent', 'Mate consent', 'Consenting pair');
+  names.push(...trackingLabels(template));
   return Array.from({ length }, (_, i) => names[i] ?? `Input ${i}`);
 }
 export function inputInterpretation(diagnostic, template) {

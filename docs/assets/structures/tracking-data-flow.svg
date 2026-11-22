@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 670" role="img" aria-labelledby="title desc">
+<style id="figure-palette">svg{--figure-bg:#f8fafc;--figure-panel:#fff;--figure-ink:#172b45;--figure-muted:#52657b;--figure-line:#8ca0b7;--figure-orange:#9a4100;--figure-animal:#166c61;}@media(prefers-color-scheme:dark){svg{--figure-bg:#171b22;--figure-panel:#26313e;--figure-ink:#e5eaf1;--figure-muted:#b2bfce;--figure-line:#879db4;--figure-orange:#ffd08a;--figure-animal:#70d5bb;}}</style>
+<title id="title">Personal movement memory and anonymous scent ownership</title>
+<desc id="desc">Two optional sources append inputs to each animal's brain. Personal sighting buffers retain only observed targets; the world stores merged species/sex ground traces. Checkpoints preserve both, while replay stores sampled inputs only.</desc>
+<style>text{font:15px system-ui,sans-serif;fill:var(--figure-ink)}.head{font-size:21px;font-weight:650}.small{font-size:14px;fill:var(--figure-muted)}.box{fill:var(--figure-panel);stroke:var(--figure-line);stroke-width:1.5}.arrow{fill:none;stroke:var(--figure-line);stroke-width:2;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="var(--figure-line)"/></marker></defs>
+<rect width="1040" height="670" fill="var(--figure-bg)"/>
+<text x="28" y="38" class="head">Two optional senses, separate owners</text>
+<text x="28" y="65" class="small">No target IDs in brain inputs; no hidden movement backfill; no compulsory pursuit action.</text>
+<rect class="box" x="28" y="90" width="470" height="244" rx="10"/>
+<text x="48" y="121" class="head">Observer: private visual memory</text>
+<rect class="box" x="48" y="144" width="430" height="58" rx="6"/>
+<text x="64" y="168">Current visibility + distance-ranked top-K targets</text>
+<text x="64" y="190" class="small">Match personal sightings by internal identity.</text>
+<path class="arrow" d="M263 203V224"/>
+<rect class="box" x="48" y="228" width="430" height="80" rx="6"/>
+<text x="64" y="253">Ring of H+1 sighting frames</text>
+<text x="64" y="276" class="small">Only selected animals; gaps remain unknown.</text>
+<text x="64" y="297" class="small">Last position, velocity estimate and fading confidence.</text>
+<rect class="box" x="542" y="90" width="470" height="244" rx="10"/>
+<text x="562" y="121" class="head">World: anonymous ground scent</text>
+<rect class="box" x="562" y="144" width="430" height="58" rx="6"/>
+<text x="578" y="168">Dry cell + species + sex → latest deposit time</text>
+<text x="578" y="190" class="small">Overlapping group trails merge; old entries expire.</text>
+<path class="arrow" d="M777 203V224"/>
+<rect class="box" x="562" y="228" width="430" height="80" rx="6"/>
+<text x="578" y="253">Local dry-path sampling → nine sectors per group</text>
+<text x="578" y="276" class="small">Several directions can be fresh simultaneously.</text>
+<text x="578" y="297" class="small">No individual destination, full route or consent signal.</text>
+<path class="arrow" d="M263 334V354H420V372"/><path class="arrow" d="M777 334V354H620V372"/>
+<rect class="box" x="220" y="376" width="600" height="73" rx="8"/>
+<text x="244" y="403" class="head">Per-animal observation → independent policy</text>
+<text x="244" y="429" class="small">Existing blocks → movement block → species/sex scent blocks</text>
+<path class="arrow" d="M350 449V478"/><path class="arrow" d="M690 449V478"/>
+<rect class="box" x="28" y="482" width="470" height="130" rx="8"/>
+<text x="48" y="511" class="head">Exact checkpoint</text>
+<text x="48" y="538">Versioned sensory state + existing world/brains</text>
+<text x="48" y="562" class="small">Restore private buffers and sparse integer deposits.</text>
+<text x="48" y="586" class="small">GRPO trials own copies; newborns inherit no memories.</text>
+<rect class="box" x="542" y="482" width="470" height="130" rx="8"/>
+<text x="562" y="511" class="head">Sampled replay → selected inspector</text>
+<text x="562" y="538">Existing input vectors in binary/compressed chunks</text>
+<text x="562" y="562" class="small">Observed movement dots + anonymous scent grids.</text>
+<text x="562" y="586" class="small">No per-frame scent maps; no extra trajectory archive.</text>
+<text x="28" y="647" class="small">Both off by default. Learning decisions, mating proximity and physical challenge gates remain separate.</text>
+</svg>

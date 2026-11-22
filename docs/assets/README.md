@@ -109,4 +109,4 @@ figures, tables and prose remain the better choice.
 
 ## Viewer appearance catalog
 
-[Source-rendered viewer specimens](viewer/README.md) identify animal/sex glyphs, resources, events, terrain, visibility and inspector/brain graphics. The [appearance reference](../viewer-visual-reference.md) embeds the six sheets with their meaning; chart values are illustrative.
+[Source-rendered viewer specimens](viewer/README.md) identify animal/sex glyphs, resources, events, terrain, visibility and inspector/brain graphics. The [appearance reference](../viewer-visual-reference.md) embeds the seven sheets with their meaning; chart values are illustrative.

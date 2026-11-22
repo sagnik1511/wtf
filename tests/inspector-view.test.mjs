@@ -214,3 +214,45 @@ test('Version four renders recorded consent gauges and escape prediction bars', 
   assert(labels.includes('Nearby consenting pair opportunity yes'));
   assert(labels.includes('strafe left'));
 });
+
+test('Movement and scent inspector plots use sampled history and anonymous species/sex groups', () => {
+  const template = {
+    observation_version: 1,
+    movement_history_steps: 2,
+    scent_observation: { species: ['prey'], radius: 2 },
+  };
+  const track = [0.5, 0, 0.25, 0, 0.5, 2 / 3, 0, 0.5, 0, 1, 0, 0, 0];
+  const root = inspectorGraphs({
+    diagnostic: {
+      tick: 8,
+      features: [
+        ...features,
+        ...track,
+        ...Array(13).fill(0),
+        ...Array(18).fill(0.5),
+      ],
+      action_probabilities: { rest: 1 },
+    },
+    template,
+    spec: { body },
+    hasWater: false,
+  });
+  const labels = text(root);
+  assert(labels.includes('Movement memory & scent'));
+  assert(labels.includes('last seen 1 steps ago'));
+  assert(labels.includes('prey · female'));
+  assert(labels.includes('prey · male'));
+  assert(labels.includes('not one animal'));
+  assert.equal(
+    walk(root).filter((n) => n.attributes.class === 'scent-grid').length,
+    2,
+  );
+  assert.equal(
+    walk(root).filter((n) => n.attributes.class === 'movement-history').length,
+    1,
+  );
+  assert(walk(root).some((n) => n.attributes['stroke-dasharray'] === '3 2'));
+  assert(
+    walk(root).some((n) => n.textContent.includes('own scent may be included')),
+  );
+});

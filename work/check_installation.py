@@ -96,6 +96,8 @@ def main():
             "/style.css",
             "/day-night.mjs",
             "/competition.mjs",
+            "/tracking.mjs",
+            "/movement-history.mjs",
             "/branding/wtf-symbol-light.svg",
             "/branding/wtf-symbol-dark.svg",
             "/branding/wtf-symbol-light.png",
@@ -115,6 +117,13 @@ def main():
             assert any(r["id"] == folder.name for r in json.load(response))
         with urlopen(base + f"/api/recordings/{folder.name}") as response:
             assert json.load(response)["config"]["name"] == "maskable_ppo"
+        with urlopen(
+            base + f"/api/recordings/{folder.name}/runs/1/movement/3"
+        ) as response:
+            heat = json.load(response)
+            assert heat["frame_index"] == 3 and heat["tick"] == 3
+            assert len(heat["counts"]) == heat["width"] * heat["height"]
+            assert sum(heat["counts"]) == heat["arrivals"]
         # This is the viewer's ordinary decoded chunk endpoint.
         with urlopen(
             base + f"/api/recordings/{folder.name}/runs/1/chunks/0"

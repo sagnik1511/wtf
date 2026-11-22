@@ -106,6 +106,7 @@ Home = "index.md"
     { "Algorithms and networks" = "algorithms.md" },
     { "Advanced algorithms" = "advanced-algorithms.md" },
     { "Brain inputs and observations" = "observations.md" },
+    { "Movement memory and scent" = "tracking.md" },
     { "Rewards and costs" = "rewards.md" },
     { "Feedback contracts" = "feedback-review.md" },
     { "Mating observations" = "mating-observations.md" },

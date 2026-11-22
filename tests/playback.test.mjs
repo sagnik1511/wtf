@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Playback } from '../viewer/playback.mjs';
 import { recentBirths } from '../viewer/birth-highlights.mjs';
 
-function setup(cycle) {
+function setup(cycle, movement = false) {
   const manifest = {
     recording_version: 1,
     name: 'test',
@@ -21,37 +21,55 @@ function setup(cycle) {
     ],
   };
   const calls = [];
-  const p = new Playback(async (path) => {
-    calls.push(path);
-    assert.ok(!path.includes('/api/step'));
-    if (path === '/api/recordings/test') return manifest;
-    if (path.endsWith('/metrics')) {
-      const run = Number(path.match(/runs\/(\d+)/)[1]);
-      return Array.from(
-        { length: manifest.runs[run - 1].frame_count },
-        (_, tick) => ({ tick, populations: { prey: 4 }, food: 10 * run }),
-      );
-    }
-    const match = path.match(/runs\/(\d+)\/chunks\/(\d+)$/);
-    const run = Number(match[1]),
-      chunk = Number(match[2]),
-      count = manifest.runs[run - 1].frame_count;
-    return Array.from({ length: Math.min(3, count - chunk * 3) }, (_, i) => ({
-      tick: chunk * 3 + i,
-      animals: [],
-      resources: [],
-      metrics: {
+  const p = new Playback(
+    async (path) => {
+      calls.push(path);
+      assert.ok(!path.includes('/api/step'));
+      if (path === '/api/recordings/test') return manifest;
+      if (path.endsWith('/metrics')) {
+        const run = Number(path.match(/runs\/(\d+)/)[1]);
+        return Array.from(
+          { length: manifest.runs[run - 1].frame_count },
+          (_, tick) => ({ tick, populations: { prey: 4 }, food: 10 * run }),
+        );
+      }
+      if (path.includes('/movement/')) {
+        const index = Number(path.split('/').at(-1));
+        return {
+          width: 8,
+          height: 8,
+          counts: Array(64).fill(0),
+          arrivals: 0,
+          maximum: 0,
+          frame_index: index,
+          tick: index,
+        };
+      }
+      const match = path.match(/runs\/(\d+)\/chunks\/(\d+)$/);
+      const run = Number(match[1]),
+        chunk = Number(match[2]),
+        count = manifest.runs[run - 1].frame_count;
+      return Array.from({ length: Math.min(3, count - chunk * 3) }, (_, i) => ({
         tick: chunk * 3 + i,
-        populations: { prey: 4 },
-        food: 10 * run,
-      },
-      ...(i === 0
-        ? {
-            diagnostics: { 7: { tick: chunk * 3, action_values: { rest: 1 } } },
-          }
-        : {}),
-    }));
-  });
+        animals: [],
+        resources: [],
+        metrics: {
+          tick: chunk * 3 + i,
+          populations: { prey: 4 },
+          food: 10 * run,
+        },
+        ...(i === 0
+          ? {
+              diagnostics: {
+                7: { tick: chunk * 3, action_values: { rest: 1 } },
+              },
+            }
+          : {}),
+      }));
+    },
+    undefined,
+    { movement },
+  );
   return { p, calls };
 }
 
@@ -769,4 +787,26 @@ test('Playback preserves cycle metadata on seek and run changes without frame ad
   const old = setup().p;
   await old.open('test');
   assert.equal('day_night' in old.snapshot(), false);
+});
+
+test('Playback movement follows time without prefix requests for local steps or rewinds', async () => {
+  const { p, calls } = setup(undefined, true);
+  await p.open('test');
+  const buffer = p.movement.map.counts.buffer;
+  await p.advance();
+  await p.advance();
+  await p.seek(1);
+  assert.equal(calls.filter((p) => p.includes('/movement/')).length, 0);
+  assert.equal(p.movement.map.frame_index, 1);
+  await p.seek(7);
+  assert.equal(calls.filter((p) => p.includes('/movement/')).length, 1);
+  await p.seek(6);
+  await p.seek(7);
+  assert.equal(calls.filter((p) => p.includes('/movement/')).length, 1);
+  await p.seek(0);
+  assert.equal(p.movement.map.arrivals, 0);
+  assert.equal(p.movement.map.counts.buffer, buffer);
+  await p.changeRun(2);
+  assert.equal(p.movement.map.frame_index, 0);
+  assert.equal(p.movement.map.arrivals, 0);
 });

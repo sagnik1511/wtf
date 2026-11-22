@@ -208,6 +208,19 @@
               value="2"
               aria-label="Whole network rank threshold"
           /></label>
+          <div class="tracking-controls">
+            <button id="movement-open" disabled>Run movement heatmap</button>
+            <button id="tracking-open" disabled>
+              Tracks &amp; scent charts
+            </button>
+            <label
+              ><input id="show-tracking" type="checkbox" checked disabled />Show
+              sampled tracks on board</label
+            >
+            <p id="tracking-status" class="muted inspector-note">
+              Select an animal to inspect its recorded senses.
+            </p>
+          </div>
           <button id="brain-open" disabled>Watch animal brain</button>
           <button id="explain-open" disabled>Explain saved brain</button>
           <p class="muted inspector-note">
@@ -234,7 +247,8 @@
         <section class="panel">
           <h2>Behavior & learning</h2>
           <p class="muted">
-            Whole saved run, including frames after the playback position.
+            Behavior tables summarize the whole saved run, including future
+            playback frames. The movement heatmap stops at the replay step.
             Early/late changes also reflect age and population selection.
           </p>
           <div id="behavior" class="muted">Load a recording.</div>

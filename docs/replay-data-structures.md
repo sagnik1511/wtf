@@ -286,3 +286,13 @@ The schemas follow [the recorder](../wtf/storage/recording.py),
 [the viewer reader](../viewer/playback.mjs). The [asset catalog](assets/storage/README.md)
 documents the three original SVG illustrations and their validation. None uses
 experiment data, model weights, screenshots or screen recordings.
+
+## Replay-time movement counts
+
+The [movement heatmap](tracking.md#replay-time-movement-heatmap) is reconstructed
+from saved body frames and known terminal positions. It creates no artifact,
+per-step grid history or replay field. The browser holds one count grid and
+previous positions alongside its current replay chunk. Larger jumps request
+`/api/recordings/{id}/runs/{run}/movement/{frame_index}`, which streams only the
+needed prefix on the server and returns counts through that frame. Other
+behavior tables remain full-run summaries; the heatmap excludes future frames.

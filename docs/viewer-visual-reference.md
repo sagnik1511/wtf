@@ -169,3 +169,17 @@ the fixed window and the status badge says **Loading recording…**. The symbol
 returns to its static form when loading completes or fails, and remains static
 through playback and frame buffering. Reduced-motion preferences disable the
 ribbon animation. See [motion assets and behavior](branding.md#motion-policy).
+
+## Movement memory and scent
+
+![Current inspector movement-memory and species/sex scent components](assets/viewer/tracking.svg)
+
+With the optional [tracking senses](tracking.md) enabled, select an animal to see
+its sampled movement history and anonymous local scent patterns. **Tracks & scent
+charts** jumps to those panels. A selected-only board overlay shows personal
+visual tracks, while **Run movement heatmap** opens arrival counts through the current replay step
+in Behavior & learning. Scent itself stays off the main board. Hollow markers
+are last-seen memories; dashed inspector lines are velocity estimates, and gaps remain
+unknown. Each labeled scent grid belongs to a species/sex channel rather than
+one animal. These controlled SVG specimens come from the actual inspector
+renderers and adapt to interface light/dark palettes.

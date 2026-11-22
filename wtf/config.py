@@ -66,8 +66,14 @@ def validate(c):
             "brains",
             "experiment",
         ),
-        optional=("recording", "terrain", "placement", "day_night"),
+        optional=("recording", "terrain", "placement", "day_night", "scent_trails"),
     )
+    if "scent_trails" in c:
+        scent = c["scent_trails"]
+        obj(scent, "scent_trails", ("enabled", "lifetime_steps"))
+        if type(scent["enabled"]) is not bool:
+            fail("scent_trails.enabled", "must be boolean")
+        num(scent["lifetime_steps"], "scent_trails.lifetime_steps", 2, 256, True)
     if "day_night" in c:
         cycle = c["day_night"]
         obj(cycle, "day_night", ("enabled", "cycle_steps"), optional=("start_phase",))
@@ -144,6 +150,29 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
+        if "movement_history_steps" in b:
+            num(b["movement_history_steps"], p + ".movement_history_steps", 0, 16, True)
+            b = {k: v for k, v in b.items() if k != "movement_history_steps"}
+        if "scent_observation" in b:
+            scent = b["scent_observation"]
+            sp = p + ".scent_observation"
+            obj(scent, sp, ("species",), optional=("radius", "separate_sexes"))
+            names = scent["species"]
+            if (
+                not isinstance(names, list)
+                or not 1 <= len(names) <= 8
+                or any(not isinstance(n, str) for n in names)
+                or len(set(names)) != len(names)
+            ):
+                fail(sp + ".species", "must contain 1–8 unique species names")
+            if any(n not in c["species"] for n in names):
+                fail(sp + ".species", "unknown species")
+            num(scent.get("radius", 2), sp + ".radius", 1, 8, True)
+            if type(scent.get("separate_sexes", True)) is not bool:
+                fail(sp + ".separate_sexes", "must be boolean")
+            if not c.get("scent_trails", {}).get("enabled", False):
+                fail(sp, "requires scent_trails.enabled")
+            b = {k: v for k, v in b.items() if k != "scent_observation"}
         if "observation_top_k" in b:
             num(b["observation_top_k"], p + ".observation_top_k", 1, 16, True)
             b = {k: v for k, v in b.items() if k != "observation_top_k"}

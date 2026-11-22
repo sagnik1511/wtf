@@ -51,6 +51,7 @@ for changed settings; `--resume` restores saved configuration/state instead.
 | Per-species colors and male/female distinction | Species `display`; theme button affects interface appearance | [Viewer appearance](viewer-visual-reference.md), [species colors](species.md#viewer-colors-and-metrics) |
 | Choose an existing algorithm or increase network depth | Species `brain` points to a named `brains` template | [Algorithm guide](algorithms.md), [advanced algorithms](advanced-algorithms.md) |
 | Learning speed and optimizer cadence | Template learning rate, batch/rollout/update fields; species multiplier | [Field reference](configuration-reference.md), algorithm-specific guides |
+| Remember sightings or sense anonymous trails | Template `movement_history_steps`, `scent_observation`; root `scent_trails` | [Tracking senses](tracking.md) |
 | See more targets or add mating/terrain inputs | Template `observation_version`, `observation_top_k`; body sight | [Observation layouts](observations.md) |
 | Add a new algorithm implementation | Python controller and explicit dispatch/schema registration | [New-policy integration](extending-policies.md) |
 | Load champions or choose what counts as best | CLI `--brains-from`, `--brain`, `--champion`; species selection configuration | [Brain library](brain-library.md) |

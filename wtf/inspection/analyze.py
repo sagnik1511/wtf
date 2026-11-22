@@ -6,6 +6,7 @@ import json
 import math
 from pathlib import Path
 from wtf.storage.replay_io import chunk_path, load_chunk
+from wtf.inspection.movement import MovementCounts
 from wtf.simulation.actions import (
     MOVE_ACTIONS,
     WALK_ACTIONS,
@@ -18,6 +19,7 @@ DEFINITIONS = {
     "energy_budget": "Opening snapshot energy + realized food energy + configured newborn grants. Net reproduction energy is newborn grants minus parent reproduction costs; energy_coverage excludes grants.",
     "feeding_success": "Positive resource-energy events / observed eat attempts.",
     "hunt_success": "Kills / observed attack attempts; partial hits are reported separately.",
+    "movement_heatmap": "Whole-run changed-position arrivals per destination cell, across all species/sexes. Only consecutive recorded frames and known terminal positions count; births, stationary frames and interpolated routes do not.",
     "movement_success": "Successful moves / observed move attempts, including blocked attempts.",
     "energy_coverage": "Food/prey energy gained / living + known action + terrain + reproduction energy demand. Initial and newborn energy are excluded from intake.",
     "occupied_grid_fraction": "Distinct recorded occupied cells / all grid cells, including obstacles in the denominator.",
@@ -260,7 +262,7 @@ class Statistics:
         )
 
 
-def analyze_run(config, frames, window_steps=250):
+def analyze_run(config, frames, window_steps=250, *, include_movement=True):
     """Consume ordered frames once, retaining only the prior frame and summaries."""
     if type(window_steps) is not int or window_steps < 1:
         raise ValueError("window_steps must be a positive integer")
@@ -271,6 +273,9 @@ def analyze_run(config, frames, window_steps=250):
     frame_count = adjacent = 0
     initial_populations, opening_energy = {}, {}
     final_metrics = {}
+    width, height = config["world"]["width"], config["world"]["height"]
+    movement = MovementCounts(width, height) if include_movement else None
+
     for frame in frames:
         tick = frame["tick"]
         if previous is not None and tick <= last_tick:
@@ -303,10 +308,18 @@ def analyze_run(config, frames, window_steps=250):
             for animal in prior.values():
                 for stat in destinations(animal["species"]):
                     stat.expose(animal)
-            actions = {i: a["last_action"] for i, a in animals.items() if i in prior}
+            actions = {}
+            for i, animal in animals.items():
+                if i in prior:
+                    actions[i] = animal["last_action"]
+                    if movement is not None:
+                        movement.position(prior[i], animal)
+
             # Successful terminal actions are recoverable from recorded events.
             for event in frame.get("events", []):
                 i, kind = event["actor"], event["kind"]
+                if movement is not None:
+                    movement.terminal(prior, animals, event)
                 if i in prior and i not in actions:
                     if kind == "action_failed":
                         actions[i] = event["cause"]
@@ -376,6 +389,8 @@ def analyze_run(config, frames, window_steps=250):
         species={s: stat.report(s) for s, stat in overall.items()},
         windows=[],
     )
+    if movement is not None:
+        result["movement_heatmap"] = movement.summary()
     for s, stat in result["species"].items():
         survivors = [
             a for a in (previous or {}).get("animals", []) if a["species"] == s
@@ -409,7 +424,7 @@ def analyze_run(config, frames, window_steps=250):
     return result
 
 
-def analyze_recording(folder, run=None, window_steps=250):
+def analyze_recording(folder, run=None, window_steps=250, *, include_movement=True):
     folder = Path(folder)
     playback = folder if (folder / "recording.json").is_file() else folder / "playback"
     playback = playback.resolve()
@@ -445,7 +460,9 @@ def analyze_recording(folder, run=None, window_steps=250):
                 yield from chunk
                 del chunk
 
-        result = analyze_run(manifest["config"], frames(), size)
+        result = analyze_run(
+            manifest["config"], frames(), size, include_movement=include_movement
+        )
         result.update(run=entry["run"], seed=entry["seed"], complete=entry["complete"])
         report["runs"].append(result)
     return report

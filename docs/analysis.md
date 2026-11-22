@@ -90,3 +90,20 @@ without that information retain their existing action-coverage limitations.
 
 See [evaluation methods](evaluation.md) for frozen policies, matched starting
 conditions, offspring-specific measures and uncertainty across seeds.
+
+## Movement arrival heatmap
+
+The viewer's **Behavior & learning** section includes an all-animal movement
+heatmap, accessible through **Run movement heatmap** in the inspector controls.
+It follows the replay through the current step, including backward seeks, while
+the other behavior tables summarize the full saved run. Seek to the final frame
+for all-run counts. Stationary time, newborn placement and frame gaps do not add
+heat, and unknown routes are never reconstructed.
+
+Forward playback and local rewinds reuse the loaded chunk with one integer grid
+and prior animal positions. Larger jumps rebuild a prefix by streaming saved
+chunks through the requested frame on the server. No per-frame heatmap history,
+extra replay fields or whole-run browser buffer are required. The independent
+CLI analysis report still supports its full-run heatmap. See the
+[tracking guide](tracking.md#replay-time-movement-heatmap) and
+[viewer specimens](viewer-visual-reference.md#movement-memory-and-scent).

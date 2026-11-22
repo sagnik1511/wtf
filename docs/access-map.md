@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **260 public documentation pages**, **99 visual files**
+Coverage: **264 public documentation pages**, **101 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -79,6 +79,7 @@ and **8 identical viewer branding copies**.
 | [Setup, runs and checkpoints](running.md) | [Home](index.md) → [run and resume](running.md) |
 | [Source call and caller graphs](source-graphs.md) | [Home](index.md) → [Source graphs and browser](source-graphs.md) |
 | [Adding prey and predator species](species.md) | [Home](index.md) → [species](species.md) |
+| [Visual movement memory and scent trails](tracking.md) | [Home](index.md) → [Tracking senses](tracking.md) |
 | [GRPO trials and independent actor batches](training-workflow-performance.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [GRPO trials and actor batches](training-workflow-performance.md) |
 | [Complete experiment tutorial](tutorial.md) | [Home](index.md) → [Complete tutorial](tutorial.md) |
 | [1. Configure a small world](tutorials/01-configuration.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Tutorial 1: Configure](tutorials/01-configuration.md) |
@@ -171,6 +172,7 @@ and **8 identical viewer branding copies**.
 | [Observation vector layout (SVG)](visual-previews/structures/observation-vector-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation vector layout (SVG)](visual-previews/structures/observation-vector-layout-svg.md) |
 | [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) |
 | [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) |
+| [Tracking data flow (SVG)](visual-previews/structures/tracking-data-flow-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Tracking data flow (SVG)](visual-previews/structures/tracking-data-flow-svg.md) |
 | [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) |
 | [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) |
 | [River crossing (GIF)](visual-previews/terrains/river-crossing-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [River crossing (GIF)](visual-previews/terrains/river-crossing-gif.md) |
@@ -187,6 +189,7 @@ and **8 identical viewer branding copies**.
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night (SVG)](visual-previews/viewer/day-night-svg.md) |
 | [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) |
 | [Themes (SVG)](visual-previews/viewer/themes-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Themes (SVG)](visual-previews/viewer/themes-svg.md) |
+| [Tracking (SVG)](visual-previews/viewer/tracking-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Tracking (SVG)](visual-previews/viewer/tracking-svg.md) |
 | [Workspace map (SVG)](visual-previews/viewer/workspace-map-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Workspace map (SVG)](visual-previews/viewer/workspace-map-svg.md) |
 | [All visuals](visuals.md) | [Home](index.md) → [All visuals](visuals.md) |
 | [Worlds and species](worlds/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Configuration, maps and animals](worlds/index.md) |
@@ -272,7 +275,8 @@ and **8 identical viewer branding copies**.
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
-| [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6 — Stable board event overlays](releases/0.0.2.6.md) |
+| [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
+| [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7 — Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -386,6 +390,7 @@ and **8 identical viewer branding copies**.
 | `assets/structures/observation-vector-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-vector-layout.svg](assets/structures/observation-vector-layout.svg) |
 | `assets/structures/package-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [package-layout.svg](assets/structures/package-layout.svg) |
 | `assets/structures/spatial-window-cache.svg` | [Home](index.md) → [All visuals](visuals.md) → [spatial-window-cache.svg](assets/structures/spatial-window-cache.svg) |
+| `assets/structures/tracking-data-flow.svg` | [Home](index.md) → [All visuals](visuals.md) → [tracking-data-flow.svg](assets/structures/tracking-data-flow.svg) |
 
 ## Terrain playback clips
 
@@ -417,6 +422,7 @@ and **8 identical viewer branding copies**.
 | `assets/viewer/day-night.svg` | [Home](index.md) → [All visuals](visuals.md) → [day-night.svg](assets/viewer/day-night.svg) |
 | `assets/viewer/terrain-and-sight.svg` | [Home](index.md) → [All visuals](visuals.md) → [terrain-and-sight.svg](assets/viewer/terrain-and-sight.svg) |
 | `assets/viewer/themes.svg` | [Home](index.md) → [All visuals](visuals.md) → [themes.svg](assets/viewer/themes.svg) |
+| `assets/viewer/tracking.svg` | [Home](index.md) → [All visuals](visuals.md) → [tracking.svg](assets/viewer/tracking.svg) |
 | `assets/viewer/workspace-map.svg` | [Home](index.md) → [All visuals](visuals.md) → [workspace-map.svg](assets/viewer/workspace-map.svg) |
 
 ## Playback clips and GitHub banner

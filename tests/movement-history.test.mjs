@@ -1,0 +1,47 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { MovementHistory } from '../viewer/movement-history.mjs';
+
+test('Movement reset rejects a stale in-flight prefix and retains one bounded grid', async () => {
+  const h = new MovementHistory();
+  h.reset(256, 256);
+  assert.equal(h.map.counts.byteLength, 256 * 256 * 4);
+  let release;
+  const waiting = h.move(
+    [{ tick: 10, animals: [] }],
+    10,
+    10,
+    () =>
+      new Promise((resolve) => {
+        release = resolve;
+      }),
+  );
+  h.reset(2, 2);
+  release({
+    width: 256,
+    height: 256,
+    frame_index: 10,
+    tick: 10,
+    counts: Array(256 * 256).fill(1),
+  });
+  await waiting;
+  assert.equal(h.map.frame_index, -1);
+  assert.equal(h.map.arrivals, 0);
+  assert.equal(h.map.counts.length, 4);
+});
+
+test('Movement prefixes validate requested time and reject impossible count data', async () => {
+  const h = new MovementHistory();
+  h.reset(2, 2);
+  const f = [{ tick: 10, animals: [] }];
+  for (const bad of [
+    { width: 2, height: 2, frame_index: 11, tick: 10, counts: [0, 0, 0, 0] },
+    { width: 2, height: 2, frame_index: 10, tick: 11, counts: [0, 0, 0, 0] },
+    { width: 2, height: 2, frame_index: 10, tick: 10, counts: [-1, 0, 0, 0] },
+  ])
+    await assert.rejects(
+      h.move(f, 10, 10, async () => bad),
+      /Invalid movement/,
+    );
+  assert.equal(h.map.arrivals, 0);
+});

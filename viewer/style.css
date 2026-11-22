@@ -154,7 +154,8 @@ button:disabled {
   left: 20px;
   right: 20px;
   padding: 12px;
-  background: #0b1118e8;
+  background: var(--panel);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: 5px;
 }
@@ -1454,4 +1455,88 @@ footer {
   color: var(--text);
   border-color: #bb8434;
   background: var(--panel);
+}
+
+.scent-grids {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+.scent-channel {
+  min-width: 0;
+}
+.scent-channel h4 {
+  margin: 6px 0;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.scent-grid,
+.movement-history {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.movement-history text {
+  font:
+    10px system-ui,
+    sans-serif;
+  fill: var(--muted);
+}
+.scent-grid text {
+  font:
+    12px system-ui,
+    sans-serif;
+  fill: var(--text);
+}
+
+.tracking-controls {
+  margin: 10px 0;
+  padding: 10px 0;
+  border-block: 1px solid var(--border);
+}
+.tracking-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: 11px;
+}
+.tracking-controls input[type='checkbox'] {
+  width: auto;
+  margin: 0;
+}
+.tracking-controls select {
+  min-width: 0;
+  max-width: 170px;
+}
+.movement-heatmap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.movement-heatmap h3 {
+  font-size: 12px;
+}
+
+.movement-heatmap-legend {
+  display: flex;
+  gap: 5px;
+  margin: 7px 0;
+}
+.movement-heatmap-legend > span {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+}
+.movement-heatmap-legend i {
+  display: block;
+  height: 9px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  margin-bottom: 3px;
 }

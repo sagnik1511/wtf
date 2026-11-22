@@ -1,5 +1,7 @@
 """Read-only archived-weight inference and local sensitivity; no live controllers."""
 
+from wtf.simulation.tracking import tracking_names
+
 from array import array
 import math
 
@@ -49,7 +51,7 @@ def feature_names(signature):
         )
     if version >= 4:
         names.extend(["Self consent", "Mate consent", "Consenting pair"])
-    return names
+    return names + tracking_names(signature)
 
 
 def prepare_model(model):
@@ -60,7 +62,7 @@ def prepare_model(model):
         raise ValueError("Unsupported explanation algorithm")
     if (
         type(inputs) is not int
-        or not 1 <= inputs <= 512
+        or not 1 <= inputs <= 4096
         or not 1 <= len(actions) <= 32
         or len(set(actions)) != len(actions)
     ):
@@ -71,6 +73,23 @@ def prepare_model(model):
         or not 1 <= sig.get("observation_top_k", 1) <= 16
     ):
         raise ValueError("Unsupported explanation observation layout")
+    history = sig.get("movement_history_steps", 0)
+    scent = sig.get("scent_observation")
+    if type(history) is not int or not 0 <= history <= 16:
+        raise ValueError("Unsupported explanation movement history")
+    if scent is not None:
+        if not isinstance(scent, dict) or not isinstance(scent.get("species"), list):
+            raise ValueError("Unsupported explanation scent layout")
+        names = scent["species"]
+        if (
+            not 1 <= len(names) <= 8
+            or any(not isinstance(n, str) or not n for n in names)
+            or len(set(names)) != len(names)
+            or type(scent.get("radius", 2)) is not int
+            or not 1 <= scent.get("radius", 2) <= 8
+            or type(scent.get("separate_sexes", True)) is not bool
+        ):
+            raise ValueError("Unsupported explanation scent layout")
     if len(feature_names(sig)) != inputs:
         raise ValueError("Unsupported explanation observation layout")
     count = 0

@@ -15,6 +15,7 @@ import random
 from collections import Counter, OrderedDict, defaultdict, deque
 from dataclasses import dataclass
 from wtf.simulation.perception import SpatialIndex
+from wtf.simulation.tracking import Tracking
 from wtf.simulation.geography import Geography, resolve_map
 from wtf.simulation.day_night import sunlight, effective_body
 
@@ -196,6 +197,11 @@ class World:
         self.total_energy_gained = defaultdict(float)
         self.kills = defaultdict(int)
         self.lifespans = []
+        self._tracking = (
+            Tracking(config, self.width) if Tracking.enabled(config) else None
+        )
+        if self._tracking is not None and self._tracking.scent is not None:
+            self._tracking.scent.advance(self)
 
     def body(self, animal):
         cycle = self.config.get("day_night")
@@ -522,6 +528,10 @@ class World:
             self._prepare_mating_context(occupied)
         else:
             self._mate_context = None
+        if self._tracking is not None and self._tracking.history_enabled:
+            self._visual_positions = {}
+            for animal in self.animals.values():
+                self._visual_positions.setdefault(animal.position, animal.id)
         return occupied, *self._perception
 
     def _prepare_mating_context(self, occupied=None):
@@ -698,12 +708,34 @@ class World:
             )
         if version >= 3:
             features += self._mating_features(a, include_intent=version >= 4)
+        history_steps = template.get("movement_history_steps", 0)
+        if history_steps:
+            targets = []
+            for category in (0, 1):
+                offset = 8 + 4 * top_k * (category + 1)
+                for slot in range(top_k):
+                    dx, dy, _, present = features[
+                        offset + 4 * slot : offset + 4 * slot + 4
+                    ]
+                    if present:
+                        x, y = round(a.x + dx * (radius + bonus)), round(
+                            a.y + dy * (radius + bonus)
+                        )
+                        targets.append((category, self._visual_positions[x, y], x, y))
+            features += self._tracking.visual.observe(
+                a, self.tick, radius + bonus, top_k, history_steps, targets
+            )
+        if "scent_observation" in template:
+            features += self._tracking.scent.sample(self, a, template)
         return tuple(features)
 
     def observe_all(self):
         # Reconcile authoritative state once per phase. Dynamic bucket contents
         # update cached windows without rebuilding their overlapping interior.
         context = self._observation_context()
+        if self._tracking is not None:
+            for animal_id in self._tracking.visual.frames.keys() - self.animals.keys():
+                del self._tracking.visual.frames[animal_id]
         return {i: self.observe(a, context) for i, a in self.animals.items()}
 
     def step(self, actions):
@@ -1051,6 +1083,8 @@ class World:
                     r["capacity_per_patch"], patch.quantity + r["growth_per_step"]
                 )
         self.tick += 1
+        if self._tracking is not None and self._tracking.scent is not None:
+            self._tracking.scent.advance(self, dead_animals.values())
         self.events = events
         return StepResult(self.observe_all(), rewards, dead, events)
 
@@ -1457,7 +1491,7 @@ class World:
         return data
 
     def checkpoint(self):
-        return dict(
+        result = dict(
             config=self.config,
             seed=self.seed,
             snapshot=self.snapshot(),
@@ -1465,6 +1499,9 @@ class World:
             lifespans=self.lifespans,
             next_animal_id=self.next_animal_id,
         )
+        if self._tracking is not None:
+            result["sensory_state"] = self._tracking.checkpoint()
+        return result
 
     @classmethod
     def restore(cls, state, static_geography=None):
@@ -1542,4 +1579,9 @@ class World:
         if not hasattr(w, "rng"):
             w.rng = random.Random()
         w.rng.setstate(state["rng_state"] if _trial else tuples(state["rng_state"]))
+        w._tracking = (
+            Tracking.restore(w.config, w.width, state.get("sensory_state"))
+            if Tracking.enabled(w.config)
+            else None
+        )
         return w

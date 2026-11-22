@@ -1,3 +1,4 @@
+import { trackingSample, drawVisualTracks } from './tracking.mjs';
 import { drawContests, contestLabel } from './competition.mjs';
 import { installTheme, boardPalette } from './theme.mjs';
 import {
@@ -11,7 +12,7 @@ import { DEFAULT_NETWORK_RANK, rankLimit } from './network-structure.mjs';
 import { api } from './api.mjs';
 import { Dashboard } from './dashboard.mjs';
 import { Playback } from './playback.mjs';
-import { behaviorRows } from './behavior-stats.mjs';
+import { behaviorRows, movementHeatmap } from './behavior-stats.mjs';
 import { speciesStyles } from './species-style.mjs';
 import { terrainView, drawTerrain } from './terrain.mjs';
 import { inspectorGraphs } from './inspector.mjs';
@@ -43,7 +44,7 @@ function showError(error) {
 }
 
 let networkRankLimit = DEFAULT_NETWORK_RANK;
-const player = new Playback(api);
+const player = new Playback(api, undefined, { movement: true });
 const dayNightClock = new DayNightClock($('day-night-clock'));
 const observationOverlay = new ObservationOverlay();
 const brainExplanation = new BrainExplanation(api);
@@ -114,6 +115,72 @@ $('inspect-animal').onclick = () => {
   selected = id;
   render();
 };
+let sensoryCache = null;
+let heatmapView = null;
+function selectedTracking() {
+  const animal = state?.animals.find((a) => a.id === selected);
+  const diagnostic = state?.selected;
+  if (!animal || !diagnostic) return null;
+  const template =
+    player.metadata.config.brains?.[state.species[animal.species].brain];
+  if (
+    sensoryCache?.diagnostic === diagnostic &&
+    sensoryCache.animal === selected &&
+    sensoryCache.frames === player.frames &&
+    sensoryCache.template === template
+  )
+    return sensoryCache.sample;
+  const body = circadianBody(
+    state.species[animal.species],
+    state.day_night,
+    diagnostic.tick,
+  );
+  const radius =
+    body.vision_radius +
+    (terrain?.hasWater ? (body.water_vision_bonus ?? 0) : 0);
+  const sample = trackingSample(
+    player.frames,
+    state.frame_index % player.metadata.recording.frames_per_chunk,
+    selected,
+    diagnostic,
+    template,
+    radius,
+  );
+  sensoryCache = {
+    diagnostic,
+    animal: selected,
+    frames: player.frames,
+    template,
+    sample,
+  };
+  return sample;
+}
+function drawSelectedTracking() {
+  if (!$('show-tracking').checked) return;
+  const sample = selectedTracking();
+  if (!sample) return;
+  const canvas = $('world');
+  drawVisualTracks(
+    canvas.getContext('2d'),
+    sample,
+    canvas.width / state.width,
+    canvas.height / state.height,
+    document.documentElement.dataset.theme === 'light',
+  );
+}
+$('tracking-open').onclick = () => {
+  if (!busy)
+    $('inspector')
+      .querySelector('.tracking-panel')
+      ?.scrollIntoView({ block: 'start', behavior: 'auto' });
+};
+$('movement-open').onclick = () => {
+  if (!busy)
+    heatmapView?.element.scrollIntoView({ block: 'start', behavior: 'auto' });
+};
+$('show-tracking').onchange = () => {
+  if (state) render();
+};
 $('explain-open').onclick = () => {
   if (busy) return;
   if (!state || selected === null || !state.selected?.features) return;
@@ -172,6 +239,8 @@ async function operation(fn, { recording = false } = {}) {
     'inspect-animal-id',
     'brain-open',
     'explain-open',
+    'tracking-open',
+    'show-tracking',
   ])
     $(id).disabled = true;
   try {
@@ -202,12 +271,17 @@ async function operation(fn, { recording = false } = {}) {
       'inspect-animal-id',
       'brain-open',
       'explain-open',
+      'tracking-open',
+      'show-tracking',
     ])
       $(id).disabled = false;
     const alive = state?.animals.some((a) => a.id === selected);
     $('inspect-animal').disabled = !state?.animals.length;
     $('brain-open').disabled = !alive;
     $('explain-open').disabled = !alive || !state?.selected?.features;
+    const senses = selectedTracking();
+    $('tracking-open').disabled = !alive || !senses;
+    $('show-tracking').disabled = !alive || !senses?.steps;
     updateRunButtons();
   }
 }
@@ -640,6 +714,14 @@ function drawInspector() {
   $('agent-label').textContent = a ? `${a.species} #${a.id}` : 'No selection';
   $('inspect-hint').hidden = Boolean(a);
   $('show-observation').disabled = !a;
+  const sensory = selectedTracking();
+  $('tracking-open').disabled = busy || !sensory;
+  $('show-tracking').disabled = busy || !sensory?.steps;
+  $('tracking-status').textContent = sensory
+    ? `Sample ${sensory.tick} · body ${state.tick}. Board: selected animal's observed tracks only. Scent stays in the charts. Updates at recorded samples.`
+    : a
+      ? 'This recording has no supported sampled tracking inputs for this animal.'
+      : 'Select an animal to inspect its recorded senses.';
   if (!a) {
     inspectorVisuals = null;
     inspectorDiagnostic = null;
@@ -858,6 +940,12 @@ async function loadBehavior() {
   const request = ++analysisRequest,
     box = $('behavior');
   box.replaceChildren(text('p', 'Analyzing saved frames…'));
+  heatmapView = movementHeatmap(player.movement.map, player.run.obstacles);
+  $('movement-open').disabled = !heatmapView;
+  if (heatmapView) {
+    heatmapView.draw(document.documentElement.dataset.theme);
+    box.append(heatmapView.element);
+  }
   try {
     const report = await api(
       `/api/recordings/${encodeURIComponent(player.id)}/runs/${state.run}/analysis`,
@@ -872,6 +960,18 @@ async function loadBehavior() {
         `Steps ${run.first_tick}–${run.last_tick} · ${run.complete ? 'Complete' : 'Partial'} run · Consecutive-step coverage ${coverage === null ? '—' : `${(coverage * 100).toFixed(1)}%`}`,
       ),
     );
+    $('movement-open').disabled = !heatmapView;
+    if (heatmapView) {
+      heatmapView.draw(document.documentElement.dataset.theme);
+      box.append(heatmapView.element);
+    } else
+      box.append(
+        text(
+          'p',
+          'Movement heatmap unavailable from this server. Restart the playback server after updating Python.',
+          'muted',
+        ),
+      );
     for (const species of Object.keys(run.species)) {
       const section = text('div', '', 'behavior-species');
       section.append(
@@ -1079,7 +1179,12 @@ function render(snapshot = null) {
   $('summaries').textContent =
     `${player.frames.length} frames loaded · one chunk in memory`;
   loadBehavior();
+  heatmapView?.update(
+    player.movement.map,
+    document.documentElement.dataset.theme,
+  );
   drawWorld();
+  drawSelectedTracking();
   drawBirthHighlights();
   drawDeathHighlights();
   drawContestHighlights();
@@ -1224,11 +1329,13 @@ installTheme({
   onChange() {
     if (state) {
       drawWorld();
+      drawSelectedTracking();
       drawBirthHighlights();
       drawDeathHighlights();
       drawContestHighlights();
       drawChart();
     }
+    heatmapView?.draw(document.documentElement.dataset.theme);
     if ($('metrics-dialog').open) dashboard.draw();
   },
 });

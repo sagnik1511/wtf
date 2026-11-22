@@ -121,6 +121,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Observation vector layout (SVG)](visual-previews/structures/observation-vector-layout-svg.md) | [observation-vector-layout.svg](assets/structures/observation-vector-layout.svg) |
 | [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) | [package-layout.svg](assets/structures/package-layout.svg) |
 | [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) | [spatial-window-cache.svg](assets/structures/spatial-window-cache.svg) |
+| [Tracking data flow (SVG)](visual-previews/structures/tracking-data-flow-svg.md) | [tracking-data-flow.svg](assets/structures/tracking-data-flow.svg) |
 
 ## Terrain playback clips
 
@@ -152,6 +153,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [day-night.svg](assets/viewer/day-night.svg) |
 | [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) | [terrain-and-sight.svg](assets/viewer/terrain-and-sight.svg) |
 | [Themes (SVG)](visual-previews/viewer/themes-svg.md) | [themes.svg](assets/viewer/themes.svg) |
+| [Tracking (SVG)](visual-previews/viewer/tracking-svg.md) | [tracking.svg](assets/viewer/tracking.svg) |
 | [Workspace map (SVG)](visual-previews/viewer/workspace-map-svg.md) | [workspace-map.svg](assets/viewer/workspace-map.svg) |
 
 ## Playback clips and GitHub banner

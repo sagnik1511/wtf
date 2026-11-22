@@ -119,6 +119,12 @@ def model_signature(config, actions):
     )
     if config.get("observation_top_k", 1) != 1:
         signature["observation_top_k"] = config["observation_top_k"]
+    if config.get("movement_history_steps", 0):
+        signature["movement_history_steps"] = config["movement_history_steps"]
+    if "scent_observation" in config:
+        from wtf.simulation.tracking import scent_contract
+
+        signature["scent_observation"] = scent_contract(config)
     if kind == "recurrent_ppo":
         signature.update(recurrent_size=config["recurrent_size"], recurrent_cell="gru")
     elif kind == "qrdqn":

@@ -250,3 +250,21 @@ fallback. Writable results and library paths belong to the current working
 directory or explicit CLI arguments, never the package installation. Preserve
 `wtf` commands and isolated [installation checks](packaging.md) when extending
 the setup; [Ubuntu coverage](linux.md) must distinguish configured CI from passes.
+
+## Optional tracking senses
+
+[Visual memory and ground scent](tracking.md) are independent opt-ins. Per-brain
+`movement_history_steps` retains only personally selected sightings, with
+identity matching, missing-step masks and fading last-seen estimates. Root
+`scent_trails` owns sparse merged cell/species/sex deposits; per-brain
+`scent_observation` chooses ordered channels and a dry-path smell radius. Neither
+sense provides individual scent targets or hidden world trajectories. Append
+layouts participate in model signatures and inspector/XAI labels. Preserve
+versioned `world.sensory_state` for exact resume and independent GRPO trials;
+record only the existing sampled input vectors, not full scent maps.
+
+The viewer's movement heatmap follows replay time using one reusable `Uint32Array`
+and prior positions. Normal steps and same-chunk rewinds reuse loaded frames;
+large jumps call the read-only movement-prefix endpoint, which streams saved
+chunks and retains no per-frame grids. Keep prefix reconstruction and full-run
+CLI analysis movement rules shared, and keep future frames out of the display.

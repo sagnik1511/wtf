@@ -31,3 +31,147 @@ export function behaviorRows(run, species) {
   }
   return rows.map(([label, get]) => [label, get(early), get(late)]);
 }
+
+const DARK_HEAT_COLORS = [
+  [41, 65, 111],
+  [41, 97, 147],
+  [33, 155, 153],
+  [157, 211, 140],
+  [255, 244, 175],
+];
+
+// Increasing luminance keeps a busy dark-mode run from collapsing into one hue.
+export function movementHeatColor(count, maximum, theme) {
+  const light = theme === 'light';
+  if (!(count > 0)) return light ? '#eaf0f5' : '#0b1118';
+  const strength = Math.min(
+    1,
+    Math.log1p(count) / Math.log1p(Math.max(1, maximum)),
+  );
+  if (light) return `hsl(${48 - 42 * strength}, 85%, ${83 - 42 * strength}%)`;
+  const colors = DARK_HEAT_COLORS;
+  const point = strength * (colors.length - 1),
+    index = Math.min(colors.length - 2, Math.floor(point)),
+    fraction = point - index;
+  return `rgb(${colors[index].map((v, i) => Math.round(v + (colors[index + 1][i] - v) * fraction)).join(', ')})`;
+}
+
+export function drawMovementHeatmap(ctx, map, theme, obstacles = []) {
+  if (
+    !map ||
+    !Number.isInteger(map.width) ||
+    !Number.isInteger(map.height) ||
+    map.width < 1 ||
+    map.height < 1 ||
+    map.width > 256 ||
+    map.height > 256 ||
+    (!Array.isArray(map.counts) && !(map.counts instanceof Uint32Array)) ||
+    map.counts.length !== map.width * map.height
+  )
+    return false;
+  const light = theme === 'light',
+    maximum = Math.max(1, map.maximum ?? 0);
+  ctx.fillStyle = movementHeatColor(0, maximum, theme);
+  ctx.fillRect(0, 0, map.width, map.height);
+  const colorCache = new Map();
+  map.counts.forEach((count, i) => {
+    if (!Number.isFinite(count) || count <= 0) return;
+    if (!colorCache.has(count))
+      colorCache.set(count, movementHeatColor(count, maximum, theme));
+    ctx.fillStyle = colorCache.get(count);
+    ctx.fillRect(i % map.width, Math.floor(i / map.width), 1, 1);
+  });
+  ctx.fillStyle = light ? '#7b8a94' : '#71808c';
+  for (const [x, y] of obstacles)
+    if (x >= 0 && x < map.width && y >= 0 && y < map.height)
+      ctx.fillRect(x, y, 1, 1);
+  return true;
+}
+
+export function movementHeatmap(map, obstacles = []) {
+  if (!map?.counts) return null;
+  const element = document.createElement('section'),
+    title = document.createElement('h3'),
+    canvas = document.createElement('canvas'),
+    note = document.createElement('p'),
+    legend = document.createElement('div');
+  element.className = 'movement-heatmap';
+  canvas.width = map.width;
+  canvas.height = map.height;
+  canvas.setAttribute('role', 'img');
+  note.className = 'muted';
+  legend.className = 'movement-heatmap-legend';
+  legend.setAttribute(
+    'aria-label',
+    'Heatmap arrival count color scale; gray cells are obstacles',
+  );
+  element.append(title, canvas, legend, note);
+  let lastMaximum = null,
+    swatches = [],
+    paintedFrame = null,
+    paintedTheme = null;
+  const view = {
+    element,
+    update(next, theme) {
+      map = next;
+      return view.draw(theme);
+    },
+    draw(theme) {
+      if (
+        map.frame_index !== undefined &&
+        paintedFrame === map.frame_index &&
+        paintedTheme === theme
+      )
+        return true;
+      title.textContent = `Movement heatmap · through step ${map.tick ?? 0}`;
+      canvas.setAttribute(
+        'aria-label',
+        `Movement arrivals through replay step ${map.tick ?? 0}, all animals: ${map.arrivals} arrivals, maximum ${map.maximum} per cell. North is up.`,
+      );
+      note.textContent = `${map.arrivals.toLocaleString()} changed-position arrivals · busiest cell ${map.maximum.toLocaleString()} · all species/sexes · logarithmic color scale. Through replay step ${map.tick ?? 0} only; future frames excluded. Stationary time, births, frame gaps and unknown terminal routes are excluded. Gray = obstacles.`;
+      if (map.maximum !== lastMaximum) {
+        lastMaximum = map.maximum;
+        legend.replaceChildren();
+        const values =
+          map.maximum > 0
+            ? [
+                ...new Set([
+                  0,
+                  ...Array.from({ length: 5 }, (_, i) =>
+                    Math.round(
+                      Math.expm1(
+                        Math.log1p(map.maximum) * (0.15 + (0.85 * i) / 4),
+                      ),
+                    ),
+                  ),
+                ]),
+              ]
+            : [0];
+        swatches = values.map((value) => {
+          const item = document.createElement('span'),
+            swatch = document.createElement('i'),
+            label = document.createElement('span');
+          label.textContent = String(value);
+          item.append(swatch, label);
+          legend.append(item);
+          return [swatch, value];
+        });
+      }
+      for (const [swatch, value] of swatches)
+        swatch.style.backgroundColor = movementHeatColor(
+          value,
+          map.maximum,
+          theme,
+        );
+      paintedFrame = map.frame_index;
+      paintedTheme = theme;
+      return drawMovementHeatmap(
+        canvas.getContext('2d'),
+        map,
+        theme,
+        obstacles,
+      );
+    },
+  };
+  return view;
+}

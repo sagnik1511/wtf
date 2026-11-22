@@ -293,7 +293,31 @@ class RecordingStore:
             raise ValueError("Run must be an integer")
         from wtf.inspection.analyze import analyze_recording
 
-        return analyze_recording(self._folder(recording_id), run=run)
+        return analyze_recording(
+            self._folder(recording_id), run=run, include_movement=False
+        )
+
+    def movement(self, recording_id, run, frame_index):
+        """Rebuild one prefix on demand; no stored grids or decoded-run cache."""
+        from wtf.inspection.movement import MovementCounts
+
+        if type(run) is not int or type(frame_index) is not int or frame_index < 0:
+            raise ValueError("Invalid movement run or frame")
+        manifest = self.metadata(recording_id)
+        entry = next((r for r in manifest["runs"] if r["run"] == run), None)
+        if entry is None or frame_index >= entry["frame_count"]:
+            raise FileNotFoundError("Recorded movement frame not found")
+        world = manifest["config"]["world"]
+        counts = MovementCounts(world["width"], world["height"])
+        size = manifest["recording"]["frames_per_chunk"]
+        folder = self._folder(recording_id)
+        for index in range(frame_index // size + 1):
+            frames = load_chunk(chunk_path(folder, run, index))
+            end = min(len(frames), frame_index - index * size + 1)
+            for local in range(end):
+                counts.consume(frames[local])
+            del frames
+        return dict(counts.summary(), frame_index=frame_index, tick=counts.tick)
 
     def telemetry(self, recording_id, run, page):
         """At most 128 summaries, with four stat-validated cached pages."""

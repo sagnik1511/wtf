@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { drawVisualTracks, trackingView } from '../viewer/tracking.mjs';
+import { drawMovementHeatmap } from '../viewer/behavior-stats.mjs';
 import { drawContests } from '../viewer/competition.mjs';
 import {
   daylight,
@@ -185,6 +187,7 @@ function board({
   theme = 'dark',
   day_night = null,
   tick = 0,
+  tracking = null,
 } = {}) {
   const canvas = new SVGCanvas(width * 48, height * 48),
     terrain = terrainView(definition),
@@ -240,6 +243,7 @@ function board({
     context,
     { timeout: 1000 },
   );
+  if (tracking) drawVisualTracks(canvas, tracking, 48, 48, theme === 'light');
   return `<svg width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}">${canvas.output.join('')}</svg>`;
 }
 const animal = (
@@ -733,6 +737,209 @@ const brains = sheet(
   body,
 );
 
+// Actual inspector components with controlled, anonymous sensory specimens.
+const sensoryTemplate = {
+  type: 'ppo',
+  observation_version: 1,
+  movement_history_steps: 3,
+  scent_observation: { species: ['prey', 'predator'], radius: 2 },
+};
+const sensoryFeatures = [
+  ...features,
+  0.6,
+  0,
+  0.2,
+  0,
+  0,
+  1,
+  1,
+  0.4,
+  0,
+  1,
+  0.2,
+  0,
+  1,
+  0,
+  0,
+  0,
+  -0.4,
+  0.2,
+  -0.1,
+  0,
+  1 / 3,
+  0.75,
+  0,
+  -0.4,
+  0.2,
+  1,
+  0,
+  0,
+  0,
+  -0.2,
+  0.2,
+  1,
+  0.2,
+  0.7,
+  0.4,
+  1,
+  0.3,
+  0.1,
+  0,
+  0.1,
+  0.2,
+  0.1,
+  0.2,
+  0.7,
+  0.6,
+  0.2,
+  0,
+  0,
+  0,
+  0.1,
+  0,
+  0,
+  0,
+  0.1,
+  0.3,
+  0.6,
+  0.8,
+  0.5,
+  0.2,
+  0.3,
+  0.2,
+  0,
+  0,
+  0,
+  0.1,
+  0.2,
+  0.6,
+  0.8,
+];
+const sensoryInspector = inspectorGraphs({
+  diagnostic: {
+    tick: 20,
+    features: sensoryFeatures,
+    action_probabilities: { rest: 0.5, move_forward: 0.5 },
+  },
+  template: sensoryTemplate,
+  spec: { body: { vision_radius: 4 } },
+  hasWater: false,
+});
+const sensoryPlots = walk(sensoryInspector).filter((n) =>
+  ['movement-history', 'scent-grid'].includes(n.attributes?.class),
+);
+assert.equal(sensoryPlots.length, 5, 'Sensory inspector specimens missing');
+let sensoryBody =
+  box(28, 95, 500, 475) +
+  text(46, 126, 'Personal visual memory', 21, '#e6edf3', 'start', true) +
+  component(sensoryPlots[0], 45, 154, 460, 345) +
+  lines(
+    46,
+    520,
+    [
+      'Solid dots: observed positions only.',
+      'Hollow marker: fading last-seen memory.',
+    ],
+    15,
+  );
+for (let i = 0; i < 4; i++) {
+  const x = 552 + (i % 2) * 310,
+    y = 95 + Math.floor(i / 2) * 245;
+  sensoryBody +=
+    box(x, y, 296, 230) +
+    text(
+      x + 16,
+      y + 30,
+      `${i < 2 ? 'prey' : 'predator'} · ${i % 2 ? 'male' : 'female'}`,
+      18,
+      '#e6edf3',
+      'start',
+      true,
+    ) +
+    component(sensoryPlots[i + 1], x + 67, y + 42, 168, 182);
+}
+sensoryBody += lines(
+  40,
+  610,
+  [
+    'Nine sectors per group: local freshness, not one target or a complete route.',
+    'Ground scent cannot cross a sealed wall or wet cells. Gaps in sight remain unknown.',
+    'These panels update at recorded diagnostic samples, using existing replay input vectors.',
+  ],
+  16,
+);
+const sampledBoard = board({
+  width: 10,
+  height: 8,
+  selected: 0,
+  animals: [
+    animal('prey', 'female', 0, 0, 4, 3),
+    animal('prey', 'male', 0, 1, 7, 3),
+    animal('predator', 'female', 2, 2, 0, 7),
+  ],
+  tracking: {
+    origin: { x: 4, y: 3 },
+    radius: 5,
+    tick: 20,
+    ...trackingView(sensoryFeatures, sensoryTemplate, 20),
+  },
+});
+sensoryBody +=
+  box(28, 700, 560, 430) +
+  text(
+    46,
+    730,
+    'Board: selected observer’s visual tracks',
+    19,
+    '#e6edf3',
+    'start',
+    true,
+  ) +
+  `<g transform="translate(92,752) scale(.76)">${sampledBoard}</g>` +
+  lines(46, 1085, ['Recorded sightings only; no world scent overlay.'], 14);
+const heatCounts = Array.from({ length: 80 }, (_, i) =>
+  i % 10 === 5 ? 12 : i % 10 === 4 ? 5 : i % 7 === 0 ? 1 : 0,
+);
+let heatBoards = '';
+for (const theme of ['dark', 'light']) {
+  const heatCanvas = new SVGCanvas(10, 8);
+  drawMovementHeatmap(
+    heatCanvas,
+    { width: 10, height: 8, counts: heatCounts, maximum: 12 },
+    theme,
+    [
+      [0, 0],
+      [1, 0],
+    ],
+  );
+  heatBoards += `<g class="movement-heatmap-${theme}" transform="translate(690,762) scale(35)">${heatCanvas.output.join('')}</g>`;
+}
+sensoryBody +=
+  box(612, 700, 560, 430) +
+  text(
+    630,
+    730,
+    'Run analysis: all-animal movement arrivals',
+    19,
+    '#e6edf3',
+    'start',
+    true,
+  ) +
+  heatBoards +
+  lines(
+    630,
+    1085,
+    ['Through replay step only; stationary frames add no heat.'],
+    14,
+  ) +
+  `<style>.movement-heatmap-light{display:none}@media(prefers-color-scheme:light){.movement-heatmap-light{display:inline}.movement-heatmap-dark{display:none}}</style>`;
+const trackingSpecimen = sheet(
+  'Inspector: movement memory and ground scent',
+  'Current inspector renderers · controlled illustrative observations, not an experiment outcome',
+  1160,
+  sensoryBody,
+);
+
 const demo = board(terrainCards[4][2]);
 body =
   box(28, 95, 1144, 74) +
@@ -997,6 +1204,7 @@ const themes = sheet(
   body,
 );
 const outputs = {
+  'tracking.svg': trackingSpecimen,
   'themes.svg': themes,
   'day-night.svg': dayNight,
   'board-objects.svg': objects,

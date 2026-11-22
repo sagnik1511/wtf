@@ -59,3 +59,55 @@ test('Predator summary labels entropy and avoids fabricated values for missing o
   );
   assert.deepEqual(behaviorRows({ windows: [] }, 'prey'), []);
 });
+
+test('Movement heatmap draws only positive arrival counts with theme-aware colors', async () => {
+  const { drawMovementHeatmap } = await import('../viewer/behavior-stats.mjs');
+  const paints = [],
+    ctx = {
+      fillStyle: '',
+      fillRect(...rect) {
+        paints.push({ color: this.fillStyle, rect });
+      },
+    };
+  const map = {
+    width: 2,
+    height: 2,
+    counts: [0, 1, 4, 0],
+    maximum: 4,
+    arrivals: 5,
+  };
+  assert.equal(drawMovementHeatmap(ctx, map, 'light', [[1, 1]]), true);
+  assert.equal(paints.length, 4);
+  assert.deepEqual(paints[1].rect, [1, 0, 1, 1]);
+  const first = paints[0].color;
+  paints.length = 0;
+  drawMovementHeatmap(ctx, map, 'dark');
+  assert.notEqual(paints[0].color, first);
+  assert.equal(
+    drawMovementHeatmap(ctx, { ...map, counts: [1] }, 'light'),
+    false,
+  );
+});
+
+test('Dark heatmap has increasing brightness across the log scale', async () => {
+  const { movementHeatColor } = await import('../viewer/behavior-stats.mjs');
+  const luminance = (color) => {
+    const rgb = color.startsWith('#')
+      ? [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16))
+      : color.match(/\d+/g).map(Number);
+    return rgb
+      .map((v) => {
+        const c = v / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      })
+      .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+  };
+  const levels = [0, 1, 3, 10, 30, 78].map((c) =>
+    luminance(movementHeatColor(c, 78, 'dark')),
+  );
+  for (let i = 1; i < levels.length; i++) assert(levels[i] > levels[i - 1]);
+  assert(
+    levels.at(-1) > levels[1] * 5,
+    'Busy cells should be clearly brighter than lightly visited cells',
+  );
+});

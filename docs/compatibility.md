@@ -39,7 +39,7 @@ limited to the runtimes actually tested. See [package verification](packaging.md
 | Experiment checkpoint | Legacy logical state v1 JSON; compact `wtf-checkpoint-v2` envelope; binary checkpoint envelope v3, inside supported plain/gzip/XZ transport | Decoders normalize to logical state v1; controllers/configuration must still be supported |
 | Champion brain | `brain_artifact_version` 1, 2 and 3; library manifests 1 and 2 | v3 metadata references binary/XZ weights; older readers do not necessarily support it |
 | Replay | `recording_version: 1`, legacy full JSON chunks, `wtf-delta-v1` chunks and current structured binary chunks, with supported none/gzip/XZ compression | Current binary magic is `WTFB` codec v1; keep the recording manifest, chunks and run metadata together |
-| Brain inputs | Supported observation versions 1–4 with configured top-k | Algorithm, architecture, action order, observation version/top-k and other signature fields must match |
+| Brain inputs | Supported observation versions 1–4 with configured top-k | Algorithm, architecture, action order, observation version/top-k, optional movement/scent layout and other signature fields must match |
 
 Use the loader appropriate to the artifact. A checkpoint restores world,
 controllers, optimizer state, buffers and RNGs. A champion initializes weights
@@ -92,3 +92,9 @@ mounted under `/data/results` in Docker retain their internal relative links.
 CPU numeric weights and replay files are portable data; compiled `.so`/`.pyd`
 kernels are platform/Python-specific and must be rebuilt or omitted on the
 receiving machine. Use the Python fallback when the native backend is unsupported.
+
+Optional [tracking senses](tracking.md) append inputs without changing base
+observation versions. Enabled checkpoints require sensory state version 1 and a
+runtime supporting those senses; older releases cannot resume these runs. Legacy
+checkpoints without the options retain their existing restore path. Replays use
+the current binary format; updated inspectors decode the optional input blocks.

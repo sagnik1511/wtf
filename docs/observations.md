@@ -78,6 +78,15 @@ or load a model with the same algorithm, architecture, actions, version and k.
 Old models without a top-k field keep their original k=1 signature; explicitly
 setting k=1 is compatible too. Exact checkpoints retain their saved setting.
 
+## Optional movement memory and scent
+
+[Movement history and scent trails](tracking.md) append personal sighting and
+anonymous species/sex ground-scent inputs after the existing versioned blocks.
+Both default off. The base widths above remain unchanged; enabled movement adds
+`2 * K * (7 + 3 * H)` values and scent adds nine values per configured channel.
+Their layout fields participate in model compatibility. The inspector displays
+sampled tracks and local scent grids without storing complete world scent maps.
+
 ## Runtime and playback
 
 Multi-target selection reuses the world's spatial buckets and visibility cache.

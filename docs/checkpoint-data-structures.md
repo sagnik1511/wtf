@@ -195,3 +195,12 @@ experiment files were changed and no learning-quality claim is made.
 
 For package-versus-format support and cross-machine limits, see the
 [artifact compatibility policy](compatibility.md).
+
+## Optional sensory continuation
+
+[Movement memory and ground scent](tracking.md#memory-and-storage-boundaries) add
+`world.sensory_state` only when enabled. Version 1 stores per-observer sighting
+frames and sparse integer cell/group deposit times; query caches are rebuilt.
+The [ownership diagram](tracking.md) separates this exact-resume state from
+sampled replay inputs. GRPO restores detached sensory collections; newborns
+and weight-only warm starts do not inherit personal sighting histories.

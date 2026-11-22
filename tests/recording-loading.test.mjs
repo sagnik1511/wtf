@@ -31,6 +31,7 @@ function fixture() {
       errors.push(e);
     },
     updateRunButtons() {},
+    selectedTracking: () => null,
   };
   vm.createContext(context);
   vm.runInContext(

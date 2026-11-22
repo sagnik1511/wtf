@@ -9,6 +9,7 @@ They contain no run IDs, measurements, recordings or saved model weights.
 | [Day and night](day-night.svg) | Same objects under actual dawn/midday/dusk/night lighting and a deterministic sunlight curve |
 | [Board objects](board-objects.svg) | Sex/species shapes and colors, resource quantities, obstacles, selection, heading, event markers and same-species competition |
 | [Terrain and sight](terrain-and-sight.svg) | Water depth/current, elevation, occlusion, directional water visibility and gates |
+| [Movement and scent](tracking.svg) | Actual sampled-history and anonymous species/sex scent-grid components |
 | [Inspector and brains](brain-views.svg) | Actual radar/output/network SVG components with illustrative data; deep-view summary |
 | [Workspace map](workspace-map.svg) | Schematic panel positions with source-rendered board/radar examples |
 

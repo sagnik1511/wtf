@@ -28,6 +28,7 @@
   "environments/river_crossing_strong_predator_deep.json",
   "environments/river_delta.json",
   "environments/scarce_food.json",
+  "environments/tracking.json",
   "maps/alpine_pass.json",
   "maps/enclosed_valleys.json",
   "maps/highlands.json",
@@ -59,11 +60,13 @@
   "viewer/inspector-stats.mjs",
   "viewer/inspector.mjs",
   "viewer/kill-highlights.mjs",
+  "viewer/movement-history.mjs",
   "viewer/network-structure.mjs",
   "viewer/playback.mjs",
   "viewer/replay-codec.mjs",
   "viewer/species-style.mjs",
   "viewer/style.css",
   "viewer/terrain.mjs",
-  "viewer/theme.mjs"
+  "viewer/theme.mjs",
+  "viewer/tracking.mjs"
 ]

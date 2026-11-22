@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 from threading import RLock
 
+from wtf.simulation.tracking import scent_contract
 from wtf.inspection.explainability import MAX_PARAMETERS, explain_model, prepare_model
 from wtf.storage.model_io import model_path, read_model
 from wtf.storage.replay_io import chunk_path, load_chunk
@@ -179,6 +180,9 @@ class ExplanationStore:
             or sig.get("observation_version", 1)
             != template.get("observation_version", 1)
             or sig.get("observation_top_k", 1) != template.get("observation_top_k", 1)
+            or sig.get("movement_history_steps", 0)
+            != template.get("movement_history_steps", 0)
+            or scent_contract(sig) != scent_contract(template)
             or sig["actions"] != spec["allowed_actions"]
         ):
             raise ValueError(

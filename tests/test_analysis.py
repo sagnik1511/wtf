@@ -83,6 +83,49 @@ def fixture():
 
 
 class AnalysisTests(unittest.TestCase):
+    def test_movement_heatmap_counts_arrivals_not_stationary_time_or_births(self):
+        a = animal(0, "prey")
+        moved = dict(a, x=3, last_action="move_forward")
+        child = animal(2, "prey", parent_id=0)
+        report = analyze_run(
+            config(),
+            [frame(0, [a]), frame(1, [moved, child]), frame(2, [moved, child])],
+        )
+        heat = report["movement_heatmap"]
+        self.assertEqual(heat["arrivals"], 1)
+        self.assertEqual(heat["counts"][2 * heat["width"] + 3], 1)
+        self.assertEqual(sum(heat["counts"]), 1)
+        self.assertEqual(len(heat["counts"]), heat["width"] * heat["height"])
+
+    def test_movement_heatmap_does_not_invent_routes_across_gaps(self):
+        a = animal(0, "prey")
+        moved = dict(a, x=4)
+        report = analyze_run(config(), [frame(0, [a]), frame(3, [moved])])
+        self.assertEqual(report["movement_heatmap"]["arrivals"], 0)
+
+    def test_movement_heatmap_includes_known_terminal_destinations(self):
+        a = animal(0, "prey")
+        report = analyze_run(
+            config(),
+            [
+                frame(0, [a]),
+                frame(
+                    1,
+                    [],
+                    [dict(kind="died", actor=0, cause="starvation", position=[3, 2])],
+                ),
+            ],
+        )
+        self.assertEqual(report["movement_heatmap"]["arrivals"], 1)
+        unknown = analyze_run(
+            config(),
+            [
+                frame(0, [a]),
+                frame(1, [], [dict(kind="died", actor=0, cause="starvation")]),
+            ],
+        )
+        self.assertEqual(unknown["movement_heatmap"]["arrivals"], 0)
+
     def test_exact_rates_terminal_rewards_and_newborn_denominators(self):
         result = analyze_run(config(), fixture(), window_steps=1)
         prey, predator = result["species"]["prey"], result["species"]["predator"]

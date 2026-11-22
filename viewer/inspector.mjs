@@ -1,3 +1,4 @@
+import { SCENT_OFFSETS, SCENT_SECTORS } from './tracking.mjs';
 import { visualColor } from './theme.mjs';
 import {
   observationView,
@@ -133,6 +134,195 @@ function radar(observation, baseFraction) {
   );
   return chart;
 }
+function trackingPanel(tracking) {
+  const panel = section('Movement memory & scent');
+  panel.className += ' tracking-panel';
+  if (tracking.steps) {
+    panel.append(
+      el(
+        'p',
+        `${tracking.steps} previous steps · personal sightings only · hollow markers are last-seen memories`,
+        'muted',
+      ),
+    );
+    const chart = svg('svg', {
+      viewBox: '0 0 280 210',
+      role: 'img',
+      'aria-label':
+        'Personal movement history. Gaps are unobserved, dashed lines estimate last observed velocity; no hidden movement is shown.',
+      class: 'movement-history',
+    });
+    const extent = Math.max(
+      1,
+      ...tracking.tracks.flatMap((t) => [
+        Math.abs(t.dx) + Math.abs(t.vx),
+        Math.abs(t.dy) + Math.abs(t.vy),
+        ...t.history
+          .filter((p) => p.seen)
+          .flatMap((p) => [Math.abs(p.dx), Math.abs(p.dy)]),
+      ]),
+    );
+    const r = 76 / extent,
+      x = (v) => 140 + v * r,
+      y = (v) => 96 + v * r;
+    chart.append(
+      svg('circle', {
+        cx: 140,
+        cy: 96,
+        r: 76,
+        fill: visualColor('#0b131c'),
+        stroke: visualColor('#415569'),
+      }),
+      svg('text', { x: 140, y: 12, 'text-anchor': 'middle' }, 'N'),
+      svg('circle', { cx: 140, cy: 96, r: 3, fill: visualColor('#fff') }),
+    );
+    for (const t of tracking.tracks) {
+      const color = TARGET_COLORS[t.category],
+        group = svg('g', { opacity: Math.max(0.25, t.confidence) });
+      const points = [
+        ...t.history.filter((p) => p.seen).reverse(),
+        { lag: t.age, dx: t.dx, dy: t.dy },
+      ].sort((a, b) => b.lag - a.lag);
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i],
+          prior = points[i - 1];
+        if (prior && prior.lag - p.lag === 1)
+          group.append(
+            svg('line', {
+              x1: x(prior.dx),
+              y1: y(prior.dy),
+              x2: x(p.dx),
+              y2: y(p.dy),
+              stroke: color,
+              'stroke-width': 2,
+            }),
+          );
+        group.append(
+          svg('circle', { cx: x(p.dx), cy: y(p.dy), r: 2, fill: color }),
+        );
+      }
+      const current = svg('circle', {
+        cx: x(t.dx),
+        cy: y(t.dy),
+        r: 5,
+        stroke: color,
+        'stroke-width': 2,
+        fill: t.visible ? color : 'none',
+      });
+      current.append(
+        svg(
+          'title',
+          {},
+          `${t.category} track ${t.slot}: ${t.visible ? 'visible' : `${t.age} steps since seen`} · ${(t.confidence * 100).toFixed(0)}% confidence`,
+        ),
+      );
+      group.append(current);
+      if (t.vx || t.vy) {
+        const ex = x(t.dx + t.vx),
+          ey = y(t.dy + t.vy);
+        group.append(
+          svg('line', {
+            x1: x(t.dx),
+            y1: y(t.dy),
+            x2: ex,
+            y2: ey,
+            stroke: color,
+            'stroke-dasharray': '3 2',
+            'stroke-width': 2,
+          }),
+        );
+      }
+      chart.append(group);
+    }
+    chart.append(
+      svg(
+        'text',
+        { x: 140, y: 198, 'text-anchor': 'middle' },
+        'Dots = sightings · dashed line = velocity estimate',
+      ),
+    );
+    panel.append(chart);
+    if (!tracking.tracks.length)
+      panel.append(
+        el('p', 'No recent animal sightings in this sample.', 'muted'),
+      );
+    for (const t of tracking.tracks)
+      panel.append(
+        el(
+          'p',
+          `${t.category} track ${t.slot} · ${t.visible ? 'visible' : `last seen ${t.age} steps ago`} · ${(t.confidence * 100).toFixed(0)}% confidence`,
+          'muted',
+        ),
+      );
+  }
+  if (tracking.scent.length) {
+    panel.append(
+      el(
+        'p',
+        `Anonymous ground scent · radius ${tracking.radius} dry-cell steps · each grid is a species/sex group, not one animal`,
+        'muted',
+      ),
+    );
+    const grids = el('div', undefined, 'scent-grids');
+    for (const channel of tracking.scent) {
+      const tile = el('div', undefined, 'scent-channel');
+      tile.append(
+        el(
+          'h4',
+          `${channel.species} · ${channel.sex === 'any' ? 'all sexes' : channel.sex}`,
+        ),
+      );
+      const chart = svg('svg', {
+        viewBox: '0 0 126 138',
+        role: 'img',
+        'aria-label': `${channel.species} ${channel.sex} local scent pattern; north is up.`,
+        class: 'scent-grid',
+      });
+      chart.append(svg('text', { x: 63, y: 11, 'text-anchor': 'middle' }, 'N'));
+      channel.strengths.forEach((strength, i) => {
+        const [dx, dy] = SCENT_OFFSETS[i],
+          rx = 3 + (dx + 1) * 40,
+          ry = 16 + (dy + 1) * 40,
+          color = visualColor(channel.sex === 'male' ? '#c6a5ff' : '#7de2bd');
+        chart.append(
+          svg('rect', {
+            x: rx,
+            y: ry,
+            width: 38,
+            height: 38,
+            rx: 3,
+            fill: color,
+            'fill-opacity': 0.05 + 0.5 * strength,
+            stroke: visualColor('#415569'),
+          }),
+        );
+        const number = svg(
+          'text',
+          {
+            x: rx + 19,
+            y: ry + 23,
+            'text-anchor': 'middle',
+            style: `fill:${visualColor('#fff')}`,
+          },
+          String(Math.round(strength * 100)),
+        );
+        number.append(
+          svg(
+            'title',
+            {},
+            `${SCENT_SECTORS[i]} · ${(strength * 100).toFixed(0)}% freshness${i === 0 ? ' · own cell; own scent may be included' : ''}`,
+          ),
+        );
+        chart.append(number);
+      });
+      tile.append(chart);
+      grids.append(tile);
+    }
+    panel.append(grids);
+  }
+  return panel;
+}
+
 function savedDisclosure(node, key, sections) {
   node.open = Boolean(sections[key]);
   node.ontoggle = () => {
@@ -423,6 +613,7 @@ export function inspectorGraphs({
     );
   root.append(
     inputs,
+    ...(observation?.tracking ? [trackingPanel(observation.tracking)] : []),
     predictions(diagnostic),
     activationPanel(diagnostic, template, { rank, sections }),
     historyGraph(samples, Boolean(diagnostic.action_probabilities), sections),
