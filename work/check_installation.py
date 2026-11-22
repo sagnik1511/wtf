@@ -95,6 +95,7 @@ def main():
             "/theme.mjs",
             "/style.css",
             "/day-night.mjs",
+            "/competition.mjs",
             "/branding/wtf-symbol-light.svg",
             "/branding/wtf-symbol-dark.svg",
             "/branding/wtf-symbol-light.png",

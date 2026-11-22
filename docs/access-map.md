@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **258 public documentation pages**, **99 visual files**
+Coverage: **259 public documentation pages**, **99 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -270,7 +270,8 @@ and **8 identical viewer branding copies**.
 | [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1](releases/0.0.2.1.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
-| [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4 — GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) |
+| [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
+| [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5 — Shared wheel and source-archive asset collection](releases/0.0.2.5.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 

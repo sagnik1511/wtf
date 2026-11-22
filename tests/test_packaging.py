@@ -1,11 +1,13 @@
 """Distribution asset contracts; installed-wheel smoke checks live in work/."""
 
+import importlib.util
 import json
 import os
 import subprocess
 import sys
 from pathlib import Path
 import tempfile
+import tarfile
 import unittest
 from unittest.mock import patch
 from xml.etree import ElementTree as ET
@@ -92,6 +94,54 @@ class PackagingTests(unittest.TestCase):
                     and "map_file" in config["terrain"]
                 ):
                     self.assertIn(config["terrain"]["map_file"], paths)
+
+    @unittest.skipUnless(
+        importlib.util.find_spec("setuptools"), "setuptools is a build-only dependency"
+    )
+    def test_sdist_contains_every_allowlisted_runtime_asset(self):
+        # A checkout wheel hides missing sdist inputs. Exercise setuptools' real
+        # source collector with a fresh egg-info directory, never stale SOURCES.txt.
+        with tempfile.TemporaryDirectory() as temporary:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "setup.py",
+                    "egg_info",
+                    "--egg-base",
+                    temporary,
+                    "sdist",
+                    "--dist-dir",
+                    temporary,
+                ],
+                cwd=ROOT,
+                env={**os.environ, "WTF_BUILD_NATIVE": "0"},
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            archive = next(Path(temporary).glob("*.tar.gz"))
+            with tarfile.open(archive) as source:
+                names = source.getnames()
+                prefix = names[0].split("/")[0] + "/"
+                for relative in json.loads(
+                    (ROOT / "packaging_assets.json").read_text()
+                ):
+                    with self.subTest(asset=relative):
+                        member = source.extractfile(prefix + relative)
+                        self.assertIsNotNone(member)
+                        self.assertEqual(member.read(), (ROOT / relative).read_bytes())
+                for name in names:
+                    parts = Path(name).parts[1:]
+                    self.assertFalse(
+                        {
+                            "results",
+                            "brain_library",
+                            ".cache",
+                            ".venv",
+                            "local",
+                        }.intersection(parts),
+                        name,
+                    )
 
     def test_branding_is_vector_based_and_ships_with_viewer(self):
         paths = json.loads((ROOT / "packaging_assets.json").read_text())

@@ -1,62 +1,6 @@
 include _build_support.py LICENSE README.md PYPI_README.md pyproject.toml setup.py packaging_assets.json
 recursive-include wtf *.py *.c *.h
-include environment.schema.json
-include environments/a2c.json
-include environments/alpine_pass.json
-include environments/baseline.json
-include environments/champion_lineage.json
-include environments/day_night.json
-include environments/dense_obstacles.json
-include environments/dqn.json
-include environments/enclosed_valleys.json
-include environments/grpo.json
-include environments/highlands.json
-include environments/lake_islands.json
-include environments/mappo.json
-include environments/maskable_ppo.json
-include environments/meandering_river.json
-include environments/mixed_brains.json
-include environments/ppo.json
-include environments/ppo_large_predator.json
-include environments/predator_heavy.json
-include environments/qrdqn.json
-include environments/recurrent_ppo.json
-include environments/reinforce.json
-include environments/river_crossing.json
-include environments/river_crossing_ppo.json
-include environments/river_crossing_strong_predator.json
-include environments/river_crossing_strong_predator_deep.json
-include environments/river_delta.json
-include environments/scarce_food.json
-include maps/alpine_pass.json
-include maps/enclosed_valleys.json
-include maps/highlands.json
-include maps/lake_islands.json
-include maps/meandering_river.json
-include maps/river_crossing.json
-include maps/river_delta.json
-include viewer/api.mjs
-include viewer/app.js
-include viewer/behavior-stats.mjs
-include viewer/binary-codec.mjs
-include viewer/birth-highlights.mjs
-include viewer/brain-activations.mjs
-include viewer/dashboard-stats.mjs
-include viewer/dashboard.mjs
-include viewer/day-night.mjs
-include viewer/death-highlights.mjs
-include viewer/explainability.mjs
-include viewer/index.html
-include viewer/inspector-stats.mjs
-include viewer/inspector.mjs
-include viewer/kill-highlights.mjs
-include viewer/network-structure.mjs
-include viewer/playback.mjs
-include viewer/replay-codec.mjs
-include viewer/species-style.mjs
-include viewer/style.css
-include viewer/terrain.mjs
-include viewer/theme.mjs
+# Runtime assets come from packaging_assets.json via BuildPy.get_source_files().
 global-exclude __pycache__ *.py[cod] *.so *.pyd *.dylib *.dll
 prune tests
 prune docs
@@ -66,12 +10,3 @@ prune results
 prune brain_library
 prune .cache
 prune .venv
-
-include viewer/branding/favicon.png
-include viewer/branding/favicon.svg
-include viewer/branding/wtf-symbol-dark.png
-include viewer/branding/wtf-symbol-dark.svg
-include viewer/branding/wtf-symbol-light.png
-include viewer/branding/wtf-symbol-light.svg
-include viewer/branding/wtf-symbol-motion-light.svg
-include viewer/branding/wtf-symbol-motion-dark.svg

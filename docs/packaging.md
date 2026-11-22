@@ -40,15 +40,24 @@ All `wtf` subpackages are discovered explicitly with the `wtf.*` package pattern
 [`packaging_assets.json`](../packaging_assets.json) is the explicit runtime asset
 allowlist: maintained environment presets, terrain maps, viewer HTML/JS/CSS and
 the configuration schema. The build hook copies these under
-`wtf/assets/` in the wheel. Source files stay in their existing checkout
+`wtf/assets/` in the wheel and supplies the same allowlist to setuptools' source
+collector for the source archive. Source files stay in their existing checkout
 locations; asset lookup uses `importlib.resources` with a checkout fallback.
 
 No experiment output, learned models, paper, personal/local JSONs, caches,
 virtual environments, host native binaries or documentation GIFs enter the
-runtime wheel. `MANIFEST.in` carries the required sources/assets into the source
-archive and prunes development/experiment trees. Add a new **shipped** preset,
+runtime wheel. `MANIFEST.in` includes build metadata/native sources and prunes
+development/experiment trees; runtime assets are not enumerated a second time.
+Missing or out-of-checkout allowlisted files fail the build with their path. Add a new **shipped** preset,
 map or viewer module to the allowlist and test it; local exploration files stay
 excluded. Neither Git tracking alone nor a wildcard makes a new resource ship.
+
+Validate the complete source-archive → wheel path with `python -m build`, rather
+than only `python -m build --wheel` against a checkout. The packaging regression
+check verifies every allowlisted source-archive member against its original
+bytes; installed smoke checks also request the competition viewer module. This
+catches a preset or JS dependency omitted from the source archive before CI
+tries to rebuild its wheel.
 
 ## Installed usage without a checkout
 

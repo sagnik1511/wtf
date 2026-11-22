@@ -14,7 +14,22 @@ ROOT = Path(__file__).resolve().parent
 ASSETS = json.loads((ROOT / "packaging_assets.json").read_text())
 
 
+def packaged_assets():
+    """Validate the shared wheel/sdist asset allowlist before copying files."""
+    for relative in ASSETS:
+        source = (ROOT / relative).resolve()
+        if ROOT not in source.parents or not source.is_file():
+            raise ValueError(f"Invalid packaged asset: {relative}")
+        yield relative, source
+
+
 class BuildPy(build_py):
+    def get_source_files(self):
+        # setuptools uses this list when assembling the source distribution.
+        return super().get_source_files() + [
+            relative for relative, _ in packaged_assets()
+        ]
+
     def run(self):
         target_package = Path(self.build_lib) / "wtf"
         if target_package.resolve() == (ROOT / "wtf").resolve():
@@ -32,10 +47,7 @@ class BuildPy(build_py):
                 raise ValueError("Build directory must not be the source checkout")
             shutil.rmtree(legacy)
         super().run()
-        for relative in ASSETS:
-            source = (ROOT / relative).resolve()
-            if ROOT not in source.parents or not source.is_file():
-                raise ValueError(f"Invalid packaged asset: {relative}")
+        for relative, source in packaged_assets():
             target = Path(self.build_lib) / "wtf/assets" / relative
             self.mkpath(str(target.parent))
             self.copy_file(str(source), str(target))
