@@ -93,6 +93,38 @@ Remove copied saved-brain selectors when founding a new species: an artifact
 for a differently named species is intentionally incompatible. See
 [brain initialization](brain-library.md#species-and-sex-selection).
 
+## Adjacent founder pairs
+
+Set `spawn` on each species that should start in neighboring female/male pairs:
+
+```json
+"initial_population": 6,
+"spawn": { "mode": "adjacent_pairs" }
+```
+
+Omitting `spawn`, or setting `"mode": "random"`, preserves normal seeded spawning.
+Adjacent pairing requires an even initial population; six founders therefore
+start as three female/male pairs. It uses the existing balanced sexes and loads
+brains afterward, preserving each animal's sex-specific model and private state.
+The option works with any species name and diet.
+
+Each pair occupies two cardinally adjacent, dry, unblocked cells with a walkable
+slope in both directions. Other species and resources retain their locations;
+animals may share a food patch's cell as with normal spawning. Configured
+inside/outside spawn zones still apply. Female anchors are preferred; if those
+cannot fit, a disjoint-cell matching fallback relocates the selected species'
+founders within its allowed region. Insufficient adjacent capacity raises a clear
+error instead of silently scattering founders. Placement uses an isolated seeded
+RNG and does not consume the simulation RNG or change headings, age, health or
+energy.
+
+This changes only new-world founder positions. Checkpoint restoration keeps saved
+positions; newborn placement is unchanged. There is no permanent pair bond,
+automatic consent or exemption from maturity, health, energy, cooldown, mating
+radius or birth-space checks. Animals can disperse before maturity and can later
+mate with any eligible same-species opposite-sex partner. Existing brains and
+replays remain compatible because observation and action contracts do not change.
+
 ## Reproduction and best brains
 
 Only an eligible female/male pair of the **same species** can reproduce. A deer

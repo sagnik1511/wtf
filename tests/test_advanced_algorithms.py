@@ -37,17 +37,18 @@ from wtf.experiment.runner import Experiment
 from tests.test_simulation import config, empty_world, animal
 
 ROOT = Path(__file__).resolve().parents[1]
-KINDS = ("recurrent_ppo", "qrdqn", "maskable_ppo", "mappo")
+KINDS = ("recurrent_ppo", "qrdqn", "maskable_ppo", "mappo", "dqn", "ddqn")
 
 
 def settings(kind):
+    source_kind = "qrdqn" if kind in ("dqn", "ddqn") else kind
     c = copy.deepcopy(
-        load(ROOT / f"environments/{kind}.json")["brains"]["prey_" + kind]
+        load(ROOT / f"environments/{source_kind}.json")["brains"]["prey_" + source_kind]
     )
     # Numerical unit fixtures keep their fixed 20-input contract as presets evolve.
     c.update(observation_version=1, observation_top_k=1)
     c["network"]["hidden_layers"] = [3]
-    if kind == "qrdqn":
+    if kind in ("qrdqn", "dqn", "ddqn"):
         c.update(
             num_quantiles=3,
             replay_capacity=8,
@@ -62,6 +63,9 @@ def settings(kind):
             c.update(recurrent_size=2, sequence_length=2)
         elif kind == "mappo":
             c["critic_hidden_layers"] = [3]
+    if kind in ("dqn", "ddqn"):
+        c["type"] = kind
+        c.pop("num_quantiles")
     return c
 
 

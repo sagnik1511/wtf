@@ -837,6 +837,8 @@ function drawInspector() {
       discrete_sac: 'Discrete SAC',
       trpo: 'TRPO',
       qrdqn: 'QR-DQN',
+      dqn: 'DQN',
+      ddqn: 'Double DQN',
       maskable_ppo: 'Maskable PPO',
       mappo: 'MAPPO (experimental)',
     }[b.algorithm] || 'Q-learning';

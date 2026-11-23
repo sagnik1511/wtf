@@ -105,6 +105,7 @@ the model signature, so start fresh or load matching saved weights.
 | Sight extension across water | `species.<name>.body.water_vision_bonus` ([directional sight](geography.md#directional-sight-across-water)) |
 | Food supply/regrowth | `resources` |
 | Founder zones and boundary food | `placement` ([layout guide](geography.md#enclosed-valley-starting-layout)) |
+| Adjacent female/male founders | `species.<name>.spawn.mode` (`random` or `adjacent_pairs`; [details](species.md#adjacent-founder-pairs)) |
 | Terrain map | `terrain.map_file`, resolved into embedded rows and legend |
 | Swim/climb abilities | `species.<name>.locomotion` and `allowed_actions` |
 | Map size and duration | `world.width`, `world.height`, `world.max_steps` |
@@ -403,3 +404,10 @@ species-specific night vision/energy modifiers and the maintained example.
 [Competition](competition.md) adds the learned `challenge` action for shared
 food and blocked paths. It is disabled by default; `competition.json` is the
 explicit opt-in example. Adding the action changes saved-model compatibility.
+
+## Multilayer DQN templates
+
+The optional `dqn` and `ddqn` types support one to four hidden layers in
+`network.hidden_layers`, such as `[64, 32, 16]` for three predator hidden layers.
+See the [complete template and semantics](algorithms.md#multilayer-dqn). The
+existing `dqn.json` preset retains its legacy `q_network` implementation.

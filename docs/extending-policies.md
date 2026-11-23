@@ -7,7 +7,7 @@
 A new brain-template **name** needs no new Python algorithm. Deep-copy the desired
 complete template under `brains`, adjust supported hyperparameters/hidden widths,
 and point a species' `brain` at it. Preserve the algorithm-specific field layout:
-legacy `q_network` uses top-level `hidden_layers`; other current templates use
+legacy `q_network` uses top-level `hidden_layers`; multilayer `dqn` and other current templates use
 `network.hidden_layers`. Different species may reference different templates.
 
 Validate the full configuration, then start a fresh run. Changed dimensions,

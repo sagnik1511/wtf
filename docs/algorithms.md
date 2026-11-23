@@ -18,6 +18,57 @@ changing training frequency. Presets use prey 1.0× and predator 1.25×; see
 [species learning rates](configuration.md#learning-rates-per-species).
 
 
+## Multilayer DQN
+
+Use `type: "dqn"` for scalar DQN or `type: "ddqn"` for scalar Double DQN,
+both with one to four hidden dense layers. The
+legacy `q_network` type and bundled `dqn.json` preset retain their existing
+single-hidden-layer format and behavior. For example:
+
+```json
+{
+  "type": "dqn",
+  "network": {
+    "type": "mlp",
+    "hidden_layers": [64, 32, 16],
+    "activation": "tanh"
+  },
+  "learning_rate": 0.001,
+  "discount_factor": 0.98,
+  "batch_size": 8,
+  "replay_capacity": 512,
+  "learning_starts_after": 32,
+  "train_every_steps": 8,
+  "target_update_every_training_steps": 50,
+  "huber_threshold": 1.0,
+  "max_grad_norm": 0.5,
+  "exploration": {
+    "initial": 0.35,
+    "minimum": 0.05,
+    "decay_per_decision": 0.999
+  }
+}
+```
+
+`[64, 32, 16]` means three hidden layers, followed by one scalar Q-value output
+per allowed action. Training uses `reward + gamma * max(Q_target(next_state))`;
+death removes the bootstrap, while a time-limit truncation retains it. This is
+scalar max-target DQN. With `type: "ddqn"`, the target instead evaluates
+`Q_target(next_state, argmax(Q_online(next_state)))`. DDQN therefore separates
+next-action selection from evaluation; neither type uses quantile regression.
+Each animal owns its replay, target weights, Adam state and exploration RNG.
+Replay capacity therefore contributes to memory per living animal.
+
+The existing packed FP32 model storage and optional native dense/gradient/Adam
+kernels support every layer. No additional dependency is required. The inspector
+shows action Q-values, epsilon, TD loss and sampled hidden-layer activations;
+archived-weight explanations support the same observation/action contract.
+Checkpoints restore the complete controller state. Birth uses the existing
+independent inheritance/mutation rules and clears child replay/training state.
+Warm starts reset replay/optimizer state and synchronize the target network.
+Saved models must match the exact algorithm (`dqn` or `ddqn`), action order, inputs and hidden
+widths; `q_network` and other algorithm weights are not silently converted.
+
 ## Private learning loop
 
 Each animal owns this loop. A template supplies initial settings and weights, not a shared live species policy.
@@ -29,6 +80,8 @@ Supported algorithms:
 | Template `type` | Model and training |
 | --- | --- |
 | `q_network` | Existing one-hidden-layer action-value network, replay, target network, epsilon-greedy policy and SGD |
+| `dqn` | One-to-four-hidden-layer scalar DQN, private replay/target network, epsilon-greedy choices, Huber TD loss and Adam |
+| `ddqn` | Scalar Double DQN with the same configurable dense layers; online next-action selection and separate target-network evaluation |
 | `ppo` | Categorical policy and scalar critic sharing an MLP, recent on-policy rollouts, GAE, clipped policy loss, entropy bonus and Adam |
 | `a2c` | Independent advantage actor-critic, one gradient update per rollout, GAE and entropy regularization |
 | `reinforce` | Actor-only episodic Monte Carlo policy gradient with a running baseline from previous episodes |

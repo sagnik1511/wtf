@@ -59,7 +59,7 @@ def other_action(
         outputs = brain.network.predict(observation) if outputs is None else outputs
         probabilities = brain.distribution(outputs, tuple(observation) + mask)[0]
         return brain.actions[sample_index(probabilities, rng)]
-    if kind in ("q_network", "qrdqn"):
+    if kind in ("q_network", "qrdqn", "dqn", "ddqn"):
         if rng.random() < brain.epsilon:
             return rng.choice(brain.actions)
         values = (

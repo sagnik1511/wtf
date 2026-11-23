@@ -468,7 +468,7 @@ def validate(c):
                     )
                 for i, size in enumerate(layers):
                     num(size, f"{p}.critic_hidden_layers.{i}", 1, 256, True)
-        elif b["type"] == "qrdqn":
+        elif b["type"] in ("qrdqn", "dqn", "ddqn"):
             obj(
                 b,
                 p,
@@ -483,7 +483,7 @@ def validate(c):
                     "train_every_steps",
                     "target_update_every_training_steps",
                     "exploration",
-                    "num_quantiles",
+                    *(("num_quantiles",) if b["type"] == "qrdqn" else ()),
                     "huber_threshold",
                     "max_grad_norm",
                 ),
@@ -514,7 +514,8 @@ def validate(c):
                 num(b[key], f"{p}.{key}", 1, 1000000, True)
             if max(b["batch_size"], b["learning_starts_after"]) > b["replay_capacity"]:
                 fail(p, "batch size and learning start must not exceed replay capacity")
-            num(b["num_quantiles"], p + ".num_quantiles", 2, 128, True)
+            if b["type"] == "qrdqn":
+                num(b["num_quantiles"], p + ".num_quantiles", 2, 128, True)
             num(b["huber_threshold"], p + ".huber_threshold", 0.00001, 100)
             num(b["max_grad_norm"], p + ".max_grad_norm", 0.00001, 100)
             e = b["exploration"]
@@ -609,7 +610,7 @@ def validate(c):
         else:
             fail(
                 p + ".type",
-                "supported types are q_network, ppo, a2c, reinforce, grpo, recurrent_ppo, qrdqn, maskable_ppo, mappo, discrete_sac, trpo and lstm_ppo",
+                "supported types are q_network, dqn, ddqn, ppo, a2c, reinforce, grpo, recurrent_ppo, qrdqn, maskable_ppo, mappo, discrete_sac, trpo and lstm_ppo",
             )
     if not isinstance(c["species"], dict) or not c["species"]:
         fail("species", "at least one species required")
@@ -641,8 +642,22 @@ def validate(c):
                 "locomotion",
                 "circadian",
                 "competition",
+                "spawn",
             ),
         )
+        if "spawn" in s:
+            obj(s["spawn"], p + ".spawn", ("mode",))
+            if s["spawn"]["mode"] not in ("random", "adjacent_pairs"):
+                fail(p + ".spawn.mode", "must be random or adjacent_pairs")
+            if (
+                s["spawn"]["mode"] == "adjacent_pairs"
+                and isinstance(s["initial_population"], int)
+                and s["initial_population"] % 2
+            ):
+                fail(
+                    p + ".initial_population",
+                    "adjacent_pairs requires an even population",
+                )
         if "competition" in s:
             rules = s["competition"]
             obj(

@@ -190,6 +190,9 @@ class VisualMemory:
 class ScentField:
     """Maintain bounded fading ground scent without individual identity."""
 
+    # Keep authoritative sensory state and its bounded ephemeral caches with one owner.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, config, width):
         self.width = width
         self.species = sorted(config["species"])
@@ -204,6 +207,8 @@ class ScentField:
         # so stationary animals do not accumulate a queue of duplicate records.
         self.cells = OrderedDict()
         self._plans = OrderedDict()
+        self._reachable = OrderedDict()
+        self._topology = None
 
     def advance(self, world, dead=()):
         """Advance fading scent state for one world step."""
@@ -221,7 +226,69 @@ class ScentField:
                 self.cells[key] = tick
                 self.cells.move_to_end(key)
 
-    def sample(self, world, animal, template):
+    def prepare(self, world):
+        """Reconcile static reachability once; strengths live for one observation phase."""
+        blocked = getattr(world.blocked, "__func__", None)
+        depth = (
+            getattr(world.geography.depth, "__func__", None)
+            if world.geography
+            else None
+        )
+        if (
+            getattr(blocked, "__qualname__", "") != "World.blocked"
+            or getattr(blocked, "__module__", "") != "wtf.simulation.world"
+            or world.geography
+            and (
+                getattr(depth, "__qualname__", "") != "Geography.depth"
+                or getattr(depth, "__module__", "") != "wtf.simulation.geography"
+            )
+        ):
+            return None
+        topology = (
+            world.width,
+            world.height,
+            frozenset(world.obstacles),
+            (
+                frozenset(p for p, values in world.geography.water.items() if values[0])
+                if world.geography
+                else frozenset()
+            ),
+        )
+        if topology != self._topology:
+            self._reachable.clear()
+            self._topology = topology
+        return {}
+
+    def _cells(self, world, start, radius, cache):
+        """Ordered reachable dry cells; bounded geometry cache never holds scent."""
+        # Keep BFS ordering and its bounded cache publication together.
+        # pylint: disable=too-many-locals
+        key = start, radius
+        if cache and key in self._reachable:
+            self._reachable.move_to_end(key)
+            return self._reachable[key]
+        seen, queue, cells = {start}, deque([(start, 0)]), []
+        while queue:
+            (x, y), distance = queue.popleft()
+            if world.blocked((x, y)) or (
+                world.geography and world.geography.depth((x, y))
+            ):
+                continue
+            dx, dy = x - start[0], y - start[1]
+            sector = SECTORS.index(((dx > 0) - (dx < 0), (dy > 0) - (dy < 0)))
+            cells.append(((y * self.width + x) * self.channels, sector))
+            if distance < radius:
+                for p in ((x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)):
+                    if p not in seen:
+                        seen.add(p)
+                        queue.append((p, distance + 1))
+        if cache:
+            self._reachable[key] = cells
+            if len(self._reachable) > 128:
+                self._reachable.popitem(last=False)
+        return cells
+
+    def sample(self, world, animal, template, phase=None):
         """Sample the local scent field using the configured sensory contract."""
 
         # Keep this ordered phase and its shared state together; splitting it only to
@@ -258,38 +325,31 @@ class ScentField:
                 self._plans.popitem(last=False)
         self._plans.move_to_end(key)
         features = [0.0] * (9 * len(plan))
-        start = animal.position
-        seen = {start}
-        queue = deque([(start, 0)])
-        # Ground scent follows locally reachable dry cells. It does not cross a
-        # sealed wall or river, and is not a simulated airborne odour plume.
-        while queue:
-            (x, y), distance = queue.popleft()
-            if world.blocked((x, y)) or (
-                world.geography and world.geography.depth((x, y))
-            ):
-                continue
-            dx, dy = x - animal.x, y - animal.y
-            sector = SECTORS.index(((dx > 0) - (dx < 0), (dy > 0) - (dy < 0)))
-            cell = (y * self.width + x) * self.channels
-            for index, groups in enumerate(plan):
-                combined = 0.0
-                for group in groups:
-                    when = self.cells.get(cell + group)
-                    if when is not None:
-                        strength = max(0.0, 1 - (world.tick - when) / self.lifetime)
-                        combined = (
-                            min(1.0, combined + strength)
-                            if blended
-                            else max(combined, strength)
-                        )
+        # Direct callers use the uncached path, including after manual world edits.
+        for cell, sector in self._cells(
+            world, animal.position, key[2], phase is not None
+        ):
+            cache_key = cell, plan, blended
+            strengths = phase.get(cache_key) if phase is not None else None
+            if strengths is None:
+                strengths = []
+                for groups in plan:
+                    combined = 0.0
+                    for group in groups:
+                        when = self.cells.get(cell + group)
+                        if when is not None:
+                            strength = max(0.0, 1 - (world.tick - when) / self.lifetime)
+                            combined = (
+                                min(1.0, combined + strength)
+                                if blended
+                                else max(combined, strength)
+                            )
+                    strengths.append(combined)
+                if phase is not None and len(phase) < 4096:
+                    phase[cache_key] = strengths
+            for index, combined in enumerate(strengths):
                 offset = index * 9 + sector
                 features[offset] = max(features[offset], combined)
-            if distance < key[2]:
-                for p in ((x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)):
-                    if p not in seen:
-                        seen.add(p)
-                        queue.append((p, distance + 1))
         return features
 
 

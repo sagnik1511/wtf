@@ -354,6 +354,8 @@ static PyMethodDef methods[] = {
     {"mlp_predict", mlp_predict_native, METH_VARARGS, "Fused dense inference."},
     {"masked_ppo_batch", masked_ppo_batch_native, METH_VARARGS,
      "Exact masked PPO minibatch."},
+    {"dqn_batch", dqn_batch_native, METH_VARARGS,
+     "Scalar DQN/Double DQN minibatch gradients."},
     {"ppo_batch", ppo_batch_native, METH_VARARGS,
      "Fused PPO batch gradients and metrics."},
     {"affine", affine, METH_VARARGS,

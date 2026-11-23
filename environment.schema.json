@@ -895,6 +895,20 @@
                 "description": "Allow a learned challenge against a cardinally adjacent same-species animal without a food or path objective. Aggression deals damage but grants no feeding or movement priority."
               }
             }
+          },
+          "spawn": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["mode"],
+            "description": "Optional placement of founders only; saved positions and newborn placement are unchanged. Adjacent pairing requires an even initial population.",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": ["random", "adjacent_pairs"],
+                "default": "random",
+                "description": "Random retains the original seeded placement. Adjacent pairs place same-species opposite-sex founders on neighboring dry cells, respecting spawn zones and walkable slopes. Fails if insufficient disjoint adjacent cells exist."
+              }
+            }
           }
         },
         "required": [
@@ -905,7 +919,31 @@
           "brain",
           "rewards"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "required": ["spawn"],
+              "properties": {
+                "spawn": {
+                  "required": ["mode"],
+                  "properties": {
+                    "mode": {
+                      "const": "adjacent_pairs"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "initial_population": {
+                  "multipleOf": 2
+                }
+              }
+            }
+          }
+        ]
       },
       "description": "Named species definitions at the root, species spawn-zone assignments under placement, or monitored species names under early_stopping; keys/names must match the environment."
     },
@@ -3679,6 +3717,488 @@
               "temperature",
               "target_tau"
             ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "dqn",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+              },
+              "observation_version": {
+                "enum": [1, 2, 3, 4],
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
+              },
+              "replay_capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Maximum stored experience transitions for replay-based learners."
+              },
+              "learning_starts_after": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Minimum collected experiences before replay-based optimization begins."
+              },
+              "train_every_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Decision-step interval between replay updates or GRPO trial requests, depending on algorithm."
+              },
+              "target_update_every_training_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Optimizer-update interval between target-network synchronizations."
+              },
+              "exploration": {
+                "type": "object",
+                "properties": {
+                  "initial": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Initial epsilon random-action probability."
+                  },
+                  "minimum": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Minimum epsilon random-action probability."
+                  },
+                  "decay_per_decision": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Multiplicative epsilon decay per decision, bounded by minimum."
+                  }
+                },
+                "required": ["initial", "minimum", "decay_per_decision"],
+                "additionalProperties": false,
+                "description": "Epsilon-greedy action-exploration schedule for value-based learners."
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "hidden_layers"],
+                "properties": {
+                  "type": {
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
+                  },
+                  "activation": {
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
+                  }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
+              },
+              "huber_threshold": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Positive Huber TD-error threshold for scalar DQN updates."
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+              }
+            },
+            "required": [
+              "type",
+              "learning_rate",
+              "discount_factor",
+              "batch_size",
+              "replay_capacity",
+              "learning_starts_after",
+              "train_every_steps",
+              "target_update_every_training_steps",
+              "exploration",
+              "network",
+              "huber_threshold",
+              "max_grad_norm"
+            ],
+            "additionalProperties": false,
+            "description": "Independent multilayer scalar DQN with max-target Bellman updates, private replay, epsilon-greedy exploration, Huber loss and Adam."
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "ddqn",
+                "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+              },
+              "observation_version": {
+                "enum": [1, 2, 3, 4],
+                "maximum": 4,
+                "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
+              },
+              "learning_rate": {
+                "type": "number",
+                "minimum": 1e-6,
+                "maximum": 0.1,
+                "description": "Base optimizer update rate before the species multiplier."
+              },
+              "discount_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Future-reward discount gamma, applied per simulation transition."
+              },
+              "batch_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm."
+              },
+              "replay_capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Maximum stored experience transitions for replay-based learners."
+              },
+              "learning_starts_after": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Minimum collected experiences before replay-based optimization begins."
+              },
+              "train_every_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Decision-step interval between replay updates or GRPO trial requests, depending on algorithm."
+              },
+              "target_update_every_training_steps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Optimizer-update interval between target-network synchronizations."
+              },
+              "exploration": {
+                "type": "object",
+                "properties": {
+                  "initial": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Initial epsilon random-action probability."
+                  },
+                  "minimum": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Minimum epsilon random-action probability."
+                  },
+                  "decay_per_decision": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Multiplicative epsilon decay per decision, bounded by minimum."
+                  }
+                },
+                "required": ["initial", "minimum", "decay_per_decision"],
+                "additionalProperties": false,
+                "description": "Epsilon-greedy action-exploration schedule for value-based learners."
+              },
+              "network": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "hidden_layers"],
+                "properties": {
+                  "type": {
+                    "const": "mlp",
+                    "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
+                  },
+                  "hidden_layers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 256
+                    },
+                    "description": "Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates."
+                  },
+                  "activation": {
+                    "const": "tanh",
+                    "description": "Hidden-layer activation function; current supported architecture uses tanh."
+                  }
+                },
+                "description": "Neural architecture used by this controller; each animal has its own live parameters."
+              },
+              "huber_threshold": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Positive Huber TD-error threshold for scalar DQN updates."
+              },
+              "max_grad_norm": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 100,
+                "description": "Global gradient-norm clipping threshold before optimizer updates."
+              },
+              "observation_top_k": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16,
+                "default": 1,
+                "description": "Maximum visible target slots per food/prey/predator category; unused slots are zero-filled."
+              },
+              "movement_history_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16,
+                "default": 0,
+                "description": "Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window."
+              },
+              "scent_observation": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "species": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Exact configured species name to sense."
+                    },
+                    "description": "Sensed species in input-channel order; all names must exist in the environment."
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8,
+                    "default": 2,
+                    "description": "Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation."
+                  },
+                  "separate_sexes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use female then male channels per species; false merges both sexes into one anonymous channel."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["separated", "blended"],
+                    "default": "separated",
+                    "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
+                  }
+                },
+                "description": "Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs.",
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "mode": {
+                          "const": "blended"
+                        }
+                      },
+                      "required": ["mode"]
+                    },
+                    "then": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["species"]
+                          },
+                          {
+                            "required": ["separate_sexes"]
+                          }
+                        ]
+                      }
+                    },
+                    "else": {
+                      "required": ["species"]
+                    }
+                  }
+                ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+              }
+            },
+            "required": [
+              "type",
+              "learning_rate",
+              "discount_factor",
+              "batch_size",
+              "replay_capacity",
+              "learning_starts_after",
+              "train_every_steps",
+              "target_update_every_training_steps",
+              "exploration",
+              "network",
+              "huber_threshold",
+              "max_grad_norm"
+            ],
+            "additionalProperties": false,
+            "description": "Independent multilayer scalar Double DQN: online greedy action selection, target-network evaluation, private replay, Huber loss and Adam."
           }
         ]
       },

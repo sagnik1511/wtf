@@ -101,6 +101,7 @@ those individual controllers.
 | Controller | Experience and additional state |
 | --- | --- |
 | Q network / DQN (`q_network`) | `weights`, `target`, `replay`, `cursor`, exploration `epsilon`; SGD has no Adam moments |
+| Multilayer DQN / DDQN (`dqn`, `ddqn`) | Online/target dense networks, bounded scalar-TD replay, `cursor`, `epsilon`, Adam moments and both RNG streams |
 | QR-DQN | Online/target networks, `replay`, `cursor`, `epsilon`, Adam state and quantile network configuration |
 | PPO / A2C | `network`, `moments`, `variances`, `rollout`, `pending` and update counters |
 | REINFORCE | `trajectory`, `pending`, running `baseline`, network and Adam state |

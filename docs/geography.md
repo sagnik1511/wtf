@@ -536,3 +536,10 @@ resolve from the working directory first, then bundled/project assets. Use an
 absolute path for an unambiguous external map. Add shipped maps/presets to
 `packaging_assets.json`; local exploratory JSONs remain excluded. See
 [packaging and resource checks](packaging.md).
+
+## Adjacent founder pairs
+
+The per-species [`spawn.mode`](species.md#adjacent-founder-pairs) option can start
+female/male founders on adjacent dry cells. It respects existing enclosure zones,
+obstacles and walkable slopes. It changes neither terrain physics nor mating
+radius, eligibility, consent or newborn placement.

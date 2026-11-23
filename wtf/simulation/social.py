@@ -167,6 +167,9 @@ def _context(world, animal, action, local):
 class SocialState:
     """Track bounded visible outcomes and species consequence estimates."""
 
+    # Keep authoritative sensory state and its bounded ephemeral caches with one owner.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, config):
         self.config = config
         self.training = True
@@ -183,6 +186,7 @@ class SocialState:
         self.pending = {}  # actor -> (species, cumulative labels, deque of contexts)
         self.before = None
         self.buckets = {}
+        self._bucket_members = ()
 
     def prepare(self, world):
         # Standalone World.step is valid before the first observe_all call.
@@ -194,10 +198,23 @@ class SocialState:
 
         if not hasattr(world, "_water_sight_cache"):
             world._water_sight_cache = OrderedDict()
+        # Reconcile authoritative membership/order and bucket coordinates. Stored
+        # objects expose current body/species fields, even for within-bucket moves.
+        if len(self._bucket_members) == len(world.animals) and all(
+            animal is previous and animal.x // 8 == bx and animal.y // 8 == by
+            for animal, (previous, bx, by) in zip(
+                world.animals.values(), self._bucket_members
+            )
+        ):
+            return
         buckets = defaultdict(list)
+        members = []
         for animal in world.animals.values():
-            buckets[animal.x // 8, animal.y // 8].append(animal)
+            bx, by = animal.x // 8, animal.y // 8
+            buckets[bx, by].append(animal)
+            members.append((animal, bx, by))
         self.buckets = buckets
+        self._bucket_members = members
 
     def begin(self, world, actions):
         """Capture pre-step visible subjects and private outcome-window contexts."""

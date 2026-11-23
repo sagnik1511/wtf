@@ -27,6 +27,8 @@ def create_brain(config, actions, base_seed, individual_seed):
     if config["type"] in (
         "recurrent_ppo",
         "qrdqn",
+        "dqn",
+        "ddqn",
         "maskable_ppo",
         "mappo",
         "discrete_sac",
@@ -58,6 +60,7 @@ def advanced_brain(kind):
 
     from wtf.learning.contextual_ppo import MaskablePPOBrain, MAPPOBrain
     from wtf.learning.qrdqn import QRDQNBrain
+    from wtf.learning.dqn import DQNBrain, DDQNBrain
     from wtf.learning.recurrent_ppo import RecurrentPPOBrain
 
     from wtf.learning.discrete_sac import DiscreteSACBrain
@@ -70,6 +73,8 @@ def advanced_brain(kind):
         "lstm_ppo": LSTMPPOBrain,
         "recurrent_ppo": RecurrentPPOBrain,
         "qrdqn": QRDQNBrain,
+        "dqn": DQNBrain,
+        "ddqn": DDQNBrain,
         "maskable_ppo": MaskablePPOBrain,
         "mappo": MAPPOBrain,
     }[kind]
@@ -90,6 +95,8 @@ def restore_brain(state):
     if kind in (
         "recurrent_ppo",
         "qrdqn",
+        "dqn",
+        "ddqn",
         "maskable_ppo",
         "mappo",
         "discrete_sac",

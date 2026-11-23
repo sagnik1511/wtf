@@ -375,7 +375,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
             y[-1] = 1
             if kind == "q_network":
                 a, b = brain.forward(x)[1], brain.forward(y)[1]
-            elif kind == "qrdqn":
+            elif kind in ("qrdqn", "dqn", "ddqn"):
                 a, b = brain.values(x), brain.values(y)
             else:
                 a, b = brain.action_probabilities(x), brain.action_probabilities(y)

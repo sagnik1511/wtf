@@ -102,6 +102,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `reproduction` | Same-species opposite-sex eligibility, consent window, maturity, cost and population limits. | object | Optional; — |
 | `circadian` | Species-specific night multipliers, used only when the world day_night cycle is enabled. | object | Optional; — |
 | `competition` | Optional same-species challenge contests for shared food and occupied paths; disabled unless enabled explicitly. | object | Optional; — |
+| `spawn` | Optional placement of founders only; saved positions and newborn placement are unchanged. Adjacent pairing requires an even initial population. | object | Optional; — |
 
 ## `config.species.<name>.locomotion`
 
@@ -271,6 +272,12 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `food` | Permit contests over the same reachable food patch when the opponent chooses eat or challenge; the winner receives the first normal bite. | boolean | Optional; `true` |
 | `blocked_path` | Permit challenges against a same-species blocker ahead; a winning challenger advances only if a valid free retreat exists or the blocker dies. | boolean | Optional; `true` |
 | `aggression` | Allow a learned challenge against a cardinally adjacent same-species animal without a food or path objective. Aggression deals damage but grants no feeding or movement priority. | boolean | Optional; `true` |
+
+## `config.species.<name>.spawn`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `mode` | Random retains the original seeded placement. Adjacent pairs place same-species opposite-sex founders on neighboring dry cells, respecting spawn zones and walkable slopes. Fails if insufficient disjoint adjacent cells exist. | string; choices: `["random", "adjacent_pairs"]` | Required; `"random"` |
 
 ## `config.brains.<name> (q_network)`
 
@@ -861,6 +868,116 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (dqn)`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"dqn"` | Required; — |
+| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
+| `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
+| `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `1000000` | Required; — |
+| `replay_capacity` | Maximum stored experience transitions for replay-based learners. | integer; min: `1`; max: `1000000` | Required; — |
+| `learning_starts_after` | Minimum collected experiences before replay-based optimization begins. | integer; min: `1`; max: `1000000` | Required; — |
+| `train_every_steps` | Decision-step interval between replay updates or GRPO trial requests, depending on algorithm. | integer; min: `1`; max: `1000000` | Required; — |
+| `target_update_every_training_steps` | Optimizer-update interval between target-network synchronizations. | integer; min: `1`; max: `1000000` | Required; — |
+| `exploration` | Epsilon-greedy action-exploration schedule for value-based learners. | object | Required; — |
+| `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
+| `huber_threshold` | Positive Huber TD-error threshold for scalar DQN updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `max_grad_norm` | Global gradient-norm clipping threshold before optimizer updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
+| `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+
+## `config.brains.<name> (dqn).exploration`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `initial` | Initial epsilon random-action probability. | number; min: `0`; max: `1` | Required; — |
+| `minimum` | Minimum epsilon random-action probability. | number; min: `0`; max: `1` | Required; — |
+| `decay_per_decision` | Multiplicative epsilon decay per decision, bounded by minimum. | number; min: `0`; max: `1` | Required; — |
+
+## `config.brains.<name> (dqn).network`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"mlp"` | Required; — |
+| `hidden_layers` | Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates. | array; min items: `1`; max items: `4`; items: integer; min: `1`; max: `256` | Required; — |
+| `activation` | Hidden-layer activation function; current supported architecture uses tanh. | value; exact: `"tanh"` | Optional; — |
+
+## `config.brains.<name> (dqn).scent_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
+| `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
+| `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (dqn).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
+
+## `config.brains.<name> (ddqn)`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"ddqn"` | Required; — |
+| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
+| `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
+| `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `1000000` | Required; — |
+| `replay_capacity` | Maximum stored experience transitions for replay-based learners. | integer; min: `1`; max: `1000000` | Required; — |
+| `learning_starts_after` | Minimum collected experiences before replay-based optimization begins. | integer; min: `1`; max: `1000000` | Required; — |
+| `train_every_steps` | Decision-step interval between replay updates or GRPO trial requests, depending on algorithm. | integer; min: `1`; max: `1000000` | Required; — |
+| `target_update_every_training_steps` | Optimizer-update interval between target-network synchronizations. | integer; min: `1`; max: `1000000` | Required; — |
+| `exploration` | Epsilon-greedy action-exploration schedule for value-based learners. | object | Required; — |
+| `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
+| `huber_threshold` | Positive Huber TD-error threshold for scalar DQN updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `max_grad_norm` | Global gradient-norm clipping threshold before optimizer updates. | number; min: `1e-05`; max: `100` | Required; — |
+| `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
+| `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
+| `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+
+## `config.brains.<name> (ddqn).exploration`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `initial` | Initial epsilon random-action probability. | number; min: `0`; max: `1` | Required; — |
+| `minimum` | Minimum epsilon random-action probability. | number; min: `0`; max: `1` | Required; — |
+| `decay_per_decision` | Multiplicative epsilon decay per decision, bounded by minimum. | number; min: `0`; max: `1` | Required; — |
+
+## `config.brains.<name> (ddqn).network`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"mlp"` | Required; — |
+| `hidden_layers` | Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates. | array; min items: `1`; max items: `4`; items: integer; min: `1`; max: `256` | Required; — |
+| `activation` | Hidden-layer activation function; current supported architecture uses tanh. | value; exact: `"tanh"` | Optional; — |
+
+## `config.brains.<name> (ddqn).scent_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `species` | Sensed species in input-channel order; all names must exist in the environment. | array; min items: `1`; max items: `8`; unique items: `true`; items: string; min length: `1` | Optional; — |
+| `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
+| `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
+| `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (ddqn).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
+
 ## `config.experiment`
 
 | Field | Definition | Type and constraints | Required / schema default |
@@ -944,4 +1061,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `horizon_steps` | Observed step window for harm, feeding and birth outcomes; death closes the window and episode truncation discards incomplete windows. | integer; min: `1`; max: `64` | Optional; `16` |
 | `update_schedule` | When collected outcome evidence becomes visible as consequence estimates: continuous updates immediately after closed windows; episode freezes the published model and publishes staged evidence before the next episode starts. | string; choices: `["continuous", "episode"]` | Optional; `"continuous"` |
 
-Field entries documented: **521**.
+Field entries documented: **583**.

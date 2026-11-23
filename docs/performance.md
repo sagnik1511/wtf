@@ -1105,3 +1105,100 @@ snapshot independence. These are path-specific synthetic results, not measured
 end-to-end training speedups; overall gains depend on checkpoint cadence,
 movement and visibility costs. Replays, recorded observations, RNG use and policy
 updates are unchanged. No disk reduction is claimed.
+
+## Scalar DQN batches and shared sensory work
+
+Scalar `dqn` and `ddqn` updates can use the optional native `dqn_batch` entry
+point. It borrows each controller's private online/target buffers and accumulates
+one sampled minibatch in the original order. Python still owns replay sampling,
+epsilon decay, Adam/clipping, update counters and hard target synchronization.
+DQN maximizes target values; DDQN selects online and evaluates the selected target
+head. Terminal transitions omit bootstrapping; truncated transitions retain it.
+
+The kernel validates and converts every sample and validates network/gradient
+shapes before changing gradients. Its temporary converted samples and workspaces
+are released at return. Old extensions missing the symbol, FP64 models and
+custom controller/network hooks retain the scalar update. Rebuild/restart the
+trainer with `.venv/bin/python -m work.build_native` to enable the new symbol;
+no new dependency, model signature or recording format is introduced.
+
+Scent reachability uses a per-world 128-entry LRU keyed by origin and radius.
+The observation-phase preparation compares dimensions, obstacle coordinates and
+water-cell membership, clearing geometry on topology changes. Only stock blocked
+and depth methods qualify; custom callbacks and direct `sample` calls use the
+uncached path. Geometry contains no animal positions or scent values. Each new
+observation phase gets a separate dictionary of at most 4,096 combined cell
+strengths, keyed by cell, ordered channel plan and blending mode. This preserves
+fresh deposits/decay, species/sex channel ordering and blended versus max
+reductions. Caches are excluded from checkpoints and rebuilt by restored worlds
+and GRPO trials.
+
+Social spatial buckets are reused only while ordered animal object identities
+and bucket coordinates match. Within-bucket movement reads current animal
+objects; replacements, reorderings, bucket crossings, births and deaths trigger
+rebuilding. The owner retains at most one ordered population reference list and
+one bucket map. No cached policy outputs or cross-step outcome estimates are
+introduced by this optimization.
+
+A candidate DQN/DDQN decision batch was tested separately. With 32 deep brains,
+225 inputs, seven actions and epsilon 0.35, five alternating fresh-process
+samples gave 75.66 → 75.20 ms for 160 decisions per animal (only 0.6%); the
+three-call traced allocation probe increased from 5,400 to 11,568 bytes.
+It was not adopted. Decisions continue through the existing scalar path.
+
+### Reproducing the comparison
+
+Save the pre-optimization package, including its compiled native library, in a
+directory containing `wtf/`. Both variants must have the existing native kernels:
+
+```sh
+.venv/bin/python work/benchmark_shared_training.py \
+  --baseline /path/to/pre-optimization-package --repeats 5 \
+  --output .cache/shared-training-benchmark.json
+```
+
+The probe alternates separate baseline/current processes and requires identical
+state hashes. Workflow cases also compare expanded replays and compressed binary
+artifact hashes and verify checkpoint round trips. Artifacts live in temporary
+directories. Microbenchmark timings exclude construction; complete workflows
+include initialization, training, recording and a shared-metadata recovery write.
+Traced peaks are measured separately after warmup, so they exclude already
+retained caches. Process peak RSS includes setup. Caching trades bounded retained
+memory for less repeated computation; no general RAM reduction is implied.
+
+### Matched local measurements
+
+Measured on ARM64 macOS / CPython 3.12.9, with existing native kernels enabled on
+both sides. The baseline is the pre-optimization working tree on `22268d3`,
+including pending adjacent-spawn and scalar DQN/DDQN support, saved with its
+matching compiled module. Five fresh-process samples per variant alternate order.
+
+| Workload | Before median | After median | Speedup |
+| --- | ---: | ---: | ---: |
+| 96 DQN transitions, 16-sample updates | 90.58 ms | 75.95 ms | 1.19× |
+| 96 DDQN transitions, 16-sample updates | 116.97 ms | 99.89 ms | 1.17× |
+| 160 scent phases, 48 stationary animals, radius 4 | 227.36 ms | 64.21 ms | 3.54× |
+| 12,000 social preparations, 64 unchanged animals | 53.19 ms | 50.05 ms | 1.06× |
+| 32-step DQN workflow with recording/recovery | 384.86 ms | 371.11 ms | 1.04× |
+| 32-step DDQN workflow with recording/recovery | 388.13 ms | 376.76 ms | 1.03× |
+
+Update probes use hidden widths `[64, 32, 16]`, 225 inputs and seven actions.
+Workflow probes use 16 prey and six predators with three hidden layers, four-step
+training/diagnostic intervals, eight-frame binary/XZ chunks and activations.
+They include initialization, recording and final recovery writing; these short
+workloads are not a forecast for large ecological experiments. Stationary scent
+and unchanged social populations favor reuse; moving populations or topology
+changes can reduce the benefit. The unchanged decision-path control measured
+75.09 → 74.55 ms, illustrating small timing variation without a code improvement.
+
+The three-call allocation probe for DQN/DDQN updates rose from 149,704 to 208,512
+bytes (57.4 KiB extra peak) because native batches validate/convert samples before
+mutating gradients. Scent rose from 7,608 to 12,808 bytes; unchanged social
+preparation fell from 2,240 to 616 bytes. These are traced allocation peaks after
+warmup, not retained cache sizes or process peaks. DQN workflow peak RSS was
+71.69 → 71.66 MiB; DDQN was 71.45 → 71.56 MiB. This does not establish a RAM saving.
+
+All complete-state, expanded-playback and compressed binary artifact checksums
+matched. Total retained workload files were exactly 1,416,211 bytes for DQN and
+1,417,652 bytes for DDQN on both sides. There is no disk-space reduction or data
+loss from this computation-only rollout.

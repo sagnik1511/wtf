@@ -21,6 +21,7 @@ from wtf.simulation.perception import SpatialIndex
 from wtf.simulation.tracking import Tracking
 from wtf.simulation.social import SocialState, enabled as social_enabled
 from wtf.simulation.geography import Geography, resolve_map
+from wtf.simulation.placement import place_adjacent_pairs
 from wtf.simulation.day_night import sunlight, effective_body
 
 
@@ -221,6 +222,7 @@ class World:
                     s["body"]["max_health"],
                     sex=sex,
                 )
+        place_adjacent_pairs(self)
         self.next_animal_id = len(self.animals)
         self.births = defaultdict(int)
         self.mutations = defaultdict(int)
@@ -623,6 +625,11 @@ class World:
             self._visual_positions = {}
             for animal in self.animals.values():
                 self._visual_positions.setdefault(animal.position, animal.id)
+        self._scent_context = (
+            self._tracking.scent.prepare(self)
+            if self._tracking is not None and self._tracking.scent is not None
+            else None
+        )
         if self._social is not None:
             self._social.prepare(self)
         return occupied, *self._perception
@@ -844,7 +851,9 @@ class World:
                 a, self.tick, radius + bonus, top_k, history_steps, targets
             )
         if "scent_observation" in template:
-            features += self._tracking.scent.sample(self, a, template)
+            features += self._tracking.scent.sample(
+                self, a, template, self._scent_context
+            )
         if self._social is not None:
             features += self._social.observe(self, a, template)
         return tuple(features)

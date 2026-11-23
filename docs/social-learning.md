@@ -22,7 +22,8 @@ The editable [environment](../environments/seaside_social.json) uses ordinary PP
 for both species on the existing [seaside map](../maps/seaside.json). It retains
 the seaside ecology, action sets and proximal mating radii. Only the two optional
 input blocks and consequence settings are enabled. Its `compact` recording profile
-retains world playback but samples diagnostics at least 50 steps apart and omits
+retains world playback with a diagnostic interval of at least 50 steps (plus
+chunk-start samples) and omits
 activation traces. Use `--recording-profile full` for the preset's normal configured
 diagnostic/activation cadence. Existing presets stay opted out.
 

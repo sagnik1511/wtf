@@ -81,7 +81,7 @@ def prepare_model(model):
 
     sig = model["signature"]
     kind, inputs, actions = sig["algorithm"], sig["inputs"], sig["actions"]
-    if kind not in POLICIES | {"q_network", "qrdqn"}:
+    if kind not in POLICIES | {"q_network", "qrdqn", "dqn", "ddqn"}:
         raise ValueError("Unsupported explanation algorithm")
     if (
         type(inputs) is not int

@@ -203,3 +203,31 @@ test('LSTM and separate actor critics use honest network routes', () => {
     assert.equal(actor.stages.at(-1).values.length, 2);
   }
 });
+
+test('Multilayer scalar DQN/DDQN show three dense blocks and one Q output per action', () => {
+  for (const kind of ['dqn', 'ddqn']) {
+    const diagnostic = {
+      algorithm: kind,
+      features: Array(20).fill(0),
+      action_values: { rest: 0.4, attack: 0.8 },
+      activations: {
+        version: 1,
+        layers: [Array(64).fill(0.1), Array(32).fill(0.2), Array(16).fill(0.3)],
+      },
+    };
+    const template = {
+      type: kind,
+      network: { hidden_layers: [64, 32, 16] },
+    };
+    const plan = animalStructure(diagnostic, template);
+    assert.equal(plan.rank, 3);
+    assert.deepEqual(
+      plan.stages.slice(1, -1).map((s) => s.values.length),
+      [64, 32, 16],
+    );
+    assert.equal(plan.stages.at(-1).values.length, 2);
+    assert.equal(plan.available, true);
+    delete diagnostic.activations;
+    assert.equal(animalStructure(diagnostic, template).available, false);
+  }
+});

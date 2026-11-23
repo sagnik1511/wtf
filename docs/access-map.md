@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **296 public documentation pages**, **115 visual files**
+Coverage: **299 public documentation pages**, **115 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -302,6 +302,9 @@ and **8 identical viewer branding copies**.
 | [0.0.2.19 Episode publication and independent review workflow](releases/0.0.2.19.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.19](releases/0.0.2.19.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
 | [0.0.2.20 Clean-environment Python quality checks](releases/0.0.2.20.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.20](releases/0.0.2.20.md) |
+| [0.0.2.21 Configurable adjacent founder pairs](releases/0.0.2.21.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.21 — Adjacent founder pairs](releases/0.0.2.21.md) |
+| [0.0.2.22 Multilayer scalar DQN and DDQN](releases/0.0.2.22.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.22 — Multilayer DQN/DDQN](releases/0.0.2.22.md) |
+| [0.0.2.23 Native scalar updates and shared sensory work](releases/0.0.2.23.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.23 — Shared sensory work and native DQN updates](releases/0.0.2.23.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |

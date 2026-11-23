@@ -50,6 +50,8 @@ KINDS = (
     "grpo",
     "recurrent_ppo",
     "qrdqn",
+    "dqn",
+    "ddqn",
     "maskable_ppo",
     "mappo",
     "discrete_sac",

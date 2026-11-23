@@ -714,6 +714,151 @@ static PyObject *masked_ppo_batch_native(PyObject *self, PyObject *args) {
     return ppo_batch_impl(args, 1);
 }
 
+/* Scalar DQN/DDQN minibatches. Sampling, Adam and target refresh stay in
+   Python. All sample conversions and allocations finish before any gradient is
+   mutated. Workspaces are batch-local; model/target buffers are borrowed, never
+   copied. */
+static PyObject *dqn_batch_native(PyObject *self, PyObject *args) {
+    PyObject *layers, *targets, *grads, *samples;
+    double discount, threshold;
+    int double_q;
+    if (!PyArg_ParseTuple(args, "OOOOddp", &layers, &targets, &grads, &samples,
+                          &discount, &threshold, &double_q))
+        return NULL;
+    if (!PyList_Check(samples) || !PyList_GET_SIZE(samples) ||
+        !isfinite(discount) || !isfinite(threshold) || threshold <= 0) {
+        PyErr_SetString(PyExc_ValueError, "Invalid DQN batch or coefficients");
+        return NULL;
+    }
+    PyObject *first = PyList_GET_ITEM(samples, 0);
+    if (!PyTuple_Check(first) || PyTuple_GET_SIZE(first) != 5) {
+        PyErr_SetString(PyExc_ValueError, "Invalid DQN sample");
+        return NULL;
+    }
+    Py_ssize_t n = PySequence_Size(PyTuple_GET_ITEM(first, 0)), count = 0,
+               total = 0, maximum = 0, tc = 0, tt = 0, tm = 0;
+    if (n < 0)
+        return NULL;
+    DenseRow *rows = dense_rows(layers, grads, n, &count, &total, &maximum);
+    if (!rows)
+        return NULL;
+    DenseRow *target_rows = dense_rows(targets, NULL, n, &tc, &tt, &tm);
+    PyObject *result = NULL;
+    double *data = NULL, *tape = NULL, *next = NULL, *scratch = NULL;
+    Py_ssize_t *actions = NULL;
+    unsigned char *terminal = NULL;
+    if (!target_rows)
+        goto done;
+    if (count != tc || total != tt) {
+        PyErr_SetString(PyExc_ValueError, "DQN target architecture mismatch");
+        goto done;
+    }
+    for (Py_ssize_t j = 0; j < count; j++) {
+        if (rows[j].n != target_rows[j].n || rows[j].m != target_rows[j].m) {
+            PyErr_SetString(PyExc_ValueError,
+                            "DQN target architecture mismatch");
+            goto done;
+        }
+    }
+    Py_ssize_t size = PyList_GET_SIZE(samples), m = rows[count - 1].m;
+    if (n > (PY_SSIZE_T_MAX - 1) / 2 ||
+        size > PY_SSIZE_T_MAX / (2 * n + 1) / sizeof(double) ||
+        total > PY_SSIZE_T_MAX / sizeof(double) ||
+        maximum > PY_SSIZE_T_MAX / 2 / sizeof(double)) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    data = PyMem_Calloc(size * (2 * n + 1), sizeof(double));
+    actions = PyMem_Calloc(size, sizeof(Py_ssize_t));
+    terminal = PyMem_Calloc(size, sizeof(unsigned char));
+    tape = PyMem_Calloc(total, sizeof(double));
+    next = PyMem_Calloc(total, sizeof(double));
+    scratch = PyMem_Calloc(2 * maximum, sizeof(double));
+    if (!data || !actions || !terminal || !tape || !next || !scratch) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    for (Py_ssize_t k = 0; k < size; k++) {
+        PyObject *sample = PyList_GET_ITEM(samples, k);
+        if (!PyTuple_Check(sample) || PyTuple_GET_SIZE(sample) != 5 ||
+            !PyBool_Check(PyTuple_GET_ITEM(sample, 4))) {
+            PyErr_SetString(PyExc_ValueError, "Invalid DQN sample");
+            goto done;
+        }
+        double *item = data + k * (2 * n + 1);
+        if (!fill_sequence(PyTuple_GET_ITEM(sample, 0), item, n))
+            goto done;
+        actions[k] = PyLong_AsSsize_t(PyTuple_GET_ITEM(sample, 1));
+        item[2 * n] = PyFloat_AsDouble(PyTuple_GET_ITEM(sample, 2));
+        if (PyErr_Occurred())
+            goto done;
+        if (actions[k] < 0 || actions[k] >= m) {
+            PyErr_SetString(PyExc_ValueError, "Invalid DQN action");
+            goto done;
+        }
+        terminal[k] = PyTuple_GET_ITEM(sample, 4) == Py_True;
+        if (!terminal[k] &&
+            !fill_sequence(PyTuple_GET_ITEM(sample, 3), item + n, n))
+            goto done;
+    }
+    double loss = 0, *delta = scratch, *previous = scratch + maximum;
+    for (Py_ssize_t k = 0; k < size; k++) {
+        double *item = data + k * (2 * n + 1);
+        memcpy(tape, item, n * sizeof(double));
+        dense_forward(rows, count, tape, 0, m);
+        double target = item[2 * n];
+        if (!terminal[k]) {
+            memcpy(next, item + n, n * sizeof(double));
+            dense_forward(double_q ? rows : target_rows, count, next, 0, m);
+            double *values = next + total - m;
+            Py_ssize_t best = 0;
+            for (Py_ssize_t a = 1; a < m; a++)
+                if (values[a] > values[best])
+                    best = a;
+            if (double_q)
+                dense_forward(target_rows, count, next, best, best + 1);
+            target += discount * values[best];
+        }
+        double error = tape[total - m + actions[k]] - target;
+        double absolute = fabs(error);
+        loss += absolute <= threshold
+                    ? 0.5 * error * error
+                    : threshold * (absolute - 0.5 * threshold);
+        memset(delta, 0, m * sizeof(double));
+        delta[actions[k]] = fmax(-threshold, fmin(threshold, error));
+        for (Py_ssize_t j = count; j-- > 0;) {
+            DenseRow *r = rows + j;
+            double *x = tape + r->offset, *dw = r->dw.buf, *db = r->db.buf;
+            const float *w = r->w.buf;
+            if (j)
+                memset(previous, 0, r->n * sizeof(double));
+            for (Py_ssize_t a = 0; a < r->m; a++) {
+                double d = delta[a];
+                db[a] += d;
+                for (Py_ssize_t i = 0; i < r->n; i++) {
+                    dw[a * r->n + i] += d * x[i];
+                    if (j)
+                        previous[i] += d * (double)w[a * r->n + i];
+                }
+            }
+            if (j)
+                for (Py_ssize_t i = 0; i < r->n; i++)
+                    delta[i] = previous[i] * (1.0 - x[i] * x[i]);
+        }
+    }
+    result = PyFloat_FromDouble(loss);
+done:
+    PyMem_Free(data);
+    PyMem_Free(actions);
+    PyMem_Free(terminal);
+    PyMem_Free(tape);
+    PyMem_Free(next);
+    PyMem_Free(scratch);
+    dense_release(rows, count);
+    dense_release(target_rows, tc);
+    return result;
+}
+
 /* LSTM cell only. The MLP head, chronological BPTT boundaries, sampling and
    optimizer cadence remain in Python. Memory is [hidden, cell]. */
 static PyObject *lstm_step_native(PyObject *self, PyObject *args) {
