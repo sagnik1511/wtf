@@ -3,15 +3,10 @@
 [Complete documentation directory](directory.md) · [All visuals](visuals.md) · [Homepage click paths](access-map.md)
 
 <div class="home-hero">
-  <picture class="site-banner brand-on-light">
+  <picture class="site-banner" data-theme-banner>
     <source srcset="assets/branding/github-banner-light.svg" type="image/svg+xml" />
     <img src="assets/branding/github-banner-light.png" width="1280" height="640" alt="WTF — Wildlife Trial Framework. Reinforcement learning in configurable environments with independent agents, multiple species and saved playback." fetchpriority="high" />
   </picture>
-  <picture class="site-banner brand-on-dark">
-    <source srcset="assets/branding/github-banner-dark.svg" type="image/svg+xml" />
-    <img src="assets/branding/github-banner-dark.png" width="1280" height="640" alt="WTF — Wildlife Trial Framework. Reinforcement learning in configurable environments with independent agents, multiple species and saved playback." fetchpriority="high" />
-  </picture>
-
 </div>
 
 WTF is a configurable reinforcement learning simulation framework. Animals have private

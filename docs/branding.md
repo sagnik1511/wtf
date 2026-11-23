@@ -81,8 +81,10 @@ uses [light SVG](assets/branding/github-banner-light.svg) and
 [dark SVG](assets/branding/github-banner-dark.svg) variants, with matching
 [light PNG](assets/branding/github-banner-light.png) and
 [dark PNG](assets/branding/github-banner-dark.png) fallbacks. They follow the
-site's manual light/dark toggle through explicit palette selectors, rather than
-only the operating-system preference. Both variants preserve the same geometry;
+site's manual light/dark toggle. One banner element changes its SVG source and
+PNG fallback when the page palette changes, so two versions cannot appear
+together. The small theme observer runs only on pages containing the banner;
+it does not rely only on the operating-system preference. Both variants preserve the same geometry;
 the light version uses forest ink on sage, and the dark version uses pale mint
 on forest. The home page prefers SVG and falls back to PNG. The banner spans the
 hero area and preserves its 2:1 aspect ratio on narrow screens. Transparent logo

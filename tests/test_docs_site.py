@@ -82,11 +82,12 @@ class DocumentationSiteTests(unittest.TestCase):
     def test_home_banner_is_static_and_header_motion_assets_remain_safe(self):
         root = Path(__file__).resolve().parents[1]
         home = (root / "docs/index.md").read_text()
-        self.assertEqual(home.count('<picture class="site-banner '), 2)
-        for theme in ("light", "dark"):
-            self.assertIn(f'class="site-banner brand-on-{theme}"', home)
-            self.assertIn(f'srcset="assets/branding/github-banner-{theme}.svg"', home)
-            self.assertIn(f'src="assets/branding/github-banner-{theme}.png"', home)
+        self.assertEqual(
+            home.count('<picture class="site-banner" data-theme-banner>'), 1
+        )
+        self.assertIn('srcset="assets/branding/github-banner-light.svg"', home)
+        self.assertIn('src="assets/branding/github-banner-light.png"', home)
+        self.assertNotIn("site-banner brand-on-", home)
         self.assertIn('width="1280" height="640"', home)
         self.assertNotIn('class="brand-lockup', home)
         self.assertIn('class="home-hero"', home)
@@ -149,9 +150,9 @@ class DocumentationSiteTests(unittest.TestCase):
                 root / f"docs/assets/branding/wtf-symbol-motion-{theme}.svg"
             ).read_text()
             self.assertIn("prefers-reduced-motion:no-preference", symbol)
-        css = (root / "docs/stylesheets/documentation.css").read_text()
-        self.assertIn(".site-banner.brand-on-dark", css)
-        self.assertIn("[data-md-color-scheme='slate'] .site-banner.brand-on-dark", css)
+        settings = (root / "zensical.toml").read_text()
+        self.assertIn('"javascripts/banner-theme.js"', settings)
+        self.assertTrue((root / "docs/javascripts/banner-theme.js").is_file())
 
     def test_structural_figures_have_embedded_theme_palettes(self):
         root = Path(__file__).resolve().parents[1]
