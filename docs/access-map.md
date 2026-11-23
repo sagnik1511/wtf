@@ -301,7 +301,7 @@ and **8 identical viewer branding copies**.
 | [0.0.2.18 Collective sensing and persistent consequence learning](releases/0.0.2.18.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.18](releases/0.0.2.18.md) |
 | [0.0.2.19 Episode publication and independent review workflow](releases/0.0.2.19.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.19](releases/0.0.2.19.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
-| [0.0.2.20 Clean-environment Python quality checks](releases/0.0.2.20.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.20 — Clean-environment Python quality checks](releases/0.0.2.20.md) |
+| [0.0.2.20 Clean-environment Python quality checks](releases/0.0.2.20.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.20](releases/0.0.2.20.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
