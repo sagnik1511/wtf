@@ -6,6 +6,7 @@ Networks are small deliberately; immutable replay tuples reduce overhead.
 
 from wtf.learning.activation_diagnostics import activation_sample
 from wtf.simulation.tracking import tracking_width
+from wtf.simulation.social import social_width
 from wtf.native import kernels
 from wtf.native.kernels import gradient_zeros
 from wtf.native.numeric import Float32, packed, plain, precision_of, restore_numeric
@@ -27,7 +28,12 @@ def observation_inputs(config):
     base = {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS, 4: INTENT_INPUTS}[
         config.get("observation_version", 1)
     ]
-    return base + 12 * (config.get("observation_top_k", 1) - 1) + tracking_width(config)
+    return (
+        base
+        + 12 * (config.get("observation_top_k", 1) - 1)
+        + tracking_width(config)
+        + social_width(config)
+    )
 
 
 class Experience(NamedTuple):

@@ -42,7 +42,8 @@ Supported algorithms:
 | `lstm_ppo` | PPO with hidden/cell LSTM memory and truncated chronological BPTT |
 
 See [Discrete SAC, TRPO and LSTM PPO](additional-policies.md) for complete templates,
-selection and lifecycle contracts. Existing environment presets remain unchanged.
+selection and lifecycle contracts. The bundled `lstm_ppo` preset configures both
+species with LSTM PPO and can be run by its short name.
 
 See the [advanced algorithms guide](advanced-algorithms.md) for presets, commands,
 configuration, memory behavior and the changed action/reward rules of these variants.

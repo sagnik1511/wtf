@@ -1,3 +1,8 @@
+import { drawFeedings } from './feeding-highlights.mjs';
+import {
+  drawEnvironmentObjects,
+  drawEnvironmentShadows,
+} from './environment-objects.mjs';
 import { trackingSample, drawVisualTracks } from './tracking.mjs';
 import { drawContests, contestLabel } from './competition.mjs';
 import { installTheme, boardPalette } from './theme.mjs';
@@ -45,6 +50,12 @@ function showError(error) {
 
 let networkRankLimit = DEFAULT_NETWORK_RANK;
 const player = new Playback(api, undefined, { movement: true });
+const reducedMotion = window.matchMedia?.(
+  '(prefers-reduced-motion: reduce)',
+) ?? { matches: false };
+reducedMotion.addEventListener?.('change', () => {
+  if (state) render();
+});
 const dayNightClock = new DayNightClock($('day-night-clock'));
 const observationOverlay = new ObservationOverlay();
 const brainExplanation = new BrainExplanation(api);
@@ -351,7 +362,10 @@ function drawWorld() {
   const palette = boardPalette(document.documentElement.dataset.theme);
   ctx.fillStyle = palette.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawTerrain(ctx, terrain, cw, ch, palette.light);
+  drawTerrain(ctx, terrain, cw, ch, palette.light, {
+    tick: state.tick,
+    reducedMotion: reducedMotion.matches,
+  });
   const sun = daylight(state.day_night, state.tick);
   drawSunlitGround(
     ctx,
@@ -361,6 +375,10 @@ function drawWorld() {
     canvas.height,
     sun,
   );
+  drawEnvironmentShadows(ctx, state, cw, ch, sun, {
+    light: palette.light,
+    reducedMotion: reducedMotion.matches,
+  });
   dayNightClock.update(state.day_night, state.tick, sun);
   const cycleStatus = $('day-night-status');
   if (cycleStatus) {
@@ -410,21 +428,19 @@ function drawWorld() {
     ctx.lineTo(canvas.width, y * ch);
     ctx.stroke();
   }
-  for (const [x, y] of state.obstacles) {
-    ctx.fillStyle = palette.obstacle;
-    ctx.fillRect(x * cw + 1, y * ch + 1, cw - 2, ch - 2);
-  }
-  const capacity = state.resource_capacity;
-  for (const r of state.resources) {
-    ctx.fillStyle = `rgba(99,171,111,${0.12 + (0.66 * r.quantity) / capacity})`;
-    const size = 0.2 + 0.6 * Math.sqrt(r.quantity / capacity);
-    ctx.fillRect(
-      (r.x + 0.5 - size / 2) * cw,
-      (r.y + 0.5 - size / 2) * ch,
-      cw * size,
-      ch * size,
-    );
-  }
+  drawEnvironmentObjects(
+    ctx,
+    state.resources,
+    state.obstacles,
+    state.resource_capacity,
+    cw,
+    ch,
+    {
+      tick: state.tick,
+      light: palette.light,
+      reducedMotion: reducedMotion.matches,
+    },
+  );
   for (const a of state.animals) {
     const x = (a.x + 0.5) * cw,
       y = (a.y + 0.5) * ch,
@@ -472,6 +488,19 @@ function drawWorld() {
     canvas.width,
     canvas.height,
     sun,
+  );
+}
+function drawFeedingHighlights() {
+  const canvas = $('world');
+  drawFeedings(
+    canvas.getContext('2d'),
+    state.feeding_highlights,
+    canvas.width / state.width,
+    canvas.height / state.height,
+    {
+      light: document.documentElement.dataset.theme === 'light',
+      reducedMotion: reducedMotion.matches,
+    },
   );
 }
 function drawContestHighlights() {
@@ -901,6 +930,7 @@ function drawInspector() {
     inspectorVisualKey = visualKey;
     inspectorDiagnostic = b;
     inspectorVisuals = inspectorGraphs({
+      consequenceSchedule: player.metadata.config.consequence_learning?.update_schedule ?? 'continuous',
       diagnostic: b,
       template: player.metadata.config.brains?.[state.species[a.species].brain],
       spec: {
@@ -1208,6 +1238,7 @@ function render(snapshot = null) {
   );
   drawWorld();
   drawSelectedTracking();
+  drawFeedingHighlights();
   drawBirthHighlights();
   drawDeathHighlights();
   drawContestHighlights();
@@ -1353,6 +1384,7 @@ installTheme({
     if (state) {
       drawWorld();
       drawSelectedTracking();
+      drawFeedingHighlights();
       drawBirthHighlights();
       drawDeathHighlights();
       drawContestHighlights();

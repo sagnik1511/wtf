@@ -110,6 +110,7 @@ Home = "index.md"
     { "SAC, TRPO and LSTM PPO" = "additional-policies.md" },
     { "Brain inputs and observations" = "observations.md" },
     { "Movement memory and scent" = "tracking.md" },
+    { "Collective learning" = "social-learning.md" },
     { "Rewards and costs" = "rewards.md" },
     { "Feedback contracts" = "feedback-review.md" },
     { "Mating observations" = "mating-observations.md" },

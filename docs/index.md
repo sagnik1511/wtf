@@ -49,6 +49,7 @@ for creating the environment, source builds and Docker.
 | Identify animal pointers and board markers | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
 | Inspect animals and their decisions | [Viewer appearance](viewer-visual-reference.md) and [brain explainability](explainability.md) |
 | Understand a diagram or visual | [Visual guide](visual-guide.md) |
+| Add collective visible outcomes and persistent species consequence estimates | [Collective learning](social-learning.md) |
 | Add movement memory and anonymous scent | [Tracking senses](tracking.md) |
 | Enable optional food/path rivalry | [Same-species competition](competition.md) |
 | Explore source calls and callers | [Source graphs and browser](source-graphs.md) |

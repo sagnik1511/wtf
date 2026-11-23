@@ -43,13 +43,31 @@ contest and a competition death using the current viewer drawing functions.
 | Coral / gold triangles | First prey-eating species: female / male |
 | Thin light body outline | Male; independent of the larger white selection ring |
 | Small dark dot | Heading, rotating with the body |
-| Green square | Resource; size and opacity increase with quantity relative to capacity |
-| Slate square | Blocking obstacle |
+| Leafy green patch / bare rooted patch | Resource; plant size and leaf count reflect recorded quantity, with a bare patch at zero |
+| Faceted slate rock | Blocking obstacle; its entire grid cell remains impassable |
+| Small green dot beside an eater | Confirmed food gain; fades over four saved frames |
 | Large white ring | Selected animal; selection drives the inspector |
 | Cyan ring, plus and BORN | Birth at the child's recorded position |
 | Red ring, cross and KILL | Killed animal's recorded position; hunter gets a gold ring |
 | Amber paired rings and connector, winner / damage label | Optional same-species challenge at the recorded fight locations; distinct from a hunting kill |
 | Green / amber ring, cross and DIED | Natural death of a resource-eater / prey-eater |
+
+### Resource and obstacle motion
+
+Food patches sway gently as replay steps advance; larger recorded quantities
+produce larger, leafier plants. Depleted patches show a small bare stem. Obstacles
+have fixed faceted-rock geometry with a faint changing surface highlight. The
+whole obstacle cell still blocks movement; decorative gaps are not paths.
+
+![Resource growth states and motion phases, including reduced-motion specimens](assets/viewer/environment-objects.svg)
+
+Motion is a deterministic function of saved tick and cell coordinates. Pausing
+freezes it; seeking back reproduces the same phase. The viewer respects the OS
+**Reduce motion** preference, including changes while open: sway and shimmer
+become static while real quantity changes remain visible. Theme changes and the
+existing day–night overlay still apply. This affects only drawing, with no extra
+replay fields, asset downloads, timers or simulation work. Growth is shown only
+when the recorded quantity changes; sway never invents food.
 
 The legend uses configured species names and female/male colors. Extra species
 receive generated colors; optional `display.color` and `display.male_color`
@@ -62,6 +80,24 @@ birth/death rings expand and fade, while competition rings fade at their
 recorded fight locations. Banners identify recent events. They do not insert a simulation or playback delay. Marker placement
 requires a recorded position; these examples do not imply inferred positions
 for older recordings.
+
+### River flow and feeding feedback
+
+Short wave crests move along each water cell's configured flow direction. Still
+water keeps stationary crests; existing current arrows remain. This is a
+decorative direction cue, not an additional physics calculation or a speed scale.
+A small green dot beside an eater marks a confirmed positive food gain, including
+competition food priority. Hunting gains and unsuccessful eating produce no dot.
+The dot fades over four saved frames, without extra delays or text labels.
+
+The marker uses the eater's saved end-of-step position, including any drift. The
+recording does not identify the exact plant consumed; the viewer never guesses
+one. Missing eaters are skipped. Seeking rebuilds the same recent cues across
+chunk boundaries. Reduced motion fixes ripple positions and dot size/opacity;
+the event still appears and expires. Pause freezes both effects. Existing replay
+files work when they contain the corresponding food-gain events.
+
+![River current and food-gain feedback across saved steps](assets/viewer/river-feeding.svg)
 
 ### Optional social contests
 
@@ -104,6 +140,15 @@ periods. The time label follows saved world steps; night remains legible.
 The sun/moon dial moves with saved frames and freezes on pause. It is hidden
 when the cycle is absent or disabled. Species sight overlays and inspector costs
 follow configured light effects.
+
+### Object shadows
+
+![Morning, midday, evening and reduced-motion object shadows](assets/viewer/object-shadows.svg)
+
+An enabled cycle projects decorative plant, rock and animal silhouettes opposite
+the sun. They shorten at midday and disappear at night. Reduced motion fixes the
+footprint while sunlight still fades its opacity. The [day–night guide](day-night.md#decorative-object-shadows)
+explains the saved-step behavior; these marks never change visibility or physics.
 
 ## Interface themes
 
@@ -190,3 +235,15 @@ unknown. Blended mode shows one heatmap for all animals; legacy separated mode r
 its named species/sex grids. A scent field is not
 one animal. These controlled SVG specimens come from the actual inspector
 renderers and adapt to interface light/dark palettes.
+
+## Collective learning
+
+![Selected-animal collective witness and consequence estimate charts](assets/viewer/social-learning.svg)
+
+Optional [collective-learning inputs](social-learning.md) appear in the agent
+inspector as local witnessed outcome charts and species consequence estimates.
+They show saved diagnostic inputs for the selected animal, including sample time
+and unknown evidence, rather than future/shared model contents. Full playback,
+pause and seek use the existing diagnostic cadence. Harm/feeding/birth colors
+adapt to both themes; no board-wide messages, individual-neighbour labels or
+extra replay fields are added.

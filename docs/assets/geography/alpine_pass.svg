@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="672" height="564" viewBox="0 0 672 564" role="img" aria-labelledby="title desc">
 <style>/* Shared source for standalone viewer/inspector SVG specimens. */
 @media (prefers-color-scheme: light) {
+  [fill='#03091c'] { fill: #304c52; }
+  [stroke='#89d4ff90'] { stroke: #145b8fb0; }
   svg {
     --viz-0b131c: #eaf0f5;
     --viz-415569: #a2b5c7;
@@ -20,6 +22,8 @@
     --viz-e1d17c: #7c6a18;
     --viz-79d6df: #236f7c;
   }
+  [fill='#63ab6f'] { fill: #34784a; }
+  [stroke='#63ab6f'] { stroke: #34784a; }
   svg text {
     fill: #172c3c;
   }
@@ -263,6 +267,16 @@
   }
   [fill='#f0dfba75'] {
     fill: #f7ead2;
+  }
+  /* Same-species competition uses the actual viewer's light-theme amber. */
+  [fill='#ffd08a'] {
+    fill: #9a4100;
+  }
+  [stroke='#ffd08a'] {
+    stroke: #9a4100;
+  }
+  text[stroke='#111827'] {
+    stroke: #ffffff;
   }
 }
 </style>
@@ -1393,5 +1407,7 @@
 <rect x="624" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="640" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <text x="16" y="531" font-size="12">Green: dry land · Brown: elevation · Gray: rock · Blue: water</text>
-<text x="16" y="550" font-size="12">Arrows: currents · Lighter blue: deeper water · Swim required to enter water</text>
-</g></svg>
+<text x="16" y="550" font-size="12">Arrows: currents · Blue shades show water depth · Swim required to enter water</text>
+</g>
+<style>@media (prefers-color-scheme: light) {[fill='#111c21'] {fill:#f1f5fa;} [fill='#e1e9e8'] {fill:#1c3543;} [stroke='#c0e9ff'] {stroke:#145b8f;} [stroke='#ffffff'] {stroke:#172c3c;} [fill='#24382e'] { fill: #d8e6cc; }[fill='#89949a'] { fill: #5e707e; }[fill='hsl(35.0,25%,33.0%)'] { fill: hsl(35.0,25%,64.0%); }[fill='hsl(47.5,25%,29.5%)'] { fill: hsl(47.5,25%,69.0%); }[fill='hsl(60.0,25%,26.0%)'] { fill: hsl(60.0,25%,74.0%); }[fill='hsl(72.5,25%,22.5%)'] { fill: hsl(72.5,25%,79.0%); }}</style>
+</svg>

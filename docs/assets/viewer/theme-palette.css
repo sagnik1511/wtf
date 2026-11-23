@@ -1,5 +1,7 @@
 /* Shared source for standalone viewer/inspector SVG specimens. */
 @media (prefers-color-scheme: light) {
+  [fill='#03091c'] { fill: #304c52; }
+  [stroke='#89d4ff90'] { stroke: #145b8fb0; }
   svg {
     --viz-0b131c: #eaf0f5;
     --viz-415569: #a2b5c7;
@@ -19,6 +21,8 @@
     --viz-e1d17c: #7c6a18;
     --viz-79d6df: #236f7c;
   }
+  [fill='#63ab6f'] { fill: #34784a; }
+  [stroke='#63ab6f'] { stroke: #34784a; }
   svg text {
     fill: #172c3c;
   }

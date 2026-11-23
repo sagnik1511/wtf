@@ -159,3 +159,17 @@ The preset starts fresh unless compatible saved brains are requested. Evidence
 for this recommendation used trained banks; fresh initialization can produce
 different outcomes. The common name is stable, while its supported defaults
 can improve.
+
+## Rolling-hill climbing effort
+
+The `rolling_hills` preset uses uphill energy costs **3.0 for prey / 4.0 for
+predators per height unit**, with the shared energy-demand reward coefficient
+−0.01. This produces additional uphill feedback −0.03 / −0.04 and makes a
+height-0-to-3 ascent consume 9 / 12 extra energy. Flat/downhill costs, proximal
+mating radii 2/3 and the one-unit climb limit remain unchanged. Health is affected
+indirectly through starvation if energy runs out, with no direct climb damage.
+
+These values strengthen terrain effort; their effect on long-term survival and
+reproduction has not been established. Keep other ecology settings fixed when
+assessing them, and reduce effort if energy coverage or breeding deteriorates.
+There is no movement-duration change. See [the map and configuration](geography.md#rolling-hills).

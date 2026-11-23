@@ -22,6 +22,21 @@ export function daylight(cycle, tick = 0) {
               : 'Dusk';
   return { enabled: true, light, phase, label };
 }
+// Decorative projection opposite the dial's sun; computed once per board draw.
+// Reduced motion keeps a short, fixed footprint, while sunlight still fades it.
+export function shadowState(illumination, reducedMotion = false) {
+  if (!illumination?.enabled || !(illumination.light > 0)) return null;
+  const strength = Math.max(0, Math.min(1, illumination.light));
+  const reach = 0.12 + 0.62 * (1 - strength);
+  return {
+    dx: reducedMotion
+      ? 0.12
+      : Math.cos(2 * Math.PI * (illumination.phase - 0.25)) * reach,
+    dy: reducedMotion ? 0.1 : 0.1 + strength * 0.06,
+    alpha: (0.09 + 0.16 * strength) * Math.min(1, strength * 5),
+  };
+}
+
 export function circadianBody(
   species,
   cycle,

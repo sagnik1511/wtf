@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+import { drawFeedings } from '../viewer/feeding-highlights.mjs';
+import {
+  drawEnvironmentObjects,
+  drawEnvironmentShadows,
+} from '../viewer/environment-objects.mjs';
 import { drawVisualTracks, trackingView } from '../viewer/tracking.mjs';
 import { drawMovementHeatmap } from '../viewer/behavior-stats.mjs';
 import { drawContests } from '../viewer/competition.mjs';
@@ -117,6 +122,9 @@ class SVGCanvas {
   lineTo(x, y) {
     this.d += `L${num(x)} ${num(y)}`;
   }
+  quadraticCurveTo(cx, cy, x, y) {
+    this.d += `Q${num(cx)} ${num(cy)} ${num(x)} ${num(y)}`;
+  }
   closePath() {
     this.d += 'Z';
   }
@@ -181,6 +189,7 @@ function board({
   definition = null,
   sight = false,
   births = [],
+  feedings = [],
   kills = [],
   deaths = [],
   contests = [],
@@ -188,6 +197,7 @@ function board({
   day_night = null,
   tick = 0,
   tracking = null,
+  reduced = false,
 } = {}) {
   const canvas = new SVGCanvas(width * 48, height * 48),
     terrain = terrainView(definition),
@@ -203,6 +213,7 @@ function board({
       resource_capacity: 20,
       contest_highlights: contests,
       birth_highlights: births,
+      feeding_highlights: feedings,
       kill_highlights: kills,
       natural_death_highlights: deaths,
     };
@@ -224,6 +235,10 @@ function board({
     selected,
     terrain,
     drawTerrain,
+    drawEnvironmentObjects,
+    drawEnvironmentShadows,
+    drawFeedings,
+    reducedMotion: { matches: reduced },
     observationOverlay: new ObservationOverlay(),
     $: (id) => controls[id],
     fitWorld: () => {},
@@ -233,13 +248,14 @@ function board({
   vm.runInContext(
     [
       'drawWorld',
+      'drawFeedingHighlights',
       'drawBirthHighlights',
       'drawDeathHighlights',
       'drawContestHighlights',
     ]
       .map(sourceFunction)
       .join('\n') +
-      '\ndrawWorld();drawBirthHighlights();drawDeathHighlights();drawContestHighlights();',
+      '\ndrawWorld();drawFeedingHighlights();drawBirthHighlights();drawDeathHighlights();drawContestHighlights();',
     context,
     { timeout: 1000 },
   );
@@ -281,20 +297,20 @@ const objectCards = [
   ],
   [
     'Resource · empty',
-    ['Small, faint square (0/20)'],
+    ['Bare rooted patch (0/20)'],
     { resources: [{ x: 1, y: 1, quantity: 0 }] },
   ],
   [
     'Resource · half full',
-    ['Size and opacity grow (10/20)'],
+    ['Growing leafy patch (10/20)'],
     { resources: [{ x: 1, y: 1, quantity: 10 }] },
   ],
   [
     'Resource · full',
-    ['Largest, strongest fill (20/20)'],
+    ['Full leafy patch (20/20)'],
     { resources: [{ x: 1, y: 1, quantity: 20 }] },
   ],
-  ['Obstacle', ['Slate square; blocks walking'], { obstacles: [[1, 1]] }],
+  ['Obstacle', ['Faceted rock; blocks whole cell'], { obstacles: [[1, 1]] }],
   [
     'Selected animal',
     ['White ring; opens inspector'],
@@ -943,7 +959,7 @@ body +=
   text(
     46,
     586,
-    '● prey ♀ / ♂     ▲ predator ♀ / ♂     ■ resource    ■ obstacle',
+    '● prey ♀ / ♂     ▲ predator ♀ / ♂     ♧ resource    ◆ obstacle',
     15,
     '#a9bacc',
   );
@@ -1164,7 +1180,229 @@ const themes = sheet(
   755,
   body,
 );
+const environmentScene = {
+  resources: [
+    { x: 0, y: 2, quantity: 2 },
+    { x: 1, y: 2, quantity: 10 },
+    { x: 2, y: 2, quantity: 20 },
+  ],
+  obstacles: [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+  ],
+};
+const environmentFrames = sheet(
+  'Resources and obstacles during playback',
+  'Actual renderer · saved-tick phases · fixed rock footprints · reduced motion freezes decorative movement',
+  630,
+  [0, 14, 28]
+    .map((tick, i) =>
+      tile(
+        28 + i * 384,
+        96,
+        `Replay step ${tick}`,
+        ['Quantity stays 2 / 10 / 20'],
+        board({ ...environmentScene, tick }),
+        360,
+        240,
+      ),
+    )
+    .join('') +
+    [
+      [
+        'Reduced motion · step 0',
+        { ...environmentScene, tick: 0, reduced: true },
+      ],
+      [
+        'Reduced motion · step 28',
+        { ...environmentScene, tick: 28, reduced: true },
+      ],
+      [
+        'Depleted patches',
+        {
+          ...environmentScene,
+          resources: environmentScene.resources.map((r) => ({
+            ...r,
+            quantity: 0,
+          })),
+          tick: 28,
+        },
+      ],
+    ]
+      .map(([title, scene], i) =>
+        tile(
+          28 + i * 384,
+          360,
+          title,
+          ['Same cells; no invented growth'],
+          board(scene),
+          360,
+          240,
+        ),
+      )
+      .join(''),
+);
+const riverScene = {
+  definition: {
+    width: 3,
+    rows: ['~~~', '~~~', '~~~'],
+    legend: { '~': { water_depth: 1, flow: [1, 0] } },
+  },
+  animals: [
+    {
+      id: 7,
+      species: 'prey',
+      sex: 'female',
+      x: 1,
+      y: 1,
+      heading: 0,
+      health: 80,
+    },
+  ],
+};
+const riverFeeding = sheet(
+  'River flow and feeding cues',
+  'Actual renderer · rightward current · small green food-gain dot beside the eater · no plant position inferred',
+  370,
+  [0, 1, 3]
+    .map((age, i) =>
+      tile(
+        28 + i * 384,
+        96,
+        `Replay step ${age}`,
+        ['Flow follows saved map vectors; cue fades'],
+        board({
+          ...riverScene,
+          tick: age,
+          feedings: [{ actor: 7, position: [1, 1], age }],
+        }),
+        360,
+        240,
+      ),
+    )
+    .join(''),
+);
+const shadowCycle = { enabled: true, cycle_steps: 100, start_phase: 0 };
+const shadowScene = {
+  ...environmentScene,
+  obstacles: [[1, 0]],
+  animals: [{ id: 8, species: 'prey', sex: 'female', x: 1, y: 1, heading: 0 }],
+  day_night: shadowCycle,
+};
+const shadows = sheet(
+  'Sunlight and object shadows',
+  'Actual renderer · long opposite-sun shadows morning/evening · short at midday · absent at night',
+  630,
+  [30, 50, 70]
+    .map((tick, i) =>
+      tile(
+        28 + i * 384,
+        96,
+        [
+          'Dawn · shadows right',
+          'Midday · short shadows',
+          'Dusk · shadows left',
+        ][i],
+        ['Saved sunlight controls direction and opacity'],
+        board({ ...shadowScene, tick }),
+        360,
+        240,
+      ),
+    )
+    .join('') +
+    [
+      [0, false, 'Night · no sun shadows'],
+      [30, true, 'Reduced motion · dawn'],
+      [70, true, 'Reduced motion · dusk'],
+    ]
+      .map(([tick, reduced, title], i) =>
+        tile(
+          28 + i * 384,
+          360,
+          title,
+          ['Reduced motion fixes footprint; sunlight still fades'],
+          board({ ...shadowScene, tick, reduced }),
+          360,
+          240,
+        ),
+      )
+      .join(''),
+);
+// Controlled saved-input specimens; these values are not experimental results.
+const collectiveTemplate = {
+  observation_version: 4,
+  observation_top_k: 3,
+  social_observation: { history_steps: 4, max_neighbors: 8 },
+  consequence_observation: true,
+};
+const collectiveFeatures = [...Array(69).fill(0), ...Array(72).fill(0)];
+collectiveFeatures[0] = 0.6;
+collectiveFeatures[1] = 1;
+collectiveFeatures.splice(69 + 4, 4, 0.75, 0.8, 0, 0);
+collectiveFeatures.splice(69 + 8, 4, 0.8, 0, 0.9, 0);
+collectiveFeatures.splice(69 + 16, 4, 0.5, 0, 0, 0.5);
+collectiveFeatures.splice(69 + 24 + 9 * 4, 4, 0.9, 0.7, 0, 0);
+collectiveFeatures.splice(69 + 24 + 7 * 4, 4, 0.8, 0, 0.9, 0);
+const collectiveCharts = (features, tick) => {
+  const tree = inspectorGraphs({
+    diagnostic: {
+      tick,
+      features,
+      action_probabilities: { rest: 0.4, eat: 0.4, swim: 0.2 },
+    },
+    template: collectiveTemplate,
+    spec: {
+      body: { vision_radius: 6 },
+      allowed_actions: ['move_forward', 'rest', 'eat', 'swim', 'reproduce'],
+    },
+    hasWater: true,
+  });
+  return walk(tree).filter(
+    (n) =>
+      n.tagName === 'svg' &&
+      ['Local witnesses', 'Species consequence estimates'].includes(
+        n.attributes['aria-label'],
+      ),
+  );
+};
+const knownCollective = collectiveCharts(collectiveFeatures, 40),
+  unknownCollective = collectiveCharts(
+    [...collectiveFeatures.slice(0, 69), ...Array(72).fill(0)],
+    0,
+  );
+assert.equal(knownCollective.length, 2);
+assert.equal(unknownCollective.length, 2);
+const socialLearning = sheet(
+  'Collective learning in the selected-animal inspector',
+  'Actual components · illustrative saved inputs · separate local witnesses and species estimates · unknown is not safe',
+  640,
+  [knownCollective, unknownCollective]
+    .map((charts, row) =>
+      charts
+        .map(
+          (chart, col) =>
+            box(28 + col * 584, 96 + row * 264, 560, 242) +
+            text(
+              46 + col * 584,
+              124 + row * 264,
+              `${row ? 'No evidence yet' : 'Recorded step 40'} · ${col ? 'species estimates' : 'local witnesses'}`,
+              18,
+              '#e6edf3',
+              'start',
+              true,
+            ) +
+            component(chart, 46 + col * 584, 142 + row * 264, 520, 176),
+        )
+        .join(''),
+    )
+    .join(''),
+);
 const outputs = {
+  'social-learning.svg': socialLearning,
+  'object-shadows.svg': shadows,
+  'river-feeding.svg': riverFeeding,
+  'environment-objects.svg': environmentFrames,
   'tracking.svg': trackingSpecimen,
   'themes.svg': themes,
   'day-night.svg': dayNight,
@@ -1176,6 +1414,27 @@ const outputs = {
 const check = process.argv.includes('--check');
 if (!check) fs.mkdirSync(outdir, { recursive: true });
 for (const [name, original] of Object.entries(outputs)) {
+  // Terrain colors are continuous HSL values, so map each specimen's actual
+  // dark fill using the renderer's light palette instead of a finite hex list.
+  const terrainRules = new Set();
+  for (const match of original.matchAll(
+    /fill="(hsl\(([-\d.]+), (\d+)%, ([-\d.]+)%\))"/g,
+  )) {
+    const [, color, hue, saturation, luminance] = match;
+    const value = Number(luminance);
+    const lightness =
+      Number(saturation) === 65 && Number(hue) === 207
+        ? 87 - value
+        : Number(saturation) === 25
+          ? 84 - (20 * (value - 19)) / 14
+          : null;
+    if (lightness !== null)
+      terrainRules.add(
+        `[fill='${color}'] { fill: hsl(${hue}, ${saturation}%, ${lightness}%); }`,
+      );
+  }
+  const terrainCSS = `@media (prefers-color-scheme: light) {${[...terrainRules].join('\n')}}`;
+
   const contents = ['themes.svg', 'day-night.svg'].includes(name)
     ? original.replace(
         /<\/svg>\s*$/,
@@ -1183,7 +1442,7 @@ for (const [name, original] of Object.entries(outputs)) {
       )
     : original.replace(
         /<\/svg>\s*$/,
-        `<style>${fs.readFileSync(path.join(outdir, 'theme-palette.css'), 'utf8')}</style></svg>\n`,
+        `<style>${fs.readFileSync(path.join(outdir, 'theme-palette.css'), 'utf8')}${terrainCSS}</style></svg>\n`,
       );
   const target = path.join(outdir, name);
   if (check)

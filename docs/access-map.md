@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **278 public documentation pages**, **104 visual files**
+Coverage: **294 public documentation pages**, **115 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -79,6 +79,7 @@ and **8 identical viewer branding copies**.
 | [Playback data structures and artifact map](replay-data-structures.md) | [Home](index.md) → [Replay structures](replay-data-structures.md) |
 | [Rewards, costs and training loss](rewards.md) | [Home](index.md) → [rewards](rewards.md) |
 | [Setup, runs and checkpoints](running.md) | [Home](index.md) → [run and resume](running.md) |
+| [Collective observations and consequence learning](social-learning.md) | [Home](index.md) → [Collective learning](social-learning.md) |
 | [Source call and caller graphs](source-graphs.md) | [Home](index.md) → [Source graphs and browser](source-graphs.md) |
 | [Adding prey and predator species](species.md) | [Home](index.md) → [species](species.md) |
 | [Visual movement memory and scent trails](tracking.md) | [Home](index.md) → [Tracking senses](tracking.md) |
@@ -139,14 +140,21 @@ and **8 identical viewer branding copies**.
 | [Runtime boundaries (SVG)](visual-previews/diagrams/runtime-boundaries-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Runtime boundaries (SVG)](visual-previews/diagrams/runtime-boundaries-svg.md) |
 | [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) |
 | [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) |
+| [Social learning (SVG)](visual-previews/diagrams/social-learning-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Social learning (SVG)](visual-previews/diagrams/social-learning-svg.md) |
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) |
 | [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) |
 | [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) |
 | [Weights versus exact state (SVG)](visual-previews/diagrams/weights-versus-exact-state-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Weights versus exact state (SVG)](visual-previews/diagrams/weights-versus-exact-state-svg.md) |
 | [Alpine pass (SVG)](visual-previews/geography/alpine_pass-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Alpine pass (SVG)](visual-previews/geography/alpine_pass-svg.md) |
+| [Canyon (SVG)](visual-previews/geography/canyon-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Canyon (SVG)](visual-previews/geography/canyon-svg.md) |
+| [Grasslands (SVG)](visual-previews/geography/grasslands-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Grasslands (SVG)](visual-previews/geography/grasslands-svg.md) |
 | [Lake islands (SVG)](visual-previews/geography/lake_islands-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Lake islands (SVG)](visual-previews/geography/lake_islands-svg.md) |
 | [Meandering river (SVG)](visual-previews/geography/meandering_river-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Meandering river (SVG)](visual-previews/geography/meandering_river-svg.md) |
+| [Oasis (SVG)](visual-previews/geography/oasis-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Oasis (SVG)](visual-previews/geography/oasis-svg.md) |
 | [River delta (SVG)](visual-previews/geography/river_delta-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [River delta (SVG)](visual-previews/geography/river_delta-svg.md) |
+| [Rolling hills (SVG)](visual-previews/geography/rolling_hills-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Rolling hills (SVG)](visual-previews/geography/rolling_hills-svg.md) |
+| [Seaside (SVG)](visual-previews/geography/seaside-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Seaside (SVG)](visual-previews/geography/seaside-svg.md) |
+| [Wetlands (SVG)](visual-previews/geography/wetlands-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Wetlands (SVG)](visual-previews/geography/wetlands-svg.md) |
 | [Github banner (PNG)](visual-previews/github-banner-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner (PNG)](visual-previews/github-banner-png.md) |
 | [Inspector example (SVG)](visual-previews/inspector/inspector-example-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Inspector example (SVG)](visual-previews/inspector/inspector-example-svg.md) |
 | [Currents (SVG)](visual-previews/physics/currents-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Currents (SVG)](visual-previews/physics/currents-svg.md) |
@@ -194,6 +202,10 @@ and **8 identical viewer branding copies**.
 | [Board objects (SVG)](visual-previews/viewer/board-objects-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Board objects (SVG)](visual-previews/viewer/board-objects-svg.md) |
 | [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) |
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night (SVG)](visual-previews/viewer/day-night-svg.md) |
+| [Environment objects (SVG)](visual-previews/viewer/environment-objects-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Environment objects (SVG)](visual-previews/viewer/environment-objects-svg.md) |
+| [Object shadows (SVG)](visual-previews/viewer/object-shadows-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Object shadows (SVG)](visual-previews/viewer/object-shadows-svg.md) |
+| [River feeding (SVG)](visual-previews/viewer/river-feeding-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [River feeding (SVG)](visual-previews/viewer/river-feeding-svg.md) |
+| [Social learning (SVG)](visual-previews/viewer/social-learning-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Social learning (SVG)](visual-previews/viewer/social-learning-svg.md) |
 | [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) |
 | [Themes (SVG)](visual-previews/viewer/themes-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Themes (SVG)](visual-previews/viewer/themes-svg.md) |
 | [Tracking (SVG)](visual-previews/viewer/tracking-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Tracking (SVG)](visual-previews/viewer/tracking-svg.md) |
@@ -281,8 +293,12 @@ and **8 identical viewer branding copies**.
 | [0.0.2.10 Record only the final scheduled episodes](releases/0.0.2.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.10](releases/0.0.2.10.md) |
 | [0.0.2.11 Modern ordinary-PPO preset](releases/0.0.2.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.11](releases/0.0.2.11.md) |
 | [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.12](releases/0.0.2.12.md) |
-| [0.0.2.13 Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.13 — Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) |
-| [0.0.2.14 Native LSTM forward and backward](releases/0.0.2.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.14 — Native LSTM forward and backward](releases/0.0.2.14.md) |
+| [0.0.2.13 Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.13](releases/0.0.2.13.md) |
+| [0.0.2.14 Native LSTM forward and backward](releases/0.0.2.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.14](releases/0.0.2.14.md) |
+| [0.0.2.15 Bundled LSTM PPO preset](releases/0.0.2.15.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.15 — Bundled LSTM PPO preset](releases/0.0.2.15.md) |
+| [0.0.2.16 Environment-object and feeding visuals](releases/0.0.2.16.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.16 — Environment-object and feeding visuals](releases/0.0.2.16.md) |
+| [0.0.2.17 Additional geography presets](releases/0.0.2.17.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.17 — Additional geography presets](releases/0.0.2.17.md) |
+| [0.0.2.18 Collective sensing and persistent consequence learning](releases/0.0.2.18.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.18 — Collective learning](releases/0.0.2.18.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
@@ -345,6 +361,7 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/runtime-boundaries.svg` | [Home](index.md) → [All visuals](visuals.md) → [runtime-boundaries.svg](assets/diagrams/runtime-boundaries.svg) |
 | `assets/diagrams/seeking-and-charts-use-separate-data.svg` | [Home](index.md) → [All visuals](visuals.md) → [seeking-and-charts-use-separate-data.svg](assets/diagrams/seeking-and-charts-use-separate-data.svg) |
 | `assets/diagrams/shared-champion-weights.svg` | [Home](index.md) → [All visuals](visuals.md) → [shared-champion-weights.svg](assets/diagrams/shared-champion-weights.svg) |
+| `assets/diagrams/social-learning.svg` | [Home](index.md) → [All visuals](visuals.md) → [social-learning.svg](assets/diagrams/social-learning.svg) |
 | `assets/diagrams/top-k-observation-pipeline.svg` | [Home](index.md) → [All visuals](visuals.md) → [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |
 | `assets/diagrams/trial-actor-batching.svg` | [Home](index.md) → [All visuals](visuals.md) → [trial-actor-batching.svg](assets/diagrams/trial-actor-batching.svg) |
 | `assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg` | [Home](index.md) → [All visuals](visuals.md) → [two-payloads-one-bounded-file-at-a-time.svg](assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg) |
@@ -355,9 +372,15 @@ and **8 identical viewer branding copies**.
 | Visual file | Click sequence from Home |
 | --- | --- |
 | `assets/geography/alpine_pass.svg` | [Home](index.md) → [All visuals](visuals.md) → [alpine_pass.svg](assets/geography/alpine_pass.svg) |
+| `assets/geography/canyon.svg` | [Home](index.md) → [All visuals](visuals.md) → [canyon.svg](assets/geography/canyon.svg) |
+| `assets/geography/grasslands.svg` | [Home](index.md) → [All visuals](visuals.md) → [grasslands.svg](assets/geography/grasslands.svg) |
 | `assets/geography/lake_islands.svg` | [Home](index.md) → [All visuals](visuals.md) → [lake_islands.svg](assets/geography/lake_islands.svg) |
 | `assets/geography/meandering_river.svg` | [Home](index.md) → [All visuals](visuals.md) → [meandering_river.svg](assets/geography/meandering_river.svg) |
+| `assets/geography/oasis.svg` | [Home](index.md) → [All visuals](visuals.md) → [oasis.svg](assets/geography/oasis.svg) |
 | `assets/geography/river_delta.svg` | [Home](index.md) → [All visuals](visuals.md) → [river_delta.svg](assets/geography/river_delta.svg) |
+| `assets/geography/rolling_hills.svg` | [Home](index.md) → [All visuals](visuals.md) → [rolling_hills.svg](assets/geography/rolling_hills.svg) |
+| `assets/geography/seaside.svg` | [Home](index.md) → [All visuals](visuals.md) → [seaside.svg](assets/geography/seaside.svg) |
+| `assets/geography/wetlands.svg` | [Home](index.md) → [All visuals](visuals.md) → [wetlands.svg](assets/geography/wetlands.svg) |
 
 ## Agent inspector
 
@@ -437,6 +460,10 @@ and **8 identical viewer branding copies**.
 | `assets/viewer/board-objects.svg` | [Home](index.md) → [All visuals](visuals.md) → [board-objects.svg](assets/viewer/board-objects.svg) |
 | `assets/viewer/brain-views.svg` | [Home](index.md) → [All visuals](visuals.md) → [brain-views.svg](assets/viewer/brain-views.svg) |
 | `assets/viewer/day-night.svg` | [Home](index.md) → [All visuals](visuals.md) → [day-night.svg](assets/viewer/day-night.svg) |
+| `assets/viewer/environment-objects.svg` | [Home](index.md) → [All visuals](visuals.md) → [environment-objects.svg](assets/viewer/environment-objects.svg) |
+| `assets/viewer/object-shadows.svg` | [Home](index.md) → [All visuals](visuals.md) → [object-shadows.svg](assets/viewer/object-shadows.svg) |
+| `assets/viewer/river-feeding.svg` | [Home](index.md) → [All visuals](visuals.md) → [river-feeding.svg](assets/viewer/river-feeding.svg) |
+| `assets/viewer/social-learning.svg` | [Home](index.md) → [All visuals](visuals.md) → [social-learning.svg](assets/viewer/social-learning.svg) |
 | `assets/viewer/terrain-and-sight.svg` | [Home](index.md) → [All visuals](visuals.md) → [terrain-and-sight.svg](assets/viewer/terrain-and-sight.svg) |
 | `assets/viewer/themes.svg` | [Home](index.md) → [All visuals](visuals.md) → [themes.svg](assets/viewer/themes.svg) |
 | `assets/viewer/tracking.svg` | [Home](index.md) → [All visuals](visuals.md) → [tracking.svg](assets/viewer/tracking.svg) |

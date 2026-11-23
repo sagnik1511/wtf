@@ -56,7 +56,7 @@ test('Terrain renderer draws map cells and flow arrows; absent maps draw nothing
       ['rect', 10, 20, 10, 10],
     ],
   );
-  assert.equal(calls.filter((x) => x[0] === 'stroke').length, 1);
+  assert.equal(calls.filter((x) => x[0] === 'stroke').length, 2);
 });
 
 test('Playback retains map metadata across chunks and run switches without adding it to frames', async () => {
@@ -233,4 +233,38 @@ test('light terrain retains geometry, depth and arrows while changing the palett
     light.map((v) => [v.kind, v.args]),
   );
   assert.ok(light.some((v, i) => v.color !== dark[i].color));
+});
+
+test('River ripples move along current, stay inside cells and freeze for still water/reduced motion', () => {
+  const points = (tick, flow = [1, 0], reducedMotion = false) => {
+    const calls = [];
+    const ctx = {
+      fillRect() {},
+      beginPath() {},
+      moveTo: (...p) => calls.push(p),
+      lineTo: (...p) => calls.push(p),
+      stroke() {},
+    };
+    drawTerrain(
+      ctx,
+      { tiles: [{ x: 1, y: 1, depth: 1, flow }], maxElevation: 1 },
+      20,
+      20,
+      false,
+      { tick, reducedMotion },
+    );
+    return calls;
+  };
+  const a = points(0),
+    b = points(1);
+  assert.ok(b[0][0] > a[0][0]);
+  assert.equal(a[0][1], b[0][1]);
+  assert.ok(points(1, [-1, 0])[0][0] < points(0, [-1, 0])[0][0]);
+  for (let tick = 0; tick < 100; tick++)
+    for (const [x, y] of points(tick, [1, -1])) {
+      assert.ok(x >= 20 && x <= 40 && y >= 20 && y <= 40);
+    }
+  assert.deepEqual(points(0, [0, 0]), points(13, [0, 0]));
+  assert.deepEqual(points(0, [1, 0], true), points(13, [1, 0], true));
+  assert.deepEqual(points(1), points(1));
 });

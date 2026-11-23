@@ -1009,3 +1009,58 @@ time, not disk compression or changed recording detail. Temporary artifacts are
 removed after each worker; raw measurements stay in ignored `.cache/`. These
 short controlled fixtures do not establish a speedup for every configuration or
 better learning, and no Ubuntu/CPython 3.13 benchmark was performed locally.
+
+
+## Resource and obstacle drawing
+
+[Environment-object visuals](viewer-visual-reference.md#resource-and-obstacle-motion)
+use one O(resources + obstacles) canvas pass during existing board draws.
+Sway/shimmer is derived from the saved tick and coordinates, with no retained
+per-frame animation history, per-object timers, image downloads or independent
+animation loop. Paused frames consume no additional animation work. Reduced-motion
+preferences are read once through a media-query object and redraw on preference
+changes. The renderer preserves its canvas state and leaves replay inputs intact.
+
+Faceted rocks and leaf curves require more canvas operations than the former
+solid rectangles; this is a visual feature, not a claimed rendering speedup.
+Simulation/learning work and replay storage are unchanged. The visual generator
+reuses the same renderer, so controlled documentation specimens cannot drift into
+a second implementation of resource or obstacle geometry.
+
+### River and feeding overlays
+
+River crests use map flow and the current saved tick; there is no separate timer
+or water-history buffer. Feeding cues inspect only the latest four saved frames,
+with at most 64 compact position records carried between chunks. Animal lookup
+maps are created only for frames with confirmed food gains. These are viewer-only
+allocations, with no new replay fields or training work. Random seeking rebuilds
+short-lived cues from preceding chunks; legacy chunks smaller than four frames
+can require up to three preceding reads. Normal playback retains one decoded
+world chunk and the bounded cue list. Drawing costs increase slightly; no speedup
+is claimed. See the [visual reference](viewer-visual-reference.md#river-flow-and-feeding-feedback).
+
+### Sunlight-driven shadows
+
+An enabled sunlit cycle adds one O(resources + obstacles + animals) geometry pass.
+Direction, reach and opacity are computed once per board draw; silhouettes share
+one filled path and avoid canvas blur/shadow filters. Disabled cycles and nighttime
+return before building paths. No RNG, replay fields, timers or persistent caches
+are introduced. This adds drawing work rather than accelerating rendering; the
+Python simulation and replay size are unchanged. See [shadow behavior](day-night.md#decorative-object-shadows).
+
+## Optional collective and consequence processing
+
+The opt-in social path builds spatial buckets per observation/transition phase,
+limits each observer to its nearest configured same-species neighbours and pools
+only a short history. Context prediction reuses one local threat/body query across
+all available actions. The consequence model stores bounded outcome-frequency
+records, without neural optimizers or full experience replay, and trains each
+animal's own physical transition once rather than once per witness.
+
+Checkpoint state holds each species table once. Completed runs export a single
+compressed aggregate file, rather than per-brain copies. Replay uses existing
+sampled diagnostic vectors with 24/48 extra inputs; no additional world-frame
+schema or event histories are introduced. Extra policy inputs still increase
+network/buffer/sample size. The `seaside_social` example opts into compact capture
+to limit diagnostic storage. No training speedup or net memory reduction is
+claimed. See [configuration, retention and limits](social-learning.md).

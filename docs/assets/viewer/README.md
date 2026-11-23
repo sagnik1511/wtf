@@ -7,6 +7,10 @@ They contain no run IDs, measurements, recordings or saved model weights.
 | --- | --- |
 | [Interface themes](themes.svg) | Schematic light/dark UI specimens from the actual CSS palette tokens |
 | [Day and night](day-night.svg) | Same objects under actual dawn/midday/dusk/night lighting and a deterministic sunlight curve |
+| [Collective learning](social-learning.svg) | Actual inspector charts for pooled local outcomes, species consequence estimates and unknown evidence |
+| [Object shadows](object-shadows.svg) | Morning/midday/evening/night projections and fixed reduced-motion footprints |
+| [River and feeding phases](river-feeding.svg) | Saved-current ripples and bounded food-gain cues, derived from existing events |
+| [Resource/obstacle phases](environment-objects.svg) | Quantity-driven plants, fixed faceted rocks, replay-tick sway/shimmer and reduced-motion snapshots |
 | [Board objects](board-objects.svg) | Sex/species shapes and colors, resource quantities, obstacles, selection, heading, event markers and same-species competition |
 | [Terrain and sight](terrain-and-sight.svg) | Water depth/current, elevation, occlusion, directional water visibility and gates |
 | [Movement and scent](tracking.svg) | Actual sampled-history and blended anonymous scent heatmap components |

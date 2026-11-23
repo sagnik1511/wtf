@@ -346,3 +346,12 @@ Use the [Docker launcher](docker.md) for container training and read-only playba
 The [complete tutorial](tutorial.md) contains all Python example code and explains
 recording, analysis and checkpoint restoration. See [compatibility](compatibility.md)
 before moving artifacts between runtime/package versions.
+
+## Reuse population consequence knowledge
+
+The opt-in `seaside_social` preset keeps independent PPO policies while adding
+local collective observations and retained species outcome estimates. Completed
+runs export `consequences.json.xz`; use `--consequences-from results/EXPERIMENT`
+with a compatible enabled environment to reuse it independently of `--brains-from`.
+Exact checkpoint resume restores its own knowledge and accepts no replacement.
+See [the full configuration and playback guide](social-learning.md).

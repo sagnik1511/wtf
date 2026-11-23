@@ -295,3 +295,24 @@ chaining provenance. Keep all replay chunks and numbered run champion archives;
 prune only newly owned retention files. Shared binary v4 checkpoint metadata
 is immutable and checksummed; keep its `_metadata/` directory with the files.
 Never replace exact optimizer/buffer/RNG state with warm-start weights.
+
+## Collective sensing and persistent outcome estimates
+
+Optional [collective learning](social-learning.md) adds 24 pooled witnessed
+same-species action/outcome inputs and 48 per-action consequence estimates after
+tracking/scent. Keep all policy weights, optimizers, exploration streams and
+rollout/replay buffers independent. Local cues require visibility at both ends;
+never infer death from an out-of-view disappearance or expose numerical rewards.
+The shared empirical predictor pools own physical outcomes per exact species,
+including both sexes and unsuccessful animals. It is an explicit population-level
+training abstraction, without a claim of biological long-distance communication.
+
+Tables persist between episodes and appear once in world checkpoint state, with
+bounded local/pending histories for exact continuation. Completed CLI experiments
+export one `consequences.json.xz`; `--consequences-from` imports compatible physical
+contracts independently of policy weights. Freeze model updates outside training,
+keep GRPO clones isolated and preserve input signatures, feature labels, schema
+field definitions and sampled-only viewer decoding when changing these paths.
+Replay adds no separate social-history/model fields. Keep the guide's biological
+motivation, approximations and limitations explicit; learned-weight inheritance
+is evolutionary computation, not acquired biological inheritance.

@@ -1,12 +1,26 @@
 """Render static geography diagrams from the editable maps, without training."""
 
+import argparse
+import math
+
 from html import escape
 from pathlib import Path
 
 from wtf.config import load
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMES = ("meandering_river", "river_delta", "alpine_pass", "lake_islands")
+NAMES = (
+    "meandering_river",
+    "river_delta",
+    "alpine_pass",
+    "lake_islands",
+    "grasslands",
+    "seaside",
+    "rolling_hills",
+    "wetlands",
+    "canyon",
+    "oasis",
+)
 TILE = 16
 
 
@@ -16,6 +30,7 @@ def preview(config):
     maximum = max(cell.get("elevation", 0) for cell in terrain["legend"].values())
     canvas_width, canvas_height = width * TILE + 32, height * TILE + 116
     title = terrain["name"].replace("_", " ").title()
+    light_rules = set()
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{canvas_width}" '
         f'height="{canvas_height}" viewBox="0 0 {canvas_width} {canvas_height}" '
@@ -27,7 +42,7 @@ def preview(config):
         '<rect width="100%" height="100%" fill="#111c21"/>',
         '<g font-family="system-ui, sans-serif" fill="#e1e9e8">',
         f'<text x="16" y="29" font-size="21">{escape(title)}</text>',
-        '<text x="16" y="49" font-size="12">Static geography · 40 × 28 cells · not a viewer recording</text>',
+        f'<text x="16" y="49" font-size="12">Static geography · {width} × {height} cells · not a viewer recording</text>',
     ]
     for y, row in enumerate(terrain["rows"]):
         for x, symbol in enumerate(row):
@@ -35,13 +50,18 @@ def preview(config):
             depth, elevation = cell.get("water_depth", 0), cell.get("elevation", 0)
             if cell.get("blocked"):
                 color = "#89949a"
+                light_color = "#5e707e"
             elif depth:
                 color = f"hsl(207,65%,{22 + min(depth, 3) * 5}%)"
+                light_color = f"hsl(207,65%,{65 - min(depth, 3) * 5}%)"
             elif elevation:
                 ratio = elevation / maximum
                 color = f"hsl({85 - 50 * ratio},25%,{19 + 14 * ratio}%)"
+                light_color = f"hsl({85 - 50 * ratio},25%,{84 - 20 * ratio}%)"
             else:
                 color = "#24382e"
+                light_color = "#d8e6cc"
+            light_rules.add(f"[fill='{color}'] {{ fill: {light_color}; }}")
             px, py = 16 + x * TILE, 60 + y * TILE
             parts.append(
                 f'<rect x="{px}" y="{py}" width="16" height="16" '
@@ -49,20 +69,32 @@ def preview(config):
             )
             fx, fy = cell.get("flow", (0, 0))
             if (fx or fy) and x % 2 == 0 and y % 3 == 0:
-                # Current vectors in this gallery all flow downstream.
-                arrow = "↘" if fx > 0 else ("↙" if fx < 0 else "↓")
+                length = math.hypot(fx, fy)
+                ux, uy = fx / length, fy / length
+                cx, cy, r = px + 8, py + 8, 5
+                tip_x, tip_y = cx + ux * r, cy + uy * r
                 parts.append(
-                    f'<text x="{px+8}" y="{py+12}" text-anchor="middle" '
-                    f'font-size="12" fill="#c0e9ff">{arrow}</text>'
+                    f'<path d="M{cx-ux*r} {cy-uy*r} L{tip_x} {tip_y} '
+                    f"M{tip_x-ux*3-uy*2} {tip_y-uy*3+ux*2} L{tip_x} {tip_y} "
+                    f'L{tip_x-ux*3+uy*2} {tip_y-uy*3-ux*2}" '
+                    'fill="none" stroke="#c0e9ff" stroke-width="1"/>'
                 )
     bottom = 60 + height * TILE
     parts.extend(
         [
             f'<text x="16" y="{bottom+23}" font-size="12">Green: dry land · Brown: elevation · Gray: rock · Blue: water</text>',
-            f'<text x="16" y="{bottom+42}" font-size="12">Arrows: currents · Lighter blue: deeper water · Swim required to enter water</text>',
-            "</g></svg>",
+            f'<text x="16" y="{bottom+42}" font-size="12">Arrows: currents · Blue shades show water depth · Swim required to enter water</text>',
+            "</g>",
         ]
     )
+    parts.append(
+        "<style>@media (prefers-color-scheme: light) {"
+        "[fill='#111c21'] {fill:#f1f5fa;} [fill='#e1e9e8'] {fill:#1c3543;} "
+        "[stroke='#c0e9ff'] {stroke:#145b8f;} [stroke='#ffffff'] {stroke:#172c3c;} "
+        + "".join(sorted(light_rules))
+        + "}</style>"
+    )
+    parts.append("</svg>")
     parts.insert(
         1,
         "<style>"
@@ -73,12 +105,23 @@ def preview(config):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
     destination = ROOT / "docs/assets/geography"
     destination.mkdir(parents=True, exist_ok=True)
     for name in NAMES:
         config = load(ROOT / "environments" / (name + ".json"))
-        (destination / (name + ".svg")).write_text(preview(config))
-    print(f"Rendered {len(NAMES)} static map previews in docs/assets/geography")
+        target = destination / (name + ".svg")
+        expected = preview(config)
+        if args.check:
+            if not target.is_file() or target.read_text() != expected:
+                raise SystemExit(f"Outdated geography preview: {target.name}")
+        else:
+            target.write_text(expected)
+    print(
+        f"{'Verified' if args.check else 'Rendered'} {len(NAMES)} static map previews in docs/assets/geography"
+    )
 
 
 if __name__ == "__main__":

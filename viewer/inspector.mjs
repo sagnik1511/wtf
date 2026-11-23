@@ -537,7 +537,117 @@ function historyGraph(samples, policy, sections) {
   return d;
 }
 
+function collectivePanel(social, spec, tick, consequenceSchedule) {
+  const panel = section('Collective learning');
+  panel.append(
+    el(
+      'p',
+      `Recorded sample at step ${tick}. The display follows saved samples.`,
+      'muted',
+    ),
+  );
+  panel.append(
+    el(
+      'p',
+      'Visible group outcomes and saved species estimates. Gray/unknown means no evidence; rates are associations.',
+      'muted',
+    ),
+  );
+  if (social.consequences.length) panel.append(el('p', consequenceSchedule === 'episode'
+    ? 'Consequence model frozen at episode start. New evidence applies next episode; bars can still change with the sampled context.'
+    : 'Consequence model updates continuously during training; playback shows saved samples only.', 'muted'));
+  for (const [title, source] of [
+    ['Local witnesses', social.collective],
+    ['Species consequence estimates', social.consequences],
+  ]) {
+    const rows = source.filter(
+      (row) =>
+        title === 'Local witnesses' ||
+        spec?.allowed_actions?.includes(row.action),
+    );
+    if (!rows.length) continue;
+    panel.append(el('h4', title));
+    const chart = svg('svg', {
+      viewBox: `0 0 340 ${28 + rows.length * 26}`,
+      width: '100%',
+      role: 'img',
+      'aria-label': title,
+    });
+    const columns = [
+      ['harm', '#ff9aab'],
+      ['feeding', '#7de2bd'],
+      ['birth', '#8ac8ff'],
+    ];
+    columns.forEach(([key, color], i) =>
+      chart.append(
+        svg(
+          'text',
+          { x: 148 + i * 62, y: 13, fill: visualColor(color), 'font-size': 10 },
+          key,
+        ),
+      ),
+    );
+    rows.forEach((row, i) => {
+      const y = 34 + i * 26;
+      chart.append(
+        svg(
+          'text',
+          { x: 2, y: y + 5, fill: visualColor('#a9bacc'), 'font-size': 11 },
+          label(row.action),
+        ),
+      );
+      if (!(row.confidence > 0))
+        chart.append(
+          svg(
+            'text',
+            { x: 148, y: y + 5, fill: visualColor('#a9bacc'), 'font-size': 10 },
+            'unknown',
+          ),
+        );
+      else
+        columns.forEach(([key, color], j) => {
+          const bar = svg('rect', {
+            x: 148 + j * 62,
+            y: y - 4,
+            width: Math.max(0, Math.min(1, row[key])) * 48,
+            height: 9,
+            rx: 2,
+            fill: visualColor(color),
+            opacity: 0.35 + 0.65 * row.confidence,
+          });
+          const track = svg('rect', {
+            x: 148 + j * 62,
+            y: y - 4,
+            width: 48,
+            height: 9,
+            rx: 2,
+            fill: visualColor('#263341'),
+          });
+          track.append(
+            svg(
+              'title',
+              {},
+              `${label(row.action)} ${key}: ${Math.round(row[key] * 100)}%; evidence ${Math.round(row.confidence * 100)}%`,
+            ),
+          );
+          chart.append(track);
+          bar.append(
+            svg(
+              'title',
+              {},
+              `${label(row.action)} ${key}: ${Math.round(row[key] * 100)}%; confidence ${Math.round(row.confidence * 100)}%`,
+            ),
+          );
+          chart.append(bar);
+        });
+    });
+    panel.append(chart);
+  }
+  return panel;
+}
+
 export function inspectorGraphs({
+  consequenceSchedule = "continuous",
   diagnostic,
   template,
   spec,
@@ -598,6 +708,9 @@ export function inspectorGraphs({
   root.append(
     inputs,
     ...(observation?.tracking ? [trackingPanel(observation.tracking)] : []),
+    ...(observation?.social
+      ? [collectivePanel(observation.social, spec, diagnostic.tick, consequenceSchedule)]
+      : []),
     predictions(diagnostic),
     activationPanel(diagnostic, template, { rank, sections }),
     historyGraph(samples, Boolean(diagnostic.action_probabilities), sections),

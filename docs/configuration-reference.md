@@ -27,6 +27,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `placement` | Optional founder zones and boundary-biased resource placement for an enclosure. | object | Optional; — |
 | `day_night` | Optional repeating sunlight cycle; omitted or disabled leaves static body values and lighting. | object | Optional; — |
 | `scent_trails` | Optional anonymous ground-scent field. Traces persist after their maker leaves or dies, merge per cell/species/sex, and do not cross water or sealed obstacles. | object | Optional; — |
+| `consequence_learning` | Optional bounded species-level predictor of physical consequences, retained across episodes and recovery checkpoints. Individual policy parameters remain independent. | object | Optional; — |
 
 ## `config.terrain (oneOf variant 1)`
 
@@ -289,6 +290,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (q_network).exploration`
 
@@ -306,6 +309,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (q_network).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (ppo)`
 
@@ -329,6 +339,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (ppo).network`
 
@@ -346,6 +358,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (ppo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (a2c)`
 
@@ -365,6 +384,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (a2c).network`
 
@@ -383,6 +404,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
+## `config.brains.<name> (a2c).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
+
 ## `config.brains.<name> (reinforce)`
 
 | Field | Definition | Type and constraints | Required / schema default |
@@ -400,6 +428,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (reinforce).network`
 
@@ -417,6 +447,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (reinforce).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (grpo)`
 
@@ -440,6 +477,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (grpo).network`
 
@@ -457,6 +496,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (grpo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (recurrent_ppo)`
 
@@ -482,6 +528,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (recurrent_ppo).network`
 
@@ -499,6 +547,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (recurrent_ppo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (maskable_ppo)`
 
@@ -522,6 +577,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (maskable_ppo).network`
 
@@ -539,6 +596,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (maskable_ppo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (mappo)`
 
@@ -563,6 +627,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (mappo).network`
 
@@ -580,6 +646,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (mappo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (qrdqn)`
 
@@ -602,6 +675,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (qrdqn).exploration`
 
@@ -628,6 +703,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
 
+## `config.brains.<name> (qrdqn).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
+
 ## `config.brains.<name> (lstm_ppo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
@@ -652,6 +734,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `observation_top_k` | Maximum visible target slots per food/prey/predator category; unused slots are zero-filled. | integer; min: `1`; max: `16` | Optional; `1` |
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (lstm_ppo).network`
 
@@ -669,6 +753,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (lstm_ppo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (trpo)`
 
@@ -697,6 +788,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `backtrack_steps` | Maximum tested fractions of the TRPO policy step. | integer; min: `1`; max: `30` | Required; — |
 | `backtrack_coefficient` | Multiplicative step shrinkage between TRPO backtracking candidates. | number; min: `0.01`; max: `0.99` | Required; — |
 | `accept_ratio` | Minimum actual-to-predicted surrogate improvement ratio for a TRPO candidate. | number; min: `0`; max: `1` | Required; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (trpo).network`
 
@@ -714,6 +807,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (trpo).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.brains.<name> (discrete_sac)`
 
@@ -734,6 +834,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `train_every_steps` | Animal decision interval between eligible Discrete SAC updates. | integer; min: `1`; max: `1000000` | Required; — |
 | `temperature` | Fixed positive entropy temperature for Discrete SAC actor and soft value targets. | number; min: `1e-06`; max: `10` | Required; — |
 | `target_tau` | Polyak fraction of current critic parameters copied into target critics after each update. | number; min: `1e-06`; max: `1` | Required; — |
+| `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
+| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 
 ## `config.brains.<name> (discrete_sac).network`
 
@@ -751,6 +853,13 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `radius` | Automatic ground-scent sampling range in orthogonal dry-cell path steps; blocked or wet cells stop propagation. | integer; min: `1`; max: `8` | Optional; `2` |
 | `separate_sexes` | Use female then male channels per species; false merges both sexes into one anonymous channel. | boolean | Optional; `true` |
 | `mode` | Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode. | string; choices: `["separated", "blended"]` | Optional; `"separated"` |
+
+## `config.brains.<name> (discrete_sac).social_observation`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
+| `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
 ## `config.experiment`
 
@@ -826,4 +935,12 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `enabled` | Deposit anonymous species/sex ground traces. Omission or false disables scent storage and sensing. | boolean | Required; `false` |
 | `lifetime_steps` | Ground-trace lifetime in simulation steps; freshness decreases linearly to zero, and revisiting a cell refreshes its group trace. | integer; min: `2`; max: `256` | Required; — |
 
-Field entries documented: **468**.
+## `config.consequence_learning`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `enabled` | Enable training and persistent storage of consequence outcome frequencies; evaluation reads without training. | boolean | Required; — |
+| `max_contexts` | Maximum context records retained per participating species using deterministic update-order LRU eviction. | integer; min: `16`; max: `8192` | Optional; `512` |
+| `horizon_steps` | Observed step window for harm, feeding and birth outcomes; death closes the window and episode truncation discards incomplete windows. | integer; min: `1`; max: `64` | Optional; `16` |
+
+Field entries documented: **520**.

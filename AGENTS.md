@@ -42,6 +42,12 @@ rather than loading every document or result into context.
   metadata, not repeated frames. GRPO may share read-only geography, while bodies,
   obstacles, RNGs and transient observation caches remain independent. Record
   final death positions after drift rather than inferring one-cell movement.
+- Optional collective/consequence observations append after tracking/scent and
+  enter model signatures. Keep same-species local visibility, hidden-outcome and
+  reward boundaries explicit. Shared consequence counts are population-level
+  training knowledge, not shared policy weights or biological remote sensing.
+  Persist tables once, freeze updates outside training and isolate GRPO trial
+  copies; see [collective learning](docs/social-learning.md).
 - Optimize disk, RAM and repeated computation while preserving recorded values,
   playback controls, chart history, random seeking and legacy readers. Caches of
   dynamic observations must invalidate when relevant animals/resources change.

@@ -1,3 +1,4 @@
+import { socialWidth } from './social.mjs';
 // Decode only the selected agent's sampled inputs; never reconstruct hidden paths.
 export const SCENT_SECTORS = [
   'here',
@@ -161,7 +162,8 @@ export function trackingSample(
   if (
     !layout?.width ||
     !Array.isArray(diagnostic?.features) ||
-    diagnostic.features.length !== base + layout.width ||
+    diagnostic.features.length !==
+      base + layout.width + (socialWidth(template ?? {}) ?? 0) ||
     !diagnostic.features.every(Number.isFinite) ||
     !(radius > 0)
   )

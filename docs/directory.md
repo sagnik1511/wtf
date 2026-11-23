@@ -76,6 +76,7 @@ narrow screens. The top tabs open the same section pages.
 | [SAC, TRPO and LSTM PPO](additional-policies.md) | Generic learners, complete JSON templates, lifecycle and viewer contracts. |
 | [Advanced algorithms](advanced-algorithms.md) | Recurrent PPO, QR-DQN, masked PPO and multi-agent PPO contracts. |
 | [Brain inputs and observations](observations.md) | Input ordering, top-k target slots and visibility versus observations. |
+| [Collective learning](social-learning.md) | Optional pooled same-species observations, retained consequence models, independent policies and playback charts. |
 | [Movement memory and scent](tracking.md) | Optional observed movement history, fading anonymous trails, model contracts and inspector plots. |
 | [Rewards and costs](rewards.md) | Physical energy costs, successful actions and failed-action feedback. |
 | [Feedback contracts](feedback-review.md) | Generic reward contracts and algorithm/environment boundaries. |

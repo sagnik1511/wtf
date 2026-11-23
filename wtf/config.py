@@ -5,20 +5,7 @@ import math
 import re
 from pathlib import Path
 
-ACTIONS = (
-    "move_forward",
-    "move_backward",
-    "strafe_left",
-    "strafe_right",
-    "turn_left",
-    "turn_right",
-    "rest",
-    "eat",
-    "attack",
-    "swim",
-    "reproduce",
-    "challenge",
-)
+from wtf.simulation.actions import ACTIONS
 
 
 def fail(path, message):
@@ -66,8 +53,41 @@ def validate(c):
             "brains",
             "experiment",
         ),
-        optional=("recording", "terrain", "placement", "day_night", "scent_trails"),
+        optional=(
+            "recording",
+            "terrain",
+            "placement",
+            "day_night",
+            "scent_trails",
+            "consequence_learning",
+        ),
     )
+    if "consequence_learning" in c:
+        rules = c["consequence_learning"]
+        obj(
+            rules,
+            "consequence_learning",
+            ("enabled",),
+            optional=("max_contexts", "horizon_steps", "update_schedule"),
+        )
+        if rules.get("update_schedule", "continuous") not in ("continuous", "episode"):
+            fail("consequence_learning.update_schedule", "must be continuous or episode")
+        if type(rules["enabled"]) is not bool:
+            fail("consequence_learning.enabled", "must be boolean")
+        num(
+            rules.get("max_contexts", 512),
+            "consequence_learning.max_contexts",
+            16,
+            8192,
+            True,
+        )
+        num(
+            rules.get("horizon_steps", 16),
+            "consequence_learning.horizon_steps",
+            1,
+            64,
+            True,
+        )
     if "scent_trails" in c:
         scent = c["scent_trails"]
         obj(scent, "scent_trails", ("enabled", "lifetime_steps"))
@@ -150,6 +170,25 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
+        if "social_observation" in b:
+            from wtf.simulation.social import social_contract
+
+            try:
+                social_contract(b)
+            except ValueError as error:
+                fail(p + ".social_observation", str(error))
+            b = {k: v for k, v in b.items() if k != "social_observation"}
+        if "consequence_observation" in b:
+            if type(b["consequence_observation"]) is not bool:
+                fail(p + ".consequence_observation", "must be boolean")
+            if b["consequence_observation"] and not c.get(
+                "consequence_learning", {}
+            ).get("enabled", False):
+                fail(
+                    p + ".consequence_observation",
+                    "requires consequence_learning.enabled",
+                )
+            b = {k: v for k, v in b.items() if k != "consequence_observation"}
         if "movement_history_steps" in b:
             num(b["movement_history_steps"], p + ".movement_history_steps", 0, 16, True)
             b = {k: v for k, v in b.items() if k != "movement_history_steps"}

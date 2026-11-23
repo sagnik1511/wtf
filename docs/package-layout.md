@@ -151,3 +151,8 @@ and registration paths use the current subpackages. Keep numerical kernels,
 persistence signatures, offspring initialization and viewer diagnostics aligned
 when changing a shared contract. New runtime assets still require the
 [packaging allowlist](../packaging_assets.json).
+
+The optional collective-sensing sidecar lives in `simulation/social.py`; the
+bounded empirical outcome model and its import/export live in
+`learning/consequences.py`. Neither owns or mutates private policy parameters.
+See [collective learning](social-learning.md).

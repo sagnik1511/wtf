@@ -198,7 +198,13 @@ class Experiment:
         # Newly initialized random-mode brains use the actual run seed.
         brain_seed = seed if policy == "random" else c["seed"]
         self.run_seeds.append(seed)
+        previous_social = getattr(getattr(self, "world", None), "_social", None)
         self.world = World(c, seed)
+        if self.world._social is not None:
+            self.world._social.training = self.mode == "train"
+            if previous_social is not None and previous_social.knowledge is not None:
+                previous_social.knowledge.publish()
+                self.world._social.knowledge = previous_social.knowledge
         self._retire_brains(set(self.brains) - set(self.world.animals))
         if not self.brains or not c["experiment"]["retain_brains_between_runs"]:
             self.brains = {}
@@ -665,6 +671,10 @@ class Experiment:
             e.seed_rng = random.Random(0)
             e.seed_rng.setstate(tuples(state["seed_rng_state"]))
         e.world = World.restore(state["world"])
+        if e.world._social is not None:
+            if e.world._social.training != (e.mode == "train"):
+                e.world._social.pending.clear()
+            e.world._social.training = e.mode == "train"
         e.brains = {}
         for raw_id, brain_state in state["brains"].items():
             animal_id = int(raw_id)

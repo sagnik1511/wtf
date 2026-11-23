@@ -31,7 +31,14 @@ export function terrainView(definition) {
   };
 }
 
-export function drawTerrain(ctx, terrain, cw, ch, light = false) {
+export function drawTerrain(
+  ctx,
+  terrain,
+  cw,
+  ch,
+  light = false,
+  { tick = 0, reducedMotion = false } = {},
+) {
   if (!terrain) return;
   for (const t of terrain.tiles) {
     const x = t.x * cw,
@@ -40,6 +47,30 @@ export function drawTerrain(ctx, terrain, cw, ch, light = false) {
       ? `hsl(207, 65%, ${(light ? 65 : 22) + Math.min(t.depth, 3) * (light ? -5 : 5)}%)`
       : `hsl(${85 - (50 * t.elevation) / terrain.maxElevation}, 25%, ${(light ? 84 : 19) + ((light ? -20 : 14) * t.elevation) / terrain.maxElevation}%)`;
     ctx.fillRect(x, y, cw, ch);
+    if (t.depth) {
+      // Two short wave crests travel along the saved current, inside this cell.
+      // Still water and reduced motion retain stationary crests.
+      const [dx, dy] = t.flow,
+        n = Math.hypot(dx, dy);
+      const ux = n ? dx / n : 1,
+        uy = n ? dy / n : 0;
+      const phase =
+        n && !reducedMotion ? (Number.isFinite(tick) ? tick : 0) * 0.065 : 0;
+      ctx.strokeStyle = light ? '#145b8fb0' : '#89d4ff90';
+      ctx.lineWidth = Math.max(0.7, Math.min(cw, ch) * 0.035);
+      ctx.beginPath();
+      for (let i = 0; i < 2; i++) {
+        const offset =
+          (((((phase + i * 0.5 + t.x * 0.17 + t.y * 0.13) % 1) + 1) % 1) -
+            0.5) *
+          0.5;
+        const cx = x + cw * (0.5 + ux * offset),
+          cy = y + ch * (0.5 + uy * offset);
+        ctx.moveTo(cx - uy * cw * 0.14, cy + ux * ch * 0.14);
+        ctx.lineTo(cx + uy * cw * 0.14, cy - ux * ch * 0.14);
+      }
+      ctx.stroke();
+    }
     if (t.depth && (t.x + t.y) % 3 === 0) {
       const [dx, dy] = t.flow,
         n = Math.hypot(dx, dy);

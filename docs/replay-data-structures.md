@@ -296,3 +296,14 @@ previous positions alongside its current replay chunk. Larger jumps request
 `/api/recordings/{id}/runs/{run}/movement/{frame_index}`, which streams only the
 needed prefix on the server and returns counts through that frame. Other
 behavior tables remain full-run summaries; the heatmap excludes future frames.
+
+## Collective inputs and separate consequence knowledge
+
+Opt-in collective learning reuses the sampled diagnostic `features` vector,
+appending the configured 24/48 inputs. A replay contains the values actually
+available to that animal at its diagnostic tick, without embedding the current
+species tables or all personal sighting histories. The viewer reads these values
+for its inspector charts. One completed-run `consequences.json.xz` stores aggregate
+knowledge for future training, while full `world.social_state` in recovery
+checkpoints also includes short local/pending histories for exact continuation.
+See the [ownership diagram](social-learning.md) for those separate paths.

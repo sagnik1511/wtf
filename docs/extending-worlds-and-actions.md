@@ -90,7 +90,7 @@ all affected paths:
 
 | Integration point | What to update |
 | --- | --- |
-| Validation | `config.py:ACTIONS` and diet/terrain-specific rules; `environment.schema.json` action enum/descriptions |
+| Validation | `simulation/actions.py:ACTIONS` (re-exported by `config.py`) and diet/terrain-specific rules; `environment.schema.json` action enum/descriptions |
 | Movement classification | `actions.py:WALK_OFFSETS`, `WALK_ACTIONS`, `MOVE_ACTIONS`, `ATTEMPT_ACTIONS` only if the new semantics belong in those groups |
 | Physics | `world.py:step`, destination/block checks and interaction resolution; respect simultaneous occupancy and event order |
 | Masking | `contextual_ppo.py:action_mask`; use pre-step physical eligibility, not future information or extra RNG draws |
@@ -133,3 +133,12 @@ Use the existing [physics illustrations](physics.md), [runtime architecture](arc
 as contracts. Regenerate field definitions after adding schema properties and
 add new shipped resources explicitly to the packaging asset list. Document
 supported behavior and defaults, not one experiment's outcomes.
+
+## Optional social action contracts
+
+When adding an action identifier, also review `wtf/simulation/social.py` and
+`viewer/social.mjs`: their stable action order, collective group mapping, context
+projection and input labels are part of the optional social/consequence model
+contract. Change the versioned contract and persistence validation when changing
+that layout. Never label hidden outcomes or copy another agent's reward/rollout
+into a private learner. See [collective learning](social-learning.md).

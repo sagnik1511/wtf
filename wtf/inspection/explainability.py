@@ -1,6 +1,7 @@
 """Read-only archived-weight inference and local sensitivity; no live controllers."""
 
 from wtf.simulation.tracking import tracking_names
+from wtf.simulation.social import social_names, social_contract
 
 from array import array
 import math
@@ -62,7 +63,7 @@ def feature_names(signature):
         )
     if version >= 4:
         names.extend(["Self consent", "Mate consent", "Consenting pair"])
-    return names + tracking_names(signature)
+    return names + tracking_names(signature) + social_names(signature)
 
 
 def prepare_model(model):
@@ -84,6 +85,9 @@ def prepare_model(model):
         or not 1 <= sig.get("observation_top_k", 1) <= 16
     ):
         raise ValueError("Unsupported explanation observation layout")
+    social_contract(sig)
+    if type(sig.get("consequence_observation", False)) is not bool:
+        raise ValueError("Invalid consequence observation layout")
     history = sig.get("movement_history_steps", 0)
     scent = sig.get("scent_observation")
     if type(history) is not int or not 0 <= history <= 16:

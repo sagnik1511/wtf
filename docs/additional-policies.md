@@ -3,7 +3,8 @@
 [Algorithms](algorithms.md) · [Policy extensions](extending-policies.md) · [Configuration fields](configuration-reference.md) · [Evaluation](evaluation.md)
 
 These are reusable policy implementations, available to any species in any
-compatible environment. No maintained environment preset changes to use them.
+compatible environment. The bundled `lstm_ppo` preset selects LSTM PPO for both
+species; Discrete SAC and TRPO remain selectable through custom JSON templates.
 They require current source; the published 0.0.2.9 distribution predates them.
 Every animal owns its parameters, optimizer, buffers and random streams. None
 uses shared species training, new automatic mating or action masking.
@@ -21,6 +22,24 @@ mating or descendant performance. Compare frozen policies on matched unseen
 seeds, retain proximal reproduction gates and measure offspring that themselves
 become parents. Changing selection criteria and the learner together confounds
 that comparison.
+
+## Run the bundled LSTM preset
+
+[`environments/lstm_ppo.json`](../environments/lstm_ppo.json) uses the ordinary
+PPO preset's flat-world calibration: 64 prey, six predators, 32×24 cells and
+proximal mating radii 2/3. Both species use recurrent size 16 and sequence length
+8; their MLP heads remain `[16]` and `[64, 32]`, with observation top-k 3/10.
+This is an LSTM starting configuration, not evidence that PPO's calibration is
+optimal for a recurrent learner. Lifespan champion chaining and full-detail
+playback of only the final two scheduled episodes remain enabled.
+
+```sh
+.venv/bin/python -m wtf run lstm_ppo --runs 20 --seed 1000 --progress
+```
+
+Episodes default to 1,500 steps. Both species start fresh unless you explicitly
+load compatible LSTM champions. Add `--record-last-episodes -1` to capture every
+episode or `--no-chain-brains` to reset founder weights between episodes.
 
 ## Discrete SAC
 

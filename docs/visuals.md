@@ -62,6 +62,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Runtime boundaries (SVG)](visual-previews/diagrams/runtime-boundaries-svg.md) | [runtime-boundaries.svg](assets/diagrams/runtime-boundaries.svg) |
 | [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) | [seeking-and-charts-use-separate-data.svg](assets/diagrams/seeking-and-charts-use-separate-data.svg) |
 | [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) | [shared-champion-weights.svg](assets/diagrams/shared-champion-weights.svg) |
+| [Social learning (SVG)](visual-previews/diagrams/social-learning-svg.md) | [social-learning.svg](assets/diagrams/social-learning.svg) |
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |
 | [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) | [trial-actor-batching.svg](assets/diagrams/trial-actor-batching.svg) |
 | [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) | [two-payloads-one-bounded-file-at-a-time.svg](assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg) |
@@ -72,9 +73,15 @@ when opened directly. The editable explorer fragment is source, not the full app
 | Theme-aware preview | Original file / variant |
 | --- | --- |
 | [Alpine pass (SVG)](visual-previews/geography/alpine_pass-svg.md) | [alpine_pass.svg](assets/geography/alpine_pass.svg) |
+| [Canyon (SVG)](visual-previews/geography/canyon-svg.md) | [canyon.svg](assets/geography/canyon.svg) |
+| [Grasslands (SVG)](visual-previews/geography/grasslands-svg.md) | [grasslands.svg](assets/geography/grasslands.svg) |
 | [Lake islands (SVG)](visual-previews/geography/lake_islands-svg.md) | [lake_islands.svg](assets/geography/lake_islands.svg) |
 | [Meandering river (SVG)](visual-previews/geography/meandering_river-svg.md) | [meandering_river.svg](assets/geography/meandering_river.svg) |
+| [Oasis (SVG)](visual-previews/geography/oasis-svg.md) | [oasis.svg](assets/geography/oasis.svg) |
 | [River delta (SVG)](visual-previews/geography/river_delta-svg.md) | [river_delta.svg](assets/geography/river_delta.svg) |
+| [Rolling hills (SVG)](visual-previews/geography/rolling_hills-svg.md) | [rolling_hills.svg](assets/geography/rolling_hills.svg) |
+| [Seaside (SVG)](visual-previews/geography/seaside-svg.md) | [seaside.svg](assets/geography/seaside.svg) |
+| [Wetlands (SVG)](visual-previews/geography/wetlands-svg.md) | [wetlands.svg](assets/geography/wetlands.svg) |
 
 ## Agent inspector
 
@@ -154,6 +161,10 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Board objects (SVG)](visual-previews/viewer/board-objects-svg.md) | [board-objects.svg](assets/viewer/board-objects.svg) |
 | [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) | [brain-views.svg](assets/viewer/brain-views.svg) |
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [day-night.svg](assets/viewer/day-night.svg) |
+| [Environment objects (SVG)](visual-previews/viewer/environment-objects-svg.md) | [environment-objects.svg](assets/viewer/environment-objects.svg) |
+| [Object shadows (SVG)](visual-previews/viewer/object-shadows-svg.md) | [object-shadows.svg](assets/viewer/object-shadows.svg) |
+| [River feeding (SVG)](visual-previews/viewer/river-feeding-svg.md) | [river-feeding.svg](assets/viewer/river-feeding.svg) |
+| [Social learning (SVG)](visual-previews/viewer/social-learning-svg.md) | [social-learning.svg](assets/viewer/social-learning.svg) |
 | [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) | [terrain-and-sight.svg](assets/viewer/terrain-and-sight.svg) |
 | [Themes (SVG)](visual-previews/viewer/themes-svg.md) | [themes.svg](assets/viewer/themes.svg) |
 | [Tracking (SVG)](visual-previews/viewer/tracking-svg.md) | [tracking.svg](assets/viewer/tracking.svg) |

@@ -149,6 +149,12 @@ def model_signature(config, actions):
         from wtf.simulation.tracking import scent_contract
 
         signature["scent_observation"] = scent_contract(config)
+    from wtf.simulation.social import social_contract
+
+    if config.get("social_observation") is not None:
+        signature["social_observation"] = social_contract(config)
+    if config.get("consequence_observation", False):
+        signature["consequence_observation"] = True
     if kind in ("recurrent_ppo", "lstm_ppo"):
         signature.update(
             recurrent_size=config["recurrent_size"],

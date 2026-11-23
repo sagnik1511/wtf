@@ -142,3 +142,15 @@ champions include both online critics; exact recovery also restores target
 critics and replay. TRPO stores separate actor/value networks and accepted-policy
 counters. LSTM recovery includes both hidden/cell memory and pending sequences;
 GRU signatures are incompatible. See [complete policy contracts](additional-policies.md).
+
+## Optional collective consequence artifacts
+
+Current source adds an independent version-1 `consequences.json.xz` aggregate
+export. Import validates exact species physical contracts and the prediction
+horizon; it supplies no policy weights or optimizer state. Exact recovery instead
+uses the single `world.social_state` checkpoint record, including bounded local
+and pending histories. These optional input contracts require an implementation
+supporting collective learning; older package versions cannot restore a new
+configuration with unknown fields, despite unchanged base checkpoint/replay
+container versions. Existing configurations/readers retain legacy behavior.
+See [collective learning](social-learning.md).

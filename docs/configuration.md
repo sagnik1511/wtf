@@ -17,6 +17,7 @@ Each JSON file is a complete experiment definition:
 | [mixed_brains.json](../environments/mixed_brains.json) | 48 | 12 | q_network / ppo |
 | [ppo.json](../environments/ppo.json) | 64 | 6 | ppo [16], k=3 / ppo [64, 32], k=10 |
 | [ppo_large_predator.json](../environments/ppo_large_predator.json) | 48 | 12 | ppo [16] / ppo [64, 32] |
+| [lstm_ppo.json](../environments/lstm_ppo.json) | 64 | 6 | lstm_ppo; recurrent 16, heads [16] / [64, 32] |
 | [recurrent_ppo.json](../environments/recurrent_ppo.json) | 48 | 12 | recurrent_ppo / recurrent_ppo |
 | [qrdqn.json](../environments/qrdqn.json) | 48 | 12 | qrdqn / qrdqn |
 | [competition.json](../environments/competition.json) | 48 | 6 | maskable_ppo / maskable_ppo; optional contests enabled |
@@ -68,6 +69,11 @@ costs and limits. Terrain-enabled brains use observation version 2 (32 features 
 both enhanced river presets use k=4 for 68 features).
 See [geography](geography.md) for map syntax, locomotion settings and model
 compatibility. These presets still contain one prey species and one predator.
+
+The [plains/coasts gallery](geography.md#plains-coasts-and-interior-landscapes)
+adds `grasslands`, `seaside`, `rolling_hills`, `wetlands`, `canyon` and `oasis`.
+These use current PPO version-4/top-k observations, unlike the older version-2
+terrain presets. Their JSON files remain independently editable.
 
 ## Adding species
 

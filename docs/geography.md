@@ -5,7 +5,7 @@
 For diagrams and the interactive explorer, see [Physics illustrated](physics.md).
 
 Terrain is optional. Existing environments remain flat unless they select a map.
-Ten optional presets cover seven maps, keeping one prey species and one predator species:
+Seventeen optional presets cover thirteen maps, keeping one prey species and one predator species:
 
 | Environment | Map |
 | --- | --- |
@@ -19,6 +19,13 @@ Ten optional presets cover seven maps, keeping one prey species and one predator
 | [river_delta.json](../environments/river_delta.json) | PPO branching delta, three distributaries and dry land between channels |
 | [alpine_pass.json](../environments/alpine_pass.json) | PPO rocky ridge, stepped slopes and two broad low passes; no swim action |
 | [lake_islands.json](../environments/lake_islands.json) | PPO still-water lake, shallow shores, deeper basin and three dry islands |
+| [grasslands.json](../environments/grasslands.json) | PPO for both species; open dry plain, sparse rocky outcrops and a low knoll |
+| [seaside.json](../environments/seaside.json) | PPO for both species; coastline, shallow shore, deeper water and an alongshore current |
+| [seaside_social.json](../environments/seaside_social.json) | The same coast with optional [collective learning](social-learning.md) and compact capture |
+| [rolling_hills.json](../environments/rolling_hills.json) | PPO for both species; rounded terraced hills, gradual slopes and summit rocks |
+| [wetlands.json](../environments/wetlands.json) | PPO for both species; slow shallow channels and two broad dry causeways |
+| [canyon.json](../environments/canyon.json) | PPO for both species; stepped walls, broad gaps and a shallow flowing creek |
+| [oasis.json](../environments/oasis.json) | PPO for both species; still-water pool, shallow margins and low surrounding dunes |
 
 ```sh
 .venv/bin/python -m wtf.cli environments/river_crossing.json --runs 10 --progress
@@ -28,8 +35,9 @@ Ten optional presets cover seven maps, keeping one prey species and one predator
 
 `enclosed_valleys.json` uses **DQN for prey and PPO for predators**. The
 `river_crossing_ppo.json` preset uses PPO for both; `river_crossing.json` and
-`highlands.json` use Q networks. All nine algorithms support terrain; retain
-`observation_version: 2` (or version 3 with mating inputs) and the species action list when switching templates.
+`highlands.json` use Q networks. Supported policy implementations can use terrain with compatible version-2,
+version-3 or version-4 observations and species action lists. Keep those contracts
+when switching templates; see [observation versions](observations.md).
 Enclosed-valley prey can load matching terrain Q/DQN weights; predators need
 matching terrain PPO weights. The river presets provide corresponding compatible
 signatures. Dry highlands omits `swim` and has a different action signature.
@@ -149,6 +157,77 @@ describe how they are generated directly from the map JSON. The existing
 full-viewer GIFs below remain actual recorded playback. The new layouts have
 been checked for loading, navigation structure and recording compatibility;
 long-term population balance and reproduction have not been calibrated.
+
+## Plains, coasts and interior landscapes
+
+These six 40 × 28 presets start from the current `ppo.json` ecology: 64 prey,
+6 predators, ordinary PPO for both, 1,500 steps and version-4 observations.
+They keep prey top-k=3, predator top-k=10, proximal mating radii 2/3 and the
+baseline's reproduction, health, reward and recording settings. They add
+explicit map-defined obstacles and the established swim/climb locomotion costs.
+Existing presets and saved runs are unchanged.
+
+Dry grasslands and rolling hills omit `swim`. Seaside, wetlands, canyon and oasis
+include it for both species, with a three-cell water sight bonus. Initial animals
+and resources use normal seeded dry-cell placement. Food is not automatically
+concentrated at coasts or the oasis; its growth rules remain the same everywhere.
+No day–night cycle is forced on these environments; it can be enabled separately.
+
+```sh
+.venv/bin/python -m wtf run seaside --runs 1 --seed 100 --progress
+# Alternatives: grasslands, rolling_hills, wetlands, canyon, oasis
+# Editable source: environments/seaside.json and maps/seaside.json
+```
+
+The wet presets have a different action signature from dry PPO brains. Load only
+compatible checkpoints/weights; matching shapes alone do not establish effective
+behavior on different geography. These layouts have loading, navigation and short
+recording smoke checks, rather than a new population-balance calibration.
+
+### Grasslands
+
+![Static map of grasslands](assets/geography/grasslands.svg)
+
+[Environment JSON](../environments/grasslands.json) · [Map JSON](../maps/grasslands.json). A mostly open plain with one low knoll and a few rock clusters. Long unobstructed approaches contrast with the denser existing maps. Grass is represented by the existing food patches, without an added grass-cover or concealment mechanism.
+
+### Seaside
+
+![Static map of seaside](assets/geography/seaside.svg)
+
+[Environment JSON](../environments/seaside.json) · [Map JSON](../maps/seaside.json). One continuous mainland borders a wavy coastline, a shallow shoreline and a deeper offshore band. The authored current runs along the shore. Swimming requires the existing health/energy gates; this does not simulate tides, waves, salinity or an open-ocean boundary.
+
+### Rolling Hills
+
+![Static map of rolling hills](assets/geography/rolling_hills.svg)
+
+[Environment JSON](../environments/rolling_hills.json) · [Map JSON](../maps/rolling_hills.json). Three rounded hills rise in one-unit terraces to elevation three, separated by saddles and low ground. Sparse summit rocks obstruct sight and movement. Slopes use ordinary climb limits and uphill energy costs; hill height alone does not add new line-of-sight occlusion.
+
+Rolling hills uses `uphill_energy_cost: 3.0` for prey and `4.0` for predators,
+per elevation unit gained. With the existing `per_energy_cost: -0.01`, an ascent
+adds reward −0.03 / −0.04, in addition to ordinary movement/living feedback.
+A continuous climb from height 0 to 3 costs 9 / 12 extra energy. Flat/downhill
+movement has no climbing surcharge. This adjustment changes effort and feedback;
+climbing still takes one replay step per cell and causes no direct health damage.
+These stronger costs are an effort setting, not an established population-balance
+optimum. Existing recordings and exact checkpoint resumes retain their saved costs.
+
+### Wetlands
+
+![Static map of wetlands](assets/geography/wetlands.svg)
+
+[Environment JSON](../environments/wetlands.json) · [Map JSON](../maps/wetlands.json). Two wandering shallow channels divide dry feeding ground and a small knoll. Two two-row-wide dry causeways connect the banks without swimming. Slow currents apply in water; there is no mud drag, reed cover or seasonal flooding.
+
+### Canyon
+
+![Static map of canyon](assets/geography/canyon.svg)
+
+[Environment JSON](../environments/canyon.json) · [Map JSON](../maps/canyon.json). An incised creek runs between stepped slopes and broken rock walls. Broad wall gaps provide access routes, and two lower-depth creek reaches reduce crossing difficulty. Every unblocked cell is connected with the configured one-unit climb and swimming rules; even the shallow crossings require swim.
+
+### Oasis
+
+![Static map of oasis](assets/geography/oasis.svg)
+
+[Environment JSON](../environments/oasis.json) · [Map JSON](../maps/oasis.json). A small still-water pool has shallow margins, low dune-like rises and scattered rocky outcrops. Animals swim without passive current assistance. This is an oasis-shaped layout, without desert heat, thirst, sand-specific movement costs or special food placement.
 
 ## Recorded terrain previews
 

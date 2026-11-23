@@ -16,6 +16,7 @@ from collections import Counter, OrderedDict, defaultdict, deque
 from dataclasses import dataclass
 from wtf.simulation.perception import SpatialIndex
 from wtf.simulation.tracking import Tracking
+from wtf.simulation.social import SocialState, enabled as social_enabled
 from wtf.simulation.geography import Geography, resolve_map
 from wtf.simulation.day_night import sunlight, effective_body
 
@@ -197,6 +198,7 @@ class World:
         self.total_energy_gained = defaultdict(float)
         self.kills = defaultdict(int)
         self.lifespans = []
+        self._social = SocialState(config) if social_enabled(config) else None
         self._tracking = (
             Tracking(config, self.width) if Tracking.enabled(config) else None
         )
@@ -532,6 +534,8 @@ class World:
             self._visual_positions = {}
             for animal in self.animals.values():
                 self._visual_positions.setdefault(animal.position, animal.id)
+        if self._social is not None:
+            self._social.prepare(self)
         return occupied, *self._perception
 
     def _prepare_mating_context(self, occupied=None):
@@ -727,6 +731,8 @@ class World:
             )
         if "scent_observation" in template:
             features += self._tracking.scent.sample(self, a, template)
+        if self._social is not None:
+            features += self._social.observe(self, a, template)
         return tuple(features)
 
     def observe_all(self):
@@ -749,6 +755,8 @@ class World:
                 ]
             ):
                 raise ValueError(f"Animal {i}: unsupported action {action}")
+        if self._social is not None:
+            self._social.begin(self, actions)
         events = []
         # Destinations occupied at the beginning of this phase remain blocked.
         # Swaps and following into a just-vacated cell are deliberately disallowed.
@@ -1085,6 +1093,8 @@ class World:
         self.tick += 1
         if self._tracking is not None and self._tracking.scent is not None:
             self._tracking.scent.advance(self, dead_animals.values())
+        if self._social is not None:
+            self._social.finish(self, events, dead_animals)
         self.events = events
         return StepResult(self.observe_all(), rewards, dead, events)
 
@@ -1499,6 +1509,8 @@ class World:
             lifespans=self.lifespans,
             next_animal_id=self.next_animal_id,
         )
+        if self._social is not None:
+            result["social_state"] = self._social.checkpoint()
         if self._tracking is not None:
             result["sensory_state"] = self._tracking.checkpoint()
         return result
@@ -1579,6 +1591,11 @@ class World:
         if not hasattr(w, "rng"):
             w.rng = random.Random()
         w.rng.setstate(state["rng_state"] if _trial else tuples(state["rng_state"]))
+        w._social = (
+            SocialState.restore(w.config, state.get("social_state"))
+            if social_enabled(w.config)
+            else None
+        )
         w._tracking = (
             Tracking.restore(w.config, w.width, state.get("sensory_state"))
             if Tracking.enabled(w.config)

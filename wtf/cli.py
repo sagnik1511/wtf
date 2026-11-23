@@ -66,6 +66,13 @@ def main():
         metavar="K",
         help="Record the final K scheduled episodes, capped at total; -1 records all (default), 0 disables playback. Metrics/brains/checkpoints still cover every episode",
     )
+    parser.add_argument("--consequence-update-schedule", choices=("continuous", "episode"),
+        help="Override enabled consequence publication timing for a fresh experiment; episode publishes only at next-episode start")
+    parser.add_argument(
+        "--consequences-from",
+        type=Path,
+        help="Load compatible population consequence knowledge from a result folder or consequences.json.xz; independent policy weights are unchanged",
+    )
     parser.add_argument(
         "--freeze-brains",
         action="store_true",
@@ -252,12 +259,37 @@ def main():
                 root=args.library_dir or DEFAULT_LIBRARY,
             )
             apply_champion_overrides(config, args.champion)
+            if args.consequence_update_schedule is not None:
+                if not config.get("consequence_learning", {}).get("enabled", False):
+                    parser.error("--consequence-update-schedule requires enabled consequence learning")
+                config["consequence_learning"]["update_schedule"]=args.consequence_update_schedule
             experiment = Experiment(
                 config,
                 args.mode or "train",
                 library_root=args.library_dir or DEFAULT_LIBRARY,
             )
         except (ValueError, OSError) as error:
+            parser.error(str(error))
+    if args.resume and args.consequence_update_schedule is not None:
+        parser.error("--consequence-update-schedule cannot override exact resume")
+    if args.consequences_from is not None:
+        if args.resume:
+            parser.error("--consequences-from cannot replace exact-resume knowledge")
+        if (
+            experiment.world._social is None
+            or experiment.world._social.knowledge is None
+        ):
+            parser.error(
+                "--consequences-from requires enabled consequence learning and inputs"
+            )
+        from wtf.learning.consequences import Consequences
+
+        try:
+            experiment.world._social.knowledge = Consequences.load(
+                experiment.config, args.consequences_from
+            )
+            experiment.observations = experiment.world.observe_all()
+        except (ValueError, OSError, EOFError) as error:
             parser.error(str(error))
     if args.freeze_brains and experiment.mode != "evaluate":
         parser.error("--freeze-brains requires --mode evaluate")
@@ -523,6 +555,11 @@ def run_experiment(
     if experiment.early_stopping.patience:
         save("early_stopping.json", experiment.early_stopping.checkpoint())
     retention.checkpoint(experiment, "final")
+    if (
+        experiment.world._social is not None
+        and experiment.world._social.knowledge is not None
+    ):
+        experiment.world._social.knowledge.save(folder / "consequences.json.xz")
 
 
 if __name__ == "__main__":

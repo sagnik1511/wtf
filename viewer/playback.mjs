@@ -1,3 +1,4 @@
+import { recentFeedings, FEED_HOLD_FRAMES } from './feeding-highlights.mjs';
 import { MovementHistory } from './movement-history.mjs';
 import { recentContests } from './competition.mjs';
 import { decodeChunk } from './replay-codec.mjs';
@@ -18,6 +19,7 @@ export class Playback {
     this.deathCarry = [];
     this.birthCarry = [];
     this.contestCarry = [];
+    this.feedingCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
@@ -58,6 +60,7 @@ export class Playback {
     this.deathCarry = [];
     this.birthCarry = [];
     this.contestCarry = [];
+    this.feedingCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
     this.chunkIndex = -1;
@@ -78,6 +81,7 @@ export class Playback {
       this.deathCarry = previousSnapshot?.natural_death_highlights ?? [];
       this.birthCarry = previousSnapshot?.birth_highlights ?? [];
       this.contestCarry = previousSnapshot?.contest_highlights ?? [];
+      this.feedingCarry = previousSnapshot?.feeding_highlights ?? [];
       this.previousTick = sequential ? this.frames.at(-1).tick : null;
       this.previousAgents = sequential
         ? this.frames.at(-1).animals.map(({ id, x, y, heading, species }) => ({
@@ -104,6 +108,35 @@ export class Playback {
           previous.length > size
         )
           throw new Error('Invalid recording chunk');
+        // Very small legacy chunks can span several chunks during a short cue.
+        for (
+          let c = Math.max(
+            0,
+            chunkIndex - Math.ceil((FEED_HOLD_FRAMES - 1) / size),
+          );
+          c < chunkIndex - 1;
+          c++
+        ) {
+          const older = decodeChunk(
+            await this.loadJSON(
+              `/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/chunks/${c}`,
+            ),
+          );
+          if (!Array.isArray(older) || !older.length || older.length > size)
+            throw new Error('Invalid recording chunk');
+          this.feedingCarry = recentFeedings(
+            older,
+            c * size,
+            older.length - 1,
+            this.feedingCarry,
+          );
+        }
+        this.feedingCarry = recentFeedings(
+          previous,
+          (chunkIndex - 1) * size,
+          previous.length - 1,
+          this.feedingCarry,
+        );
         this.previousTick = previous.at(-1).tick;
         this.previousAgents = previous
           .at(-1)
@@ -227,6 +260,12 @@ export class Playback {
       done: this.atEnd,
       // Full-run lightweight metrics survive chunk changes; no future points.
       history,
+      feeding_highlights: recentFeedings(
+        this.frames,
+        this.chunkIndex * this.metadata.recording.frames_per_chunk,
+        local,
+        this.feedingCarry,
+      ),
       contest_highlights: recentContests(
         this.frames,
         this.chunkIndex * this.metadata.recording.frames_per_chunk,

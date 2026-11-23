@@ -1,3 +1,4 @@
+import { socialWidth, socialView } from './social.mjs';
 import { trackingLayout, trackingView } from './tracking.mjs';
 import { visualColor } from './theme.mjs';
 import { circadianBody } from './day-night.mjs';
@@ -27,13 +28,15 @@ export function observationView(features, template) {
     : { 20: 1, 32: 2, 42: 3, 45: 4 }[features.length];
   const k = template?.observation_top_k ?? 1;
   const tracking = trackingLayout(template ?? {});
+  const extra = socialWidth(template ?? {});
   if (
     !WIDTHS[version] ||
     !Number.isInteger(k) ||
     k < 1 ||
     k > 16 ||
     !tracking ||
-    features.length !== WIDTHS[version] + 12 * (k - 1) + tracking.width
+    extra === null ||
+    features.length !== WIDTHS[version] + 12 * (k - 1) + tracking.width + extra
   )
     return null;
   let offset = 8;
@@ -97,6 +100,11 @@ export function observationView(features, template) {
       Object.assign(result.mating, { selfIntent, mateIntent, consentingPair });
     }
   }
+  result.social = socialView(
+    features,
+    template ?? {},
+    WIDTHS[version] + 12 * (k - 1) + tracking.width,
+  );
   if (tracking.width)
     result.tracking = trackingView(
       features,

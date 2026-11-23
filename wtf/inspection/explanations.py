@@ -7,6 +7,7 @@ from pathlib import Path
 from threading import RLock
 
 from wtf.simulation.tracking import scent_contract
+from wtf.simulation.social import social_contract
 from wtf.inspection.explainability import MAX_PARAMETERS, explain_model, prepare_model
 from wtf.storage.model_io import model_path, read_model
 from wtf.storage.replay_io import chunk_path, load_chunk
@@ -183,6 +184,9 @@ class ExplanationStore:
             or sig.get("movement_history_steps", 0)
             != template.get("movement_history_steps", 0)
             or scent_contract(sig) != scent_contract(template)
+            or social_contract(sig) != social_contract(template)
+            or sig.get("consequence_observation", False)
+            != template.get("consequence_observation", False)
             or sig["actions"] != spec["allowed_actions"]
         ):
             raise ValueError(

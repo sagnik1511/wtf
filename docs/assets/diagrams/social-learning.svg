@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+<title id="title">Collective observations and independent policy learning</title>
+<desc id="desc">Visible same-species actions form each animal's bounded local summary. Own outcomes update a separate species-level training predictor. Both inform independent brains. Checkpoints retain shared model state once and short local histories; replay uses sampled inputs only.</desc>
+<style>
+svg{--figure-bg:#0b131c;--figure-panel:#162632;--figure-line:#647d8b;--figure-shared:#172c30;--figure-green:#7de2bd;--figure-policy:#20263d;--figure-purple:#b7a5ef;--figure-ink:#e6edf3;--figure-muted:#b4c5d0;--figure-blue:#8ac8ff;}
+@media(prefers-color-scheme: light){svg{--figure-bg:#f1f5fa;--figure-panel:#fff;--figure-line:#607786;--figure-shared:#e1f1e8;--figure-green:#236d50;--figure-policy:#eeebf8;--figure-purple:#77609a;--figure-ink:#1c3543;--figure-muted:#496170;--figure-blue:#225c8a;}}
+.bg{fill:var(--figure-bg,#0b131c)}.box{fill:var(--figure-panel,#162632);stroke:var(--figure-line,#647d8b);stroke-width:1.5}.shared{fill:var(--figure-shared,#172c30);stroke:var(--figure-green,#7de2bd);stroke-width:1.5}.policy{fill:var(--figure-policy,#20263d);stroke:var(--figure-purple,#b7a5ef);stroke-width:1.5}.label{fill:var(--figure-ink,#e6edf3);font:16px system-ui,sans-serif}.small{fill:var(--figure-muted,#b4c5d0);font:14px system-ui,sans-serif}.heading{fill:var(--figure-ink,#e6edf3);font:600 25px system-ui,sans-serif}.edge{fill:none;stroke:var(--figure-blue,#8ac8ff);stroke-width:2;marker-end:url(#arrow)}.dash{stroke-dasharray:6 4}.arrow{fill:var(--figure-blue,#8ac8ff)}
+</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path class="arrow" d="M0 0L8 4L0 8Z"/></marker></defs>
+<rect class="bg" width="1200" height="760" rx="14"/>
+<text class="heading" x="30" y="42">Collective information, independent decisions</text>
+<text class="small" x="30" y="69">Local sensing and an optional population-level training abstraction are separate information paths.</text>
+<rect class="box" x="30" y="112" width="310" height="140" rx="12"/>
+<text class="label" x="50" y="143">Visible same-species neighbours</text>
+<text class="small" x="50" y="174">Action plus visible harm / feeding / birth</text>
+<text class="small" x="50" y="199">Sight and occlusion checked at both ends</text>
+<text class="small" x="50" y="224">No hidden outcomes or exact rewards</text>
+<rect class="box" x="402" y="112" width="340" height="140" rx="12"/>
+<text class="label" x="422" y="143">Observer's collective summary</text>
+<text class="small" x="422" y="174">Six action groups, four values each</text>
+<text class="small" x="422" y="199">Bounded recent counts; no target identities</text>
+<text class="small" x="422" y="224">24 optional inputs</text>
+<path class="edge" d="M340 182H394"/>
+<rect class="policy" x="818" y="112" width="352" height="342" rx="12"/>
+<text class="label" x="840" y="146">Each animal owns its policy</text>
+<rect class="box" x="838" y="169" width="312" height="75" rx="8"/>
+<text class="small" x="854" y="199">Own observations + optional summaries</text>
+<text class="small" x="854" y="222">and consequence estimates</text>
+<path class="edge" d="M742 182H810"/>
+<path class="edge" d="M995 250V279"/>
+<text class="label" x="850" y="309">Own action → own reward</text>
+<text class="label" x="850" y="341">Own weights and optimizer</text>
+<text class="small" x="850" y="378">No shared PPO trajectories or policy weights</text>
+<text class="small" x="850" y="404">Other species use separate knowledge</text>
+<text class="small" x="850" y="430">Unknown contexts retain zero confidence</text>
+<rect class="box" x="30" y="335" width="310" height="150" rx="12"/>
+<text class="label" x="50" y="366">Animals' own training experiences</text>
+<text class="small" x="50" y="397">Coordinate-free local physical context</text>
+<text class="small" x="50" y="422">Short observed outcome window</text>
+<text class="small" x="50" y="447">Includes unsuccessful animals and deaths</text>
+<rect class="shared" x="402" y="316" width="340" height="200" rx="12"/>
+<text class="label" x="422" y="348">Persistent tables per exact species</text>
+<text class="small" x="422" y="380">Bounded context → outcome frequencies</text>
+<text class="small" x="422" y="407">Both sexes contribute; policies stay private</text>
+<text class="small" x="422" y="434">Training updates; evaluation reads only</text>
+<text class="small" x="422" y="461">48 optional action-context estimate inputs</text>
+<text class="small" x="422" y="489">Shared training knowledge, not remote sensing</text>
+<path class="edge dash" d="M340 410H394"/>
+<path class="edge" d="M742 410H778V225H810"/>
+<rect class="box" x="30" y="580" width="555" height="140" rx="12"/>
+<text class="label" x="50" y="614">Recovery and reuse</text>
+<text class="small" x="50" y="645">Checkpoint: shared tables once + short local/pending histories</text>
+<text class="small" x="50" y="671">Export: one compressed aggregate model per completed experiment</text>
+<text class="small" x="50" y="697">New episode: reset local history; retain species tables</text>
+<path class="edge" d="M565 516V546H308V572"/>
+<rect class="box" x="623" y="580" width="547" height="140" rx="12"/>
+<text class="label" x="645" y="614">Saved playback inspector</text>
+<text class="small" x="645" y="645">Reads existing sampled input vectors and their timestamps</text>
+<text class="small" x="645" y="671">No future model lookup; no extra world-frame fields</text>
+<text class="small" x="645" y="697">Local witness charts and species consequence estimates</text>
+<path class="edge" d="M995 454V572"/>
+</svg>

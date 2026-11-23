@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="672" height="564" viewBox="0 0 672 564" role="img" aria-labelledby="title desc">
 <style>/* Shared source for standalone viewer/inspector SVG specimens. */
 @media (prefers-color-scheme: light) {
+  [fill='#03091c'] { fill: #304c52; }
+  [stroke='#89d4ff90'] { stroke: #145b8fb0; }
   svg {
     --viz-0b131c: #eaf0f5;
     --viz-415569: #a2b5c7;
@@ -20,6 +22,8 @@
     --viz-e1d17c: #7c6a18;
     --viz-79d6df: #236f7c;
   }
+  [fill='#63ab6f'] { fill: #34784a; }
+  [stroke='#63ab6f'] { stroke: #34784a; }
   svg text {
     fill: #172c3c;
   }
@@ -264,6 +268,16 @@
   [fill='#f0dfba75'] {
     fill: #f7ead2;
   }
+  /* Same-species competition uses the actual viewer's light-theme amber. */
+  [fill='#ffd08a'] {
+    fill: #9a4100;
+  }
+  [stroke='#ffd08a'] {
+    stroke: #9a4100;
+  }
+  text[stroke='#111827'] {
+    stroke: #ffffff;
+  }
 }
 </style>
 <title id="title">River Delta</title>
@@ -293,7 +307,7 @@
 <rect x="304" y="60" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="60" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="60" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="72" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M341.5486938018372 63.642122314377254 L346.4513061981628 72.35787768562275 M343.237371405016 70.72367355351423 L346.4513061981628 72.35787768562275 L346.72367355351423 68.762628594984" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="60" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="60" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="60" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -414,7 +428,7 @@
 <rect x="304" y="108" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="108" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="108" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="120" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M341.5486938018372 111.64212231437725 L346.4513061981628 120.35787768562275 M343.237371405016 118.72367355351423 L346.4513061981628 120.35787768562275 L346.72367355351423 116.762628594984" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="108" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="108" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="108" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -535,7 +549,7 @@
 <rect x="304" y="156" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="156" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="156" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="168" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M341.5486938018372 159.64212231437725 L346.4513061981628 168.35787768562275 M343.237371405016 166.72367355351423 L346.4513061981628 168.35787768562275 L346.72367355351423 164.762628594984" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="156" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="156" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="156" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -654,13 +668,13 @@
 <rect x="272" y="204" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="288" y="204" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="304" y="204" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="312" y="216" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M314.2360679774998 207.52786404500043 L309.7639320225002 216.47213595499957 M309.31671842700024 212.8944271909999 L309.7639320225002 216.47213595499957 L312.8944271909999 214.68328157299973" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="320" y="204" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="204" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="216" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M341.7639320225002 207.52786404500043 L346.2360679774998 216.47213595499957 M343.1055728090001 214.68328157299973 L346.2360679774998 216.47213595499957 L346.68328157299976 212.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="204" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="204" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="376" y="216" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M373.7639320225002 207.52786404500043 L378.2360679774998 216.47213595499957 M375.1055728090001 214.68328157299973 L378.2360679774998 216.47213595499957 L378.68328157299976 212.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="384" y="204" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="400" y="204" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="416" y="204" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -775,19 +789,19 @@
 <rect x="240" y="252" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="256" y="252" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="272" y="252" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="280" y="264" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M282.2360679774998 255.52786404500043 L277.7639320225002 264.4721359549996 M277.31671842700024 260.8944271909999 L277.7639320225002 264.4721359549996 L280.8944271909999 262.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="288" y="252" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="304" y="252" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="312" y="264" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M314.2360679774998 255.52786404500043 L309.7639320225002 264.4721359549996 M309.31671842700024 260.8944271909999 L309.7639320225002 264.4721359549996 L312.8944271909999 262.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="320" y="252" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="252" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="264" text-anchor="middle" font-size="12" fill="#c0e9ff">↓</text>
+<path d="M344.0 255.0 L344.0 265.0 M342.0 262.0 L344.0 265.0 L346.0 262.0" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="252" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="252" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="376" y="264" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M373.7639320225002 255.52786404500043 L378.2360679774998 264.4721359549996 M375.1055728090001 262.68328157299976 L378.2360679774998 264.4721359549996 L378.68328157299976 260.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="384" y="252" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="400" y="252" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="408" y="264" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M405.7639320225002 255.52786404500043 L410.2360679774998 264.4721359549996 M407.1055728090001 262.68328157299976 L410.2360679774998 264.4721359549996 L410.68328157299976 260.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="416" y="252" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="432" y="252" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="448" y="252" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -898,23 +912,23 @@
 <rect x="208" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="224" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="240" y="300" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="248" y="312" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M250.2360679774998 303.5278640450004 L245.7639320225002 312.4721359549996 M245.31671842700024 308.8944271909999 L245.7639320225002 312.4721359549996 L248.89442719099992 310.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="256" y="300" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="272" y="300" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="280" y="312" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M282.2360679774998 303.5278640450004 L277.7639320225002 312.4721359549996 M277.31671842700024 308.8944271909999 L277.7639320225002 312.4721359549996 L280.8944271909999 310.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="288" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="304" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="300" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="300" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="312" text-anchor="middle" font-size="12" fill="#c0e9ff">↓</text>
+<path d="M344.0 303.0 L344.0 313.0 M342.0 310.0 L344.0 313.0 L346.0 310.0" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="300" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="400" y="300" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="408" y="312" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M405.7639320225002 303.5278640450004 L410.2360679774998 312.4721359549996 M407.1055728090001 310.68328157299976 L410.2360679774998 312.4721359549996 L410.68328157299976 308.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="416" y="300" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="432" y="300" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="440" y="312" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M437.7639320225002 303.5278640450004 L442.2360679774998 312.4721359549996 M439.1055728090001 310.68328157299976 L442.2360679774998 312.4721359549996 L442.68328157299976 308.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="448" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="464" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="480" y="300" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1021,27 +1035,27 @@
 <rect x="176" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="192" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="208" y="348" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="216" y="360" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M218.2360679774998 351.5278640450004 L213.7639320225002 360.4721359549996 M213.31671842700024 356.8944271909999 L213.7639320225002 360.4721359549996 L216.89442719099992 358.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="224" y="348" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="240" y="348" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="248" y="360" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M250.2360679774998 351.5278640450004 L245.7639320225002 360.4721359549996 M245.31671842700024 356.8944271909999 L245.7639320225002 360.4721359549996 L248.89442719099992 358.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="256" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="272" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="288" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="304" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="348" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="348" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="360" text-anchor="middle" font-size="12" fill="#c0e9ff">↓</text>
+<path d="M344.0 351.0 L344.0 361.0 M342.0 358.0 L344.0 361.0 L346.0 358.0" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="348" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="400" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="416" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="432" y="348" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="440" y="360" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M437.7639320225002 351.5278640450004 L442.2360679774998 360.4721359549996 M439.1055728090001 358.68328157299976 L442.2360679774998 360.4721359549996 L442.68328157299976 356.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="448" y="348" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="464" y="348" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="472" y="360" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M469.7639320225002 351.5278640450004 L474.2360679774998 360.4721359549996 M471.1055728090001 358.68328157299976 L474.2360679774998 360.4721359549996 L474.68328157299976 356.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="480" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="496" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="512" y="348" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1144,10 +1158,10 @@
 <rect x="144" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="160" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="176" y="396" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="184" y="408" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M186.2360679774998 399.5278640450004 L181.7639320225002 408.4721359549996 M181.31671842700024 404.8944271909999 L181.7639320225002 408.4721359549996 L184.89442719099992 406.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="192" y="396" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="208" y="396" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="216" y="408" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M218.2360679774998 399.5278640450004 L213.7639320225002 408.4721359549996 M213.31671842700024 404.8944271909999 L213.7639320225002 408.4721359549996 L216.89442719099992 406.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="224" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="240" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="256" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1156,7 +1170,7 @@
 <rect x="304" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="396" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="396" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="408" text-anchor="middle" font-size="12" fill="#c0e9ff">↓</text>
+<path d="M344.0 399.0 L344.0 409.0 M342.0 406.0 L344.0 409.0 L346.0 406.0" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="396" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1165,10 +1179,10 @@
 <rect x="432" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="448" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="464" y="396" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="472" y="408" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M469.7639320225002 399.5278640450004 L474.2360679774998 408.4721359549996 M471.1055728090001 406.68328157299976 L474.2360679774998 408.4721359549996 L474.68328157299976 404.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="480" y="396" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="496" y="396" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="504" y="408" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M501.7639320225002 399.5278640450004 L506.2360679774998 408.4721359549996 M503.1055728090001 406.68328157299976 L506.2360679774998 408.4721359549996 L506.68328157299976 404.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="512" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="528" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="544" y="396" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1267,10 +1281,10 @@
 <rect x="112" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="128" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="144" y="444" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="152" y="456" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M154.2360679774998 447.5278640450004 L149.7639320225002 456.4721359549996 M149.31671842700024 452.8944271909999 L149.7639320225002 456.4721359549996 L152.89442719099992 454.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="160" y="444" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="176" y="444" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="184" y="456" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M186.2360679774998 447.5278640450004 L181.7639320225002 456.4721359549996 M181.31671842700024 452.8944271909999 L181.7639320225002 456.4721359549996 L184.89442719099992 454.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="192" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="208" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="224" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1281,7 +1295,7 @@
 <rect x="304" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="444" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="444" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="456" text-anchor="middle" font-size="12" fill="#c0e9ff">↓</text>
+<path d="M344.0 447.0 L344.0 457.0 M342.0 454.0 L344.0 457.0 L346.0 454.0" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="444" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1292,10 +1306,10 @@
 <rect x="464" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="480" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="496" y="444" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="504" y="456" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M501.7639320225002 447.5278640450004 L506.2360679774998 456.4721359549996 M503.1055728090001 454.68328157299976 L506.2360679774998 456.4721359549996 L506.68328157299976 452.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="512" y="444" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="528" y="444" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="536" y="456" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M533.7639320225002 447.5278640450004 L538.2360679774998 456.4721359549996 M535.1055728090001 454.68328157299976 L538.2360679774998 456.4721359549996 L538.6832815729998 452.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="544" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="560" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="576" y="444" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1390,10 +1404,10 @@
 <rect x="80" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="96" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="112" y="492" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="120" y="504" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M122.23606797749979 495.5278640450004 L117.76393202250021 504.4721359549996 M117.31671842700027 500.8944271909999 L117.76393202250021 504.4721359549996 L120.89442719099992 502.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="128" y="492" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="144" y="492" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="152" y="504" text-anchor="middle" font-size="12" fill="#c0e9ff">↙</text>
+<path d="M154.2360679774998 495.5278640450004 L149.7639320225002 504.4721359549996 M149.31671842700024 500.8944271909999 L149.7639320225002 504.4721359549996 L152.89442719099992 502.68328157299976" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="160" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="176" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="192" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1406,7 +1420,7 @@
 <rect x="304" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="320" y="492" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="336" y="492" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="344" y="504" text-anchor="middle" font-size="12" fill="#c0e9ff">↓</text>
+<path d="M344.0 495.0 L344.0 505.0 M342.0 502.0 L344.0 505.0 L346.0 502.0" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="352" y="492" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="368" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="384" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
@@ -1419,15 +1433,17 @@
 <rect x="496" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="512" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="528" y="492" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="536" y="504" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M533.7639320225002 495.5278640450004 L538.2360679774998 504.4721359549996 M535.1055728090001 502.68328157299976 L538.2360679774998 504.4721359549996 L538.6832815729998 500.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="544" y="492" width="16" height="16" fill="hsl(207,65%,28.0%)" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="560" y="492" width="16" height="16" fill="hsl(207,65%,25.0%)" stroke="#ffffff" stroke-opacity=".05"/>
-<text x="568" y="504" text-anchor="middle" font-size="12" fill="#c0e9ff">↘</text>
+<path d="M565.7639320225002 495.5278640450004 L570.2360679774998 504.4721359549996 M567.1055728090001 502.68328157299976 L570.2360679774998 504.4721359549996 L570.6832815729998 500.8944271909999" fill="none" stroke="#c0e9ff" stroke-width="1"/>
 <rect x="576" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="592" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="608" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="624" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <rect x="640" y="492" width="16" height="16" fill="#24382e" stroke="#ffffff" stroke-opacity=".05"/>
 <text x="16" y="531" font-size="12">Green: dry land · Brown: elevation · Gray: rock · Blue: water</text>
-<text x="16" y="550" font-size="12">Arrows: currents · Lighter blue: deeper water · Swim required to enter water</text>
-</g></svg>
+<text x="16" y="550" font-size="12">Arrows: currents · Blue shades show water depth · Swim required to enter water</text>
+</g>
+<style>@media (prefers-color-scheme: light) {[fill='#111c21'] {fill:#f1f5fa;} [fill='#e1e9e8'] {fill:#1c3543;} [stroke='#c0e9ff'] {stroke:#145b8f;} [stroke='#ffffff'] {stroke:#172c3c;} [fill='#24382e'] { fill: #d8e6cc; }[fill='hsl(207,65%,25.0%)'] { fill: hsl(207,65%,62.0%); }[fill='hsl(207,65%,28.0%)'] { fill: hsl(207,65%,59.0%); }}</style>
+</svg>

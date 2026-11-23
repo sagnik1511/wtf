@@ -1,5 +1,19 @@
 """Shared action groups and replay movement labels; no world dependencies."""
 
+ACTIONS = (
+    "move_forward",
+    "move_backward",
+    "strafe_left",
+    "strafe_right",
+    "turn_left",
+    "turn_right",
+    "rest",
+    "eat",
+    "attack",
+    "swim",
+    "reproduce",
+    "challenge",
+)
 WALK_OFFSETS = {
     "move_forward": 0,
     "move_backward": 2,

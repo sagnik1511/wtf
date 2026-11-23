@@ -3,7 +3,14 @@
     "terrainMap": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["map_version", "name", "width", "height", "rows", "legend"],
+      "required": [
+        "map_version",
+        "name",
+        "width",
+        "height",
+        "rows",
+        "legend"
+      ],
       "properties": {
         "map_version": {
           "const": 1,
@@ -85,7 +92,9 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["path"],
+          "required": [
+            "path"
+          ],
           "properties": {
             "path": {
               "type": "string",
@@ -97,10 +106,16 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["selection", "metric"],
+          "required": [
+            "selection",
+            "metric"
+          ],
           "properties": {
             "selection": {
-              "enum": ["best", "latest"],
+              "enum": [
+                "best",
+                "latest"
+              ],
               "description": "Shared-library selection strategy for the requested champion metric."
             },
             "metric": {
@@ -129,7 +144,9 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["map_file"],
+          "required": [
+            "map_file"
+          ],
           "properties": {
             "map_file": {
               "type": "string",
@@ -186,7 +203,12 @@
           "description": "Maximum simulation steps per episode, not wall-clock seconds."
         }
       },
-      "required": ["width", "height", "boundary", "max_steps"],
+      "required": [
+        "width",
+        "height",
+        "boundary",
+        "max_steps"
+      ],
       "additionalProperties": false,
       "description": "Grid dimensions, boundary rule and maximum episode duration."
     },
@@ -194,7 +216,10 @@
       "type": "object",
       "properties": {
         "generation": {
-          "enum": ["scattered", "explicit"],
+          "enum": [
+            "scattered",
+            "explicit"
+          ],
           "description": "Choose scattered random obstacle generation or an explicit obstacle list."
         },
         "occupied_fraction": {
@@ -219,7 +244,11 @@
           "description": "Obstacle coordinates as [x, y] pairs; used by explicit generation."
         }
       },
-      "required": ["generation", "occupied_fraction", "explicit_cells"],
+      "required": [
+        "generation",
+        "occupied_fraction",
+        "explicit_cells"
+      ],
       "additionalProperties": false,
       "description": "Blocking-cell generation or explicit coordinates."
     },
@@ -392,14 +421,19 @@
                     "description": "Path to archived champion metadata, not a replay or exact checkpoint file."
                   }
                 },
-                "required": ["path"]
+                "required": [
+                  "path"
+                ]
               },
               {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
                   "selection": {
-                    "enum": ["best", "latest"],
+                    "enum": [
+                      "best",
+                      "latest"
+                    ],
                     "description": "Shared-library selection strategy for the requested champion metric."
                   },
                   "metric": {
@@ -414,7 +448,10 @@
                     "description": "Champion ranking criterion to select from the requested library/archive context."
                   }
                 },
-                "required": ["selection", "metric"]
+                "required": [
+                  "selection",
+                  "metric"
+                ]
               }
             ],
             "description": "Species-wide champion selector used when a sex-specific initializer does not override it."
@@ -426,7 +463,10 @@
             "description": "Number of founder animals of this species."
           },
           "diet": {
-            "enum": ["resource", "prey"],
+            "enum": [
+              "resource",
+              "prey"
+            ],
             "description": "Resource-eating animals consume food patches; prey-eating animals hunt resource-eating animals across species."
           },
           "allowed_actions": {
@@ -607,7 +647,9 @@
           "champion_selection": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["criterion"],
+            "required": [
+              "criterion"
+            ],
             "properties": {
               "criterion": {
                 "enum": [
@@ -700,7 +742,11 @@
                 "description": "Optional reward per actual damage point credited to this attacker; omitted means zero."
               }
             },
-            "required": ["per_energy_gained", "per_damage_taken", "death"],
+            "required": [
+              "per_energy_gained",
+              "per_damage_taken",
+              "death"
+            ],
             "additionalProperties": false,
             "description": "Coefficients converting physical events, energy costs and failed choices into learning feedback."
           },
@@ -922,7 +968,12 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
@@ -939,7 +990,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -1001,7 +1052,11 @@
                     "description": "Multiplicative epsilon decay per decision, bounded by minimum."
                   }
                 },
-                "required": ["initial", "minimum", "decay_per_decision"],
+                "required": [
+                  "initial",
+                  "minimum",
+                  "decay_per_decision"
+                ],
                 "additionalProperties": false,
                 "description": "Epsilon-greedy action-exploration schedule for value-based learners."
               },
@@ -1049,7 +1104,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -1063,25 +1121,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -1107,14 +1199,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -1140,7 +1240,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -1194,7 +1294,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -1252,7 +1352,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -1266,25 +1369,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -1312,14 +1449,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -1345,7 +1490,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -1363,7 +1508,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -1433,7 +1578,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -1447,25 +1595,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -1490,14 +1672,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -1523,7 +1713,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -1541,7 +1731,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -1605,7 +1795,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -1619,25 +1812,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -1661,14 +1888,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -1694,7 +1929,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -1712,7 +1947,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -1808,7 +2043,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -1822,25 +2060,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -1868,14 +2140,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -1901,7 +2181,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -1955,7 +2235,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -2025,7 +2305,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -2039,25 +2322,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -2087,14 +2404,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -2120,7 +2445,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -2174,7 +2499,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -2232,7 +2557,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -2246,25 +2574,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -2292,14 +2654,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -2325,7 +2695,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -2379,7 +2749,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -2448,7 +2818,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -2462,25 +2835,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -2508,13 +2915,18 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -2576,14 +2988,21 @@
                     "description": "Multiplicative epsilon decay per decision, bounded by minimum."
                   }
                 },
-                "required": ["initial", "minimum", "decay_per_decision"],
+                "required": [
+                  "initial",
+                  "minimum",
+                  "decay_per_decision"
+                ],
                 "additionalProperties": false,
                 "description": "Epsilon-greedy action-exploration schedule for value-based learners."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -2615,13 +3034,13 @@
               },
               "huber_threshold": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Huber transition threshold for quantile-regression loss."
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -2669,7 +3088,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -2683,25 +3105,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -2730,14 +3186,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -2763,7 +3227,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -2817,7 +3281,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -2887,7 +3351,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -2901,25 +3368,59 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -2949,14 +3450,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -2982,7 +3491,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -3024,7 +3533,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -3076,7 +3585,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -3090,22 +3602,30 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
@@ -3118,7 +3638,7 @@
               },
               "max_kl": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 1,
                 "description": "Maximum empirical old-to-new categorical policy KL accepted by TRPO backtracking."
               },
@@ -3130,7 +3650,7 @@
               },
               "cg_damping": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 10,
                 "description": "Positive diagonal damping added to the TRPO Fisher-vector product."
               },
@@ -3157,6 +3677,32 @@
                 "minimum": 0,
                 "maximum": 1,
                 "description": "Minimum actual-to-predicted surrogate improvement ratio for a TRPO candidate."
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -3190,14 +3736,22 @@
                 "description": "Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object."
               },
               "observation_version": {
-                "enum": [1, 2, 3, 4],
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4
+                ],
                 "maximum": 4,
                 "description": "Input-layout version; affects feature meanings, width and saved-model compatibility."
               },
               "network": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "hidden_layers"],
+                "required": [
+                  "type",
+                  "hidden_layers"
+                ],
                 "properties": {
                   "type": {
                     "const": "mlp",
@@ -3223,7 +3777,7 @@
               },
               "learning_rate": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 0.1,
                 "description": "Base optimizer update rate before the species multiplier."
               },
@@ -3241,7 +3795,7 @@
               },
               "max_grad_norm": {
                 "type": "number",
-                "minimum": 1e-5,
+                "minimum": 1e-05,
                 "maximum": 100,
                 "description": "Global gradient-norm clipping threshold before optimizer updates."
               },
@@ -3289,7 +3843,10 @@
                   },
                   "mode": {
                     "type": "string",
-                    "enum": ["separated", "blended"],
+                    "enum": [
+                      "separated",
+                      "blended"
+                    ],
                     "default": "separated",
                     "description": "Separated preserves legacy species/sex channels. Blended combines all configured species and sexes into one anonymous nine-sector field; do not specify species or separate_sexes in blended mode."
                   }
@@ -3303,22 +3860,30 @@
                           "const": "blended"
                         }
                       },
-                      "required": ["mode"]
+                      "required": [
+                        "mode"
+                      ]
                     },
                     "then": {
                       "not": {
                         "anyOf": [
                           {
-                            "required": ["species"]
+                            "required": [
+                              "species"
+                            ]
                           },
                           {
-                            "required": ["separate_sexes"]
+                            "required": [
+                              "separate_sexes"
+                            ]
                           }
                         ]
                       }
                     },
                     "else": {
-                      "required": ["species"]
+                      "required": [
+                        "species"
+                      ]
                     }
                   }
                 ]
@@ -3343,15 +3908,41 @@
               },
               "temperature": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 10,
                 "description": "Fixed positive entropy temperature for Discrete SAC actor and soft value targets."
               },
               "target_tau": {
                 "type": "number",
-                "minimum": 1e-6,
+                "minimum": 1e-06,
                 "maximum": 1,
                 "description": "Polyak fraction of current critic parameters copied into target critics after each update."
+              },
+              "social_observation": {
+                "type": "object",
+                "description": "Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards.",
+                "additionalProperties": false,
+                "properties": {
+                  "history_steps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 4,
+                    "description": "Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled."
+                  },
+                  "max_neighbors": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16,
+                    "default": 8,
+                    "description": "Maximum nearest visible same-species neighbors sampled per observer per step before aggregation."
+                  }
+                }
+              },
+              "consequence_observation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
               }
             },
             "required": [
@@ -3391,7 +3982,11 @@
           "description": "Legacy controller-retention compatibility flag; modern champion chaining is governed by chain_best_brains."
         },
         "world_seed_policy": {
-          "enum": ["random", "fixed", "increment"],
+          "enum": [
+            "random",
+            "fixed",
+            "increment"
+          ],
           "description": "Choose random, fixed or incrementing world seeds across runs; CLI seed overrides are recorded."
         },
         "record_metrics_every_steps": {
@@ -3441,7 +4036,9 @@
               "description": "Configured species to monitor. Omit to watch all; any monitored sex/species improvement resets patience."
             }
           },
-          "required": ["patience_runs"],
+          "required": [
+            "patience_runs"
+          ],
           "additionalProperties": false,
           "description": "Optional consecutive-run stagnation limit and monitored species."
         },
@@ -3522,12 +4119,20 @@
           "description": "Maximum committed replay frames per independently loadable chunk."
         },
         "encoding": {
-          "enum": ["binary", "delta", "snapshot"],
+          "enum": [
+            "binary",
+            "delta",
+            "snapshot"
+          ],
           "default": "binary",
           "description": "Replay representation: legacy full snapshots, JSON deltas or structured binary according to allowed values."
         },
         "compression": {
-          "enum": ["gzip", "xz", "none"],
+          "enum": [
+            "gzip",
+            "xz",
+            "none"
+          ],
           "default": "xz",
           "description": "Replay transport compression; independent of the logical encoding."
         },
@@ -3550,7 +4155,11 @@
           "description": "Include compact sampled hidden activations for actual-animal playback; does not add weights."
         },
         "profile": {
-          "enum": ["full", "compact", "training-only"],
+          "enum": [
+            "full",
+            "compact",
+            "training-only"
+          ],
           "default": "full",
           "description": "Training recording preset: full preserves configured cadence, compact uses a diagnostic interval of at least 50 steps (plus chunk-start/final samples) and omits activations, training-only omits replay files. Evaluation/random use full configured recording; enabled=false still disables capture."
         },
@@ -3566,7 +4175,11 @@
     "placement": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enclosure_bounds", "species", "resources"],
+      "required": [
+        "enclosure_bounds",
+        "species",
+        "resources"
+      ],
       "properties": {
         "enclosure_bounds": {
           "type": "array",
@@ -3582,7 +4195,10 @@
         "species": {
           "type": "object",
           "additionalProperties": {
-            "enum": ["inside", "outside"]
+            "enum": [
+              "inside",
+              "outside"
+            ]
           },
           "description": "Named species definitions at the root, species spawn-zone assignments under placement, or monitored species names under early_stopping; keys/names must match the environment."
         },
@@ -3622,7 +4238,10 @@
     "day_night": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enabled", "cycle_steps"],
+      "required": [
+        "enabled",
+        "cycle_steps"
+      ],
       "properties": {
         "enabled": {
           "type": "boolean",
@@ -3646,7 +4265,10 @@
     "scent_trails": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enabled", "lifetime_steps"],
+      "required": [
+        "enabled",
+        "lifetime_steps"
+      ],
       "properties": {
         "enabled": {
           "type": "boolean",
@@ -3661,6 +4283,43 @@
         }
       },
       "description": "Optional anonymous ground-scent field. Traces persist after their maker leaves or dies, merge per cell/species/sex, and do not cross water or sealed obstacles."
+    },
+    "consequence_learning": {
+      "type": "object",
+      "description": "Optional bounded species-level predictor of physical consequences, retained across episodes and recovery checkpoints. Individual policy parameters remain independent.",
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable training and persistent storage of consequence outcome frequencies; evaluation reads without training."
+        },
+        "max_contexts": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 8192,
+          "default": 512,
+          "description": "Maximum context records retained per participating species using deterministic update-order LRU eviction."
+        },
+        "horizon_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64,
+          "default": 16,
+          "description": "Observed step window for harm, feeding and birth outcomes; death closes the window and episode truncation discards incomplete windows."
+        },
+        "update_schedule": {
+          "type": "string",
+          "enum": [
+            "continuous",
+            "episode"
+          ],
+          "default": "continuous",
+          "description": "When collected outcome evidence becomes visible as consequence estimates: continuous updates immediately after closed windows; episode freezes the published model and publishes staged evidence before the next episode starts."
+        }
+      }
     }
   },
   "required": [

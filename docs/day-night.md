@@ -117,3 +117,19 @@ a recording again or advancing a frame is unnecessary. Light mode also changes t
 Animals keep their species/sex colors, with contrast outlines for the light
 ground. Daylight illumination and night shading apply on top of either palette,
 so simulated night remains visibly darker even with the light interface.
+
+## Decorative object shadows
+
+Plants, rocks and animals cast short ground silhouettes during the sunlit part of
+an enabled cycle. Shadows point right in the morning and left in the evening,
+shorten near midday, and fade out at sunrise/sunset. They use saved phase and
+sunlight, so pausing freezes them and seeking reproduces the same appearance.
+No directional shadows are drawn at night or with day–night disabled.
+
+![Shadow direction and length through the saved day, with reduced-motion examples](assets/viewer/object-shadows.svg)
+
+Both interface themes use their own shadow ink, below board glyphs, the grid and
+observation overlays. OS reduced motion fixes the projection to a short footprint;
+sunlight still adjusts opacity. Shadow silhouettes are decorative: they do not
+change sight, health, movement, elevation or river physics. No per-frame shadow
+fields, extra playback timer, blur filter or history buffer is needed.
