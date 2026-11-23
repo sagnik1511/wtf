@@ -240,10 +240,16 @@ renderers and adapt to interface light/dark palettes.
 
 ![Selected-animal collective witness and consequence estimate charts](assets/viewer/social-learning.svg)
 
-Optional [collective-learning inputs](social-learning.md) appear in the agent
-inspector as local witnessed outcome charts and species consequence estimates.
-They show saved diagnostic inputs for the selected animal, including sample time
-and unknown evidence, rather than future/shared model contents. Full playback,
-pause and seek use the existing diagnostic cadence. Harm/feeding/birth colors
-adapt to both themes; no board-wide messages, individual-neighbour labels or
-extra replay fields are added.
+Optional [collective-learning inputs](social-learning.md#playback-inspection) have
+two homes: **Metrics dashboard → Species collective outcomes** shows species
+averages, while **Agent inspector → Collective learning** shows the selected
+animal's averages. Both accumulate saved witness and consequence rates through
+the current replay step, holding past samples forward without using future
+samples. Unknown evidence stays distinct from zero outcomes. The specimen above
+uses the actual chart renderer with illustrative cumulative inputs: witness,
+general and context groups in combined mode. General and context estimates keep
+separate confidence and are never blended by the viewer.
+
+Charts update in place, pause and rewind with playback, adapt to both themes and
+add no replay fields. Raw inputs and model predictions remain the original saved
+values. See the linked guide for averaging, sparse-sample and seek semantics.

@@ -1,3 +1,4 @@
+import { collectivePanel } from './collective-view.mjs';
 import { TelemetryCache, metrics, series } from './dashboard-stats.mjs';
 const $ = (id) => document.getElementById(id);
 const number = (value) =>
@@ -19,6 +20,7 @@ export class Dashboard {
     this.color = color;
     this.request = 0;
     this.points = [];
+    this.collectivePanels = new Map();
     this.chartTypes = [
       'population',
       'energy',
@@ -61,6 +63,45 @@ export class Dashboard {
       this.update(this.context);
     };
   }
+  drawCollective() {
+    if (!this.context || !$('metrics-dialog').open) return;
+    const { state, id, species } = this.context;
+    const key = `${id}:${state.run}`;
+    if (this.collectiveKey !== key) {
+      this.collectiveKey = key;
+      this.collectivePanels.clear();
+      $('collective-grid').replaceChildren();
+    }
+    const chosen = $('dashboard-species').value;
+    // A backward seek may precede a species' first saved evidence.
+    for (const panel of this.collectivePanels.values()) panel.hidden = true;
+    let visible = false;
+    for (const [name, social] of Object.entries(
+      state.collective?.by_species ?? {},
+    )) {
+      if (!social) continue;
+      let panel = this.collectivePanels.get(name);
+      const averages = { animal: social, tick: state.collective.tick };
+      if (!panel) {
+        panel = collectivePanel(
+          social,
+          species[name],
+          state.tick,
+          state.collective.schedule ?? 'continuous',
+          averages,
+          name,
+        );
+        this.collectivePanels.set(name, panel);
+        $('collective-grid').append(panel);
+      }
+      panel.hidden = Boolean(chosen && chosen !== name);
+      if (!panel.hidden) {
+        panel.update(averages);
+        visible = true;
+      }
+    }
+    $('collective-section').hidden = !visible;
+  }
   async update(context) {
     this.context = context;
     if (!context || !$('metrics-dialog').open) return;
@@ -101,6 +142,7 @@ export class Dashboard {
     $('dashboard-play').textContent = context.playing
       ? 'Pause'
       : 'Play recording';
+    this.drawCollective();
     $('dashboard-status').textContent = 'Loading per-step history…';
     try {
       const points = await this.cache.history(
@@ -125,6 +167,7 @@ export class Dashboard {
     }
   }
   draw() {
+    this.drawCollective();
     if (!$('metrics-dialog').open || !this.context) return;
     const selected = $('dashboard-species').value,
       names = Object.keys(this.context.species).filter(

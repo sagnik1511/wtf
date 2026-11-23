@@ -42,6 +42,7 @@ class Consequences:
         self.updates = 0
         self.published_updates = 0
         self.staged_tables = {}
+        self._action_cache = {}
 
     def learn(self, species, key, labels):
         """Accumulate physical outcome counts in the configured publication table."""
@@ -66,12 +67,14 @@ class Consequences:
             table.popitem(last=False)
         self.updates += 1
         if self.update_schedule == "continuous":
+            self._action_cache.pop(species, None)
             self.published_updates = self.updates
 
     def publish(self):
         """Publish completed-episode evidence before the next world observes."""
         for species, table in self.staged_tables.items():
             self.tables[species] = table
+            self._action_cache.pop(species, None)
         self.staged_tables.clear()
         self.published_updates = self.updates
 
@@ -82,6 +85,39 @@ class Consequences:
             return [0.0] * 4
         n = row[0]
         return [n / (n + 4), *(value / n for value in row[1:])]
+
+    def predict_action(self, species, action):
+        """Published species/action knowledge, independent of query animal state.
+
+        Aggregate retained contexts once per species/publication revision; the
+        derived cache adds no checkpoint fields and never sees staged outcomes.
+        """
+        # Reject bool as an action index, consistently with persisted enum fields.
+        # pylint: disable=unidiomatic-typecheck
+        if type(action) is not int or not 0 <= action < len(ACTIONS):
+            raise ValueError("Invalid consequence action")
+        rows = self._action_cache.get(species)
+        if rows is None:
+            rows = [[0, 0, 0, 0] for _ in ACTIONS]
+            for key, values in self.tables[species].items():
+                row = rows[key[0]]
+                for i, value in enumerate(values):
+                    row[i] += value
+            # Immutable cached rates share float values across consumers/replay
+            # observations; return a fresh list so callers cannot mutate the cache.
+            rows = tuple(
+                (
+                    (
+                        values[0] / (values[0] + 4),
+                        *(value / values[0] for value in values[1:]),
+                    )
+                    if values[0]
+                    else (0.0, 0.0, 0.0, 0.0)
+                )
+                for values in rows
+            )
+            self._action_cache[species] = rows
+        return list(rows[action])
 
     @staticmethod
     def _table_state(tables):

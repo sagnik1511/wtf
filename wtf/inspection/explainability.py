@@ -3,7 +3,7 @@
 from array import array
 import math
 from wtf.simulation.tracking import tracking_names
-from wtf.simulation.social import social_names, social_contract
+from wtf.simulation.social import social_names, social_contract, consequence_scope
 
 
 MAX_PARAMETERS = 1_000_000
@@ -97,6 +97,7 @@ def prepare_model(model):
     ):
         raise ValueError("Unsupported explanation observation layout")
     social_contract(sig)
+    consequence_scope(sig)
     if type(sig.get("consequence_observation", False)) is not bool:
         raise ValueError("Invalid consequence observation layout")
     history = sig.get("movement_history_steps", 0)

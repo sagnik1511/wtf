@@ -184,7 +184,8 @@
         "history_steps": 4,
         "max_neighbors": 8
       },
-      "consequence_observation": true
+      "consequence_observation": true,
+      "consequence_scope": "species_action"
     },
     "predator_ppo": {
       "type": "ppo",
@@ -211,7 +212,8 @@
         "history_steps": 4,
         "max_neighbors": 8
       },
-      "consequence_observation": true
+      "consequence_observation": true,
+      "consequence_scope": "species_action"
     }
   },
   "experiment": {

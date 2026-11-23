@@ -110,7 +110,7 @@ test('Inspector social charts use recorded samples, show unknown states and adap
     assert.ok(text.includes('Collective learning'));
     assert.ok(text.includes('Recorded sample at step 27'));
     assert.ok(text.includes('Local witnesses'));
-    assert.ok(text.includes('Species consequence estimates'));
+    assert.ok(text.includes('Consequence estimates'));
     assert.ok(text.includes('unknown'));
     assert.ok(nodes.filter((n) => n.tagName === 'svg').length >= 4);
     const serialized = JSON.stringify(root);
@@ -186,4 +186,139 @@ test('Inspector explains episode-frozen knowledge separately from changing conte
   assert.ok(text.includes('frozen at episode start'));
   assert.ok(text.includes('New evidence applies next episode'));
   assert.ok(text.includes('sampled context'));
+});
+
+test('Inspector updates cumulative animal charts in place without adding species dashboard charts', () => {
+  globalThis.document = {
+    documentElement: { dataset: { theme: 'light' } },
+    createElement: (t) => new Node(t),
+    createElementNS: (_, t) => new Node(t),
+  };
+  const social = observationView(features, template).social;
+  const before = { tick: 27, animal: social, by_species: { prey: social } };
+  const root = inspectorGraphs({
+    diagnostic: { tick: 27, features, action_values: { swim: 1, rest: 0 } },
+    collectiveAverages: before,
+    template,
+    spec: { body: { vision_radius: 5 }, allowed_actions: ['swim', 'rest'] },
+    hasWater: true,
+  });
+  const originalNodes = walk(root),
+    count = originalNodes.length;
+  const after = structuredClone(before);
+  after.tick = 28;
+  after.animal.collective[1].harm = 0.25;
+  root.collective.update(after);
+  const updated = walk(root),
+    text = updated.map((n) => n.textContent).join(' ');
+  assert.equal(updated.length, count);
+  assert.deepEqual(updated, originalNodes);
+  assert.ok(text.includes('Running averages through step 28'));
+  assert.ok(text.includes('swim harm: 25%'));
+  assert.ok(!text.includes('Species average ·'));
+  assert.equal(features[base + tracking + 5], 0.75);
+  assert.ok(JSON.stringify(root).includes('var(--viz-'));
+});
+
+test('State-independent consequence scope keeps width but labels knowledge explicitly', () => {
+  const scoped = { ...template, consequence_scope: 'species_action' };
+  assert.equal(socialWidth(scoped), socialWidth(template));
+  const social = observationView(features, scoped).social;
+  assert.equal(social.scope, 'species_action');
+  assert.ok(
+    socialLabels(scoped).some((name) =>
+      name.startsWith('Species action attack'),
+    ),
+  );
+  for (const invalid of [null, false, [], 'all'])
+    assert.equal(
+      socialWidth({ ...template, consequence_scope: invalid }),
+      null,
+    );
+  assert.equal(socialWidth({ consequence_scope: 'species_action' }), null);
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const code =
+    'import json,sys\nfrom wtf.simulation.social import social_names\nprint(json.dumps(social_names(json.loads(sys.argv[1]))))';
+  const process = spawnSync(
+    root + '.venv/bin/python',
+    ['-c', code, JSON.stringify(scoped)],
+    { cwd: root, encoding: 'utf8' },
+  );
+  assert.equal(process.status, 0, process.stderr);
+  assert.deepEqual(socialLabels(scoped), JSON.parse(process.stdout));
+  globalThis.document = {
+    documentElement: { dataset: { theme: 'dark' } },
+    createElement: (t) => new Node(t),
+    createElementNS: (_, t) => new Node(t),
+  };
+  const graph = inspectorGraphs({
+    diagnostic: { tick: 1, features, action_values: { swim: 1, rest: 0 } },
+    template: scoped,
+    spec: { body: { vision_radius: 4 }, allowed_actions: ['swim', 'rest'] },
+    hasWater: true,
+  });
+  assert.ok(
+    walk(graph).some((n) =>
+      n.textContent.includes('regardless of current state or action mask'),
+    ),
+  );
+});
+
+test('Combined scope decodes separate general/context blocks and renders both without blending', () => {
+  const scoped = { ...template, consequence_scope: 'both' };
+  const combined = [
+    ...features.slice(0, base + tracking + 24),
+    ...Array.from({ length: 12 }, () => [1, 0.8, 0.3, 0.2]).flat(),
+    ...Array.from({ length: 12 }, () => [0.5, 0.1, 0.6, 0]).flat(),
+  ];
+  assert.equal(socialWidth(scoped), socialWidth(template) + 48);
+  const social = observationView(combined, scoped).social;
+  assert.equal(social.general_consequences.length, 12);
+  assert.equal(social.consequences.length, 12);
+  assert.equal(social.general_consequences[8].harm, 0.8);
+  assert.equal(social.consequences[8].harm, 0.1);
+  assert.equal(socialLabels(scoped).length, 120);
+  assert.ok(socialLabels(scoped)[24].startsWith('Species action '));
+  assert.ok(socialLabels(scoped)[72].startsWith('Consequence '));
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const code =
+    'import json,sys\nfrom wtf.simulation.social import social_names\nprint(json.dumps(social_names(json.loads(sys.argv[1]))))';
+  const result = spawnSync(
+    root + '.venv/bin/python',
+    ['-c', code, JSON.stringify(scoped)],
+    { cwd: root, encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(socialLabels(scoped), JSON.parse(result.stdout));
+  globalThis.document = {
+    documentElement: { dataset: { theme: 'light' } },
+    createElement: (t) => new Node(t),
+    createElementNS: (_, t) => new Node(t),
+  };
+  const graph = inspectorGraphs({
+    diagnostic: { tick: 2, features: combined, action_values: { attack: 1 } },
+    collectiveAverages: { tick: 2, animal: social },
+    template: scoped,
+    spec: { body: { vision_radius: 4 }, allowed_actions: ['attack'] },
+    hasWater: true,
+  });
+  const text = walk(graph)
+    .map((n) => n.textContent)
+    .join(' ');
+  assert.ok(text.includes('General consequence estimates'));
+  assert.ok(text.includes('Context consequence estimates'));
+  assert.ok(text.includes('attack harm: 80%'));
+  assert.ok(text.includes('attack harm: 10%'));
+  const count = walk(graph).length;
+  const update = structuredClone(social);
+  update.general_consequences[8].harm = 0.6;
+  update.consequences[8].harm = 0.2;
+  graph.collective.update({ tick: 3, animal: update });
+  assert.equal(walk(graph).length, count);
+  const changed = walk(graph)
+    .map((n) => n.textContent)
+    .join(' ');
+  assert.ok(changed.includes('attack harm: 60%'));
+  assert.ok(changed.includes('attack harm: 20%'));
+  assert.equal(social.general_consequences[8].harm, 0.8);
 });

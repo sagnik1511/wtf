@@ -307,7 +307,13 @@ tracking/scent. Keep all policy weights, optimizers, exploration streams and
 rollout/replay buffers independent. Local cues require visibility at both ends;
 never infer death from an out-of-view disappearance or expose numerical rewards.
 The shared empirical predictor pools own physical outcomes per exact species,
-including both sexes and unsuccessful animals. It is an explicit population-level
+including both sexes and unsuccessful animals. Templates may set
+`consequence_scope: "species_action"` to read published action-level aggregates
+regardless of current state/mask; omission/`context` preserves context lookup.
+Keep scope in model compatibility. Single-source modes use 48 inputs; `both`
+concatenates general then context for 96. Preserve separate confidence, no
+hand-coded behavioral gates and no duplicate event collection. The derived action cache is species-owned, invalidated by publication or
+continuous learning and excluded from persistence. It is an explicit population-level
 training abstraction, without a claim of biological long-distance communication.
 
 Tables persist between episodes and appear once in world checkpoint state, with

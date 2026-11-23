@@ -47,10 +47,27 @@ def social_contract(template):
     return result
 
 
+def consequence_scope(template):
+    """Validate the selected consequence input blocks."""
+    scope = template.get("consequence_scope", "context")
+    if scope not in ("context", "species_action", "both") or (
+        "consequence_scope" in template
+        and not template.get("consequence_observation", False)
+    ):
+        raise ValueError(
+            "consequence_scope requires enabled consequence observations "
+            "and must be context, species_action or both"
+        )
+    return scope
+
+
 def social_width(template):
     """Compute the optional social and consequence input width."""
+    scope = consequence_scope(template)
     return (24 if social_contract(template) is not None else 0) + (
-        48 if template.get("consequence_observation", False) else 0
+        48 * (2 if scope == "both" else 1)
+        if template.get("consequence_observation", False)
+        else 0
     )
 
 
@@ -60,8 +77,19 @@ def social_names(template):
     if social_contract(template) is not None:
         names += [f"Collective {group} {part}" for group in GROUPS for part in PARTS]
     if template.get("consequence_observation", False):
+        scope = consequence_scope(template)
+        prefixes = (
+            ("Species action", "Consequence")
+            if scope == "both"
+            else (
+                ("Species action",) if scope == "species_action" else ("Consequence",)
+            )
+        )
         names += [
-            f"Consequence {action} {part}" for action in ACTIONS for part in PARTS
+            f"{prefix} {action} {part}"
+            for prefix in prefixes
+            for action in ACTIONS
+            for part in PARTS
         ]
     return names
 
@@ -370,16 +398,28 @@ class SocialState:
                     *(v / n if n else 0.0 for v in totals[i + 1 : i + 4]),
                 ]
         if template.get("consequence_observation", False):
-            allowed = world.config["species"][animal.species]["allowed_actions"]
-            local = _local_context(world, animal, self.buckets)
-            for action in ACTIONS:
-                features += (
-                    self.knowledge.predict(
+            features += self._consequence_features(world, animal, template)
+        return features
+
+    def _consequence_features(self, world, animal, template):
+        """General block first in combined mode; each retains its own confidence."""
+        allowed = world.config["species"][animal.species]["allowed_actions"]
+        scope = template.get("consequence_scope", "context")
+        scopes = ("species_action", "context") if scope == "both" else (scope,)
+        local = (
+            _local_context(world, animal, self.buckets) if "context" in scopes else None
+        )
+        features = []
+        for lookup in scopes:
+            for index, action in enumerate(ACTIONS):
+                if action not in allowed:
+                    features += [0.0] * 4
+                elif lookup == "species_action":
+                    features += self.knowledge.predict_action(animal.species, index)
+                else:
+                    features += self.knowledge.predict(
                         animal.species, _context(world, animal, action, local)
                     )
-                    if action in allowed
-                    else [0.0] * 4
-                )
         return features
 
     def checkpoint(self):

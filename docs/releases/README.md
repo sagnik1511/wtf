@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.20](0.0.2.20.md), `9c3bce0`.
-**Latest committed runtime implementation:** [0.0.2.19](0.0.2.19.md), `33b3725`.
+**Latest committed rollout:** [0.0.2.23](0.0.2.23.md), `c01bf16`.
+**Latest committed runtime implementation:** [0.0.2.23](0.0.2.23.md), `c01bf16`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** [0.0.2.21 — Adjacent founder pairs](0.0.2.21.md), [0.0.2.22 — Multilayer DQN/DDQN](0.0.2.22.md), [0.0.2.23 — Shared sensory work and native DQN updates](0.0.2.23.md).
+**Pending rollouts:** [0.0.2.24 — Cumulative collective outcome views](0.0.2.24.md), [0.0.2.25 — General consequence knowledge](0.0.2.25.md), [0.0.2.26 — Combined consequence inputs](0.0.2.26.md).
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,9 +25,12 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.23](0.0.2.23.md) | Pending | 2026-11-23 | Not committed; base `22268d3` | Native scalar DQN/DDQN updates and bounded sensory work reuse |
-| [0.0.2.22](0.0.2.22.md) | Pending | 2026-11-23 | Not committed; base `22268d3` | Multilayer scalar DQN/DDQN with replay, target-network and inspector integration |
-| [0.0.2.21](0.0.2.21.md) | Pending | 2026-11-23 | Not committed; base `22268d3` | Optional per-species adjacent founder pairs with zone/terrain safeguards |
+| [0.0.2.26](0.0.2.26.md) | Pending | 2026-11-24 | Not committed; base `c01bf16` | Separate general/context consequence vectors with learned neural relevance |
+| [0.0.2.25](0.0.2.25.md) | Pending | 2026-11-23 | Not committed; base `c01bf16` | State-independent species/action knowledge with learned neural relevance |
+| [0.0.2.24](0.0.2.24.md) | Pending | 2026-11-23 | Not committed; base `c01bf16` | Cumulative species/animal collective outcomes in dashboard and inspector |
+| [0.0.2.23](0.0.2.23.md) | Committed | 2026-11-23 | `c01bf16` | Native scalar DQN/DDQN updates and bounded sensory work reuse |
+| [0.0.2.22](0.0.2.22.md) | Committed | 2026-11-23 | `c01bf16` | Multilayer scalar DQN/DDQN with replay, target-network and inspector integration |
+| [0.0.2.21](0.0.2.21.md) | Committed | 2026-11-23 | `c01bf16` | Optional per-species adjacent founder pairs with zone/terrain safeguards |
 | [0.0.2.20](0.0.2.20.md) | Committed | 2026-11-23 | `9c3bce0` | Explicit CI setuptools dependency and documented lazy-export inference exceptions |
 | [0.0.2.19](0.0.2.19.md) | Committed | 2026-11-23 | `33b3725` | Episode publication safeguards, bounded social hotpath reuse, independent review, full-repository Pylint cleanup and CI/build preflight |
 | [0.0.2.18](0.0.2.18.md) | Committed | 2026-11-23 | `29d2c2f` | Optional collective visible outcomes, persistent species consequence models and sampled playback charts |

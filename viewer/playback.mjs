@@ -1,5 +1,6 @@
 import { recentFeedings, FEED_HOLD_FRAMES } from './feeding-highlights.mjs';
 import { MovementHistory } from './movement-history.mjs';
+import { CollectiveHistory } from './collective-history.mjs';
 import { recentContests } from './competition.mjs';
 import { decodeChunk } from './replay-codec.mjs';
 import { recentNaturalDeaths } from './death-highlights.mjs';
@@ -8,9 +9,15 @@ import { recentKills } from './kill-highlights.mjs';
 // File-format reader only: no simulation, model weights, or learning code.
 // One decoded chunk is retained, regardless of total recording duration.
 export class Playback {
-  constructor(loadJSON, now = () => Date.now(), { movement = false } = {}) {
+  constructor(
+    loadJSON,
+    now = () => Date.now(),
+    { movement = false, collective = false } = {},
+  ) {
     this.loadJSON = loadJSON;
     this.movement = movement ? new MovementHistory() : null;
+    this.collectiveEnabled = collective;
+    this.collective = null;
     this.now = now;
     this.lastMetadataRefresh = -Infinity;
     this.frames = [];
@@ -44,6 +51,22 @@ export class Playback {
     const entry = this.runs.find((entry) => entry.run === Number(run));
     if (!entry) throw new Error('Recorded run not found');
     this.run = entry;
+    this.collective =
+      this.collectiveEnabled &&
+      Object.values(this.metadata.config.species ?? {}).some((spec) => {
+        const b = this.metadata.config.brains?.[spec.brain];
+        return (
+          b && (b.social_observation !== undefined || b.consequence_observation)
+        );
+      })
+        ? new CollectiveHistory()
+        : null;
+    if (this.collective) {
+      this.collective.reset(
+        this.metadata.config,
+        this.metadata.recording.frames_per_chunk,
+      );
+    }
     this.movement?.reset(
       this.metadata.config.world.width,
       this.metadata.config.world.height,
@@ -164,6 +187,18 @@ export class Playback {
           `/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/movement/${frame}`,
         ),
       );
+    if (this.collective)
+      await this.collective.move(
+        this.frames,
+        chunkIndex * size,
+        index,
+        async (chunk) =>
+          decodeChunk(
+            await this.loadJSON(
+              `/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/chunks/${chunk}`,
+            ),
+          ),
+      );
     this.frameIndex = index;
     return this.snapshot(selected);
   }
@@ -246,6 +281,7 @@ export class Playback {
     return {
       ...frame,
       selected: diagnostic,
+      collective: this.collective?.totals.view(selected) ?? null,
       width: c.world.width,
       height: c.world.height,
       resource_capacity: c.resources.capacity_per_patch,

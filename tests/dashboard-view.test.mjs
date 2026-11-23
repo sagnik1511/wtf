@@ -42,6 +42,7 @@ globalThis.document = {
     return nodes.get(id);
   },
   createElement: (tag) => new Node(tag),
+  createElementNS: (_, tag) => new Node(tag),
 };
 globalThis.window = { devicePixelRatio: 1 };
 globalThis.getComputedStyle = () => ({
@@ -163,4 +164,85 @@ test('Slower previous seek responses cannot overwrite the latest dashboard posit
   release();
   await old;
   assert.equal(dashboard.points.at(-1).tick, 3);
+});
+
+test('Species cumulative charts belong to the dashboard, update in place and follow its filter', () => {
+  const dashboard = new Dashboard(
+    async () => ({}),
+    () => '#7de2bd',
+  );
+  $('metrics-dialog').open = true;
+  $('dashboard-species').value = '';
+  const social = (value) => ({
+    collective: [
+      { action: 'walk', confidence: 1, harm: value, feeding: 0, birth: 0 },
+    ],
+    consequences: [
+      { action: 'rest', confidence: 1, harm: value, feeding: 0, birth: 0 },
+    ],
+  });
+  dashboard.context = {
+    id: 'averages',
+    species: {
+      prey: { allowed_actions: ['rest'] },
+      predator: { allowed_actions: ['rest'] },
+    },
+    state: {
+      run: 1,
+      tick: 20,
+      collective: {
+        tick: 20,
+        schedule: 'episode',
+        by_species: { prey: social(0.2), predator: social(0.6) },
+      },
+    },
+  };
+  dashboard.drawCollective();
+  assert.equal(dashboard.collectivePanels.size, 2);
+  assert.equal($('collective-section').hidden, false);
+  const panel = dashboard.collectivePanels.get('prey');
+  const walk = (node) => [node, ...node.children.flatMap(walk)];
+  assert.ok(
+    walk(panel).some((n) => n.textContent.includes('frozen at episode start')),
+  );
+  const nodes = walk(panel);
+  dashboard.context.state.collective.tick = 21;
+  dashboard.context.state.collective.by_species.prey = social(0.4);
+  $('dashboard-species').value = 'prey';
+  dashboard.drawCollective();
+  assert.equal(dashboard.collectivePanels.get('prey'), panel);
+  assert.deepEqual(walk(panel), nodes);
+  assert.equal(panel.hidden, false);
+  assert.equal(dashboard.collectivePanels.get('predator').hidden, true);
+  assert.ok(
+    walk(panel).some((n) =>
+      n.textContent.includes('Running averages through step 21'),
+    ),
+  );
+  assert.ok(walk(panel).some((n) => n.textContent.includes('walk harm: 40%')));
+  // Rewind before predator's first diagnostic: its later chart must disappear.
+  $('dashboard-species').value = '';
+  const predator = dashboard.collectivePanels.get('predator');
+  dashboard.context.state.collective = {
+    tick: 0,
+    by_species: { prey: social(0) },
+  };
+  dashboard.drawCollective();
+  assert.equal(predator.hidden, true);
+  assert.equal(panel.hidden, false);
+  dashboard.context.state.collective.by_species.predator = social(0.1);
+  dashboard.drawCollective();
+  assert.equal(dashboard.collectivePanels.get('predator'), predator);
+  assert.equal(predator.hidden, false);
+  dashboard.context.state.collective.by_species = {};
+  dashboard.drawCollective();
+  assert.equal(panel.hidden, true);
+  assert.equal(predator.hidden, true);
+  assert.equal($('collective-section').hidden, true);
+  dashboard.context.state.run = 2;
+  dashboard.context.state.collective = null;
+  dashboard.drawCollective();
+  assert.equal(dashboard.collectivePanels.size, 0);
+  assert.equal($('collective-section').hidden, true);
+  $('metrics-dialog').open = false;
 });

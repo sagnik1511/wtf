@@ -202,6 +202,14 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
+        if "consequence_scope" in b:
+            from wtf.simulation.social import consequence_scope
+
+            try:
+                consequence_scope(b)
+            except ValueError as error:
+                fail(p + ".consequence_scope", str(error))
+            b = {k: v for k, v in b.items() if k != "consequence_scope"}
         if "social_observation" in b:
             from wtf.simulation.social import social_contract
 

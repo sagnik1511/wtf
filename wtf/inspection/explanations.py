@@ -212,6 +212,8 @@ class ExplanationStore:
             != template.get("movement_history_steps", 0)
             or scent_contract(sig) != scent_contract(template)
             or social_contract(sig) != social_contract(template)
+            or sig.get("consequence_scope", "context")
+            != template.get("consequence_scope", "context")
             or sig.get("consequence_observation", False)
             != template.get("consequence_observation", False)
             or sig["actions"] != spec["allowed_actions"]

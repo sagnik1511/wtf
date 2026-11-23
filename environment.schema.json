@@ -1145,7 +1145,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -1160,7 +1166,22 @@
               "target_update_every_training_steps",
               "exploration"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            ]
           },
           {
             "type": "object",
@@ -1374,7 +1395,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -1391,6 +1418,21 @@
               "batch_size",
               "max_grad_norm",
               "normalize_advantages"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -1581,7 +1623,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -1595,6 +1643,21 @@
               "value_coefficient",
               "rollout_steps",
               "normalize_advantages"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -1779,7 +1842,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -1792,6 +1861,21 @@
               "max_episode_steps",
               "baseline_decay",
               "normalize_advantages"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -2008,7 +2092,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -2025,6 +2115,21 @@
               "train_every_steps",
               "epochs",
               "batch_size"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -2251,7 +2356,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -2270,6 +2381,21 @@
               "normalize_advantages",
               "recurrent_size",
               "sequence_length"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -2484,7 +2610,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -2501,6 +2633,21 @@
               "batch_size",
               "max_grad_norm",
               "normalize_advantages"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -2726,7 +2873,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -2744,6 +2897,21 @@
               "max_grad_norm",
               "normalize_advantages",
               "critic_hidden_layers"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -2973,7 +3141,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -2991,7 +3165,22 @@
               "huber_threshold",
               "max_grad_norm"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            ]
           },
           {
             "type": "object",
@@ -3217,7 +3406,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -3236,6 +3431,21 @@
               "normalize_advantages",
               "recurrent_size",
               "sequence_length"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -3480,7 +3690,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -3503,6 +3719,21 @@
               "backtrack_steps",
               "backtrack_coefficient",
               "accept_ratio"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -3701,7 +3932,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -3716,6 +3953,21 @@
               "train_every_steps",
               "temperature",
               "target_tau"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
             ]
           },
           {
@@ -3939,7 +4191,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -3957,7 +4215,22 @@
               "max_grad_norm"
             ],
             "additionalProperties": false,
-            "description": "Independent multilayer scalar DQN with max-target Bellman updates, private replay, epsilon-greedy exploration, Huber loss and Adam."
+            "description": "Independent multilayer scalar DQN with max-target Bellman updates, private replay, epsilon-greedy exploration, Huber loss and Adam.",
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            ]
           },
           {
             "type": "object",
@@ -4180,7 +4453,13 @@
               "consequence_observation": {
                 "type": "boolean",
                 "default": false,
-                "description": "Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled."
+                "description": "Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled."
+              },
+              "consequence_scope": {
+                "type": "string",
+                "enum": ["context", "species_action", "both"],
+                "default": "context",
+                "description": "Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility."
               }
             },
             "required": [
@@ -4198,7 +4477,22 @@
               "max_grad_norm"
             ],
             "additionalProperties": false,
-            "description": "Independent multilayer scalar Double DQN: online greedy action selection, target-network evaluation, private replay, Huber loss and Adam."
+            "description": "Independent multilayer scalar Double DQN: online greedy action selection, target-network evaluation, private replay, Huber loss and Adam.",
+            "allOf": [
+              {
+                "if": {
+                  "required": ["consequence_scope"]
+                },
+                "then": {
+                  "required": ["consequence_observation"],
+                  "properties": {
+                    "consequence_observation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            ]
           }
         ]
       },

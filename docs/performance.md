@@ -1202,3 +1202,95 @@ All complete-state, expanded-playback and compressed binary artifact checksums
 matched. Total retained workload files were exactly 1,416,211 bytes for DQN and
 1,417,652 bytes for DDQN on both sides. There is no disk-space reduction or data
 loss from this computation-only rollout.
+
+
+## Cumulative collective playback views
+
+Collective-history aggregation is viewer-only and stores totals for living
+animals and configured species, rather than a timeline of inputs. A detached
+chunk-start copy supports local rewinds; distant jumps rebuild the earlier
+prefix by streaming and releasing one older chunk at a time. Selection changes
+reuse already accumulated living-animal totals. A temporary older chunk can
+coexist with the selected chunk during a prefix rebuild; long recordings can
+therefore take longer to seek without requiring whole-recording RAM.
+
+Dashboard and inspector charts reuse their existing SVG nodes when averages
+change. Species panels are updated only while the dashboard is open and their
+species filter is visible. Closed dashboards retain aggregate numbers without
+building per-step chart histories. No additional replay bytes are written and
+training is untouched. Tests verify bounded live-agent state, constant chart
+node identities, rewind/cancellation and read-only reconstruction. No timing or
+peak-RAM improvement is claimed; this adds a bounded viewer feature.
+
+
+## Published species/action summaries
+
+State-independent consequence lookup builds one derived action-count summary per
+species from its published bounded context table. Subsequent animals reuse it;
+continuous learning invalidates only the updated species and episode publication
+invalidates only changed species. Staged evidence remains separate. The cache is
+bounded by species × 12 actions × four immutable rates and is omitted from checkpoints,
+exports and replay. Restore/GRPO trials construct independent empty caches.
+Species/action observation lookup also avoids constructing the querying animal's
+local physical context. Context collection for real outcomes remains unchanged.
+No speed or RAM benchmark improvement is claimed; tests verify reuse,
+invalidation, publication isolation and exact restore.
+
+
+## Combined consequence inputs
+
+`consequence_scope: "both"` reuses the same published tables and general summary
+cache, then appends context-matched estimates as a separate block. It collects
+no additional events and introduces no persistent table or file-format version.
+The general cache stores immutable rate tuples; fresh returned lists share their
+float values across consumers, while list mutation cannot alter cached data.
+Continuous learning/publication invalidation and cache restore boundaries are
+unchanged. This avoids repeated divisions and duplicate live general-rate float
+objects. No wall-time or peak-RAM improvement is claimed.
+
+Combined mode adds 48 neural inputs per animal: first-layer parameters, captured
+diagnostics and replay observations become wider. Cumulative viewer summaries
+keep both sources independently in their bounded living-animal/species totals;
+charts update existing SVG nodes. This is a configurable learning feature with
+extra input/storage costs, not a behavior-preserving speed optimization.
+
+
+## Reusing unchanged species playback means
+
+Cumulative playback now reuses each species' instantaneous mean while its ordered
+member objects and held social row objects remain identical. New diagnostics,
+member replacement/order changes, births and deaths invalidate the relevant
+species. Extinction removes its member references. Copied chunk-prefix totals
+start with an empty derived cache, preserving independent ownership and seek
+reconstruction. The cache holds two references per sampled living animal;
+it does not retain another frame, duplicate row values or enter saved artifacts.
+
+A Node.js 20.12.1 ARM64/macOS probe used 70 animals, two species, 1,600 frames,
+combined consequence inputs and diagnostic samples every 50 steps. Five alternating
+fresh-process samples compared the staged scope-26 implementation before this
+reuse against the current code, on committed base `c01bf16`. Each process warms
+once; timing includes replay aggregation and the probe's mean-build counters,
+not simulation, rendering or disk/network access. A separate pass hashes every
+frame's selected-animal and both-species cumulative view; all hashes agree.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Median aggregation time | 116.89 ms | 92.18 ms |
+| Species mean reconstructions | 3,200 | 64 |
+| Cached member pairs | 0 | 70 |
+
+This is 1.27× throughput (21.1% less elapsed time) and 98% fewer mean
+reconstructions in this sparse-diagnostic workload. Frequent samples or changing
+populations reduce reuse. The extra member references trade bounded retained RAM
+for fewer reductions/temporary rows; no peak-RAM, disk saving or end-to-end
+viewer speedup is claimed. Reproduce with a saved pre-reuse package root:
+
+```sh
+node work/benchmark_collective_history.mjs \
+  --baseline /path/to/pre-reuse-root --repeats 5 \
+  --output .cache/collective-history-benchmark.json
+```
+
+Reference checks compare cached and forced-fresh reductions through new samples,
+order changes, birth/death/extinction and independent copied states. Existing
+chunk/seek, publication and dual-source charts retain their contracts.

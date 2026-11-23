@@ -43,7 +43,9 @@ rather than loading every document or result into context.
   obstacles, RNGs and transient observation caches remain independent. Record
   final death positions after drift rather than inferring one-cell movement.
 - Optional collective/consequence observations append after tracking/scent and
-  enter model signatures. Keep same-species local visibility, hidden-outcome and
+  enter model signatures. Consequence scopes context/species_action use 48 inputs;
+  both concatenates general then context for 96, with independent confidence and
+  no duplicate evidence collection. Keep same-species local visibility, hidden-outcome and
   reward boundaries explicit. Shared consequence counts are population-level
   training knowledge, not shared policy weights or biological remote sensing.
   Persist tables once, freeze updates outside training and isolate GRPO trial

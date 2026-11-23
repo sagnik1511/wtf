@@ -298,7 +298,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (q_network).exploration`
 
@@ -347,7 +348,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (ppo).network`
 
@@ -392,7 +394,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (a2c).network`
 
@@ -436,7 +439,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (reinforce).network`
 
@@ -485,7 +489,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (grpo).network`
 
@@ -536,7 +541,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (recurrent_ppo).network`
 
@@ -585,7 +591,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (maskable_ppo).network`
 
@@ -635,7 +642,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (mappo).network`
 
@@ -683,7 +691,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (qrdqn).exploration`
 
@@ -742,7 +751,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (lstm_ppo).network`
 
@@ -796,7 +806,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `backtrack_coefficient` | Multiplicative step shrinkage between TRPO backtracking candidates. | number; min: `0.01`; max: `0.99` | Required; — |
 | `accept_ratio` | Minimum actual-to-predicted surrogate improvement ratio for a TRPO candidate. | number; min: `0`; max: `1` | Required; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (trpo).network`
 
@@ -842,7 +853,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `temperature` | Fixed positive entropy temperature for Discrete SAC actor and soft value targets. | number; min: `1e-06`; max: `10` | Required; — |
 | `target_tau` | Polyak fraction of current critic parameters copied into target critics after each update. | number; min: `1e-06`; max: `1` | Required; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (discrete_sac).network`
 
@@ -889,7 +901,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (dqn).exploration`
 
@@ -944,7 +957,8 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `movement_history_steps` | Previous simulation steps of personal top-k animal sightings to retain. Zero disables the appended movement block; unseen positions are never backfilled and last-seen confidence fades over this window. | integer; min: `0`; max: `16` | Optional; `0` |
 | `scent_observation` | Optional automatic scent inputs: nine local sector strengths per separated group or one blended field for all animals. Requires scent_trails.enabled; omission disables this brain's scent inputs. | object | Optional; — |
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
-| `consequence_observation` | Append 48 inputs: confidence, harm, feeding and birth predictions for each of 12 action identifiers. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
+| `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
 
 ## `config.brains.<name> (ddqn).exploration`
 
@@ -1061,4 +1075,4 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `horizon_steps` | Observed step window for harm, feeding and birth outcomes; death closes the window and episode truncation discards incomplete windows. | integer; min: `1`; max: `64` | Optional; `16` |
 | `update_schedule` | When collected outcome evidence becomes visible as consequence estimates: continuous updates immediately after closed windows; episode freezes the published model and publishes staged evidence before the next episode starts. | string; choices: `["continuous", "episode"]` | Optional; `"continuous"` |
 
-Field entries documented: **583**.
+Field entries documented: **597**.

@@ -24,15 +24,15 @@ svg{--figure-bg:#0b131c;--figure-panel:#162632;--figure-line:#647d8b;--figure-sh
 <rect class="policy" x="818" y="112" width="352" height="342" rx="12"/>
 <text class="label" x="840" y="146">Each animal owns its policy</text>
 <rect class="box" x="838" y="169" width="312" height="75" rx="8"/>
-<text class="small" x="854" y="199">Own observations + optional summaries</text>
-<text class="small" x="854" y="222">and consequence estimates</text>
+<text class="small" x="854" y="199">Body + targets + optional summaries</text>
+<text class="small" x="854" y="222">NN learns relevance of shared estimates</text>
 <path class="edge" d="M742 182H810"/>
 <path class="edge" d="M995 250V279"/>
 <text class="label" x="850" y="309">Own action → own reward</text>
 <text class="label" x="850" y="341">Own weights and optimizer</text>
 <text class="small" x="850" y="378">No shared PPO trajectories or policy weights</text>
 <text class="small" x="850" y="404">Other species use separate knowledge</text>
-<text class="small" x="850" y="430">Unknown contexts retain zero confidence</text>
+<text class="small" x="850" y="430">Availability limits execution only</text>
 <rect class="box" x="30" y="335" width="310" height="150" rx="12"/>
 <text class="label" x="50" y="366">Animals' own training experiences</text>
 <text class="small" x="50" y="397">Coordinate-free local physical context</text>
@@ -40,11 +40,14 @@ svg{--figure-bg:#0b131c;--figure-panel:#162632;--figure-line:#647d8b;--figure-sh
 <text class="small" x="50" y="447">Includes unsuccessful animals and deaths</text>
 <rect class="shared" x="402" y="316" width="340" height="200" rx="12"/>
 <text class="label" x="422" y="348">Persistent tables per exact species</text>
-<text class="small" x="422" y="380">Bounded context → outcome frequencies</text>
-<text class="small" x="422" y="407">Both sexes contribute; policies stay private</text>
-<text class="small" x="422" y="434">Training updates; evaluation reads only</text>
-<text class="small" x="422" y="461">48 optional action-context estimate inputs</text>
-<text class="small" x="422" y="489">Shared training knowledge, not remote sensing</text>
+<text class="small" x="422" y="374">Published context counts; bounded memory</text>
+<rect class="box" x="420" y="385" width="144" height="44" rx="6"/>
+<text class="small" x="433" y="412">Context lookup</text>
+<rect class="box" x="578" y="385" width="146" height="44" rx="6"/>
+<text class="small" x="591" y="412">Species / action</text>
+<text class="small" x="422" y="452">48 inputs per source; both = 96</text>
+<text class="small" x="422" y="477">Both sexes; evaluation never updates</text>
+<text class="small" x="422" y="502">Both: general then context, no blending</text>
 <path class="edge dash" d="M340 410H394"/>
 <path class="edge" d="M742 410H778V225H810"/>
 <rect class="box" x="30" y="580" width="555" height="140" rx="12"/>
@@ -54,9 +57,9 @@ svg{--figure-bg:#0b131c;--figure-panel:#162632;--figure-line:#647d8b;--figure-sh
 <text class="small" x="50" y="697">Episode mode: publish staged evidence at next training start</text>
 <path class="edge" d="M565 516V546H308V572"/>
 <rect class="box" x="623" y="580" width="547" height="140" rx="12"/>
-<text class="label" x="645" y="614">Saved playback inspector</text>
+<text class="label" x="645" y="614">Saved playback views</text>
 <text class="small" x="645" y="645">Reads existing sampled input vectors and their timestamps</text>
 <text class="small" x="645" y="671">No future model lookup; no extra world-frame fields</text>
-<text class="small" x="645" y="697">Local witness charts and species consequence estimates</text>
+<text class="small" x="645" y="697">Agent averages in inspector; species in metrics</text>
 <path class="edge" d="M995 454V572"/>
 </svg>

@@ -26,6 +26,7 @@ import { speciesStyles } from '../viewer/species-style.mjs';
 import { drawTerrain, terrainView } from '../viewer/terrain.mjs';
 import { ObservationOverlay } from '../viewer/inspector-stats.mjs';
 import { inspectorGraphs } from '../viewer/inspector.mjs';
+import { CollectiveTotals } from '../viewer/collective-history.mjs';
 import { explanationCharts } from '../viewer/explainability.mjs';
 import {
   animalStructure,
@@ -1331,12 +1332,13 @@ const shadows = sheet(
 );
 // Controlled saved-input specimens; these values are not experimental results.
 const collectiveTemplate = {
+  consequence_scope: 'both',
   observation_version: 4,
   observation_top_k: 3,
   social_observation: { history_steps: 4, max_neighbors: 8 },
   consequence_observation: true,
 };
-const collectiveFeatures = [...Array(69).fill(0), ...Array(72).fill(0)];
+const collectiveFeatures = [...Array(69).fill(0), ...Array(120).fill(0)];
 collectiveFeatures[0] = 0.6;
 collectiveFeatures[1] = 1;
 collectiveFeatures.splice(69 + 4, 4, 0.75, 0.8, 0, 0);
@@ -1344,8 +1346,11 @@ collectiveFeatures.splice(69 + 8, 4, 0.8, 0, 0.9, 0);
 collectiveFeatures.splice(69 + 16, 4, 0.5, 0, 0, 0.5);
 collectiveFeatures.splice(69 + 24 + 9 * 4, 4, 0.9, 0.7, 0, 0);
 collectiveFeatures.splice(69 + 24 + 7 * 4, 4, 0.8, 0, 0.9, 0);
-const collectiveCharts = (features, tick) => {
+collectiveFeatures.splice(69 + 24 + 48 + 9 * 4, 4, 0.7, 0.9, 0, 0);
+collectiveFeatures.splice(69 + 24 + 48 + 7 * 4, 4, 0.6, 0, 0.5, 0);
+const collectiveCharts = (features, tick, collectiveAverages) => {
   const tree = inspectorGraphs({
+    collectiveAverages,
     diagnostic: {
       tick,
       features,
@@ -1361,38 +1366,65 @@ const collectiveCharts = (features, tick) => {
   return walk(tree).filter(
     (n) =>
       n.tagName === 'svg' &&
-      ['Local witnesses', 'Species consequence estimates'].includes(
-        n.attributes['aria-label'],
-      ),
+      [
+        'Local witnesses',
+        'General consequence estimates',
+        'Context consequence estimates',
+      ].includes(n.attributes['aria-label']),
   );
 };
-const knownCollective = collectiveCharts(collectiveFeatures, 40),
-  unknownCollective = collectiveCharts(
-    [...collectiveFeatures.slice(0, 69), ...Array(72).fill(0)],
-    0,
-  );
-assert.equal(knownCollective.length, 2);
-assert.equal(unknownCollective.length, 2);
+const illustratedTotals = new CollectiveTotals({
+  brains: { test: collectiveTemplate },
+  species: { prey: { brain: 'test' } },
+});
+const speciesFeatures = collectiveFeatures.map((v, i) =>
+  i >= 69 && (i < 93 || i >= 141) && (i - 69) % 4 === 1 ? v / 2 : v,
+);
+const illustratedFrame = (tick) => ({
+  tick,
+  animals: [
+    { id: 0, species: 'prey' },
+    { id: 1, species: 'prey' },
+  ],
+  diagnostics: {
+    0: { tick, features: collectiveFeatures },
+    1: { tick, features: speciesFeatures },
+  },
+});
+illustratedTotals.consume(illustratedFrame(0));
+illustratedTotals.consume(illustratedFrame(40));
+const illustratedAverage = illustratedTotals.view(0);
+const animalCollective = collectiveCharts(
+    collectiveFeatures,
+    40,
+    illustratedAverage,
+  ),
+  speciesCollective = collectiveCharts(collectiveFeatures, 40, {
+    tick: 40,
+    animal: illustratedAverage.by_species.prey,
+  });
+assert.equal(animalCollective.length, 3);
+assert.equal(speciesCollective.length, 3);
 const socialLearning = sheet(
-  'Collective learning in the selected-animal inspector',
-  'Actual components · illustrative saved inputs · separate local witnesses and species estimates · unknown is not safe',
+  'Cumulative collective outcomes',
+  'Combined mode · actual charts · illustrative inputs · animal inspector above · species metrics below',
   640,
-  [knownCollective, unknownCollective]
+  [animalCollective, speciesCollective]
     .map((charts, row) =>
       charts
         .map(
           (chart, col) =>
-            box(28 + col * 584, 96 + row * 264, 560, 242) +
+            box(28 + col * 384, 96 + row * 264, 360, 242) +
             text(
-              46 + col * 584,
+              46 + col * 384,
               124 + row * 264,
-              `${row ? 'No evidence yet' : 'Recorded step 40'} · ${col ? 'species estimates' : 'local witnesses'}`,
+              `${row ? 'Species' : 'Inspector'} · ${['witnesses', 'general', 'context'][col]}`,
               18,
               '#e6edf3',
               'start',
               true,
             ) +
-            component(chart, 46 + col * 584, 142 + row * 264, 520, 176),
+            component(chart, 46 + col * 384, 142 + row * 264, 324, 176),
         )
         .join(''),
     )

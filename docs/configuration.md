@@ -411,3 +411,16 @@ The optional `dqn` and `ddqn` types support one to four hidden layers in
 `network.hidden_layers`, such as `[64, 32, 16]` for three predator hidden layers.
 See the [complete template and semantics](algorithms.md#multilayer-dqn). The
 existing `dqn.json` preset retains its legacy `q_network` implementation.
+
+
+## Consequence knowledge scope
+
+With consequence observations enabled, brain templates may set
+`"consequence_scope": "species_action"` to receive published action outcomes
+across their species' retained contexts, regardless of current state or action
+mask. The network combines this knowledge with its ordinary state inputs; no
+hand-written behavioral modes are added. The legacy default is `"context"`.
+Set `"consequence_scope": "both"` for separate general and context vectors
+(96 inputs, general first), allowing the NN to learn their relevance. Single-source
+modes retain 48 inputs. Non-default scopes have explicit distinct signatures.
+See [scope, timing and compatibility](social-learning.md#state-independent-knowledge-and-learned-relevance).

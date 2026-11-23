@@ -882,7 +882,8 @@ footer {
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
-#trend-grid {
+#trend-grid,
+#collective-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -924,7 +925,8 @@ footer {
   #metrics-dialog {
     padding: 12px;
   }
-  #trend-grid {
+  #trend-grid,
+  #collective-grid {
     grid-template-columns: 1fr;
   }
   .dashboard-controls label {

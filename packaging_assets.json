@@ -64,6 +64,8 @@
   "viewer/branding/wtf-symbol-light.svg",
   "viewer/branding/wtf-symbol-motion-dark.svg",
   "viewer/branding/wtf-symbol-motion-light.svg",
+  "viewer/collective-history.mjs",
+  "viewer/collective-view.mjs",
   "viewer/competition.mjs",
   "viewer/dashboard-stats.mjs",
   "viewer/dashboard.mjs",

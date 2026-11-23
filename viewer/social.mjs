@@ -23,6 +23,16 @@ export const SOCIAL_GROUPS = [
 ];
 const PARTS = ['confidence', 'harm', 'feeding', 'birth'];
 export function socialWidth(template = {}) {
+  if (
+    !['context', 'species_action', 'both'].includes(
+      template.consequence_scope === undefined
+        ? 'context'
+        : template.consequence_scope,
+    ) ||
+    (template.consequence_scope !== undefined &&
+      template.consequence_observation !== true)
+  )
+    return null;
   const spec = template.social_observation;
   if (
     spec !== undefined &&
@@ -40,7 +50,12 @@ export function socialWidth(template = {}) {
   if (typeof (template.consequence_observation ?? false) !== 'boolean')
     return null;
   return (
-    (spec === undefined ? 0 : 24) + (template.consequence_observation ? 48 : 0)
+    (spec === undefined ? 0 : 24) +
+    (template.consequence_observation
+      ? template.consequence_scope === 'both'
+        ? 96
+        : 48
+      : 0)
   );
 }
 export function socialLabels(template = {}) {
@@ -49,9 +64,19 @@ export function socialLabels(template = {}) {
   if (template.social_observation !== undefined)
     for (const action of SOCIAL_GROUPS)
       for (const part of PARTS) names.push(`Collective ${action} ${part}`);
-  if (template.consequence_observation)
-    for (const action of SOCIAL_ACTIONS)
-      for (const part of PARTS) names.push(`Consequence ${action} ${part}`);
+  if (template.consequence_observation) {
+    const prefixes =
+      template.consequence_scope === 'both'
+        ? ['Species action', 'Consequence']
+        : [
+            template.consequence_scope === 'species_action'
+              ? 'Species action'
+              : 'Consequence',
+          ];
+    for (const prefix of prefixes)
+      for (const action of SOCIAL_ACTIONS)
+        for (const part of PARTS) names.push(`${prefix} ${action} ${part}`);
+  }
   return names;
 }
 export function socialView(features, template, offset) {
@@ -65,9 +90,16 @@ export function socialView(features, template, offset) {
       offset += 4;
       return { action, confidence, harm, feeding, birth };
     });
+  const collective =
+    template.social_observation === undefined ? [] : rows(SOCIAL_GROUPS);
+  const general =
+    template.consequence_observation && template.consequence_scope === 'both'
+      ? rows(SOCIAL_ACTIONS)
+      : [];
   return {
-    collective:
-      template.social_observation === undefined ? [] : rows(SOCIAL_GROUPS),
+    scope: template.consequence_scope ?? 'context',
+    collective,
+    ...(general.length ? { general_consequences: general } : {}),
     consequences: template.consequence_observation ? rows(SOCIAL_ACTIONS) : [],
   };
 }

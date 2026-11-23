@@ -49,7 +49,10 @@ function showError(error) {
 }
 
 let networkRankLimit = DEFAULT_NETWORK_RANK;
-const player = new Playback(api, undefined, { movement: true });
+const player = new Playback(api, undefined, {
+  movement: true,
+  collective: true,
+});
 const reducedMotion = window.matchMedia?.(
   '(prefers-reduced-motion: reduce)',
 ) ?? { matches: false };
@@ -936,6 +939,7 @@ function drawInspector() {
         player.metadata.config.consequence_learning?.update_schedule ??
         'continuous',
       diagnostic: b,
+      collectiveAverages: state.collective,
       template: player.metadata.config.brains?.[state.species[a.species].brain],
       spec: {
         ...state.species[a.species],
@@ -955,6 +959,7 @@ function drawInspector() {
       ),
     });
   }
+  inspectorVisuals.collective?.update?.(state.collective);
   box.append(inspectorVisuals);
   const bodyDetails = text('details', '', 'feature-details');
   bodyDetails.open = Boolean(inspectorSections.body);

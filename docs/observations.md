@@ -123,7 +123,8 @@ preserves versions 1–3 and uses a distinct saved-model signature.
 ## Optional collective and consequence inputs
 
 [Collective learning](social-learning.md) appends pooled visible same-species
-outcomes (24 inputs) and optional persistent consequence estimates (48 inputs),
+outcomes (24 inputs) and optional persistent consequence estimates (48 inputs
+for `context` or `species_action`, 96 general-then-context inputs for `both`),
 after existing tracking/scent blocks. No individual identities or exact rewards
 are exposed. The optional layouts are part of model compatibility; observation
 versions 1–4 retain their original base meanings when the blocks are absent.

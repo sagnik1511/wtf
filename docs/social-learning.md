@@ -107,9 +107,82 @@ so these rates are associations and are not causal estimates. Consequences
 beyond the selected horizon, such as much later starvation, do not label the
 initial action harmful.
 
+### State-independent knowledge and learned relevance
+
+Choose which consequence sources each consuming brain receives:
+
+```json
+"consequence_observation": true,
+"consequence_scope": "species_action"
+```
+
+| `consequence_scope` | Inputs | Meaning |
+| --- | ---: | --- |
+| `context` (default) | 48 | Current physical context, preserving the legacy lookup |
+| `species_action` | 48 | General action knowledge across the species' retained contexts |
+| `both` | 96 | General 48 first, then context 48; independent confidence per action/source |
+
+Use `"consequence_scope": "both"` to give the NN both sources without manually
+blending them or choosing a source for it. All ordinary state inputs remain.
+For example, general swimming experience may indicate moderate harm while the
+current deep-water context indicates high harm. Those arrive as separate
+features, so the independent network can learn how to use them. An unknown
+context does not erase known general evidence. The two sources are correlated
+summaries of the same experience, not independent trials; enabling both does not
+collect or count an event twice.
+
+`species_action` aggregates published outcome counts for each action across the
+species' retained contexts. It supplies the same general knowledge to all
+consuming animals of that exact species, regardless of sex, current health,
+energy, position, chosen action or dynamic action mask. Every supported action's
+knowledge remains present when that action is unavailable. Unsupported actions
+remain zero-filled. The regular body, terrain, target and mating inputs stay
+alongside this vector, so each independent network can learn when and how the
+knowledge is useful. No hard-coded hunting/mating mode or automatic preference
+is introduced, and useful behavior is not guaranteed merely by adding inputs.
+
+For example, a distant predator can receive feeding evidence from another
+predator's attack while its own attack is masked. That information remains when
+prey approaches and attack becomes eligible. The network can use hunger and
+prey observations to learn pursuit or attack preferences; the mask still controls
+execution for maskable policies, and physical checks still apply for all policies.
+
+Only real attempted actions and observed physical outcomes update the tables.
+Masked or unchosen actions do not create fictional successes/failures, and
+numerical rewards are not shared. Rates are count-weighted across retained
+contexts, rather than a mean of context percentages. They remain associations
+within the configured outcome horizon, not causal action values. Context
+capacity/eviction and counter rescaling still bound the available evidence;
+this is not unlimited lifetime memory.
+
+Omitting `consequence_scope`, or setting `context`, preserves the previous
+context-matched lookup. In that mode a new physical context can be unknown even
+when the action has evidence elsewhere. Each single-source mode keeps 48 inputs;
+`both` adds another 48. Non-default scopes are explicit model-signature distinctions: use fresh matching
+brains, or resume an existing checkpoint with its original scope. Weights are not silently
+exchanged across different scopes, including the wider combined layout. The physical
+consequence export can be reused across scopes when its physical/horizon
+contract matches, since the stored counts have not changed.
+
+The maintained `seaside_social` example uses `species_action`; the local seaside
+DQN scent/day-night configuration uses `both`. Other presets retain their existing
+mode. Publication remains independent: with `update_schedule: "episode"`, new
+knowledge first becomes visible at the next episode. A fresh single episode has
+no earlier published evidence to expose.
+
+General summaries use a derived species-owned cache, invalidated by continuous
+learning or publication. Staged episode evidence never enters it. Cache size is
+bounded by species × action count, and summaries are rebuilt after restoration.
+No new checkpoint version, top-level replay fields or extra persistent count
+table is required. The combined mode does store 48 more values per recorded
+diagnostic vector and increases model first-layer/replay-buffer memory; it is
+not a storage-saving setting. Cached immutable general rates reuse float objects
+across live observations until publication changes them. Recorded samples, model feature labels and viewer notes identify the
+scope; cumulative chart behavior remains as described below.
+
 Each of the twelve stable action identifiers contributes confidence and three
-outcome rates: **48 inputs**. Unsupported actions have zero-filled slots.
-Unknown contexts also have zero confidence. The predictor supplies information;
+outcome rates per source: **48 inputs**, or **96 for `both`**. Unsupported actions have zero-filled slots.
+Unknown lookups also have zero confidence. The predictor supplies information;
 it does not force an action, change action masks, issue a reward or merge policy
 weights. Each learner decides how to use the estimates through its own algorithm.
 
@@ -184,8 +257,10 @@ Exact `--resume` uses its checkpoint's own model and rejects `--consequences-fro
 ## Input and storage compatibility
 
 These blocks append **after** existing observation, movement-history and scent
-inputs. Enabling both adds 72 inputs; the example has 141 prey inputs and 225
-predator inputs. The optional fields enter model signatures. Old weights without
+inputs. Local witnesses plus one consequence source add 72 inputs; the
+maintained example has 141 prey inputs and 225 predator inputs. Local witnesses
+plus both consequence sources add 120 inputs. The local seaside DQN scent/day-night
+setup has 198 prey inputs and 282 predator inputs with combined consequences. The optional fields enter model signatures. Old weights without
 the blocks cannot initialize these wider policies; unchanged presets and legacy
 checkpoints retain their original layouts and behavior.
 
@@ -203,22 +278,51 @@ in total RAM/disk usage is claimed from enabling this feature.
 
 ## Playback inspection
 
-Select a living animal in a recording with these inputs. Open its agent inspector
-and find **Collective learning**:
+Open **Metrics dashboard → Species collective outcomes** for species averages.
+The dashboard's species filter selects which panels are visible; its trend-window
+selector does not shorten these cumulative averages. The action selector controls
+the trend charts; collective panels retain the available action rows. Select a living animal and
+open **Agent inspector → Collective learning** for that individual's averages:
 
 - **Local witnesses:** harm, feeding and birth rates grouped by observed action.
-- **Species consequence estimates:** corresponding rates for the selected animal's
-  available actions in its sampled physical context.
+- **Consequence estimates:** corresponding shared-model estimates for that animal, averaged over its
+  available recorded lifetime. These are general species/action rates or
+  context-matched rates according to its template scope.
+  Combined mode displays **General consequence estimates** and **Context consequence
+  estimates** separately in both the inspector and species dashboard.
 
-Charts show the recorded sample step, evidence through opacity/tooltips and
-unknown contexts explicitly. They update when replay reaches a new diagnostic
-sample, remain fixed while paused and follow backward seeking. There is no
-independent animation timer. The panel labels the configured publication mode.
-In episode mode, bars may change as the animal's sampled context changes even
-though the underlying predictor stays frozen throughout that episode. They read
-saved values only, with no future model
-state or omniscient reconstruction from board positions. Both themes use the
-shared inspector palette. Older recordings without these inputs omit the panel.
+Both views average through the current playback step rather than displaying
+only that step's diagnostic values. Species summaries first average available
+living-animal values at each step, then average those per-step means over time.
+Each step therefore has equal time weight; high-population periods do not
+implicitly outweigh low-population periods. Individual summaries start with that
+animal's first valid saved inputs, with independent totals for each identity.
+Extinct species retain their last cumulative result.
+
+Saved diagnostic values are held forward until the next sample. For example,
+values 0 at step 0 and 1 at step 4 yield a step-4 mean of 1/5, not 1/2: steps
+0–3 retain the earlier value and only step 4 receives the new one. This is a
+viewer reconstruction from sparse samples, not a claim to recover unsaved
+intermediate inputs. Missing initial samples are not filled with zeros. Unknown
+contexts count toward elapsed observed time but are excluded from outcome-rate
+averages, so “unknown” does not become “safe.” These are means of saved rates,
+not pooled raw outcome counts or causal estimates.
+
+Playback updates averages in place, pauses at the current frame and excludes
+future samples during backward seeking. Run changes reset totals. Rewinds inside
+the loaded chunk reuse a compact chunk-start aggregate; distant seeks rebuild a
+prefix by reading older chunks sequentially and releasing them. Only living-agent
+aggregates, species totals and one chunk-start copy are retained; no per-frame
+history, whole-run decode or additional replay artifact is stored. A distant seek
+can temporarily decode one additional chunk alongside the selected chunk.
+
+Brain inputs, policy outputs, raw input displays, prediction charts and
+consequence learning/publication schedules are unchanged. In episode mode the
+predictor remains frozen until the next episode, while viewer averages may change
+as recorded contexts change. These charts never query future model weights or
+hidden outcomes. Both interface themes use the shared palette. Older recordings
+with saved collective inputs work without conversion; those without them omit
+the panels.
 
 ![Actual inspector components with illustrative collective and predictor inputs](assets/viewer/social-learning.svg)
 

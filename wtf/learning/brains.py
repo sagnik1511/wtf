@@ -202,6 +202,8 @@ def model_signature(config, actions):
         signature["social_observation"] = social_contract(config)
     if config.get("consequence_observation", False):
         signature["consequence_observation"] = True
+        if config.get("consequence_scope", "context") != "context":
+            signature["consequence_scope"] = config["consequence_scope"]
     if kind in ("recurrent_ppo", "lstm_ppo"):
         signature.update(
             recurrent_size=config["recurrent_size"],
