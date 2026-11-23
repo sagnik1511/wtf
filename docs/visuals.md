@@ -17,6 +17,10 @@ when opened directly. The editable explorer fragment is source, not the full app
 | --- | --- |
 | [Favicon (PNG)](visual-previews/branding/favicon-png.md) | [favicon.png](assets/branding/favicon.png) |
 | [Favicon (SVG)](visual-previews/branding/favicon-svg.md) | [favicon.svg](assets/branding/favicon.svg) |
+| [Github banner dark (PNG)](visual-previews/branding/github-banner-dark-png.md) | [github-banner-dark.png](assets/branding/github-banner-dark.png) |
+| [Github banner dark (SVG)](visual-previews/branding/github-banner-dark-svg.md) | [github-banner-dark.svg](assets/branding/github-banner-dark.svg) |
+| [Github banner light (PNG)](visual-previews/branding/github-banner-light-png.md) | [github-banner-light.png](assets/branding/github-banner-light.png) |
+| [Github banner light (SVG)](visual-previews/branding/github-banner-light-svg.md) | [github-banner-light.svg](assets/branding/github-banner-light.svg) |
 | [Github banner (SVG)](visual-previews/branding/github-banner-svg.md) | [github-banner.svg](assets/branding/github-banner.svg) |
 | [WTF lockup dark (PNG)](visual-previews/branding/wtf-lockup-dark-png.md) | [wtf-lockup-dark.png](assets/branding/wtf-lockup-dark.png) |
 | [WTF lockup dark (SVG)](visual-previews/branding/wtf-lockup-dark-svg.md) | [wtf-lockup-dark.svg](assets/branding/wtf-lockup-dark.svg) |

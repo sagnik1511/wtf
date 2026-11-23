@@ -186,12 +186,17 @@ def visual_previews(names, root=ROOT):
                     "",
                 ]
             )
-        elif name.startswith("docs/assets/branding/") and any(
-            x in name for x in ("-light.", "-dark.")
-        ):
+        elif (
+            name.startswith("docs/assets/branding/")
+            and any(x in name for x in ("-light.", "-dark."))
+        ) or name.endswith(("github-banner.png", "github-banner.svg")):
             for theme in ("light", "dark"):
-                variant = name.replace("-light.", f"-{theme}.").replace(
-                    "-dark.", f"-{theme}."
+                variant = (
+                    f"docs/assets/branding/github-banner-{theme}{Path(name).suffix}"
+                    if name.endswith(("github-banner.png", "github-banner.svg"))
+                    else name.replace("-light.", f"-{theme}.").replace(
+                        "-dark.", f"-{theme}."
+                    )
                 )
                 body.append(
                     f'<img class="brand-on-{theme} visual-brand-preview" src="{href(variant)}" alt="{html.escape(title, quote=True)}" />'
@@ -199,7 +204,7 @@ def visual_previews(names, root=ROOT):
             body.extend(
                 [
                     "",
-                    "Logo ink follows the selected surface. The original link keeps the named variant.",
+                    "Artwork follows the selected site theme. The original link keeps the named export.",
                     "",
                 ]
             )
@@ -220,13 +225,6 @@ def visual_previews(names, root=ROOT):
                 else ""
             )
             body.extend([f"![{title}]({href(name)}){extra}", ""])
-            if name.endswith(("github-banner.png", "github-banner.svg")):
-                body.extend(
-                    [
-                        "The GitHub banner is fixed brand artwork; its chosen background and logo colors do not change with the interface palette.",
-                        "",
-                    ]
-                )
             if name.endswith(("viewer/themes.svg", "viewer/day-night.svg")):
                 body.extend(
                     [

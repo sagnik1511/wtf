@@ -79,21 +79,23 @@ class DocumentationSiteTests(unittest.TestCase):
         text = "[Web](https://example.com/a?q=1#anchor) [Section](#section)"
         self.assertEqual(self.render(text), text)
 
-    def test_home_banner_and_symbol_pair_keep_motion_reduced_motion_safe(self):
+    def test_home_banner_is_static_and_header_motion_assets_remain_safe(self):
         root = Path(__file__).resolve().parents[1]
         home = (root / "docs/index.md").read_text()
-        self.assertEqual(home.count('<picture class="site-banner">'), 1)
-        self.assertIn('srcset="assets/branding/github-banner.svg"', home)
-        self.assertIn('src="assets/github-banner.png"', home)
+        self.assertEqual(home.count('<picture class="site-banner '), 2)
+        for theme in ("light", "dark"):
+            self.assertIn(f'class="site-banner brand-on-{theme}"', home)
+            self.assertIn(f'srcset="assets/branding/github-banner-{theme}.svg"', home)
+            self.assertIn(f'src="assets/branding/github-banner-{theme}.png"', home)
         self.assertIn('width="1280" height="640"', home)
         self.assertNotIn('class="brand-lockup', home)
         self.assertIn('class="home-hero"', home)
-        self.assertIn('class="hero-motion"', home)
+        self.assertNotIn('class="hero-motion"', home)
         ns = {"s": "http://www.w3.org/2000/svg"}
         for theme, ink in (("light", "#163b2a"), ("dark", "#def3e5")):
             name = f"wtf-lockup-motion-{theme}.svg"
             self.assertNotIn(name, home)
-            self.assertIn(f"wtf-symbol-motion-{theme}.svg", home)
+            self.assertNotIn(f"wtf-symbol-motion-{theme}.svg", home)
             svg = ET.parse(root / "docs/assets/branding" / name).getroot()
             style = svg.find("s:style", ns).text
             self.assertIn(ink, style)
@@ -114,6 +116,42 @@ class DocumentationSiteTests(unittest.TestCase):
             "viewer/index.html",
         ):
             self.assertNotIn("wtf-lockup-motion", (root / name).read_text())
+
+    def test_banner_themes_preserve_geometry_and_header_uses_reduced_motion_safe_symbols(
+        self,
+    ):
+        root = Path(__file__).resolve().parents[1]
+        ns = "{http://www.w3.org/2000/svg}"
+        variants = [
+            ET.parse(root / f"docs/assets/branding/github-banner-{theme}.svg").getroot()
+            for theme in ("light", "dark")
+        ]
+        self.assertEqual(variants[0].get("viewBox"), variants[1].get("viewBox"))
+        self.assertEqual(
+            [e.get("d") for e in variants[0].iter(ns + "path")],
+            [e.get("d") for e in variants[1].iter(ns + "path")],
+        )
+        self.assertIn("#163b2a", ET.tostring(variants[0], encoding="unicode"))
+        self.assertIn("#def3e5", ET.tostring(variants[1], encoding="unicode"))
+        partial = (root / "docs/overrides/partials/logo.html").read_text()
+        for theme in ("light", "dark"):
+            png = (
+                root / f"docs/assets/branding/github-banner-{theme}.png"
+            ).read_bytes()
+            self.assertEqual(png[:8], b"\x89PNG\r\n\x1a\n")
+            self.assertEqual(
+                (int.from_bytes(png[16:20], "big"), int.from_bytes(png[20:24], "big")),
+                (1280, 640),
+            )
+            self.assertIn(f"wtf-symbol-motion-{theme}.svg", partial)
+            self.assertIn(f"wtf-symbol-{theme}.png", partial)
+            symbol = (
+                root / f"docs/assets/branding/wtf-symbol-motion-{theme}.svg"
+            ).read_text()
+            self.assertIn("prefers-reduced-motion:no-preference", symbol)
+        css = (root / "docs/stylesheets/documentation.css").read_text()
+        self.assertIn(".site-banner.brand-on-dark", css)
+        self.assertIn("[data-md-color-scheme='slate'] .site-banner.brand-on-dark", css)
 
     def test_structural_figures_have_embedded_theme_palettes(self):
         root = Path(__file__).resolve().parents[1]
@@ -353,6 +391,28 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertIn("brand-on-light", logo)
             self.assertIn("brand-on-dark", logo)
             self.assertIn("Open original file", logo)
+
+    def test_original_banner_previews_also_follow_the_selected_site_palette(self):
+        # Keep documentation tooling lazy for Python-only test discovery.
+        # pylint: disable=import-outside-toplevel
+        from work.docs_access import visual_previews, preview_source
+
+        names = [
+            "docs/assets/github-banner.png",
+            "docs/assets/branding/github-banner.svg",
+        ]
+        names += [
+            f"docs/assets/branding/github-banner-{theme}.{extension}"
+            for theme in ("light", "dark")
+            for extension in ("svg", "png")
+        ]
+        previews = visual_previews(names)
+        for name in names[:2]:
+            body = previews[preview_source(name)]
+            for theme in ("light", "dark"):
+                self.assertIn(f"brand-on-{theme}", body)
+                self.assertIn(f"github-banner-{theme}{Path(name).suffix}", body)
+            self.assertIn("Open original file", body)
 
     def test_built_link_audit_rejects_orphan_pages_and_follows_index_hubs(self):
 

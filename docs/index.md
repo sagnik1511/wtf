@@ -3,21 +3,15 @@
 [Complete documentation directory](directory.md) · [All visuals](visuals.md) · [Homepage click paths](access-map.md)
 
 <div class="home-hero">
-<picture class="site-banner">
-  <source srcset="assets/branding/github-banner.svg" type="image/svg+xml" />
-  <img src="assets/github-banner.png" width="1280" height="640" alt="WTF — Wildlife Trial Framework. Reinforcement learning in configurable environments with independent agents, multiple species and saved playback." fetchpriority="high" />
-</picture>
-  <div class="hero-motion">
-    <picture class="brand-on-light">
-      <source srcset="assets/branding/wtf-symbol-motion-light.svg" type="image/svg+xml" />
-      <img src="assets/branding/wtf-symbol-light.png" width="192" height="192" alt="WTF environment loop, circulating around a fixed window" />
-    </picture>
-    <picture class="brand-on-dark">
-      <source srcset="assets/branding/wtf-symbol-motion-dark.svg" type="image/svg+xml" />
-      <img src="assets/branding/wtf-symbol-dark.png" width="192" height="192" alt="WTF environment loop, circulating around a fixed window" />
-    </picture>
-    <p>Observe. Act. Learn.</p>
-  </div>
+  <picture class="site-banner brand-on-light">
+    <source srcset="assets/branding/github-banner-light.svg" type="image/svg+xml" />
+    <img src="assets/branding/github-banner-light.png" width="1280" height="640" alt="WTF — Wildlife Trial Framework. Reinforcement learning in configurable environments with independent agents, multiple species and saved playback." fetchpriority="high" />
+  </picture>
+  <picture class="site-banner brand-on-dark">
+    <source srcset="assets/branding/github-banner-dark.svg" type="image/svg+xml" />
+    <img src="assets/branding/github-banner-dark.png" width="1280" height="640" alt="WTF — Wildlife Trial Framework. Reinforcement learning in configurable environments with independent agents, multiple species and saved playback." fetchpriority="high" />
+  </picture>
+
 </div>
 
 WTF is a configurable reinforcement learning simulation framework. Animals have private

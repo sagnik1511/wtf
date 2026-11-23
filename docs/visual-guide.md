@@ -122,8 +122,8 @@ adapts to system light/dark preference. The live viewer has its own theme toggle
 separate from simulated sunlight.
 
 The project symbol stays to the left of the shared documentation header title
-on every page, including narrow layouts. It is a home link and uses the matching
-light/dark logo. The landing-page hero uses the static forest banner in both
-themes, beside a smaller theme-aware animated symbol. On narrow screens these
-stack into a compact layout. The symbol and the viewer's recording-loading
-indicator respect reduced-motion preferences.
+on every page, including narrow layouts. It is an animated home link and uses the matching
+light/dark symbol. The landing-page banner switches between forest-on-sage and
+pale-mint-on-forest variants with the site toggle and scales to narrow screens.
+The header home-link symbol and the viewer's recording-loading indicator
+respect reduced-motion preferences.

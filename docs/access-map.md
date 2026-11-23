@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **304 public documentation pages**, **116 visual files**
+Coverage: **308 public documentation pages**, **120 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -99,6 +99,10 @@ and **8 identical viewer branding copies**.
 | [Archived brain (GIF)](visual-previews/archived-brain-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Archived brain (GIF)](visual-previews/archived-brain-gif.md) |
 | [Favicon (PNG)](visual-previews/branding/favicon-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Favicon (PNG)](visual-previews/branding/favicon-png.md) |
 | [Favicon (SVG)](visual-previews/branding/favicon-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Favicon (SVG)](visual-previews/branding/favicon-svg.md) |
+| [Github banner dark (PNG)](visual-previews/branding/github-banner-dark-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner dark (PNG)](visual-previews/branding/github-banner-dark-png.md) |
+| [Github banner dark (SVG)](visual-previews/branding/github-banner-dark-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner dark (SVG)](visual-previews/branding/github-banner-dark-svg.md) |
+| [Github banner light (PNG)](visual-previews/branding/github-banner-light-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner light (PNG)](visual-previews/branding/github-banner-light-png.md) |
+| [Github banner light (SVG)](visual-previews/branding/github-banner-light-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner light (SVG)](visual-previews/branding/github-banner-light-svg.md) |
 | [Github banner (SVG)](visual-previews/branding/github-banner-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner (SVG)](visual-previews/branding/github-banner-svg.md) |
 | [WTF lockup dark (PNG)](visual-previews/branding/wtf-lockup-dark-png.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF lockup dark (PNG)](visual-previews/branding/wtf-lockup-dark-png.md) |
 | [WTF lockup dark (SVG)](visual-previews/branding/wtf-lockup-dark-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF lockup dark (SVG)](visual-previews/branding/wtf-lockup-dark-svg.md) |
@@ -326,6 +330,10 @@ and **8 identical viewer branding copies**.
 | --- | --- |
 | `assets/branding/favicon.png` | [Home](index.md) → [All visuals](visuals.md) → [favicon.png](assets/branding/favicon.png) |
 | `assets/branding/favicon.svg` | [Home](index.md) → [All visuals](visuals.md) → [favicon.svg](assets/branding/favicon.svg) |
+| `assets/branding/github-banner-dark.png` | [Home](index.md) → [All visuals](visuals.md) → [github-banner-dark.png](assets/branding/github-banner-dark.png) |
+| `assets/branding/github-banner-dark.svg` | [Home](index.md) → [All visuals](visuals.md) → [github-banner-dark.svg](assets/branding/github-banner-dark.svg) |
+| `assets/branding/github-banner-light.png` | [Home](index.md) → [All visuals](visuals.md) → [github-banner-light.png](assets/branding/github-banner-light.png) |
+| `assets/branding/github-banner-light.svg` | [Home](index.md) → [All visuals](visuals.md) → [github-banner-light.svg](assets/branding/github-banner-light.svg) |
 | `assets/branding/github-banner.svg` | [Home](index.md) → [All visuals](visuals.md) → [github-banner.svg](assets/branding/github-banner.svg) |
 | `assets/branding/wtf-lockup-dark.png` | [Home](index.md) → [All visuals](visuals.md) → [wtf-lockup-dark.png](assets/branding/wtf-lockup-dark.png) |
 | `assets/branding/wtf-lockup-dark.svg` | [Home](index.md) → [All visuals](visuals.md) → [wtf-lockup-dark.svg](assets/branding/wtf-lockup-dark.svg) |
