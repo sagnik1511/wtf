@@ -75,7 +75,8 @@ Enable a top-level population-learning block:
 "consequence_learning": {
   "enabled": true,
   "max_contexts": 512,
-  "horizon_steps": 16
+  "horizon_steps": 16,
+  "update_schedule": "continuous"
 }
 ```
 
@@ -118,11 +119,41 @@ real world's knowledge. Local histories and incomplete windows reset between
 episodes; the species tables survive independently of champion selection and
 `--no-chain-brains`.
 
+## Publication timing
+
+`update_schedule` defaults to `continuous`: finished outcome windows update the
+predictor during training. Choose `episode` to collect the same bounded evidence
+while keeping the published predictor frozen until the next training episode's
+first observations:
+
+```sh
+.venv/bin/python -m wtf run seaside_social --runs 3 --seed 100 \
+  --consequence-update-schedule episode --progress
+```
+
+The CLI override applies to fresh experiments with consequence learning enabled;
+`--resume` restores its saved schedule. Local witness inputs and individual
+policy learning keep their existing cadence. Collection still uses rolling
+horizon windows, rather than whole-episode trajectories. The first episode has
+unknown estimates unless compatible population knowledge was imported.
+
+Episode mode lazily copies a species table on its first new evidence, keeping
+published rows separate from staged updates. This bounds staging by one extra
+capacity-limited table per updated species. Changing the schedule does not change
+input width or require different policy weights. Evaluation and random modes
+neither collect evidence nor publish staged training evidence at episode changes;
+that evidence remains available for a later training continuation.
+
 ## Save, restore and reuse
 
 Recovery checkpoints include the species tables **once**, plus the short personal
 witness histories and pending outcome windows needed for exact continuation.
 No knowledge table is copied into each animal's brain checkpoint or champion.
+Continuous mode retains version-1 model state. Episode mode uses version-2
+recovery state with both published and staged tables, so interruption does not
+publish evidence early or lose it. Completed aggregate exports remain version 1
+and include finished-window evidence from the final episode without changing
+that episode's recorded predictions. Either schedule accepts compatible exports.
 
 A completed CLI experiment also writes one `consequences.json.xz` beside its
 summary. This is a compressed aggregate table with physical contracts, not full
@@ -181,7 +212,10 @@ and find **Collective learning**:
 Charts show the recorded sample step, evidence through opacity/tooltips and
 unknown contexts explicitly. They update when replay reaches a new diagnostic
 sample, remain fixed while paused and follow backward seeking. There is no
-independent animation timer. They read saved values only, with no future model
+independent animation timer. The panel labels the configured publication mode.
+In episode mode, bars may change as the animal's sampled context changes even
+though the underlying predictor stays frozen throughout that episode. They read
+saved values only, with no future model
 state or omniscient reconstruction from board positions. Both themes use the
 shared inspector palette. Older recordings without these inputs omit the panel.
 

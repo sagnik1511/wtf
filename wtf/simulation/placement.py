@@ -2,6 +2,7 @@
 
 
 def zone(position, bounds):
+    """Resolve the configured placement zone."""
     x, y = position
     left, top, right, bottom = bounds
     if left < x < right and top < y < bottom:
@@ -12,6 +13,7 @@ def zone(position, bounds):
 
 
 def resource_pools(free, placement):
+    """Build the eligible resource placement pools."""
     bounds = placement["enclosure_bounds"]
     left, top, right, bottom = bounds
     width = placement["resources"]["boundary_width"]
@@ -31,12 +33,26 @@ def resource_pools(free, placement):
 
 
 def resource_counts(count, rules):
+    """Compute the resource counts assigned to placement pools."""
     near = int(count * rules["boundary_fraction"] + 0.5)
     inside = int(near * rules["inside_fraction"] + 0.5)
     return {"inside": inside, "outside": near - inside, "far": count - near}
 
 
 def validate_placement(config, unavailable):
+    """Validate the configured animal and resource placement rules."""
+
+    # This import is deferred until the operation runs, after both modules have
+    # initialized.
+    # pylint: disable=cyclic-import
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     from wtf.config import obj, num, fail
 
     p = config["placement"]

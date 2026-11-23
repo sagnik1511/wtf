@@ -1,12 +1,36 @@
 """Shared gradient clipping and per-agent Adam optimizer state."""
 
 import math
+from typing import Any
 from wtf.native import kernels
 from wtf.native.numeric import Float32
 
 
 class AdamOptimizer:
+    # Concrete brain constructors own these independent per-animal values.
+    """Share Adam update logic while concrete brains own optimizer state."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-few-public-methods
+
+    moments: list
+    variances: list
+    network: Any
+    config: dict
+    # A concrete brain initializes its own counter; this also exposes the mixin
+    # default to static analysis of the augmented assignment below.
+    updates: int = 0
+
     def _adam_step(self, gradients, count):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         if kernels.native is not None:
             rows = [
                 (

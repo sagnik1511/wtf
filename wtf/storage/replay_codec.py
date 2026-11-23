@@ -1,8 +1,9 @@
 """Chunk-local keyframes and lossless sparse field updates; no simulation logic."""
 
-from wtf.native import kernels
 import copy
 import math
+from wtf.native import kernels
+
 
 CODEC = "wtf-delta-v1"
 ANIMAL_FIELDS = [
@@ -37,6 +38,12 @@ RESOURCE_FIELDS = ["x", "y", "quantity"]
 
 
 def clone(value):
+    """Copy a JSON-compatible replay value into independent storage."""
+
+    # The optional CPython API is checked by its wrapper and native/reference
+    # equivalence tests.
+    # pylint: disable=c-extension-no-member
+
     if kernels.available("clone_tree"):
         result = kernels.native.clone_tree(value)
         if result is not NotImplemented:
@@ -45,6 +52,12 @@ def clone(value):
 
 
 def same(a, b):
+    """Compare replay values using the codec's exact-value convention."""
+
+    # The optional CPython API is checked by its wrapper and native/reference
+    # equivalence tests.
+    # pylint: disable=c-extension-no-member
+
     if kernels.available("same_tree"):
         result = kernels.native.same_tree(a, b)
         if result is not NotImplemented:
@@ -62,6 +75,7 @@ def same(a, b):
 
 
 def mapping_delta(old, new):
+    """Build the changed-field representation between two mappings."""
     patch = {}
     changed = {k: v for k, v in new.items() if k not in old or not same(old[k], v)}
     removed = [k for k in old if k not in new]
@@ -73,14 +87,22 @@ def mapping_delta(old, new):
 
 
 def entity_key(record, kind):
+    """Return the stable identity key used by an entity channel."""
     return record["id"] if kind == "animals" else (record["x"], record["y"])
 
 
 def normalize_key(key, kind):
+    """Normalize an entity key for cross-language replay compatibility."""
     return key if kind == "animals" else tuple(key)
 
 
 def entity_delta(old, new, fields, kind):
+    """Encode changed, born and removed entities relative to a prior frame."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     previous = {entity_key(r, kind): r for r in old}
     current = {entity_key(r, kind): r for r in new}
     if len(previous) != len(old) or len(current) != len(new):
@@ -126,11 +148,15 @@ class DeltaEncoder:
 
     @staticmethod
     def header():
-        return dict(
-            codec=CODEC, animal_fields=ANIMAL_FIELDS, resource_fields=RESOURCE_FIELDS
-        )
+        """Build the replay header containing shared static metadata."""
+        return {
+            "codec": CODEC,
+            "animal_fields": ANIMAL_FIELDS,
+            "resource_fields": RESOURCE_FIELDS,
+        }
 
     def encode(self, frame):
+        """Encode one frame as an initial value or a delta from the previous frame."""
         previous, self.previous = self.previous, frame
         if previous is None:
             return frame
@@ -165,12 +191,19 @@ class DeltaEncoder:
 
 
 def apply_mapping(target, patch):
+    """Apply a changed-field mapping to the current replay state."""
     for key in patch.get("drop", []):
         target.pop(key, None)
     target.update(clone(patch.get("set", {})))
 
 
 def apply_entities(records, patch, fields, kind):
+    """Apply entity additions, changes and removals to replay state."""
+
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+
     entities = {entity_key(r, kind): r for r in records}
     for key in patch.get("drop", []):
         entities.pop(normalize_key(key, kind))
@@ -200,6 +233,12 @@ def apply_entities(records, patch, fields, kind):
 
 
 def iter_decode(payload):
+    """Yield complete frames from a replay header and subsequent deltas."""
+
+    # Explicit channel keys keep frame validation aligned with the matching header
+    # field table.
+    # pylint: disable=consider-using-dict-items
+
     if isinstance(payload, list):
         yield from payload
         return
@@ -241,9 +280,11 @@ def iter_decode(payload):
 
 
 def decode_chunk(payload):
+    """Decode one independently addressable replay chunk."""
     return list(iter_decode(payload))
 
 
 def encode_chunk(frames):
+    """Encode a replay chunk while retaining its exact decoded values."""
     encoder = DeltaEncoder()
     return dict(encoder.header(), frames=[encoder.encode(frame) for frame in frames])

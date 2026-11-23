@@ -1,5 +1,13 @@
 """Independent actor batches and reset GRPO worlds preserve exact state."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -118,6 +126,11 @@ class TrialReuseTests(unittest.TestCase):
                 self.assertEqual(e.world.checkpoint(), before)
 
     def test_frozen_model_qualification_is_once_per_group(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.batched import policy_plan
 
         world, brains = policy_fixtures.GRPOTests().encounter()
@@ -130,6 +143,11 @@ class TrialReuseTests(unittest.TestCase):
             self.assertEqual(qualified.call_count, 1)
 
     def test_trials_with_birth_mutation_match_and_do_not_mutate_real_parents(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from tests.reproduction_support import force_action
         from wtf.learning.mutation import mutate_birth
 
@@ -167,6 +185,11 @@ class TrialReuseTests(unittest.TestCase):
 )
 class IndependentBatchTests(unittest.TestCase):
     def test_native_models_shapes_edits_signed_zero_and_error_cleanup(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         rng = random.Random(4)
         nets = [
             MLP(hidden, 3, i, inputs=n)
@@ -175,7 +198,7 @@ class IndependentBatchTests(unittest.TestCase):
         observations = [
             tuple(rng.random() for _ in range(net.sizes[0])) for net in nets
         ]
-        for turn in range(3):
+        for _turn in range(3):
             jobs = [(net.layers, o) for net, o in zip(nets, observations)]
             expected = [net.predict(o) for net, o in zip(nets, observations)]
             self.assertEqual(
@@ -225,16 +248,16 @@ class IndependentBatchTests(unittest.TestCase):
         for kind in KINDS:
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as folder:
                 c = environment(kind, 1)
-                c["recording"] = dict(
-                    enabled=True,
-                    frames_per_chunk=2,
-                    frame_every_steps=1,
-                    diagnostics_every_steps=1,
-                    record_activations=True,
-                    compression="xz",
-                    compression_level=1,
-                    encoding="binary",
-                )
+                c["recording"] = {
+                    "enabled": True,
+                    "frames_per_chunk": 2,
+                    "frame_every_steps": 1,
+                    "diagnostics_every_steps": 1,
+                    "record_activations": True,
+                    "compression": "xz",
+                    "compression_level": 1,
+                    "encoding": "binary",
+                }
                 e = Experiment(c)
                 reference = Experiment.restore(e.checkpoint())
                 recorders = [
@@ -278,6 +301,11 @@ class IndependentBatchTests(unittest.TestCase):
                 )
 
     def test_one_native_entry_for_multiple_independent_actors(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         e = Experiment(environment("ppo", 0))
         with (
             patch.object(

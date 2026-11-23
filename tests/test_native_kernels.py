@@ -1,5 +1,16 @@
 """Native/reference arithmetic, backend switching and malformed-input checks."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 from array import array
 import copy
 import json
@@ -12,18 +23,19 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-
 from wtf.native import kernels
 from wtf.native.numeric import Float32, precision_scope
 from wtf.learning.ppo import MLP
 from wtf.experiment.runner import Experiment
-from tests.test_numeric_precision import KINDS, settings
-from tests.test_simulation import config
+
 
 try:
     from wtf.native import _kernels
 except ImportError:
     _kernels = None
+
+from tests.test_numeric_precision import KINDS, settings
+from tests.test_simulation import config
 
 
 @unittest.skipIf(
@@ -33,6 +45,11 @@ except ImportError:
 class NativeKernelTests(unittest.TestCase):
     def test_float_reductions_match_compensated_python_sum(self):
         # The old left-to-right native reduction returned zero for this input.
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         cases = (
             [1e16, 1.0, -1e16],
             [1e16, 1.0, 1.0, -1e16],
@@ -63,6 +80,10 @@ class NativeKernelTests(unittest.TestCase):
             self.assertEqual(network.predict((1e16, 1.0, -1e16)), [1.0, 1.0])
 
     def test_dense_forward_ranges_and_gradients_are_bit_exact(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         rng = random.Random(123)
         for width in (20, 32):
             for hidden in ([], [4], [5, 3]):
@@ -123,6 +144,17 @@ class NativeKernelTests(unittest.TestCase):
                         b = Experiment.restore(json.loads(json.dumps(b.checkpoint())))
 
     def test_adam_and_sgd_match_reference_with_nonzero_momentum_and_clipping(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         from wtf.learning.brains import create_brain
 
         rng = random.Random(39)
@@ -151,6 +183,11 @@ class NativeKernelTests(unittest.TestCase):
         self.assertEqual(p, expected)
 
     def test_invalid_dimensions_and_buffer_types_fail_before_writes(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         f = Float32([1.0, 2.0, 3.0, 4.0])
         d = array("d", [0.0] * 4)
         for call in (
@@ -184,6 +221,11 @@ class NativeKernelTests(unittest.TestCase):
             self.assertEqual(d, array("d", [0.0] * 4))
 
     def test_recorded_binary_frames_match_through_chunk_boundaries(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.storage.recording import Recorder, RecordingStore
         from wtf.storage.replay_io import load_chunk
 
@@ -224,7 +266,7 @@ class NativeKernelTests(unittest.TestCase):
         with precision_scope("float64"):
             a = MLP([3], 2, 7)
         with patch.object(kernels, "native") as native:
-            out, tape = a.forward((0.1,) * 20)
+            _out, tape = a.forward((0.1,) * 20)
             a.accumulate_gradient(tape, [0.1] * 3, a.zeros())
             a.predict((0.1,) * 20)
             self.assertEqual(native.mock_calls, [])
@@ -244,6 +286,7 @@ assert '3.12–3.13' in status()['fallback_reason']
                 env=dict(os.environ, WTF_KERNELS=mode),
                 capture_output=True,
                 text=True,
+                check=False,
             )
             if mode == "auto":
                 self.assertEqual(result.returncode, 0, result.stderr)
@@ -258,6 +301,7 @@ assert '3.12–3.13' in status()['fallback_reason']
             env=dict(os.environ, WTF_KERNELS="python"),
             capture_output=True,
             text=True,
+            check=False,
         )
         self.assertEqual(p.returncode, 0, p.stderr)
 
@@ -288,6 +332,7 @@ assert status()['backend']=='python'
             env=dict(os.environ, WTF_KERNELS="auto"),
             capture_output=True,
             text=True,
+            check=False,
         )
         self.assertEqual(p.returncode, 0, p.stderr)
         p = subprocess.run(
@@ -295,6 +340,7 @@ assert status()['backend']=='python'
             env=dict(os.environ, WTF_KERNELS="native"),
             capture_output=True,
             text=True,
+            check=False,
         )
         self.assertNotEqual(p.returncode, 0)
         self.assertIn("work.build_native", p.stderr)

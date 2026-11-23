@@ -1,5 +1,8 @@
 """Exact LSTM cell kernels, controller continuation and recorded-playback parity."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 from array import array
 from contextlib import contextmanager
 import copy
@@ -41,6 +44,13 @@ SUPPORTED = kernels.available("lstm_step") and kernels.available("lstm_backward"
 @unittest.skipUnless(SUPPORTED, "Build the optional LSTM kernels first")
 class NativeLSTMTests(unittest.TestCase):
     def test_forward_tapes_backward_and_nonzero_gradient_accumulation_are_exact(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+
         for h in (1, 2, 8, 16, 128):
             c = settings("lstm_ppo")
             c.update(recurrent_size=h, observation_version=4, observation_top_k=3)
@@ -125,6 +135,11 @@ class NativeLSTMTests(unittest.TestCase):
             self.assertEqual(a.diagnostics(x, True), expected)
 
     def test_both_individual_entry_points_can_be_missing_and_fp64_falls_back(self):
+
+        # The callback is consumed synchronously within this iteration; it never
+        # escapes the loop.
+        # pylint: disable=cell-var-from-loop
+
         c = settings("lstm_ppo")
         n = LSTMNetwork(c, 2, 7)
         x = (0.1,) * 20
@@ -161,6 +176,11 @@ class NativeLSTMTests(unittest.TestCase):
             legacy.backward(tape, [1.0, 0.0, 0.0], [0.0] * 4, legacy.zeros())
 
     def test_invalid_native_calls_do_not_mutate_gradients(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         n = LSTMNetwork(settings("lstm_ppo"), 2, 7)
         x = (0.1,) * 20
         memory = [0.2] * 4
@@ -214,12 +234,12 @@ class NativeLSTMTests(unittest.TestCase):
 
     def test_world_replay_chunks_and_restoration_match_reference(self):
         c = environment("lstm_ppo")
-        c["recording"] = dict(
-            enabled=True,
-            frame_every_steps=1,
-            frames_per_chunk=3,
-            diagnostics_every_steps=2,
-        )
+        c["recording"] = {
+            "enabled": True,
+            "frame_every_steps": 1,
+            "frames_per_chunk": 3,
+            "diagnostics_every_steps": 2,
+        }
         a = Experiment(c)
         b = Experiment(c)
         with tempfile.TemporaryDirectory() as folder:

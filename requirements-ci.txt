@@ -1,0 +1,5 @@
+# Development/CI only; keep local review and Actions on the same tool versions.
+black==24.10.0
+pylint==4.1.4
+build==1.6.1
+twine==7.0.0

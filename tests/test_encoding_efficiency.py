@@ -1,5 +1,8 @@
 """Per-save reuse, bounded payloads and unchanged public checkpoint contracts."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from pathlib import Path
 import tempfile
@@ -16,6 +19,10 @@ from wtf.storage.retention import ArtifactRetention
 
 class EncodingEfficiencyTests(unittest.TestCase):
     def test_periodic_gate_and_export_encode_each_snapshot_once(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         e = Experiment(environment("ppo", 0))
         unique = {
             id(entry["model"])

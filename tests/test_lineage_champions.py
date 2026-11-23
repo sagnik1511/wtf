@@ -1,5 +1,8 @@
 """Pedigree deduplication, proven generations, independent pools and persistence."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -35,6 +38,11 @@ def configured(kind="q_network"):
 
 
 def body(i, species="predator", age=3, kills=1, food=2, parents=(-1, -1), sex="female"):
+
+    # Keep setup, action and assertions together as one regression scenario.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+
     return Animal(
         i,
         species,
@@ -76,6 +84,11 @@ class LineageTests(unittest.TestCase):
                 self.assertEqual(metadata, saved)
 
     def test_champions_materialize_lineage_metadata_only_for_winners(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from unittest.mock import patch
 
         e = Experiment(configured())
@@ -101,6 +114,11 @@ class LineageTests(unittest.TestCase):
             )
 
     def test_fractional_food_accumulation_continues_exactly(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import random
 
         rng = random.Random(19)
@@ -210,6 +228,14 @@ class LineageTests(unittest.TestCase):
                 self.assertEqual(pool, saved)
 
     def test_chaining_all_existing_algorithms_and_birth_generation_reset(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in (
             "q_network",
             "ppo",
@@ -304,6 +330,10 @@ class LineageTests(unittest.TestCase):
                 apply_brain_overrides(copy.deepcopy(c), ["prey=lineage"], root / "old")
 
     def test_selection_only_cli_overrides_and_validation(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         c = config()
         apply_champion_overrides(
             c, ["prey:male=food", "prey=lineage", "predator=lineage"]
@@ -347,6 +377,7 @@ class LineageTests(unittest.TestCase):
                 ],
                 capture_output=True,
                 text=True,
+                check=False,
             )
             self.assertEqual(p.returncode, 0, p.stderr)
             summary = json.loads(

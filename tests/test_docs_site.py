@@ -1,5 +1,13 @@
 """Documentation publication boundaries; optional docs tools stay out of runtime."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,7 +21,17 @@ from unittest.mock import patch
     importlib.util.find_spec("zensical"), "Install requirements-docs.txt"
 )
 class DocumentationSiteTests(unittest.TestCase):
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-public-methods
+
     def setUp(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work import docs_site
 
         self.site = docs_site
@@ -155,6 +173,11 @@ class DocumentationSiteTests(unittest.TestCase):
                 self.assertEqual(canonical.read_text(), "Canonical page")
 
     def test_built_link_audit_checks_prefix_anchors_and_picture_sources(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.check_docs_links import check_site
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -177,6 +200,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertTrue(any("missing target" in e for e in report["errors"]))
 
     def test_navigation_and_directory_cover_all_primary_guides(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.build_docs import load_config
 
         root = Path(__file__).resolve().parents[1]
@@ -216,6 +244,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertIn(source.relative_to(root / "docs").as_posix(), navigation)
 
     def test_click_routes_exclude_navigation_images_and_proof_page_links(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.docs_access import content_routes
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -248,6 +281,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertNotIn("figure.svg", parents)
 
     def test_visual_catalog_covers_variants_and_checks_runtime_copies(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.docs_access import visual_catalog, label
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -271,6 +309,11 @@ class DocumentationSiteTests(unittest.TestCase):
                 visual_catalog(names, root)
 
     def test_generated_visual_previews_use_pairs_and_real_edit_source(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.docs_access import visual_previews, preview_source
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -304,6 +347,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertIn("Open original file", logo)
 
     def test_built_link_audit_rejects_orphan_pages_and_follows_index_hubs(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.check_docs_links import check_site
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -366,6 +414,10 @@ class DocumentationSiteTests(unittest.TestCase):
                 self.assertIn("prefers-color-scheme: light", style, str(path))
 
     def test_daylight_boards_and_comparison_samples_select_real_palettes(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         root = Path(__file__).resolve().parents[1] / "docs/assets/viewer"
         ns = {"s": "http://www.w3.org/2000/svg"}
         day = ET.parse(root / "day-night.svg").getroot()
@@ -402,6 +454,11 @@ class DocumentationSiteTests(unittest.TestCase):
             document = ET.parse(path).getroot()
 
             def visit(element, viewport):
+
+                # The callback is consumed synchronously within this iteration; it
+                # never escapes the loop.
+                # pylint: disable=cell-var-from-loop
+
                 if element.tag == ns + "svg":
                     viewport = element
                 if element.tag == ns + "style" and "prefers-color-scheme" in (
@@ -448,6 +505,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertEqual(result, {"guide.md": docs / "guide.md"})
 
     def test_zensical_pages_and_readme_urls_preserve_legacy_destinations(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.build_docs import page_for
 
         for source, url in (
@@ -462,6 +524,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertEqual(page.file.dest_uri, url + "index.html")
 
     def test_zensical_output_is_included_in_link_and_route_audits(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.check_docs_links import check_site
         from work.docs_access import content_routes
 
@@ -489,6 +556,11 @@ class DocumentationSiteTests(unittest.TestCase):
                 content_routes(root, "https://example.com/wtf/")
 
     def test_staging_reuses_original_guides_and_preserves_edit_provenance(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.build_docs import prepare
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -510,7 +582,7 @@ class DocumentationSiteTests(unittest.TestCase):
                 ),
                 patch("work.docs_access.inventory", return_value=[]),
             ):
-                staged, config, pages = prepare(root)
+                staged, _config, pages = prepare(root)
             docs = root / ".cache/docs-build/docs"
             self.assertFalse((docs / "private.md").exists())
             self.assertIn("[Install](installation.md)", (docs / "guide.md").read_text())
@@ -524,6 +596,11 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertTrue(staged.is_file())
 
     def test_source_reference_filename_and_css_variable_urls(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.check_docs_links import check_site
 
         with tempfile.TemporaryDirectory() as temporary:

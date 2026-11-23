@@ -6,7 +6,31 @@ on:
 permissions:
   contents: read
 jobs:
+  python-quality:
+    name: Python ${{ matrix.check }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [black, pylint]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-ci.txt
+      - name: Install pinned Python quality tools
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt -r requirements-ci.txt
+      - name: Check Python source
+        run: .venv/bin/python -m work.check_ci --${{ matrix.check }}
   portable:
+    needs: python-quality
     # Keep interpreter availability stable; ubuntu-latest can move ahead of old Python builds.
     runs-on: ubuntu-24.04
     strategy:
@@ -22,11 +46,12 @@ jobs:
       - name: Create isolated build environment
         run: |
           python -m venv .venv
-          .venv/bin/python -m pip install --upgrade pip build twine
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements-ci.txt
       - name: Build and validate distribution metadata
         run: |
           .venv/bin/python -m build
-          .venv/bin/python -m twine check dist/*
+          .venv/bin/python -m twine check --strict dist/*
       - name: Install wheel away from the checkout
         shell: bash
         run: |
@@ -44,6 +69,7 @@ jobs:
           cd "$RUNNER_TEMP/source-work"
           "$RUNNER_TEMP/source-env/bin/python" -I "$GITHUB_WORKSPACE/work/check_installation.py"
   native:
+    needs: python-quality
     strategy:
       fail-fast: false
       matrix:
@@ -65,9 +91,10 @@ jobs:
           WTF_KERNELS=python .venv/bin/python -m unittest discover
       - name: Build opt-in native wheel
         run: |
-          .venv/bin/python -m pip install --upgrade pip build twine
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -r requirements-ci.txt
           WTF_BUILD_NATIVE=1 .venv/bin/python -m build --wheel
-          .venv/bin/python -m twine check dist/*.whl
+          .venv/bin/python -m twine check --strict dist/*.whl
       - name: Verify compiled installation and checkpoint restore
         shell: bash
         run: |

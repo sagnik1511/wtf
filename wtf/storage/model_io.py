@@ -29,7 +29,7 @@ def model_path(artifact_path, reference):
 def encode_model(model):
     """One canonical lossless model record, shared by gates and file writers."""
     buffer = io.BytesIO()
-    RecordWriter(buffer).write(dict(kind="champion_model", model=model))
+    RecordWriter(buffer).write({"kind": "champion_model", "model": model})
     payload = buffer.getvalue()
     return payload, hashlib.sha256(payload).hexdigest()
 
@@ -48,6 +48,7 @@ class ModelEncodings:
         self.bytes = 0
 
     def encoded(self, model):
+        """Encode an immutable model snapshot with export-local reuse."""
         key = id(model)
         previous = self.models.get(key)
         if key in self.payloads:
@@ -66,6 +67,7 @@ class ModelEncodings:
         return payload, digest
 
     def digest(self, model):
+        """Return the content digest for an immutable model snapshot."""
         previous = self.models.get(id(model))
         return bytes.fromhex(
             previous[1] if previous is not None else self.encoded(model)[1]
@@ -73,6 +75,7 @@ class ModelEncodings:
 
 
 def write_model(model, staging, pool, *, encoding=None):
+    """Write a model using the supported lossless weight representation."""
     payload, digest = (
         encode_model(model) if encoding is None else encoding.encoded(model)
     )
@@ -89,12 +92,12 @@ def write_model(model, staging, pool, *, encoding=None):
         target.parent.mkdir(parents=True, exist_ok=True)
         with lzma.open(target, "wb", preset=6) as stream:
             stream.write(payload)
-    return dict(
-        signature=model["signature"],
-        precision=model.get("precision", "float64"),
-        weights_file=f"../models/{digest}.bin.xz",
-        sha256=digest,
-    )
+    return {
+        "signature": model["signature"],
+        "precision": model.get("precision", "float64"),
+        "weights_file": f"../models/{digest}.bin.xz",
+        "sha256": digest,
+    }
 
 
 def publish_models(staging, pool):
@@ -108,6 +111,7 @@ def publish_models(staging, pool):
 
 
 def read_model(artifact_path, reference):
+    """Read a supported model representation and resolve shared weight data."""
     try:
         with lzma.open(model_path(artifact_path, reference), "rb") as stream:
             payload = stream.read(MAX_RECORD + len(MAGIC) + 5)

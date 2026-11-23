@@ -21,6 +21,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--frames-dir", type=Path, required=True)
     parser.add_argument("--light-frames-dir", type=Path)

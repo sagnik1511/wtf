@@ -15,17 +15,17 @@ from pathlib import Path
 from wtf.storage.replay_io import chunk_path, load_chunk
 from wtf.storage.replay_codec import DeltaEncoder
 
-DEFAULT_RECORDING = dict(
-    enabled=True,
-    frame_every_steps=1,
-    frames_per_chunk=64,
-    diagnostics_every_steps=10,
-    record_activations=True,
-    compression="xz",
-    compression_level=6,
-    encoding="binary",
-    record_last_episodes=-1,
-)
+DEFAULT_RECORDING = {
+    "enabled": True,
+    "frame_every_steps": 1,
+    "frames_per_chunk": 64,
+    "diagnostics_every_steps": 10,
+    "record_activations": True,
+    "compression": "xz",
+    "compression_level": 6,
+    "encoding": "binary",
+    "record_last_episodes": -1,
+}
 
 
 RECORDING_PROFILES = ("full", "compact", "training-only")
@@ -37,6 +37,11 @@ def settings(config, mode="train"):
     Evaluation/random runs retain the ordinary full recording options. Explicit
     recording.enabled=False and the CLI --no-record switch still disable capture.
     """
+
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+
     options = dict(DEFAULT_RECORDING, **config.get("recording", {}))
     profile = options.get("profile", "full")
     if profile not in RECORDING_PROFILES:
@@ -59,6 +64,7 @@ def settings(config, mode="train"):
 
 
 def write_json(path, value):
+    """Write human-readable JSON to the requested path."""
     temporary = path.with_suffix(path.suffix + ".tmp")
     with temporary.open("w") as handle:
         json.dump(value, handle, separators=(",", ":"), allow_nan=False)
@@ -67,23 +73,29 @@ def write_json(path, value):
 
 
 class Recorder:
+    """Stream saved world frames and sampled diagnostics into replay chunks."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, folder, config, mode):
         self.options = settings(config, mode)
         if not self.options["enabled"]:
             raise ValueError("Playback recording is disabled by the effective settings")
         self.folder = Path(folder) / "playback"
         self.folder.mkdir(parents=True, exist_ok=False)
-        self.manifest = dict(
-            recording_version=1,
-            name=config["name"],
-            mode=mode,
-            status="writing",
-            config=copy.deepcopy(config),
-            recording=self.options,
-            storage_compression=self.options["compression"],
-            storage_format=self.options["encoding"],
-            runs=[],
-        )
+        self.manifest = {
+            "recording_version": 1,
+            "name": config["name"],
+            "mode": mode,
+            "status": "writing",
+            "config": copy.deepcopy(config),
+            "recording": self.options,
+            "storage_compression": self.options["compression"],
+            "storage_format": self.options["encoding"],
+            "runs": [],
+        }
         self.stream = None
         self.run = None
         self.chunk_frames = 0
@@ -95,6 +107,7 @@ class Recorder:
         write_json(self.folder / "recording.json", self.manifest)
 
     def begin_run(self, experiment, metrics=None):
+        """Initialize recording state for the next selected episode."""
         if self.run is not None:
             self.end_run(experiment=None)
         total = experiment.config["experiment"]["runs"]
@@ -102,17 +115,17 @@ class Recorder:
         if last != -1 and experiment.run_index + 1 <= total - min(total, last):
             return False
         world = experiment.world
-        self.run = dict(
-            run=experiment.run_index + 1,
-            seed=world.seed,
-            brain_precision=experiment.brain_precision,
-            obstacles=sorted(world.obstacles),
-            chunk_count=0,
-            frame_count=0,
-            first_tick=world.tick,
-            last_tick=world.tick,
-            complete=experiment.finished_run,
-        )
+        self.run = {
+            "run": experiment.run_index + 1,
+            "seed": world.seed,
+            "brain_precision": experiment.brain_precision,
+            "obstacles": sorted(world.obstacles),
+            "chunk_count": 0,
+            "frame_count": 0,
+            "first_tick": world.tick,
+            "last_tick": world.tick,
+            "complete": experiment.finished_run,
+        }
         self.run["initialized_from"] = {
             s: {sex: m["provenance"] for sex, m in groups.items()}
             for s, groups in experiment.run_initial_models.items()
@@ -121,8 +134,17 @@ class Recorder:
         self.last_tick = self.last_diagnostic_tick = None
         self._publish()
         self.capture(experiment, force=True, metrics=metrics)
+        return None
 
     def _open_chunk(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         binary = self.options["encoding"] == "binary"
         name = f'run_{self.run["run"]:04d}_chunk_{self.run["chunk_count"]:06d}' + (
             ".bin" if binary else ".json"
@@ -141,11 +163,11 @@ class Recorder:
                     self.chunk_temporary,
                     "wb",
                     filters=[
-                        dict(
-                            id=lzma.FILTER_LZMA2,
-                            preset=self.options["compression_level"],
-                            dict_size=1 << 20,
-                        )
+                        {
+                            "id": lzma.FILTER_LZMA2,
+                            "preset": self.options["compression_level"],
+                            "dict_size": 1 << 20,
+                        }
                     ],
                 )
             else:
@@ -160,7 +182,7 @@ class Recorder:
                 )
             self.encoder = DeltaEncoder()
             self.binary_writer = RecordWriter(self.stream)
-            self.binary_writer.write(dict(kind="replay", delta=self.encoder.header()))
+            self.binary_writer.write({"kind": "replay", "delta": self.encoder.header()})
             self.chunk_frames = 0
             return
         self.binary_writer = None
@@ -170,11 +192,11 @@ class Recorder:
                 "wt",
                 encoding="utf-8",
                 filters=[
-                    dict(
-                        id=lzma.FILTER_LZMA2,
-                        preset=self.options["compression_level"],
-                        dict_size=1 << 20,
-                    )
+                    {
+                        "id": lzma.FILTER_LZMA2,
+                        "preset": self.options["compression_level"],
+                        "dict_size": 1 << 20,
+                    }
                 ],
             )
         else:
@@ -198,12 +220,19 @@ class Recorder:
         self.chunk_frames = 0
 
     def _commit_chunk(self):
+
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         if self.stream is None:
             return
         if self.binary_writer is None:
             self.stream.write("]}\n" if self.encoder else "]\n")
         else:
-            self.binary_writer.write(dict(kind="replay_end", frames=self.chunk_frames))
+            self.binary_writer.write(
+                {"kind": "replay_end", "frames": self.chunk_frames}
+            )
         self.stream.close()
         self.stream = None
         self.encoder = None
@@ -215,6 +244,12 @@ class Recorder:
         self._publish()
 
     def capture(self, experiment, force=False, metrics=None):
+        """Capture the current world frame and any due inspector samples."""
+
+        # Keyword dict construction deliberately detects duplicate keys in dynamic **
+        # expansions; a literal would silently overwrite them.
+        # pylint: disable=use-dict-literal
+
         if self.run is None:
             return False
         tick = experiment.world.tick
@@ -235,7 +270,7 @@ class Recorder:
             or tick - self.last_diagnostic_tick >= diagnostic_interval
         ):
             frame["diagnostics"] = {}
-            for i, a in experiment.world.animals.items():
+            for i, _a in experiment.world.animals.items():
                 b = experiment.brains[i]
                 o = experiment.observations[i]
                 diagnostic = (
@@ -261,6 +296,7 @@ class Recorder:
         return True
 
     def end_run(self, experiment=None):
+        """Commit the final recording chunk and close the episode."""
         if self.run is None:
             return
         if experiment is not None:
@@ -271,6 +307,7 @@ class Recorder:
         self.run = None
 
     def close(self, completed=True):
+        """Release this component's open output or reporting resources."""
         self.end_run()
         self.manifest["status"] = "complete" if completed else "interrupted"
         self._publish()
@@ -298,6 +335,7 @@ class RecordingStore:
         return folder
 
     def catalog(self):
+        """List the available saved artifacts with their metadata."""
         records = []
         for p in sorted(self.results.glob("*/playback/recording.json"), reverse=True):
             try:
@@ -305,25 +343,35 @@ class RecordingStore:
                 m = self.metadata(p.parent.parent.name)
                 if any(r["chunk_count"] for r in m["runs"]):
                     records.append(
-                        dict(
-                            id=p.parent.parent.name,
-                            name=m["name"],
-                            mode=m["mode"],
-                            status=m["status"],
-                            runs=len(m["runs"]),
-                        )
+                        {
+                            "id": p.parent.parent.name,
+                            "name": m["name"],
+                            "mode": m["mode"],
+                            "status": m["status"],
+                            "runs": len(m["runs"]),
+                        }
                     )
             except (OSError, ValueError, KeyError):
                 continue
         return records
 
     def metadata(self, recording_id):
+        """Read recording metadata without loading all replay chunks."""
         m = json.loads((self._folder(recording_id) / "recording.json").read_text())
         if m.get("recording_version") != 1:
             raise ValueError("Unsupported recording version")
         return m
 
     def analysis(self, recording_id, run):
+        """Load or compute the saved-recording behavior analysis."""
+
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         if type(run) is not int:
             raise ValueError("Run must be an integer")
         from wtf.inspection.analyze import analyze_recording
@@ -334,6 +382,14 @@ class RecordingStore:
 
     def movement(self, recording_id, run, frame_index):
         """Rebuild one prefix on demand; no stored grids or decoded-run cache."""
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+
         from wtf.inspection.movement import MovementCounts
 
         if type(run) is not int or type(frame_index) is not int or frame_index < 0:
@@ -356,6 +412,17 @@ class RecordingStore:
 
     def telemetry(self, recording_id, run, page):
         """At most 128 summaries, with four stat-validated cached pages."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+
         from wtf.inspection.telemetry import PAGE_SIZE, summarize
 
         if type(run) is not int or type(page) is not int or page < 0:
@@ -399,7 +466,12 @@ class RecordingStore:
                     points.append(summarize(manifest["config"], frame, previous))
                 previous = frame
             del frames
-        result = dict(page=page, page_size=PAGE_SIZE, start_frame=start, points=points)
+        result = {
+            "page": page,
+            "page_size": PAGE_SIZE,
+            "start_frame": start,
+            "points": points,
+        }
         with self._cache_lock:
             self.telemetry_cache[key] = copy.deepcopy(result)
             while len(self.telemetry_cache) > 4:
@@ -412,6 +484,11 @@ class RecordingStore:
         Existing CLI recordings already have metrics.csv. Standalone playback
         exports without that file are read one committed chunk at a time.
         """
+
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+
         if (
             type(run) is not int
             or type(max_points) is not int
@@ -432,14 +509,14 @@ class RecordingStore:
                 with metrics_path.open(newline="") as handle:
                     for row in csv.DictReader(handle):
                         if int(row["run"]) == run:
-                            yield dict(
-                                tick=int(row["tick"]),
-                                food=float(row["food"]),
-                                populations={
+                            yield {
+                                "tick": int(row["tick"]),
+                                "food": float(row["food"]),
+                                "populations": {
                                     name: int(row[f"{name}_population"])
                                     for name in manifest["config"]["species"]
                                 },
-                            )
+                            }
             else:
                 for index in range(entry["chunk_count"]):
                     frames = load_chunk(self.chunk(recording_id, run, index))
@@ -452,11 +529,11 @@ class RecordingStore:
             if not entry["first_tick"] <= metric["tick"] <= entry["last_tick"]:
                 continue
             # Store only chart values, never agents, events or diagnostics.
-            last = dict(
-                tick=metric["tick"],
-                food=metric["food"],
-                populations=metric["populations"],
-            )
+            last = {
+                "tick": metric["tick"],
+                "food": metric["food"],
+                "populations": metric["populations"],
+            }
             if count % stride == 0:
                 points.append(last)
             count += 1
@@ -468,6 +545,12 @@ class RecordingStore:
         return points
 
     def chunk(self, recording_id, run, index):
+        """Read one requested saved replay chunk."""
+
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+
         m = self.metadata(recording_id)
         if type(run) is not int or type(index) is not int:
             raise ValueError("Run and chunk must be integers")

@@ -1,5 +1,10 @@
 """Build public docs from existing guides without copying local research output."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 from pathlib import Path
 import html
 import json
@@ -112,6 +117,11 @@ def _replay_picture(match, origin, destination):
 
 def on_page_markdown(markdown, page, config, files):
     """Preserve checkout links and literal code; resolve website links in memory."""
+
+    # The callback keeps its caller's keyword signature; this branch does not consume
+    # every input.
+    # pylint: disable=unused-argument
+
     destination = page.file.src_uri
     origin = EXTRA_PAGES.get(destination, "docs/" + destination)
     sections = FENCES.split(markdown)

@@ -8,6 +8,7 @@ from wtf.learning.brains import offspring_seed, mix_parent_brains
 
 
 def sample_index(probabilities, rng):
+    """Sample a categorical index using the supplied private random generator."""
     draw, cumulative = rng.random(), 0.0
     for index, probability in enumerate(probabilities):
         cumulative += probability
@@ -28,6 +29,17 @@ def other_action(
     mating_context=None,
     outputs=None,
 ):
+    """Choose a nonfocal animal's action for an isolated trial rollout."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-positional-arguments
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     kind = brain.config["type"]
     if kind in ("recurrent_ppo", "lstm_ppo"):
         hidden = memories[animal_id]
@@ -72,6 +84,19 @@ def collect_group(world, brains, focal_id, *, reuse_world=True):
     Only the focal agent's sampled actions differ. No replay buffers are copied;
     policies copy only for rare mutated newborns. One cloned world is retained.
     """
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+    # This internal collaborator intentionally inspects the owning component's private
+    # state.
+    # pylint: disable=protected-access
+
     focal = brains[focal_id]
     if focal_id not in world.animals:
         raise ValueError("GRPO focal agent must be alive")

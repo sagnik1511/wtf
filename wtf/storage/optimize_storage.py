@@ -20,6 +20,7 @@ SUFFIXES = (".bin.xz", ".bin.gz", ".bin", ".json.xz", ".json.gz", ".json")
 
 
 def file_digest(path):
+    """Compute a content checksum without retaining the entire file."""
     h = hashlib.sha256()
     with path.open("rb") as stream:
         for data in iter(lambda: stream.read(1024 * 1024), b""):
@@ -28,6 +29,7 @@ def file_digest(path):
 
 
 def copies(folder, stem):
+    """Enumerate the source copies used by the storage migration."""
     result = []
     for suffix in SUFFIXES:
         p = (folder / (stem + suffix)).resolve()
@@ -41,6 +43,7 @@ def copies(folder, stem):
 
 
 def publish_candidate(originals, hashes, temporary, target):
+    """Publish a verified replacement artifact using the guarded migration path."""
     if any(file_digest(p) != h for p, h in hashes.items()):
         raise ValueError("Source changed during storage optimization")
     smallest = min(originals, key=lambda p: p.stat().st_size)
@@ -58,6 +61,15 @@ def publish_candidate(originals, hashes, temporary, target):
 def optimize_experiment(
     folder, replays=True, checkpoints=True, compression="xz", progress=None
 ):
+    """Rewrite supported artifacts only after logical-equivalence validation."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-nested-blocks
+    # pylint: disable=too-many-statements
+
     if compression not in ("xz", "gzip"):
         raise ValueError("Binary storage compression must be xz or gzip")
     folder = Path(folder).resolve()
@@ -119,34 +131,34 @@ def optimize_experiment(
                             payload = encode_chunk(frames)
                         opener = lzma.open if compression == "xz" else gzip.open
                         options = (
-                            dict(
-                                filters=[
-                                    dict(
-                                        id=lzma.FILTER_LZMA2,
-                                        preset=6,
-                                        dict_size=1 << 20,
-                                    )
+                            {
+                                "filters": [
+                                    {
+                                        "id": lzma.FILTER_LZMA2,
+                                        "preset": 6,
+                                        "dict_size": 1 << 20,
+                                    }
                                 ]
-                            )
+                            }
                             if compression == "xz"
-                            else dict(compresslevel=6)
+                            else {"compresslevel": 6}
                         )
                         with opener(temp, "wb", **options) as stream:
                             writer = RecordWriter(stream)
                             writer.write(
-                                dict(
-                                    kind="replay",
-                                    delta={
+                                {
+                                    "kind": "replay",
+                                    "delta": {
                                         k: v
                                         for k, v in payload.items()
                                         if k != "frames"
                                     },
-                                )
+                                }
                             )
                             for packet in payload["frames"]:
                                 writer.write(packet)
                             writer.write(
-                                dict(kind="replay_end", frames=len(payload["frames"]))
+                                {"kind": "replay_end", "frames": len(payload["frames"])}
                             )
                         if frame_digest(load_chunk(temp)) != expected:
                             raise ValueError(
@@ -242,20 +254,21 @@ def optimize_experiment(
                 if temp.exists():
                     temp.unlink()
             del state
-    return dict(
-        folder=str(folder),
-        before_bytes=before,
-        after_bytes=after,
-        saved_bytes=before - after,
-        files_reduced=converted,
-        replay_before_bytes=replay_before,
-        replay_after_bytes=replay_after,
-        checkpoint_before_bytes=checkpoint_before,
-        checkpoint_after_bytes=checkpoint_after,
-    )
+    return {
+        "folder": str(folder),
+        "before_bytes": before,
+        "after_bytes": after,
+        "saved_bytes": before - after,
+        "files_reduced": converted,
+        "replay_before_bytes": replay_before,
+        "replay_after_bytes": replay_after,
+        "checkpoint_before_bytes": checkpoint_before,
+        "checkpoint_after_bytes": checkpoint_after,
+    }
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("path", type=Path)
     parser.add_argument(

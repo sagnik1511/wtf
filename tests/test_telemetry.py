@@ -1,5 +1,8 @@
 """Per-step outcomes, sampled predictions, gaps and independently seekable pages."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import json
 from pathlib import Path
 import tempfile
@@ -39,7 +42,7 @@ class TelemetryTests(unittest.TestCase):
 
     def test_gaps_and_unsampled_predictions_remain_missing(self):
         c = config()
-        a, b, d = fixture()
+        a, _b, d = fixture()
         a["diagnostics"] = {
             "0": {"action_values": {"rest": -2, "eat": 3}, "epsilon": 0.2},
             "1": {
@@ -60,11 +63,20 @@ class TelemetryTests(unittest.TestCase):
         json.dumps(later, allow_nan=False)
 
     def test_spatial_components_transitive_links_solitary_and_empty(self):
-        animals = [dict(x=0, y=0), dict(x=3, y=0), dict(x=6, y=0), dict(x=20, y=20)]
-        self.assertEqual(groups(animals), dict(clusters=1, solitary=1, largest=3))
-        self.assertEqual(groups([]), dict(clusters=0, solitary=0, largest=0))
+        animals = [
+            {"x": 0, "y": 0},
+            {"x": 3, "y": 0},
+            {"x": 6, "y": 0},
+            {"x": 20, "y": 20},
+        ]
+        self.assertEqual(groups(animals), {"clusters": 1, "solitary": 1, "largest": 3})
+        self.assertEqual(groups([]), {"clusters": 0, "solitary": 0, "largest": 0})
 
     def test_pages_cross_chunks_exactly_and_reject_missing_or_invalid_pages(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             c = config()

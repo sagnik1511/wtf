@@ -1,11 +1,16 @@
 """Incremental spatial windows; all state is derived and checkpoint independent."""
 
-from wtf.native import kernels
 import math
 from itertools import chain
+from wtf.native import kernels
 
 
 class _Bucket:
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-few-public-methods
+
     __slots__ = ("points", "version")
 
     def __init__(self):
@@ -30,6 +35,8 @@ def _difference(bounds, overlap):
 
 
 class SpatialIndex:
+    """Bucket world entities for bounded local perception queries."""
+
     CELL_SIZE = 8
 
     def __init__(self):
@@ -46,6 +53,12 @@ class SpatialIndex:
         Scanning the authoritative entities also detects manual edits between
         steps. Growth above the food-presence threshold needs no invalidation.
         """
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+
         seen, dirty = set(), set()
         size = self.CELL_SIZE
         for order, (animal_id, (x, y)) in enumerate(points):
@@ -88,6 +101,11 @@ class SpatialIndex:
                 del self.results[animal_id]
 
     def _window(self, animal_id, x, y, radius):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         size = self.CELL_SIZE
         bounds = (
             (x - radius) // size,
@@ -121,6 +139,16 @@ class SpatialIndex:
         return cells.values()
 
     def nearest(self, animal, radius, visible, range_check=None, range_key=None):
+        """Find the nearest eligible visible entities with deterministic ordering."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-boolean-expressions
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         ax, ay, animal_id = animal.x, animal.y, animal.id
         buckets = self._window(animal_id, ax, ay, radius)
         if buckets is None:
@@ -211,6 +239,17 @@ class SpatialIndex:
         bucket revisions, radius, k and directional range settings key it;
         sync clears results on obstacle/visibility edits and removes dead IDs.
         """
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-positional-arguments
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         if k == 1:
             return self.nearest(animal, radius, visible, range_check, range_key)
         ax, ay, animal_id = animal.x, animal.y, animal.id

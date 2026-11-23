@@ -1,8 +1,16 @@
 """Opt-in contest mechanics, physical priority, rewards and exact continuation."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
-from pathlib import Path
+
 import unittest
 from wtf.config import validate
 from wtf.learning.contextual_ppo import action_mask
@@ -12,6 +20,11 @@ from tests.test_simulation import config, empty_world, animal
 
 
 def arena(**rules):
+
+    # Keyword dict construction deliberately detects duplicate keys in dynamic **
+    # expansions; a literal would silently overwrite them.
+    # pylint: disable=use-dict-literal
+
     w = empty_world()
     for spec in w.config["species"].values():
         spec["allowed_actions"].append("challenge")
@@ -170,25 +183,30 @@ class CompetitionTests(unittest.TestCase):
         )
 
     def test_displacement_cannot_enter_water_or_exceed_climb_limit(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.simulation.geography import Geography
 
         w = arena()
         rows = [list("." * w.width) for _ in range(w.height)]
         for x, y, symbol in ((4, 2, "~"), (3, 1, "3"), (3, 3, "#")):
             rows[y][x] = symbol
-        definition = dict(
-            map_version=1,
-            name="contest_limits",
-            width=w.width,
-            height=w.height,
-            rows=["".join(row) for row in rows],
-            legend={
+        definition = {
+            "map_version": 1,
+            "name": "contest_limits",
+            "width": w.width,
+            "height": w.height,
+            "rows": ["".join(row) for row in rows],
+            "legend": {
                 ".": {},
                 "~": {"water_depth": 1, "flow": [0, 0]},
                 "3": {"elevation": 3},
                 "#": {"blocked": True},
             },
-        )
+        }
         w.config["terrain"] = definition
         w.geography = Geography(definition, w.width, w.height)
         w.obstacles |= w.geography.obstacles
@@ -196,6 +214,11 @@ class CompetitionTests(unittest.TestCase):
         self.assertEqual([a.position for a in w.animals.values()], [(2, 2), (3, 2)])
 
     def test_replay_codec_retains_contest_events_without_new_fields(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.storage.replay_codec import encode_chunk, decode_chunk
 
         w = arena()
@@ -205,6 +228,11 @@ class CompetitionTests(unittest.TestCase):
         self.assertEqual(decode_chunk(encode_chunk(frames)), frames)
 
     def test_every_controller_can_choose_learn_and_resume_challenge(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from tests.test_mutation import KINDS, environment
         from tests.reproduction_support import force_action
         from wtf.experiment.runner import Experiment
@@ -214,7 +242,11 @@ class CompetitionTests(unittest.TestCase):
                 c = environment(kind, 0)
                 for spec in c["species"].values():
                     spec["allowed_actions"].append("challenge")
-                    spec["competition"] = dict(enabled=True, damage=2, energy_cost=0.2)
+                    spec["competition"] = {
+                        "enabled": True,
+                        "damage": 2,
+                        "energy_cost": 0.2,
+                    }
                     spec["reproduction"]["enabled"] = False
                 e = Experiment(validate(c))
                 w = e.world

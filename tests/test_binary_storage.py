@@ -1,11 +1,14 @@
 """Binary Python/JavaScript parity, exact resume, transport and verified migration."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import base64
-import copy
-import gzip
+
+
 import io
 import json
-import lzma
+
 import math
 import os
 from pathlib import Path
@@ -17,20 +20,13 @@ from http.server import ThreadingHTTPServer
 from urllib.request import Request, urlopen
 from unittest.mock import patch
 
-from wtf.storage.binary_io import (
-    Encoder,
-    Decoder,
-    RecordWriter,
-    records,
-    replay_payload,
-    MAGIC,
-)
+from wtf.storage.binary_io import Encoder, Decoder, RecordWriter, replay_payload, MAGIC
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.storage.compress_recordings import frame_digest, compress_recording
 from wtf.storage.optimize_storage import optimize_experiment
 from wtf.storage.recording import Recorder, RecordingStore
 from wtf.storage.replay_codec import encode_chunk, decode_chunk
-from wtf.storage.replay_io import chunk_path, load_chunk, read_chunk_bytes
+from wtf.storage.replay_io import load_chunk, read_chunk_bytes
 from wtf.experiment.runner import Experiment
 from wtf.server import make_handler, State
 from tests.test_advanced_algorithms import environment
@@ -42,15 +38,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def binary(frames):
+
+    # Local fixture/geometry names describe a separate scope and do not consume the
+    # outer binding.
+    # pylint: disable=redefined-outer-name
+
     payload = encode_chunk(frames)
     out = io.BytesIO()
     writer = RecordWriter(out)
     writer.write(
-        dict(kind="replay", delta={k: v for k, v in payload.items() if k != "frames"})
+        {"kind": "replay", "delta": {k: v for k, v in payload.items() if k != "frames"}}
     )
     for packet in payload["frames"]:
         writer.write(packet)
-    writer.write(dict(kind="replay_end", frames=len(frames)))
+    writer.write({"kind": "replay_end", "frames": len(frames)})
     return out.getvalue()
 
 
@@ -91,7 +92,7 @@ class BinaryCodecTests(unittest.TestCase):
             [1, 2, 3, 4],
             [1.0, 2.0, -0.0, 4.0],
             [2**32 - 1] * 20,
-            [dict(id=i, species="prey", health=10.0 + i) for i in range(4)],
+            [{"id": i, "species": "prey", "health": 10.0 + i} for i in range(4)],
             {"$ref": 3, "__proto__": "safe", "odd": [[1.0, 0, False]]},
         ]
         encoder, decoder = Encoder(), Decoder()
@@ -132,15 +133,17 @@ class BinaryCodecTests(unittest.TestCase):
         assert(Object.is(result[1].animals[0].health,-0));
         assert(Object.is(result[0].extension.f32[1],-0));
         """
-        payload = dict(
-            bytes=base64.b64encode(binary(original)).decode(), expected=original
-        )
+        payload = {
+            "bytes": base64.b64encode(binary(original)).decode(),
+            "expected": original,
+        }
         p = subprocess.run(
             ["node", "--input-type=module", "-e", script],
             input=json.dumps(payload),
             text=True,
             capture_output=True,
             cwd=ROOT,
+            check=False,
         )
         self.assertEqual(p.returncode, 0, p.stderr)
 
@@ -157,7 +160,7 @@ class BinaryCodecTests(unittest.TestCase):
                 replay_payload(data[:n])
         out = io.BytesIO()
         w = RecordWriter(out)
-        w.write(dict(kind="replay", delta=encode_chunk([])))
+        w.write({"kind": "replay", "delta": encode_chunk([])})
         with self.assertRaisesRegex(ValueError, "footer"):
             replay_payload(out.getvalue())
 
@@ -207,12 +210,12 @@ class BinaryLifecycleTests(unittest.TestCase):
                 path = store.chunk("run", 1, i)
                 chunks[str(i)] = base64.b64encode(read_chunk_bytes(path)).decode()
                 expected.extend(load_chunk(path))
-            payload = dict(
-                metadata=metadata,
-                metrics=store.metrics("run", 1),
-                chunks=chunks,
-                expected=expected,
-            )
+            payload = {
+                "metadata": metadata,
+                "metrics": store.metrics("run", 1),
+                "chunks": chunks,
+                "expected": expected,
+            }
             script = """import assert from 'node:assert/strict';
             import {Playback} from './viewer/playback.mjs';
             import {decodeBinaryReplay} from './viewer/binary-codec.mjs';
@@ -237,10 +240,16 @@ class BinaryLifecycleTests(unittest.TestCase):
                 text=True,
                 capture_output=True,
                 cwd=ROOT,
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_all_algorithms_resume_binary_checkpoints_exactly(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from tests.test_policy_algorithms import environment as policy_environment
         from tests.test_ppo import ppo_environment
 
@@ -283,6 +292,11 @@ class BinaryLifecycleTests(unittest.TestCase):
             self.assertEqual(a.checkpoint(), b.checkpoint())
 
     def test_replay_and_checkpoint_conversion_preserves_sources_until_verified(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "run"
             a = record(p, "gzip", steps=12)
@@ -329,6 +343,11 @@ class BinaryLifecycleTests(unittest.TestCase):
                 optimize_experiment(p)
 
     def test_telemetry_cache_is_bounded_detached_and_file_validated(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "run"
             recording(p, steps=520)
@@ -357,11 +376,11 @@ class BinaryLifecycleTests(unittest.TestCase):
             playback.mkdir()
             source = playback / "run_0001_chunk_000000.json"
             source.write_text("[{}]")
-            metadata = dict(
-                recording_version=1,
-                status="complete",
-                runs=[dict(run=1, chunk_count=1)],
-            )
+            metadata = {
+                "recording_version": 1,
+                "status": "complete",
+                "runs": [{"run": 1, "chunk_count": 1}],
+            }
             (playback / "recording.json").write_text(json.dumps(metadata))
             result = optimize_experiment(p, checkpoints=False)
             self.assertEqual(result["saved_bytes"], 0)
@@ -387,6 +406,7 @@ class BinaryLifecycleTests(unittest.TestCase):
             text=True,
             capture_output=True,
             cwd=ROOT,
+            check=False,
         )
         self.assertEqual(p.returncode, 0, p.stderr)
 

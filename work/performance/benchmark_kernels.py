@@ -5,6 +5,11 @@ Optional --reference points to an earlier source tree containing wtf/.
 No profiler, champion publication or persistent simulation output is produced.
 """
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import argparse
 import hashlib
 import json
@@ -35,6 +40,15 @@ CASES = {
 
 
 def worker(args):
+    """Execute one controlled benchmark workload."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     if args.reference:
         sys.path.insert(0, str(args.reference.resolve()))
     from wtf.config import load
@@ -46,7 +60,7 @@ def worker(args):
 
         backend = status()
     except ImportError:
-        backend = dict(backend="reference", requested="reference")
+        backend = {"backend": "reference", "requested": "reference"}
     filename, record = CASES[args.case]
     config = load(Path("environments") / filename)
     config["seed"] = 42
@@ -70,26 +84,26 @@ def worker(args):
             writer.close()
         seconds = time.perf_counter() - started
         peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        result = dict(
-            case=args.case,
-            backend=backend,
-            seconds=seconds,
-            initialization_seconds=initialization_seconds,
-            peak_rss_mib=peak / (1024**2 if sys.platform == "darwin" else 1024),
-            output_bytes=sum(
-                p.stat().st_size for p in folder.rglob("*") if p.is_file()
+        result = {
+            "case": args.case,
+            "backend": backend,
+            "seconds": seconds,
+            "initialization_seconds": initialization_seconds,
+            "peak_rss_mib": peak / (1024**2 if sys.platform == "darwin" else 1024),
+            "output_bytes": sum(
+                (p.stat().st_size for p in folder.rglob("*") if p.is_file())
             ),
-            completed_steps=experiment.world.tick,
-            updates=experiment.total_updates,
-            founder_population={
+            "completed_steps": experiment.world.tick,
+            "updates": experiment.total_updates,
+            "founder_population": {
                 s: c["initial_population"] for s, c in config["species"].items()
             },
-            algorithms={
+            "algorithms": {
                 s: config["brains"][c["brain"]]["type"]
                 for s, c in config["species"].items()
             },
-            metrics=experiment.world.metrics(),
-        )
+            "metrics": experiment.world.metrics(),
+        }
         digest = hashlib.sha256()
         for part in json.JSONEncoder(
             sort_keys=True, separators=(",", ":"), allow_nan=False
@@ -108,6 +122,14 @@ def worker(args):
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--steps", type=int, default=180)
     p.add_argument("--repeats", type=int, default=3)
@@ -158,7 +180,9 @@ def main():
                     WTF_KERNELS=args.reference_backend if mode == "reference" else mode,
                     PYTHONDONTWRITEBYTECODE="1",
                 )
-                run = subprocess.run(command, env=env, capture_output=True, text=True)
+                run = subprocess.run(
+                    command, env=env, capture_output=True, text=True, check=False
+                )
                 if run.returncode:
                     sys.stderr.write(run.stderr)
                     raise RuntimeError(
@@ -173,7 +197,8 @@ def main():
                 )
                 args.output.parent.mkdir(parents=True, exist_ok=True)
                 args.output.write_text(
-                    json.dumps(dict(status="running", samples=results), indent=2) + "\n"
+                    json.dumps({"status": "running", "samples": results}, indent=2)
+                    + "\n"
                 )
     summary = {}
     for case in args.cases:
@@ -213,19 +238,20 @@ def main():
         row["updates"] = samples[0]["updates"]
         row["completed_steps"] = samples[0]["completed_steps"]
         summary[case] = row
-    report = dict(
-        status="complete",
-        python=platform.python_version(),
-        platform=platform.platform(),
-        machine=platform.machine(),
-        steps=args.steps,
-        repeats=args.repeats,
-        method="Alternating separate processes; seed 42; full preset populations; one episode; medians; RSS before semantic digest; initialization reported separately",
-        summary=summary,
-        samples=results,
-    )
+    report = {
+        "status": "complete",
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "steps": args.steps,
+        "repeats": args.repeats,
+        "method": "Alternating separate processes; seed 42; full preset populations; one episode; medians; RSS before semantic digest; initialization reported separately",
+        "summary": summary,
+        "samples": results,
+    }
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(summary, indent=2), flush=True)
+    return None
 
 
 if __name__ == "__main__":

@@ -1,5 +1,13 @@
 """Optional geography: river vectors, swimming gates, slopes and exact learning."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -14,7 +22,7 @@ from wtf.learning.brains import model_signature, load_model_weights, model_snaps
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.config import validate, load
 from wtf.learning.contextual_ppo import action_mask
-from wtf.simulation.geography import Geography
+
 from wtf.learning.grouped_rollouts import collect_group
 from wtf.storage.recording import Recorder, RecordingStore
 from wtf.storage.replay_io import load_chunk
@@ -30,13 +38,13 @@ def configuration(kind="q_network", rows=None, legend=None):
     rows = rows or ["....~...."] * 7
     c["world"].update(width=len(rows[0]), height=len(rows), max_steps=8)
     c["resources"]["patch_count"] = 0
-    c["terrain"] = dict(
-        map_version=1,
-        name="test_map",
-        width=len(rows[0]),
-        height=len(rows),
-        rows=rows,
-        legend=legend
+    c["terrain"] = {
+        "map_version": 1,
+        "name": "test_map",
+        "width": len(rows[0]),
+        "height": len(rows),
+        "rows": rows,
+        "legend": legend
         or {
             ".": {},
             "#": {"blocked": True},
@@ -44,25 +52,30 @@ def configuration(kind="q_network", rows=None, legend=None):
             "1": {"elevation": 1},
             "3": {"elevation": 3},
         },
-    )
+    }
     for b in c["brains"].values():
         b["observation_version"] = 2
-    for name, s in c["species"].items():
+    for _name, s in c["species"].items():
         s["initial_population"] = 2 if s["diet"] == "resource" else 0
         s["reproduction"]["enabled"] = False
         s["allowed_actions"].append("swim")
-        s["locomotion"] = dict(
-            swim_min_health=10,
-            swim_energy_cost=2,
-            water_energy_cost=0,
-            drowning_damage=2,
-            uphill_energy_cost=3,
-            max_climb=1,
-        )
+        s["locomotion"] = {
+            "swim_min_health": 10,
+            "swim_energy_cost": 2,
+            "water_energy_cost": 0,
+            "drowning_damage": 2,
+            "uphill_energy_cost": 3,
+            "max_climb": 1,
+        }
     return c
 
 
 def animal(i, x, y, heading=1, energy=40, health=30, species="prey", sex="female"):
+
+    # Keep setup, action and assertions together as one regression scenario.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+
     return Animal(
         i,
         species,
@@ -369,6 +382,11 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
             self.assertNotEqual(a, b, kind)
 
     def test_all_algorithms_update_weights_connected_to_the_last_terrain_input(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.brain import Experience
         from wtf.learning.policy_gradients import PolicyStep
         from wtf.learning.ppo import policy_distribution
@@ -448,6 +466,11 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
             load_model_weights(e.brains[0], model)
 
     def test_recording_stores_map_once_and_telemetry_counts_swimming_and_costs(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         c = configuration()
         c["recording"].update(
             encoding="binary",
@@ -489,17 +512,18 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
             assert.deepStrictEqual(frames,d.frames);
             assert.equal(frames.at(-1).diagnostics['0'].features.length,32);
             """
-            payload = dict(
-                bytes=base64.b64encode(
+            payload = {
+                "bytes": base64.b64encode(
                     read_chunk_bytes(store.chunk("terrain", 1, 0))
                 ).decode(),
-                frames=frames,
-            )
+                "frames": frames,
+            }
             result = subprocess.run(
                 ["node", "--input-type=module", "-e", script],
                 input=json.dumps(payload),
                 text=True,
                 capture_output=True,
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -530,6 +554,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
                     ],
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 folder = next((root / name).iterdir())

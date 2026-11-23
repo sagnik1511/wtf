@@ -1,8 +1,16 @@
 """Numerical objectives, information boundaries and full algorithm lifecycles."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
-import math
+
 import subprocess
 import sys
 import tempfile
@@ -21,7 +29,7 @@ from wtf.learning.brains import (
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.config import load, validate
 from wtf.learning.contextual_ppo import action_mask, central_contexts
-from wtf.learning.ppo import policy_distribution
+
 from wtf.learning.qrdqn import quantile_huber
 from wtf.storage.recording import Recorder
 from wtf.storage.replay_io import load_chunk, chunk_path
@@ -88,6 +96,13 @@ class AdvancedMathTests(unittest.TestCase):
                 self.assertAlmostEqual(analytic, numeric, places=7)
 
     def test_gru_two_step_backprop_matches_numerical_gradient(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+
         b = create_brain(settings("recurrent_ppo"), ["rest", "eat"], 7, 4)
         network = b.network
         x1 = tuple((i - 10) / 20 for i in range(INPUTS))
@@ -124,6 +139,11 @@ class AdvancedMathTests(unittest.TestCase):
                     )
 
     def test_masked_objective_and_entropy_gradient(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         b = create_brain(
             settings("maskable_ppo"), ["rest", "eat", "move_forward"], 1, 2
         )
@@ -173,6 +193,11 @@ class AdvancedMathTests(unittest.TestCase):
 
 class MaskAndMemoryTests(unittest.TestCase):
     def test_masks_use_immediate_physics_and_preserve_turns(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         w = empty_world()
         prey = animal(0, "prey", 4, 3)
         pred = animal(1, "predator", 4, 4)
@@ -265,6 +290,14 @@ class MaskAndMemoryTests(unittest.TestCase):
             captured = []
 
             def capture(predictions, targets, kappa):
+
+                # The callback is consumed synchronously within this iteration; it
+                # never escapes the loop.
+                # pylint: disable=cell-var-from-loop
+                # The callback keeps its caller's keyword signature; this branch does
+                # not consume every input.
+                # pylint: disable=unused-argument
+
                 captured.append(targets)
                 return 0.0, [0.0] * len(predictions)
 
@@ -353,6 +386,11 @@ class AdvancedLifecycleTests(unittest.TestCase):
                 load_model_weights(b, model_snapshot(a))
 
     def test_mappo_collects_team_rewards_and_current_next_context(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         e = Experiment(environment("mappo"))
         before = central_contexts(e.world)
         captured = {}
@@ -411,6 +449,11 @@ class AdvancedLifecycleTests(unittest.TestCase):
             self.assertEqual(e.total_updates, 0)
 
     def test_reproduction_death_and_checkpoint_release(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from tests.test_reproduction import reproduction
 
         for kind in KINDS:
@@ -484,7 +527,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
                     "--progress",
                 ]
                 result = subprocess.run(
-                    command, cwd=ROOT, capture_output=True, text=True
+                    command, cwd=ROOT, capture_output=True, text=True, check=False
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn("100%", result.stderr)
@@ -516,7 +559,7 @@ class AdvancedLifecycleTests(unittest.TestCase):
                     "--no-progress",
                 ]
                 result = subprocess.run(
-                    command, cwd=ROOT, capture_output=True, text=True
+                    command, cwd=ROOT, capture_output=True, text=True, check=False
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 destination = next((root / "warm").iterdir())
@@ -543,6 +586,11 @@ class AdvancedLifecycleTests(unittest.TestCase):
             validate(c)
 
     def test_grpo_trials_keep_other_algorithms_unchanged(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.grouped_rollouts import collect_group
         from tests.test_policy_algorithms import GRPOTests
 

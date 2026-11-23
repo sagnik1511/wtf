@@ -4,6 +4,7 @@ import math
 
 
 def sunlight(cycle, tick):
+    """Compute sunlight from the configured saved-world time."""
     if not cycle or not cycle.get("enabled", False):
         return 1.0
     phase = (
@@ -14,6 +15,7 @@ def sunlight(cycle, tick):
 
 
 def effective_body(species, light):
+    """Apply configured day/night modifiers to the species body."""
     body = species["body"]
     rules = species.get("circadian")
     if not rules:

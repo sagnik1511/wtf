@@ -1,5 +1,10 @@
 """Experiment lifecycle, training, evaluation and exact JSON checkpoints."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import copy
 import random
 import secrets
@@ -29,9 +34,20 @@ from wtf.storage.library import (
 
 
 class Experiment:
+    """Own episode scheduling, independent brains, selection and exact recovery."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(
         self, config, mode="train", library_root=None, *, freeze_evaluation_brains=False
     ):
+
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+
         if mode not in ("train", "evaluate", "random"):
             raise ValueError("mode must be train, evaluate, or random")
         if type(freeze_evaluation_brains) is not bool or (
@@ -85,6 +101,17 @@ class Experiment:
         self._start_run()
 
     def _start_run(self):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-nested-blocks
+        # pylint: disable=too-many-statements
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+
         c = self.config
         best_entries = None
         if self.improvement_only:
@@ -155,27 +182,28 @@ class Experiment:
                                 .get(sex, {})
                                 .get("provenance", {})
                             )
-                            provenance = dict(
-                                artifact_id=f"run:{self.run_index}:{self.world.seed}:{species}:{sex}:{metric}",
-                                path=None,
-                                criterion=metric,
-                                score=candidate["score"],
-                                sex=sex,
-                                model_generation=parent.get("model_generation", 0) + 1,
-                                source_run=candidate["source"].get(
+                            provenance = {
+                                "artifact_id": f"run:{self.run_index}:{self.world.seed}:{species}:{sex}:{metric}",
+                                "path": None,
+                                "criterion": metric,
+                                "score": candidate["score"],
+                                "sex": sex,
+                                "model_generation": parent.get("model_generation", 0)
+                                + 1,
+                                "source_run": candidate["source"].get(
                                     "run", self.run_index
                                 ),
-                                rank=list(candidate["rank"]),
-                            )
+                                "rank": list(candidate["rank"]),
+                            }
                         provenance = {
                             k: v
                             for k, v in provenance.items()
                             if k != "parent_artifact"
                         }
-                        models.setdefault(species, {})[sex] = dict(
-                            model=copy.deepcopy(candidate["model"]),
-                            provenance=copy.deepcopy(provenance),
-                        )
+                        models.setdefault(species, {})[sex] = {
+                            "model": copy.deepcopy(candidate["model"]),
+                            "provenance": copy.deepcopy(provenance),
+                        }
                         if metric == "lineage":
                             models[species][sex]["provenance"]["lineage_qualified"] = (
                                 candidate.get("lineage", {}).get("qualified", False)
@@ -203,7 +231,8 @@ class Experiment:
         if self.world._social is not None:
             self.world._social.training = self.mode == "train"
             if previous_social is not None and previous_social.knowledge is not None:
-                previous_social.knowledge.publish()
+                if self.mode == "train":
+                    previous_social.knowledge.publish()
                 self.world._social.knowledge = previous_social.knowledge
         self._retire_brains(set(self.brains) - set(self.world.animals))
         if not self.brains or not c["experiment"]["retain_brains_between_runs"]:
@@ -269,6 +298,14 @@ class Experiment:
         self.last_record = None
 
     def _refresh_context(self, contexts=None, mating_context=None):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+
         contextual = [
             i
             for i in self.world.animals
@@ -308,12 +345,31 @@ class Experiment:
 
     @property
     def done(self):
+        """Return whether the configured experiment has finished."""
         return self.finished_run and (
             self.run_index + 1 >= self.config["experiment"]["runs"]
             or self.early_stopping.stopped
         )
 
     def step(self):
+        """Choose actions, advance the world and update independent learners."""
+
+        # Keyword dict construction deliberately detects duplicate keys in dynamic **
+        # expansions; a literal would silently overwrite them.
+        # pylint: disable=use-dict-literal
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-statements
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+
         if self.finished_run:
             if self.done:
                 return self.snapshot()
@@ -464,7 +520,7 @@ class Experiment:
                     **copy.deepcopy(self.last_record),
                     lifespans=copy.deepcopy(self.world.lifespans),
                     survivors=[
-                        dict(id=a.id, species=a.species, age=a.age)
+                        {"id": a.id, "species": a.species, "age": a.age}
                         for a in self.world.animals.values()
                     ],
                 )
@@ -475,13 +531,13 @@ class Experiment:
         return None
 
     def _champion_source(self):
-        return dict(
-            experiment=self.config["name"],
-            mode=self.mode,
-            run=self.run_index + 1,
-            seed=self.world.seed,
-            tick=self.world.tick,
-        )
+        return {
+            "experiment": self.config["name"],
+            "mode": self.mode,
+            "run": self.run_index + 1,
+            "seed": self.world.seed,
+            "tick": self.world.tick,
+        }
 
     def _release_dead_brains(self, ids):
         if self.legacy_brain_retention:
@@ -503,6 +559,7 @@ class Experiment:
             ).updates - self.inherited_updates.pop(i, 0)
 
     def next_run(self):
+        """Start the next scheduled world after finalizing the current episode."""
         if not self.finished_run or self.done:
             return False
         self.run_index += 1
@@ -512,11 +569,18 @@ class Experiment:
     @property
     def total_updates(self):
         # Inherited optimizer counters do not represent new training work.
+        """Count accumulated learning updates across current and retired animals."""
         return self.retired_updates + sum(
             b.updates - self.inherited_updates.get(i, 0) for i, b in self.brains.items()
         )
 
     def snapshot(self, selected=None):
+        """Build a serializable view of the current simulation state."""
+
+        # Keyword dict construction deliberately detects duplicate keys in dynamic **
+        # expansions; a literal would silently overwrite them.
+        # pylint: disable=use-dict-literal
+
         data = self.world.snapshot()
         data.update(
             run=self.run_index + 1,
@@ -544,36 +608,37 @@ class Experiment:
         # The file writer consumes this borrowed view synchronously, before any
         # further simulation step. Public snapshots retain their detached contract.
         clone = copy.deepcopy if detached else lambda value: value
-        state = dict(
-            checkpoint_version=1,
-            brain_precision=self.brain_precision,
-            initial_models=clone(self.initial_models),
-            initial_weights=clone(self.initial_weights),
-            run_initial_models=clone(self.run_initial_models),
-            champion_artifacts=clone(self.champion_artifacts),
-            legacy_brain_retention=self.legacy_brain_retention,
-            champions=clone(self.champions.entries),
-            lineage=self.champions.lineage.checkpoint(),
-            guard_lineage_chaining=self.guard_lineage_chaining,
-            improvement_only=self.improvement_only,
-            freeze_evaluation_brains=self.freeze_evaluation_brains,
-            early_stopping=self.early_stopping.checkpoint(),
-            retired_updates=self.retired_updates,
-            inherited_updates={str(i): n for i, n in self.inherited_updates.items()},
-            randomization_seed=self.randomization_seed,
-            seed_rng_state=self.seed_rng.getstate() if self.seed_rng else None,
-            config=clone(self.config),
-            mode=self.mode,
-            run_index=self.run_index,
-            world=self.world.checkpoint(),
-            history=clone(self.history),
-            summaries=clone(self.summaries),
-            run_seeds=self.run_seeds[:],
-            finished_run=self.finished_run,
-        )
+        state = {
+            "checkpoint_version": 1,
+            "brain_precision": self.brain_precision,
+            "initial_models": clone(self.initial_models),
+            "initial_weights": clone(self.initial_weights),
+            "run_initial_models": clone(self.run_initial_models),
+            "champion_artifacts": clone(self.champion_artifacts),
+            "legacy_brain_retention": self.legacy_brain_retention,
+            "champions": clone(self.champions.entries),
+            "lineage": self.champions.lineage.checkpoint(),
+            "guard_lineage_chaining": self.guard_lineage_chaining,
+            "improvement_only": self.improvement_only,
+            "freeze_evaluation_brains": self.freeze_evaluation_brains,
+            "early_stopping": self.early_stopping.checkpoint(),
+            "retired_updates": self.retired_updates,
+            "inherited_updates": {str(i): n for i, n in self.inherited_updates.items()},
+            "randomization_seed": self.randomization_seed,
+            "seed_rng_state": self.seed_rng.getstate() if self.seed_rng else None,
+            "config": clone(self.config),
+            "mode": self.mode,
+            "run_index": self.run_index,
+            "world": self.world.checkpoint(),
+            "history": clone(self.history),
+            "summaries": clone(self.summaries),
+            "run_seeds": self.run_seeds[:],
+            "finished_run": self.finished_run,
+        }
         return state
 
     def checkpoint(self, include_brains=True):
+        """Serialize state required to resume this component."""
         state = self._checkpoint_metadata(detached=True)
         if include_brains:
             state["brains"] = {str(i): b.checkpoint() for i, b in self.brains.items()}
@@ -581,6 +646,11 @@ class Experiment:
 
     def write_checkpoint(self, path, *, shared_metadata=False):
         """Atomic streamed checkpoint; .gz selects the compact lossless format."""
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.storage.checkpoint_io import write_checkpoint
 
         # Preserve subclass/instance checkpoint hooks; only the stock snapshot
@@ -602,6 +672,16 @@ class Experiment:
 
     @classmethod
     def restore(cls, state, mode=None):
+        """Reconstruct the component from its persisted continuation state."""
+
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-statements
+
         if state.get("checkpoint_version") != 1:
             raise ValueError("Unsupported checkpoint version")
         e = cls.__new__(cls)
@@ -638,7 +718,7 @@ class Experiment:
         e.champions = ChampionBook(
             e.config,
             state.get("champions"),
-            state.get("lineage", dict(partial=True)),
+            state.get("lineage", {"partial": True}),
         )
         e.retired_updates = state.get("retired_updates", 0)
         e.inherited_updates = {

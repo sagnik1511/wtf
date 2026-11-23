@@ -1,5 +1,13 @@
 """Champion snapshots, compatible warm starts and ancestry without replay copies."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -40,7 +48,7 @@ class ChampionTests(unittest.TestCase):
             Animal(1, "prey", 2, 1, 0, 60, 25, age=10, energy_gained=20),
             Animal(2, "prey", 3, 1, 0, 60, 30, age=8, energy_gained=1),
         ]
-        book.consider(animals, e.brains, dict(tick=10))
+        book.consider(animals, e.brains, {"tick": 10})
         self.assertEqual(
             book.entries["prey"]["female"]["health"]["source"]["animal_id"], 2
         )
@@ -211,6 +219,11 @@ class LibraryTests(unittest.TestCase):
             )
 
     def test_checkpoint_embeds_initial_models_and_resumes_without_library(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             seed = Experiment(config())
@@ -381,6 +394,11 @@ class LibraryTests(unittest.TestCase):
         )
 
     def test_cli_applies_source_models_without_editing_environment(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import subprocess
         import sys
 
@@ -441,6 +459,7 @@ class LibraryTests(unittest.TestCase):
                 ],
                 capture_output=True,
                 text=True,
+                check=False,
             )
             self.assertEqual(failed.returncode, 2)
             self.assertIn("cannot be used with --resume", failed.stderr)
@@ -469,6 +488,11 @@ class LibraryTests(unittest.TestCase):
             )
 
     def test_run_local_models_move_with_the_experiment_folder(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import shutil
 
         with tempfile.TemporaryDirectory() as directory:
@@ -493,6 +517,11 @@ class LibraryTests(unittest.TestCase):
             )
 
     def test_legacy_models_are_localized_without_changing_artifact_identity(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import shutil
 
         with tempfile.TemporaryDirectory() as directory:
@@ -514,6 +543,11 @@ class LibraryTests(unittest.TestCase):
             )
 
     def test_source_run_name_resolves_under_working_directory_results(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from unittest.mock import patch
         from wtf.storage import library
 
@@ -531,7 +565,13 @@ class LibraryTests(unittest.TestCase):
                 )
 
     def test_cli_saves_self_contained_models_by_default(self):
-        import subprocess, sys
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
+        import subprocess
+        import sys
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

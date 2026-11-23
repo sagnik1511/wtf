@@ -1,5 +1,10 @@
 """Explicit runtime-asset packaging and opt-in native compilation."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import json
 import os
 import shutil
@@ -24,8 +29,11 @@ def packaged_assets():
 
 
 class BuildPy(build_py):
+    """Copy only allowlisted runtime assets into wheel and source builds."""
+
     def get_source_files(self):
         # setuptools uses this list when assembling the source distribution.
+        """Include allowlisted runtime assets in the source distribution inventory."""
         return super().get_source_files() + [
             relative for relative, _ in packaged_assets()
         ]

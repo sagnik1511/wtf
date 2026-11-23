@@ -1,5 +1,8 @@
 """Scheduled-tail playback selection without altering training or retained reports."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import csv
 import json
 from pathlib import Path
@@ -59,6 +62,11 @@ class LastEpisodeRecordingTests(unittest.TestCase):
         self.assertFalse(settings(c, "evaluate")["enabled"])
 
     def test_tail_clamping_and_exact_frames_training_state(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+
         saved = {}
         with tempfile.TemporaryDirectory() as directory:
             for k in (-1, 0, 1, 2, 3, 99):

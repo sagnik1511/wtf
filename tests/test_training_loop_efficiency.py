@@ -1,6 +1,9 @@
 """Exact learning equivalence and dead-buffer lifecycle; no profiling/timings."""
 
-import copy
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
+
 import json
 import random
 import unittest
@@ -16,6 +19,13 @@ class FullOutputBrain(Brain):
     """The former full-output replay update, retained as an arithmetic reference."""
 
     def learn(self, experience):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         c = self.config
         if len(self.replay) < c["replay_capacity"]:
             self.replay.append(experience)

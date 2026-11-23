@@ -12,6 +12,10 @@ from wtf.storage.recording import write_json
 class ArtifactRetention:
     """Own only files published by this instance, never scan/prune older artifacts."""
 
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, folder, options, checkpoint_format="binary"):
         self.folder = Path(folder)
         self.options = options
@@ -29,6 +33,7 @@ class ArtifactRetention:
         self.owned_models = set()
 
     def checkpoint(self, experiment, name):
+        """Write an experiment checkpoint and prune older owned recovery files."""
         folder = self.folder / "checkpoints"
         folder.mkdir(parents=True, exist_ok=True)
         path = folder / (name + self.suffix)
@@ -42,6 +47,12 @@ class ArtifactRetention:
         return path
 
     def step_brains(self, experiment):
+        """Save any due strictly improved brain milestones."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         interval = self.options.get("brain_save_every_steps", 250)
         if not interval or experiment.world.tick % interval:
             return False

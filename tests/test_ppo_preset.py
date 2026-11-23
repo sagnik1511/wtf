@@ -4,6 +4,9 @@ These checks exercise chosen actions; they do not assume a learned policy will
 choose them or establish long-term ecological stability.
 """
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import unittest
 
 from wtf.config import load

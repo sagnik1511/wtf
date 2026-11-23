@@ -1,6 +1,14 @@
 """Analysis uses exact denominators, inheritance baselines and coverage flags."""
 
-import copy
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
+
 import json
 from pathlib import Path
 import subprocess
@@ -13,38 +21,39 @@ from tests.test_simulation import config
 
 
 def animal(i, species, age=0, action="rest", parent_id=-1):
-    return dict(
-        id=i,
-        species=species,
-        x=i + 1,
-        y=2,
-        heading=0,
-        energy=60,
-        health=30,
-        age=age,
-        last_action=action,
-        parent_id=parent_id,
-        generation=int(parent_id >= 0),
-    )
+    return {
+        "id": i,
+        "species": species,
+        "x": i + 1,
+        "y": 2,
+        "heading": 0,
+        "energy": 60,
+        "health": 30,
+        "age": age,
+        "last_action": action,
+        "parent_id": parent_id,
+        "generation": int(parent_id >= 0),
+    }
 
 
 def frame(tick, animals, events=(), diagnostics=None):
-    return dict(
-        tick=tick,
-        animals=animals,
-        events=list(events),
-        metrics=dict(
-            tick=tick,
-            populations={
-                s: sum(a["species"] == s for a in animals) for s in ("prey", "predator")
+    return {
+        "tick": tick,
+        "animals": animals,
+        "events": list(events),
+        "metrics": {
+            "tick": tick,
+            "populations": {
+                s: sum((a["species"] == s for a in animals))
+                for s in ("prey", "predator")
             },
-            food=20,
-            kills={},
-            births={},
-            deaths={},
-        ),
-        diagnostics=diagnostics or {},
-    )
+            "food": 20,
+            "kills": {},
+            "births": {},
+            "deaths": {},
+        },
+        "diagnostics": diagnostics or {},
+    }
 
 
 def fixture():
@@ -58,10 +67,10 @@ def fixture():
                 animal(2, "prey", parent_id=0),
             ],
             [
-                dict(kind="energy_gained", actor=0, amount=4, cause="resource"),
-                dict(kind="damage_dealt", actor=1, amount=5),
-                dict(kind="damage_taken", actor=0, amount=5),
-                dict(kind="born", actor=0, target=2),
+                {"kind": "energy_gained", "actor": 0, "amount": 4, "cause": "resource"},
+                {"kind": "damage_dealt", "actor": 1, "amount": 5},
+                {"kind": "damage_taken", "actor": 0, "amount": 5},
+                {"kind": "born", "actor": 0, "target": 2},
             ],
         ),
         frame(
@@ -71,12 +80,12 @@ def fixture():
                 animal(2, "prey", 1, "move_forward", 0),
             ],
             [
-                dict(kind="damage_dealt", actor=1, amount=25),
-                dict(kind="damage_taken", actor=0, amount=25),
-                dict(kind="kill", actor=1, target=0),
-                dict(kind="energy_gained", actor=1, amount=40, cause="prey"),
-                dict(kind="died", actor=0, cause="predation"),
-                dict(kind="moved", actor=2),
+                {"kind": "damage_dealt", "actor": 1, "amount": 25},
+                {"kind": "damage_taken", "actor": 0, "amount": 25},
+                {"kind": "kill", "actor": 1, "target": 0},
+                {"kind": "energy_gained", "actor": 1, "amount": 40, "cause": "prey"},
+                {"kind": "died", "actor": 0, "cause": "predation"},
+                {"kind": "moved", "actor": 2},
             ],
         ),
     ]
@@ -112,7 +121,14 @@ class AnalysisTests(unittest.TestCase):
                 frame(
                     1,
                     [],
-                    [dict(kind="died", actor=0, cause="starvation", position=[3, 2])],
+                    [
+                        {
+                            "kind": "died",
+                            "actor": 0,
+                            "cause": "starvation",
+                            "position": [3, 2],
+                        }
+                    ],
                 ),
             ],
         )
@@ -121,7 +137,7 @@ class AnalysisTests(unittest.TestCase):
             config(),
             [
                 frame(0, [a]),
-                frame(1, [], [dict(kind="died", actor=0, cause="starvation")]),
+                frame(1, [], [{"kind": "died", "actor": 0, "cause": "starvation"}]),
             ],
         )
         self.assertEqual(unknown["movement_heatmap"]["arrivals"], 0)
@@ -156,8 +172,8 @@ class AnalysisTests(unittest.TestCase):
         frames = fixture()[:2]
         frames[1]["animals"] = [animal(1, "predator", 1, "rest")]
         frames[1]["events"] = [
-            dict(kind="energy_gained", actor=0, amount=4, cause="resource"),
-            dict(kind="died", actor=0, cause="starvation"),
+            {"kind": "energy_gained", "actor": 0, "amount": 4, "cause": "resource"},
+            {"kind": "died", "actor": 0, "cause": "starvation"},
         ]
         prey = analyze_run(config(), frames)["species"]["prey"]
         self.assertEqual(prey["observed_actions"], 1)
@@ -178,16 +194,17 @@ class AnalysisTests(unittest.TestCase):
 
     def test_inherited_counters_are_not_counted_as_child_learning(self):
         def diagnostic(updates, groups, zero=True):
-            return dict(
-                algorithm="grpo",
-                updates=updates,
-                rollout_updates=groups,
-                action_probabilities={"attack": 0.5, "rest": 0.5},
-                entropy=0.6931471805599453,
-                training_metrics=dict(
-                    zero_variance=zero, group_returns=[0, 0] if zero else [0, 1]
-                ),
-            )
+            return {
+                "algorithm": "grpo",
+                "updates": updates,
+                "rollout_updates": groups,
+                "action_probabilities": {"attack": 0.5, "rest": 0.5},
+                "entropy": 0.6931471805599453,
+                "training_metrics": {
+                    "zero_variance": zero,
+                    "group_returns": [0, 0] if zero else [0, 1],
+                },
+            }
 
         frames = [
             frame(0, [animal(1, "predator")], diagnostics={"1": diagnostic(10, 5)}),
@@ -218,18 +235,23 @@ class AnalysisTests(unittest.TestCase):
             frame(
                 0,
                 [animal(1, "predator")],
-                diagnostics={"1": dict(algorithm="grpo", updates=0, rollout_updates=0)},
+                diagnostics={
+                    "1": {"algorithm": "grpo", "updates": 0, "rollout_updates": 0}
+                },
             ),
             frame(
                 1,
                 [animal(1, "predator", 1)],
                 diagnostics={
-                    "1": dict(
-                        algorithm="grpo",
-                        updates=2,
-                        rollout_updates=3,
-                        training_metrics=dict(zero_variance=True, group_returns=[0, 0]),
-                    )
+                    "1": {
+                        "algorithm": "grpo",
+                        "updates": 2,
+                        "rollout_updates": 3,
+                        "training_metrics": {
+                            "zero_variance": True,
+                            "group_returns": [0, 0],
+                        },
+                    }
                 },
             ),
         ]
@@ -253,23 +275,23 @@ class AnalysisTests(unittest.TestCase):
     def save(self, folder, frames, run=1):
         playback = folder / "playback"
         playback.mkdir(parents=True)
-        metadata = dict(
-            recording_version=1,
-            name="test",
-            mode="train",
-            config=config(),
-            runs=[
-                dict(
-                    run=run,
-                    seed=42,
-                    first_tick=frames[0]["tick"],
-                    last_tick=frames[-1]["tick"],
-                    chunk_count=len(frames),
-                    frame_count=len(frames),
-                    complete=True,
-                )
+        metadata = {
+            "recording_version": 1,
+            "name": "test",
+            "mode": "train",
+            "config": config(),
+            "runs": [
+                {
+                    "run": run,
+                    "seed": 42,
+                    "first_tick": frames[0]["tick"],
+                    "last_tick": frames[-1]["tick"],
+                    "chunk_count": len(frames),
+                    "frame_count": len(frames),
+                    "complete": True,
+                }
             ],
-        )
+        }
         (playback / "recording.json").write_text(json.dumps(metadata))
         for index, f in enumerate(frames):
             (playback / f"run_{run:04d}_chunk_{index:06d}.json").write_text(

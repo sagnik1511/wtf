@@ -1,3 +1,12 @@
+"""Regression coverage for ppo behavior and compatibility."""
+
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import copy
 import json
 import math
@@ -100,6 +109,13 @@ class PPOMathTests(unittest.TestCase):
                 self.assertGreater(sum(abs(g) for g in gradient), 0.0)
 
     def test_multilayer_backprop_matches_finite_differences(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+
         network = MLP([3, 2], 2, 14)
         observation = tuple((i - 10) / 20 for i in range(20))
         outputs, activations = network.forward(observation)
@@ -255,6 +271,10 @@ class PPOIntegrationTests(unittest.TestCase):
                 validate(bad)
 
     def test_ppo_and_mixed_checkpoint_continuation_across_runs(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for mixed in (False, True):
             for retain in (False, True):
                 with self.subTest(mixed=mixed, retain=retain):

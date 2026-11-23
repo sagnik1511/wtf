@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_config(path=None):
+    """Load the documentation site configuration with resolved paths."""
     path = Path(path or ROOT / "zensical.toml")
     with path.open("rb") as stream:
         values = tomllib.load(stream)["project"]
@@ -30,6 +31,7 @@ def load_config(path=None):
 
 
 def page_for(source):
+    """Build the page descriptor used by documentation link rewriting."""
     prefix = source[:-3]
     url = prefix + "/"
     if Path(source).name in {"index.md", "README.md"}:
@@ -41,6 +43,17 @@ def page_for(source):
 
 def prepare(root=ROOT):
     """Never let the site generator scan the private checkout documentation tree."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+    # Documentation-only dependencies are installed from requirements-docs.txt in the
+    # separate docs environment.
+    # pylint: disable=import-error
+
     import tomli_w
 
     config_path = root / "zensical.toml"
@@ -87,6 +100,14 @@ def prepare(root=ROOT):
 @contextmanager
 def build_lock(root):
     """Preview and CLI builds share staging/output; never mutate them together."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+    # The Windows-only stdlib import is guarded by os.name; it is unavailable on POSIX
+    # lint hosts.
+    # pylint: disable=import-error
+
     path = root / ".cache/docs-build.lock"
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a+b") as stream:
@@ -113,11 +134,17 @@ def build_lock(root):
 
 
 def build(root=ROOT):
+    """Generate the configured build output and validate required inputs."""
     with build_lock(root):
         return _build(root)
 
 
 def _build(root):
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     from work.build_source_docs import build as build_source_reference
 
     source_html = build_source_reference(root)
@@ -150,6 +177,11 @@ def _build(root):
 
 def source_signature(root=ROOT):
     """Watch source changes only, excluding all generated output and private files."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     paths = set(docs_site.public_sources(root).values())
     paths.update(root / name for name in docs_site.EXTRA_PAGES.values())
     paths.update(
@@ -175,10 +207,13 @@ def source_signature(root=ROOT):
 
 
 def serve(address):
+    """Serve a local preview and rebuild when maintained sources change."""
     config = build()
     prefix = urlsplit(config.site_url).path.rstrip("/")
 
     class Handler(SimpleHTTPRequestHandler):
+        """Serve read-only HTTP responses using the configured local services."""
+
         def translate_path(self, path):
             if path == prefix or path.startswith(prefix + "/"):
                 path = path[len(prefix) :] or "/"
@@ -217,6 +252,7 @@ def serve(address):
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "command", choices=("build", "serve"), nargs="?", default="build"

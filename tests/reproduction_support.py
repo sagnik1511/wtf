@@ -1,5 +1,13 @@
 """Controlled neural choices for tests; never bypass physical reproduction gates."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-function-docstring
+
 import copy
 from wtf.storage.library import ChampionBook
 

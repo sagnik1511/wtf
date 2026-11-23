@@ -1064,3 +1064,44 @@ schema or event histories are introduced. Extra policy inputs still increase
 network/buffer/sample size. The `seaside_social` example opts into compact capture
 to limit diagnostic storage. No training speedup or net memory reduction is
 claimed. See [configuration, retention and limits](social-learning.md).
+
+## Collective learning hotpaths
+
+Episode-scheduled consequence checkpoints pack the published and staged table
+rows independently but copy their common physical contracts only once. Returned
+rows and contracts remain detached from live model state. There is no retained
+encoding cache, additional checkpoint field or artifact-layout change.
+
+Witness processing checks both start and end positions for a moving subject.
+When they are equal, one visibility query suffices within that same finish phase.
+This reuses a pure result only for identical coordinates with the same observer,
+world and sight parameters; it does not cache across steps or visibility changes.
+Hidden starts of moving subjects still exclude their outcomes.
+
+A local CPython 3.12 microbenchmark compared these two paths against `29d2c2f`
+with the evaluation-freeze fix applied equally. Seven batches per implementation,
+10 warmup calls, used 1,000 empty-checkpoint calls, 100 populated-checkpoint calls
+or 100 witness-finish calls per batch. Values below are medians per call; traced
+allocation peaks cover ten repeated calls after garbage collection, not process
+RSS. Both species had published and staged tables in the populated case. The
+stationary case used 35 animals with eight same-species witnesses each.
+
+| Path | Before | After | Time reduction | Peak traced bytes, before → after |
+| --- | --- | --- | --- | --- |
+| Empty episode checkpoint | 51.54 µs | 27.73 µs | 46.2% | 8,736 → 5,384 |
+| Episode checkpoint, 512 rows/species per table | 941.74 µs | 758.90 µs | 19.4% | 663,272 → 660,216 |
+| Stationary witness finish | 341.64 µs | 247.48 µs | 27.6% | 125,088 → 125,088 |
+
+An independent rerun reproduced exact state equality, visibility call counts and
+allocation peaks. Its medians were 45.92 → 24.75 µs (empty checkpoint),
+942.26 → 919.91 µs (populated checkpoint), and 392.22 → 380.94 µs (witness finish).
+This timing variability limits the strength of speedup claims; the removed
+copies and visibility calls are the stable structural improvements.
+
+Visibility calls fell from 560 to 280 for the stationary fixture. Serialized
+checkpoint/export values and witness recovery state matched the reference
+exactly. Regressions separately check moving subjects with a hidden start and
+snapshot independence. These are path-specific synthetic results, not measured
+end-to-end training speedups; overall gains depend on checkpoint cadence,
+movement and visibility costs. Replays, recorded observations, RNG use and policy
+updates are unchanged. No disk reduction is claimed.

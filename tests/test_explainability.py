@@ -1,5 +1,13 @@
 """Archived inference parity, local derivative checks and bounded playback access."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -74,6 +82,16 @@ class InferenceExplanationTests(unittest.TestCase):
                 )
 
     def test_gradients_match_finite_differences_for_all_algorithms(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Keep the small synchronous numeric callback adjacent to the expression it
+        # parameterizes.
+        # pylint: disable=unnecessary-lambda-assignment
+        # The callback is consumed synchronously within this iteration; it never
+        # escapes the loop.
+        # pylint: disable=cell-var-from-loop
+
         for kind in KINDS:
             with self.subTest(kind=kind):
                 e = Experiment(environment(kind, 0))
@@ -110,7 +128,7 @@ class InferenceExplanationTests(unittest.TestCase):
             self.assertEqual(
                 len(
                     feature_names(
-                        dict(observation_version=version, observation_top_k=3)
+                        {"observation_version": version, "observation_top_k": 3}
                     )
                 ),
                 width + 24,
@@ -131,6 +149,10 @@ class InferenceExplanationTests(unittest.TestCase):
 
 class ExplanationStoreTests(unittest.TestCase):
     def fixture(self, root):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         c = environment("ppo", 0)
         c["world"]["max_steps"] = 3
         c["recording"].update(
@@ -153,6 +175,11 @@ class ExplanationStoreTests(unittest.TestCase):
         return e, animal, folder
 
     def test_bounded_context_and_shared_weight_cache_across_criteria_and_what_if(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             e, animal, _ = self.fixture(root)
@@ -209,13 +236,13 @@ class ExplanationStoreTests(unittest.TestCase):
             _, animal, run = self.fixture(root)
             store = ExplanationStore(RecordingStore(root))
             for kwargs in (
-                dict(frame=-1),
-                dict(animal=99999),
-                dict(criterion="unknown"),
-                dict(feature=0, value=float("nan")),
-                dict(action="fly"),
+                {"frame": -1},
+                {"animal": 99999},
+                {"criterion": "unknown"},
+                {"feature": 0, "value": float("nan")},
+                {"action": "fly"},
             ):
-                args = dict(recording_id="saved", run=1, frame=0, animal=animal)
+                args = {"recording_id": "saved", "run": 1, "frame": 0, "animal": animal}
                 args.update(kwargs)
                 with self.assertRaises(ValueError):
                     store.explain(**args)
@@ -232,6 +259,16 @@ class ExplanationStoreTests(unittest.TestCase):
 
 class ExplanationAPITests(unittest.TestCase):
     def test_http_endpoint_and_read_only_boundary(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # The server spans the request/test lifecycle and is closed by the existing
+        # teardown/finally path.
+        # pylint: disable=consider-using-with
+
         import threading
         from http.server import ThreadingHTTPServer
         from urllib.error import HTTPError
@@ -266,6 +303,11 @@ class ExplanationAPITests(unittest.TestCase):
                 thread.join(timeout=5)
 
     def test_server_analysis_does_not_import_live_brains_or_world(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import subprocess
         import sys
 
@@ -281,6 +323,13 @@ class ExplanationAPITests(unittest.TestCase):
 
 class ExplanationCacheContractTests(unittest.TestCase):
     def test_blob_dedup_freshness_and_legacy_inline_weights(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import os
         from wtf.storage.model_io import read_model, model_path
 

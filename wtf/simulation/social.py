@@ -27,27 +27,35 @@ GROUP = {
 
 
 def social_contract(template):
+    """Resolve the optional local social-observation contract."""
+
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+
     if "social_observation" not in template:
         return None
     spec = template["social_observation"]
     if not isinstance(spec, dict) or set(spec) - {"history_steps", "max_neighbors"}:
         raise ValueError("Invalid collective social observation layout")
-    result = dict(
-        history_steps=spec.get("history_steps", 4),
-        max_neighbors=spec.get("max_neighbors", 8),
-    )
+    result = {
+        "history_steps": spec.get("history_steps", 4),
+        "max_neighbors": spec.get("max_neighbors", 8),
+    }
     if any(type(value) is not int or not 1 <= value <= 16 for value in result.values()):
         raise ValueError("Social history_steps/max_neighbors must be integers in 1..16")
     return result
 
 
 def social_width(template):
+    """Compute the optional social and consequence input width."""
     return (24 if social_contract(template) is not None else 0) + (
         48 if template.get("consequence_observation", False) else 0
     )
 
 
 def social_names(template):
+    """Name the optional social and consequence inputs in vector order."""
     names = []
     if social_contract(template) is not None:
         names += [f"Collective {group} {part}" for group in GROUPS for part in PARTS]
@@ -59,6 +67,7 @@ def social_names(template):
 
 
 def enabled(config):
+    """Return whether the optional feature is configured for this context."""
     return any(
         social_width(config["brains"][spec["brain"]])
         for spec in config["species"].values()
@@ -71,6 +80,11 @@ def _template(world, animal):
 
 def _can_see(world, observer, target):
     # A cached immutable start/end sight description; no lookups of hidden bodies.
+
+    # This internal collaborator intentionally inspects the owning component's private
+    # state.
+    # pylint: disable=protected-access
+
     x, y, radius, bonus = observer
     dx, dy = target[0] - x, target[1] - y
     if dx * dx + dy * dy > (radius + bonus) ** 2:
@@ -114,6 +128,11 @@ def _local_context(world, animal, buckets):
 
 def _context(world, animal, action, local):
     """Local physical context only; never absolute position or a hidden target state."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     body, danger = local
     rules = world.config["species"][animal.species].get("locomotion", {})
     source = animal.position
@@ -146,6 +165,8 @@ def _context(world, animal, action, local):
 
 
 class SocialState:
+    """Track bounded visible outcomes and species consequence estimates."""
+
     def __init__(self, config):
         self.config = config
         self.training = True
@@ -165,6 +186,12 @@ class SocialState:
 
     def prepare(self, world):
         # Standalone World.step is valid before the first observe_all call.
+        """Prepare the inputs needed by the next processing phase."""
+
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+
         if not hasattr(world, "_water_sight_cache"):
             world._water_sight_cache = OrderedDict()
         buckets = defaultdict(list)
@@ -173,6 +200,12 @@ class SocialState:
         self.buckets = buckets
 
     def begin(self, world, actions):
+        """Capture pre-step visible subjects and private outcome-window contexts."""
+
+        # The callback is consumed synchronously within this iteration; it never
+        # escapes the loop.
+        # pylint: disable=cell-var-from-loop
+
         positions = {a.id: a.position for a in world.animals.values()}
         self.prepare(world)
         buckets = self.buckets
@@ -225,6 +258,13 @@ class SocialState:
         self.before = positions, dict(actions), witnesses
 
     def finish(self, world, events, dead_animals):
+        """Aggregate visible outcomes and close completed consequence windows."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+
         positions, actions, witnesses = self.before
         self.before = None
         all_animals = {**dead_animals, **world.animals}
@@ -255,7 +295,10 @@ class SocialState:
                 if (
                     subject is None
                     or not _can_see(world, sight, subject.position)
-                    or not _can_see(world, sight, positions[subject_id])
+                    or (
+                        subject.position != positions[subject_id]
+                        and not _can_see(world, sight, positions[subject_id])
+                    )
                 ):
                     continue
                 offset = GROUP[actions[subject_id]] * 4
@@ -295,6 +338,7 @@ class SocialState:
                     del self.pending[animal_id]
 
     def observe(self, world, animal, template):
+        """Append only the configured local social and consequence features."""
         features = []
         contract = social_contract(template)
         if contract is not None:
@@ -322,12 +366,15 @@ class SocialState:
         return features
 
     def checkpoint(self):
-        return dict(
-            version=1,
-            training=self.training,
-            knowledge=self.knowledge.checkpoint() if self.knowledge else None,
-            sightings={str(i): list(history) for i, history in self.sightings.items()},
-            pending={
+        """Serialize state required to resume this component."""
+        return {
+            "version": 1,
+            "training": self.training,
+            "knowledge": self.knowledge.checkpoint() if self.knowledge else None,
+            "sightings": {
+                str(i): list(history) for i, history in self.sightings.items()
+            },
+            "pending": {
                 str(i): [
                     name,
                     list(totals),
@@ -335,10 +382,20 @@ class SocialState:
                 ]
                 for i, (name, totals, queue) in self.pending.items()
             },
-        )
+        }
 
     @classmethod
     def restore(cls, config, state):
+        """Reconstruct the component from its persisted continuation state."""
+
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-boolean-expressions
+        # pylint: disable=too-many-branches
+
         result = cls(config)
         if (
             not isinstance(state, dict)

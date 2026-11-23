@@ -1,5 +1,8 @@
 """Exact state, publication ordering and bounded ownership for artifact retention."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -126,6 +129,13 @@ class ArtifactRetentionTests(unittest.TestCase):
             self.assertFalse((Path(folder) / "champions").exists())
 
     def test_recent_best_milestones_and_all_replays_are_preserved(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import contextlib
         import io
         from wtf.cli import run_experiment
@@ -134,34 +144,34 @@ class ArtifactRetentionTests(unittest.TestCase):
         from tests.test_ppo import ppo_environment
 
         c = ppo_environment()
-        c["recording"] = dict(
-            enabled=True,
-            encoding="binary",
-            compression="xz",
-            frames_per_chunk=3,
-            frame_every_steps=1,
-            diagnostics_every_steps=2,
-        )
+        c["recording"] = {
+            "enabled": True,
+            "encoding": "binary",
+            "compression": "xz",
+            "frames_per_chunk": 3,
+            "frame_every_steps": 1,
+            "diagnostics_every_steps": 2,
+        }
         outcomes = []
         with tempfile.TemporaryDirectory() as folder:
             for name, options in [
                 (
                     "before",
-                    dict(
-                        checkpoint_keep_last=0,
-                        checkpoint_every_steps=0,
-                        brain_save_every_steps=0,
-                        checkpoint_shared_metadata=False,
-                    ),
+                    {
+                        "checkpoint_keep_last": 0,
+                        "checkpoint_every_steps": 0,
+                        "brain_save_every_steps": 0,
+                        "checkpoint_shared_metadata": False,
+                    },
                 ),
                 (
                     "after",
-                    dict(
-                        checkpoint_keep_last=2,
-                        checkpoint_every_steps=3,
-                        brain_save_every_steps=2,
-                        brain_keep_last=2,
-                    ),
+                    {
+                        "checkpoint_keep_last": 2,
+                        "checkpoint_every_steps": 3,
+                        "brain_save_every_steps": 2,
+                        "brain_keep_last": 2,
+                    },
                 ),
             ]:
                 root = Path(folder) / name

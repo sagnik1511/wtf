@@ -1,5 +1,17 @@
 """Storage precision, exact continuation, inheritance and lossless narrow encodings."""
 
+# This self-contained regression intentionally repeats reference/setup data.
+# pylint: disable=duplicate-code
+
+
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import math
@@ -106,6 +118,11 @@ class NumericPrecisionTests(unittest.TestCase):
     def test_legacy_brains_restore_without_rounding_and_keep_float64_optimizer_state(
         self,
     ):
+
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+
         for kind in KINDS:
             with self.subTest(kind=kind), precision_scope("float64"):
                 original = create_brain(settings(kind), ["rest", "eat"], 7, 11)

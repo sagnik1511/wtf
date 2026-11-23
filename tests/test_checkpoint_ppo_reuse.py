@@ -1,11 +1,18 @@
 """Bounded metadata identity reuse and update-local PPO sample preparation."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-
 from wtf.storage import checkpoint_io
 from wtf.storage.checkpoint_io import (
     Encoder,
@@ -15,8 +22,8 @@ from wtf.storage.checkpoint_io import (
 )
 from wtf.learning import ppo
 from wtf.native import kernels
-from tests.test_ppo import ppo_settings
 from wtf.learning.brain import Experience
+from tests.test_ppo import ppo_settings
 
 
 class CheckpointMetadataReuseTests(unittest.TestCase):
@@ -117,6 +124,11 @@ class PPOSampleReuseTests(unittest.TestCase):
 
     @unittest.skipUnless(kernels.available("ppo_batch"), "Native PPO batch required")
     def test_native_rows_prepared_once_and_reused_across_epochs_and_resume(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         c = ppo_settings()
         c.update(epochs=3, rollout_steps=4, batch_size=2, target_kl=0)
         brain = ppo.PPOBrain(c, ["rest", "attack"], 3, 5)
@@ -150,7 +162,7 @@ class PPOSampleReuseTests(unittest.TestCase):
             patch.object(kernels, "available", return_value=False),
             patch.object(ppo, "_prepare_native_samples") as prepare,
         ):
-            for tick in range(4):
+            for _tick in range(4):
                 obs = (0.0,) * 20
                 action = brain.choose(obs)
                 brain.learn(Experience(obs, action, 0.2, obs, False, False))

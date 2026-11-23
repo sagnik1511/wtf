@@ -1,16 +1,19 @@
 """Exact v2 math/spatial/data behavior; no timing thresholds."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 from array import array
 import copy
 import json
 import math
 import random
-import sys
+
 import unittest
 from unittest.mock import patch
 
 from wtf.native import kernels
-from wtf.learning.ppo import MLP, policy_distribution, loss_and_gradient, PPOBrain
+from wtf.learning.ppo import MLP, policy_distribution, loss_and_gradient
 from wtf.learning.qrdqn import quantile_huber
 from wtf.learning.recurrent_ppo import GRUNetwork
 from wtf.storage.binary_io import Encoder, Decoder, varint
@@ -28,6 +31,14 @@ SUPPORTED = NATIVE is not None and getattr(NATIVE, "api_version", 1) == 2
 @unittest.skipUnless(SUPPORTED, "Build v2 native kernels first")
 class NativeExtensionTests(unittest.TestCase):
     def test_masked_ppo_batch_matches_scalar_training_exactly(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         from tests.test_mutation import environment
         from wtf.experiment.runner import Experiment
 
@@ -48,7 +59,6 @@ class NativeExtensionTests(unittest.TestCase):
             ):
                 scalar.step()
             self.assertEqual(batched.checkpoint(), scalar.checkpoint())
-        from wtf.learning.contextual_ppo import MaskablePPOBrain
 
         brain = next(iter(batched.brains.values()))
         gradients = brain.network.zeros()
@@ -74,6 +84,13 @@ class NativeExtensionTests(unittest.TestCase):
         self.assertEqual(gradients, baseline)
 
     def test_policy_math_and_fused_batch_gradients_are_exact(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         rng = random.Random(987)
         for hidden in ([], [3], [4, 3]):
             network = MLP(hidden, 3, 42)
@@ -147,6 +164,11 @@ class NativeExtensionTests(unittest.TestCase):
         )
 
     def test_quantile_loss_keeps_pairwise_accumulation_order(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         rng = random.Random(6)
         for n in (1, 3, 16):
             p = [rng.uniform(-5, 5) for _ in range(n)]
@@ -157,10 +179,15 @@ class NativeExtensionTests(unittest.TestCase):
                 self.assertEqual(NATIVE.quantile(p, t, k), expected)
 
     def test_group_metrics_match_sparse_python_for_dense_and_negative_coordinates(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         rng = random.Random(42)
         for n in (0, 1, 60, 500):
             animals = [
-                dict(x=rng.randrange(-20, 40), y=rng.randrange(-10, 28))
+                {"x": rng.randrange(-20, 40), "y": rng.randrange(-10, 28)}
                 for _ in range(n)
             ]
             got = NATIVE.groups(animals, 3)
@@ -169,6 +196,11 @@ class NativeExtensionTests(unittest.TestCase):
             self.assertEqual(got, expected)
 
     def test_codec_keeps_bytes_types_signed_zero_aliases_and_detachment(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         shared = [{"x": -0.0, "y": 1.0}]
         data = {
             "first": shared,
@@ -203,6 +235,16 @@ class NativeExtensionTests(unittest.TestCase):
         self.assertEqual(Decoder().decode(encoded), data)
 
     def test_body_and_growth_phases_preserve_numeric_types_and_death_events(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+        # Energy depletion and positive health are separate physical gates kept
+        # explicit for auditability.
+        # pylint: disable=chained-comparison
+
         c = config()
         w = World(c, 12)
         for i, a in w.animals.items():
@@ -249,6 +291,11 @@ class NativeExtensionTests(unittest.TestCase):
         )
 
     def test_native_views_are_released_and_bad_inputs_are_rejected(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         f = array("f", [1.0, 2.0, 3.0, 4.0])
         d = array("d", [0.0] * 4)
         for call in (
@@ -269,6 +316,11 @@ class NativeExtensionTests(unittest.TestCase):
 
     def test_stale_extension_does_not_activate_v2_functions(self):
         class Old:
+
+            # This record/owner deliberately keeps its related fields and lifecycle
+            # operations together without artificial wrappers.
+            # pylint: disable=too-few-public-methods
+
             api_version = 1
 
         with patch.object(kernels, "native", Old()):

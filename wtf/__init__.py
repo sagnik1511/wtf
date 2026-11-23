@@ -16,12 +16,22 @@ __all__ = ["Experiment", "load_config"]
 
 def load_config(name_or_path="baseline"):
     """Load a bundled preset name or a local environment JSON and validate it."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     from wtf.config import load
 
     return load(name_or_path)
 
 
 def __getattr__(name):
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     if name == "Experiment":
         from wtf.experiment.runner import Experiment
 

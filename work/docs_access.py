@@ -1,5 +1,10 @@
 """Catalog public visuals and prove click-only routes from the documentation home."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import argparse
 from collections import defaultdict, deque
 from html.parser import HTMLParser
@@ -99,6 +104,7 @@ def inventory(root=ROOT):
 
 
 def label(name):
+    """Create a readable label from a documentation source name."""
     text = Path(name).stem.replace("-", " ").replace("_", " ").capitalize()
     text = re.sub(
         r"\b(wtf|ppo|grpo|mappo|dqn|svg|rng)\b",
@@ -112,12 +118,18 @@ def label(name):
 
 
 def preview_source(name):
+    """Resolve the documentation page hosting a visual preview."""
     relative = name.removeprefix("docs/assets/")
     return "visual-previews/" + relative.replace(".", "-") + ".md"
 
 
 def visual_previews(names, root=ROOT):
     """Small generated Zensical wrappers retain the selected site palette."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     pages = {}
     for name in names:
         if not name.startswith("docs/"):
@@ -125,6 +137,11 @@ def visual_previews(names, root=ROOT):
         source = preview_source(name)
 
         def href(asset):
+
+            # The callback is consumed synchronously within this iteration; it never
+            # escapes the loop.
+            # pylint: disable=cell-var-from-loop
+
             return posixpath.relpath(
                 asset.removeprefix("docs/"), posixpath.dirname(source)
             )
@@ -223,6 +240,7 @@ def visual_previews(names, root=ROOT):
 
 
 def visual_catalog(names, root=ROOT):
+    """Render the catalog of tracked documentation visuals."""
     groups = defaultdict(list)
     duplicates = []
     for name in names:
@@ -312,18 +330,20 @@ class ArticleLinks(HTMLParser):
         self.href = None
         self.text = ""
 
-    def handle_starttag(self, tag, attributes):
-        attrs = dict(attributes)
-        if tag == "meta" and attrs.get("name") == "generator":
+    def handle_starttag(self, tag, attrs):
+        parsed_attrs = dict(attrs)
+        if tag == "meta" and parsed_attrs.get("name") == "generator":
             self.document = (
-                attrs.get("content", "").lower().startswith(("mkdocs-", "zensical"))
+                parsed_attrs.get("content", "")
+                .lower()
+                .startswith(("mkdocs-", "zensical"))
             )
         if tag == "article":
             self.article = True
         if self.article and tag == "h1":
             self.heading = True
         if self.article and tag == "a":
-            self.href, self.text = attrs.get("href"), ""
+            self.href, self.text = parsed_attrs.get("href"), ""
 
     def handle_data(self, data):
         if self.href is not None:
@@ -344,6 +364,7 @@ class ArticleLinks(HTMLParser):
 
 
 def destination(origin, href, site_url):
+    """Resolve a local content link to its documentation destination."""
     base = site_url.rstrip("/") + "/"
     location = urlsplit(base)
     target = urlsplit(urljoin(base + origin, href))
@@ -360,6 +381,7 @@ def destination(origin, href, site_url):
 
 
 def content_routes(site_dir, site_url):
+    """Find content-click routes from the documentation homepage."""
     pages = {}
     for path in sorted(Path(site_dir).rglob("*.html")):
         page = ArticleLinks()
@@ -391,6 +413,7 @@ def content_routes(site_dir, site_url):
 
 
 def source_page(target, root=ROOT):
+    """Resolve a built page to its maintained source."""
     if target == "index.html":
         return "index.md"
     prefix = target.removesuffix("/index.html")
@@ -406,11 +429,13 @@ def source_page(target, root=ROOT):
 
 
 def markdown_link(text, href):
+    """Format a documentation link while retaining its target."""
     text = text.replace("|", "&#124;").replace("[", "&#91;").replace("]", "&#93;")
     return f"[{text}]({href})"
 
 
 def breadcrumb(target, parents, pages, root=ROOT):
+    """Build the content-click breadcrumb for a documentation target."""
     chain = []
     while parents[target] is not None:
         origin, text = parents[target]
@@ -421,6 +446,12 @@ def breadcrumb(target, parents, pages, root=ROOT):
 
 
 def access_map(names, site_dir, site_url, root=ROOT):
+    """Prove and render homepage routes to pages and visual assets."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     pages, parents = content_routes(site_dir, site_url)
     media = [name for name in names if name.startswith("docs/")]
     missing = [name for name in media if name[5:] not in parents]
@@ -517,6 +548,12 @@ def access_map(names, site_dir, site_url, root=ROOT):
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()

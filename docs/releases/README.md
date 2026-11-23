@@ -6,10 +6,15 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.14](0.0.2.14.md), `10be63a`.
-**Latest committed runtime implementation:** [0.0.2.14](0.0.2.14.md), `10be63a`.
+**Latest committed rollout:** [0.0.2.18](0.0.2.18.md), `29d2c2f`.
+**Latest committed runtime implementation:** [0.0.2.18](0.0.2.18.md), `29d2c2f`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** [0.0.2.15 — Bundled LSTM PPO preset](0.0.2.15.md), [0.0.2.16 — Environment-object and feeding visuals](0.0.2.16.md), [0.0.2.17 — Additional geography presets](0.0.2.17.md), [0.0.2.18 — Collective learning](0.0.2.18.md).
+**Pending rollout:** [0.0.2.19 — Episode publication and independent review workflow](0.0.2.19.md).
+
+New release records include a **Fixes and optimizations** section maintained by
+`wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
+measured improvements, empty categories and unresolved decisions. Pending review
+is marked explicitly; historical records do not require a retrospective rewrite.
 
 ## Rollout index
 
@@ -20,10 +25,11 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.18](0.0.2.18.md) | Pending | 2026-11-23 | Not committed; base `10be63a` | Optional collective visible outcomes, persistent species consequence models and sampled playback charts |
-| [0.0.2.17](0.0.2.17.md) | Pending | 2026-11-23 | Not committed; base `10be63a` | Six themed geography maps and PPO presets: plains, coast, hills, wetlands, canyon and oasis |
-| [0.0.2.16](0.0.2.16.md) | Pending | 2026-11-23 | Not committed; base `10be63a` | Quantity-driven plants, faceted rocks, directional river crests, bounded feeding feedback and sunlight-driven shadows |
-| [0.0.2.15](0.0.2.15.md) | Pending | 2026-11-23 | Not committed; base `10be63a` | Bundled LSTM PPO preset and short-name CLI selection |
+| [0.0.2.19](0.0.2.19.md) | Pending | 2026-11-23 | Not committed; base `29d2c2f` | Episode publication safeguards, bounded social hotpath reuse, independent review, full-repository Pylint cleanup and CI/build preflight |
+| [0.0.2.18](0.0.2.18.md) | Committed | 2026-11-23 | `29d2c2f` | Optional collective visible outcomes, persistent species consequence models and sampled playback charts |
+| [0.0.2.17](0.0.2.17.md) | Committed | 2026-11-23 | `29d2c2f` | Six themed geography maps and PPO presets: plains, coast, hills, wetlands, canyon and oasis |
+| [0.0.2.16](0.0.2.16.md) | Committed | 2026-11-23 | `29d2c2f` | Quantity-driven plants, faceted rocks, directional river crests, bounded feeding feedback and sunlight-driven shadows |
+| [0.0.2.15](0.0.2.15.md) | Committed | 2026-11-23 | `29d2c2f` | Bundled LSTM PPO preset and short-name CLI selection |
 | [0.0.2.14](0.0.2.14.md) | Committed | 2026-11-23 | `10be63a` | Exact optional native LSTM gates and BPTT, matched state/playback benchmarks |
 | [0.0.2.13](0.0.2.13.md) | Committed | 2026-11-23 | `10be63a` | Generic Discrete SAC, TRPO, LSTM PPO, complete lifecycle/XAI integration and local hotpath reuse |
 | [0.0.2.12](0.0.2.12.md) | Committed | 2026-11-23 | `1117b6d` | Bounded checkpoint metadata identity reuse and update-local PPO sample preparation |

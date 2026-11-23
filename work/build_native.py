@@ -15,6 +15,7 @@ from _build_support import configure_compiler
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     root = Path(__file__).resolve().parents[1]
     if Path.cwd() != root:
         raise SystemExit("Run this command from the repository root")

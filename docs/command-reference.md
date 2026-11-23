@@ -32,6 +32,7 @@ lists bundled environment names. `python -m wtf` offers the same hub;
 | `--record-last-episodes K` | Current source: record final K scheduled episodes, capped at total; -1 records all (default), 0 none. Persists on resume; [early-stop/profile behavior](recording.md#record-only-the-final-scheduled-episodes) |
 | `--recording-profile full\|compact\|training-only` | Training capture preset; evaluation/random resolve a configured training preset to full. Explicit compact/training-only CLI choices require train mode. Persisted on resume; see [profiles](recording.md#training-recording-profiles) |
 | `--consequences-from PATH` | Import compatible shared consequence estimates from a result folder or `consequences.json.xz`; requires opted-in inputs, leaves individual policy weights independent and cannot override exact resume |
+| `--consequence-update-schedule continuous\|episode` | Fresh enabled consequence-learning experiments: publish continuously (default) or before the next training episode; saved schedule governs resume |
 | `--freeze-brains` | Evaluation only: offspring copy the same-sex parent’s model without crossover; no learning or mutation. Persisted in checkpoints |
 | `--no-record` | Skip replay recording; metrics and exact checkpoints are still saved |
 | `--progress`, `--no-progress` | Force or suppress tqdm display; otherwise automatic output handling applies |

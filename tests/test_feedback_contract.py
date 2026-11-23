@@ -1,5 +1,13 @@
 """The same environment feedback reaches every algorithm on every preset."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from contextlib import ExitStack
 from pathlib import Path
@@ -18,6 +26,12 @@ class FeedbackContractTests(unittest.TestCase):
     def test_all_presets_and_algorithms_deliver_individual_or_species_mean_feedback(
         self,
     ):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-statements
+
         for path in sorted((ROOT / "environments").glob("*.json")):
             preset = load(path)
             for kind in KINDS:

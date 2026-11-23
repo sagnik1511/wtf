@@ -1,5 +1,13 @@
 """Distribution asset contracts; installed-wheel smoke checks live in work/."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import importlib.util
 import json
 import os
@@ -36,6 +44,7 @@ class PackagingTests(unittest.TestCase):
             ],
             capture_output=True,
             text=True,
+            check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -48,6 +57,7 @@ class PackagingTests(unittest.TestCase):
             ],
             capture_output=True,
             text=True,
+            check=False,
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("requires Python 3.12+", result.stderr)
@@ -117,6 +127,7 @@ class PackagingTests(unittest.TestCase):
                 env={**os.environ, "WTF_BUILD_NATIVE": "0"},
                 capture_output=True,
                 text=True,
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             archive = next(Path(temporary).glob("*.tar.gz"))
@@ -172,9 +183,14 @@ class PackagingTests(unittest.TestCase):
                     ]
                 )
             self.assertTrue(geometry[0])
-            self.assertEqual(*geometry)
+            self.assertEqual(geometry[0], geometry[1])
 
     def test_linux_build_support_leaves_system_compiler_configuration_unchanged(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from _build_support import configure_compiler
 
         before = dict(os.environ)

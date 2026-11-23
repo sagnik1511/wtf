@@ -7,11 +7,13 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 
 
 def asset_root():
+    """Locate the installed runtime asset directory."""
     packaged = files("wtf").joinpath("assets")
     return packaged if packaged.joinpath("environments").is_dir() else SOURCE_ROOT
 
 
 def asset(relative):
+    """Resolve a runtime asset within the installed or checkout asset tree."""
     relative = str(relative)
     parts = PurePosixPath(relative).parts
     if not parts or relative.startswith("/") or "\\" in relative or ".." in parts:
@@ -30,6 +32,7 @@ def asset(relative):
 
 def preset_names():
     # The explicit distribution manifest excludes exploratory/local presets.
+    """List the bundled environment preset names."""
     return sorted(
         p.name[:-5]
         for p in asset("environments").iterdir()
@@ -40,6 +43,7 @@ def preset_names():
 
 
 def preset_text(name):
+    """Read a bundled environment preset as JSON text."""
     name = str(name)
     if name.startswith("environments/"):
         name = name[len("environments/") :]

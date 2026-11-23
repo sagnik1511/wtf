@@ -1,6 +1,12 @@
-from wtf.storage.checkpoint_io import read_checkpoint
-
 """Run-to-run champion transfer and original-initialization controls."""
+
+# Preserve existing fixture dependency order after the standard-library imports.
+# pylint: disable=wrong-import-order
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -11,6 +17,7 @@ from wtf.learning.brains import model_snapshot
 from wtf.config import validate
 from wtf.storage.library import export_champions
 from wtf.experiment.runner import Experiment
+from wtf.storage.checkpoint_io import read_checkpoint
 from tests.test_simulation import config as base_config
 from tests.test_library import settings
 
@@ -138,7 +145,15 @@ class BrainChainingTests(unittest.TestCase):
             self.assertEqual(b.brains[0] is original, retain)
 
     def test_cli_three_runs_chain_archives_or_reuse_original_source(self):
-        import subprocess, sys
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
+        import subprocess
+        import sys
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

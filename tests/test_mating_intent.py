@@ -1,5 +1,13 @@
 """Consent persistence, cancellation, physical gates and stored playback state."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import unittest
@@ -195,8 +203,8 @@ class MatingIntentTests(unittest.TestCase):
         choose(w, {0: "reproduce"})
         snapshot = w.snapshot()
         restored = World.restore(json.loads(json.dumps(w.checkpoint())))
-        a = choose(w, {1: "reproduce"})
-        b = choose(restored, {1: "reproduce"})
+        _a = choose(w, {1: "reproduce"})
+        _b = choose(restored, {1: "reproduce"})
         self.assertEqual(w.checkpoint(), restored.checkpoint())
         encoder = DeltaEncoder()
         payload = dict(

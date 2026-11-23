@@ -28,6 +28,20 @@ from wtf.server import make_handler, State
 
 
 def main():
+    """Verify installed commands, assets, checkpoint restore and playback."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # Exercise the installed lazy public export rather than bypassing it with an
+    # internal import.
+    # pylint: disable=no-member
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
+    assert asset("viewer/index.html").is_file()
     workspace = Path.cwd()
     assert (
         importlib.util.find_spec("ecosystem") is None
@@ -78,7 +92,7 @@ def main():
     restored = Experiment.restore(state)
     assert restored.done and restored.world.tick == 5
     store = RecordingStore(workspace / "results")
-    metadata = store.metadata(folder.name)
+    _metadata = store.metadata(folder.name)
     frames = load_chunk(chunk_path(folder / "playback", 1, 0))
     assert len(frames) == 6 and frames[-1]["tick"] == 5
     assert frames[0]["diagnostics"]
@@ -130,7 +144,8 @@ def main():
         ) as response:
             assert len(json.load(response)) == 6
         try:
-            urlopen(base + "/../LICENSE")
+            with urlopen(base + "/../LICENSE"):
+                pass
         except HTTPError as error:
             assert error.code == 404
         else:

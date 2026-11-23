@@ -1,14 +1,12 @@
 """Independent A2C, episodic REINFORCE, and experimental branched GRPO."""
 
-from wtf.learning.activation_diagnostics import activation_sample
-from wtf.native.numeric import packed, plain, precision_of, restore_numeric
-
-
 import copy
-from wtf.learning.brain import observation_inputs
 import math
 import random
 from typing import NamedTuple
+from wtf.learning.activation_diagnostics import activation_sample
+from wtf.native.numeric import packed, plain, precision_of, restore_numeric
+from wtf.learning.brain import observation_inputs
 from wtf.learning.optimization import AdamOptimizer
 from wtf.learning.ppo import MLP, PPOBrain, advantages_and_returns, policy_distribution
 
@@ -23,6 +21,14 @@ def actor_loss_gradient(
     reference_logits=None,
     kl_coefficient=0.0,
 ):
+    """Compute the categorical actor loss and its logit derivative."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-positional-arguments
+
     probabilities, logs = policy_distribution(logits)
     entropy = -sum(p * logp for p, logp in zip(probabilities, logs))
     approximate_kl = 0.0
@@ -54,12 +60,12 @@ def actor_loss_gradient(
     return (
         loss,
         gradient,
-        dict(
-            policy_loss=policy_loss,
-            entropy=entropy,
-            approximate_kl=approximate_kl,
-            reference_kl=reference_kl,
-        ),
+        {
+            "policy_loss": policy_loss,
+            "entropy": entropy,
+            "approximate_kl": approximate_kl,
+            "reference_kl": reference_kl,
+        },
     )
 
 
@@ -77,6 +83,8 @@ def normalized(values, *, inplace=False):
 
 
 class A2CBrain(PPOBrain):
+    """Advantage actor-critic using its configured rollout update schedule."""
+
     algorithm = "a2c"
 
     def _update(self):
@@ -87,7 +95,7 @@ class A2CBrain(PPOBrain):
         if c["normalize_advantages"]:
             advantages = normalized(advantages, inplace=True)
         gradients = self.network.zeros()
-        totals = dict(policy_loss=0.0, value_loss=0.0, entropy=0.0)
+        totals = {"policy_loss": 0.0, "value_loss": 0.0, "entropy": 0.0}
         for step, advantage, target in zip(self.rollout, advantages, targets):
             outputs, activations = self.network.forward(step.observation)
             _, derivative, metrics = actor_loss_gradient(
@@ -108,6 +116,8 @@ class A2CBrain(PPOBrain):
 
 
 class PolicyStep(NamedTuple):
+    """One policy transition including the action log probability."""
+
     observation: tuple
     action: int
     reward: float
@@ -118,6 +128,15 @@ class PolicyStep(NamedTuple):
 
 class ActorBrain(AdamOptimizer):
     """Common categorical policy and checkpointing, without a value network."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
+    # Subclasses select the algorithm; only GRPO creates its guarded extra state.
+    algorithm: str
+    reference_network: MLP
+    group_rng: random.Random
 
     def __init__(self, config, actions, base_seed, individual_seed):
         self.config, self.actions = copy.deepcopy(config), list(actions)
@@ -140,9 +159,11 @@ class ActorBrain(AdamOptimizer):
         self.last_metrics = {}
 
     def action_probabilities(self, observation):
+        """Return the categorical action probabilities for an observation."""
         return policy_distribution(self.network.predict(observation))[0]
 
     def choose(self, observation, explore=True, random_baseline=False):
+        """Choose an action using this animal's private policy and exploration state."""
         if random_baseline:
             return self.rng.choice(self.actions)
         logits = self.network.predict(observation)
@@ -164,22 +185,23 @@ class ActorBrain(AdamOptimizer):
         return self.actions[action]
 
     def diagnostics(self, observation, include_activations=False):
+        """Return predictions and optional activation samples for inspection."""
         if include_activations:
             outputs, layers = self.network.forward(observation)
         else:
             outputs = self.network.predict(observation)
         probabilities, logs = policy_distribution(outputs)
-        info = dict(
-            algorithm=self.algorithm,
-            features=observation,
-            action_probabilities=dict(zip(self.actions, probabilities)),
-            entropy=-sum(p * lp for p, lp in zip(probabilities, logs)),
-            updates=self.updates,
-            rollout_updates=self.rollout_updates,
-            buffer_kind="episode" if self.algorithm == "reinforce" else "group",
-            buffer_size=len(self.trajectory),
-            training_metrics=copy.deepcopy(self.last_metrics),
-        )
+        info = {
+            "algorithm": self.algorithm,
+            "features": observation,
+            "action_probabilities": dict(zip(self.actions, probabilities)),
+            "entropy": -sum((p * lp for p, lp in zip(probabilities, logs))),
+            "updates": self.updates,
+            "rollout_updates": self.rollout_updates,
+            "buffer_kind": "episode" if self.algorithm == "reinforce" else "group",
+            "buffer_size": len(self.trajectory),
+            "training_metrics": copy.deepcopy(self.last_metrics),
+        }
         if self.algorithm == "reinforce":
             info["return_baseline"] = self.baseline
         else:
@@ -190,24 +212,25 @@ class ActorBrain(AdamOptimizer):
         return activation_sample(info, layers[1:-1]) if include_activations else info
 
     def checkpoint(self):
-        state = dict(
-            algorithm=self.algorithm,
-            precision=precision_of(self),
-            config=copy.deepcopy(self.config),
-            actions=self.actions[:],
-            network=self.network.checkpoint(),
-            moments=plain(self.moments),
-            variances=plain(self.variances),
-            trajectory=[s._asdict() for s in self.trajectory],
-            pending=self.pending,
-            steps=self.steps,
-            updates=self.updates,
-            rollout_updates=self.rollout_updates,
-            baseline=self.baseline,
-            last_metrics=copy.deepcopy(self.last_metrics),
-            rng_state=self.rng.getstate(),
-            training_rng_state=self.training_rng.getstate(),
-        )
+        """Serialize state required to resume this component."""
+        state = {
+            "algorithm": self.algorithm,
+            "precision": precision_of(self),
+            "config": copy.deepcopy(self.config),
+            "actions": self.actions[:],
+            "network": self.network.checkpoint(),
+            "moments": plain(self.moments),
+            "variances": plain(self.variances),
+            "trajectory": [s._asdict() for s in self.trajectory],
+            "pending": self.pending,
+            "steps": self.steps,
+            "updates": self.updates,
+            "rollout_updates": self.rollout_updates,
+            "baseline": self.baseline,
+            "last_metrics": copy.deepcopy(self.last_metrics),
+            "rng_state": self.rng.getstate(),
+            "training_rng_state": self.training_rng.getstate(),
+        }
         if self.algorithm == "grpo":
             state.update(
                 reference_network=self.reference_network.checkpoint(),
@@ -218,6 +241,12 @@ class ActorBrain(AdamOptimizer):
 
     @classmethod
     def restore(cls, state):
+        """Reconstruct the component from its persisted continuation state."""
+
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         b = cls(state["config"], state["actions"], 0, 0)
         for key in (
             "steps",
@@ -258,9 +287,12 @@ class ActorBrain(AdamOptimizer):
 
 
 class ReinforceBrain(ActorBrain):
+    """Episode-return policy gradient with a private running baseline."""
+
     algorithm = "reinforce"
 
     def learn(self, experience):
+        """Consume a transition and apply the configured learning schedule."""
         if len(self.trajectory) >= self.config["max_episode_steps"]:
             raise ValueError("REINFORCE episode exceeded max_episode_steps")
         action = self.action_indices[experience.action]
@@ -289,6 +321,11 @@ class ReinforceBrain(ActorBrain):
             self._update()
 
     def _update(self):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         c = self.config
         returns, total = [0.0] * len(self.trajectory), 0.0
         for i in range(len(self.trajectory) - 1, -1, -1):
@@ -301,7 +338,7 @@ class ReinforceBrain(ActorBrain):
         if c["normalize_advantages"]:
             advantages = normalized(advantages, inplace=True)
         gradients = self.network.zeros()
-        totals = dict(policy_loss=0.0, entropy=0.0)
+        totals = {"policy_loss": 0.0, "entropy": 0.0}
         for step, advantage in zip(self.trajectory, advantages):
             logits, activations = self.network.forward(step.observation)
             _, derivative, info = actor_loss_gradient(
@@ -342,15 +379,32 @@ class GRPOBrain(ActorBrain):
 
     @property
     def needs_group(self):
+        """Return whether the GRPO controller is due for another trial group."""
         return self.steps - self.last_group_step >= self.config["train_every_steps"]
 
     def learn(self, experience):
         # Training data comes from matched simulator trials collected by the
         # runner. A single real transition is not a comparable outcome group.
+        """Consume a transition and apply the configured learning schedule."""
+
+        # The callback keeps its caller's keyword signature; this branch does not
+        # consume every input.
+        # pylint: disable=unused-argument
+
         self.steps += 1
         self.pending = None
 
     def update_group(self, trajectories):
+        """Apply one grouped policy update from matched trial trajectories."""
+
+        # Keep independent numeric/compatibility or benchmark paths explicit to
+        # preserve their exact contracts.
+        # pylint: disable=duplicate-code
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         c = self.config
         if len(trajectories) < 2 or any(not t for t in trajectories):
             raise ValueError("GRPO needs at least two nonempty matched trajectories")
@@ -365,13 +419,13 @@ class GRPOBrain(ActorBrain):
         deviation = math.sqrt(sum((r - mean) ** 2 for r in returns) / len(returns))
         self.last_group_step = self.steps
         self.rollout_updates += 1
-        self.last_metrics = dict(
-            group_returns=returns,
-            mean_return=mean,
-            return_std=deviation,
-            zero_variance=deviation < 1e-8,
-            early_stopped=False,
-        )
+        self.last_metrics = {
+            "group_returns": returns,
+            "mean_return": mean,
+            "return_std": deviation,
+            "zero_variance": deviation < 1e-08,
+            "early_stopped": False,
+        }
         if deviation < 1e-8:
             return
         count = sum(len(t) for t in trajectories)

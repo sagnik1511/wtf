@@ -51,7 +51,7 @@ svg{--figure-bg:#0b131c;--figure-panel:#162632;--figure-line:#647d8b;--figure-sh
 <text class="label" x="50" y="614">Recovery and reuse</text>
 <text class="small" x="50" y="645">Checkpoint: shared tables once + short local/pending histories</text>
 <text class="small" x="50" y="671">Export: one compressed aggregate model per completed experiment</text>
-<text class="small" x="50" y="697">New episode: reset local history; retain species tables</text>
+<text class="small" x="50" y="697">Episode mode: publish staged evidence at next training start</text>
 <path class="edge" d="M565 516V546H308V572"/>
 <rect class="box" x="623" y="580" width="547" height="140" rx="12"/>
 <text class="label" x="645" y="614">Saved playback inspector</text>

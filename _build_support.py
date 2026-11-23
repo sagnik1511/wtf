@@ -8,6 +8,7 @@ import sys
 def configure_compiler():
     # Use installed binaries/SDK directly on macOS; Apple's command shims can
     # fail during an Xcode update. Explicit user CC/SDKROOT choices still win.
+    """Configure only the supported platform-specific native build flags."""
     if sys.platform == "darwin":
         candidates = (
             [Path(os.environ["DEVELOPER_DIR"])]

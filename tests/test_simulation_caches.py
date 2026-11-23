@@ -1,5 +1,13 @@
 """Bounded geometry reuse and final-winner snapshots preserve simulation state."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import random
@@ -57,13 +65,13 @@ def old_consider(book, animals, brains, source, newborns=()):
         )
         for key in wins:
             rank = scores[key]
-            champions[key] = dict(
-                criterion=key,
-                score=rank[0],
-                rank=list(rank),
-                source=source_data,
-                model=model,
-            )
+            champions[key] = {
+                "criterion": key,
+                "score": rank[0],
+                "rank": list(rank),
+                "source": source_data,
+                "model": model,
+            }
             if key == "balanced":
                 champions[key]["selection_policy"] = policies[a.species]
             elif key == "lineage":
@@ -77,6 +85,11 @@ class SimulationCacheTests(unittest.TestCase):
     def test_visibility_reuses_ray_when_target_index_changes_but_geometry_does_not(
         self,
     ):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         w = empty_world()
         a = animal(0, "prey", 2, 2)
         from wtf.simulation.world import Resource
@@ -97,6 +110,11 @@ class SimulationCacheTests(unittest.TestCase):
         self.assertEqual(second, reference_observation(w, a))
 
     def test_obstacle_edits_invalidate_visibility_and_nearest_results(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         w = empty_world()
         a = animal(0, "prey", 2, 2)
         from wtf.simulation.world import Resource

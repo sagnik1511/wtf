@@ -1,3 +1,7 @@
+"""Regression coverage for simulation behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import copy
 import json
 import tempfile
@@ -57,6 +61,11 @@ def empty_world():
 
 
 def animal(i, species, x, y, heading=0, energy=20.0, health=30.0):
+
+    # Keep setup, action and assertions together as one regression scenario.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+
     return Animal(i, species, x, y, heading, energy, health)
 
 
@@ -241,6 +250,11 @@ class ExperimentTests(unittest.TestCase):
         self.assertEqual(a.checkpoint(), b.checkpoint())
 
     def test_next_run_uses_champion_or_original_weights(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.brains import model_snapshot
 
         for chain in (True, False):
@@ -279,6 +293,14 @@ class ExperimentTests(unittest.TestCase):
 class ServerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # The server spans the request/test lifecycle and is closed by the existing
+        # teardown/finally path.
+        # pylint: disable=consider-using-with
+
         from wtf.storage.recording import Recorder
 
         cls.directory = tempfile.TemporaryDirectory()
@@ -338,6 +360,11 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 404)
 
     def test_replay_gzip_negotiation_and_plain_fallback(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import gzip
 
         path = self.url + "/api/recordings/recorded_test/runs/1/chunks/0"

@@ -17,19 +17,21 @@ SECTOR_NAMES = (
 
 
 def scent_contract(template):
+    """Resolve the optional scent-observation contract."""
     spec = template.get("scent_observation")
     if spec is None:
         return None
     if spec.get("mode", "separated") == "blended":
-        return dict(mode="blended", radius=spec.get("radius", 2))
-    return dict(
-        species=list(spec["species"]),
-        radius=spec.get("radius", 2),
-        separate_sexes=spec.get("separate_sexes", True),
-    )
+        return {"mode": "blended", "radius": spec.get("radius", 2)}
+    return {
+        "species": list(spec["species"]),
+        "radius": spec.get("radius", 2),
+        "separate_sexes": spec.get("separate_sexes", True),
+    }
 
 
 def scent_channels(template):
+    """Enumerate the configured anonymous scent groups."""
     spec = scent_contract(template)
     if spec is None:
         return []
@@ -43,6 +45,7 @@ def scent_channels(template):
 
 
 def tracking_width(template):
+    """Compute the optional visual-history and scent input width."""
     steps = template.get("movement_history_steps", 0)
     return (
         2 * template.get("observation_top_k", 1) * (7 + 3 * steps) if steps else 0
@@ -50,6 +53,7 @@ def tracking_width(template):
 
 
 def tracking_names(template):
+    """Name tracking features in their observation-vector order."""
     names = []
     steps = template.get("movement_history_steps", 0)
     if steps:
@@ -84,10 +88,20 @@ def tracking_names(template):
 
 
 class VisualMemory:
+    """Retain only observed target positions with bounded fading memory."""
+
     def __init__(self):
         self.frames = {}
 
     def observe(self, animal, tick, radius, k, steps, targets):
+        """Update visible target memory and produce its bounded input features."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-positional-arguments
+
         frames = self.frames.setdefault(animal.id, deque())
         while frames and frames[0][0] < tick - steps:
             frames.popleft()
@@ -153,6 +167,7 @@ class VisualMemory:
         return features
 
     def checkpoint(self):
+        """Serialize state required to resume this component."""
         return [
             [i, [[t, [[j, *p] for j, p in seen.items()]] for t, seen in frames]]
             for i, frames in self.frames.items()
@@ -160,6 +175,7 @@ class VisualMemory:
 
     @classmethod
     def restore(cls, state):
+        """Reconstruct the component from its persisted continuation state."""
         result = cls()
         result.frames = {
             i: deque(
@@ -172,6 +188,8 @@ class VisualMemory:
 
 
 class ScentField:
+    """Maintain bounded fading ground scent without individual identity."""
+
     def __init__(self, config, width):
         self.width = width
         self.species = sorted(config["species"])
@@ -188,6 +206,7 @@ class ScentField:
         self._plans = OrderedDict()
 
     def advance(self, world, dead=()):
+        """Advance fading scent state for one world step."""
         tick = world.tick
         while self.cells and tick - next(iter(self.cells.values())) >= self.lifetime:
             self.cells.popitem(last=False)
@@ -203,6 +222,12 @@ class ScentField:
                 self.cells.move_to_end(key)
 
     def sample(self, world, animal, template):
+        """Sample the local scent field using the configured sensory contract."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         spec = template.get("scent_observation")
         if spec is None:
             return []
@@ -269,6 +294,8 @@ class ScentField:
 
 
 class Tracking:
+    """Coordinate optional visual memory and ground-scent observations."""
+
     def __init__(self, config, width):
         self.visual = VisualMemory()
         self.history_enabled = any(
@@ -282,11 +309,13 @@ class Tracking:
 
     @staticmethod
     def enabled(config):
+        """Return whether the optional feature is configured for this context."""
         return config.get("scent_trails", {}).get("enabled", False) or any(
             b.get("movement_history_steps", 0) for b in config["brains"].values()
         )
 
     def checkpoint(self):
+        """Serialize state required to resume this component."""
         result = {"version": 1, "visual": self.visual.checkpoint()}
         if self.scent is not None:
             result["scent"] = list(map(list, self.scent.cells.items()))
@@ -294,6 +323,7 @@ class Tracking:
 
     @classmethod
     def restore(cls, config, width, state):
+        """Reconstruct the component from its persisted continuation state."""
         if state is None or state.get("version") != 1:
             raise ValueError("Checkpoint has missing or unsupported sensory_state")
         result = cls(config, width)

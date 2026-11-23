@@ -1,5 +1,13 @@
 """Visible multi-target slots, dynamic invalidation and all learner contracts."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import math
@@ -25,6 +33,10 @@ from tests.test_water_vision import setup
 
 def reference_targets(world, animal, k):
     """Full uncached scan: filter sight before selecting distance-ordered slots."""
+
+    # Keep setup, action and assertions together as one regression scenario.
+    # pylint: disable=too-many-locals
+
     body = world.body(animal)
     base = body["vision_radius"]
     bonus = (
@@ -189,6 +201,10 @@ class TopKObservationTests(unittest.TestCase):
             load_model_weights(new.brains[0], model_snapshot(old.brains[0]))
 
     def test_all_algorithms_train_and_resume_with_mixed_k_and_versions(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             for version in (1, 2, 3):
                 with self.subTest(kind=kind, version=version):

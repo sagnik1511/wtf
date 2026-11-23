@@ -5,6 +5,12 @@ import sys
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     parser = argparse.ArgumentParser(prog="wtf", description="Wildlife Trial Framework")
     parser.add_argument("command", choices=("run", "view", "analyze", "presets"))
     args = parser.parse_args(sys.argv[1:2])

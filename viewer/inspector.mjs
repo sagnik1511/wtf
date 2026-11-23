@@ -553,9 +553,16 @@ function collectivePanel(social, spec, tick, consequenceSchedule) {
       'muted',
     ),
   );
-  if (social.consequences.length) panel.append(el('p', consequenceSchedule === 'episode'
-    ? 'Consequence model frozen at episode start. New evidence applies next episode; bars can still change with the sampled context.'
-    : 'Consequence model updates continuously during training; playback shows saved samples only.', 'muted'));
+  if (social.consequences.length)
+    panel.append(
+      el(
+        'p',
+        consequenceSchedule === 'episode'
+          ? 'Consequence model frozen at episode start. New evidence applies next episode; bars can still change with the sampled context.'
+          : 'Consequence model updates continuously during training; playback shows saved samples only.',
+        'muted',
+      ),
+    );
   for (const [title, source] of [
     ['Local witnesses', social.collective],
     ['Species consequence estimates', social.consequences],
@@ -647,7 +654,7 @@ function collectivePanel(social, spec, tick, consequenceSchedule) {
 }
 
 export function inspectorGraphs({
-  consequenceSchedule = "continuous",
+  consequenceSchedule = 'continuous',
   diagnostic,
   template,
   spec,
@@ -709,7 +716,14 @@ export function inspectorGraphs({
     inputs,
     ...(observation?.tracking ? [trackingPanel(observation.tracking)] : []),
     ...(observation?.social
-      ? [collectivePanel(observation.social, spec, diagnostic.tick, consequenceSchedule)]
+      ? [
+          collectivePanel(
+            observation.social,
+            spec,
+            diagnostic.tick,
+            consequenceSchedule,
+          ),
+        ]
       : []),
     predictions(diagnostic),
     activationPanel(diagnostic, template, { rank, sections }),

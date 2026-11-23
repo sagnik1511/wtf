@@ -19,6 +19,7 @@ import time
 
 
 def digest(value):
+    """Compute a stable checksum for workload-equivalence comparisons."""
     result = hashlib.sha256()
     for part in json.JSONEncoder(
         sort_keys=True, separators=(",", ":"), allow_nan=False
@@ -28,6 +29,26 @@ def digest(value):
 
 
 def worker(args):
+    """Execute one controlled benchmark workload."""
+
+    # Keep independent numeric/compatibility or benchmark paths explicit to preserve
+    # their exact contracts.
+    # pylint: disable=duplicate-code
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+    # This internal collaborator intentionally inspects the owning component's private
+    # state.
+    # pylint: disable=protected-access
+    # The same branch condition guards both construction and consumption of this local
+    # result.
+    # pylint: disable=possibly-used-before-assignment
+
     from wtf.config import load
     from wtf.experiment.runner import Experiment
     from wtf.native import kernels
@@ -106,17 +127,27 @@ def worker(args):
         replay = hashlib.sha256()
         for path in chunks:
             replay.update(path.read_bytes())
-        return dict(
-            seconds=seconds,
-            peak_rss_mib=rss,
-            state_sha256=checksum,
-            actual_steps=actual_steps,
-            replay_sha256=replay.hexdigest(),
-            replay_bytes=sum(p.stat().st_size for p in chunks),
-        )
+        return {
+            "seconds": seconds,
+            "peak_rss_mib": rss,
+            "state_sha256": checksum,
+            "actual_steps": actual_steps,
+            "replay_sha256": replay.hexdigest(),
+            "replay_bytes": sum((p.stat().st_size for p in chunks)),
+        }
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
+
+    # Keep independent numeric/compatibility or benchmark paths explicit to preserve
+    # their exact contracts.
+    # pylint: disable=duplicate-code
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--environment", type=Path, default=Path("environments/competition.json")
@@ -176,24 +207,24 @@ def main():
         values = {row[field] for samples in rows.values() for row in samples}
         if len(values) != 1:
             raise RuntimeError(f"Before/after mismatch: {field}")
-    result = dict(
-        environment=str(args.environment),
-        case=args.case,
-        steps=args.steps,
-        actual_steps=rows["native"][0]["actual_steps"],
-        seed=args.seed,
-        prey_k=args.prey_k,
-        predator_k=args.predator_k,
-        samples=args.samples,
-        python=platform.python_version(),
-        platform=platform.system(),
-        versions=rows,
-    )
+    result = {
+        "environment": str(args.environment),
+        "case": args.case,
+        "steps": args.steps,
+        "actual_steps": rows["native"][0]["actual_steps"],
+        "seed": args.seed,
+        "prey_k": args.prey_k,
+        "predator_k": args.predator_k,
+        "samples": args.samples,
+        "python": platform.python_version(),
+        "platform": platform.system(),
+        "versions": rows,
+    }
     result["median"] = {
-        mode: dict(
-            seconds=statistics.median(row["seconds"] for row in samples),
-            peak_rss_mib=statistics.median(row["peak_rss_mib"] for row in samples),
-        )
+        mode: {
+            "seconds": statistics.median((row["seconds"] for row in samples)),
+            "peak_rss_mib": statistics.median((row["peak_rss_mib"] for row in samples)),
+        }
         for mode, samples in rows.items()
     }
     result["speedup"] = (

@@ -4,16 +4,17 @@ import copy
 
 
 def lineage_policy(config, species):
+    """Resolve the configured lineage-ranking rules for a species."""
     spec = config["species"][species]
-    return dict(
-        version=1,
-        family="founder_descendants",
-        diet=spec["diet"],
-        min_age_steps=spec.get("champion_selection", {}).get(
+    return {
+        "version": 1,
+        "family": "founder_descendants",
+        "diet": spec["diet"],
+        "min_age_steps": spec.get("champion_selection", {}).get(
             "lineage_min_age_steps",
             max(1, spec.get("reproduction", {}).get("min_age_steps", 1)),
         ),
-    )
+    }
 
 
 class LineageBook:
@@ -42,13 +43,13 @@ class LineageBook:
         for root in node["roots"]:
             family = self.families.get(root)
             if family is None:
-                family = self.families[root] = dict(
-                    members=0,
-                    viable_descendants=0,
-                    kills=0,
-                    energy_gained=0.0,
-                    animal_steps=0,
-                )
+                family = self.families[root] = {
+                    "members": 0,
+                    "viable_descendants": 0,
+                    "kills": 0,
+                    "energy_gained": 0.0,
+                    "animal_steps": 0,
+                }
             family["members"] += int(new)
             family["viable_descendants"] += int(
                 node["viable"]
@@ -60,6 +61,7 @@ class LineageBook:
 
     def observe(self, animals):
         # Parents always have lower IDs; sort also supports unordered callers.
+        """Accumulate the animal's observed contribution to its founder families."""
         for animal in sorted(animals, key=lambda a: a.id):
             key = str(animal.id)
             old = self.nodes.get(key)
@@ -71,13 +73,13 @@ class LineageBook:
                     and self.nodes[str(p)]["species"] == animal.species
                 ]
                 roots = sorted({r for p in parents for r in p["roots"]})
-                node = dict(
-                    species=animal.species,
-                    roots=roots or [animal.id],
-                    generation=(
-                        max(p["generation"] for p in parents) + 1 if parents else 0
+                node = {
+                    "species": animal.species,
+                    "roots": roots or [animal.id],
+                    "generation": (
+                        max((p["generation"] for p in parents)) + 1 if parents else 0
                     ),
-                )
+                }
                 if len(parents) < 2 and animal.parent_id >= 0:
                     self.partial = True
             else:
@@ -93,6 +95,15 @@ class LineageBook:
 
     def rank(self, animal, *, include_metadata=True):
         """Rank a candidate; materialize detached diagnostics only when requested."""
+
+        # Keyword dict construction deliberately detects duplicate keys in dynamic **
+        # expansions; a literal would silently overwrite them.
+        # pylint: disable=use-dict-literal
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         node = self.nodes[str(animal.id)]
         predator = self.policies[animal.species]["diet"] == "prey"
         qualified = node["viable"] and (
@@ -121,7 +132,8 @@ class LineageBook:
                 *own,
                 animal.health,
             )
-            if best is None or rank > best[0]:
+            # Short-circuiting excludes None before indexing the current rank.
+            if best is None or rank > best[0]:  # pylint: disable=unsubscriptable-object
                 best = rank, root
         rank, root = best
         metadata = None
@@ -140,11 +152,12 @@ class LineageBook:
         return rank, metadata
 
     def checkpoint(self):
-        return dict(
-            version=1,
-            partial=self.partial,
-            nodes=copy.deepcopy(self.nodes),
-            families={
+        """Serialize state required to resume this component."""
+        return {
+            "version": 1,
+            "partial": self.partial,
+            "nodes": copy.deepcopy(self.nodes),
+            "families": {
                 str(key): copy.deepcopy(value) for key, value in self.families.items()
             },
-        )
+        }

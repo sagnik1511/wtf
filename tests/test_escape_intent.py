@@ -1,5 +1,13 @@
 """Local escape physics, observable consent and calibrated preset lifecycle."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -10,12 +18,7 @@ from unittest.mock import patch
 from wtf.native import kernels
 from wtf.inspection.analyze import analyze_run
 from wtf.learning.brain import observation_inputs
-from wtf.learning.brains import (
-    model_signature,
-    model_snapshot,
-    load_model_weights,
-    create_brain,
-)
+from wtf.learning.brains import model_snapshot, load_model_weights, create_brain
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.config import load, validate
 from wtf.learning.contextual_ppo import action_mask

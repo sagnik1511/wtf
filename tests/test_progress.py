@@ -1,3 +1,7 @@
+"""Regression coverage for progress behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import io
 import unittest
 from wtf.progress import RunProgress
@@ -63,6 +67,14 @@ class ProgressTests(unittest.TestCase):
 
 class ProgressCLITests(unittest.TestCase):
     def test_cli_progress_can_be_forced_or_disabled(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         import subprocess
         import sys
         import tempfile

@@ -8,6 +8,7 @@ from wtf.storage.replay_codec import decode_chunk
 
 
 def chunk_path(folder, run, index):
+    """Resolve the stored path for the requested run and chunk indices."""
     folder = Path(folder).resolve()
     stem = f"run_{run:04d}_chunk_{index:06d}"
     for suffix in (".bin.xz", ".bin.gz", ".bin", ".json.xz", ".json.gz", ".json"):
@@ -20,6 +21,7 @@ def chunk_path(folder, run, index):
 
 
 def read_chunk_bytes(path):
+    """Read the bytes of one saved replay chunk."""
     path = Path(path)
     if path.suffix in (".gz", ".xz"):
         opener = gzip.open if path.suffix == ".gz" else lzma.open
@@ -29,6 +31,12 @@ def read_chunk_bytes(path):
 
 
 def load_chunk_payload(path):
+    """Load one chunk's encoded replay payload."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     path = Path(path)
     from wtf.storage.binary_io import MAGIC, replay_payload
 
@@ -39,4 +47,5 @@ def load_chunk_payload(path):
 
 
 def load_chunk(path):
+    """Load the decoded frames of one saved replay chunk."""
     return decode_chunk(load_chunk_payload(path))

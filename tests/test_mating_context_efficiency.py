@@ -1,5 +1,13 @@
 """Phase-local mating reuse preserves fresh checks, RNGs and birth ordering."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from pathlib import Path
 import unittest

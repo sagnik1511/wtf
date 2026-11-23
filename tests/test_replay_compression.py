@@ -1,5 +1,8 @@
 """Compressed replays preserve exact data and stay readable during conversion."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import gzip
 import json
 from pathlib import Path

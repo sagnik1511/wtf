@@ -1,5 +1,13 @@
 """Source-reference scope, parser coverage, graphs and cache invalidation."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import json
 from pathlib import Path
 import shutil
@@ -63,6 +71,11 @@ class SourceReferenceTests(unittest.TestCase):
                 source.build()
 
     def test_every_source_page_is_reachable_with_or_without_internal_crawler(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from work.check_docs_links import check_site
 
         for has_crawler in (False, True):

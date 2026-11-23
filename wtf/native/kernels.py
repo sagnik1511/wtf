@@ -5,6 +5,11 @@ Native float reductions match builtin sum() on CPython 3.12 and 3.13.
 New interpreter versions fall back until numerical equivalence is validated.
 """
 
+# This public backend/layout identifier is established API rather than an uppercase
+# scalar constant.
+# pylint: disable=invalid-name
+
+
 import os
 import sys
 from array import array
@@ -36,18 +41,20 @@ if _mode != "python":
 
 
 def status():
-    return dict(
-        backend="native" if native is not None else "python",
-        requested=_mode,
-        fallback_reason=_reason,
-        native_api_version=(
+    """Describe the selected native backend and any fallback reason."""
+    return {
+        "backend": "native" if native is not None else "python",
+        "requested": _mode,
+        "fallback_reason": _reason,
+        "native_api_version": (
             getattr(native, "api_version", 1) if native is not None else None
         ),
-    )
+    }
 
 
 def gradient_zeros(values):
     # Legacy list-backed networks preserve the reference representation too.
+    """Allocate gradient storage compatible with the active numeric representation."""
     packed_gradient = isinstance(values, array) and (
         native is not None or values.typecode == "d"
     )
@@ -55,6 +62,12 @@ def gradient_zeros(values):
 
 
 def available(name):
+    """Check whether the loaded native backend supports the requested operation."""
+
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+
     if native is None:
         return False
     version = getattr(native, "api_version", 1)

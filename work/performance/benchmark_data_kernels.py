@@ -20,9 +20,15 @@ CASES = ("binary_encode", "binary_decode", "replay_expand", "dashboard", "groups
 
 
 def prepare():
+    """Prepare the inputs needed by the next processing phase."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     from wtf.config import load
     from wtf.experiment.runner import Experiment
-    from wtf.storage.recording import Recorder, RecordingStore
+    from wtf.storage.recording import Recorder
     from wtf.storage.replay_io import load_chunk
 
     c = load("environments/ppo.json")
@@ -44,15 +50,23 @@ def prepare():
         if not frames:
             raise RuntimeError("No fixture frames")
     rng = random.Random(42)
-    data = dict(
-        config=c,
-        frames=frames,
-        animals=[dict(x=rng.randrange(40), y=rng.randrange(28)) for _ in range(500)],
-    )
+    data = {
+        "config": c,
+        "frames": frames,
+        "animals": [
+            {"x": rng.randrange(40), "y": rng.randrange(28)} for _ in range(500)
+        ],
+    }
     (ROOT / "data-fixtures.json").write_text(json.dumps(data, separators=(",", ":")))
 
 
 def worker(args):
+    """Execute one controlled benchmark workload."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     if args.reference:
         sys.path.insert(0, str(args.reference.resolve()))
     from wtf.storage.binary_io import Encoder, Decoder
@@ -62,13 +76,13 @@ def worker(args):
     data = json.loads((ROOT / "data-fixtures.json").read_text())
     payload = encode_chunk(data["frames"])
     encoded = Encoder().encode(payload)
-    loops = dict(
-        binary_encode=20,
-        binary_decode=20,
-        replay_expand=10,
-        dashboard=3,
-        groups_500=100,
-    )[args.case]
+    loops = {
+        "binary_encode": 20,
+        "binary_decode": 20,
+        "replay_expand": 10,
+        "dashboard": 3,
+        "groups_500": 100,
+    }[args.case]
     outputs = None
     start = time.perf_counter()
     for _ in range(loops):
@@ -93,18 +107,19 @@ def worker(args):
     )
     print(
         json.dumps(
-            dict(
-                case=args.case,
-                seconds=seconds,
-                loops=loops,
-                sha256=hashlib.sha256(semantic).hexdigest(),
-            )
+            {
+                "case": args.case,
+                "seconds": seconds,
+                "loops": loops,
+                "sha256": hashlib.sha256(semantic).hexdigest(),
+            }
         ),
         flush=True,
     )
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--reference", type=Path)
     p.add_argument("--worker", action="store_true")
@@ -140,6 +155,7 @@ def main():
                     ),
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
                 if r.returncode:
                     raise RuntimeError(r.stderr)
@@ -162,11 +178,15 @@ def main():
             loops=selected[0]["loops"],
             sha256=selected[0]["sha256"],
         )
-    report = dict(
-        status="complete", repeats=args.repeats, summary=summary, samples=results
-    )
+    report = {
+        "status": "complete",
+        "repeats": args.repeats,
+        "summary": summary,
+        "samples": results,
+    }
     (ROOT / "data-benchmark.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(summary, indent=2))
+    return None
 
 
 if __name__ == "__main__":

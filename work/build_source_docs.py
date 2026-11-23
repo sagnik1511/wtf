@@ -120,6 +120,12 @@ def write_page_index(directory):
 
 
 def build(root=ROOT, force=False):
+    """Generate the configured build output and validate required inputs."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     for program in ("doxygen", "dot"):
         if not shutil.which(program):
             raise RuntimeError(
@@ -229,6 +235,7 @@ dependencies and ignored research scripts are excluded.
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()

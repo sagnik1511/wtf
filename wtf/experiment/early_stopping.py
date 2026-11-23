@@ -6,6 +6,12 @@ from wtf.storage.library import SEXES, selection_criterion
 
 
 class EarlyStopping:
+    """Track champion improvement and patience across completed episodes."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, config, mode, initial_models=None, state=None):
         settings = config["experiment"].get("early_stopping", {})
         self.patience = settings.get("patience_runs", 0)
@@ -46,10 +52,11 @@ class EarlyStopping:
         if self.active:
             for species, sex, criterion, rank in self._records(entries):
                 self.best.setdefault(species, {}).setdefault(
-                    sex, dict(criterion=criterion, rank=list(rank))
+                    sex, {"criterion": criterion, "rank": list(rank)}
                 )
 
     def finish_run(self, run, entries):
+        """Update improvement counters after a completed episode."""
         if not self.active or self.stopped or run <= self.last_run:
             return
         improved = False
@@ -60,32 +67,34 @@ class EarlyStopping:
                 or previous["criterion"] != criterion
                 or tuple(rank) > tuple(previous["rank"])
             ):
-                self.best.setdefault(species, {})[sex] = dict(
-                    criterion=criterion, rank=list(rank)
-                )
+                self.best.setdefault(species, {})[sex] = {
+                    "criterion": criterion,
+                    "rank": list(rank),
+                }
                 improved = True
         self.stagnant_runs = 0 if improved else self.stagnant_runs + 1
         self.last_run = run
         if self.stagnant_runs >= self.patience:
             self.stopped = True
-            self.reason = dict(
-                cause="no_champion_improvement",
-                run=run,
-                stagnant_runs=self.stagnant_runs,
-                patience_runs=self.patience,
-                species=self.species[:],
-            )
+            self.reason = {
+                "cause": "no_champion_improvement",
+                "run": run,
+                "stagnant_runs": self.stagnant_runs,
+                "patience_runs": self.patience,
+                "species": self.species[:],
+            }
 
     def checkpoint(self):
+        """Serialize state required to resume this component."""
         if not self.patience and not self.stopped:
             return None
-        return dict(
-            patience_runs=self.patience,
-            species=self.species[:],
-            criteria=copy.deepcopy(self.criteria),
-            best_ranks=copy.deepcopy(self.best),
-            stagnant_runs=self.stagnant_runs,
-            last_run=self.last_run,
-            stopped=self.stopped,
-            reason=copy.deepcopy(self.reason),
-        )
+        return {
+            "patience_runs": self.patience,
+            "species": self.species[:],
+            "criteria": copy.deepcopy(self.criteria),
+            "best_ranks": copy.deepcopy(self.best),
+            "stagnant_runs": self.stagnant_runs,
+            "last_run": self.last_run,
+            "stopped": self.stopped,
+            "reason": copy.deepcopy(self.reason),
+        }

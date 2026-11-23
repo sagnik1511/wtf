@@ -7,6 +7,12 @@ from types import MappingProxyType
 
 
 def resolve_map(value):
+    """Load and resolve the configured geography source."""
+
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     if isinstance(value, dict) and "map_file" in value:
         if (
             set(value) != {"map_file"}
@@ -20,15 +26,24 @@ def resolve_map(value):
         if not path.is_absolute():
             local = Path.cwd() / path
             if local.is_file():
-                return json.loads(local.read_text())
+                return json.loads(local.read_text(encoding="utf-8"))
             from wtf.resources import asset
 
             return json.loads(asset(path.as_posix()).read_text(encoding="utf-8"))
-        return json.loads(path.read_text())
+        return json.loads(path.read_text(encoding="utf-8"))
     return value
 
 
 def validate_map(value, width, height):
+    """Validate terrain dimensions and per-cell geography fields."""
+
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-branches
+
     def fail(message):
         raise ValueError("terrain: " + message)
 
@@ -119,12 +134,15 @@ class Geography:
         self.obstacles = frozenset(self.obstacles)
 
     def elevation(self, position):
+        """Return the elevation at the requested grid coordinate."""
         return self.elevations.get(position, 0)
 
     def depth(self, position):
+        """Return the water depth at the requested grid coordinate."""
         return self.water.get(position, (0, 0, 0))[0]
 
     def features(self, animal, directions):
+        """Build the local terrain observation features."""
         p = animal.position
         depth, fx, fy = self.water.get(p, (0, 0, 0))
         height = self.elevation(p)

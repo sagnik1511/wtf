@@ -1,5 +1,8 @@
 """Archive-local reuse without stale configurations or changed saved values."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -14,6 +17,10 @@ from tests.test_simulation import config
 
 class ExportEfficiencyTests(unittest.TestCase):
     def test_configurations_serialize_once_per_object_and_refresh_between_exports(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         experiment = Experiment(config())
         entries = [
             entry

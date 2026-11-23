@@ -17,6 +17,7 @@ from wtf.experiment.runner import Experiment
 
 
 def write_json(path, value):
+    """Write human-readable JSON to the requested path."""
     path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
 
 
@@ -57,6 +58,7 @@ def run_experiment(environment=None, output=Path("results"), steps=200, seed=100
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--environment", type=Path)
     parser.add_argument("--output", type=Path, default=Path("results"))

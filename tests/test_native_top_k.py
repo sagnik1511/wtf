@@ -1,5 +1,13 @@
 """Top-k selector parity, dispatch safety and exact training/replay continuation."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from pathlib import Path
 import random
@@ -30,6 +38,13 @@ def reference_backend():
 @unittest.skipUnless(SUPPORTED, "Build the optional top-k kernel")
 class NativeTopKTests(unittest.TestCase):
     def test_randomized_candidate_order_ties_occlusion_water_and_padding(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         rng = random.Random(894)
         width, height = 31, 23
         for trial in range(100):
@@ -81,6 +96,11 @@ class NativeTopKTests(unittest.TestCase):
         )
 
     def test_invalid_arguments_and_iterator_exceptions_propagate(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         valid = [[], 2, 2, 0, 4, 3, bytes(25), bytes(25), 5, 5, 4, 0]
         for index, value in (
             (0, [(0, 1, 9, 0)]),
@@ -114,6 +134,11 @@ class NativeTopKTests(unittest.TestCase):
         self.assertEqual(NATIVE.nearest_many(*valid), [])
 
     def test_native_dispatch_custom_callback_fallback_and_missing_symbol(self):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         c = load("environments/competition.json")
         w = World(c, 100)
         w.observe_all()
@@ -153,6 +178,11 @@ class NativeTopKTests(unittest.TestCase):
         index.results.clear()
 
         class OldExtension:
+
+            # This record/owner deliberately keeps its related fields and lifecycle
+            # operations together without artificial wrappers.
+            # pylint: disable=too-few-public-methods
+
             api_version = 2
 
         with patch.object(kernels, "native", OldExtension()):
@@ -187,6 +217,10 @@ class NativeTopKTests(unittest.TestCase):
                 self.assertEqual(actual, expected, (preset, tick))
 
     def test_all_controllers_and_recorded_replay_match_reference(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as folder:
                 c = environment(kind, 0)
@@ -195,16 +229,16 @@ class NativeTopKTests(unittest.TestCase):
                     b["observation_top_k"] = 3 + i
                     c["brains"][name + "_top_k"] = b
                     species["brain"] = name + "_top_k"
-                c["recording"] = dict(
-                    enabled=True,
-                    frames_per_chunk=2,
-                    frame_every_steps=1,
-                    diagnostics_every_steps=1,
-                    record_activations=True,
-                    compression="xz",
-                    compression_level=1,
-                    encoding="binary",
-                )
+                c["recording"] = {
+                    "enabled": True,
+                    "frames_per_chunk": 2,
+                    "frame_every_steps": 1,
+                    "diagnostics_every_steps": 1,
+                    "record_activations": True,
+                    "compression": "xz",
+                    "compression_level": 1,
+                    "encoding": "binary",
+                }
                 e = Experiment(c)
                 with reference_backend():
                     r = Experiment(c)

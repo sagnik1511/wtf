@@ -1,5 +1,8 @@
 """Compact actual-animal activation samples preserve controller and world state."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from pathlib import Path
 import tempfile
@@ -15,6 +18,10 @@ from tests.test_mutation import KINDS, environment
 
 class ActivationDiagnosticsTests(unittest.TestCase):
     def test_all_algorithms_sample_actual_layers_without_changing_any_state(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             with self.subTest(kind=kind):
                 e = Experiment(environment(kind, 0))
@@ -52,6 +59,10 @@ class ActivationDiagnosticsTests(unittest.TestCase):
                 self.assertEqual(b.checkpoint(), before)
 
     def test_one_inference_pass_and_no_unused_critic_tape(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             with self.subTest(kind=kind):
                 e = Experiment(environment(kind, 0))
@@ -79,6 +90,13 @@ class ActivationDiagnosticsTests(unittest.TestCase):
                     self.assertEqual(forward.call_count, 1)
 
     def test_recording_roundtrips_all_animals_and_keeps_simulation_identical(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as folder:
                 c = environment(kind, 0)
@@ -123,6 +141,11 @@ class ActivationDiagnosticsTests(unittest.TestCase):
                         self.assertEqual(frame, reference)
 
     def test_only_visualization_values_are_rounded_to_fp32(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from array import array
         from wtf.learning.activation_diagnostics import activation_sample
 

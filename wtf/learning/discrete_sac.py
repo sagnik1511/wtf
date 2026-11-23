@@ -12,6 +12,7 @@ from wtf.native.numeric import packed, precision_of
 
 
 def soft_value(probabilities, logs, first, second, temperature):
+    """Compute the twin-critic soft state value under a categorical policy."""
     return sum(
         p * (min(a, b) - temperature * lp)
         for p, lp, a, b in zip(probabilities, logs, first, second)
@@ -19,6 +20,7 @@ def soft_value(probabilities, logs, first, second, temperature):
 
 
 def actor_objective(logits, first, second, temperature):
+    """Compute the discrete SAC actor objective and logit derivatives."""
     probabilities, logs = policy_distribution(logits)
     q = [min(a, b) for a, b in zip(first, second)]
     expected = sum(p * v for p, v in zip(probabilities, q))
@@ -32,6 +34,8 @@ def actor_objective(logits, first, second, temperature):
 
 
 class DiscreteSACBrain(PPOBrain):
+    """Independent discrete SAC actor with twin critics and target networks."""
+
     algorithm = "discrete_sac"
 
     def __init__(self, config, actions, base_seed, individual_seed):
@@ -46,6 +50,7 @@ class DiscreteSACBrain(PPOBrain):
         )
 
     def synchronize_targets(self):
+        """Copy critic parameters into their target networks."""
         for target, critic in zip(self.target_critics, self.network.critics):
             target.layers = copy.deepcopy(critic.layers)
 
@@ -77,6 +82,11 @@ class DiscreteSACBrain(PPOBrain):
             self._update()
 
     def _update(self):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         c = self.config
         alpha = c["temperature"]
         block = self.network.block
@@ -86,7 +96,7 @@ class DiscreteSACBrain(PPOBrain):
         critic_gradients = [
             gradients[(j + 1) * block : (j + 2) * block] for j in range(2)
         ]
-        metrics = dict(policy_loss=0.0, critic_loss=0.0, entropy=0.0)
+        metrics = {"policy_loss": 0.0, "critic_loss": 0.0, "entropy": 0.0}
         for step in batch:
             target = step.reward
             if not step.terminated:
@@ -108,6 +118,8 @@ class DiscreteSACBrain(PPOBrain):
                 critic.accumulate_gradient(tape, derivative, critic_gradients[j])
                 metrics["critic_loss"] += 0.5 * error * error
             logits, tape = self.network.actor.forward(step.observation)
+            # The two critic outputs fill first/second; Pylint cannot infer loop length.
+            # pylint: disable-next=no-value-for-parameter
             loss, derivative, entropy = actor_objective(logits, *values, alpha)
             self.network.actor.accumulate_gradient(tape, derivative, actor_gradients)
             metrics["policy_loss"] += loss

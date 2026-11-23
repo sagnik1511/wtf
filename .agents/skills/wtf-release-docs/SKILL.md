@@ -34,3 +34,11 @@ Check new/changed relative links, previous/next links, version uniqueness and
 that every claimed commit exists. For documentation-only work, validate links,
 assets or skill metadata as relevant; avoid unrelated training/test runs. Describe
 unverified behavior plainly. Record rollout status accurately in the final report.
+
+Future release records include **Fixes and optimizations** from the template.
+Have `wtf-reviewer` fill that section after a stable release review with verified
+fixes, regression checks, adopted optimization evidence and remaining decisions.
+Until review occurs, mark it pending. Explicitly distinguish no verified items
+from an unperformed check. Do not fabricate measurements or rewrite past records
+to fit the new template; documentation-only changes still follow the existing
+rule about whether a release record is needed.

@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def digest(value):
+    """Compute a stable checksum for workload-equivalence comparisons."""
     return hashlib.sha256(
         json.dumps(
             value, sort_keys=True, separators=(",", ":"), allow_nan=False
@@ -30,11 +31,24 @@ def digest(value):
 
 
 def worker(args):
+    """Execute one controlled benchmark workload."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+    # This internal collaborator intentionally inspects the owning component's private
+    # state.
+    # pylint: disable=protected-access
+
     sys.path.insert(0, str(args.source.resolve()))
     from wtf.config import load
     from wtf.experiment.runner import Experiment
     from wtf.learning.brains import create_brain
-    from wtf.learning.lstm_ppo import LSTMNetwork
+
     from wtf.learning.recurrent_ppo import RecurrentStep
     from wtf.learning.ppo import policy_distribution
     from wtf.storage.recording import Recorder
@@ -77,11 +91,11 @@ def worker(args):
         sample = network.step(x, state, tape=True)
         _, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
-        report = dict(
-            seconds=seconds,
-            python_peak_bytes=peak,
-            state=digest([outputs, state, sample]),
-        )
+        report = {
+            "seconds": seconds,
+            "python_peak_bytes": peak,
+            "state": digest([outputs, state, sample]),
+        }
     elif args.job == "backward":
         _, _, tape = network.step(x, memory, True)
         gradients = network.zeros()
@@ -96,16 +110,16 @@ def worker(args):
         network.backward(tape, derivative, future, fresh)
         _, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
-        report = dict(
-            seconds=seconds,
-            python_peak_bytes=peak,
-            state=digest(
+        report = {
+            "seconds": seconds,
+            "python_peak_bytes": peak,
+            "state": digest(
                 [
                     previous,
                     [{k: list(v) for k, v in layer.items()} for layer in gradients],
                 ]
             ),
-        )
+        }
     elif args.job == "update":
         template.update(rollout_steps=32)
         brain = create_brain(template, actions, 100, 101)
@@ -148,9 +162,11 @@ def worker(args):
         brain._update()
         _, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
-        report = dict(
-            seconds=seconds, python_peak_bytes=peak, state=digest(brain.checkpoint())
-        )
+        report = {
+            "seconds": seconds,
+            "python_peak_bytes": peak,
+            "state": digest(brain.checkpoint()),
+        }
     else:
         with tempfile.TemporaryDirectory() as folder:
             folder = Path(folder)
@@ -179,20 +195,20 @@ def worker(args):
             for path in chunks:
                 for frame in load_chunk(path):
                     replay.update(bytes.fromhex(digest(frame)))
-            report = dict(
-                seconds=seconds,
-                state=final,
-                replay=replay.hexdigest(),
-                checkpoint_hashes=digest(
+            report = {
+                "seconds": seconds,
+                "state": final,
+                "replay": replay.hexdigest(),
+                "checkpoint_hashes": digest(
                     [hashlib.sha256(p.read_bytes()).hexdigest() for p in checkpoints]
                 ),
-                replay_hashes=digest(
+                "replay_hashes": digest(
                     [hashlib.sha256(p.read_bytes()).hexdigest() for p in chunks]
                 ),
-                checkpoint_bytes=sum(p.stat().st_size for p in checkpoints),
-                replay_bytes=sum(p.stat().st_size for p in chunks),
-                rss_mib=rss / (1024**2 if sys.platform == "darwin" else 1024),
-            )
+                "checkpoint_bytes": sum((p.stat().st_size for p in checkpoints)),
+                "replay_bytes": sum((p.stat().st_size for p in chunks)),
+                "rss_mib": rss / (1024**2 if sys.platform == "darwin" else 1024),
+            }
     report.setdefault(
         "rss_mib",
         resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -202,6 +218,7 @@ def worker(args):
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--source", type=Path, default=ROOT)
@@ -268,11 +285,12 @@ def main():
             }
             for variant, values in rows.items()
         }
-        reports[job] = dict(samples=rows, medians=medians)
+        reports[job] = {"samples": rows, "medians": medians}
     target = ROOT / ".cache/native-lstm-benchmark.json"
     target.write_text(json.dumps(reports, indent=2) + "\n")
     print(target)
     print(json.dumps({job: r["medians"] for job, r in reports.items()}, indent=2))
+    return None
 
 
 if __name__ == "__main__":

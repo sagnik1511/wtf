@@ -1,5 +1,8 @@
 """Avoid duplicate work while retaining numerical and lifecycle behavior."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import unittest
 from unittest.mock import patch
@@ -19,6 +22,11 @@ class AdvancedEfficiencyTests(unittest.TestCase):
             created = []
 
             def track(network, *args, **kwargs):
+
+                # The callback is consumed synchronously within this iteration; it
+                # never escapes the loop.
+                # pylint: disable=cell-var-from-loop
+
                 created.append(network)
                 original(network, *args, **kwargs)
 
@@ -153,6 +161,11 @@ class AdvancedEfficiencyTests(unittest.TestCase):
         self.assertEqual(before, b.checkpoint())
 
     def test_grpo_masked_agents_share_trial_occupancy_without_brain_proxies(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.contextual_ppo import action_mask
         from wtf.learning.grouped_rollouts import collect_group
         from tests.test_policy_algorithms import GRPOTests

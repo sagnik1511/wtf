@@ -1,5 +1,8 @@
 """Lossless layout changes, bounded chunks, and cross-language reconstruction."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import gzip
 import json
@@ -18,18 +21,25 @@ from tests.test_simulation import config
 
 
 def frames():
-    first = dict(
-        step=0,
-        animals=[dict(id=1, species="prey", x=1, y=2, health=5.0, age=0)],
-        resources=[dict(x=0, y=0, quantity=1), dict(x=2, y=3, quantity=3.0)],
-        metrics=dict(food=4, deaths=0),
-        diagnostics={"1": {"observation": [1, 2]}},
-    )
+    first = {
+        "step": 0,
+        "animals": [
+            {"id": 1, "species": "prey", "x": 1, "y": 2, "health": 5.0, "age": 0}
+        ],
+        "resources": [
+            {"x": 0, "y": 0, "quantity": 1},
+            {"x": 2, "y": 3, "quantity": 3.0},
+        ],
+        "metrics": {"food": 4, "deaths": 0},
+        "diagnostics": {"1": {"observation": [1, 2]}},
+    }
     second = copy.deepcopy(first)
     second.update(step=1)
     second.pop("diagnostics")
     second["animals"][0].update(x=2, age=1, health=-0.0)
-    second["animals"].append(dict(id=2, species="prey", x=3, y=4, health=5, age=0))
+    second["animals"].append(
+        {"id": 2, "species": "prey", "x": 3, "y": 4, "health": 5, "age": 0}
+    )
     second["resources"][0]["quantity"] = 1.0
     second["resources"].reverse()
     second["metrics"].update(food=4.0, births=1)
@@ -42,7 +52,7 @@ def frames():
     fourth = copy.deepcopy(third)
     fourth.update(step=3)
     fourth["animals"].pop()
-    fourth["resources"].append(dict(x=5, y=6, quantity=2))
+    fourth["resources"].append({"x": 5, "y": 6, "quantity": 2})
     fifth = copy.deepcopy(fourth)
     fifth.pop("animals")
     fifth.pop("metrics")
@@ -98,10 +108,11 @@ class CodecTests(unittest.TestCase):
         """
         result = subprocess.run(
             ["node", "--input-type=module", "-e", script],
-            input=json.dumps(dict(payload=payload, expected=frames())),
+            input=json.dumps({"payload": payload, "expected": frames()}),
             text=True,
             capture_output=True,
             cwd=Path(__file__).resolve().parents[1],
+            check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -136,6 +147,11 @@ class CodecTests(unittest.TestCase):
             self.assertEqual(results[0][1], results[1][1])
 
     def test_upgrade_gzip_snapshots_verifies_and_is_idempotent(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             playback = root / "playback"
@@ -145,37 +161,37 @@ class CodecTests(unittest.TestCase):
             rng = random.Random(42)
             original = []
             animals = [
-                dict(
-                    id=i,
-                    species="prey",
-                    x=i,
-                    y=2,
-                    health=5.0,
-                    age=0,
-                    energy=rng.random(),
-                )
+                {
+                    "id": i,
+                    "species": "prey",
+                    "x": i,
+                    "y": 2,
+                    "health": 5.0,
+                    "age": 0,
+                    "energy": rng.random(),
+                }
                 for i in range(80)
             ]
             for step in range(64):
                 for animal in animals:
                     animal.update(age=step, health=rng.random(), x=rng.random())
                 original.append(
-                    dict(
-                        step=step,
-                        animals=copy.deepcopy(animals),
-                        resources=[],
-                        metrics={},
-                    )
+                    {
+                        "step": step,
+                        "animals": copy.deepcopy(animals),
+                        "resources": [],
+                        "metrics": {},
+                    }
                 )
             path = playback / "run_0001_chunk_000000.json.gz"
             path.write_bytes(gzip.compress(json.dumps(original).encode()))
             (playback / "recording.json").write_text(
                 json.dumps(
-                    dict(
-                        recording_version=1,
-                        status="complete",
-                        runs=[dict(run=1, chunk_count=1)],
-                    )
+                    {
+                        "recording_version": 1,
+                        "status": "complete",
+                        "runs": [{"run": 1, "chunk_count": 1}],
+                    }
                 )
             )
             result = compress_recording(root, delta=True)
@@ -194,11 +210,11 @@ class CodecTests(unittest.TestCase):
             original = path.read_bytes()
             (playback / "recording.json").write_text(
                 json.dumps(
-                    dict(
-                        recording_version=1,
-                        status="complete",
-                        runs=[dict(run=1, chunk_count=1)],
-                    )
+                    {
+                        "recording_version": 1,
+                        "status": "complete",
+                        "runs": [{"run": 1, "chunk_count": 1}],
+                    }
                 )
             )
             with patch(

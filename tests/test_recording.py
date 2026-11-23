@@ -1,4 +1,13 @@
-import copy
+"""Regression coverage for recording behavior and compatibility."""
+
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import json
 import subprocess
 import sys
@@ -28,12 +37,16 @@ class RecordingTests(unittest.TestCase):
         return recorder
 
     def test_multiple_runs_and_exact_frame_content(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         c = config()
         c["recording"].update(frames_per_chunk=3, diagnostics_every_steps=2)
         a, control = Experiment(c), Experiment(c)
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory) / "example"
-            recorder = self.record(folder, a)
+            _recorder = self.record(folder, a)
             while not control.done:
                 control.step()
             self.assertEqual(
@@ -136,16 +149,23 @@ class RecordingTests(unittest.TestCase):
                 store.metrics("export", 999)
 
     def test_csv_history_is_bounded_and_isolated_by_run(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import csv
 
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory) / "long"
             (folder / "playback").mkdir(parents=True)
-            manifest = dict(
-                recording_version=1,
-                config={"species": {"prey": {}}},
-                runs=[dict(run=1, chunk_count=1, first_tick=0, last_tick=10000)],
-            )
+            manifest = {
+                "recording_version": 1,
+                "config": {"species": {"prey": {}}},
+                "runs": [
+                    {"run": 1, "chunk_count": 1, "first_tick": 0, "last_tick": 10000}
+                ],
+            }
             (folder / "playback/recording.json").write_text(json.dumps(manifest))
             with (folder / "metrics.csv").open("w", newline="") as handle:
                 writer = csv.writer(handle)
@@ -172,6 +192,11 @@ class RecordingTests(unittest.TestCase):
                 store.metadata(name)
 
     def test_recording_options_validate(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.config import validate
 
         for key, value in [

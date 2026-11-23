@@ -1,5 +1,8 @@
 """Combined survival/hunting selection, old archives, and chaining contracts."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -14,7 +17,6 @@ from wtf.storage.library import (
     balanced_rank,
     export_champions,
     apply_brain_overrides,
-    source_balanced_rank,
 )
 from wtf.experiment.runner import Experiment
 from tests.test_library import settings
@@ -33,6 +35,11 @@ def balanced_config():
 
 class BalancedChampionsTests(unittest.TestCase):
     def test_score_rewards_both_caps_bonus_and_does_not_reward_passive_survival(self):
+
+        # Keep the small synchronous numeric callback adjacent to the expression it
+        # parameterizes.
+        # pylint: disable=unnecessary-lambda-assignment
+
         policy = balanced_policy(balanced_config(), "predator")
         rank = lambda age, kills: balanced_rank(age, kills, 0, 55, policy)
         self.assertEqual(rank(600, 8)[0], 10)
@@ -187,6 +194,10 @@ class BalancedChampionsTests(unittest.TestCase):
         validate(load(Path(__file__).resolve().parents[1] / "environments/grpo.json"))
 
     def test_checkpoint_continuation_preserves_balanced_selection(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         a = Experiment(balanced_config())
         a.step()
         b = Experiment.restore(json.loads(json.dumps(a.checkpoint())))

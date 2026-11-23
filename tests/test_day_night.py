@@ -1,3 +1,12 @@
+"""Regression coverage for day night behavior and compatibility."""
+
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import copy
 import unittest
 from pathlib import Path
@@ -18,13 +27,13 @@ class DayNightTests(unittest.TestCase):
         c["species"]["predator"]["initial_population"] = 0
         c["obstacles"].update(generation="explicit", explicit_cells=[])
         c["resources"]["patch_count"] = 1
-        c["day_night"] = dict(enabled=True, cycle_steps=100, start_phase=0)
+        c["day_night"] = {"enabled": True, "cycle_steps": 100, "start_phase": 0}
         c["species"]["prey"]["body"]["vision_radius"] = 6
-        c["species"]["prey"]["circadian"] = dict(
-            night_vision_radius_multiplier=0.5,
-            night_living_cost_multiplier=0.5,
-            night_movement_cost_multiplier=2,
-        )
+        c["species"]["prey"]["circadian"] = {
+            "night_vision_radius_multiplier": 0.5,
+            "night_living_cost_multiplier": 0.5,
+            "night_movement_cost_multiplier": 2,
+        }
         return c
 
     def test_sunlight_curve_and_periodicity(self):
@@ -90,7 +99,7 @@ class DayNightTests(unittest.TestCase):
         c = self.config()
         c.pop("day_night")
         original = World(c, 100)
-        c["day_night"] = dict(enabled=False, cycle_steps=100)
+        c["day_night"] = {"enabled": False, "cycle_steps": 100}
         disabled = World(c, 100)
         for _ in range(30):
             self.assertEqual(original.observe_all(), disabled.observe_all())
@@ -113,6 +122,11 @@ class DayNightTests(unittest.TestCase):
             validate(c)
 
     def test_cycle_cache_is_once_per_tick_and_private_after_restore(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from unittest.mock import patch
 
         w = World(self.config(), 100)
@@ -132,6 +146,14 @@ class DayNightTests(unittest.TestCase):
             self.assertEqual(light.call_count, 3)
 
     def test_native_cycle_metabolism_matches_previous_python_path_exactly(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         from unittest.mock import patch
         from wtf.native import kernels
         import random
@@ -141,9 +163,10 @@ class DayNightTests(unittest.TestCase):
         c = self.config()
         c["species"]["prey"]["initial_population"] = 6
         c["species"]["predator"]["initial_population"] = 2
-        c["species"]["predator"]["circadian"] = dict(
-            night_living_cost_multiplier=1.15, night_movement_cost_multiplier=0.9
-        )
+        c["species"]["predator"]["circadian"] = {
+            "night_living_cost_multiplier": 1.15,
+            "night_movement_cost_multiplier": 0.9,
+        }
         native = World(c, 100)
         first = next(iter(native.animals.values()))
         first.energy = 0.01

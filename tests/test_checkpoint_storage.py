@@ -1,5 +1,8 @@
 """Exact compact state, old-reader compatibility and verified atomic conversion."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import gzip
 import json
 import math

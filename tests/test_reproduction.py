@@ -1,5 +1,13 @@
 """Birth mechanics, learned-state inheritance and exact continuation."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import json
 from pathlib import Path
 import tempfile
@@ -22,16 +30,16 @@ from tests.test_policy_algorithms import environment
 
 def reproduction(**overrides):
     return dict(
-        dict(
-            enabled=True,
-            health_threshold=24,
-            min_age_steps=1,
-            cooldown_steps=3,
-            min_energy=10,
-            energy_cost=5,
-            max_population=8,
-            mate_radius=10,
-        ),
+        {
+            "enabled": True,
+            "health_threshold": 24,
+            "min_age_steps": 1,
+            "cooldown_steps": 3,
+            "min_energy": 10,
+            "energy_cost": 5,
+            "max_population": 8,
+            "mate_radius": 10,
+        },
         **overrides,
     )
 
@@ -51,6 +59,10 @@ def breeding_world():
 
 
 def breeding_experiment(kind="q_network"):
+
+    # This self-contained regression intentionally repeats reference/setup data.
+    # pylint: disable=duplicate-code
+
     c = (
         config()
         if kind == "q_network"

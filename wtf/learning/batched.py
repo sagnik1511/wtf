@@ -18,6 +18,23 @@ KINDS = (PPOBrain, A2CBrain, ReinforceBrain, GRPOBrain, MaskablePPOBrain, MAPPOB
 def choose_actions(
     brains, observations, explore=True, random_baseline=False, allow_batch=True
 ):
+    """Choose independent animals' actions using compatible batched paths."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-boolean-expressions
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+    # This internal collaborator intentionally inspects the owning component's private
+    # state.
+    # pylint: disable=protected-access
+    # The optional CPython API is checked by its wrapper and native/reference
+    # equivalence tests.
+    # pylint: disable=c-extension-no-member
+
     if not allow_batch or random_baseline or not kernels.available("mlp_predict_many"):
         return {
             i: brains[i].choose(o, explore=explore, random_baseline=random_baseline)
@@ -97,6 +114,11 @@ def choose_actions(
 
 def policy_plan(brains):
     """Read-only model qualification for one frozen GRPO policy set."""
+
+    # Exact types intentionally reject bool/subclass substitutions in persisted
+    # numeric contracts.
+    # pylint: disable=unidiomatic-typecheck
+
     if not kernels.available("mlp_predict_many"):
         return {}
     plan = {}
@@ -119,6 +141,11 @@ def policy_plan(brains):
 
 def predict_policies(brains, observations, plan=None):
     """Frozen outputs only; the group owns qualification and birth/death updates."""
+
+    # The optional CPython API is checked by its wrapper and native/reference
+    # equivalence tests.
+    # pylint: disable=c-extension-no-member
+
     if plan is None:
         plan = policy_plan(brains)
     if len(plan) < 2:

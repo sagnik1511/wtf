@@ -1,5 +1,8 @@
 """Executable contributor recipes and complete schema-field documentation."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import ast
 import copy
 import json
@@ -64,6 +67,11 @@ class DocumentationContractsTests(unittest.TestCase):
                                 self.assertIn(argument.value, section)
 
     def test_species_recipe_writes_valid_local_json_without_modifying_preset(self):
+
+        # Execute maintained tutorial snippets in isolated namespaces to verify their
+        # documented API.
+        # pylint: disable=exec-used
+
         original = (ROOT / "environments/maskable_ppo.json").read_text()
         code = excerpt("docs/species.md", "species-example")
         # Intercept writes and directory creation: execute the real recipe without
@@ -90,6 +98,11 @@ class DocumentationContractsTests(unittest.TestCase):
         )
 
     def test_illustrative_policy_class_learns_and_restores_its_schedule(self):
+
+        # Execute maintained tutorial snippets in isolated namespaces to verify their
+        # documented API.
+        # pylint: disable=exec-used
+
         namespace = {}
         exec(
             compile(

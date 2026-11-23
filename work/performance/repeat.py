@@ -1,5 +1,10 @@
 """Alternate reference and optimized processes; record median local timings."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import json
 import statistics
 import subprocess

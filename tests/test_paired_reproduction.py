@@ -1,17 +1,19 @@
 """Sex-specific founder templates, biparental crossover and paired persistence."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
 import tempfile
 import unittest
-
 from wtf.learning.brains import mix_parent_brains, model_snapshot
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.config import load
 from wtf.experiment.runner import Experiment
-from tests.reproduction_support import force_reproduction
 from wtf.simulation.world import Animal, World
+from tests.reproduction_support import force_reproduction
 from tests.test_mutation import KINDS, environment
 from tests.test_reproduction import breeding_world
 
@@ -34,9 +36,17 @@ def parameters(brain):
 
 
 class PairedGeneticsTests(unittest.TestCase):
+
+    # This self-contained regression intentionally repeats reference/setup data.
+    # pylint: disable=duplicate-code
+
     def test_crossover_every_algorithm_mixes_parameters_without_parent_or_rng_changes(
         self,
     ):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             e = force_reproduction(Experiment(environment(kind, 0)))
             mother = e.brains[0]
@@ -165,6 +175,11 @@ class PairedGeneticsTests(unittest.TestCase):
         restored.step()
 
     def test_analysis_counts_both_parents_cost_but_keeps_old_recording_semantics(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.inspection.analyze import Statistics
 
         w = breeding_world()

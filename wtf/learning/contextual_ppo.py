@@ -1,8 +1,7 @@
 """PPO variants with local action masks or a centralized training critic."""
 
-import math
 from wtf.simulation.actions import WALK_ACTIONS
-from wtf.learning.brain import INPUTS, observation_inputs
+from wtf.learning.brain import observation_inputs
 from wtf.learning.ppo import MLP, PPOBrain, loss_and_gradient, policy_distribution
 
 CENTRAL_INPUTS = 16
@@ -16,6 +15,15 @@ def action_mask(
     Turning/rest remain possible. An approaching target can still move into an
     unmasked attack's range only on a later decision; this changes the task.
     """
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     front = world.front(animal)
     if mating_context is not None:
         occupied, populations = mating_context[:2]
@@ -121,6 +129,8 @@ class LocalMLP(MLP):
 
 
 class MaskablePPOBrain(PPOBrain):
+    """PPO controller that samples only physically eligible actions."""
+
     algorithm = "maskable_ppo"
 
     def __init__(self, config, actions, base_seed, individual_seed):
@@ -220,42 +230,51 @@ class CentralNetwork:
 
     @property
     def layers(self):
+        """Expose the ordered trainable parameter layers."""
         return self.actor.layers + self.critic.layers
 
     @layers.setter
     def layers(self, values):
+        """Expose the ordered trainable parameter layers."""
         n = len(self.actor.layers)
         self.actor.layers, self.critic.layers = values[:n], values[n:]
 
     def zeros(self):
+        """Allocate zero gradients matching the ordered parameter layout."""
         return self.actor.zeros() + self.critic.zeros()
 
     clear_gradients = staticmethod(MLP.clear_gradients)
 
     def predict(self, observation):
+        """Compute outputs without performing a learning update."""
         return self.actor.predict(observation[: self.inputs]) + [
             self.value(observation)
         ]
 
     def activation_forward(self, observation):
         # Only the local actor's tape is displayed. Keep critic inference value-only.
+        """Evaluate the network with intermediate activation samples."""
         outputs, layers = self.actor.forward(observation[: self.inputs])
         return outputs + [self.value(observation)], layers
 
     def value(self, observation):
+        """Evaluate the state-value head for the supplied observation."""
         return self.critic.predict(observation)[0]
 
     def forward(self, observation):
+        """Evaluate the network and retain intermediates needed by backpropagation."""
         a, at = self.actor.forward(observation[: self.inputs])
         v, vt = self.critic.forward(observation)
         return a + v, (at, vt)
 
     def accumulate_gradient(self, tape, gradient, gradients):
+        """Accumulate derivatives into the supplied gradient storage."""
         n = len(self.actor.layers)
         self.actor.accumulate_gradient(tape[0], gradient[:-1], gradients[:n])
         self.critic.accumulate_gradient(tape[1], gradient[-1:], gradients[n:])
 
     def checkpoint(self):
+        """Serialize state required to resume this component."""
         return self.actor.checkpoint() + self.critic.checkpoint()
 
 

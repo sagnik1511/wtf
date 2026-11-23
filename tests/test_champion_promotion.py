@@ -1,5 +1,13 @@
 """Strict best-so-far promotion and portable, deduplicated model storage."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import lzma
@@ -84,6 +92,10 @@ class ChampionPromotionTests(unittest.TestCase):
                     self.assertEqual(e.champions.entries[species][sex], entries)
 
     def test_archives_retain_identity_and_write_no_new_weights_for_ties(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         e = Experiment(configuration())
         establish_records(e)
         with tempfile.TemporaryDirectory() as folder:

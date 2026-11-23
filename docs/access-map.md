@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **294 public documentation pages**, **115 visual files**
+Coverage: **295 public documentation pages**, **115 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -295,10 +295,11 @@ and **8 identical viewer branding copies**.
 | [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.12](releases/0.0.2.12.md) |
 | [0.0.2.13 Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.13](releases/0.0.2.13.md) |
 | [0.0.2.14 Native LSTM forward and backward](releases/0.0.2.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.14](releases/0.0.2.14.md) |
-| [0.0.2.15 Bundled LSTM PPO preset](releases/0.0.2.15.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.15 — Bundled LSTM PPO preset](releases/0.0.2.15.md) |
-| [0.0.2.16 Environment-object and feeding visuals](releases/0.0.2.16.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.16 — Environment-object and feeding visuals](releases/0.0.2.16.md) |
-| [0.0.2.17 Additional geography presets](releases/0.0.2.17.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.17 — Additional geography presets](releases/0.0.2.17.md) |
-| [0.0.2.18 Collective sensing and persistent consequence learning](releases/0.0.2.18.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.18 — Collective learning](releases/0.0.2.18.md) |
+| [0.0.2.15 Bundled LSTM PPO preset](releases/0.0.2.15.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.15](releases/0.0.2.15.md) |
+| [0.0.2.16 Environment-object and feeding visuals](releases/0.0.2.16.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.16](releases/0.0.2.16.md) |
+| [0.0.2.17 Additional geography presets](releases/0.0.2.17.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.17](releases/0.0.2.17.md) |
+| [0.0.2.18 Collective sensing and persistent consequence learning](releases/0.0.2.18.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.18](releases/0.0.2.18.md) |
+| [0.0.2.19 Episode publication and independent review workflow](releases/0.0.2.19.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.19 — Episode publication and independent review workflow](releases/0.0.2.19.md) |
 | [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |

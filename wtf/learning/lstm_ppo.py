@@ -5,9 +5,9 @@ reset at episode boundaries and births. Archived explanations use zero memory.
 """
 
 from array import array
-from wtf.native import kernels
 import math
 import random
+from wtf.native import kernels
 from wtf.learning.brain import observation_inputs
 from wtf.learning.ppo import MLP, policy_distribution
 from wtf.learning.recurrent_ppo import GRUNetwork, RecurrentPPOBrain, sigmoid
@@ -16,25 +16,43 @@ from wtf.native.numeric import Float32, packed
 
 
 class LSTMNetwork(GRUNetwork):
+    """Four-gate recurrent memory followed by a policy/value head."""
+
     def __init__(self, config, actions, seed):
+
+        # LSTM replaces the complete GRU layout; calling super would allocate/discard
+        # wrong gates and RNG work.
+        # pylint: disable=super-init-not-called
+
         self.hidden_size = h = config["recurrent_size"]
         self.inputs = observation_inputs(config)
         rng = random.Random(seed ^ 0x6A09E667)
         self.cell = packed(
-            dict(
-                input_weights=[
+            {
+                "input_weights": [
                     rng.uniform(-1, 1) * math.sqrt(6 / (self.inputs + h))
                     for _ in range(4 * h * self.inputs)
                 ],
-                recurrent_weights=[
+                "recurrent_weights": [
                     rng.uniform(-1, 1) * math.sqrt(3 / h) for _ in range(4 * h * h)
                 ],
-                bias=[0.0] * h + [1.0] * h + [0.0] * (2 * h),
-            )
+                "bias": [0.0] * h + [1.0] * h + [0.0] * (2 * h),
+            }
         )
         self.head = MLP(config["network"]["hidden_layers"], actions, seed, inputs=h)
 
     def step(self, observation, hidden, tape=False, value_only=False):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+        # The fixed four-gate loop fills this list before unpacking; static inference
+        # sees only its empty initializer.
+        # pylint: disable=unbalanced-tuple-unpacking
+
         h = self.hidden_size
         if len(hidden) != 2 * h:
             raise ValueError("LSTM memory must contain hidden and cell state")
@@ -101,6 +119,14 @@ class LSTMNetwork(GRUNetwork):
         ), state
 
     def backward(self, tape, output_gradient, future_gradient, gradients):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         x, old, incoming, forget, candidate, output, cell, head_tape = tape
         h = self.hidden_size
         derivative = self.head.accumulate_gradient(
@@ -164,6 +190,8 @@ class LSTMNetwork(GRUNetwork):
 
 
 class LSTMPPOBrain(RecurrentPPOBrain):
+    """PPO controller with private LSTM hidden and cell state."""
+
     algorithm = "lstm_ppo"
 
     def __init__(self, config, actions, base_seed, individual_seed):
@@ -185,22 +213,22 @@ class LSTMPPOBrain(RecurrentPPOBrain):
             outputs, current = self.network.step(observation, self.hidden)
         p, logs = policy_distribution(outputs[:-1])
         h = self.config["recurrent_size"]
-        info = dict(
-            algorithm=self.algorithm,
-            features=observation,
-            action_probabilities=dict(zip(self.actions, p)),
-            state_value=outputs[-1],
-            entropy=-sum(v * lp for v, lp in zip(p, logs)),
-            updates=self.updates,
-            rollout_updates=self.rollout_updates,
-            buffer_kind="sequence",
-            buffer_size=len(self.rollout),
-            recurrent_size=h,
-            recurrent_cell="lstm",
-            memory_norm=math.sqrt(sum(v * v for v in self.hidden[:h])),
-            cell_norm=math.sqrt(sum(v * v for v in self.hidden[h:])),
-            training_metrics=self.last_metrics.copy(),
-        )
+        info = {
+            "algorithm": self.algorithm,
+            "features": observation,
+            "action_probabilities": dict(zip(self.actions, p)),
+            "state_value": outputs[-1],
+            "entropy": -sum((v * lp for v, lp in zip(p, logs))),
+            "updates": self.updates,
+            "rollout_updates": self.rollout_updates,
+            "buffer_kind": "sequence",
+            "buffer_size": len(self.rollout),
+            "recurrent_size": h,
+            "recurrent_cell": "lstm",
+            "memory_norm": math.sqrt(sum((v * v for v in self.hidden[:h]))),
+            "cell_norm": math.sqrt(sum((v * v for v in self.hidden[h:]))),
+            "training_metrics": self.last_metrics.copy(),
+        }
         return (
             activation_sample(info, [current[:h]] + list(tape[-1][1:-1]), self.hidden)
             if include_activations

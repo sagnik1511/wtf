@@ -15,6 +15,7 @@ _DEFAULT_PRECISION = ContextVar("brain_precision", default="float32")
 
 @contextmanager
 def precision_scope(precision):
+    """Temporarily select the requested numeric precision contract."""
     if precision not in ("float32", "float64"):
         raise ValueError("Unsupported brain precision: " + str(precision))
     token = _DEFAULT_PRECISION.set(precision)
@@ -25,6 +26,8 @@ def precision_scope(precision):
 
 
 class Float32(array):
+    """Compact floating-point storage compatible with the numeric helpers."""
+
     __slots__ = ()
 
     def __new__(cls, values=()):
@@ -36,6 +39,7 @@ class Float32(array):
         return result
 
     def copy(self):
+        """Copy this compact numeric storage into an independent array."""
         return type(self)(self)
 
     def __deepcopy__(self, memo):
@@ -70,6 +74,7 @@ def plain(value):
 
 
 def precision_of(brain):
+    """Return the component's persisted numeric precision."""
     values = brain.weights if hasattr(brain, "weights") else brain.network.layers
     leaf = (
         next(iter(values.values()))

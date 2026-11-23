@@ -1,5 +1,8 @@
 """Species-scoped plateau patience, finalization, and exact continuation."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -288,6 +291,7 @@ class EarlyStoppingTests(unittest.TestCase):
                     [sys.executable, "-m", "wtf.cli", str(path), *args],
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(message, result.stderr)

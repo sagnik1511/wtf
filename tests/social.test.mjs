@@ -163,11 +163,27 @@ test('Playback shows saved collective samples at their own time and reverses on 
   assert.equal(await read(0), 0);
 });
 
-
-test('Inspector explains episode-frozen knowledge separately from changing context',()=>{
- globalThis.document={documentElement:{dataset:{theme:'dark'}},createElement:t=>new Node(t),createElementNS:(_,t)=>new Node(t)};
- const root=inspectorGraphs({consequenceSchedule:'episode',diagnostic:{tick:27,features,action_probabilities:{swim:.2,rest:.8}},template,spec:{body:{vision_radius:5},allowed_actions:['swim','rest']},hasWater:true});
- const text=walk(root).map(n=>n.textContent).join(' ');
- assert.ok(text.includes('frozen at episode start'));assert.ok(text.includes('New evidence applies next episode'));
- assert.ok(text.includes('sampled context'));
+test('Inspector explains episode-frozen knowledge separately from changing context', () => {
+  globalThis.document = {
+    documentElement: { dataset: { theme: 'dark' } },
+    createElement: (t) => new Node(t),
+    createElementNS: (_, t) => new Node(t),
+  };
+  const root = inspectorGraphs({
+    consequenceSchedule: 'episode',
+    diagnostic: {
+      tick: 27,
+      features,
+      action_probabilities: { swim: 0.2, rest: 0.8 },
+    },
+    template,
+    spec: { body: { vision_radius: 5 }, allowed_actions: ['swim', 'rest'] },
+    hasWater: true,
+  });
+  const text = walk(root)
+    .map((n) => n.textContent)
+    .join(' ');
+  assert.ok(text.includes('frozen at episode start'));
+  assert.ok(text.includes('New evidence applies next episode'));
+  assert.ok(text.includes('sampled context'));
 });

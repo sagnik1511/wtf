@@ -1,5 +1,13 @@
 """Exact snapshot reuse and phase-local competition occupancy ownership."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import gc
 import math
@@ -213,9 +221,25 @@ class OccupancyReuseTests(unittest.TestCase):
 
     def test_phase_occupancy_matches_rebuilt_reference_after_moves_and_deaths(self):
         # Rebuild before each advance, reproducing the original helper's ownership.
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.simulation.competition import _advance
 
         def rebuilt(world, winner, loser, events, Event, occupied):
+
+            # These callback/keyword names are fixed by the stdlib or injected
+            # constructor interface.
+            # pylint: disable=invalid-name
+            # Keep setup, action and assertions together as one regression scenario.
+            # pylint: disable=too-many-arguments
+            # pylint: disable=too-many-positional-arguments
+            # The callback keeps its caller's keyword signature; this branch does not
+            # consume every input.
+            # pylint: disable=unused-argument
+
             return _advance(
                 world,
                 winner,

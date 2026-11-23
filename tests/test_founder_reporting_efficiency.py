@@ -1,5 +1,8 @@
 """Founder state isolation and explicitly scoped report reuse."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from contextlib import redirect_stdout
 import io
@@ -19,6 +22,10 @@ from tests.test_mutation import KINDS, environment
 
 class FounderInitializationTests(unittest.TestCase):
     def test_one_constructor_per_species_sex_with_original_seeded_state(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         for kind in KINDS:
             with self.subTest(kind=kind):
                 c = environment(kind, 0)

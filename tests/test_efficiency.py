@@ -1,5 +1,8 @@
 """Check optimizations against reference algorithms, not timing thresholds."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import json
 import math
 import tempfile
@@ -14,6 +17,10 @@ from tests.test_simulation import config
 
 
 def reference_observation(world, a):
+
+    # This self-contained regression intentionally repeats reference/setup data.
+    # pylint: disable=duplicate-code
+
     body = world.body(a)
     radius = body["vision_radius"]
     occupied = {other.position for other in world.animals.values() if other.id != a.id}
@@ -117,6 +124,14 @@ class EfficiencyTests(unittest.TestCase):
         self.assertLess(w.observe(a)[8], 0)
 
     def test_mlp_gradients_preserve_exact_accumulation_order(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-nested-blocks
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for hidden in ([3], [4, 3, 2]):
             network = MLP(hidden, 5, 42)
             expected, actual = network.zeros(), network.zeros()

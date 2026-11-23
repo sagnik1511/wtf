@@ -10,6 +10,7 @@ from wtf.storage.checkpoint_io import read_checkpoint, write_checkpoint
 
 
 def state_digest(state):
+    """Compute a stable checksum of decoded continuation state."""
     result = hashlib.sha256()
     for part in json.JSONEncoder(
         sort_keys=True, separators=(",", ":"), allow_nan=False
@@ -19,6 +20,7 @@ def state_digest(state):
 
 
 def file_digest(path):
+    """Compute a content checksum without retaining the entire file."""
     result = hashlib.sha256()
     with path.open("rb") as handle:
         while True:
@@ -30,6 +32,24 @@ def file_digest(path):
 
 
 def optimize_experiment(folder):
+    """Rewrite supported artifacts only after logical-equivalence validation."""
+
+    # This import is deferred until the operation runs, after both modules have
+    # initialized.
+    # pylint: disable=cyclic-import
+
+    # Keep independent numeric/compatibility or benchmark paths explicit to preserve
+    # their exact contracts.
+    # pylint: disable=duplicate-code
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # Keep imports lazy so optional tools and training dependencies load only on this
+    # path.
+    # pylint: disable=import-outside-toplevel
+
     folder = Path(folder).resolve()
     playback = folder / "playback/recording.json"
     if (
@@ -53,13 +73,13 @@ def optimize_experiment(folder):
         from wtf.storage.optimize_storage import optimize_experiment as optimize_binary
 
         result = optimize_binary(folder, replays=False, checkpoints=True)
-        return dict(
-            folder=result["folder"],
-            before_bytes=result["before_bytes"],
-            after_bytes=result["after_bytes"],
-            saved_bytes=result["saved_bytes"],
-            checkpoints_converted=result["files_reduced"],
-        )
+        return {
+            "folder": result["folder"],
+            "before_bytes": result["before_bytes"],
+            "after_bytes": result["after_bytes"],
+            "saved_bytes": result["saved_bytes"],
+            "checkpoints_converted": result["files_reduced"],
+        }
     stems = sorted(
         {
             p.name[:-3] if p.name.endswith(".gz") else p.name
@@ -107,16 +127,17 @@ def optimize_experiment(folder):
         finally:
             if temporary.exists():
                 temporary.unlink()
-    return dict(
-        folder=str(folder),
-        before_bytes=before,
-        after_bytes=after,
-        saved_bytes=before - after,
-        checkpoints_converted=converted,
-    )
+    return {
+        "folder": str(folder),
+        "before_bytes": before,
+        "after_bytes": after,
+        "saved_bytes": before - after,
+        "checkpoints_converted": converted,
+    }
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "path", type=Path, help="Experiment directory, or results root with --all"
@@ -132,7 +153,12 @@ def main():
         if args.all
         else [args.path]
     )
-    totals = dict(before_bytes=0, after_bytes=0, saved_bytes=0, checkpoints_converted=0)
+    totals = {
+        "before_bytes": 0,
+        "after_bytes": 0,
+        "saved_bytes": 0,
+        "checkpoints_converted": 0,
+    }
     for folder in folders:
         try:
             result = optimize_experiment(folder)

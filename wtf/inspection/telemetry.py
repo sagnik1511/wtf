@@ -1,20 +1,27 @@
 """Exact per-recorded-step dashboard data, derived without running a simulation."""
 
-from wtf.native import kernels
-from wtf.simulation.actions import ATTEMPT_ACTIONS, movement_action
 from collections import Counter, defaultdict
 import math
+from wtf.native import kernels
+from wtf.simulation.actions import ATTEMPT_ACTIONS, movement_action
+
 
 PAGE_SIZE = 128
 GROUP_RADIUS = 3
 
 
 def mean(values):
+    """Return a mean using the documented empty-sample convention."""
     return sum(values) / len(values) if values else None
 
 
 def groups(animals):
     """Same-species connected components within three cells, ignoring obstacles."""
+
+    # The optional CPython API is checked by its wrapper and native/reference
+    # equivalence tests.
+    # pylint: disable=c-extension-no-member
+
     if kernels.available("groups"):
         result = kernels.native.groups(animals, GROUP_RADIUS)
         if result is not NotImplemented:
@@ -40,14 +47,27 @@ def groups(animals):
                         parent[find(i)] = find(j)
         buckets[(bx, by)].append(i)
     sizes = Counter(find(i) for i in range(len(animals)))
-    return dict(
-        clusters=sum(n >= 2 for n in sizes.values()),
-        solitary=sum(n == 1 for n in sizes.values()),
-        largest=max(sizes.values(), default=0),
-    )
+    return {
+        "clusters": sum((n >= 2 for n in sizes.values())),
+        "solitary": sum((n == 1 for n in sizes.values())),
+        "largest": max(sizes.values(), default=0),
+    }
 
 
 def summarize(config, frame, previous=None):
+    """Aggregate available samples into the documented summary fields."""
+
+    # Keyword dict construction deliberately detects duplicate keys in dynamic **
+    # expansions; a literal would silently overwrite them.
+    # pylint: disable=use-dict-literal
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-boolean-expressions
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+
     animals = {a["id"]: a for a in frame["animals"]}
     prior = {a["id"]: a for a in previous["animals"]} if previous else {}
     consecutive = previous is not None and frame["tick"] == previous["tick"] + 1
@@ -153,15 +173,15 @@ def summarize(config, frame, previous=None):
         success = event["kill"] if spec["diet"] == "prey" else event["productive_feeds"]
         species[name] = dict(
             **(
-                dict(
-                    challenge_attempts=action["challenge"] if consecutive else None,
-                    contest_wins=event["contest_won"] if consecutive else None,
-                    contest_losses=event["contest_lost"] if consecutive else None,
-                    competition_deaths=event["competition"] if consecutive else None,
-                    competition_energy=(
+                {
+                    "challenge_attempts": action["challenge"] if consecutive else None,
+                    "contest_wins": event["contest_won"] if consecutive else None,
+                    "contest_losses": event["contest_lost"] if consecutive else None,
+                    "competition_deaths": event["competition"] if consecutive else None,
+                    "competition_energy": (
                         event["competition_energy"] if consecutive else None
                     ),
-                )
+                }
                 if spec.get("competition", {}).get("enabled", False)
                 else {}
             ),
@@ -225,9 +245,9 @@ def summarize(config, frame, previous=None):
             epsilon=mean(epsilons),
             diagnostic_samples=samples,
         )
-    return dict(
-        tick=frame["tick"],
-        consecutive=consecutive,
-        food=frame["metrics"]["food"],
-        species=species,
-    )
+    return {
+        "tick": frame["tick"],
+        "consecutive": consecutive,
+        "food": frame["metrics"]["food"],
+        "species": species,
+    }

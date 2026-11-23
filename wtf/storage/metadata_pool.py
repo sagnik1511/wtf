@@ -11,11 +11,14 @@ MAX_METADATA = 16 * 1024 * 1024
 
 
 class MetadataPool:
+    """Store shared immutable metadata by content-derived identity."""
+
     def __init__(self, folder):
         self.folder = Path(folder)
         self.cache = {}
 
     def store(self, value):
+        """Store a shared immutable metadata value and return its reference."""
         raw = json.dumps(value, separators=(",", ":"), allow_nan=False).encode()
         if len(raw) > MAX_METADATA:
             raise ValueError("Checkpoint metadata exceeds size limit")
@@ -38,6 +41,7 @@ class MetadataPool:
         return digest
 
     def load(self, digest):
+        """Read persisted data and validate its supported contract."""
         if not isinstance(digest, str) or not re.fullmatch("[0-9a-f]{64}", digest):
             raise ValueError("Invalid checkpoint metadata reference")
         if digest not in self.cache:

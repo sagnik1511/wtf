@@ -1,4 +1,8 @@
-import json
+"""Regression coverage for examples behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 from pathlib import Path
 import tempfile
 import unittest

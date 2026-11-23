@@ -1,5 +1,8 @@
 """Survival gates and lineage behavior under the legacy mating contract."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 from pathlib import Path
 import unittest

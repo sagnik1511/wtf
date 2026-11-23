@@ -1,5 +1,8 @@
 """Shared inference, scratch buffers and trial-history isolation; no timings."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import math
@@ -33,6 +36,11 @@ class FullTapeFreshGradientMLP(MLP):
         return self.forward(observation)[0][-1]
 
     def clear_gradients(self, gradients):
+
+        # This test reference needs instance-owned network shapes while production
+        # clearing is static.
+        # pylint: disable=arguments-differ
+
         gradients[:] = self.zeros()
 
 
@@ -51,6 +59,11 @@ class PolicyLoopEfficiencyTests(unittest.TestCase):
                     network.layers[0]["weights"][0] += 0.1
 
     def test_gradient_reset_preserves_storage_and_removes_previous_minibatch(self):
+
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+
         network = MLP([4, 3], 3, 7)
         gradients = network.zeros()
         ids = [id(v) for layer in gradients for v in layer.values()]
@@ -79,6 +92,10 @@ class PolicyLoopEfficiencyTests(unittest.TestCase):
     def test_all_policy_controllers_match_full_tape_and_fresh_gradients_through_resume(
         self,
     ):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         for kind, cls in [
             ("ppo", PPOBrain),
             ("a2c", A2CBrain),
@@ -97,6 +114,11 @@ class PolicyLoopEfficiencyTests(unittest.TestCase):
                 )
 
                 def reference_path():
+
+                    # The callback is consumed synchronously within this iteration; it
+                    # never escapes the loop.
+                    # pylint: disable=cell-var-from-loop
+
                     b.network.__class__ = FullTapeFreshGradientMLP
                     if kind == "grpo":
                         b.reference_network.__class__ = FullTapeFreshGradientMLP
@@ -160,7 +182,7 @@ class PolicyLoopEfficiencyTests(unittest.TestCase):
         focal = brains[1]
         focal.config["rollout_horizon"] = 4
         world.lifespans = [
-            dict(id=500 + i, species="prey", age=10, cause="starvation")
+            {"id": 500 + i, "species": "prey", "age": 10, "cause": "starvation"}
             for i in range(100)
         ]
         world.next_animal_id = 10000

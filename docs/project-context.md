@@ -225,6 +225,9 @@ AGENTS.md                         Shared agent instructions
   wtf-optimize/
     SKILL.md                      Compute, cache and storage workflow
     agents/openai.yaml
+  wtf-reviewer/
+    SKILL.md                      Independent review and coordinated fixes
+    agents/openai.yaml
   wtf-release-docs/
     SKILL.md                      Versioned rollout workflow
     agents/openai.yaml
@@ -316,3 +319,15 @@ field definitions and sampled-only viewer decoding when changing these paths.
 Replay adds no separate social-history/model fields. Keep the guide's biological
 motivation, approximations and limitations explicit; learned-weight inheritance
 is evolutionary computation, not acquired biological inheritance.
+
+Substantial development updates and explicit commit/PR reviews use the repo-local
+`wtf-reviewer` skill in a separate context with a stable diff. See the
+[independent review handoff](development.md#independent-review-handoff). No
+permanent reviewer process or custom-agent configuration is required.
+
+Python CI gates and local review share `work.check_ci` and pinned
+`requirements-ci.txt`: maintained-source Black checks, full maintained-source Pylint
+checks, and a fresh portable wheel/sdist build with strict metadata
+validation. Reviewers also inspect full changed-file Pylint and relevant native,
+installation and documentation checks; see the
+[preflight guide](development.md#python-ci-and-build-preflight).

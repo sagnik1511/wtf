@@ -1,5 +1,13 @@
 """Arbitrary species identities with multiple prey and predator populations."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import csv
 import json
@@ -42,10 +50,19 @@ def configuration(kind="q_network"):
 
 
 def body(i, species, x, y, sex="female", heading=0):
+
+    # Keep setup, action and assertions together as one regression scenario.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+
     return Animal(i, species, x, y, heading, 40, 30, sex=sex, last_action="reproduce")
 
 
 class MultipleSpeciesTests(unittest.TestCase):
+
+    # This self-contained regression intentionally repeats reference/setup data.
+    # pylint: disable=duplicate-code
+
     def test_renamed_species_independent_private_controllers_and_mixed_algorithms(self):
         c = configuration()
         c["species"]["deer"]["body"]["max_health"] = 45
@@ -81,6 +98,10 @@ class MultipleSpeciesTests(unittest.TestCase):
             e.step()
 
     def test_all_algorithms_resume_with_multiple_species_across_run_boundaries(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             a = Experiment(configuration(kind))
             a.step()
@@ -216,6 +237,10 @@ class MultipleSpeciesTests(unittest.TestCase):
             )
 
     def test_cli_metrics_columns_and_presets_stay_configurable(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             path = root / "environment.json"
@@ -237,6 +262,7 @@ class MultipleSpeciesTests(unittest.TestCase):
                 ],
                 capture_output=True,
                 text=True,
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             folder = next((root / "results").iterdir())

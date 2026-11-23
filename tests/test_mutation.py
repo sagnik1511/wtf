@@ -1,5 +1,17 @@
 """Rare independent birth mutations, optimizer resets and lifecycle persistence."""
 
+# This self-contained regression intentionally repeats reference/setup data.
+# pylint: disable=duplicate-code
+
+
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import base64
 import csv
@@ -11,24 +23,24 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-
-from wtf.learning.brains import create_brain, inherit_brain, model_snapshot
+from wtf.learning.brains import inherit_brain, model_snapshot
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.config import validate, load
 from wtf.learning.mutation import mutation_trial, mutate_weights, mutate_birth
 from wtf.storage.recording import Recorder
 from wtf.storage.replay_io import chunk_path, load_chunk, read_chunk_bytes
 from wtf.experiment.runner import Experiment
-from tests.reproduction_support import force_reproduction
 from wtf.inspection.telemetry import summarize
 from wtf.inspection.analyze import analyze_recording
 from wtf.storage.library import export_champions
+from tests.reproduction_support import force_reproduction
 from tests.test_simulation import config
 from tests.test_ppo import ppo_environment
 from tests.test_policy_algorithms import environment as policy_environment
 from tests.test_advanced_algorithms import environment as advanced_environment
 from tests.test_reproduction import reproduction
 from tests.new_policy_support import environment as new_policy_environment
+
 
 KINDS = (
     "q_network",
@@ -44,12 +56,19 @@ KINDS = (
     "trpo",
     "lstm_ppo",
 )
-SETTINGS = dict(
-    enabled=True, probability_per_birth=1.0, max_changed_weights=3, noise_std=0.005
-)
+SETTINGS = {
+    "enabled": True,
+    "probability_per_birth": 1.0,
+    "max_changed_weights": 3,
+    "noise_std": 0.005,
+}
 
 
 def environment(kind, probability=1.0):
+
+    # This self-contained regression intentionally repeats reference/setup data.
+    # pylint: disable=duplicate-code
+
     c = (
         config()
         if kind == "q_network"
@@ -195,7 +214,7 @@ class MutationMathTests(unittest.TestCase):
         self.assertEqual(b.updates, 7)
 
     def test_nontrigger_does_not_traverse_weights(self):
-        settings = dict(SETTINGS, probability_per_birth=0.0001)
+        _settings = dict(SETTINGS, probability_per_birth=0.0001)
         with patch(
             "wtf.learning.mutation.mutate_weights",
             side_effect=AssertionError("model traversal"),
@@ -272,6 +291,11 @@ class MutationLifecycleTests(unittest.TestCase):
         )
 
     def test_evaluation_and_random_baselines_keep_newborn_weights_frozen(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         for mode in ("evaluate", "random"):
             e = force_reproduction(Experiment(environment("ppo"), mode=mode))
             with patch.object(type(e.brains[0]), "choose", return_value="reproduce"):
@@ -326,6 +350,11 @@ class MutationLifecycleTests(unittest.TestCase):
             )
 
     def test_trial_birth_mutations_do_not_change_real_world_or_other_policies(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.grouped_rollouts import collect_group
 
         e = force_reproduction(Experiment(environment("grpo")))
@@ -372,18 +401,19 @@ class MutationLifecycleTests(unittest.TestCase):
             assert(frames.at(-1).animals.some(a=>a.mutated&&a.mutation_count===1&&a.mutation_weights>0));
             assert(frames.at(-1).events.some(e=>e.kind==='mutated'));
             """
-            data = dict(
-                bytes=base64.b64encode(
+            data = {
+                "bytes": base64.b64encode(
                     read_chunk_bytes(chunk_path(Path(d) / "playback", 1, 0))
                 ).decode(),
-                expected=f,
-            )
+                "expected": f,
+            }
             result = subprocess.run(
                 ["node", "--input-type=module", "-e", script],
                 input=json.dumps(data),
                 text=True,
                 capture_output=True,
                 cwd=Path(__file__).resolve().parents[1],
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(
@@ -431,6 +461,7 @@ class MutationLifecycleTests(unittest.TestCase):
                 ],
                 capture_output=True,
                 text=True,
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             output = next((root / "results").iterdir())

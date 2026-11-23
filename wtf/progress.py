@@ -1,11 +1,23 @@
 """Terminal progress only; never changes world or learning state."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import sys
 from tqdm import tqdm
 
 
 class RunProgress:
+    """Manage an optional progress bar across runs and simulation steps."""
+
     def __init__(self, mode="train", enabled=None, stream=None):
+
+        # bar names the injected progress-bar factory, not placeholder application
+        # code.
+        # pylint: disable=disallowed-name
+
         self.mode = mode
         self.stream = stream if stream is not None else sys.stderr
         self.enabled = (
@@ -14,6 +26,12 @@ class RunProgress:
         self.bar = None
 
     def start(self, experiment, metrics=None):
+        """Start progress reporting for the current episode."""
+
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         self.close()
         if not self.enabled or experiment.finished_run:
             return
@@ -43,6 +61,7 @@ class RunProgress:
         )
 
     def tick(self, experiment):
+        """Advance the optional progress display to the saved-world step."""
         if self.bar is None:
             return
         self.bar.update(experiment.world.tick - self.bar.n)
@@ -55,6 +74,7 @@ class RunProgress:
             self.close()
 
     def close(self):
+        """Release this component's open output or reporting resources."""
         if self.bar is not None:
             self.bar.close()
             self.bar = None

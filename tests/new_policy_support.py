@@ -1,6 +1,9 @@
 """Small explicit fixtures for newly added generic policy implementations."""
 
-import copy
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-function-docstring
+
+
 from tests.test_ppo import ppo_settings
 from tests.test_simulation import config
 

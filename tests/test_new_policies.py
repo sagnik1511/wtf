@@ -1,5 +1,13 @@
 """Numerical objectives, LSTM BPTT, trust bounds and complete policy lifecycles."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import math
@@ -33,7 +41,7 @@ class NewPolicyMathTests(unittest.TestCase):
         first = [1.0, -0.5, 0.7]
         second = [0.4, 0.6, 0.8]
         alpha = 0.2
-        loss, gradient, entropy = actor_objective(logits, first, second, alpha)
+        loss, gradient, _entropy = actor_objective(logits, first, second, alpha)
         p, logs = policy_distribution(logits)
         self.assertAlmostEqual(loss, -soft_value(p, logs, first, second, alpha))
         for i in range(3):
@@ -48,6 +56,11 @@ class NewPolicyMathTests(unittest.TestCase):
             self.assertAlmostEqual(gradient[i], numerical, places=7)
 
     def test_sac_bootstraps_truncation_but_not_death(self):
+
+        # Explicit indices align the related packed arrays without introducing another
+        # captured value.
+        # pylint: disable=consider-using-enumerate
+
         for terminated in (True, False):
             c = settings("discrete_sac")
             c.update(batch_size=1, learning_starts_after=1)
@@ -83,7 +96,7 @@ class NewPolicyMathTests(unittest.TestCase):
 
     def test_trpo_surrogate_gradient_and_conjugate_gradient(self):
         logits = [0.2, -0.4, 0.6]
-        value, gradient = trpo.surrogate(logits, 1, -1.2, 0.7, 0.03)
+        _value, gradient = trpo.surrogate(logits, 1, -1.2, 0.7, 0.03)
         for i in range(3):
             plus = logits[:]
             minus = logits[:]
@@ -101,12 +114,16 @@ class NewPolicyMathTests(unittest.TestCase):
         self.assertAlmostEqual(solved[1], 7 / 11, places=10)
 
     def test_exact_fisher_vector_matches_kl_gradient_difference(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         with precision_scope("float64"):
             b = create_brain(settings("trpo"), ["rest", "attack"], 3, 5)
         network = b.network.actor
         x = (0.2,) * 20
         logits, tape = network.forward(x)
-        p, logs = policy_distribution(logits)
+        p, _logs = policy_distribution(logits)
         base = trpo.flatten(network.layers)
         direction = [((i % 7) - 3) * 0.02 for i in range(len(base))]
         actual = trpo.fisher_product(network, [tape], [p], direction, 0.0)
@@ -130,6 +147,10 @@ class NewPolicyMathTests(unittest.TestCase):
         self.assertGreaterEqual(trpo.dot(direction, actual), 0.0)
 
     def test_lstm_two_step_bptt_matches_finite_differences_with_nonzero_memory(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         c = settings("lstm_ppo")
         with precision_scope("float64"):
             network = LSTMNetwork(c, 2, 7)
@@ -137,7 +158,7 @@ class NewPolicyMathTests(unittest.TestCase):
         first = (0.1,) * 20
         second = (-0.2,) * 20
         _, hidden, t1 = network.step(first, initial, tape=True)
-        outputs, _, t2 = network.step(second, hidden, tape=True)
+        _outputs, _, t2 = network.step(second, hidden, tape=True)
         gradients = network.zeros()
         future = network.backward(t2, [1.0, 0.0, 0.0], [0.0] * 4, gradients)
         network.backward(t1, [0.0, 0.0, 0.0], future, gradients)
@@ -187,6 +208,11 @@ class NewPolicyMathTests(unittest.TestCase):
             calls = 0
 
             def evaluate(*args, **kwargs):
+
+                # The callback is consumed synchronously within this iteration; it
+                # never escapes the loop.
+                # pylint: disable=cell-var-from-loop
+
                 nonlocal calls
                 calls += 1
                 v, g = objective(*args, **kwargs)
@@ -291,6 +317,11 @@ class NewPolicyLifecycleTests(unittest.TestCase):
                 validate(c)
 
     def test_grpo_trials_do_not_advance_new_recurrent_policy_memory(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from tests.test_policy_algorithms import settings as policy_settings
         from wtf.learning.grouped_rollouts import collect_group
 

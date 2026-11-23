@@ -1,5 +1,13 @@
 """Optional collective sensing, bounded consequence memory and independent policies."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -9,7 +17,7 @@ import tempfile
 import unittest
 
 from tests.test_geography import configuration, animal
-from tests.test_mutation import environment, KINDS
+from tests.test_mutation import KINDS
 from wtf.config import validate, load
 from wtf.experiment.runner import Experiment
 from wtf.simulation.world import World, Resource
@@ -27,11 +35,13 @@ def config(kind="ppo", horizon=2):
     c = configuration(kind, rows=["........."] * 7, legend={".": {}})
     c["world"]["max_steps"] = 6
     c["experiment"].update(runs=2, world_seed_policy="increment")
-    c["consequence_learning"] = dict(
-        enabled=True, max_contexts=16, horizon_steps=horizon
-    )
+    c["consequence_learning"] = {
+        "enabled": True,
+        "max_contexts": 16,
+        "horizon_steps": horizon,
+    }
     for b in c["brains"].values():
-        b["social_observation"] = dict(history_steps=2, max_neighbors=2)
+        b["social_observation"] = {"history_steps": 2, "max_neighbors": 2}
         b["consequence_observation"] = True
     return validate(c)
 
@@ -362,6 +372,11 @@ class SocialLearningTests(unittest.TestCase):
     def test_grpo_trials_and_reused_worlds_cannot_update_real_population_knowledge(
         self,
     ):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.grouped_rollouts import collect_group
 
         e = Experiment(config("grpo", horizon=1))
@@ -379,6 +394,10 @@ class SocialLearningTests(unittest.TestCase):
         self.assertEqual(trial.checkpoint(), before)
 
     def test_cli_export_import_and_recorded_features(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         c = config(horizon=1)
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -403,7 +422,9 @@ class SocialLearningTests(unittest.TestCase):
                 ]
                 if previous:
                     args += ["--consequences-from", str(previous)]
-                result = subprocess.run(args, capture_output=True, text=True)
+                result = subprocess.run(
+                    args, capture_output=True, text=True, check=False
+                )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 folder = next(out.iterdir())
                 model = Consequences.load(c, folder)

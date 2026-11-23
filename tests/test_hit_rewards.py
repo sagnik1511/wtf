@@ -1,6 +1,10 @@
+"""Regression coverage for hit rewards behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import json
 import unittest
-from pathlib import Path
+
 
 from wtf.config import validate
 from wtf.experiment.runner import Experiment

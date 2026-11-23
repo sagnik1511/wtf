@@ -1,0 +1,4 @@
+interface:
+  display_name: "WTF Independent Review"
+  short_description: "Review commits, edge cases, checks and safe fixes"
+  default_prompt: "Use $wtf-reviewer to independently review the requested commit, PR or stable working-tree changes, fix clear defects and report remaining decisions."

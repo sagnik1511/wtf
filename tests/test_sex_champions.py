@@ -1,5 +1,13 @@
 """Species/sex champion identity, warm starts, chaining and legacy boundaries."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -45,7 +53,7 @@ def source(folder, kind="q_network"):
 class SexChampionTests(unittest.TestCase):
     def test_four_groups_rank_independently_and_export_only_sex_paths(self):
         with tempfile.TemporaryDirectory() as d:
-            e, archive = source(Path(d))
+            _e, archive = source(Path(d))
             manifest = json.loads((archive / "manifest.json").read_text())
             self.assertEqual(manifest["library_version"], 2)
             self.assertEqual(len(manifest["entries"]), 22)
@@ -179,7 +187,7 @@ class SexChampionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             e = Experiment(configuration())
-            for i, a in e.world.animals.items():
+            for _i, a in e.world.animals.items():
                 a.age = 100 if a.sex == "male" else 20
             e.champions.consider(
                 e.world.animals.values(), e.brains, e._champion_source()
@@ -203,6 +211,11 @@ class SexChampionTests(unittest.TestCase):
             )
 
     def test_checkpoints_keep_group_provenance_after_source_deleted(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import shutil
 
         with tempfile.TemporaryDirectory() as d:
@@ -338,6 +351,10 @@ class SexChampionTests(unittest.TestCase):
                 apply_brain_overrides(configuration(), [request])
 
     def test_cli_records_each_sex_source_and_can_select_only_male(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             source(root / "source")
@@ -364,6 +381,7 @@ class SexChampionTests(unittest.TestCase):
                 ],
                 capture_output=True,
                 text=True,
+                check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             folder = next((root / "results").iterdir())

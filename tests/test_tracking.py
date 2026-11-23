@@ -1,5 +1,13 @@
 """Personal information boundaries, anonymous scent, exact resume and compact replays."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -13,12 +21,7 @@ from wtf.experiment.runner import Experiment
 from wtf.inspection.explainability import feature_names, prepare_model
 from wtf.learning.brain import observation_inputs
 from wtf.learning.brains import model_snapshot, load_model_weights
-from wtf.simulation.tracking import (
-    Tracking,
-    scent_contract,
-    tracking_names,
-    tracking_width,
-)
+from wtf.simulation.tracking import scent_contract, tracking_names, tracking_width
 from wtf.simulation.world import Animal, World
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.storage.recording import Recorder
@@ -30,11 +33,11 @@ from tests.reproduction_support import force_reproduction
 
 def tracked(c, steps=3, scent=True):
     if scent:
-        c["scent_trails"] = dict(enabled=True, lifetime_steps=8)
+        c["scent_trails"] = {"enabled": True, "lifetime_steps": 8}
     for b in c["brains"].values():
         b["movement_history_steps"] = steps
         if scent:
-            b["scent_observation"] = dict(species=list(c["species"]), radius=2)
+            b["scent_observation"] = {"species": list(c["species"]), "radius": 2}
     return c
 
 
@@ -135,7 +138,7 @@ class ScentTests(unittest.TestCase):
         cell = (2 * field.width + 3) * field.channels
         field.cells[cell + field.groups["prey", "female"]] = 0
         field.cells[cell + field.groups["predator", "male"]] = 1
-        template = dict(scent_observation=dict(mode="blended", radius=2))
+        template = {"scent_observation": {"mode": "blended", "radius": 2}}
         values = field.sample(w, w.animals[0], template)
         self.assertEqual(len(values), 9)
         self.assertEqual(values[3], 0.625)
@@ -159,7 +162,7 @@ class ScentTests(unittest.TestCase):
         scent = w._tracking.scent
         scent.cells.clear()
         scent.advance(w)
-        template = dict(scent_observation=dict(species=["prey"], radius=2))
+        template = {"scent_observation": {"species": ["prey"], "radius": 2}}
         values = scent.sample(w, w.animals[0], template)
         self.assertEqual(values[3], 1)  # east female
         self.assertEqual(values[7], 1)  # west female; not a single selected prey
@@ -183,7 +186,7 @@ class ScentTests(unittest.TestCase):
     def test_fading_expiration_walls_and_water(self):
         w = scene(0, True)
         scent = w._tracking.scent
-        template = dict(scent_observation=dict(species=["prey"], radius=2))
+        template = {"scent_observation": {"species": ["prey"], "radius": 2}}
         del w.animals[1]
         w.tick = 4
         scent.advance(w)
@@ -202,6 +205,10 @@ class ScentTests(unittest.TestCase):
 
 class TrackingIntegrationTests(unittest.TestCase):
     def test_blended_contract_all_policies_resume_and_legacy_weights(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         for kind in KINDS:
             with self.subTest(kind=kind):
                 c = tracked(environment(kind, 0), 2)
@@ -217,7 +224,7 @@ class TrackingIntegrationTests(unittest.TestCase):
                     scent_contract(separated.brains[0].config),
                 )
                 for b in c["brains"].values():
-                    b["scent_observation"] = dict(mode="blended", radius=2)
+                    b["scent_observation"] = {"mode": "blended", "radius": 2}
                 validate(c)
                 e = force_reproduction(Experiment(c))
                 with self.assertRaisesRegex(ValueError, "incompatible"):
@@ -323,11 +330,14 @@ class TrackingIntegrationTests(unittest.TestCase):
     def test_equal_width_scent_modes_cannot_silently_reuse_weights(self):
         c = tracked(environment("ppo", 0), 0)
         for template in c["brains"].values():
-            template["scent_observation"] = dict(species=["prey"], separate_sexes=False)
+            template["scent_observation"] = {
+                "species": ["prey"],
+                "separate_sexes": False,
+            }
         e = Experiment(c)
         model = model_snapshot(e.brains[0])
         for template in c["brains"].values():
-            template["scent_observation"] = dict(mode="blended")
+            template["scent_observation"] = {"mode": "blended"}
         other = Experiment(c)
         self.assertEqual(
             observation_inputs(e.brains[0].config),
@@ -356,7 +366,7 @@ class TrackingIntegrationTests(unittest.TestCase):
                 c = tracked(environment("ppo", 0), 2)
                 if mode == "blended":
                     for template in c["brains"].values():
-                        template["scent_observation"] = dict(mode="blended")
+                        template["scent_observation"] = {"mode": "blended"}
                 c["recording"].update(
                     encoding="binary",
                     compression="xz",
@@ -420,13 +430,13 @@ class TrackingIntegrationTests(unittest.TestCase):
             ("movement_history_steps", -1),
             ("movement_history_steps", 17),
             ("movement_history_steps", True),
-            ("scent_observation", dict(mode="wrong")),
-            ("scent_observation", dict(mode="blended", species=["prey"])),
-            ("scent_observation", dict(mode="blended", separate_sexes=False)),
-            ("scent_observation", dict(species=["missing"])),
-            ("scent_observation", dict(species=["prey", "prey"])),
-            ("scent_observation", dict(species=["prey"], radius=9)),
-            ("scent_observation", dict(species=["prey"], separate_sexes=1)),
+            ("scent_observation", {"mode": "wrong"}),
+            ("scent_observation", {"mode": "blended", "species": ["prey"]}),
+            ("scent_observation", {"mode": "blended", "separate_sexes": False}),
+            ("scent_observation", {"species": ["missing"]}),
+            ("scent_observation", {"species": ["prey", "prey"]}),
+            ("scent_observation", {"species": ["prey"], "radius": 9}),
+            ("scent_observation", {"species": ["prey"], "separate_sexes": 1}),
         ):
             c = tracked(config())
             next(iter(c["brains"].values()))[key] = value

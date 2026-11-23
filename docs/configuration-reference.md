@@ -942,5 +942,6 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `enabled` | Enable training and persistent storage of consequence outcome frequencies; evaluation reads without training. | boolean | Required; — |
 | `max_contexts` | Maximum context records retained per participating species using deterministic update-order LRU eviction. | integer; min: `16`; max: `8192` | Optional; `512` |
 | `horizon_steps` | Observed step window for harm, feeding and birth outcomes; death closes the window and episode truncation discards incomplete windows. | integer; min: `1`; max: `64` | Optional; `16` |
+| `update_schedule` | When collected outcome evidence becomes visible as consequence estimates: continuous updates immediately after closed windows; episode freezes the published model and publishes staged evidence before the next episode starts. | string; choices: `["continuous", "episode"]` | Optional; `"continuous"` |
 
-Field entries documented: **520**.
+Field entries documented: **521**.

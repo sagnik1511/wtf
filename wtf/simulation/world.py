@@ -1,12 +1,8 @@
 """Physical state and simultaneous action resolution; no learning dependencies."""
 
-from wtf.native import kernels
-from wtf.simulation.actions import (
-    WALK_OFFSETS,
-    WALK_ACTIONS,
-    MOVE_ACTIONS,
-    ATTEMPT_ACTIONS,
-)
+# Keep the complete world/schema ownership contract together instead of fragmenting it
+# for a line-count limit.
+# pylint: disable=too-many-lines
 
 
 import copy
@@ -14,11 +10,19 @@ import math
 import random
 from collections import Counter, OrderedDict, defaultdict, deque
 from dataclasses import dataclass
+from wtf.native import kernels
+from wtf.simulation.actions import (
+    WALK_OFFSETS,
+    WALK_ACTIONS,
+    MOVE_ACTIONS,
+    ATTEMPT_ACTIONS,
+)
 from wtf.simulation.perception import SpatialIndex
 from wtf.simulation.tracking import Tracking
 from wtf.simulation.social import SocialState, enabled as social_enabled
 from wtf.simulation.geography import Geography, resolve_map
 from wtf.simulation.day_night import sunlight, effective_body
+
 
 DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 VISIBILITY_CACHE_LIMIT = 2048
@@ -48,6 +52,12 @@ _TRIAL_STATE_FIELDS = frozenset(
 
 @dataclass
 class Animal:
+    """Mutable per-animal body, identity and lifecycle counters."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     id: int
     species: str
     x: int
@@ -77,11 +87,14 @@ class Animal:
 
     @property
     def position(self):
+        """Return the entity's grid coordinates."""
         return self.x, self.y
 
 
 @dataclass
 class Resource:
+    """Position and remaining quantity of a world food source."""
+
     x: int
     y: int
     quantity: float
@@ -89,6 +102,8 @@ class Resource:
 
 @dataclass(frozen=True)
 class Event:
+    """One physical or lifecycle outcome emitted by a world step."""
+
     kind: str
     actor: int
     target: int = -1
@@ -100,6 +115,8 @@ class Event:
 
 @dataclass
 class StepResult:
+    """Observations, rewards and events produced by one world step."""
+
     observations: dict
     rewards: dict
     dead_ids: set
@@ -107,7 +124,21 @@ class StepResult:
 
 
 class World:
+    """Own the grid, physical rules, entities and observation state."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, config, seed):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         self.config = copy.deepcopy(config)
         if "terrain" in self.config:
             self.config["terrain"] = resolve_map(self.config["terrain"])
@@ -206,6 +237,7 @@ class World:
             self._tracking.scent.advance(self)
 
     def body(self, animal):
+        """Resolve the animal's current effective physical body."""
         cycle = self.config.get("day_night")
         if not cycle or not cycle.get("enabled", False):
             return self.config["species"][animal.species]["body"]
@@ -214,6 +246,11 @@ class World:
         return self._cycle_bodies[animal.species]
 
     def _refresh_cycle_bodies(self, cycle):
+
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         light = sunlight(cycle, self.tick)
         species = self.config["species"]
         self._cycle_bodies = {
@@ -223,6 +260,11 @@ class World:
         self._body_tick = self.tick
 
     def _metabolism_species(self):
+
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         cycle = self.config.get("day_night")
         if not cycle or not cycle.get("enabled", False):
             return self.config["species"]
@@ -241,21 +283,26 @@ class World:
         return self._cycle_specs
 
     def diet(self, animal):
+        """Return the configured species diet."""
         return self.config["species"][animal.species]["diet"]
 
     def front(self, animal):
+        """Return the cell directly ahead of an animal."""
         dx, dy = DIRECTIONS[animal.heading]
         return animal.x + dx, animal.y + dy
 
     def movement_destination(self, animal, action):
+        """Resolve the destination of the selected movement action."""
         dx, dy = DIRECTIONS[(animal.heading + WALK_OFFSETS.get(action, 0)) % 4]
         return animal.x + dx, animal.y + dy
 
     def blocked(self, p):
+        """Check whether the requested cell is blocked in this movement context."""
         x, y = p
         return not (0 <= x < self.width and 0 <= y < self.height) or p in self.obstacles
 
     def terrain_move_cost(self, animal, destination, action):
+        """Compute the configured effort of the terrain transition."""
         if not self.geography:
             return 0.0
         rules = self.config["species"][animal.species].get("locomotion", {})
@@ -273,6 +320,12 @@ class World:
         return cost
 
     def movement_block_reason(self, animal, destination, action, occupied=None):
+        """Explain why a requested terrain transition is ineligible."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-return-statements
+
         if self.blocked(destination):
             return "obstacle"
         if occupied is not None and destination in occupied:
@@ -310,6 +363,12 @@ class World:
             events.append(Event("energy_spent", animal.id, amount=amount, cause=cause))
 
     def _river_drift(self, events):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+
         if not self.geography:
             return
         paths = {}
@@ -379,6 +438,7 @@ class World:
 
     def visible(self, start, end):
         # Integer Bresenham ray. The start cell does not occlude itself.
+        """Check obstacle occlusion between the ordered grid endpoints."""
         x, y = start
         tx, ty = end
         dx, dy = abs(tx - x), -abs(ty - y)
@@ -399,6 +459,11 @@ class World:
     def _perception_visible(self, start, end):
         # Only used after _observation_context has reconciled obstacle changes.
         # Keep ordered endpoints: Bresenham tie behavior is not assumed symmetric.
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         key = start, end
         cache = self._visibility_cache
         if key in cache:
@@ -413,8 +478,13 @@ class World:
                 0 <= p[0] < self.width and 0 <= p[1] < self.height for p in (start, end)
             )
         ):
+            # maps is the optional native tuple, guarded against None above.
             result, wet = kernels.native.ray(
-                *start, *end, *maps, self.width, self.height
+                *start,
+                *end,
+                *maps,  # pylint: disable=not-an-iterable
+                self.width,
+                self.height,
             )
             self._water_sight_cache[key] = wet
             if len(self._water_sight_cache) > VISIBILITY_CACHE_LIMIT:
@@ -428,6 +498,14 @@ class World:
 
     def _water_sight_cells(self, start, end):
         # Static map data only; ordered endpoints match the visibility ray.
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         key = start, end
         cache = self._water_sight_cache
         if key in cache:
@@ -441,6 +519,8 @@ class World:
                 0 <= p[0] < self.width and 0 <= p[1] < self.height for p in (start, end)
             )
         ):
+            # maps is the optional native tuple, guarded against None above.
+            # pylint: disable-next=not-an-iterable
             _, count = kernels.native.ray(*start, *end, *maps, self.width, self.height)
             cache[key] = count
             if len(cache) > VISIBILITY_CACHE_LIMIT:
@@ -468,6 +548,15 @@ class World:
         return count
 
     def _observation_context(self):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         occupied, food, prey, predators = {}, [], [], []
         species = self.config["species"]
         for i, animal in self.animals.items():
@@ -540,6 +629,11 @@ class World:
 
     def _prepare_mating_context(self, occupied=None):
         """Fresh decision-phase data; never implicitly reuse it after state edits."""
+
+        # This cache or restored state is rebuilt at its owning lifecycle boundary,
+        # not eagerly.
+        # pylint: disable=attribute-defined-outside-init
+
         if occupied is None:
             occupied = {a.position: a for a in self.animals.values()}
         populations, buckets, status = Counter(), defaultdict(list), {}
@@ -578,6 +672,12 @@ class World:
         return self._mate_context
 
     def _mating_features(self, a, include_intent=False):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-boolean-expressions
+        # pylint: disable=too-many-locals
+
         occupied, populations, buckets, status = self._mate_context
         spec = self.config["species"][a.species]
         rules = spec.get("reproduction", {})
@@ -610,7 +710,11 @@ class World:
                     ):
                         continue
                     key = squared, mate.id
-                    if best is None or key < best[0]:
+                    # Short-circuiting excludes None before indexing the candidate.
+                    if (
+                        best is None
+                        or key < best[0]  # pylint: disable=unsubscriptable-object
+                    ):
                         best = key, mate
                     if (
                         (not pair or (include_intent and not consenting_pair))
@@ -657,6 +761,16 @@ class World:
         return min(1.0, max(0, animal.mating_intent_until_tick - self.tick + 1) / steps)
 
     def observe(self, a, context=None):
+        """Build the current observation vector for one animal."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+
         body = self.body(a)
         radius = body["vision_radius"]
         template = self.config["brains"][self.config["species"][a.species]["brain"]]
@@ -738,6 +852,7 @@ class World:
     def observe_all(self):
         # Reconcile authoritative state once per phase. Dynamic bucket contents
         # update cached windows without rebuilding their overlapping interior.
+        """Build current observations for all living animals."""
         context = self._observation_context()
         if self._tracking is not None:
             for animal_id in self._tracking.visual.frames.keys() - self.animals.keys():
@@ -745,6 +860,25 @@ class World:
         return {i: self.observe(a, context) for i, a in self.animals.items()}
 
     def step(self, actions):
+        """Resolve one simultaneous physical step and its resulting observations."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-boolean-expressions
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-nested-blocks
+        # pylint: disable=too-many-statements
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+        # Energy depletion and positive health are separate physical gates kept
+        # explicit for auditability.
+        # pylint: disable=chained-comparison
+
         if set(actions) != set(self.animals):
             raise ValueError("Exactly one action required for every living animal")
         for i, action in actions.items():
@@ -1241,6 +1375,11 @@ class World:
         return ""
 
     def _mating_failure_reason(self, animal, occupied, populations, paired):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-return-statements
+
         rules = self.config["species"][animal.species].get("reproduction")
         reason = self._personal_mating_failure(animal, rules, animal.age)
         if reason:
@@ -1293,6 +1432,11 @@ class World:
         An explicit context is valid only in its unchanged decision phase; calls
         without one always read current state, including same-tick edits.
         """
+
+        # Keep the small synchronous numeric callback adjacent to the expression it
+        # parameterizes.
+        # pylint: disable=unnecessary-lambda-assignment
+
         spec = self.config["species"][animal.species]
         rules = spec.get("reproduction")
         if (
@@ -1341,6 +1485,14 @@ class World:
     def _reproduce(self, events):
         # Resolve after combat/starvation. Only animals present before this
         # phase can parent; newborns first act on the next simulation step.
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-boolean-expressions
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-statements
+
         parents = list(self.animals.values())
         rules = {
             name: spec.get("reproduction")
@@ -1468,28 +1620,35 @@ class World:
                 events.append(Event("mating_failed", animal.id, cause=reason))
 
     def metrics(self):
+        """Return the current population and physical-outcome metrics."""
         populations = Counter(a.species for a in self.animals.values())
-        return dict(
-            tick=self.tick,
-            populations={s: populations[s] for s in self.config["species"]},
-            food=sum(r.quantity for r in self.resources.values()),
-            deaths=dict(self.deaths),
-            energy_gained=dict(self.total_energy_gained),
-            kills=dict(self.kills),
-            births=dict(self.births),
-            mutations=dict(self.mutations),
-        )
+        return {
+            "tick": self.tick,
+            "populations": {s: populations[s] for s in self.config["species"]},
+            "food": sum((r.quantity for r in self.resources.values())),
+            "deaths": dict(self.deaths),
+            "energy_gained": dict(self.total_energy_gained),
+            "kills": dict(self.kills),
+            "births": dict(self.births),
+            "mutations": dict(self.mutations),
+        }
 
     def snapshot(self, include_static=True, metrics=None):
         # Explicit report reuse is valid only within an unchanged-state phase.
         # Standalone snapshots always read current state; outputs own their maps.
-        data = dict(
-            tick=self.tick,
-            resources=[vars(r).copy() for r in self.resources.values()],
-            animals=[vars(a).copy() for a in self.animals.values()],
-            events=[vars(e).copy() for e in self.events],
-            metrics=self.metrics() if metrics is None else copy.deepcopy(metrics),
-        )
+        """Build a serializable view of the current simulation state."""
+
+        # Keyword dict construction deliberately detects duplicate keys in dynamic **
+        # expansions; a literal would silently overwrite them.
+        # pylint: disable=use-dict-literal
+
+        data = {
+            "tick": self.tick,
+            "resources": [vars(r).copy() for r in self.resources.values()],
+            "animals": [vars(a).copy() for a in self.animals.values()],
+            "events": [vars(e).copy() for e in self.events],
+            "metrics": self.metrics() if metrics is None else copy.deepcopy(metrics),
+        }
         if include_static:
             return dict(
                 width=self.width,
@@ -1501,14 +1660,15 @@ class World:
         return data
 
     def checkpoint(self):
-        result = dict(
-            config=self.config,
-            seed=self.seed,
-            snapshot=self.snapshot(),
-            rng_state=self.rng.getstate(),
-            lifespans=self.lifespans,
-            next_animal_id=self.next_animal_id,
-        )
+        """Serialize state required to resume this component."""
+        result = {
+            "config": self.config,
+            "seed": self.seed,
+            "snapshot": self.snapshot(),
+            "rng_state": self.rng.getstate(),
+            "lifespans": self.lifespans,
+            "next_animal_id": self.next_animal_id,
+        }
         if self._social is not None:
             result["social_state"] = self._social.checkpoint()
         if self._tracking is not None:
@@ -1518,6 +1678,7 @@ class World:
     @classmethod
     def restore(cls, state, static_geography=None):
         # Construct directly: restoration must not depend on a new layout draw.
+        """Reconstruct the component from its persisted continuation state."""
         w = cls.__new__(cls)
         w.config = copy.deepcopy(state["config"])
         return w._restore_state(state, static_geography)
@@ -1537,6 +1698,11 @@ class World:
         return self._restore_state(state, geography, _trial=True)
 
     def _restore_state(self, state, static_geography=None, _trial=False):
+
+        # This internal collaborator intentionally inspects the owning component's
+        # private state.
+        # pylint: disable=protected-access
+
         w = self
         w.seed = state["seed"]
         s = state["snapshot"]

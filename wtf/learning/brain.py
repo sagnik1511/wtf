@@ -4,6 +4,11 @@ Packed float32 parameters and standard-library math keep installation self-conta
 Networks are small deliberately; immutable replay tuples reduce overhead.
 """
 
+import copy
+import math
+import random
+from operator import mul
+from typing import NamedTuple, Optional
 from wtf.learning.activation_diagnostics import activation_sample
 from wtf.simulation.tracking import tracking_width
 from wtf.simulation.social import social_width
@@ -12,12 +17,6 @@ from wtf.native.kernels import gradient_zeros
 from wtf.native.numeric import Float32, packed, plain, precision_of, restore_numeric
 
 
-import copy
-import math
-import random
-from operator import mul
-from typing import NamedTuple, Optional
-
 INPUTS = 20
 TERRAIN_INPUTS = 32
 MATING_INPUTS = 42
@@ -25,6 +24,7 @@ INTENT_INPUTS = 45
 
 
 def observation_inputs(config):
+    """Compute the observation width required by the brain contract."""
     base = {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS, 4: INTENT_INPUTS}[
         config.get("observation_version", 1)
     ]
@@ -37,6 +37,8 @@ def observation_inputs(config):
 
 
 class Experience(NamedTuple):
+    """One transition with separate terminal and time-limit flags."""
+
     observation: tuple
     action: str
     reward: float
@@ -46,6 +48,12 @@ class Experience(NamedTuple):
 
 
 class Brain:
+    """Independent value-learning controller with private replay and random state."""
+
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, config, actions, base_seed, individual_seed):
         self.config = copy.deepcopy(config)
         self.actions = list(actions)
@@ -74,6 +82,11 @@ class Brain:
         self.epsilon = config["exploration"]["initial"]
 
     def _hidden(self, observation, weights):
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         w1 = weights["w1"]
         hidden = self.hidden
         if kernels.native is not None and isinstance(w1, Float32):
@@ -91,6 +104,12 @@ class Brain:
         ]
 
     def forward(self, observation, weights=None):
+        """Evaluate the network and retain intermediates needed by backpropagation."""
+
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         w = self.weights if weights is None else weights
         h = self._hidden(observation, w)
         w2, hidden = w["w2"], self.hidden
@@ -104,12 +123,23 @@ class Brain:
         return h, q
 
     def choose(self, observation, explore=True, random_baseline=False):
+        """Choose an action using this animal's private policy and exploration state."""
         if random_baseline or (explore and self.rng.random() < self.epsilon):
             return self.rng.choice(self.actions)
         q = self.forward(observation)[1]
         return self.actions[max(range(len(q)), key=q.__getitem__)]
 
     def learn(self, experience):
+        """Consume a transition and apply the configured learning schedule."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-locals
+        # The optional CPython API is checked by its wrapper and native/reference
+        # equivalence tests.
+        # pylint: disable=c-extension-no-member
+
         c = self.config
         if len(self.replay) < c["replay_capacity"]:
             self.replay.append(experience)
@@ -173,49 +203,57 @@ class Brain:
                 self.target[key][:] = values
 
     def diagnostics(self, observation, include_activations=False):
+        """Return predictions and optional activation samples for inspection."""
         hidden, outputs = self.forward(observation)
-        info = dict(
-            algorithm="q_learning",
-            features=observation,
-            action_values=dict(zip(self.actions, outputs)),
-            epsilon=self.epsilon,
-            updates=self.updates,
-            replay_size=len(self.replay),
-        )
+        info = {
+            "algorithm": "q_learning",
+            "features": observation,
+            "action_values": dict(zip(self.actions, outputs)),
+            "epsilon": self.epsilon,
+            "updates": self.updates,
+            "replay_size": len(self.replay),
+        }
         return activation_sample(info, [hidden]) if include_activations else info
 
     def checkpoint(self):
-        return dict(
-            precision=precision_of(self),
-            config=copy.deepcopy(self.config),
-            actions=self.actions[:],
-            weights=plain(self.weights),
-            target=plain(self.target),
-            replay=[
-                dict(
-                    observation=tuple(e.observation),
-                    action=e.action,
-                    reward=e.reward,
-                    next_observation=(
+        """Serialize state required to resume this component."""
+        return {
+            "precision": precision_of(self),
+            "config": copy.deepcopy(self.config),
+            "actions": self.actions[:],
+            "weights": plain(self.weights),
+            "target": plain(self.target),
+            "replay": [
+                {
+                    "observation": tuple(e.observation),
+                    "action": e.action,
+                    "reward": e.reward,
+                    "next_observation": (
                         tuple(e.next_observation)
                         if e.next_observation is not None
                         else None
                     ),
-                    terminated=e.terminated,
-                    truncated=e.truncated,
-                )
+                    "terminated": e.terminated,
+                    "truncated": e.truncated,
+                }
                 for e in self.replay
             ],
-            cursor=self.cursor,
-            steps=self.steps,
-            updates=self.updates,
-            epsilon=self.epsilon,
-            rng_state=self.rng.getstate(),
-            training_rng_state=self.training_rng.getstate(),
-        )
+            "cursor": self.cursor,
+            "steps": self.steps,
+            "updates": self.updates,
+            "epsilon": self.epsilon,
+            "rng_state": self.rng.getstate(),
+            "training_rng_state": self.training_rng.getstate(),
+        }
 
     @classmethod
     def restore(cls, state):
+        """Reconstruct the component from its persisted continuation state."""
+
+        # Keep independent numeric/compatibility or benchmark paths explicit to
+        # preserve their exact contracts.
+        # pylint: disable=duplicate-code
+
         b = cls(state["config"], state["actions"], 0, 0)
         for k in ("cursor", "steps", "updates", "epsilon"):
             setattr(b, k, copy.deepcopy(state[k]))

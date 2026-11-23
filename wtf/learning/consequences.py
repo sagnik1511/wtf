@@ -14,6 +14,10 @@ MAX_FILE_BYTES = 16 * 1024 * 1024
 class Consequences:
     """Bounded empirical outcome model per species, with deterministic LRU updates."""
 
+    # This record/owner deliberately keeps its related fields and lifecycle operations
+    # together without artificial wrappers.
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, config):
         settings = config.get("consequence_learning", {})
         self.update_schedule = settings.get("update_schedule", "continuous")
@@ -40,11 +44,12 @@ class Consequences:
         self.staged_tables = {}
 
     def learn(self, species, key, labels):
+        """Accumulate physical outcome counts in the configured publication table."""
         if self.update_schedule == "episode":
             # Copy only a species receiving its first new evidence this episode.
             if species not in self.staged_tables:
                 self.staged_tables[species] = OrderedDict(
-                    (key, list(row)) for key,row in self.tables[species].items()
+                    (key, list(row)) for key, row in self.tables[species].items()
                 )
             table = self.staged_tables[species]
         else:
@@ -71,57 +76,110 @@ class Consequences:
         self.published_updates = self.updates
 
     def predict(self, species, key):
+        """Read confidence and outcome rates from published population knowledge."""
         row = self.tables[species].get(key)
         if row is None:
             return [0.0] * 4
         n = row[0]
         return [n / (n + 4), *(value / n for value in row[1:])]
 
+    @staticmethod
+    def _table_state(tables):
+        return {
+            name: [[list(key), list(row)] for key, row in table.items()]
+            for name, table in tables.items()
+        }
+
     def _state(self, tables):
-        return dict(
-            version=1,
-            horizon_steps=self.horizon,
-            contracts=copy.deepcopy(self.contracts),
-            updates=self.updates,
-            tables={
-                name: [[list(key), list(row)] for key, row in table.items()]
-                for name, table in tables.items()
-            },
-        )
+        return {
+            "version": 1,
+            "horizon_steps": self.horizon,
+            "contracts": copy.deepcopy(self.contracts),
+            "updates": self.updates,
+            "tables": self._table_state(tables),
+        }
 
     def checkpoint(self):
+        """Serialize state required to resume this component."""
         state = self._state(self.tables)
         if self.update_schedule == "episode":
-            state.update(version=2, update_schedule="episode",
-                         published_updates=self.published_updates,
-                         staged_tables=self._state(self.staged_tables)["tables"])
+            state.update(
+                version=2,
+                update_schedule="episode",
+                published_updates=self.published_updates,
+                staged_tables=self._table_state(self.staged_tables),
+            )
         return state
 
     def export_state(self):
         # A completed-run warm start receives all finished windows, including
         # the final episode's evidence, without publishing into its old replay.
-        return self._state({name:self.staged_tables.get(name,table) for name,table in self.tables.items()})
+        """Build the aggregate population-knowledge warm-start representation."""
+        return self._state(
+            {
+                name: self.staged_tables.get(name, table)
+                for name, table in self.tables.items()
+            }
+        )
 
     @classmethod
     def restore(cls, config, state):
+        """Reconstruct the component from its persisted continuation state."""
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-boolean-expressions
+        # Exact types intentionally reject bool/subclass substitutions in persisted
+        # numeric contracts.
+        # pylint: disable=unidiomatic-typecheck
+
         result = cls(config)
         if isinstance(state, dict) and state.get("version") == 2:
-            required={"version","horizon_steps","contracts","updates","tables","update_schedule","published_updates","staged_tables"}
-            if (type(state["version"]) is not int or set(state)!=required or result.update_schedule!="episode"
-                or state["update_schedule"]!="episode"
+            required = {
+                "version",
+                "horizon_steps",
+                "contracts",
+                "updates",
+                "tables",
+                "update_schedule",
+                "published_updates",
+                "staged_tables",
+            }
+            if (
+                type(state["version"]) is not int
+                or set(state) != required
+                or result.update_schedule != "episode"
+                or state["update_schedule"] != "episode"
                 or type(state["published_updates"]) is not int
                 or type(state["updates"]) is not int
                 or not 0 <= state["published_updates"] <= state["updates"]
-                or not isinstance(state["staged_tables"],dict)
-                or set(state["staged_tables"]) - set(result.tables)):
+                or not isinstance(state["staged_tables"], dict)
+                or set(state["staged_tables"]) - set(result.tables)
+            ):
                 raise ValueError("Invalid episode consequence checkpoint")
-            base={key:state[key] for key in ("version","horizon_steps","contracts","updates","tables")}
-            base["version"]=1
-            result=cls.restore(config,base)
-            staged={**base,"tables":{name:state["staged_tables"].get(name,[]) for name in result.tables}}
-            restored_staged=cls.restore(config,staged)
-            result.staged_tables={name:restored_staged.tables[name] for name in state["staged_tables"]}
-            result.published_updates=state["published_updates"]
+            base = {
+                key: state[key]
+                for key in (
+                    "version",
+                    "horizon_steps",
+                    "contracts",
+                    "updates",
+                    "tables",
+                )
+            }
+            base["version"] = 1
+            result = cls.restore(config, base)
+            staged = {
+                **base,
+                "tables": {
+                    name: state["staged_tables"].get(name, []) for name in result.tables
+                },
+            }
+            restored_staged = cls.restore(config, staged)
+            result.staged_tables = {
+                name: restored_staged.tables[name] for name in state["staged_tables"]
+            }
+            result.published_updates = state["published_updates"]
             return result
         if not isinstance(state, dict) or set(state) != {
             "version",
@@ -176,6 +234,7 @@ class Consequences:
         return result
 
     def save(self, path):
+        """Persist the component using its supported storage representation."""
         path = Path(path)
         temporary = path.with_name(path.name + ".tmp")
         try:
@@ -189,6 +248,7 @@ class Consequences:
 
     @classmethod
     def load(cls, config, path):
+        """Read persisted data and validate its supported contract."""
         path = Path(path)
         if path.is_dir():
             path = path / "consequences.json.xz"

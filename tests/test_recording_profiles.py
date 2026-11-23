@@ -1,5 +1,12 @@
 """Training capture policies and explicit frozen-policy recorded evaluation."""
 
+# This self-contained regression intentionally repeats reference/setup data.
+# pylint: disable=duplicate-code
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
@@ -76,6 +83,11 @@ class RecordingProfileTests(unittest.TestCase):
             validate(c)
 
     def test_recording_does_not_change_learning_and_compact_keeps_world_frames(self):
+
+        # Keep the small synchronous numeric callback adjacent to the expression it
+        # parameterizes.
+        # pylint: disable=unnecessary-lambda-assignment
+
         saved = {}
         with tempfile.TemporaryDirectory() as directory:
             for profile in ("full", "compact", "training-only"):
@@ -129,6 +141,10 @@ class RecordingProfileTests(unittest.TestCase):
         )
 
     def test_training_only_to_frozen_recorded_evaluation_and_resume(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             c = config()

@@ -1,3 +1,7 @@
+"""Regression coverage for placement behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import copy
 import json
 import unittest
@@ -35,6 +39,10 @@ class PlacementTests(unittest.TestCase):
         self.assertNotEqual(World(c, 100).snapshot(), World(c, 101).snapshot())
 
     def test_two_gates_connect_the_interior_to_exterior_over_walkable_slopes(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         c = load("environments/enclosed_valleys.json")
         w = World(c, 100)
         left, top, right, bottom = c["placement"]["enclosure_bounds"]

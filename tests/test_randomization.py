@@ -1,3 +1,7 @@
+"""Regression coverage for randomization behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import copy
 import json
 import subprocess
@@ -118,6 +122,10 @@ class RandomizationTests(unittest.TestCase):
             validate(c)
 
     def test_cli_explicit_seed_is_reproducible_with_random_default(self):
+
+        # This self-contained regression intentionally repeats reference/setup data.
+        # pylint: disable=duplicate-code
+
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
             for policy, expected in ((None, [7, 8]), ("fixed", [7, 7])):

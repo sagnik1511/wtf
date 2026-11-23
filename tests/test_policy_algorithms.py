@@ -1,3 +1,7 @@
+"""Regression coverage for policy algorithms behavior and compatibility."""
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
 import copy
 import json
 import math
@@ -206,6 +210,11 @@ class GRPOTests(unittest.TestCase):
         calls = []
 
         def fake_group(world, brains, focal_id):
+
+            # The callback keeps its caller's keyword signature; this branch does not
+            # consume every input.
+            # pylint: disable=unused-argument
+
             calls.append(focal_id)
             o = world.observe(world.animals[focal_id])
             return [[PolicyStep(o, 0, 0.0, 0.0, False, True)]] * 2
@@ -222,6 +231,10 @@ class GRPOTests(unittest.TestCase):
 
 
 class ExtraAlgorithmIntegrationTests(unittest.TestCase):
+
+    # This self-contained regression intentionally repeats reference/setup data.
+    # pylint: disable=duplicate-code
+
     def test_resuming_models_and_partial_episodes_is_exact(self):
         for kind in ("a2c", "reinforce", "grpo"):
             for retain in (False, True):

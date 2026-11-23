@@ -1,5 +1,8 @@
 """Qualified promotion and versioned, local, RNG-free mating observations."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 import unittest
@@ -94,14 +97,17 @@ class MatingObservationTests(unittest.TestCase):
                 with self.subTest(kind=kind, wet=wet):
                     c = environment(kind, 0)
                     if wet:
-                        c["terrain"] = dict(
-                            map_version=1,
-                            name="test_river",
-                            width=5,
-                            height=5,
-                            rows=["..~.."] * 5,
-                            legend={".": {}, "~": {"water_depth": 1, "flow": [0, 0.2]}},
-                        )
+                        c["terrain"] = {
+                            "map_version": 1,
+                            "name": "test_river",
+                            "width": 5,
+                            "height": 5,
+                            "rows": ["..~.."] * 5,
+                            "legend": {
+                                ".": {},
+                                "~": {"water_depth": 1, "flow": [0, 0.2]},
+                            },
+                        }
                         for spec in c["species"].values():
                             spec["allowed_actions"].append("swim")
                     for b in c["brains"].values():
@@ -133,17 +139,22 @@ class MatingObservationTests(unittest.TestCase):
             validate(c)
 
     def test_mate_sight_obeys_directional_water_bonus_and_walls(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.simulation.geography import Geography
 
         w = self.world()
-        definition = dict(
-            map_version=1,
-            name="sight",
-            width=10,
-            height=8,
-            rows=[".........."] * 2 + ["...~~~...."] + [".........."] * 5,
-            legend={".": {}, "~": {"water_depth": 1}},
-        )
+        definition = {
+            "map_version": 1,
+            "name": "sight",
+            "width": 10,
+            "height": 8,
+            "rows": [".........."] * 2 + ["...~~~...."] + [".........."] * 5,
+            "legend": {".": {}, "~": {"water_depth": 1}},
+        }
         w.geography = Geography(definition, 10, 8)
         w.config["terrain"] = definition
         w.config["species"]["prey"]["body"].update(
@@ -158,6 +169,11 @@ class MatingObservationTests(unittest.TestCase):
         self.assertEqual(w.observe_all()[0][39], 0)
 
     def test_longer_grpo_trials_keep_v3_inputs_and_isolate_real_world(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         from wtf.learning.grouped_rollouts import collect_group
 
         c = load("environments/meandering_river.json")
@@ -179,6 +195,11 @@ class MatingObservationTests(unittest.TestCase):
 
 class PromotionGuardTests(unittest.TestCase):
     def test_loaded_qualified_model_is_protected_without_cross_sex_fallback(self):
+
+        # Keep imports lazy so optional tools and training dependencies load only on
+        # this path.
+        # pylint: disable=import-outside-toplevel
+
         import tempfile
         from pathlib import Path
         from wtf.storage.library import export_champions, apply_brain_overrides

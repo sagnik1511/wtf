@@ -1,5 +1,8 @@
 """Streamed replay-prefix counts, information boundaries and Python/JS parity."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import json
 from pathlib import Path
 import shutil
@@ -28,7 +31,7 @@ def moving_frames():
         frame(
             3,
             [b, animal(2, "prey", parent_id=0)],
-            [dict(kind="died", actor=0, cause="starvation", position=[5, 2])],
+            [{"kind": "died", "actor": 0, "cause": "starvation", "position": [5, 2]}],
         ),
         frame(5, [dict(b, x=4), animal(2, "prey", parent_id=0)]),
         frame(6, [dict(b, x=5), animal(2, "prey", parent_id=0)]),
@@ -39,24 +42,24 @@ class MovementPrefixTests(unittest.TestCase):
     def save(self, root, frames):
         folder = root / "example" / "playback"
         folder.mkdir(parents=True)
-        manifest = dict(
-            recording_version=1,
-            name="example",
-            mode="train",
-            config=config(),
-            recording=dict(frames_per_chunk=2),
-            runs=[
-                dict(
-                    run=1,
-                    frame_count=len(frames),
-                    chunk_count=3,
-                    seed=100,
-                    first_tick=frames[0]["tick"],
-                    last_tick=frames[-1]["tick"],
-                    complete=True,
-                )
+        manifest = {
+            "recording_version": 1,
+            "name": "example",
+            "mode": "train",
+            "config": config(),
+            "recording": {"frames_per_chunk": 2},
+            "runs": [
+                {
+                    "run": 1,
+                    "frame_count": len(frames),
+                    "chunk_count": 3,
+                    "seed": 100,
+                    "first_tick": frames[0]["tick"],
+                    "last_tick": frames[-1]["tick"],
+                    "complete": True,
+                }
             ],
-        )
+        }
         (folder / "recording.json").write_text(json.dumps(manifest))
         for i in range(0, len(frames), 2):
             (folder / f"run_0001_chunk_{i//2:06d}.json").write_text(
@@ -146,9 +149,10 @@ assert(requests>0&&requests<6);
 console.log('prefix parity passed');"""
         result = subprocess.run(
             ["node", "--input-type=module", "-e", script],
-            input=json.dumps(dict(frames=frames, expected=expected)),
+            input=json.dumps({"frames": frames, "expected": expected}),
             cwd=ROOT,
             capture_output=True,
             text=True,
+            check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)

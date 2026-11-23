@@ -24,6 +24,7 @@ DEFAULT_VARIANTS = ("baseline", "energy", "energy_breeding")
 
 
 def configure(source, variant, seed, steps):
+    """Build one configuration for the controlled calibration comparison."""
     c = deepcopy(source)
     c["seed"] = seed
     c["world"]["max_steps"] = steps
@@ -54,6 +55,13 @@ def configure(source, variant, seed, steps):
 
 
 def trial(config):
+    """Run one bounded calibration trial and collect its summary."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+
     e = Experiment(config)
     names = list(config["species"])
     stats = {name: Counter() for name in names}
@@ -113,13 +121,19 @@ def trial(config):
             newborn_survivors=sum(a.id not in initial_ids for a in survivors),
             max_surviving_generation=max((a.generation for a in survivors), default=0),
         )
-    return dict(
-        tick=e.world.tick,
-        species={n: dict(stats[n], actions=dict(actions[n])) for n in names},
-    )
+    return {
+        "tick": e.world.tick,
+        "species": {n: dict(stats[n], actions=dict(actions[n])) for n in names},
+    }
 
 
 def aggregate(report):
+    """Aggregate the controlled trial summaries."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     groups = defaultdict(list)
     for episode in report["episodes"]:
         groups[(episode["environment"], episode["variant"])].append(episode)
@@ -140,44 +154,50 @@ def aggregate(report):
             opening_energy = len(episodes) * founders * body["initial_energy"]
             offspring_energy = totals["births"] * body["initial_energy"]
             inputs = opening_energy + offspring_energy + totals["food_energy"]
-            species[name] = dict(
-                opening_energy=opening_energy,
-                offspring_energy=offspring_energy,
-                food_input_share=totals["food_energy"] / inputs if inputs else None,
-                total_births=totals["births"],
-                median_births=median(r["births"] for r in rows),
-                runs_with_births=sum(r["births"] > 0 for r in rows),
-                total_survivors=totals["survivors"],
-                extinction_runs=sum(r["survivors"] == 0 for r in rows),
-                starvation_deaths=totals["deaths_starvation"],
-                drowning_deaths=totals["deaths_drowning"],
-                newborn_survivors=totals["newborn_survivors"],
-                kills=totals["kills"],
-                physical_mate_states=totals["physical_mate_states"],
-                sampled_states=totals["sampled_states"],
-                energy_coverage=(
+            species[name] = {
+                "opening_energy": opening_energy,
+                "offspring_energy": offspring_energy,
+                "food_input_share": totals["food_energy"] / inputs if inputs else None,
+                "total_births": totals["births"],
+                "median_births": median((r["births"] for r in rows)),
+                "runs_with_births": sum((r["births"] > 0 for r in rows)),
+                "total_survivors": totals["survivors"],
+                "extinction_runs": sum((r["survivors"] == 0 for r in rows)),
+                "starvation_deaths": totals["deaths_starvation"],
+                "drowning_deaths": totals["deaths_drowning"],
+                "newborn_survivors": totals["newborn_survivors"],
+                "kills": totals["kills"],
+                "physical_mate_states": totals["physical_mate_states"],
+                "sampled_states": totals["sampled_states"],
+                "energy_coverage": (
                     totals["food_energy"] / totals["energy_demand"]
                     if totals["energy_demand"]
                     else None
                 ),
-                starving_fraction=(
+                "starving_fraction": (
                     totals["starving_steps"] / totals["animal_steps"]
                     if totals["animal_steps"]
                     else None
                 ),
-            )
+            }
         summaries.append(
-            dict(
-                environment=environment,
-                variant=variant,
-                episodes=len(episodes),
-                species=species,
-            )
+            {
+                "environment": environment,
+                "variant": variant,
+                "episodes": len(episodes),
+                "species": species,
+            }
         )
     return summaries
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
+
+    # Keyword dict construction deliberately detects duplicate keys in dynamic **
+    # expansions; a literal would silently overwrite them.
+    # pylint: disable=use-dict-literal
+
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "--environments",
@@ -221,14 +241,16 @@ def main():
             p.error(f"Cannot load captured baseline configurations: {error}")
     else:
         sources = {str(path): load(path) for path in args.environments}
-    report = dict(
-        steps=args.steps,
-        seeds=args.seeds,
-        variants=args.variants,
-        reference_report=str(args.reference_report) if args.reference_report else None,
-        configurations={},
-        episodes=[],
-    )
+    report = {
+        "steps": args.steps,
+        "seeds": args.seeds,
+        "variants": args.variants,
+        "reference_report": (
+            str(args.reference_report) if args.reference_report else None
+        ),
+        "configurations": {},
+        "episodes": [],
+    }
     for path, c in sources.items():
         report["configurations"][path] = {
             v: configure(c, v, args.seeds[0], args.steps) for v in args.variants

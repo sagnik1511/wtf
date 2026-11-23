@@ -77,6 +77,129 @@ format/check cycle. Summarize formatter results in the final handoff, including
 any unavailable tools. Documentation-only updates require link/asset checks;
 they do not trigger an unrelated source-wide reformat or training run.
 
+## Independent review handoff
+
+Keep the reusable [wtf-reviewer skill](../.agents/skills/wtf-reviewer/SKILL.md) in
+`.agents/skills/wtf-reviewer/`.
+For substantial changes or explicit commit/PR reviews, the developer hands a
+stable commit/range or working-tree diff to a separate reviewer context, along
+with the relevant behavior and compatibility contracts. The reviewer inspects
+callers and edge cases, verifies findings, and coordinates fixes with the
+developer. Pause overlapping edits before handoff and global formatting.
+
+Example requests:
+
+```text
+Use $wtf-reviewer in a separate reviewer context to review commit <sha>.
+Verify findings, fix clear defects and report ambiguous behavior decisions.
+
+Use $wtf-reviewer to review this stable working-tree diff against HEAD.
+Keep simulation and viewer behavior unchanged except for the requested feature.
+```
+
+A parent developer delegates one review; the reviewer does not recursively
+spawn reviewers. This uses an on-demand context rather than a persistent agent,
+Git hook or background watcher. If separate execution is unavailable, report
+self-review explicitly. Reports belong in chat or ignored `.cache/reviews/`. For release reviews, the
+reviewer also fills the release template's **Fixes and optimizations** section
+with verified change summaries and remaining decisions. Package guides do not
+collect review transcripts. External PR comments,
+commits, pushes and publication still require explicit authorization.
+
+The shared quality helper makes local checks reproducible:
+
+```sh
+.venv/bin/python -m work.check_quality --fix
+# Read-only checks, or inspect the maintained source inventory:
+.venv/bin/python -m work.check_quality --check
+.venv/bin/python -m work.check_quality --list
+```
+
+`--fix` formats all maintained sources and then runs formatter check modes,
+Python/JavaScript syntax checks, JSON/TOML parsing and `git diff --check`.
+Logs go under ignored `.cache/quality/`. Missing tools cause failure rather than
+silent installation or skipped languages. Tests and any configured semantic
+linters remain separate: syntax/format checks cannot establish correctness.
+Generated exports use their producer's checks; maintained asset CSS is source.
+
+### Python CI and build preflight
+
+The package workflow runs two required Python quality jobs on Python 3.12 and
+Ubuntu 24.04 before the portable/native build matrices. Black checks every
+maintained Python source, including tests and tooling. Pylint checks that same
+inventory with its full default diagnostics, rather than an error-only package
+profile. Missing or deleted/generated files are excluded by the shared inventory.
+Specific, reasoned exceptions live beside the affected functions/classes or
+self-contained regression modules; there is no global warning-disable
+configuration, baseline allowance or permissive score threshold.
+
+Install the same pinned tools and run the local preflight before handoff:
+
+```sh
+.venv/bin/python -m pip install -r requirements.txt -r requirements-ci.txt
+.venv/bin/python -m work.check_ci
+# Or select a gate while fixing a failure:
+.venv/bin/python -m work.check_ci --black
+.venv/bin/python -m work.check_ci --pylint
+.venv/bin/python -m work.check_ci --build
+```
+
+The build gate creates an isolated build environment, builds both the source
+archive and a portable wheel from it, and runs `twine check --strict` on exactly
+those new artifacts. A temporary directory under ignored `.cache/ci-builds/`
+is removed afterward; stale distributions are neither validated nor deleted.
+It does not publish or replace experiment data. Optional native settings in the
+calling shell cannot turn this portable preflight into a native build. The
+existing CI installation/native matrices still validate installed commands,
+viewer assets and checkpoint recovery independently.
+
+`wtf-reviewer` runs this preflight plus the checks relevant to the changed
+contracts: documentation builds/links, native builds and isolated installation
+checks when applicable. Report unavailable dependencies or matrix cases explicitly.
+Local success is not evidence of an executed Ubuntu GitHub Actions pass.
+
+### Pylint review
+
+`wtf-reviewer` runs Pylint separately from formatters and syntax checks on Python
+files in the reviewed commit/range or working-tree diff, including staged and
+new untracked sources. Deleted and generated files are excluded. Use the review
+base rather than just `git diff` without a base; a staged file must not escape
+review. With no Python changes, record the check as not applicable.
+
+Install Pylint into the project development environment, then run it on the
+reviewed files using existing repo configuration if present:
+
+```sh
+.venv/bin/python -m pip install -r requirements-ci.txt
+.venv/bin/python -m pylint --persistent=n --reports=n path/to/changed_file.py
+```
+
+Pylint is not a runtime dependency. The quality helper does not run it implicitly.
+Fix meaningful findings. For a false positive or a refactor with no useful
+benefit, add a specific, narrowly scoped suppression and an adjacent reason:
+
+```python
+# One explicit physical phase keeps the established update order easy to audit.
+# pylint: disable-next=too-many-locals
+```
+
+The comment belongs immediately before the affected definition/statement.
+Inline `# pylint: disable=message-name` is also valid. Use disable/enable around
+larger blocks only when necessary; avoid blanket `disable=all` or global warning
+suppression. Investigate correctness warnings before considering suppression.
+Report inherited/out-of-scope findings separately instead of hiding them. Rerun
+Pylint and include its version, file scope, exit status and deliberate suppressions
+in the review handoff. Missing Pylint or nonzero exit status is not a passing lint
+check; an unresolved behavior decision stays visible for the owner.
+
+Run all maintained-source formatters after the cleanup, then rerun full Pylint;
+Black may move multiline expressions away from line-specific directives. Attach
+exceptions to their actual owning scope or expression and verify their effect.
+An optional `--enable=useless-suppression` audit can identify stale directives;
+inspect platform-dependent imports and native inference before removing one.
+Preserve semantic distinctions such as exact numeric type checks and duplicate-key
+rejection in `dict(..., **data)` rather than applying a linter rewrite blindly.
+
 ## Documentation website
 
 Use the [website maintenance guide](documentation-site.md) for GitHub Pages,

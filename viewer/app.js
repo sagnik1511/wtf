@@ -930,7 +930,9 @@ function drawInspector() {
     inspectorVisualKey = visualKey;
     inspectorDiagnostic = b;
     inspectorVisuals = inspectorGraphs({
-      consequenceSchedule: player.metadata.config.consequence_learning?.update_schedule ?? 'continuous',
+      consequenceSchedule:
+        player.metadata.config.consequence_learning?.update_schedule ??
+        'continuous',
       diagnostic: b,
       template: player.metadata.config.brains?.[state.species[a.species].brain],
       spec: {

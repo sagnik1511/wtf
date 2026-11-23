@@ -185,6 +185,24 @@ These reusable workflows live in `.agents/skills/`:
 - [wtf-analyze-run](.agents/skills/wtf-analyze-run/SKILL.md): saved experiment analysis.
 - [wtf-optimize](.agents/skills/wtf-optimize/SKILL.md): simulation/storage optimization.
 - [wtf-release-docs](.agents/skills/wtf-release-docs/SKILL.md): rollout records and links.
+- [wtf-reviewer](.agents/skills/wtf-reviewer/SKILL.md): independent commit/PR review and verified fixes.
 
 Read a skill when its workflow matches the task. It supplements the guides;
 it does not authorize new experiments, data conversion or publishing.
+
+For substantial changes or explicit commit/PR reviews, apply `wtf-reviewer` in a
+separate reviewer context after handing off a stable diff and its behavioral
+contracts. Coordinate file ownership before fixes and repository-wide formatting.
+Use a scoped review per handoff, without a permanent agent or background watcher.
+If separate execution is unavailable, identify the pass as self-review.
+
+Reviewer passes run Pylint on reviewed Python sources, including staged and new
+files. Use specific, narrowly scoped `# pylint: disable=message-name` comments
+with adjacent reasons for justified exceptions; never blanket-disable warnings
+to hide defects. See [Pylint review](docs/development.md#pylint-review).
+
+Before review handoff, run `.venv/bin/python -m work.check_ci` using the pinned
+`requirements-ci.txt` tools: Black, full maintained-source Pylint checks, portable
+wheel/sdist build and strict metadata validation. Review full Pylint output on
+changed Python files as well. Run relevant documentation/native/installation
+checks from the workflows and distinguish local results from unrun CI matrices.

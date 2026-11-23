@@ -1,5 +1,8 @@
 """Maintained landscapes must be navigable, spawn safely and round-trip to replay."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 from collections import deque
 import json
 from pathlib import Path
@@ -60,6 +63,10 @@ class LandscapeTests(unittest.TestCase):
                 )
 
     def test_rolling_hills_climbing_cost_and_feedback_track_actual_energy(self):
+
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-locals
+
         c = load("environments/rolling_hills.json")
         for species, uphill in (("prey", 3.0), ("predator", 4.0)):
             spec = c["species"][species]
@@ -154,6 +161,7 @@ class LandscapeTests(unittest.TestCase):
                         ],
                         capture_output=True,
                         text=True,
+                        check=False,
                     )
                     self.assertEqual(completed.returncode, 0, completed.stderr)
                     folder = next(output.iterdir())

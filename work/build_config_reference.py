@@ -1,5 +1,10 @@
 """Export every schema field and its definition into the configuration handbook."""
 
+# Black owns code layout; long literal payloads, URLs and regression names retain
+# their exact text.
+# pylint: disable=line-too-long
+
+
 import argparse
 import json
 from pathlib import Path
@@ -8,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def render_reference(schema):
+    """Render schema properties into the maintained field reference."""
     rows = [
         "# Configuration field reference\n",
         "[Customization handbook](customization.md) · [Configuration guide](configuration.md) · [Schema](../environment.schema.json)\n",
@@ -71,6 +77,11 @@ def render_reference(schema):
         return "; ".join(parts).replace("|", "\\|")
 
     def visit(original, path="config"):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+
         nonlocal count
         node = resolved(original)
         props = node.get("properties", {})
@@ -120,6 +131,7 @@ def render_reference(schema):
 
 
 def main():
+    """Parse command-line options and run the requested operation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()

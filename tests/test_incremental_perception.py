@@ -1,5 +1,13 @@
 """Incremental observations must match a fresh scan of the current world."""
 
+# Regression fixtures inspect private state to verify ownership, caches and exact
+# continuation without expanding the public API.
+# pylint: disable=protected-access
+
+
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import random
 import unittest
 from unittest.mock import patch
@@ -32,7 +40,7 @@ class IncrementalPerceptionTests(unittest.TestCase):
         observer = Animal(999, "prey", 1, 16, 0, 60, 30)
         index.sync(points, {observer.id})
         index.nearest(observer, 6, lambda a, b: True)
-        old_bounds, old_cells = index.windows[observer.id]
+        _old_bounds, old_cells = index.windows[observer.id]
         references = old_cells.copy()
         observer.x += 1
         visited = []
@@ -45,7 +53,7 @@ class IncrementalPerceptionTests(unittest.TestCase):
 
         with patch.object(perception, "_cells", track):
             index.nearest(observer, 6, lambda a, b: True)
-        bounds, cells = index.windows[observer.id]
+        _bounds, cells = index.windows[observer.id]
         self.assertIs(cells, old_cells)
         self.assertEqual(len(cells), 6)
         self.assertEqual(len(visited), 2)  # Four interior buckets were reused.
@@ -79,6 +87,13 @@ class IncrementalPerceptionTests(unittest.TestCase):
         self.assertEqual(current, reference_observation(w, a))
 
     def test_overlap_updates_birth_death_food_obstacles_and_vision(self):
+
+        # Local fixture/geometry names describe a separate scope and do not consume
+        # the outer binding.
+        # pylint: disable=redefined-outer-name
+        # Keep setup, action and assertions together as one regression scenario.
+        # pylint: disable=too-many-branches
+
         w = world()
         rng = random.Random(72)
         for spec in w.config["species"].values():
@@ -160,6 +175,11 @@ class IncrementalPerceptionTests(unittest.TestCase):
         calls = []
 
         def visible(start, end):
+
+            # The callback keeps its caller's keyword signature; this branch does not
+            # consume every input.
+            # pylint: disable=unused-argument
+
             calls.append(end)
             return True
 

@@ -12,10 +12,17 @@ from wtf.learning.policy_networks import PolicyBundle
 
 
 def flatten(layers):
+    """Flatten ordered parameter arrays without changing their order."""
     return [float(v) for layer in layers for values in layer.values() for v in values]
 
 
 def assign(layers, vector):
+    """Assign a flat parameter vector into the existing ordered layout."""
+
+    # Explicit indices align the related packed arrays without introducing another
+    # captured value.
+    # pylint: disable=consider-using-enumerate
+
     cursor = 0
     for layer in layers:
         for values in layer.values():
@@ -25,10 +32,12 @@ def assign(layers, vector):
 
 
 def dot(a, b):
+    """Compute the dot product in the established arithmetic order."""
     return sum(x * y for x, y in zip(a, b))
 
 
 def conjugate_gradient(product, target, iterations, tolerance):
+    """Solve the implicit linear system using conjugate gradients."""
     x = [0.0] * len(target)
     residual = list(target)
     direction = list(residual)
@@ -68,6 +77,11 @@ def split_direction(network, vector):
 
 def logit_tangent(network, tape, vector, directions=None):
     """J v, without perturbing/rounding live FP32 policy parameters."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-locals
+
     if directions is None:
         directions = split_direction(network, vector)
     tangent = [0.0] * len(tape[0])
@@ -92,6 +106,7 @@ def logit_tangent(network, tape, vector, directions=None):
 
 
 def fisher_product(network, tapes, probabilities, vector, damping):
+    """Compute a Fisher-vector product for the current policy."""
     gradients = network.zeros()
     directions = split_direction(network, vector)
     for tape, p in zip(tapes, probabilities):
@@ -112,6 +127,13 @@ def surrogate(
     distribution=None,
     with_gradient=True,
 ):
+    """Evaluate the trust-region surrogate objective and policy divergence."""
+
+    # Keep this ordered phase and its shared state together; splitting it only to meet
+    # a count obscures the contract.
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+
     p, logs = policy_distribution(logits) if distribution is None else distribution
     ratio = math.exp(max(-60.0, min(60.0, logs[action] - old_logp)))
     entropy = -dot(p, logs)
@@ -128,6 +150,8 @@ def surrogate(
 
 
 class TRPOBrain(PPOBrain):
+    """Categorical policy learner with a KL-constrained trust-region update."""
+
     algorithm = "trpo"
 
     def __init__(self, config, actions, base_seed, individual_seed):
@@ -138,6 +162,15 @@ class TRPOBrain(PPOBrain):
         return PolicyBundle(config, actions, seed, observation_inputs(config))
 
     def _update(self):
+
+        # Keep this ordered phase and its shared state together; splitting it only to
+        # meet a count obscures the contract.
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-statements
+        # Keep the small synchronous numeric callback adjacent to the expression it
+        # parameterizes.
+        # pylint: disable=unnecessary-lambda-assignment
+
         c = self.config
         actor = self.network.actor
         critic = self.network.critics[0]
@@ -243,12 +276,12 @@ class TRPOBrain(PPOBrain):
                     )
                     loss += 0.5 * error * error
                 self._adam_step(gradients, len(batch))
-        self.last_metrics = dict(
-            empirical_kl=kl,
-            policy_accepted=accepted,
-            surrogate_improvement=improvement,
-            value_loss=loss / count,
-        )
+        self.last_metrics = {
+            "empirical_kl": kl,
+            "policy_accepted": accepted,
+            "surrogate_improvement": improvement,
+            "value_loss": loss / count,
+        }
         self.rollout_updates += 1
         self.rollout.clear()
 

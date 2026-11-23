@@ -1,3 +1,5 @@
+"""Dispatch the installed WTF command-line interface."""
+
 from wtf.commands import main
 
 if __name__ == "__main__":

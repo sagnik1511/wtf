@@ -1,19 +1,22 @@
 """Mutual reproduction choices, physical failure gates and RL reward feedback."""
 
+# Test/fixture names and module narratives document the expected behavior.
+# pylint: disable=missing-class-docstring,missing-function-docstring
+
 import copy
 import json
 from pathlib import Path
 import tempfile
 import unittest
-from contextlib import ExitStack
+
 from unittest.mock import patch
 
-from wtf.inspection.analyze import analyze_run, analyze_recording
+from wtf.inspection.analyze import analyze_run
 from wtf.storage.checkpoint_io import read_checkpoint
 from wtf.config import validate, load
 from wtf.learning.contextual_ppo import action_mask
-from wtf.storage.recording import Recorder, RecordingStore
-from wtf.storage.replay_io import load_chunk
+
+
 from wtf.experiment.runner import Experiment
 from wtf.inspection.telemetry import summarize
 from wtf.simulation.world import World
