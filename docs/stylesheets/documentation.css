@@ -109,3 +109,70 @@
   border-radius: 0.35rem;
   color-scheme: inherit;
 }
+
+/* One static hero keeps its intentional forest surface in either page palette. */
+.site-banner {
+  display: block;
+  margin: 1.2rem 0 1.8rem;
+}
+.md-typeset .site-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.6rem;
+  background: #091511;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(150px, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  margin: 1.2rem 0 1.8rem;
+}
+.home-hero .site-banner {
+  margin: 0;
+  align-self: center;
+}
+.hero-motion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.6rem;
+  background: var(--md-code-bg-color);
+}
+.hero-motion picture {
+  width: 100%;
+  max-width: 164px;
+}
+.md-typeset .hero-motion img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+}
+.md-typeset .hero-motion p {
+  margin: 0;
+  color: var(--md-default-fg-color);
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero-motion {
+    flex-direction: row;
+    gap: 1.2rem;
+  }
+  .hero-motion picture {
+    max-width: 64px;
+  }
+}

@@ -17,6 +17,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | --- | --- |
 | [Favicon (PNG)](visual-previews/branding/favicon-png.md) | [favicon.png](assets/branding/favicon.png) |
 | [Favicon (SVG)](visual-previews/branding/favicon-svg.md) | [favicon.svg](assets/branding/favicon.svg) |
+| [Github banner (SVG)](visual-previews/branding/github-banner-svg.md) | [github-banner.svg](assets/branding/github-banner.svg) |
 | [WTF lockup dark (PNG)](visual-previews/branding/wtf-lockup-dark-png.md) | [wtf-lockup-dark.png](assets/branding/wtf-lockup-dark.png) |
 | [WTF lockup dark (SVG)](visual-previews/branding/wtf-lockup-dark-svg.md) | [wtf-lockup-dark.svg](assets/branding/wtf-lockup-dark.svg) |
 | [WTF lockup light (PNG)](visual-previews/branding/wtf-lockup-light-png.md) | [wtf-lockup-light.png](assets/branding/wtf-lockup-light.png) |

@@ -111,3 +111,26 @@ test('Dark heatmap has increasing brightness across the log scale', async () => 
     'Busy cells should be clearly brighter than lightly visited cells',
   );
 });
+
+test('Shared species heatmap scale gives equal counts equal colors despite different local maxima', async () => {
+  const { drawMovementHeatmap } = await import('../viewer/behavior-stats.mjs');
+  for (const theme of ['light', 'dark']) {
+    const colors = [];
+    for (const maximum of [1, 8]) {
+      const ctx = {
+        fillStyle: '',
+        fillRect(x) {
+          if (x === 1) colors.push(this.fillStyle);
+        },
+      };
+      drawMovementHeatmap(
+        ctx,
+        { width: 2, height: 1, counts: [0, 1], maximum },
+        theme,
+        [],
+        8,
+      );
+    }
+    assert.equal(colors[0], colors[1]);
+  }
+});

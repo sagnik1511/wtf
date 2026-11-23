@@ -380,7 +380,9 @@ class RecordingStore:
             self._folder(recording_id), run=run, include_movement=False
         )
 
-    def movement(self, recording_id, run, frame_index):
+    # Keep validation and the streamed-prefix lifetime together; grouping adds one argument.
+    # pylint: disable-next=too-many-locals
+    def movement(self, recording_id, run, frame_index, species=None, by_species=False):
         """Rebuild one prefix on demand; no stored grids or decoded-run cache."""
 
         # Keep imports lazy so optional tools and training dependencies load only on
@@ -392,14 +394,24 @@ class RecordingStore:
 
         from wtf.inspection.movement import MovementCounts
 
+        if type(by_species) is not bool or (by_species and species is not None):
+            raise ValueError("Invalid movement grouping")
         if type(run) is not int or type(frame_index) is not int or frame_index < 0:
             raise ValueError("Invalid movement run or frame")
         manifest = self.metadata(recording_id)
         entry = next((r for r in manifest["runs"] if r["run"] == run), None)
         if entry is None or frame_index >= entry["frame_count"]:
             raise FileNotFoundError("Recorded movement frame not found")
-        world = manifest["config"]["world"]
-        counts = MovementCounts(world["width"], world["height"])
+        if species is not None and (
+            not isinstance(species, str) or species not in manifest["config"]["species"]
+        ):
+            raise ValueError("Unknown movement species")
+        counts = MovementCounts(
+            manifest["config"]["world"]["width"],
+            manifest["config"]["world"]["height"],
+            species,
+            manifest["config"]["species"] if by_species else (),
+        )
         size = manifest["recording"]["frames_per_chunk"]
         folder = self._folder(recording_id)
         for index in range(frame_index // size + 1):

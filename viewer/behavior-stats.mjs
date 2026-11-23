@@ -56,7 +56,13 @@ export function movementHeatColor(count, maximum, theme) {
   return `rgb(${colors[index].map((v, i) => Math.round(v + (colors[index + 1][i] - v) * fraction)).join(', ')})`;
 }
 
-export function drawMovementHeatmap(ctx, map, theme, obstacles = []) {
+export function drawMovementHeatmap(
+  ctx,
+  map,
+  theme,
+  obstacles = [],
+  scaleMaximum = map?.maximum,
+) {
   if (
     !map ||
     !Number.isInteger(map.width) ||
@@ -70,7 +76,7 @@ export function drawMovementHeatmap(ctx, map, theme, obstacles = []) {
   )
     return false;
   const light = theme === 'light',
-    maximum = Math.max(1, map.maximum ?? 0);
+    maximum = Math.max(1, scaleMaximum ?? 0);
   ctx.fillStyle = movementHeatColor(0, maximum, theme);
   ctx.fillRect(0, 0, map.width, map.height);
   const colorCache = new Map();
@@ -88,7 +94,7 @@ export function drawMovementHeatmap(ctx, map, theme, obstacles = []) {
   return true;
 }
 
-export function movementHeatmap(map, obstacles = []) {
+export function movementHeatmap(map, obstacles = [], { compact = false } = {}) {
   if (!map?.counts) return null;
   const element = document.createElement('section'),
     title = document.createElement('h3'),
@@ -100,6 +106,7 @@ export function movementHeatmap(map, obstacles = []) {
   canvas.height = map.height;
   canvas.setAttribute('role', 'img');
   note.className = 'muted';
+  note.hidden = compact;
   legend.className = 'movement-heatmap-legend';
   legend.setAttribute(
     'aria-label',
@@ -109,38 +116,48 @@ export function movementHeatmap(map, obstacles = []) {
   let lastMaximum = null,
     swatches = [],
     paintedFrame = null,
-    paintedTheme = null;
+    paintedTheme = null,
+    paintedMap = null,
+    scaleMaximum = map.maximum,
+    paintedMaximum = null;
   const view = {
     element,
-    update(next, theme) {
+    update(next, theme, maximum = next.maximum) {
       map = next;
+      scaleMaximum = maximum;
       return view.draw(theme);
     },
     draw(theme) {
       if (
         map.frame_index !== undefined &&
+        paintedMap === map &&
         paintedFrame === map.frame_index &&
-        paintedTheme === theme
+        paintedTheme === theme &&
+        paintedMaximum === scaleMaximum
       )
         return true;
-      title.textContent = `Movement heatmap · through step ${map.tick ?? 0}`;
+      const group =
+        map.species === null || map.species === undefined
+          ? 'all species'
+          : map.species;
+      title.textContent = `Movement heatmap · ${group} · through step ${map.tick ?? 0}`;
       canvas.setAttribute(
         'aria-label',
-        `Movement arrivals through replay step ${map.tick ?? 0}, all animals: ${map.arrivals} arrivals, maximum ${map.maximum} per cell. North is up.`,
+        `Movement arrivals through replay step ${map.tick ?? 0}, ${group}: ${map.arrivals} arrivals, maximum ${map.maximum} per cell. North is up.`,
       );
-      note.textContent = `${map.arrivals.toLocaleString()} changed-position arrivals · busiest cell ${map.maximum.toLocaleString()} · all species/sexes · logarithmic color scale. Through replay step ${map.tick ?? 0} only; future frames excluded. Stationary time, births, frame gaps and unknown terminal routes are excluded. Gray = obstacles.`;
-      if (map.maximum !== lastMaximum) {
-        lastMaximum = map.maximum;
+      note.textContent = `${map.arrivals.toLocaleString()} changed-position arrivals · busiest cell ${map.maximum.toLocaleString()} · ${group}, both sexes · logarithmic color scale. Through replay step ${map.tick ?? 0} only; future frames excluded. Stationary time, births, frame gaps and unknown terminal routes are excluded. Gray = obstacles.`;
+      if (scaleMaximum !== lastMaximum) {
+        lastMaximum = scaleMaximum;
         legend.replaceChildren();
         const values =
-          map.maximum > 0
+          scaleMaximum > 0
             ? [
                 ...new Set([
                   0,
                   ...Array.from({ length: 5 }, (_, i) =>
                     Math.round(
                       Math.expm1(
-                        Math.log1p(map.maximum) * (0.15 + (0.85 * i) / 4),
+                        Math.log1p(scaleMaximum) * (0.15 + (0.85 * i) / 4),
                       ),
                     ),
                   ),
@@ -160,9 +177,11 @@ export function movementHeatmap(map, obstacles = []) {
       for (const [swatch, value] of swatches)
         swatch.style.backgroundColor = movementHeatColor(
           value,
-          map.maximum,
+          scaleMaximum,
           theme,
         );
+      paintedMap = map;
+      paintedMaximum = scaleMaximum;
       paintedFrame = map.frame_index;
       paintedTheme = theme;
       return drawMovementHeatmap(
@@ -170,6 +189,7 @@ export function movementHeatmap(map, obstacles = []) {
         map,
         theme,
         obstacles,
+        scaleMaximum,
       );
     },
   };

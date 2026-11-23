@@ -62,6 +62,8 @@ export function collectivePanel(
 
   function charts(container, data) {
     const updates = [];
+    const groups = el('div', undefined, 'collective-groups');
+    container.append(groups);
     for (const [title, key] of [
       ['Local witnesses', 'collective'],
       ...(data.general_consequences?.length
@@ -76,13 +78,26 @@ export function collectivePanel(
           key === 'collective' || spec?.allowed_actions?.includes(row.action),
       );
       if (!rows.length) continue;
-      container.append(el('h4', title));
+      const group = el('section', undefined, 'collective-group');
+      groups.append(group);
+      group.append(el('h4', title));
       const chart = svg('svg', {
         viewBox: `0 0 340 ${28 + rows.length * 26}`,
-        width: '100%',
+        width: 340,
+        height: 28 + rows.length * 26,
+        preserveAspectRatio: 'xMinYMin meet',
+        class: 'collective-chart',
+        'font-family': 'system-ui, sans-serif',
         role: 'img',
         'aria-label': title,
       });
+      chart.append(
+        svg(
+          'text',
+          { x: 2, y: 13, fill: visualColor('#a9bacc'), 'font-size': 10 },
+          'Action',
+        ),
+      );
       const columns = [
         ['harm', '#ff9aab'],
         ['feeding', '#7de2bd'],
@@ -93,7 +108,8 @@ export function collectivePanel(
           svg(
             'text',
             {
-              x: 148 + i * 62,
+              x: 172 + i * 62,
+              'text-anchor': 'middle',
               y: 13,
               fill: visualColor(color),
               'font-size': 10,
@@ -157,7 +173,7 @@ export function collectivePanel(
           }
         });
       });
-      container.append(chart);
+      group.append(chart);
     }
     const update = (next) => updates.forEach((f) => f(next));
     update(data);

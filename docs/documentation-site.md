@@ -11,7 +11,8 @@ Python-backed replay server.
 Use the **sun/moon icon at the top right** to switch between light and dark
 appearance. The initial palette follows the operating system preference, and a
 manual choice is remembered in that browser. Page surfaces, navigation, text and
-project logos follow the selected site theme. The project symbol remains visible
+project logos follow the selected site theme. The landing-page banner keeps its
+intentional dark forest background in either theme. The project symbol remains visible
 beside the title on every page and at mobile widths. Adaptive SVG diagrams follow
 the same toggle; [visual theme rules](visual-guide.md#light-and-dark-appearance)
 explain how paired replay exports and standalone SVG specimens follow the theme

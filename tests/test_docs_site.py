@@ -79,13 +79,21 @@ class DocumentationSiteTests(unittest.TestCase):
         text = "[Web](https://example.com/a?q=1#anchor) [Section](#section)"
         self.assertEqual(self.render(text), text)
 
-    def test_logo_motion_is_limited_to_home_hero(self):
+    def test_home_banner_and_symbol_pair_keep_motion_reduced_motion_safe(self):
         root = Path(__file__).resolve().parents[1]
         home = (root / "docs/index.md").read_text()
+        self.assertEqual(home.count('<picture class="site-banner">'), 1)
+        self.assertIn('srcset="assets/branding/github-banner.svg"', home)
+        self.assertIn('src="assets/github-banner.png"', home)
+        self.assertIn('width="1280" height="640"', home)
+        self.assertNotIn('class="brand-lockup', home)
+        self.assertIn('class="home-hero"', home)
+        self.assertIn('class="hero-motion"', home)
         ns = {"s": "http://www.w3.org/2000/svg"}
         for theme, ink in (("light", "#163b2a"), ("dark", "#def3e5")):
             name = f"wtf-lockup-motion-{theme}.svg"
-            self.assertIn(name, home)
+            self.assertNotIn(name, home)
+            self.assertIn(f"wtf-symbol-motion-{theme}.svg", home)
             svg = ET.parse(root / "docs/assets/branding" / name).getroot()
             style = svg.find("s:style", ns).text
             self.assertIn(ink, style)

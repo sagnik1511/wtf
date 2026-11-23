@@ -123,4 +123,7 @@ separate from simulated sunlight.
 
 The project symbol stays to the left of the shared documentation header title
 on every page, including narrow layouts. It is a home link and uses the matching
-light/dark logo; only the home-page hero has the ribbon animation.
+light/dark logo. The landing-page hero uses the static forest banner in both
+themes, beside a smaller theme-aware animated symbol. On narrow screens these
+stack into a compact layout. The symbol and the viewer's recording-loading
+indicator respect reduced-motion preferences.

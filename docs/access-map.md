@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **302 public documentation pages**, **115 visual files**
+Coverage: **304 public documentation pages**, **116 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -99,6 +99,7 @@ and **8 identical viewer branding copies**.
 | [Archived brain (GIF)](visual-previews/archived-brain-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Archived brain (GIF)](visual-previews/archived-brain-gif.md) |
 | [Favicon (PNG)](visual-previews/branding/favicon-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Favicon (PNG)](visual-previews/branding/favicon-png.md) |
 | [Favicon (SVG)](visual-previews/branding/favicon-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Favicon (SVG)](visual-previews/branding/favicon-svg.md) |
+| [Github banner (SVG)](visual-previews/branding/github-banner-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner (SVG)](visual-previews/branding/github-banner-svg.md) |
 | [WTF lockup dark (PNG)](visual-previews/branding/wtf-lockup-dark-png.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF lockup dark (PNG)](visual-previews/branding/wtf-lockup-dark-png.md) |
 | [WTF lockup dark (SVG)](visual-previews/branding/wtf-lockup-dark-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF lockup dark (SVG)](visual-previews/branding/wtf-lockup-dark-svg.md) |
 | [WTF lockup light (PNG)](visual-previews/branding/wtf-lockup-light-png.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF lockup light (PNG)](visual-previews/branding/wtf-lockup-light-png.md) |
@@ -305,9 +306,10 @@ and **8 identical viewer branding copies**.
 | [0.0.2.21 Configurable adjacent founder pairs](releases/0.0.2.21.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.21](releases/0.0.2.21.md) |
 | [0.0.2.22 Multilayer scalar DQN and DDQN](releases/0.0.2.22.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.22](releases/0.0.2.22.md) |
 | [0.0.2.23 Native scalar updates and shared sensory work](releases/0.0.2.23.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.23](releases/0.0.2.23.md) |
-| [0.0.2.24 Cumulative collective outcome views](releases/0.0.2.24.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.24 — Cumulative collective outcome views](releases/0.0.2.24.md) |
-| [0.0.2.25 General consequence knowledge with learned relevance](releases/0.0.2.25.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.25 — General consequence knowledge](releases/0.0.2.25.md) |
-| [0.0.2.26 Combined general and context consequence inputs](releases/0.0.2.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.26 — Combined consequence inputs](releases/0.0.2.26.md) |
+| [0.0.2.24 Cumulative collective outcome views](releases/0.0.2.24.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.24](releases/0.0.2.24.md) |
+| [0.0.2.25 General consequence knowledge with learned relevance](releases/0.0.2.25.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.25](releases/0.0.2.25.md) |
+| [0.0.2.26 Combined general and context consequence inputs](releases/0.0.2.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.26](releases/0.0.2.26.md) |
+| [0.0.2.27 Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.27 — Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
@@ -324,6 +326,7 @@ and **8 identical viewer branding copies**.
 | --- | --- |
 | `assets/branding/favicon.png` | [Home](index.md) → [All visuals](visuals.md) → [favicon.png](assets/branding/favicon.png) |
 | `assets/branding/favicon.svg` | [Home](index.md) → [All visuals](visuals.md) → [favicon.svg](assets/branding/favicon.svg) |
+| `assets/branding/github-banner.svg` | [Home](index.md) → [All visuals](visuals.md) → [github-banner.svg](assets/branding/github-banner.svg) |
 | `assets/branding/wtf-lockup-dark.png` | [Home](index.md) → [All visuals](visuals.md) → [wtf-lockup-dark.png](assets/branding/wtf-lockup-dark.png) |
 | `assets/branding/wtf-lockup-dark.svg` | [Home](index.md) → [All visuals](visuals.md) → [wtf-lockup-dark.svg](assets/branding/wtf-lockup-dark.svg) |
 | `assets/branding/wtf-lockup-light.png` | [Home](index.md) → [All visuals](visuals.md) → [wtf-lockup-light.png](assets/branding/wtf-lockup-light.png) |

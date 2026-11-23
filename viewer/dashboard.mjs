@@ -1,3 +1,4 @@
+import { movementHeatmap } from './behavior-stats.mjs';
 import { collectivePanel } from './collective-view.mjs';
 import { TelemetryCache, metrics, series } from './dashboard-stats.mjs';
 const $ = (id) => document.getElementById(id);
@@ -14,13 +15,26 @@ const element = (tag, value, cls) => {
   return node;
 };
 
+const replaceIfChanged = (parent, children) => {
+  if (
+    parent.children.length !== children.length ||
+    children.some((node, i) => parent.children[i] !== node)
+  )
+    parent.replaceChildren(...children);
+};
+
 export class Dashboard {
-  constructor(loadJSON, color) {
+  constructor(loadJSON, color, selectMovementSpecies = null) {
     this.cache = new TelemetryCache(loadJSON);
     this.color = color;
+    this.selectMovementSpecies = selectMovementSpecies;
+    this.speciesHeatmaps = new Map();
+    this.heatmap = null;
     this.request = 0;
     this.points = [];
     this.collectivePanels = new Map();
+    this.speciesCards = new Map();
+    this.legendItems = new Map();
     this.chartTypes = [
       'population',
       'energy',
@@ -52,7 +66,22 @@ export class Dashboard {
       $('trend-grid').append(panel);
       return { canvas, summary, select };
     });
-    $('dashboard-species').onchange = () => this.draw();
+    $('dashboard-species').onchange = async () => {
+      this.draw();
+      if (!this.selectMovementSpecies) return;
+      try {
+        await this.selectMovementSpecies($('dashboard-species').value || null);
+        this.drawMovement();
+      } catch (error) {
+        $('dashboard-movement').replaceChildren(
+          element(
+            'p',
+            `Movement heatmap unavailable: ${error.message}`,
+            'muted',
+          ),
+        );
+      }
+    };
     $('dashboard-action').onchange = () => this.draw();
     $('dashboard-window').onchange = () => this.update(this.context);
     this.resize = new ResizeObserver(() => this.draw());
@@ -62,6 +91,71 @@ export class Dashboard {
       $('metrics-dialog').showModal();
       this.update(this.context);
     };
+  }
+  speciesMovement(name) {
+    const { state } = this.context;
+    const map = state.movement_by_species?.[name];
+    if (!map || map.frame_index !== state.frame_index) return null;
+    let widget = this.speciesHeatmaps.get(name);
+    if (!widget) {
+      widget = movementHeatmap(map, state.obstacles ?? [], { compact: true });
+      this.speciesHeatmaps.set(name, widget);
+    }
+    widget.update(
+      map,
+      document.documentElement?.dataset.theme ?? 'dark',
+      this.speciesMaximum,
+    );
+    return widget;
+  }
+  drawMovement() {
+    if (!this.context || !$('metrics-dialog').open) return;
+    const { state, id } = this.context;
+    const runKey = `${id}:${state.run}`;
+    if (this.movementKey !== runKey) {
+      this.movementKey = runKey;
+      this.speciesHeatmaps.clear();
+    }
+    this.speciesMaximum = Math.max(
+      0,
+      ...Object.values(state.movement_by_species ?? {}).map(
+        (group) => group.maximum,
+      ),
+    );
+    if (!$('dashboard-species').value)
+      for (const name of this.speciesHeatmaps.keys())
+        this.speciesMovement(name);
+    const map = state.movement_heatmap;
+    const box = $('dashboard-movement');
+    const chosen = $('dashboard-species').value || null;
+    box.hidden = !map || !chosen;
+    if (!map || !chosen) {
+      this.heatmap = null;
+      if (box.firstChild) box.replaceChildren();
+      return;
+    }
+    const key = `${id}:${state.run}:${chosen}`;
+    if (
+      (map.species ?? null) !== chosen ||
+      map.frame_index !== state.frame_index
+    ) {
+      this.heatmap = null;
+      box.replaceChildren(
+        element(
+          'p',
+          'Loading selected species movement through the current step…',
+          'muted',
+        ),
+      );
+      return;
+    }
+    const theme = document.documentElement?.dataset.theme ?? 'dark';
+    if (!this.heatmap || this.heatmapKey !== key) {
+      this.heatmapKey = key;
+      this.heatmap = movementHeatmap(map, state.obstacles ?? []);
+      box.replaceChildren(this.heatmap.element);
+    }
+    this.heatmap.update(map, theme);
   }
   drawCollective() {
     if (!this.context || !$('metrics-dialog').open) return;
@@ -142,6 +236,13 @@ export class Dashboard {
     $('dashboard-play').textContent = context.playing
       ? 'Pause'
       : 'Play recording';
+    // While an older prefix loads, resize/theme/filter redraws must not reuse
+    // telemetry from after the newly selected playback step.
+    if (this.points.at(-1)?.tick > state.tick) {
+      this.points = this.points.filter((point) => point.tick <= state.tick);
+      this.draw();
+    }
+    this.drawMovement();
     this.drawCollective();
     $('dashboard-status').textContent = 'Loading per-step history…';
     try {
@@ -167,31 +268,42 @@ export class Dashboard {
     }
   }
   draw() {
+    this.drawMovement();
     this.drawCollective();
     if (!$('metrics-dialog').open || !this.context) return;
     const selected = $('dashboard-species').value,
       names = Object.keys(this.context.species).filter(
         (name) => !selected || name === selected,
       );
-    $('dashboard-legend').replaceChildren(
-      ...names.map((name) => {
+    const viewKey = `${this.context.id}:${this.context.state.run}`;
+    if (this.cardsKey !== viewKey) {
+      this.cardsKey = viewKey;
+      this.speciesCards.clear();
+      this.legendItems.clear();
+    }
+    const legend = names.map((name) => {
+      let entry = this.legendItems.get(name);
+      if (!entry) {
         const item = element('span', '', 'legend-key'),
           marker = element('span', '●', 'legend-symbol');
-        marker.style.color = this.color(name);
         item.append(marker, element('span', name));
-        return item;
-      }),
-    );
+        entry = { item, marker };
+        this.legendItems.set(name, entry);
+      }
+      entry.marker.style.color = this.color(name);
+      return entry.item;
+    });
+    replaceIfChanged($('dashboard-legend'), legend);
     const point = this.points.at(-1),
       cards = $('species-now');
-    cards.replaceChildren();
+    const visibleCards = [];
     for (const name of names) {
-      const s = point?.species[name];
-      if (!s) continue;
-      const card = element('article', undefined, 'species-card'),
-        heading = element('strong', name, 'series-heading');
-      heading.style.borderLeftColor = this.color(name);
-      card.append(heading);
+      const s = point?.species[name] ?? { groups: {} };
+      if (
+        !point?.species[name] &&
+        !Object.hasOwn(this.context.state.movement_by_species ?? {}, name)
+      )
+        continue;
       const rows = [
         ['Population', number(s.population)],
         ['Health / energy', `${percent(s.health)} / ${percent(s.energy)}`],
@@ -212,18 +324,49 @@ export class Dashboard {
           `${number(s.mean_age)} / ${number(s.mean_generation)}`,
         ],
       ];
-      for (const [label, value] of rows) {
-        const row = element('div');
-        row.append(element('span', label), element('b', value));
-        card.append(row);
+      let card = this.speciesCards.get(name);
+      if (!card) {
+        const node = element('article', undefined, 'species-card'),
+          heading = element('strong', name, 'series-heading'),
+          values = [],
+          base = [heading];
+        for (const [label] of rows) {
+          const row = element('div'),
+            value = element('b', '');
+          values.push(value);
+          row.append(element('span', label), value);
+          base.push(row);
+        }
+        node.append(...base);
+        card = { node, heading, values, base, movement: null };
+        this.speciesCards.set(name, card);
       }
-      cards.append(card);
+      card.heading.style.borderLeftColor = this.color(name);
+      rows.forEach(([, value], i) => {
+        if (card.values[i].textContent !== value)
+          card.values[i].textContent = value;
+      });
+      const movement = !selected
+        ? (this.speciesMovement(name)?.element ?? null)
+        : null;
+      if (card.movement !== movement) {
+        card.movement = movement;
+        card.node.replaceChildren(
+          ...card.base,
+          ...(movement ? [movement] : []),
+        );
+      }
+      visibleCards.push(card.node);
     }
+    replaceIfChanged(cards, visibleCards);
+    const lineCache = new Map();
     this.charts.forEach((chart, i) => {
       const type = this.chartTypes[i],
         definition = metrics[type],
         action = $('dashboard-action').value;
-      const lines = series(this.points, names, type, action);
+      if (!lineCache.has(type))
+        lineCache.set(type, series(this.points, names, type, action));
+      const lines = lineCache.get(type);
       const suffix = definition.action
         ? ` · ${action.replaceAll('_', ' ')}`
         : '';
@@ -260,17 +403,22 @@ export class Dashboard {
     const style = getComputedStyle(canvas);
     ctx.font = `12px ${style.fontFamily}`;
     ctx.textBaseline = 'middle';
-    const values = lines
-      .flatMap((line) => line.points.map((p) => p.value))
-      .filter(Number.isFinite);
     const left = 53,
       right = 12,
       top = 14,
       bottom = 24,
       w = Math.max(1, width - left - right),
       h = Math.max(1, height - top - bottom);
-    let min = Math.min(0, ...values),
-      max = Math.max(definition.percent ? 1 : 0, ...values);
+    let min = 0,
+      max = definition.percent ? 1 : 0,
+      hasValues = false;
+    for (const line of lines)
+      for (const point of line.points)
+        if (Number.isFinite(point.value)) {
+          hasValues = true;
+          min = Math.min(min, point.value);
+          max = Math.max(max, point.value);
+        }
     if (max === min) max = min + 1;
     const first = this.points[0]?.tick ?? 0,
       last = this.points.at(-1)?.tick ?? 1,
@@ -324,7 +472,7 @@ export class Dashboard {
           ctx.fill();
         }
     }
-    if (!values.length) {
+    if (!hasValues) {
       ctx.fillStyle = style.getPropertyValue('--muted').trim() || '#8b9cad';
       ctx.textAlign = 'center';
       ctx.fillText('No samples in this time window', left + w / 2, top + h / 2);

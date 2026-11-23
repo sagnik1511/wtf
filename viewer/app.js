@@ -130,7 +130,30 @@ $('inspect-animal').onclick = () => {
   render();
 };
 let sensoryCache = null;
-let heatmapView = null;
+let heatmapView = null,
+  heatmapKey = null;
+function drawAllMovement() {
+  if (!state || !player.movement) return;
+  const map = player.movement.map,
+    box = $('sidebar-movement');
+  const ready =
+    map.frame_index === state.frame_index &&
+    map.tick === state.tick &&
+    state.movement_by_species === map.by_species &&
+    player.run.run === state.run;
+  box.hidden = !ready;
+  if (!ready) return;
+  const key = `${player.id}:${state.run}`;
+  if (heatmapKey !== key || !heatmapView) {
+    heatmapKey = key;
+    heatmapView = movementHeatmap(player.movement.map, state.obstacles ?? []);
+    $('sidebar-movement').replaceChildren(heatmapView.element);
+  }
+  heatmapView.update(
+    player.movement.map,
+    document.documentElement.dataset.theme,
+  );
+}
 function selectedTracking() {
   const animal = state?.animals.find((a) => a.id === selected);
   const diagnostic = state?.selected;
@@ -190,7 +213,7 @@ $('tracking-open').onclick = () => {
 };
 $('movement-open').onclick = () => {
   if (!busy)
-    heatmapView?.element.scrollIntoView({ block: 'start', behavior: 'auto' });
+    $('sidebar-movement').scrollIntoView({ block: 'start', behavior: 'auto' });
 };
 $('show-tracking').onchange = () => {
   if (state) render();
@@ -249,6 +272,7 @@ async function operation(fn, { recording = false } = {}) {
     'dashboard-back',
     'dashboard-next',
     'dashboard-timeline',
+    'dashboard-species',
     'inspect-animal',
     'inspect-animal-id',
     'brain-open',
@@ -281,6 +305,7 @@ async function operation(fn, { recording = false } = {}) {
       'dashboard-back',
       'dashboard-next',
       'dashboard-timeline',
+      'dashboard-species',
       'inspect-animal',
       'inspect-animal-id',
       'brain-open',
@@ -337,7 +362,10 @@ function syncTerrain() {
     ? `${terrain.name}${terrain.hasWater ? ' · ≈ River → current' : ''}${terrain.hasElevation ? ' · ▧ Elevation' : ''}`
     : '';
 }
-const dashboard = new Dashboard(api, speciesColor);
+const dashboard = new Dashboard(api, speciesColor, async (species) => {
+  if (!state || busy) return;
+  render(await player.selectMovementSpecies(species, selected));
+});
 function fitWorld() {
   const canvas = $('world'),
     holder = canvas.parentElement;
@@ -683,12 +711,14 @@ function drawChart() {
     .getPropertyValue('--muted')
     .trim();
   ctx.textBaseline = 'middle';
-  const popMax = Math.max(
-    1,
-    ...history.flatMap((m) => Object.values(m.populations)),
-  );
-  const foodMax = Math.max(1, ...history.map((m) => m.food)),
-    timeMax = Math.max(1, state.tick);
+  let popMax = 1,
+    foodMax = 1;
+  for (const metric of history) {
+    for (const population of Object.values(metric.populations))
+      popMax = Math.max(popMax, population);
+    foodMax = Math.max(foodMax, metric.food);
+  }
+  const timeMax = Math.max(1, state.tick);
   const popLabel = popMax.toLocaleString(),
     foodLabel = Math.round(foodMax).toLocaleString();
   const left = Math.max(30, ctx.measureText(popLabel).width + 10);
@@ -1002,12 +1032,6 @@ async function loadBehavior() {
   const request = ++analysisRequest,
     box = $('behavior');
   box.replaceChildren(text('p', 'Analyzing saved frames…'));
-  heatmapView = movementHeatmap(player.movement.map, player.run.obstacles);
-  $('movement-open').disabled = !heatmapView;
-  if (heatmapView) {
-    heatmapView.draw(document.documentElement.dataset.theme);
-    box.append(heatmapView.element);
-  }
   try {
     const report = await api(
       `/api/recordings/${encodeURIComponent(player.id)}/runs/${state.run}/analysis`,
@@ -1022,18 +1046,6 @@ async function loadBehavior() {
         `Steps ${run.first_tick}–${run.last_tick} · ${run.complete ? 'Complete' : 'Partial'} run · Consecutive-step coverage ${coverage === null ? '—' : `${(coverage * 100).toFixed(1)}%`}`,
       ),
     );
-    $('movement-open').disabled = !heatmapView;
-    if (heatmapView) {
-      heatmapView.draw(document.documentElement.dataset.theme);
-      box.append(heatmapView.element);
-    } else
-      box.append(
-        text(
-          'p',
-          'Movement heatmap unavailable from this server. Restart the playback server after updating Python.',
-          'muted',
-        ),
-      );
     for (const species of Object.keys(run.species)) {
       const section = text('div', '', 'behavior-species');
       section.append(
@@ -1134,6 +1146,14 @@ async function changeRunBy(offset) {
   );
 }
 function render(snapshot = null) {
+  // Passive UI toggles during an incomplete seek keep the committed display.
+  if (
+    !snapshot &&
+    Math.floor(
+      player.frameIndex / player.metadata.recording.frames_per_chunk,
+    ) !== player.chunkIndex
+  )
+    return;
   const previousRun = state?.run;
   state = snapshot ?? player.snapshot(selected);
   if (previousRun !== undefined && previousRun !== state.run) {
@@ -1241,10 +1261,8 @@ function render(snapshot = null) {
   $('summaries').textContent =
     `${player.frames.length} frames loaded · one chunk in memory`;
   loadBehavior();
-  heatmapView?.update(
-    player.movement.map,
-    document.documentElement.dataset.theme,
-  );
+  drawAllMovement();
+  $('movement-open').disabled = !player.movement;
   drawWorld();
   drawSelectedTracking();
   drawFeedingHighlights();
@@ -1399,7 +1417,7 @@ installTheme({
       drawContestHighlights();
       drawChart();
     }
-    heatmapView?.draw(document.documentElement.dataset.theme);
+    drawAllMovement();
     if ($('metrics-dialog').open) dashboard.draw();
   },
 });

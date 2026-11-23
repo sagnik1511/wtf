@@ -2,16 +2,25 @@
 
 [Complete documentation directory](directory.md) · [All visuals](visuals.md) · [Homepage click paths](access-map.md)
 
-<picture class="brand-lockup brand-on-light">
-  <source srcset="assets/branding/wtf-lockup-motion-light.svg" type="image/svg+xml" />
-  <img src="assets/branding/wtf-lockup-light.png" width="260" alt="WTF — Wildlife Trial Framework" />
+<div class="home-hero">
+<picture class="site-banner">
+  <source srcset="assets/branding/github-banner.svg" type="image/svg+xml" />
+  <img src="assets/github-banner.png" width="1280" height="640" alt="WTF — Wildlife Trial Framework. Reinforcement learning in configurable environments with independent agents, multiple species and saved playback." fetchpriority="high" />
 </picture>
-<picture class="brand-lockup brand-on-dark">
-  <source srcset="assets/branding/wtf-lockup-motion-dark.svg" type="image/svg+xml" />
-  <img src="assets/branding/wtf-lockup-dark.png" width="260" alt="WTF — Wildlife Trial Framework" />
-</picture>
+  <div class="hero-motion">
+    <picture class="brand-on-light">
+      <source srcset="assets/branding/wtf-symbol-motion-light.svg" type="image/svg+xml" />
+      <img src="assets/branding/wtf-symbol-light.png" width="192" height="192" alt="WTF environment loop, circulating around a fixed window" />
+    </picture>
+    <picture class="brand-on-dark">
+      <source srcset="assets/branding/wtf-symbol-motion-dark.svg" type="image/svg+xml" />
+      <img src="assets/branding/wtf-symbol-dark.png" width="192" height="192" alt="WTF environment loop, circulating around a fixed window" />
+    </picture>
+    <p>Observe. Act. Learn.</p>
+  </div>
+</div>
 
-WTF is a configurable reinforcement learning wtf. Animals have private
+WTF is a configurable reinforcement learning simulation framework. Animals have private
 brains, observe their surroundings, choose actions, learn from feedback and can
 produce descendants. Python simulates and records; JavaScript plays the saved
 world later, independently of training.

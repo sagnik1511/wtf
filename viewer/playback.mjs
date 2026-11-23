@@ -70,15 +70,19 @@ export class Playback {
     this.movement?.reset(
       this.metadata.config.world.width,
       this.metadata.config.world.height,
+      null,
+      Object.keys(this.metadata.config.species),
     );
+    this.movementSpecies = null;
     this.metrics = [];
+    this.frames = [];
+    this.chunkIndex = -1;
     const metrics = await this.loadJSON(
       `/api/recordings/${encodeURIComponent(this.id)}/runs/${entry.run}/metrics`,
     );
     if (!Array.isArray(metrics) || metrics.length > 2048)
       throw new Error('Invalid run metrics');
     this.metrics = metrics;
-    this.frames = [];
     this.killCarry = [];
     this.deathCarry = [];
     this.birthCarry = [];
@@ -86,7 +90,6 @@ export class Playback {
     this.feedingCarry = [];
     this.previousAgents = [];
     this.previousTick = null;
-    this.chunkIndex = -1;
     return this.seek(0, selected);
   }
   async seek(index, selected = null) {
@@ -184,7 +187,7 @@ export class Playback {
     if (this.movement)
       await this.movement.move(this.frames, chunkIndex * size, index, (frame) =>
         this.loadJSON(
-          `/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/movement/${frame}`,
+          `/api/recordings/${encodeURIComponent(this.id)}/runs/${this.run.run}/movement/${frame}?by_species=1`,
         ),
       );
     if (this.collective)
@@ -200,6 +203,15 @@ export class Playback {
           ),
       );
     this.frameIndex = index;
+    return this.snapshot(selected);
+  }
+  async selectMovementSpecies(species, selected = null) {
+    if (
+      species !== null &&
+      !Object.hasOwn(this.metadata.config.species, species)
+    )
+      throw new Error('Unknown movement species');
+    this.movementSpecies = species;
     return this.snapshot(selected);
   }
   async refreshMetadata(selected = null, force = false) {
@@ -258,6 +270,13 @@ export class Playback {
     return next ? this.changeRun(next.run, selected) : this.snapshot(selected);
   }
   snapshot(selected = null) {
+    if (
+      Math.floor(this.frameIndex / this.metadata.recording.frames_per_chunk) !==
+      this.chunkIndex
+    )
+      throw new Error(
+        'Playback seek incomplete; retry seeking before inspecting this frame',
+      );
     const local = this.frameIndex % this.metadata.recording.frames_per_chunk;
     const frame = this.frames[local];
     if (!frame) throw new Error('Recorded frame missing');
@@ -281,6 +300,12 @@ export class Playback {
     return {
       ...frame,
       selected: diagnostic,
+      movement_heatmap: this.movement
+        ? this.movementSpecies
+          ? this.movement.map.by_species[this.movementSpecies]
+          : this.movement.map
+        : null,
+      movement_by_species: this.movement?.map.by_species ?? {},
       collective: this.collective?.totals.view(selected) ?? null,
       width: c.world.width,
       height: c.world.height,

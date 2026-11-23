@@ -176,35 +176,47 @@ the replay to see movement histories develop.
 
 ## Replay-time movement heatmap
 
-**Run movement heatmap** jumps to **Behavior & learning**, where an all-animal
-heatmap accumulates arrivals **only through the current replay frame**. It updates
-while playing and rewinds when seeking backward. Seek to the end to see the
-entire run. Other behavior/learning tables still summarize the full saved run;
-this heatmap is explicitly labeled with its current ending step.
+**All-species heatmap** jumps to the combined overview in the viewer sidebar.
+Open **Metrics dashboard** for compact maps alongside each species' current
+metrics. Its **All species** selector shows these cards together; choose one
+exact species name to enlarge its map. Both sexes contribute; extinct
+species retain their accumulated paths. Every map uses the same board geometry
+and current replay step. Species cards share a logarithmic count color scale;
+the combined overview and enlarged single map use their own scale. Equal colors
+in species cards mean equal arrival counts, not population-normalized movement.
 
-Heat counts changed-position arrivals per destination cell across all species
-and sexes, including drift and displacement when they change the final position.
-Stationary frames and newborn placements add no heat. Only consecutive recorded
-frames are compared; missing intervals and unknown terminal routes are not
-interpolated. Known terminal destination positions can contribute arrivals.
-A combined movement/drift step contributes its known final cell, not an invented
-path through intermediate cells. The logarithmic color scale preserves lightly
-visited areas; dark mode uses increasing-brightness blue/teal/yellow colors.
-The numeric color key shows arrival counts, and gray cells are obstacles.
+Maps accumulate arrivals **only through the current replay frame**, updating
+while playing and rewinding when seeking backward. Seek to the end for the entire
+run. The History selector limits trend charts only; heatmaps always start at the
+first recorded frame. Other behavior/learning tables still summarize the full run.
 
-The browser retains one reusable unsigned-32-bit count grid and previous animal
-positions, reusing its already loaded replay chunk for forward playback and
-rewinds within that chunk. At 40 × 28 cells, the count buffer is 4,480 bytes,
-plus small metadata and the previous-position map. There is no per-frame grid
-history, grid copy on each replay step or extra decoded run in RAM.
+Heat counts changed-position arrivals per destination cell, including drift and
+displacement when they change the final position. Stationary frames and newborn
+placements add no heat. Only consecutive recorded frames are compared; missing
+intervals and unknown terminal routes are not interpolated. Known terminal
+destination positions can contribute arrivals. A combined movement/drift step
+contributes its final cell rather than an invented intermediate path. The color
+key shows arrival counts; gray cells are obstacles. Both interface themes use
+legible backgrounds and increasing-strength colors.
 
-For a jump outside the available frames, the read-only movement-prefix endpoint
-streams saved chunks through the requested frame and returns one count grid.
-The server retains one chunk and prior positions while rebuilding, and discards
-them afterwards. The browser keeps its single current chunk; it never downloads
-the entire run for this rebuild. Large jumps trade recomputation for bounded
-memory. Full-run behavior responses omit their unused heatmap grid; the CLI
-analysis report may still include a full-run grid by default.
+One pass through the loaded replay frames updates the combined grid and each
+species grid. The browser retains one reusable Uint32 count grid per configured
+species plus the combined grid, and one shared previous-position map. At 40 × 28
+cells each count grid is 4,480 bytes: three species plus the overview use 17,920
+bytes for count buffers, excluding canvas pixels and other metadata. There is no
+per-frame grid history, grid copy on each step or extra decoded run in RAM.
+Changing the species selector reuses these grids immediately, without replay
+reads or pausing playback. Adding species adds current grids, never frame histories.
+
+For a distant seek the read-only movement-prefix endpoint accepts
+`?by_species=1`, streams saved chunks through the requested frame **once**, and
+returns combined and per-species counts together. Its optional
+`?species=<URL-encoded-name>` mode returns just one group for other clients;
+the two query modes cannot be combined. Without either query it retains the
+legacy combined response shape. The server retains one chunk and shared prior
+positions during reconstruction and discards them afterwards. The browser never
+downloads the whole run for this rebuild. Full-run behavior responses omit unused
+heatmap grids; CLI analysis may still include the combined full-run grid.
 
 No heatmap file or new replay field is written. Existing recordings work without
 regeneration, even when the optional senses were disabled. Restart an already

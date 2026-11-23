@@ -45,3 +45,39 @@ test('Movement prefixes validate requested time and reject impossible count data
     );
   assert.equal(h.map.arrivals, 0);
 });
+
+test('Grouped prefixes validate all species before mutating any grid', async () => {
+  const h = new MovementHistory();
+  h.reset(2, 2, null, ['hare', 'field mouse', 'fox']);
+  const group = (species) => ({
+    width: 2,
+    height: 2,
+    species,
+    counts: [0, 1, 0, 0],
+  });
+  const data = {
+    ...group(null),
+    frame_index: 10,
+    tick: 10,
+    by_species: Object.fromEntries(
+      ['hare', 'field mouse', 'fox'].map((name) => [name, group(name)]),
+    ),
+  };
+  data.by_species.fox.counts[0] = -1;
+  await assert.rejects(
+    h.move([{ tick: 10, animals: [] }], 10, 10, async () => data),
+    /Invalid movement/,
+  );
+  for (const map of h.maps)
+    assert.equal(
+      map.counts.reduce((a, b) => a + b),
+      0,
+    );
+  data.by_species.fox.counts[0] = 0;
+  await h.move([{ tick: 10, animals: [] }], 10, 10, async () => data);
+  assert.equal(h.maps.length, 4);
+  for (const map of h.maps) {
+    assert.equal(map.counts.byteLength, 16);
+    assert.equal(map.frame_index, 10);
+  }
+});

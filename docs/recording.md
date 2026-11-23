@@ -325,7 +325,9 @@ Previous configurations without this section use the same defaults. Set `enabled
 
 The recorder encodes one frame at a time into an open chunk file; it never collects the full playback history in RAM. Completed chunk files are renamed atomically, then advertised in the manifest. Cleanly interrupted runs retain their committed frames and are labeled `interrupted`; a hard crash can leave an unadvertised `.tmp` file. Such files are not served. The current manifest can be refreshed to discover additional committed chunks, although the intended workflow is playback after simulation finishes.
 
-The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. Chart history is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads bounded requested chunks and caches at most four stat-validated
+The browser retains one decoded world chunk at a time and loads the necessary chunk for seeking. It also keeps a small previous-frame position list to locate removed animals for death highlights. A direct seek can briefly read the preceding chunk to recover those positions, then release it. For older recordings that omit intermediate steps, natural deaths still show a banner, but no location is guessed if the immediately preceding state was not recorded. The **Metrics dashboard → Population & food** overview keeps its all-species run
+history independently of the dashboard Species/History filters. Chart history
+is loaded separately as at most 2,048 lightweight population/food samples for the current run, plus the exact current-frame point. It persists across world-chunk boundaries and only displays points up to the playback position. Very long histories are progressively downsampled, preserving the first and last recorded metric points. Switching runs resets the chart to that run. The server reads bounded requested chunks and caches at most four stat-validated
 derived telemetry pages, without caching an entire recording. Neural weights, target networks, optimizer state and raw experience buffers are absent from playback files; recorded diagnostics contain observations and counts plus Q values/epsilon or PPO probabilities/entropy/value. Hidden-activation samples add compact FP32 layer arrays and recurrent prior memory where applicable. The inspector identifies the diagnostic sample step, which may precede the displayed body state.
 
 Training still needs the live brains and replay buffers. CLI checkpoint writing copies and encodes one brain at a time, then atomically publishes a compact compressed checkpoint ([format and migration](running.md#optimize-existing-checkpoint-files)). Programmatic `checkpoint()` still returns a detached in-memory snapshot of all brains; restoring a checkpoint still materializes that complete state. Recording avoids an additional full-run frame history; it does not make learning itself constant-memory or guarantee a measured peak-memory reduction. Disk usage grows with duration. `frames_per_chunk` is capped at 256, but individual frame size still depends on world/population size.
@@ -420,3 +422,14 @@ species-specific night vision/energy modifiers and the maintained example.
 
 For package-versus-format support and cross-machine limits, see the
 [artifact compatibility policy](compatibility.md).
+
+
+### Movement by species
+
+The combined movement heatmap stays in the viewer sidebar under **All-species
+movement**. Open **Metrics dashboard** for compact maps beside each species' metrics. **Species** enlarges one exact species, including
+species that are now extinct. Arrivals accumulate
+only through the current replay step and include both sexes. The trend History
+window does not truncate the heatmap. One pass updates current combined/species grids; filtering reuses them.
+No new replay data or per-frame grid archive is stored. See
+[movement reconstruction and memory boundaries](tracking.md#replay-time-movement-heatmap).

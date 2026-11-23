@@ -1294,3 +1294,44 @@ node work/benchmark_collective_history.mjs \
 Reference checks compare cached and forced-fresh reductions through new samples,
 order changes, birth/death/extinction and independent copied states. Existing
 chunk/seek, publication and dual-source charts retain their contracts.
+
+## Reusing dashboard presentation nodes
+
+Species metric cards and legend entries are retained by exact species name for
+one recording/run. Every draw refreshes values and colors; filtering changes only
+which existing nodes are attached. Recording/run changes clear these node maps.
+Their size is bounded by configured species, with no per-frame DOM history or
+cached observations. Compact species heatmaps are not repainted while a single
+species is enlarged; returning to All species refreshes them at the current step.
+
+Repeated metric choices in the six chart slots share one prepared series during
+that draw only. The local map is discarded afterwards, so changing the action,
+filter, recorded values, window or playback position never reuses stale series.
+Chart bounds scan finite values directly instead of building flattened arrays
+or spreading every species/time value into a function call. The population/food
+overview similarly scans its existing run history. This also avoids the argument
+limit that could break plots with many species. Movement accumulation builds
+its shared prior-position map in one loop without filter/map staging arrays.
+
+A three-species, 1,000-redraw DOM probe compared against the immediately preceding
+uncommitted 0.0.2.27 viewer. It used the default six chart choices, one telemetry
+point per redraw, species filtering, a theme change and a run reset; heatmap and
+collective data were absent in this node-count probe and have separate tests.
+DOM element construction fell from **62,105 to 143**, and `replaceChildren`
+calls from **3,002 to 10**. Ordered DOM snapshots matched at every draw. These are
+operation counts in a lightweight DOM/canvas harness, not browser timings,
+whole-viewer speedups or measured peak-RAM reductions. Retained nodes deliberately
+trade a bounded per-species cache for less repeated allocation.
+
+Backward seeking immediately removes future telemetry from the visible trend
+history before older pages finish loading. Theme/resize/filter redraws during
+that request cannot redisplay later values. Regressions cover three exact
+species, card reuse, missing/absent species, shared heatmap scales, filter/run
+resets, independent draw-local series, and 150-species/1,024-point chart bounds.
+Failed cross-chunk seeks cannot publish a snapshot from the wrong loaded chunk;
+inspection requests require a successful retry. Passive redraws keep the committed
+board during that failure. Sidebar heatmap repainting also checks frame, tick,
+run and shared grid-container identity, including theme changes during pending
+collective-history loads. A mismatched sidebar map stays hidden until the loaded
+state is committed; no backup grid copy is retained. Simulation, recording bytes,
+sampling cadence, numeric precision and normal replay controls are unchanged.

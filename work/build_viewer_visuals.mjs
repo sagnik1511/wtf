@@ -880,24 +880,36 @@ const heatCounts = Array.from({ length: 80 }, (_, i) =>
 );
 let heatBoards = '';
 for (const theme of ['dark', 'light']) {
-  const heatCanvas = new SVGCanvas(10, 8);
-  drawMovementHeatmap(
-    heatCanvas,
-    { width: 10, height: 8, counts: heatCounts, maximum: 12 },
-    theme,
-    [
-      [0, 0],
-      [1, 0],
-    ],
-  );
-  heatBoards += `<g class="movement-heatmap-${theme}" transform="translate(690,762) scale(35)">${heatCanvas.output.join('')}</g>`;
+  for (const [i, name] of ['hare', 'field mouse', 'fox'].entries()) {
+    const heatCanvas = new SVGCanvas(10, 8);
+    drawMovementHeatmap(
+      heatCanvas,
+      {
+        width: 10,
+        height: 8,
+        counts: heatCounts.map((count) => Math.round((count * (i + 1)) / 3)),
+        maximum: 12,
+      },
+      theme,
+      [
+        [0, 0],
+        [1, 0],
+      ],
+      12,
+    );
+    const x = 640 + i * 170;
+    heatBoards += `<g class="movement-heatmap-${theme}" transform="translate(${x},810) scale(15)">${heatCanvas.output.join('')}</g>`;
+    if (theme === 'dark')
+      heatBoards += text(x + 75, 790, name, 14, '#e6edf3', 'middle');
+  }
 }
+
 sensoryBody +=
   box(612, 700, 560, 430) +
   text(
     630,
     730,
-    'Run analysis: all-animal movement arrivals',
+    'Metrics dashboard: movement beside species metrics',
     19,
     '#e6edf3',
     'start',
@@ -907,7 +919,7 @@ sensoryBody +=
   lines(
     630,
     1085,
-    ['Through replay step only; stationary frames add no heat.'],
+    ['Shared count scale; same replay step; select one to enlarge.'],
     14,
   ) +
   `<style>.movement-heatmap-light{display:none}@media(prefers-color-scheme:light){.movement-heatmap-light{display:inline}.movement-heatmap-dark{display:none}}</style>`;
@@ -985,20 +997,12 @@ body +=
   component(radar, 845, 415, 255, 170);
 body +=
   box(28, 623, 740, 130) +
-  text(
-    46,
-    653,
-    '5 · Speed, timeline and population / food history',
-    18,
-    '#e6edf3',
-    'start',
-    true,
-  ) +
-  `<path d="M50 713H745M62 732V681M68 709L190 698L310 704L420 677L530 687L728 671" fill="none" stroke="#7de2bd" stroke-width="2"/>` +
+  text(46, 653, '5 · Speed and replay timeline', 18, '#e6edf3', 'start', true) +
+  `<path d="M80 710H720" fill="none" stroke="#a9bacc" stroke-width="3"/><circle cx="360" cy="710" r="7" fill="#7de2bd"/>` +
   text(
     46,
     777,
-    '6 · Metrics dashboard opens step-following species charts.',
+    '6 · Metrics dashboard: population / food + species charts.',
     16,
     '#a9bacc',
   );

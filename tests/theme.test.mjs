@@ -101,6 +101,9 @@ test('actual app theme handler repaints a loaded paused board and events without
       paints.push(['tracks']);
     },
     heatmapView: null,
+    drawAllMovement() {
+      if (context.state) paints.push(['heatmap']);
+    },
     drawFeedingHighlights() {
       paints.push(['feeding']);
     },
@@ -126,7 +129,16 @@ test('actual app theme handler repaints a loaded paused board and events without
   button.onclick();
   assert.deepEqual(
     paints.map((p) => p[0]),
-    ['board', 'tracks', 'feeding', 'birth', 'death', 'contest', 'chart'],
+    [
+      'board',
+      'tracks',
+      'feeding',
+      'birth',
+      'death',
+      'contest',
+      'chart',
+      'heatmap',
+    ],
   );
   assert.equal(paints[0][1], boardPalette('light').background);
   assert.deepEqual(state, { tick: 123, frame_index: 123, selected: 7 });
@@ -143,6 +155,7 @@ test('actual app theme handler repaints a loaded paused board and events without
       'death',
       'contest',
       'chart',
+      'heatmap',
       'dashboard',
     ],
   );

@@ -220,10 +220,10 @@ def visual_previews(names, root=ROOT):
                 else ""
             )
             body.extend([f"![{title}]({href(name)}){extra}", ""])
-            if name.endswith("github-banner.png"):
+            if name.endswith(("github-banner.png", "github-banner.svg")):
                 body.extend(
                     [
-                        "The GitHub banner is a fixed screenshot; its recorded pixels do not change with the interface palette.",
+                        "The GitHub banner is fixed brand artwork; its chosen background and logo colors do not change with the interface palette.",
                         "",
                     ]
                 )

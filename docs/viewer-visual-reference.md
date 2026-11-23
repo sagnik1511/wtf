@@ -178,8 +178,9 @@ dims it in either interface theme.
 ![Schematic placement of recording controls, current totals, board, agent inspector, timeline, history and supporting panels](assets/viewer/workspace-map.svg)
 
 Choose a saved recording and run before playing. The board and current totals
-follow the playhead. The population/food history and **Metrics dashboard** show
-values over recorded time; the separate behavior analysis summarizes a run.
+follow the playhead. **Metrics dashboard → Population & food** shows the
+all-species overview through the current replay step, with food on its right
+axis. The dashboard also holds per-species trends; the separate behavior analysis summarizes a run.
 Species colors follow the legend. See [dashboard metrics](recording.md#per-step-species-dashboard)
 for definitions and missing-data handling.
 
@@ -228,8 +229,9 @@ ribbon animation. See [motion assets and behavior](branding.md#motion-policy).
 With the optional [tracking senses](tracking.md) enabled, select an animal to see
 its sampled movement history and anonymous local scent patterns. **Tracks & scent
 charts** jumps to those panels. A selected-only board overlay shows personal
-visual tracks, while **Run movement heatmap** opens arrival counts through the current replay step
-in Behavior & learning. Scent itself stays off the main board. Hollow markers
+visual tracks, while **All-species heatmap** opens the combined sidebar map. **Metrics dashboard**
+keeps compact maps beside every species' metrics and a **Species** selector to
+enlarge one group; all maps count arrivals through the current replay step. Scent itself stays off the main board. Hollow markers
 are last-seen memories; dashed inspector lines are velocity estimates, and gaps remain
 unknown. Blended mode shows one heatmap for all animals; legacy separated mode retains
 its named species/sex grids. A scent field is not

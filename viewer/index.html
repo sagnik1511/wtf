@@ -168,18 +168,6 @@
             aria-label="Seek recorded frame"
           /><output id="frame-label">No frames loaded</output>
         </div>
-        <details class="chart-panel">
-          <summary class="section-head">
-            <h2>Population & food</h2>
-            <span>Run history · food uses right axis</span>
-          </summary>
-          <canvas
-            id="chart"
-            width="1200"
-            height="220"
-            aria-label="Recorded population and food"
-          ></canvas>
-        </details>
       </section>
       <aside>
         <section class="panel">
@@ -209,7 +197,7 @@
               aria-label="Whole network rank threshold"
           /></label>
           <div class="tracking-controls">
-            <button id="movement-open" disabled>Run movement heatmap</button>
+            <button id="movement-open" disabled>All-species heatmap</button>
             <button id="tracking-open" disabled>
               Tracks &amp; scent charts
             </button>
@@ -245,11 +233,16 @@
           <div id="summaries" class="muted"></div>
         </section>
         <section class="panel">
+          <h2>All-species movement</h2>
+          <div id="sidebar-movement"></div>
+        </section>
+        <section class="panel">
           <h2>Behavior & learning</h2>
           <p class="muted">
             Behavior tables summarize the whole saved run, including future
-            playback frames. The movement heatmap stops at the replay step.
-            Early/late changes also reflect age and population selection.
+            playback frames. The metrics dashboard contains per-species movement
+            heatmaps through replay time. Early/late changes also reflect age
+            and population selection.
           </p>
           <div id="behavior" class="muted">Load a recording.</div>
         </section>
@@ -320,7 +313,29 @@
           aria-label="Seek replay and metrics together"
       /></label>
       <p id="dashboard-status" class="muted" role="status">Load a recording.</p>
+      <details class="chart-panel" open>
+        <summary class="section-head">
+          <h2>Population & food</h2>
+          <span>All species · through replay step · food uses right axis</span>
+        </summary>
+        <p class="muted">
+          Overview uses the recorded run history, independently of the Species
+          and History filters.
+        </p>
+        <canvas
+          id="chart"
+          width="1200"
+          height="220"
+          aria-label="Recorded population and food"
+        ></canvas>
+      </details>
       <div id="dashboard-legend" class="legend"></div>
+      <div id="dashboard-movement"></div>
+      <p class="muted dashboard-notes">
+        Species cards include movement through the current step. Their maps
+        share a count color scale. The all-species overview stays in the
+        sidebar.
+      </p>
       <div id="species-now"></div>
       <div id="trend-grid"></div>
       <section id="collective-section" hidden>

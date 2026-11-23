@@ -888,6 +888,41 @@ footer {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
+#collective-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.collective-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.collective-group {
+  min-width: 0;
+}
+.collective-group h4 {
+  margin: 0 0 8px;
+}
+.collective-chart {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+}
+#dashboard-movement .movement-heatmap canvas {
+  max-width: 560px;
+}
+#dashboard-movement {
+  margin: 12px 0;
+}
+@media (min-width: 1000px) {
+  #collective-grid .collective-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  #collective-grid .collective-group h4 {
+    min-height: 2.8em;
+  }
+}
 .trend-card select {
   width: 100%;
   font-size: 12px;
@@ -1622,4 +1657,9 @@ footer {
   color: var(--text);
   border-left: 3px solid;
   padding-left: 7px;
+}
+
+/* Keep the relocated overview legible inside the metrics dialog on short screens. */
+#metrics-dialog #chart {
+  height: 170px;
 }

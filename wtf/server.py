@@ -110,10 +110,23 @@ def make_handler(state):
                         and parts[3] == "runs"
                         and parts[5] == "movement"
                     ):
+                        query = parse_qs(
+                            urlparse(self.path).query, keep_blank_values=True
+                        )
+                        if set(query) - {"species", "by_species"} or any(
+                            len(v) != 1 for v in query.values()
+                        ):
+                            raise ValueError("Invalid movement query")
+                        if query.get("by_species", ["0"])[0] not in {"0", "1"}:
+                            raise ValueError("Invalid movement grouping")
                         return self.send(
                             200,
                             state.recordings.movement(
-                                parts[2], int(parts[4]), int(parts[6])
+                                parts[2],
+                                int(parts[4]),
+                                int(parts[6]),
+                                species=query.get("species", [None])[0],
+                                by_species=query.get("by_species", ["0"])[0] == "1",
                             ),
                         )
                     if len(parts) == 6 and parts[3] == "runs" and parts[5] == "metrics":

@@ -12,7 +12,8 @@ or opaque background. PNGs are transparent fallback exports of the same SVGs.
 
 | Placement | Form | Theme selection |
 | --- | --- | --- |
-| README and documentation home | Full symbol, WTF lettering and project-name lockup | GitHub follows the OS preference; the website follows its theme toggle |
+| README | Full symbol, WTF lettering and project-name lockup | GitHub follows the OS preference |
+| Documentation landing page | Wide static banner beside a smaller animated symbol | Banner keeps its forest surface; symbol follows the page theme |
 | Documentation header and navigation | Symbol only beside the site title | Website light/dark theme |
 | Viewer header | Symbol only beside the existing readable title | Viewer light/dark theme, independently of simulated day/night |
 | Browser tab | Symbol-only SVG favicon; PNG fallback | SVG follows the browser's OS colour preference |
@@ -40,16 +41,17 @@ simple; the outlined wordmark retains the approved lettering across platforms.
 
 ## Motion policy
 
-The documentation home-page hero and the viewer’s recording-loading indicator
-use animation. Four ribbon sections circulate
+The viewer’s recording-loading indicator uses animation. The documentation
+landing page pairs the static banner below with a smaller animated symbol.
+Four ribbon sections circulate
 anticlockwise around a fixed rounded-square band over a 12-second cycle. The
 central opening, outer boundary and lettering remain stationary; diagonal scarf
 joins travel with the ribbon. The animation uses native SVG path animation,
 without JavaScript, external resources or embedded raster frames.
 
-Use [the light motion lockup](assets/branding/wtf-lockup-motion-light.svg) or
-[the dark motion lockup](assets/branding/wtf-lockup-motion-dark.svg) to match the
-site theme. These are presentation variants; the static SVGs above remain the
+The optional [light motion lockup](assets/branding/wtf-lockup-motion-light.svg) and
+[dark motion lockup](assets/branding/wtf-lockup-motion-dark.svg) remain available
+as presentation assets for matching surfaces; the static SVGs above remain the
 canonical artwork. With `prefers-reduced-motion`, the motion SVG displays the
 original static mark. PNG fallbacks are also static.
 
@@ -60,15 +62,32 @@ recording or explicitly selecting a run. Success and failure both restore the
 static symbol. Playback, seeking and frame buffering do not animate the header;
 reduced-motion preferences display the static symbol even during loading.
 
-Keep the README, documentation headers/navigation, favicons and other guide
-pages unanimated. Do not apply a global spinning-logo rule. Preserve the fixed opening
-and diagonal joins when maintaining the home-page animation.
+Keep the landing-page banner, README branding, documentation headers/navigation,
+favicons and other guide-page branding static; only the adjacent home-page symbol
+and viewer loading indicator animate. Do not apply a global spinning-logo rule. Preserve the fixed opening
+and diagonal joins when maintaining the motion assets.
 
 ## GitHub banner
 
-The [GitHub social-preview banner](assets/github-banner.png) is a fixed screenshot
-asset, separate from the transparent logos and interface theme variants. The
-[complete visual catalog](visuals.md) also lists the viewer’s identical branding
+The [GitHub social-preview PNG](assets/github-banner.png) is a 1280 × 640
+brand banner using the approved pale-mint/lime symbol and original outlined
+lettering on a dark forest background. Its
+[editable SVG source](assets/branding/github-banner.svg) contains the same logo
+paths and no embedded screenshots or external images. The fixed background is
+intentional for the uploaded social preview and the single responsive landing-page
+hero. The home page prefers the SVG and falls back to the PNG. A smaller
+theme-aware animated symbol sits alongside it without repeating the wordmark.
+On narrow screens the banner retains its 2:1 ratio and the symbol becomes a
+compact row beneath it. Motion respects reduced-motion settings. Transparent logos and interface theme
+variants remain separate.
+
+Re-export without a screenshot or a generative redraw:
+
+```sh
+rsvg-convert -w 1280 -h 640 -o docs/assets/github-banner.png docs/assets/branding/github-banner.svg
+```
+
+The [complete visual catalog](visuals.md) also lists the viewer’s identical branding
 copies and every fallback format.
 
 ## Maintain and export

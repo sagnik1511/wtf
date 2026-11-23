@@ -291,6 +291,11 @@ open **Agent inspector → Collective learning** for that individual's averages:
   Combined mode displays **General consequence estimates** and **Context consequence
   estimates** separately in both the inspector and species dashboard.
 
+All chart groups use the same action-label column, outcome columns and row spacing.
+Wide dashboard panels align local/general/context groups side by side; the narrower
+agent inspector stacks them without stretching shorter charts. Different groups
+can have different action lists; their rows remain labeled independently.
+
 Both views average through the current playback step rather than displaying
 only that step's diagnostic values. Species summaries first average available
 living-animal values at each step, then average those per-step means over time.

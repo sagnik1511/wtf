@@ -8,6 +8,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import threading
+from http.server import ThreadingHTTPServer
+from urllib.error import HTTPError
+from urllib.request import urlopen
 import unittest
 from unittest.mock import patch
 
@@ -17,6 +21,7 @@ from wtf.inspection.analyze import analyze_run
 from wtf.inspection.movement import MovementCounts
 from wtf.storage.recording import RecordingStore
 from wtf.storage.replay_io import load_chunk
+from wtf.server import State, make_handler
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -96,6 +101,85 @@ class MovementPrefixTests(unittest.TestCase):
                 with self.subTest(run=run, index=index), self.assertRaises(error):
                     store.movement("example", run, index)
 
+    def test_species_prefixes_partition_all_movements_including_terminal_drift(self):
+        frames = moving_frames()
+        # A third species of the same diet is independent of the first one.
+        for i, f in enumerate(frames):
+            f["animals"].append(dict(animal(3, "field_mouse"), x=i % 4))
+        with tempfile.TemporaryDirectory() as temporary:
+            store = self.save(Path(temporary), frames)
+            manifest_path = Path(temporary) / "example/playback/recording.json"
+            manifest = json.loads(manifest_path.read_text())
+            manifest["config"]["species"]["field_mouse"] = manifest["config"][
+                "species"
+            ]["prey"]
+            manifest_path.write_text(json.dumps(manifest))
+            for i in range(len(frames)):
+                with patch(
+                    "wtf.storage.recording.load_chunk", wraps=load_chunk
+                ) as reader:
+                    grouped = store.movement("example", 1, i, by_species=True)
+                self.assertEqual(reader.call_count, i // 2 + 1)
+                self.assertEqual(
+                    grouped["counts"], store.movement("example", 1, i)["counts"]
+                )
+                groups = [
+                    store.movement("example", 1, i, name)
+                    for name in ("prey", "predator", "field_mouse")
+                ]
+                self.assertEqual(
+                    grouped["counts"],
+                    [sum(cells) for cells in zip(*(g["counts"] for g in groups))],
+                )
+                for name, group in zip(("prey", "predator", "field_mouse"), groups):
+                    self.assertEqual(group["species"], name)
+                    self.assertEqual(
+                        grouped["by_species"][name]["counts"], group["counts"]
+                    )
+            for invalid in ("unknown", "", 1, []):
+                with self.assertRaises(ValueError):
+                    store.movement("example", 1, 2, invalid)
+            prey = store.movement("example", 1, 3, "prey")
+            self.assertEqual(prey["counts"][2 * 10 + 5], 1)
+            self.assertEqual(prey["arrivals"], 3)
+
+    def test_http_species_query_and_invalid_filter_errors(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.save(root, moving_frames())
+            with ThreadingHTTPServer(
+                ("127.0.0.1", 0), make_handler(State(root))
+            ) as server:
+                thread = threading.Thread(target=server.serve_forever, daemon=True)
+                thread.start()
+                base = (
+                    f"http://127.0.0.1:{server.server_port}"
+                    "/api/recordings/example/runs/1/movement/3"
+                )
+                try:
+                    with urlopen(base + "?species=prey", timeout=5) as response:
+                        result = json.load(response)
+                    self.assertEqual(result["species"], "prey")
+                    self.assertEqual(result["arrivals"], 3)
+                    with urlopen(base + "?by_species=1", timeout=5) as response:
+                        grouped = json.load(response)
+                    self.assertEqual(grouped["by_species"]["prey"]["arrivals"], 3)
+                    for query in (
+                        "?species=unknown",
+                        "?species=",
+                        "?species=prey&species=predator",
+                        "?other=prey",
+                        "?by_species=bad",
+                        "?by_species=1&species=prey",
+                    ):
+                        with self.assertRaises(HTTPError) as error:
+                            with urlopen(base + query, timeout=5) as response:
+                                self.fail(f"Unexpected status {response.status}")
+                        self.assertEqual(error.exception.code, 400)
+                finally:
+                    server.shutdown()
+                    thread.join(timeout=5)
+
     def test_viewer_behavior_report_omits_unused_full_run_grid(self):
         frames = moving_frames()
         full = analyze_run(config(), frames)
@@ -133,8 +217,8 @@ class MovementPrefixTests(unittest.TestCase):
         script = """import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {MovementHistory} from './viewer/movement-history.mjs';
-const {frames,expected}=JSON.parse(fs.readFileSync(0,'utf8'));
-const history=new MovementHistory();history.reset(10,8);const buffer=history.map.counts.buffer;
+const {frames,expected,species,species_names=[]}=JSON.parse(fs.readFileSync(0,'utf8'));
+const history=new MovementHistory();history.reset(10,8,species,species_names);const buffer=history.map.counts.buffer;
 let requests=0;
 for(const i of [0,1,0,1,2,3,2,5,4,5,0,5]) {
  const start=Math.floor(i/2)*2;
@@ -144,12 +228,41 @@ for(const i of [0,1,0,1,2,3,2,5,4,5,0,5]) {
  assert.equal(history.map.maximum,expected[i].maximum);
  assert.equal(history.map.tick,frames[i].tick);
  assert.equal(history.map.counts.buffer,buffer);
+ for(const name of species_names) assert.deepEqual([...history.map.by_species[name].counts], expected[i].by_species[name].counts);
 }
 assert(requests>0&&requests<6);
 console.log('prefix parity passed');"""
+        for name in (None, "prey", "predator"):
+            if name is not None:
+                counter = MovementCounts(10, 8, name)
+                expected = []
+                for i, f in enumerate(frames):
+                    counter.consume(f)
+                    expected.append(
+                        dict(counter.summary(), frame_index=i, tick=f["tick"])
+                    )
+            self.assert_js_parity(script, frames, expected, name)
+
+        counter = MovementCounts(10, 8, species_names=("prey", "predator", "absent"))
+        expected = []
+        for i, f in enumerate(frames):
+            counter.consume(f)
+            expected.append(dict(counter.summary(), frame_index=i, tick=f["tick"]))
+        self.assert_js_parity(
+            script, frames, expected, None, ("prey", "predator", "absent")
+        )
+
+    def assert_js_parity(self, script, frames, expected, species, species_names=()):
         result = subprocess.run(
             ["node", "--input-type=module", "-e", script],
-            input=json.dumps({"frames": frames, "expected": expected}),
+            input=json.dumps(
+                {
+                    "frames": frames,
+                    "expected": expected,
+                    "species": species,
+                    "species_names": species_names,
+                }
+            ),
             cwd=ROOT,
             capture_output=True,
             text=True,

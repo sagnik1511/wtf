@@ -34,8 +34,27 @@ function setup(cycle, movement = false) {
         );
       }
       if (path.includes('/movement/')) {
-        const index = Number(path.split('/').at(-1));
+        const url = new URL(path, 'http://localhost');
+        const index = Number(url.pathname.split('/').at(-1));
         return {
+          ...(url.searchParams.get('by_species') === '1'
+            ? {
+                by_species: Object.fromEntries(
+                  Object.keys(manifest.config.species).map((name) => [
+                    name,
+                    {
+                      species: name,
+                      width: 8,
+                      height: 8,
+                      counts: Array(64).fill(0),
+                    },
+                  ]),
+                ),
+              }
+            : {}),
+          ...(url.searchParams.has('species')
+            ? { species: url.searchParams.get('species') }
+            : {}),
           width: 8,
           height: 8,
           counts: Array(64).fill(0),
@@ -70,7 +89,7 @@ function setup(cycle, movement = false) {
     undefined,
     { movement },
   );
-  return { p, calls };
+  return { p, calls, manifest };
 }
 
 test('Playback reads one bounded chunk and reuses it for local frames', async () => {
@@ -856,4 +875,74 @@ test('Playback opens and seeks original episode IDs when only the scheduled tail
   await player.changeRun(9);
   assert.equal(player.snapshot().tick, 0);
   assert.ok(calls.every((path) => !path.includes('/runs/1/')));
+});
+
+test('Movement species selection reuses cumulative grids without I/O', async () => {
+  const { p, calls, manifest } = setup(undefined, true);
+  manifest.config.species['field mouse'] = { diet: 'resource' };
+  await p.open('test');
+  await p.seek(7);
+  const chunks = () => calls.filter((path) => path.includes('/chunks/')).length;
+  const before = chunks();
+  const all = p.snapshot().movement_heatmap;
+  const callCount = calls.length;
+  const filtered = await p.selectMovementSpecies('field mouse');
+  assert.equal(calls.length, callCount);
+  assert.equal(filtered.movement_heatmap.species, 'field mouse');
+  assert.equal(filtered.movement_heatmap.frame_index, 7);
+  assert.notEqual(filtered.movement_heatmap.counts, all.counts);
+  assert(calls.at(-1).endsWith('/movement/7?by_species=1'));
+  assert.equal(chunks(), before);
+  const map = filtered.movement_heatmap;
+  await p.selectMovementSpecies('field mouse');
+  assert.equal(p.snapshot().movement_heatmap, map);
+  await p.seek(6);
+  assert.equal(p.snapshot().movement_heatmap.species, 'field mouse');
+  await p.selectMovementSpecies(null);
+  assert.equal(p.snapshot().movement_heatmap.species, null);
+  await assert.rejects(
+    p.selectMovementSpecies('unknown'),
+    /Unknown movement species/,
+  );
+  await p.changeRun(2);
+  assert.equal(p.snapshot().movement_heatmap.species, null);
+});
+
+test('A failed grouped prefix can be retried without changing the replay position', async () => {
+  const { p } = setup(undefined, true);
+  await p.open('test');
+  const loader = p.loadJSON;
+  p.loadJSON = async (path) => {
+    if (path.includes('/movement/'))
+      throw new Error('temporary prefix failure');
+    return loader(path);
+  };
+  await assert.rejects(p.seek(7), /temporary prefix failure/);
+  assert.equal(p.frameIndex, 0);
+  assert.throws(() => p.snapshot(), /seek incomplete/);
+  await assert.rejects(p.selectMovementSpecies('prey'), /seek incomplete/);
+  p.loadJSON = loader;
+  const snapshot = await p.seek(7);
+  assert.equal(snapshot.movement_heatmap.frame_index, 7);
+  assert.equal(snapshot.movement_by_species.prey.frame_index, 7);
+});
+
+test('A failed run-metrics load cannot relabel the preceding run frames', async () => {
+  const { p } = setup(undefined, true);
+  await p.open('test');
+  const loader = p.loadJSON;
+  p.loadJSON = async (path) => {
+    if (path.includes('/runs/2/metrics'))
+      throw new Error('temporary metrics failure');
+    return loader(path);
+  };
+  await assert.rejects(p.changeRun(2), /temporary metrics failure/);
+  assert.equal(p.frames.length, 0);
+  assert.equal(p.chunkIndex, -1);
+  assert.throws(() => p.snapshot(), /seek incomplete/);
+  await assert.rejects(p.selectMovementSpecies('prey'), /seek incomplete/);
+  p.loadJSON = loader;
+  const snapshot = await p.changeRun(2);
+  assert.equal(snapshot.run, 2);
+  assert.equal(snapshot.metrics.food, 20);
 });
