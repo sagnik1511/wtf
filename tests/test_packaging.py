@@ -48,6 +48,25 @@ class PackagingTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_star_exports_resolve_experiment_without_eager_binding(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import sys, wtf; "
+                "assert 'wtf.experiment.runner' not in sys.modules; "
+                "assert 'wtf.simulation.world' not in sys.modules; "
+                "namespace = {}; exec('from wtf import *', namespace); "
+                "assert namespace['Experiment'] is wtf.Experiment; "
+                "assert namespace['load_config'] is wtf.load_config; "
+                "assert set(namespace) - {'__builtins__'} == set(wtf.__all__)",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_source_checkout_rejects_older_interpreters_clearly(self):
         result = subprocess.run(
             [

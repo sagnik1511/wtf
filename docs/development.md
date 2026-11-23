@@ -144,6 +144,13 @@ Install the same pinned tools and run the local preflight before handoff:
 .venv/bin/python -m work.check_ci --build
 ```
 
+`requirements-ci.txt` includes setuptools explicitly because maintained native
+build scripts import it, while Python 3.12+ virtual environments do not seed it.
+A build backend installed in a temporary isolated build environment does not
+satisfy imports in the separate Pylint environment. Reproduce CI with a fresh
+venv and a tracked-source checkout without local native binaries when changing
+the quality gate; an established development venv can hide missing dependencies.
+
 The build gate creates an isolated build environment, builds both the source
 archive and a portable wheel from it, and runs `twine check --strict` on exactly
 those new artifacts. A temporary directory under ignored `.cache/ci-builds/`

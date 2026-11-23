@@ -9,7 +9,7 @@ child document. Operational instructions remain in the relevant project guides.
 **Latest committed rollout:** [0.0.2.19](0.0.2.19.md), `33b3725`.
 **Latest committed runtime implementation:** [0.0.2.19](0.0.2.19.md), `33b3725`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** None.
+**Pending rollout:** [0.0.2.20 — Clean-environment Python quality checks](0.0.2.20.md).
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,6 +25,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
+| [0.0.2.20](0.0.2.20.md) | Pending | 2026-11-23 | Not committed; base `62f546a` | Explicit CI setuptools dependency and documented lazy-export inference exceptions |
 | [0.0.2.19](0.0.2.19.md) | Committed | 2026-11-23 | `33b3725` | Episode publication safeguards, bounded social hotpath reuse, independent review, full-repository Pylint cleanup and CI/build preflight |
 | [0.0.2.18](0.0.2.18.md) | Committed | 2026-11-23 | `29d2c2f` | Optional collective visible outcomes, persistent species consequence models and sampled playback charts |
 | [0.0.2.17](0.0.2.17.md) | Committed | 2026-11-23 | `29d2c2f` | Six themed geography maps and PPO presets: plains, coast, hills, wetlands, canyon and oasis |

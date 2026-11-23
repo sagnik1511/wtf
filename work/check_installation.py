@@ -18,6 +18,9 @@ from urllib.error import HTTPError
 from urllib.request import urlopen
 
 import wtf
+
+# Exercise the public __getattr__ export; Pylint may not infer its dynamic name.
+# pylint: disable-next=no-name-in-module
 from wtf import Experiment
 from wtf import load_config
 from wtf.storage.checkpoint_io import read_checkpoint

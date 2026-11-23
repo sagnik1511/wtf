@@ -11,6 +11,8 @@ if sys.version_info < (3, 12):
         "Wildlife Trial Framework requires Python 3.12+; recreate .venv with python3.12"
     )
 
+# Experiment is resolved by __getattr__; eager binding would import training here.
+# pylint: disable-next=undefined-all-variable
 __all__ = ["Experiment", "load_config"]
 
 
