@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.18](0.0.2.18.md), `29d2c2f`.
-**Latest committed runtime implementation:** [0.0.2.18](0.0.2.18.md), `29d2c2f`.
+**Latest committed rollout:** [0.0.2.19](0.0.2.19.md), `33b3725`.
+**Latest committed runtime implementation:** [0.0.2.19](0.0.2.19.md), `33b3725`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollout:** [0.0.2.19 — Episode publication and independent review workflow](0.0.2.19.md).
+**Pending rollouts:** None.
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,7 +25,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.19](0.0.2.19.md) | Pending | 2026-11-23 | Not committed; base `29d2c2f` | Episode publication safeguards, bounded social hotpath reuse, independent review, full-repository Pylint cleanup and CI/build preflight |
+| [0.0.2.19](0.0.2.19.md) | Committed | 2026-11-23 | `33b3725` | Episode publication safeguards, bounded social hotpath reuse, independent review, full-repository Pylint cleanup and CI/build preflight |
 | [0.0.2.18](0.0.2.18.md) | Committed | 2026-11-23 | `29d2c2f` | Optional collective visible outcomes, persistent species consequence models and sampled playback charts |
 | [0.0.2.17](0.0.2.17.md) | Committed | 2026-11-23 | `29d2c2f` | Six themed geography maps and PPO presets: plains, coast, hills, wetlands, canyon and oasis |
 | [0.0.2.16](0.0.2.16.md) | Committed | 2026-11-23 | `29d2c2f` | Quantity-driven plants, faceted rocks, directional river crests, bounded feeding feedback and sunlight-driven shadows |
