@@ -15,8 +15,16 @@ from wtf.learning.contextual_ppo import (
 KINDS = (PPOBrain, A2CBrain, ReinforceBrain, GRPOBrain, MaskablePPOBrain, MAPPOBrain)
 
 
+# Execution controls are keyword-only; preserve the existing positional API.
+# pylint: disable-next=too-many-arguments
 def choose_actions(
-    brains, observations, explore=True, random_baseline=False, allow_batch=True
+    brains,
+    observations,
+    explore=True,
+    random_baseline=False,
+    allow_batch=True,
+    *,
+    accelerator=None,
 ):
     """Choose independent animals' actions using compatible batched paths."""
 
@@ -35,6 +43,8 @@ def choose_actions(
     # equivalence tests.
     # pylint: disable=c-extension-no-member
 
+    if accelerator is not None and allow_batch and not random_baseline:
+        return accelerator.choose_actions(brains, observations, explore)
     if not allow_batch or random_baseline or not kernels.available("mlp_predict_many"):
         return {
             i: brains[i].choose(o, explore=explore, random_baseline=random_baseline)

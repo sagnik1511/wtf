@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.26](0.0.2.26.md), `4f23bcc`.
-**Latest committed runtime implementation:** [0.0.2.26](0.0.2.26.md), `4f23bcc`.
+**Latest committed rollout:** [0.0.2.27](0.0.2.27.md), `de5e288`.
+**Latest committed runtime implementation:** [0.0.2.27](0.0.2.27.md), `de5e288`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** [0.0.2.27 — Species heatmaps and aligned consequence charts](0.0.2.27.md).
+**Pending rollouts:** [0.0.2.28 — Experimental CUDA dense training](0.0.2.28.md).
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,7 +25,8 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.27](0.0.2.27.md) | Pending | 2026-11-24 | Not committed; base `4f23bcc` | Simultaneous species dashboard heatmaps and aligned witness/consequence chart groups |
+| [0.0.2.28](0.0.2.28.md) | Pending | 2026-11-24 | Not committed; base `cde757a` | Optional Linux/NVIDIA dense evaluation and DQN/DDQN gradients |
+| [0.0.2.27](0.0.2.27.md) | Committed | 2026-11-24 | `de5e288` | Simultaneous species dashboard heatmaps and aligned witness/consequence chart groups |
 | [0.0.2.26](0.0.2.26.md) | Committed | 2026-11-24 | `4f23bcc` | Separate general/context consequence vectors with learned neural relevance |
 | [0.0.2.25](0.0.2.25.md) | Committed | 2026-11-24 | `4f23bcc` | State-independent species/action knowledge with learned neural relevance |
 | [0.0.2.24](0.0.2.24.md) | Committed | 2026-11-24 | `4f23bcc` | Cumulative species/animal collective outcomes in dashboard and inspector |

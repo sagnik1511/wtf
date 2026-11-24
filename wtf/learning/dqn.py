@@ -32,7 +32,7 @@ class DQNBrain(QRDQNBrain):
         super().__init__(storage_config, actions, base_seed, individual_seed)
         self.config = copy.deepcopy(config)
 
-    def learn(self, experience):
+    def learn(self, experience, *, defer=None):
         """Fit scalar Bellman targets from independent bounded replay samples."""
         # Keep sample/target/update order together, independent of QR-DQN's loss.
         # pylint: disable=too-many-locals,duplicate-code
@@ -54,15 +54,23 @@ class DQNBrain(QRDQNBrain):
             return
         gradients = self.network.zeros()
         samples = self.training_rng.sample(self.replay, c["batch_size"])
+        if defer is not None:
+            defer.submit(self, samples, gradients)
+            return
         total_loss = self._batch_loss(samples, gradients)
-        self._adam_step(gradients, c["batch_size"])
+        self._finish_update(gradients, total_loss, c["batch_size"])
+
+    def _finish_update(self, gradients, total_loss, count):
+        """Commit one private update before champion selection or inheritance."""
+        c = self.config
+        self._adam_step(gradients, count)
         if self.updates % c["target_update_every_training_steps"] == 0:
             for target_layer, online in zip(
                 self.target_network.layers, self.network.layers
             ):
                 for key, values in online.items():
                     target_layer[key][:] = values
-        self.last_metrics = {"td_loss": total_loss / c["batch_size"]}
+        self.last_metrics = {"td_loss": total_loss / count}
 
     def _batch_loss(self, samples, gradients):
         """Update-local batching; private sample order and gradient sums are exact."""

@@ -59,6 +59,24 @@ def main():
     parser.add_argument("--runs", type=int)
     parser.add_argument("--steps", type=int)
     parser.add_argument(
+        "--device",
+        choices=("cpu", "cuda"),
+        default="cpu",
+        help="Experimental CUDA dense action evaluation and DQN/DDQN gradients; CPU remains default",
+    )
+    parser.add_argument(
+        "--cuda-batch-agents",
+        type=int,
+        default=64,
+        help="Maximum independent training jobs per CUDA flush (default 64)",
+    )
+    parser.add_argument(
+        "--cuda-workspace-mb",
+        type=int,
+        default=256,
+        help="CUDA workspace cache budget in MiB, excluding driver overhead (default 256)",
+    )
+    parser.add_argument(
         "--seed",
         type=int,
         help="Use a reproducible base seed (defaults seed policy to increment)",
@@ -321,6 +339,19 @@ def main():
             experiment.observations = experiment.world.observe_all()
         except (ValueError, OSError, EOFError) as error:
             parser.error(str(error))
+    if args.device == "cuda":
+        try:
+            experiment.set_training_device(
+                "cuda",
+                max_agents=args.cuda_batch_agents,
+                workspace_mb=args.cuda_workspace_mb,
+            )
+        except (ValueError, RuntimeError, OSError) as error:
+            parser.error(str(error))
+        print(
+            f"Experimental CUDA backend: {experiment._cuda_training.status()}",
+            file=sys.stderr,
+        )
     if args.freeze_brains and experiment.mode != "evaluate":
         parser.error("--freeze-brains requires --mode evaluate")
     if args.freeze_brains:
@@ -371,6 +402,11 @@ def main():
     save(
         "manifest.json",
         {
+            **(
+                {"training_accelerator": experiment._cuda_training.status()}
+                if experiment._cuda_training is not None
+                else {}
+            ),
             "mode": experiment.mode,
             "python": sys.version,
             "platform": platform.platform(),

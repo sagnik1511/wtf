@@ -21,6 +21,9 @@ lists bundled environment names. `python -m wtf` offers the same hub;
 | Argument | Definition |
 | --- | --- |
 | `environment` | Complete environment JSON; defaults to `environments/baseline.json` when omitted |
+| `--device cpu\|cuda` | CPU default; optional experimental Linux/NVIDIA dense forwards and DQN/DDQN gradients. [Build and limits](cuda.md) |
+| `--cuda-batch-agents N` | Independent jobs per GPU batch; default 64, range 1–4096 |
+| `--cuda-workspace-mb N` | Device workspace LRU budget in MiB; default 256, range 1–16384; excludes driver/host memory |
 | `--mode train` | Choose actions with training exploration and perform learning; default for a fresh experiment |
 | `--mode evaluate` | Use evaluation decisions without learning; this is still simulation, not saved replay |
 | `--mode random` | Use random baseline decisions without training |

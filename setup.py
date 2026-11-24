@@ -54,6 +54,9 @@ class BuildPy(build_py):
             if legacy.resolve() == (ROOT / "ecosystem").resolve():
                 raise ValueError("Build directory must not be the source checkout")
             shutil.rmtree(legacy)
+        # CUDA binaries are device-local builds, never portable wheel assets.
+        for stale in target_package.rglob("_cuda_dqn*.so"):
+            stale.unlink()
         super().run()
         for relative, source in packaged_assets():
             target = Path(self.build_lib) / "wtf/assets" / relative

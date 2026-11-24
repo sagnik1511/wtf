@@ -154,3 +154,11 @@ supporting collective learning; older package versions cannot restore a new
 configuration with unknown fields, despite unchanged base checkpoint/replay
 container versions. Existing configurations/readers retain legacy behavior.
 See [collective learning](social-learning.md).
+
+## Experimental CUDA backend
+
+The [optional source CUDA backend](cuda.md) changes execution, not artifact formats.
+CPU remains the default; restored checkpoints start on CPU until CUDA is selected
+again. Device buffers are transient. GPU math can round differently, so trajectories
+need not match CPU bit-for-bit. CUDA compilation/execution and speedups require
+Linux/NVIDIA validation; this prototype is not a published GPU-support guarantee.

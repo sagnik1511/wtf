@@ -12,7 +12,7 @@ import tempfile
 from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-EXTENSIONS = {".py", ".js", ".mjs", ".cjs", ".c", ".h", ".cpp", ".hpp"}
+EXTENSIONS = {".py", ".js", ".mjs", ".cjs", ".c", ".h", ".cpp", ".hpp", ".cu"}
 
 
 def source_files(root=ROOT):

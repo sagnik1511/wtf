@@ -1335,3 +1335,10 @@ run and shared grid-container identity, including theme changes during pending
 collective-history loads. A mismatched sidebar map stays hidden until the loaded
 state is committed; no backup grid copy is retained. Simulation, recording bytes,
 sampling cadence, numeric precision and normal replay controls are unchanged.
+
+## Experimental CUDA backend
+
+See [CUDA training](cuda.md) for optional dense action batches across eleven learners
+and DQN/DDQN gradient batches. CPU remains the default. Real NVIDIA execution and
+end-to-end speedups are unverified locally; the guide provides required hardware
+tests and a matched full-loop benchmark, including host/device transfers.
