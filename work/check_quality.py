@@ -20,7 +20,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON = {".py"}
-NATIVE = {".c", ".h", ".cc", ".cpp", ".cxx", ".hpp"}
+NATIVE = {".c", ".h", ".cc", ".cpp", ".cxx", ".hpp", ".cu"}
 JAVASCRIPT = {".js", ".mjs", ".cjs"}
 WEB = JAVASCRIPT | {".css", ".html", ".json"}
 SUPPORTED = PYTHON | NATIVE | WEB | {".sh", ".toml"}

@@ -9,12 +9,17 @@ import math
 import random
 from operator import mul
 from typing import NamedTuple
+from contextvars import ContextVar
 from wtf.learning.activation_diagnostics import activation_sample
 from wtf.native import kernels
 from wtf.native.kernels import gradient_zeros
 from wtf.native.numeric import Float32, packed, plain, precision_of, restore_numeric
 from wtf.learning.brain import INPUTS, observation_inputs
 from wtf.learning.optimization import AdamOptimizer
+
+
+# Transient, thread/task-local execution context; never retained by a brain/checkpoint.
+PPO_ACCELERATOR = ContextVar("ppo_accelerator", default=None)
 
 
 class RolloutStep(NamedTuple):
@@ -499,6 +504,10 @@ class PPOBrain(AdamOptimizer):
             )
             for i, value in enumerate(advantages):
                 advantages[i] = (value - mean) / deviation
+        accelerator = PPO_ACCELERATOR.get()
+        if self.rollout and accelerator is not None and accelerator.accepts_ppo(self):
+            accelerator.submit_ppo(self, advantages, targets)
+            return
         totals, samples, stopped = {}, 0, False
         gradients = None
         indices = list(range(len(self.rollout)))

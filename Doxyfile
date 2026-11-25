@@ -4,8 +4,8 @@ PROJECT_NAME           = "WTF source reference"
 PROJECT_BRIEF          = "Wildlife Trial Framework — source, callees and callers"
 OUTPUT_LANGUAGE        = English
 RECURSIVE              = NO
-FILE_PATTERNS          = *.py *.js *.mjs *.cjs *.c *.h *.cpp *.hpp
-EXTENSION_MAPPING      = js=JavaScript mjs=JavaScript cjs=JavaScript
+FILE_PATTERNS          = *.py *.js *.mjs *.cjs *.c *.h *.cpp *.hpp *.cu
+EXTENSION_MAPPING      = js=JavaScript mjs=JavaScript cjs=JavaScript cu=C++
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
 EXTRACT_STATIC         = YES

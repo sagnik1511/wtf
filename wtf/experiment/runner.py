@@ -6,6 +6,7 @@
 
 
 import copy
+from contextlib import nullcontext
 import random
 import secrets
 from wtf.native.numeric import precision_scope
@@ -56,6 +57,7 @@ class Experiment:
             raise ValueError(
                 "Frozen brains require evaluate mode and a boolean setting"
             )
+        self._cuda_training = None
         self.config = copy.deepcopy(validate(config))
         self.guard_lineage_chaining = self.config["experiment"].get(
             "guard_lineage_chaining", True
@@ -99,6 +101,47 @@ class Experiment:
         self.run_seeds = []
         self.last_record = None
         self._start_run()
+
+    # Backend controls are explicit execution options, independent of saved config.
+    # pylint: disable-next=too-many-arguments
+    def set_training_device(
+        self,
+        device="cpu",
+        *,
+        max_agents=64,
+        workspace_mb=256,
+        precision="fp64",
+        profile=False,
+        inference="auto",
+    ):
+        """Select a transient backend; checkpoints retain portable CPU-owned state."""
+        # The optional CUDA loader is never imported on ordinary CPU runs.
+        # pylint: disable=import-outside-toplevel,protected-access
+        if device not in ("cpu", "cuda"):
+            raise ValueError("Training device must be cpu or cuda")
+        if device == "cpu":
+            if self._cuda_training is not None:
+                self._cuda_training.close()
+            self._cuda_training = None
+            return
+        if self.mode != "train":
+            raise ValueError("CUDA acceleration currently supports training mode only")
+        from wtf.learning.cuda_training import CudaTraining
+
+        if not any(CudaTraining.supports(brain) for brain in self.brains.values()):
+            raise ValueError(
+                "CUDA requires a supported DQN/DDQN or dense policy brain with FP32-stored weights"
+            )
+        accelerator = CudaTraining(
+            max_agents=max_agents,
+            workspace_mb=workspace_mb,
+            precision=precision,
+            profile=profile,
+            inference=inference,
+        )
+        if self._cuda_training is not None:
+            self._cuda_training.close()
+        self._cuda_training = accelerator
 
     def _start_run(self):
 
@@ -403,7 +446,9 @@ class Experiment:
             self.observations,
             explore=training,
             random_baseline=self.mode == "random",
-            allow_batch=any(
+            accelerator=self._cuda_training,
+            allow_batch=self._cuda_training is not None
+            or any(
                 self.config["brains"][spec["brain"]]["type"]
                 in ("ppo", "a2c", "reinforce", "grpo", "maskable_ppo", "mappo")
                 for spec in self.config["species"].values()
@@ -432,9 +477,10 @@ class Experiment:
             prior_species = (
                 {a.id: a.species for a in tracked_animals} if team_rewards else {}
             )
-            for i, observation in self.observations.items():
-                self.brains[i].learn(
-                    Experience(
+            accelerator = self._cuda_training
+            with accelerator.batch() if accelerator is not None else nullcontext():
+                for i, observation in self.observations.items():
+                    experience = Experience(
                         observation,
                         actions[i],
                         (
@@ -446,7 +492,10 @@ class Experiment:
                         i in result.dead_ids,
                         limit and i not in result.dead_ids,
                     )
-                )
+                    if accelerator is not None and accelerator.accepts(self.brains[i]):
+                        self.brains[i].learn(experience, defer=accelerator)
+                    else:
+                        self.brains[i].learn(experience)
         if training:
             # Includes the final action and terminal learning of dead animals,
             # before deceased descendants' controllers are released.
@@ -685,6 +734,7 @@ class Experiment:
         if state.get("checkpoint_version") != 1:
             raise ValueError("Unsupported checkpoint version")
         e = cls.__new__(cls)
+        e._cuda_training = None
         e.brain_precision = state.get("brain_precision", "float64")
         with precision_scope(e.brain_precision):
             pass  # Validate before constructing any controllers.

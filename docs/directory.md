@@ -111,6 +111,7 @@ narrow screens. The top tabs open the same section pages.
 | [Add geography and actions](extending-worlds-and-actions.md) | Add geography, physical rules, actions and observation contracts. |
 | [Package builds](packaging.md) | Wheel/sdist resources, isolated installation and release checks. |
 | [GRPO trials and actor batches](training-workflow-performance.md) | Construction/inference ownership, matched benchmarks and fallback limits. |
+| [Experimental CUDA](cuda.md) | Linux/Colab build, per-learner boundaries and full-loop benchmarking. |
 | [Performance](performance.md) | Shared work, bounded caches, allocation reductions and invalidation. |
 | [Native kernels](native-kernels.md) | Optional native learning kernels and portable fallback behavior. |
 | [Native top-k perception](native-top-k.md) | Exact selector behavior, cache ownership and matched benchmarks. |

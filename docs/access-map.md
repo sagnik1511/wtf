@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **308 public documentation pages**, **120 visual files**
+Coverage: **311 public documentation pages**, **120 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -42,6 +42,7 @@ and **8 identical viewer branding copies**.
 | [Configuration field reference](configuration-reference.md) | [Home](index.md) → [All configuration fields](configuration-reference.md) |
 | [Environment configuration and reproduction](configuration.md) | [Home](index.md) → [environment configuration](configuration.md) |
 | [Development](contributing/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Architecture, extensions and checks](contributing/index.md) |
+| [Experimental CUDA training](cuda.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Experimental CUDA](cuda.md) |
 | [Customization handbook](customization.md) | [Home](index.md) → [Customization handbook](customization.md) |
 | [Day–night cycles](day-night.md) | [Home](index.md) → [day–night cycles](day-night.md) |
 | [Development and verification](development.md) | [Home](index.md) → [Development](development.md) |
@@ -313,7 +314,9 @@ and **8 identical viewer branding copies**.
 | [0.0.2.24 Cumulative collective outcome views](releases/0.0.2.24.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.24](releases/0.0.2.24.md) |
 | [0.0.2.25 General consequence knowledge with learned relevance](releases/0.0.2.25.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.25](releases/0.0.2.25.md) |
 | [0.0.2.26 Combined general and context consequence inputs](releases/0.0.2.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.26](releases/0.0.2.26.md) |
-| [0.0.2.27 Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.27 — Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) |
+| [0.0.2.27 Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.27](releases/0.0.2.27.md) |
+| [0.0.2.28 Experimental CUDA dense training backend](releases/0.0.2.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.28](releases/0.0.2.28.md) |
+| [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |

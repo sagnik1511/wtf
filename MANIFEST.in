@@ -1,5 +1,5 @@
 include _build_support.py LICENSE README.md PYPI_README.md pyproject.toml setup.py packaging_assets.json
-recursive-include wtf *.py *.c *.h
+recursive-include wtf *.py *.c *.h *.cu
 # Runtime assets come from packaging_assets.json via BuildPy.get_source_files().
 global-exclude __pycache__ *.py[cod] *.so *.pyd *.dylib *.dll
 prune tests

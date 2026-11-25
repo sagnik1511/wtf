@@ -40,4 +40,4 @@ include-package-data = false
 include = ["wtf", "wtf.*"]
 
 [tool.setuptools.package-data]
-"wtf.native" = ["_kernels*.c", "_kernels*.h"]
+"wtf.native" = ["_kernels*.c", "_kernels*.h", "_cuda_dqn.cu"]

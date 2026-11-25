@@ -154,3 +154,17 @@ supporting collective learning; older package versions cannot restore a new
 configuration with unknown fields, despite unchanged base checkpoint/replay
 container versions. Existing configurations/readers retain legacy behavior.
 See [collective learning](social-learning.md).
+
+## Experimental CUDA backend
+
+The [optional source CUDA backend](cuda.md) changes execution, not artifact formats.
+CPU remains the default; restored checkpoints start on CPU until CUDA is selected
+again. Device buffers are transient. GPU math can round differently, so trajectories
+need not match CPU bit-for-bit. CUDA compilation/execution and speedups require
+Linux/NVIDIA validation; this prototype is not a published GPU-support guarantee.
+
+The revised CUDA source uses kernel ABI 2; rebuild local shared libraries after
+pulling. Optional `--cuda-precision fp32` changes GPU arithmetic, while model and
+optimizer storage remains FP32 as before. Backend choices remain transient;
+resume explicitly selects CUDA/precision again. Ordinary/masked PPO now publish
+device-trained weights and Adam state at the completed rollout-update boundary.
