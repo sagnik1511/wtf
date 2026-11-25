@@ -108,7 +108,12 @@ def worker(args):
     start = time.perf_counter()
     experiment = Experiment(config)
     experiment.set_training_device(
-        args.worker, max_agents=args.batch_agents, workspace_mb=args.workspace_mb
+        args.worker,
+        max_agents=args.batch_agents,
+        workspace_mb=args.workspace_mb,
+        precision=args.cuda_precision,
+        profile=args.cuda_profile,
+        inference=args.cuda_inference,
     )
     initialization = time.perf_counter() - start
     completed, warm_seconds = 0, 0.0
@@ -152,7 +157,7 @@ def worker(args):
 def main(argv=None):
     """Run CPU and CUDA cases independently; report failures instead of fake timings."""
     # Keep benchmark cases, process results and report construction together.
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-statements
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--algorithms", nargs="+", choices=KINDS, default=list(KINDS))
     parser.add_argument("--steps", type=int, default=128)
@@ -162,6 +167,15 @@ def main(argv=None):
     parser.add_argument(
         "--hidden", nargs="+", type=int, help="Optional matched hidden-layer sizes"
     )
+    parser.add_argument("--cuda-precision", choices=("fp64", "fp32"), default="fp64")
+    parser.add_argument(
+        "--cuda-inference",
+        choices=("auto", "cpu", "cuda"),
+        default="auto",
+        help="auto uses CPU actions for CUDA-trained PPO/DQN; "
+        "GPU for other dense policies",
+    )
+    parser.add_argument("--cuda-profile", action="store_true")
     parser.add_argument("--batch-agents", type=int, default=64)
     parser.add_argument("--workspace-mb", type=int, default=256)
     parser.add_argument(
@@ -199,6 +213,14 @@ def main(argv=None):
                     "--workspace-mb",
                     str(args.workspace_mb),
                 ]
+                command += [
+                    "--cuda-precision",
+                    args.cuda_precision,
+                    "--cuda-inference",
+                    args.cuda_inference,
+                ]
+                if args.cuda_profile:
+                    command.append("--cuda-profile")
                 if args.hidden:
                     command += ["--hidden", *map(str, args.hidden)]
                 process = subprocess.run(
@@ -232,6 +254,7 @@ def main(argv=None):
         exercised = bool(gpu) and all(
             r["accelerator"].get("predictions", 0)
             + r["accelerator"].get("model_updates", 0)
+            + r["accelerator"].get("ppo_model_updates", 0)
             > 0
             for r in gpu
         )
@@ -240,12 +263,13 @@ def main(argv=None):
                 "algorithm": kind,
                 "matched_work_counts": matched,
                 "cuda_exercised": exercised,
+                "profiled": args.cuda_profile,
                 "loop_speedup": (
                     (
                         statistics.median(r["loop_seconds"] for r in cpu)
                         / statistics.median(r["loop_seconds"] for r in gpu)
                     )
-                    if matched and exercised
+                    if matched and exercised and not args.cuda_profile
                     else None
                 ),
             }

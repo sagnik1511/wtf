@@ -21,7 +21,10 @@ lists bundled environment names. `python -m wtf` offers the same hub;
 | Argument | Definition |
 | --- | --- |
 | `environment` | Complete environment JSON; defaults to `environments/baseline.json` when omitted |
-| `--device cpu\|cuda` | CPU default; optional experimental Linux/NVIDIA dense forwards and DQN/DDQN gradients. [Build and limits](cuda.md) |
+| `--device cpu\|cuda` | CPU default; optional experimental Linux/NVIDIA dense forwards, PPO/masked-PPO training and DQN/DDQN gradients. [Build and limits](cuda.md) |
+| `--cuda-precision fp64\|fp32` | CUDA arithmetic; FP64 default. Optional FP32 changes learning numerics, not world physics/storage |
+| `--cuda-inference auto\|cpu\|cuda` | Auto uses CPU actions for CUDA-trained PPO/DQN and CUDA actions for other supported dense policies |
+| `--cuda-profile` | CUDA events and host component timings; adds overhead, use separately from speed comparisons |
 | `--cuda-batch-agents N` | Independent jobs per GPU batch; default 64, range 1–4096 |
 | `--cuda-workspace-mb N` | Device workspace LRU budget in MiB; default 256, range 1–16384; excludes driver/host memory |
 | `--mode train` | Choose actions with training exploration and perform learning; default for a fresh experiment |

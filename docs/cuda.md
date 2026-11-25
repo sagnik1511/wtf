@@ -2,139 +2,219 @@
 
 [Performance](performance.md) · [Installation](installation.md) · [Running experiments](running.md)
 
-The CPU backend remains the default. The optional CUDA backend batches independent
-animals' dense networks on Linux/NVIDIA without sharing their weights or adding a
-mandatory ML framework. This is a source-branch prototype, not an established GPU
-speedup. It has not yet been compiled or executed on NVIDIA hardware by its author.
-Use the real-device tests and full-loop benchmark below before adopting it.
+CPU remains the default. The optional Linux/NVIDIA backend keeps animals' weights,
+optimizer state, replay sampling and RNG ownership independent. The initial T4
+prototype was slower than native CPU; the revised backend adds optional FP32,
+cooperative dense kernels, smaller gradient storage and complete PPO training
+updates. **The revised CUDA kernels still require compilation, correctness tests
+and performance measurements on NVIDIA hardware.** CPU-oracle tests are not GPU
+execution evidence.
 
-## What moves to the GPU
+## GPU and CPU responsibilities
 
-| Learner | GPU work | Work that remains on CPU |
+| Learner | GPU training work | Work remaining on CPU |
 | --- | --- | --- |
-| DQN / DDQN | Dense action evaluation; sampled TD targets, Huber loss and backpropagation | Replay sampling, exploration, gradient clipping, Adam, target synchronization |
-| PPO / masked PPO / A2C | Dense actor/value evaluation during actual world steps | Rollout preparation, losses, backpropagation and optimizer |
-| REINFORCE / GRPO | Dense action evaluation during actual world steps | Policy gradients, optimizer and GRPO trial worlds/evaluation |
-| MAPPO | Dense local actor and centralized critic evaluation | Context preparation, gradients and optimizer |
-| TRPO / discrete SAC | Dense action-selection actor; TRPO value evaluation | Trust-region/replay work, gradients and optimizers |
-| QR-DQN | Dense action evaluation | Quantile targets, gradients and optimizer |
-| Recurrent PPO / LSTM PPO / legacy `q_network` | None in this prototype | Entire learner |
+| PPO / masked PPO | Minibatch forward, clipped objective, entropy/value derivatives, backward, norm clipping, Adam and KL rejection | GAE/advantage normalization, private shuffle schedules, rollout collection |
+| DQN / DDQN | TD targets, Huber loss, backward and batch gradient reduction | Private replay sampling, gradient clipping, Adam and target synchronization |
+| A2C / REINFORCE / GRPO / MAPPO / TRPO / discrete SAC / QR-DQN | No training-update kernel yet; optional dense action evaluation | Existing learners and optimizers; GRPO trial worlds/evaluation |
+| Recurrent PPO / LSTM PPO / legacy `q_network` | None | Entire learner |
 
-This does **not** make PPO training fully GPU-resident. Policy inference may be a
-small fraction of its runtime; a faster matrix evaluation alone is insufficient
-evidence of faster training. Unsupported or customized brains retain their CPU
-path in a mixed experiment. An entirely unsupported population rejects CUDA
-selection. Legacy non-FP32 parameter containers retain their CPU path.
+`--cuda-inference auto` uses the existing CPU action-evaluation path for CUDA-trained
+PPO, masked PPO, DQN and DDQN. It uses CUDA dense evaluation for the other supported
+dense policies. This avoids launching small GPU inference calls every world step
+when the useful GPU work is a training minibatch. `--cuda-inference cpu` forces CPU
+actions; `--cuda-inference cuda` forces the supported CUDA action path and allows
+comparison with the original prototype. Unsupported/custom controllers stay on CPU.
+An entirely unsupported population rejects CUDA selection.
 
-World physics, observations, champion selection, births, recording and the viewer
-remain on their existing paths. The saved artifacts have the same formats.
+World physics, observations, reproduction, champion selection, recording and the
+viewer keep their existing paths and formats. Learning schedules and batch sizes
+are unchanged. Brains are never pooled into a shared species model.
+
+## Training state and transfer boundaries
+
+Ready ordinary/masked PPO updates are grouped by architecture, minibatch capacity
+and objective/optimizer settings. Every animal retains its own epoch count,
+shuffle RNG, samples, optimizer-step counter, KL stopping and metrics. Short final
+batches and animals finishing early use inactive sample slots, not extra evidence.
+
+For one group, parameters and private Adam moments/variances upload once. They
+remain on-device across that group's epochs and minibatches. Each round transfers
+only its observations, sample metadata, masks and small metric/acceptance summaries.
+Updated parameters and optimizer buffers copy back once before champion selection,
+child inheritance, diagnostics or checkpointing. Device state is not authoritative
+across world steps: published CPU state remains the portable source of truth.
+DQN/DDQN still publish gradients to their existing CPU optimizer.
+
+The new kernel stores activations and layer deltas per sample, then reduces their
+products across the batch. It removes the former `animals × samples × parameters`
+gradient tensor. Warps cooperate on each forward dot product, reading adjacent
+weights. Reduction order can change floating-point rounding even in FP64.
+
+Each workspace caches the exact uploaded FP32 weight bytes, including DQN targets.
+Unchanged contents skip upload and native validation. Content comparisons detect
+in-place writes and raw buffer edits; there is no reliance on a step counter alone.
+Python staging arrays are reused, while model validity checks run in native code
+on changed uploads. Group order/population changes still trigger uploads when bytes
+differ. Cache/buffer ownership is per experiment; LRU eviction releases both staging
+and device buffers. No cache is serialized.
 
 ## Build on Linux or Colab
 
-Use a checkout containing this implementation (including `tests/` and `work/` for
-validation), Python 3.12+, an NVIDIA GPU/driver and the
-[NVIDIA CUDA toolkit](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/).
-Select a GPU runtime in Colab first. The published package may predate this branch;
-install your checkout rather than assuming the released wheel contains the prototype.
+Use a checkout of the CUDA branch containing `tests/` and `work/`, Python 3.12–3.13
+for the native CPU baseline, and an NVIDIA GPU/driver plus
+[CUDA toolkit](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/).
+Use the same GPU runtime for both CPU and CUDA benchmarks.
 
 ```sh
-python -m pip install -e .
-nvidia-smi
-nvcc --version
+python -m pip install -e . setuptools wheel
+python -m work.build_native
 python -m wtf.native.cuda_build
 WTF_TEST_CUDA=1 python -m unittest tests.test_cuda -v
 ```
 
-The explicit build uses NVCC, C++17 and the CUDA runtime through a small `ctypes`
-ABI; it does not require PyTorch, CuPy or NumPy. Imports never launch a compiler.
-The default architecture is `native`. If the toolkit requires an explicit target,
-use `--arch sm_75` for a T4, or the architecture of your actual GPU. Build locally
-for the destination GPU; do not copy a Mac/another GPU's binary into a wheel.
+**Rebuild after pulling this update:** the native CUDA ABI changes from 1 to 2.
+An old `_cuda_dqn.so` fails clearly and must not be reused. NVCC/C++17 builds the
+library without PyTorch, CuPy or NumPy. Imports never run a compiler. The default
+architecture is `native`; use `--arch sm_75` for an explicit T4 target if necessary.
+Portable wheels/sdists ship source, never device-local CUDA binaries.
 
-`--output /path/to/_cuda_dqn.so` changes the build destination. Set
-`WTF_CUDA_LIBRARY=/path/to/_cuda_dqn.so` when loading that location. The portable
-wheel and source archive ship CUDA source, not a precompiled CUDA binary. Rebuild
-after changing kernel source. Driver/toolkit errors stop the run visibly.
+For read-only installs, build with `--output /path/to/_cuda_dqn.so` and set
+`WTF_CUDA_LIBRARY=/path/to/_cuda_dqn.so`. The published PyPI wheel may predate this
+branch; use the matching checkout for these features.
 
-## Run and resume
+## Arithmetic and inference controls
+
+| Option | Meaning |
+| --- | --- |
+| `--device cpu` | Default CPU execution |
+| `--device cuda` | Explicit experimental CUDA execution |
+| `--cuda-precision fp64` | Default GPU arithmetic; FP32 stored parameters/Adam state |
+| `--cuda-precision fp32` | Optional GPU arithmetic, activations and gradient buffers use FP32 |
+| `--cuda-inference auto\|cpu\|cuda` | Choose CPU/native or CUDA action evaluation as described above |
+| `--cuda-batch-agents N` | Maximum independent jobs grouped together; default 64, range 1–4096 |
+| `--cuda-workspace-mb N` | Device workspace LRU budget in MiB; default 256, range 1–16384 |
+| `--cuda-profile` | Opt-in CUDA event and host packing/optimizer timings |
 
 ```sh
 python -m wtf run ppo --runs 5 --seed 100 --progress --device cuda
-python -m wtf run maskable_ppo --runs 5 --seed 100 --progress --device cuda
-python -m wtf run grpo --runs 5 --seed 100 --progress --device cuda
+python -m wtf run maskable_ppo --runs 5 --seed 100 --progress \
+  --device cuda --cuda-precision fp32
 ```
 
-The historical `dqn` preset uses the legacy `q_network` controller. For the dense
-DQN/DDQN gradient kernel, use a JSON whose brain `type` is `dqn` or `ddqn`, as
-explained in [policies](additional-policies.md); the benchmark constructs both from the
-maintained QR-DQN preset with its quantile setting removed.
+FP32 affects GPU brain calculations only. It does not change world physics,
+configuration values, replay dtypes, checkpoint formats or the default CPU path.
+It can change actions, KL decisions, learned weights and subsequent trajectories;
+reduced precision is a numerical tradeoff, not exact behavioral equivalence.
+FP64 GPU sums and math also need not match CPU bit-for-bit.
 
-`--cuda-batch-agents 64` caps jobs per batch. `--cuda-workspace-mb 256` caps cached
-device allocations in MiB, excluding CUDA context/driver memory and host replay
-buffers. Reduce either for smaller GPUs. A single model/sample batch exceeding
-the budget fails explicitly. Workspaces are reused by architecture, population
-count, sample count and prediction/training mode, with least-recently-used eviction.
-Prediction buffers do not allocate replay, target or per-sample gradient arrays.
+The historical `dqn` preset uses legacy `q_network`, not dense DQN. The benchmark
+constructs actual dense `dqn`/`ddqn` from the QR-DQN preset with its quantile option
+removed. For custom JSON, see [policy definitions](additional-policies.md).
 
-For Python callers, use `experiment.set_training_device('cuda')` after creating or
-restoring an `Experiment`. `set_training_device('cpu')` releases its device cache.
-Checkpoints retain weights, optimizer state, replay and RNGs on the CPU. Device
-handles and backend choices are transient: restore defaults to CPU; explicitly
-pass `--device cuda` again to accelerate a resumed CLI run. Evaluation mode is
-CPU-only in this prototype.
+The device budget excludes driver/context and host memory. Host staging arrays and
+exact-byte upload caches are bounded by live workspaces but consume additional RAM;
+PPO rollouts and DQN replay also remain on the host. Profiled workspaces add two CUDA
+events each. One model/minibatch exceeding the budget fails explicitly. Dense
+layouts support 1–16 layers of widths 1–4096 and sample batches up to 4096.
 
-## Benchmark all learners, including transfers
+Python callers use `experiment.set_training_device('cuda', precision='fp32',
+inference='auto', profile=False)`. Selecting CPU closes that experiment's cache.
+Restore defaults to CPU; select CUDA and precision again after restoring. Backend
+handles, profiling counters and execution choices are not checkpoint fields.
+Evaluation remains CPU-only. Device errors abort visibly; resume a completed
+checkpoint rather than retrying a partially advanced world as a transaction.
 
-From the same source checkout on the GPU machine:
+## Colab comparison
+
+From the existing checkout, pull the branch and rebuild before testing. Run the
+hardware suite first. For the first timing pass, compare CPU and optimized FP64:
 
 ```sh
-python -m work.benchmark_cuda --steps 256 --warmup 16 --repeats 3 \
-  --output .cache/cuda-comparison.json
+python -m work.benchmark_cuda --algorithms ppo dqn ddqn --devices cpu cuda \
+  --steps 1000 --warmup 32 --hidden 64 64 32 --seed 100 --repeats 1 \
+  --cuda-precision fp64 --output .cache/cuda-fp64.json
 ```
 
-The default list covers all eleven supported dense learners. For deeper models:
+Then benchmark optional FP32 separately:
 
 ```sh
-python -m work.benchmark_cuda --algorithms ppo maskable_ppo a2c reinforce grpo \
-  dqn ddqn mappo qrdqn trpo discrete_sac --hidden 64 64 32 \
-  --steps 512 --warmup 32 --repeats 3 --output .cache/cuda-deep.json
+python -m work.benchmark_cuda --algorithms ppo dqn ddqn --devices cpu cuda \
+  --steps 1000 --warmup 32 --hidden 64 64 32 --seed 100 --repeats 1 \
+  --cuda-precision fp32 --output .cache/cuda-fp32.json
 ```
 
-Both species use the named learner; nonmatching legacy controllers in a mixed
-preset are replaced with that preset's named learner. Each CPU/GPU case uses a fresh subprocess with matched seed/configuration. The
-report includes startup, complete `Experiment.step` time, warmup/steady timing,
-step/update counts, process peak RSS, device workspace use and actual kernel-job
-counts. No recording files are written. Packing, transfers, CPU optimizers, world
-steps and episode finalization are timed. Do not count a zero-update test as a
-training benchmark; increase the horizon if the configured update schedule has
-not started. REINFORCE may update only at episode end. The script suppresses the
-speedup ratio when update/step counts differ, no updates occur, or no GPU jobs run. Matching counts
-alone do not establish identical work or equivalent learned behavior.
+Each command runs six experiments sequentially: CPU/GPU for each learner. Both
+species use the named learner; legacy controllers in mixed presets are replaced
+with the named learner. Each subprocess receives the same fixed seed/configuration
+within its pair. No recordings or checkpoints are written. Use `--repeats 3` for
+multiple matched seeds after the first successful pass. Omit `--algorithms` to
+exercise all eleven supported dense families; only PPO/masked PPO and DQN/DDQN have
+training kernels. Use `--cuda-inference cuda` to isolate the forced-GPU action path.
 
-For CPU native baselines, build the existing CPU extension first using the
-[development workflow](development.md). Without it the baseline is portable Python,
-which must be identified when reporting numbers. `--devices cpu` is a local harness
-smoke check and provides no CUDA performance evidence.
+Reports include complete loop/startup/warmup/steady time, actual seeds, step/update
+counts, process peak RSS, native CPU backend, CUDA precision/inference strategy,
+workspace bytes and kernel-job counts. Timings include world work and transfers.
+A speedup ratio is suppressed for unmatched counts, zero training updates, no CUDA
+jobs, or a profiled run. Matching counts do not prove identical trajectories.
 
-## Numerical and ownership boundaries
+## Diagnose time and bytes
 
-CUDA uses FP32 stored parameters with FP64 arithmetic/activations/gradients to
-follow the existing arithmetic contract closely. It disables fused multiply-add
-contraction. GPU reductions and `tanh` still differ from CPython's compensated sums
-and platform math: **GPU trajectories are not guaranteed bit-for-bit identical**.
-The default CPU path is unchanged. This prototype does not silently reduce precision
-for speed; modest GPUs can be particularly slow at FP64.
+Run a separate diagnostic pass, not the headline timing comparison:
 
-Each animal retains its own parameters, optimizer, replay and RNG. The scheduler
-collects ready DQN jobs, computes independent gradients, then applies the existing
-CPU update before champion selection and child inheritance. No device work is left
-in flight at the checkpoint boundary. Sampling and action probabilities remain
-with the owning brain; masks still apply. Failed device work raises an error,
-rather than silently switching algorithms. It is not a transactional retry of an
-already partially advanced world: resume a previously completed checkpoint.
+```sh
+python -m work.benchmark_cuda --algorithms ppo dqn ddqn --devices cuda \
+  --steps 1000 --warmup 32 --hidden 64 64 32 --seed 100 --repeats 1 \
+  --cuda-precision fp32 --cuda-profile --output .cache/cuda-profile.json
+```
 
-CPU-reference tests verify packing/scheduling against existing learners, including
-mixed recurrent populations and multiple species. Only `WTF_TEST_CUDA=1` exercises
-the actual shared library; a missing compiler/device must not be reported as a
-passed GPU test. Follow [NVIDIA's best practices](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
-by comparing complete workloads including transfers. Keep CPU when it is faster.
+The `accelerator` section reports:
+
+- `packing_seconds`: measured Python preparation/staging, including PPO scheduling.
+- `cpu_optimizer_seconds`: DQN gradient unpacking and existing CPU optimizer work.
+- `cuda_upload_seconds`, `cuda_compute_seconds`, `cuda_download_seconds`: CUDA event
+  elapsed intervals around each phase; upload intervals may include host cache
+  checks/staging gaps between synchronous copies. They are not pure device busy time.
+- `host_to_device_bytes`, `device_to_host_bytes`: actual requested copy bytes,
+  including initial layout metadata; unchanged weights do not add transfer bytes.
+- `weight_uploads`, `weight_cache_hits`: exact-content upload/cache decisions.
+- `ppo_batches`, `ppo_model_updates`: grouped minibatch calls and completed private
+  rollout updates; `records[].updates` is the actual optimizer-update count.
+
+Event profiling introduces synchronization and overhead. Leave it off for speed
+comparisons. Component counters do not account for every Python/CUDA runtime cost
+and are not an additive replacement for full-loop timing. Process RSS is host memory;
+workspace bytes exclude GPU context/driver overhead.
+
+## Analytical device-buffer footprint
+
+For 64 independent networks with layout `[20,64,64,32,10]` and 16 samples per
+training batch, allocation formulas give the following DQN workspace sizes:
+
+| Layout | Device buffer bytes | MiB | Reduction from original |
+| --- | --- | --- | --- |
+| Original FP64 gradient tensor | 77,449,792 | 73.862 | — |
+| Revised FP64 activations/deltas | 11,569,728 | 11.034 | 85.06% |
+| Revised optional FP32 | 7,814,976 | 7.453 | 89.91% |
+
+These are exact buffer-accounting calculations, not measured peak GPU/RAM usage.
+They exclude host staging/content caches, allocator overhead, CUDA context and
+profiling events. They do not establish runtime improvements.
+
+## Original prototype baseline
+
+The user-reported single-pair Colab baseline used Python 3.13.16, a Tesla T4,
+NVCC 13.0.88, seed 100, 1000 steps, hidden layers `[64,64,32]`, FP64 and forced CUDA
+action evaluation. CPU native kernels were built in the same runtime.
+
+| Learner | CPU loop | Original CUDA loop | Optimizer updates on each side |
+| --- | --- | --- | --- |
+| PPO | 32.721 s | 78.386 s | 14522 |
+| DQN | 17.066 s | 35.288 s | 8144 |
+| DDQN | 23.370 s | 38.820 s | 8714 |
+
+Those numbers establish a slowdown for the original implementation and workload.
+They are not results for the revised kernels. Revised NVIDIA correctness, RAM and
+speed measurements are pending. Follow [NVIDIA's guidance](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
+on transfer reduction and coalesced access, and retain CPU whenever complete
+training is faster there.

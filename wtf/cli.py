@@ -65,6 +65,23 @@ def main():
         help="Experimental CUDA dense action evaluation and DQN/DDQN gradients; CPU remains default",
     )
     parser.add_argument(
+        "--cuda-precision",
+        choices=("fp64", "fp32"),
+        default="fp64",
+        help="CUDA arithmetic; fp64 default, fp32 changes learning numerics",
+    )
+    parser.add_argument(
+        "--cuda-inference",
+        choices=("auto", "cpu", "cuda"),
+        default="auto",
+        help="auto uses CPU action evaluation for CUDA-trained PPO/DQN; GPU for other dense policies",
+    )
+    parser.add_argument(
+        "--cuda-profile",
+        action="store_true",
+        help="Opt-in CUDA event/component timings; adds synchronization overhead",
+    )
+    parser.add_argument(
         "--cuda-batch-agents",
         type=int,
         default=64,
@@ -345,6 +362,9 @@ def main():
                 "cuda",
                 max_agents=args.cuda_batch_agents,
                 workspace_mb=args.cuda_workspace_mb,
+                precision=args.cuda_precision,
+                profile=args.cuda_profile,
+                inference=args.cuda_inference,
             )
         except (ValueError, RuntimeError, OSError) as error:
             parser.error(str(error))

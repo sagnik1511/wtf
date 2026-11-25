@@ -102,7 +102,18 @@ class Experiment:
         self.last_record = None
         self._start_run()
 
-    def set_training_device(self, device="cpu", *, max_agents=64, workspace_mb=256):
+    # Backend controls are explicit execution options, independent of saved config.
+    # pylint: disable-next=too-many-arguments
+    def set_training_device(
+        self,
+        device="cpu",
+        *,
+        max_agents=64,
+        workspace_mb=256,
+        precision="fp64",
+        profile=False,
+        inference="auto",
+    ):
         """Select a transient backend; checkpoints retain portable CPU-owned state."""
         # The optional CUDA loader is never imported on ordinary CPU runs.
         # pylint: disable=import-outside-toplevel,protected-access
@@ -121,7 +132,13 @@ class Experiment:
             raise ValueError(
                 "CUDA requires a supported DQN/DDQN or dense policy brain with FP32-stored weights"
             )
-        accelerator = CudaTraining(max_agents=max_agents, workspace_mb=workspace_mb)
+        accelerator = CudaTraining(
+            max_agents=max_agents,
+            workspace_mb=workspace_mb,
+            precision=precision,
+            profile=profile,
+            inference=inference,
+        )
         if self._cuda_training is not None:
             self._cuda_training.close()
         self._cuda_training = accelerator

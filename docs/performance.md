@@ -1342,3 +1342,9 @@ See [CUDA training](cuda.md) for optional dense action batches across eleven lea
 and DQN/DDQN gradient batches. CPU remains the default. Real NVIDIA execution and
 end-to-end speedups are unverified locally; the guide provides required hardware
 tests and a matched full-loop benchmark, including host/device transfers.
+
+The revised CUDA path removes per-sample parameter-gradient tensors, reuses host
+staging and exact-content device weight caches, and batches complete private PPO
+updates with device Adam. Default automatic inference keeps CUDA-trained PPO/DQN
+actions on CPU. Optional FP32 and diagnostic timing/copy counters are described
+in the [CUDA guide](cuda.md). Revised T4 performance remains unmeasured locally.
