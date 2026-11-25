@@ -320,7 +320,7 @@ and **8 identical viewer branding copies**.
 | [0.0.2.28 Experimental CUDA dense training backend](releases/0.0.2.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.28](releases/0.0.2.28.md) |
 | [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
-| [0.0.2.30 Bulk gradient conversion and resident DQN optimizers](releases/0.0.2.30.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.30](releases/0.0.2.30.md) |
+| [0.0.2.30 Bulk gradient conversion and resident DQN optimizers](releases/0.0.2.30.md) | [Home](index.md) → [Calibration](calibration.md) → [V3 benchmark evidence](releases/0.0.2.30.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
