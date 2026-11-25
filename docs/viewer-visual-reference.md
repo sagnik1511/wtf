@@ -7,8 +7,8 @@
 Use this catalog to identify board objects, overlays and inspector graphics.
 The examples are controlled specimens rendered through current viewer code.
 The workspace map is schematic; chart values are illustrative, not experiment
-results. Existing [full-viewer clips](geography.md#recorded-terrain-previews)
-show the interface in motion.
+results. The [animated vector demonstrations](geography.md#recorded-terrain-previews)
+show controlled board states in motion.
 
 ## Find a viewer element
 

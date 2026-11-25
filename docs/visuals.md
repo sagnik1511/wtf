@@ -83,6 +83,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Canyon (SVG)](visual-previews/geography/canyon-svg.md) | [canyon.svg](assets/geography/canyon.svg) |
 | [Grasslands (SVG)](visual-previews/geography/grasslands-svg.md) | [grasslands.svg](assets/geography/grasslands.svg) |
 | [Lake islands (SVG)](visual-previews/geography/lake_islands-svg.md) | [lake_islands.svg](assets/geography/lake_islands.svg) |
+| [Land bridge (SVG)](visual-previews/geography/land_bridge-svg.md) | [land_bridge.svg](assets/geography/land_bridge.svg) |
 | [Meandering river (SVG)](visual-previews/geography/meandering_river-svg.md) | [meandering_river.svg](assets/geography/meandering_river.svg) |
 | [Oasis (SVG)](visual-previews/geography/oasis-svg.md) | [oasis.svg](assets/geography/oasis.svg) |
 | [River delta (SVG)](visual-previews/geography/river_delta-svg.md) | [river_delta.svg](assets/geography/river_delta.svg) |
@@ -140,31 +141,18 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) | [spatial-window-cache.svg](assets/structures/spatial-window-cache.svg) |
 | [Tracking data flow (SVG)](visual-previews/structures/tracking-data-flow-svg.md) | [tracking-data-flow.svg](assets/structures/tracking-data-flow.svg) |
 
-## Terrain playback clips
-
-| Theme-aware preview | Original file / variant |
-| --- | --- |
-| [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) | [enclosed-valleys.gif](assets/terrains/enclosed-valleys.gif) |
-| [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) | [highlands.gif](assets/terrains/highlands.gif) |
-| [River crossing (GIF)](visual-previews/terrains/river-crossing-gif.md) | [river-crossing.gif](assets/terrains/river-crossing.gif) |
-
-## Light-theme playback variants
-
-| Theme-aware preview | Original file / variant |
-| --- | --- |
-| [Animal brain light (WEBP)](visual-previews/themed/animal-brain-light-webp.md) | [animal-brain-light.webp](assets/themed/animal-brain-light.webp) |
-| [Archived brain light (WEBP)](visual-previews/themed/archived-brain-light-webp.md) | [archived-brain-light.webp](assets/themed/archived-brain-light.webp) |
-| [Day night light (WEBP)](visual-previews/themed/day-night-light-webp.md) | [day-night-light.webp](assets/themed/day-night-light.webp) |
-| [Enclosed valleys light (WEBP)](visual-previews/themed/enclosed-valleys-light-webp.md) | [enclosed-valleys-light.webp](assets/themed/enclosed-valleys-light.webp) |
-| [Highlands light (WEBP)](visual-previews/themed/highlands-light-webp.md) | [highlands-light.webp](assets/themed/highlands-light.webp) |
-| [River crossing light (WEBP)](visual-previews/themed/river-crossing-light-webp.md) | [river-crossing-light.webp](assets/themed/river-crossing-light.webp) |
-| [Simulation playback light (WEBP)](visual-previews/themed/simulation-playback-light-webp.md) | [simulation-playback-light.webp](assets/themed/simulation-playback-light.webp) |
-| [Species metrics light (WEBP)](visual-previews/themed/species-metrics-light-webp.md) | [species-metrics-light.webp](assets/themed/species-metrics-light.webp) |
-
 ## Viewer objects and appearance
 
 | Theme-aware preview | Original file / variant |
 | --- | --- |
+| [Animation animal brain (SVG)](visual-previews/viewer/animation-animal-brain-svg.md) | [animation-animal-brain.svg](assets/viewer/animation-animal-brain.svg) |
+| [Animation archived brain (SVG)](visual-previews/viewer/animation-archived-brain-svg.md) | [animation-archived-brain.svg](assets/viewer/animation-archived-brain.svg) |
+| [Animation day night (SVG)](visual-previews/viewer/animation-day-night-svg.md) | [animation-day-night.svg](assets/viewer/animation-day-night.svg) |
+| [Animation enclosed valleys (SVG)](visual-previews/viewer/animation-enclosed-valleys-svg.md) | [animation-enclosed-valleys.svg](assets/viewer/animation-enclosed-valleys.svg) |
+| [Animation highlands (SVG)](visual-previews/viewer/animation-highlands-svg.md) | [animation-highlands.svg](assets/viewer/animation-highlands.svg) |
+| [Animation river crossing (SVG)](visual-previews/viewer/animation-river-crossing-svg.md) | [animation-river-crossing.svg](assets/viewer/animation-river-crossing.svg) |
+| [Animation simulation playback (SVG)](visual-previews/viewer/animation-simulation-playback-svg.md) | [animation-simulation-playback.svg](assets/viewer/animation-simulation-playback.svg) |
+| [Animation species metrics (SVG)](visual-previews/viewer/animation-species-metrics-svg.md) | [animation-species-metrics.svg](assets/viewer/animation-species-metrics.svg) |
 | [Board objects (SVG)](visual-previews/viewer/board-objects-svg.md) | [board-objects.svg](assets/viewer/board-objects.svg) |
 | [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) | [brain-views.svg](assets/viewer/brain-views.svg) |
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [day-night.svg](assets/viewer/day-night.svg) |
@@ -181,12 +169,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 
 | Theme-aware preview | Original file / variant |
 | --- | --- |
-| [Animal brain (GIF)](visual-previews/animal-brain-gif.md) | [animal-brain.gif](assets/animal-brain.gif) |
-| [Archived brain (GIF)](visual-previews/archived-brain-gif.md) | [archived-brain.gif](assets/archived-brain.gif) |
-| [Day night (GIF)](visual-previews/day-night-gif.md) | [day-night.gif](assets/day-night.gif) |
 | [Github banner (PNG)](visual-previews/github-banner-png.md) | [github-banner.png](assets/github-banner.png) |
-| [Simulation playback (GIF)](visual-previews/simulation-playback-gif.md) | [simulation-playback.gif](assets/simulation-playback.gif) |
-| [Species metrics (GIF)](visual-previews/species-metrics-gif.md) | [species-metrics.gif](assets/species-metrics.gif) |
 
 ## Viewer branding copies
 

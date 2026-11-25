@@ -5,7 +5,7 @@
 For diagrams and the interactive explorer, see [Physics illustrated](physics.md).
 
 Terrain is optional. Existing environments remain flat unless they select a map.
-Seventeen optional presets cover thirteen maps, keeping one prey species and one predator species:
+Optional presets cover several map layouts, keeping one prey species and one predator species:
 
 | Environment | Map |
 | --- | --- |
@@ -18,6 +18,8 @@ Seventeen optional presets cover thirteen maps, keeping one prey species and one
 | [meandering_river.json](../environments/meandering_river.json) | A2C prey / GRPO predators on a floodplain with river bends, two shallow fords, slow margins and low knolls |
 | [river_delta.json](../environments/river_delta.json) | PPO branching delta, three distributaries and dry land between channels |
 | [alpine_pass.json](../environments/alpine_pass.json) | PPO rocky ridge, stepped slopes and two broad low passes; no swim action |
+| [land_bridge.json](../environments/land_bridge.json) | PPO for both species; two terraced hilltops connected by a three-cell-wide low dry bridge, with shallow shores and still water |
+| [land_bridge_behaviors.json](../environments/land_bridge_behaviors.json) | Same hilltops and bridge with ordinary PPO, local social inputs, both consequence scopes, scent/history, day–night and challenges |
 | [lake_islands.json](../environments/lake_islands.json) | PPO still-water lake, shallow shores, deeper basin and three dry islands |
 | [grasslands.json](../environments/grasslands.json) | PPO for both species; open dry plain, sparse rocky outcrops and a low knoll |
 | [seaside.json](../environments/seaside.json) | PPO for both species; coastline, shallow shore, deeper water and an alongshore current |
@@ -154,7 +156,7 @@ each island is not guaranteed food, mates or both species in every run.
 These are **static map diagrams**, not screenshots, viewer recordings or evidence
 of learned behavior. [Preview provenance and regeneration](assets/geography/README.md)
 describe how they are generated directly from the map JSON. The existing
-full-viewer GIFs below remain actual recorded playback. The new layouts have
+vector animations below illustrate viewer appearance with controlled states. The new layouts have
 been checked for loading, navigation structure and recording compatibility;
 long-term population balance and reproduction have not been calibrated.
 
@@ -229,38 +231,91 @@ optimum. Existing recordings and exact checkpoint resumes retain their saved cos
 
 [Environment JSON](../environments/oasis.json) · [Map JSON](../maps/oasis.json). A small still-water pool has shallow margins, low dune-like rises and scattered rocky outcrops. Animals swim without passive current assistance. This is an oasis-shaped layout, without desert heat, thirst, sand-specific movement costs or special food placement.
 
+## Land bridge
+
+![Actual land-bridge map: two terraced hilltops connected by a low dry crossing](assets/geography/land_bridge.svg)
+
+[Environment JSON](../environments/land_bridge.json) · [Map JSON](../maps/land_bridge.json).
+Two rounded landmasses rise through one-unit terraces to **elevation 5**,
+sharing a three-cell-wide dry connection at **elevation 0** on a 40 × 28 closed map.
+The shore and bridge approaches remain gradual, so existing `max_climb: 1`
+permits stepwise ascent. Climbing spends the configured uphill energy cost
+(1.0 per height unit for prey; 1.3 for predators), with existing effort feedback.
+Height itself does not add sight occlusion or direct health damage. The bridge is ordinary ground: walking needs no swim action or
+extra bridge cost. It creates a narrow shared route; existing occupancy rules
+apply, without a queue or a new competition mechanism. Shallow shores surround
+the land, with deeper still water farther out. Animals may alternatively swim
+when their health and action eligibility permit. There is no current,
+bridge collapse or species-specific access restriction.
+
+Both species start on available dry cells across the map; they are not assigned
+to opposite islands. Food also starts on dry cells. The preset uses ordinary PPO
+for both species and retains every episode's configured playback.
+
+```sh
+.venv/bin/python -m wtf run land_bridge --runs 1 --steps 1500 --seed 100 --progress
+```
+
+Edit the map's `rows` to widen or narrow the connection. The preview above comes
+from the actual map, rather than the illustrative animation maps.
+
+### Land bridge with optional behaviors
+
+Use [land_bridge_behaviors.json](../environments/land_bridge_behaviors.json) for
+the same hilltops, bridge, populations and ordinary PPO learner settings, with
+these existing optional features enabled for both species:
+
+| Feature | Configuration |
+| --- | --- |
+| Local same-species witnessing | `social_observation`: 4-step history, at most 8 neighbors |
+| General and context consequences | `consequence_scope: "both"`; bounded 512-context species tables, 16-step outcome horizon |
+| Consequence publication | `update_schedule: "episode"`; publish to brains before the next episode, while individual learning and local sensing continue each step |
+| Personal visual movement history | 3 steps; normal visibility and last-seen rules apply |
+| Blended anonymous scent | Radius 2, trail lifetime 20 steps; no individual identity or separated scent channels |
+| Day–night | 400-step cycle; prey night vision ×0.5, predator ×0.85; living/movement multipliers from the day–night preset |
+| Same-species challenges | Learned `challenge` action; food/path/aggression contexts, damage 5 and effort 1 |
+| Reproduction | Existing mutual consent, 5-step intent, proximal radii (prey 2, predator 3), and rare child-only mutation |
+| Storage and inspection | All episode playbacks, sampled activations, existing improvement-only champions and rolling recovery checkpoints |
+
+```sh
+.venv/bin/python -m wtf run land_bridge_behaviors \
+  --runs 5 --steps 1500 --seed 100 --progress
+```
+
+Start fresh: the added observation blocks and challenge action require a
+different model signature from the simple land-bridge preset. Individual brains
+remain independent; consequence tables are shared only within each exact species.
+The first episode begins with unknown consequence estimates; later episodes can
+consume the accumulated published evidence. These combined options demonstrate
+integration, not a claim of improved survival or reproduction. Same-species
+competition can introduce additional harm and energy use. Change either species'
+`competition.enabled` to `false` to disable those contests.
+
+See [collective learning](social-learning.md), [tracking and scent](tracking.md),
+[day–night](day-night.md) and [competition](competition.md) for each feature's
+semantics. Continuous publication is still selectable with
+`--consequence-update-schedule continuous`.
+
 ## Recorded terrain previews
 
-These **3.5-second full-viewer previews** retain the current header, controls,
-counters, board and sidebar. They are assembled directly from saved replay
-frames, with no desktop screen recording. Simulation time is compressed between
-sampled frames. [Sources, sampling and regeneration](assets/terrains/README.md)
-are documented alongside the GIFs. The separate [physics diagrams](physics.md) explain
-the rules; these clips show the actual viewer UI.
+These four-second animated SVGs use the current terrain, animal and visibility
+renderers with small authored example maps and paths. They are clearly labeled
+vector demonstrations, not whole-viewer screenshots, saved experiments or
+examples of learned navigation. They follow the site theme and freeze under
+reduced motion. [Sources and regeneration](assets/terrains/README.md).
+The separate [physics diagrams](physics.md) explain the rules.
 
 ### River crossing
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/river-crossing-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/terrains/river-crossing.gif" type="image/gif" />
-  <img src="assets/terrains/river-crossing.gif" alt="Full viewer playback of river crossing, including controls, statistics and event highlights" />
-</picture>
+![Animated vector demonstration: river crossing; illustrative states, not an experiment recording](assets/viewer/animation-river-crossing.svg)
 
 ### Highlands
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/highlands-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/terrains/highlands.gif" type="image/gif" />
-  <img src="assets/terrains/highlands.gif" alt="Full viewer playback of highlands, showing elevation shading, terrain and statistics" />
-</picture>
+![Animated vector demonstration: highlands; illustrative states, not an experiment recording](assets/viewer/animation-highlands.svg)
 
 ### Enclosed valleys
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/enclosed-valleys-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/terrains/enclosed-valleys.gif" type="image/gif" />
-  <img src="assets/terrains/enclosed-valleys.gif" alt="Full viewer playback of enclosed valleys, showing the wall, gates, river, animals and statistics" />
-</picture>
+![Animated vector demonstration: enclosed valleys; illustrative states, not an experiment recording](assets/viewer/animation-enclosed-valleys.svg)
 
 Animals may pass through the gates during playback; the inside/outside placement
 rule applies to founders, not permanent confinement.

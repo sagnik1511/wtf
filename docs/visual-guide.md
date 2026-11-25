@@ -9,7 +9,7 @@ implemented data flow and ownership, not measured performance or proof of
 learning. The guides embed SVG images, so GitHub and local Markdown readers need no
 Mermaid extension to display them. Mermaid authoring sources are local-only and ignored by Git; see the
 [diagram catalog](assets/diagrams/README.md) for export validation and optional
-local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary images.
+local regeneration. Physics SVGs and animated vector demonstrations are ordinary embedded images.
 
 | Question | Guide and visual |
 | --- | --- |
@@ -56,7 +56,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | Which checks fit a change? | [Verification paths](development.md#choose-checks-for-the-change) |
 | When is a rollout committed? | [Record lifecycle](releases/README.md#rollout-record-lifecycle) |
 | What do rivers, cliffs, visibility and births look like? | [Physics SVG gallery and interactive explorer](physics.md) |
-| What do the actual maps look like during playback? | [Full-viewer terrain GIFs](geography.md#recorded-terrain-previews) |
+| What do the actual maps look like during playback? | [Animated terrain demonstrations](geography.md#recorded-terrain-previews) |
 
 README and the contributor context already have overview/navigation tables;
 asset catalogs already map filenames to cases. They link these visuals rather
@@ -106,12 +106,12 @@ CSS `color-scheme`, even when the operating-system theme differs. Opened on
 their own, these SVGs follow the browser's system preference. Logo variants are
 selected explicitly by the site theme.
 
-Playback previews select an actual light or dark export: the website follows
-its palette toggle and GitHub uses picture media selection. The light animation
-uses compact WebP; the original GIF remains the dark/legacy fallback. No CSS
-color-inversion filter changes recorded animals, lighting or chart values.
-Standalone GIF URLs still show their saved pixels; theme selection belongs to
-the page embedding them.
+Playback illustrations are animated SVGs with theme-aware vector elements,
+not recordings wrapped inside SVG. Their states and chart values are explicitly
+illustrative. Each loops for four seconds and shows its first state when reduced
+motion is requested. Animation support depends on the Markdown host; a static
+fallback remains meaningful. No scripts, raster frames or network requests are
+embedded. See [animation sources](assets/viewer/README.md#animated-vector-demonstrations).
 
 Geography and inspector/viewer SVG specimens have light/dark presentation
 palettes too. Terrain values, node activities, action scores and sign/category

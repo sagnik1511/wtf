@@ -14,8 +14,8 @@ Identify animal pointers, food, obstacles and birth/death symbols in the
 The [viewer visual guide](viewer-visual-reference.md) also covers terrain, sight,
 themes and brain-view graphics.
 
-See the [recorded terrain previews](geography.md#recorded-terrain-previews) for
-short full-screen clips of this viewer on all three maps.
+See the [animated terrain demonstrations](geography.md#recorded-terrain-previews)
+for controlled examples of board appearance on three map types.
 
 ## Visual agent inspector
 
@@ -117,14 +117,10 @@ appear in the playback catalog.
 
 ## Per-step species dashboard
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/species-metrics-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/species-metrics.gif" type="image/gif" />
-  <img src="assets/species-metrics.gif" alt="Species dashboard charts updating as the saved replay advances" />
-</picture>
+![Animated vector demonstration: species metrics; illustrative states, not an experiment recording](assets/viewer/animation-species-metrics.svg)
 
-A 3.5-second preview showing species trends as the recorded timeline advances.
-The selected animation matches the documentation theme.
+A theme-aware vector demonstration illustrates growing per-species history at the
+playhead. Its values are authored examples, not measured population data.
 
 Click **Metrics dashboard** in the toolbar. Its charts follow the replay position
 while playing, stepping or scrubbing; no future frames are displayed. The modal

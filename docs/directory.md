@@ -147,7 +147,7 @@ are indexed by the release hub rather than repeated in the sidebar.
 | [Inspector illustration](assets/inspector/README.md) | Current sight versus sampled observations/predictions |
 | [Physics assets](assets/physics/README.md) | Interactive explorer and controlled physics SVG cases |
 | [Map diagrams](assets/geography/README.md) | Vector geography from maintained map definitions |
-| [Terrain playback exports](assets/terrains/README.md) | Full-viewer clips and refresh instructions |
+| [Terrain playback exports](assets/terrains/README.md) | Animated vector demonstrations and regeneration instructions |
 | [Flow diagrams](assets/diagrams/README.md) | Architecture, learning, inheritance, recording and maintenance flows |
 | [Runtime structures](assets/structures/README.md) | Input vectors, lineage, caches, activations and explanations |
 | [Storage structures](assets/storage/README.md) | Replay, model-weight and checkpoint blocks |

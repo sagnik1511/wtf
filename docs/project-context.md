@@ -8,8 +8,8 @@ Local results and running processes change independently of Git.
 
 For diagrams matched to common questions, start with the
 [visual guide](visual-guide.md). The [physics gallery](physics.md) and
-[recorded terrain previews](geography.md#recorded-terrain-previews) show spatial
-behavior and actual playback.
+[animated terrain demonstrations](geography.md#recorded-terrain-previews) show spatial
+behavior and illustrative board appearance.
 
 ## Customizing or extending the setup
 

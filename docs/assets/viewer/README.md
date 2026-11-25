@@ -36,7 +36,7 @@ byte-for-byte regeneration. No simulation or browser is started.
 
 Board scenes use enlarged cells. Events freeze age zero and omit canvas shadow
 glow. These sheets are identification references, not pixel-exact screenshots
-or animation demonstrations. Workspace boxes and the deep-brain description are
+or simulation results. Workspace boxes and the deep-brain description are
 schematic. All feature values, probabilities, activations and chart lines are
 explicitly illustrative; they do not describe learned behavior. Keep local PNG
 previews in ignored `.cache/`, and track only the intended SVG exports here.
@@ -50,3 +50,29 @@ components, so appending a stylesheet at the first `</svg>` themes only that
 component. The exporter attaches the palette before the final root closing tag;
 a regression check rejects theme styles scoped to nested viewports. Validate the
 complete sheet in both site palettes, not just a component or the CSS source.
+
+## Animated vector demonstrations
+
+The generator also uses [animation composition](../../../work/build_doc_animations.mjs)
+to build eight four-second SVG loops, with eight discrete illustrative states:
+
+| Asset | Source and meaning |
+| --- | --- |
+| [World playback](animation-simulation-playback.svg) | Current board and selected sight, authored positions |
+| [Species metrics](animation-species-metrics.svg) | Schematic cumulative bars for three example species |
+| [Day–night](animation-day-night.svg) | Current board lighting at authored cycle phases |
+| [Animal brain](animation-animal-brain.svg) | Current inspector/network components, illustrative samples |
+| [Archived brain](animation-archived-brain.svg) | Current explanation charts, illustrative comparison data |
+| [River crossing](animation-river-crossing.svg) | Controlled small river map |
+| [Highlands](animation-highlands.svg) | Controlled small elevation map |
+| [Enclosed valleys](animation-enclosed-valleys.svg) | Controlled small enclosure and gate |
+
+The label is inside each image so it survives direct sharing. These do not
+claim to show real inference, learned trajectories, an exact preset map or the
+whole interface. Archive chart values are authored independently of weights.
+One SVG contains both board palettes; the outer viewport owns adaptive theme
+styles. CSS selects one state at a time, and reduced motion disables the loop
+and reveals the first state. No script, embedded raster or external font is used.
+The site's `color-scheme` connects embedded SVGs to its palette toggle; standalone
+images use the browser preference. Hosts that disable animation can show the
+static first state. Regenerate and check with the commands above.

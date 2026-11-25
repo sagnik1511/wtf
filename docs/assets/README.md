@@ -15,7 +15,7 @@ available separately. Opening a raw file leaves the site's theme controls.
 | --- | --- |
 | Structural, physics, map and inspector SVGs | Adaptive palettes follow the site toggle |
 | Theme/daylight comparison sheets | Day/night boards use the selected palette; interface comparison puts the selected theme first, alongside the labeled alternate |
-| Playback GIFs and light WebP variants | Select the matching recorded export, without color inversion |
+| Animated vector demonstrations | One SVG adapts to the site theme; reduced motion freezes the first state |
 | Logo SVG/PNG variants | Select the matching light/dark artwork; favicon PNG has a contrasting presentation surface |
 | Full physics explorer / editable fragment | Embed the complete interactive explorer with inherited light/dark mode; the fragment remains an editable-source download |
 | GitHub banner PNG | Fixed screenshot shown unchanged, with its purpose stated explicitly |
@@ -29,31 +29,15 @@ The catalog does not eagerly embed every image or animation. See the
 The [branding guide](../branding.md) links the transparent SVG symbols, full
 lockups and PNG fallbacks, including light/dark variants and usage rules.
 
-## Current playback clips
+## Animated playback demonstrations
 
-The playback previews are exported from the current viewer using saved replay
-frames, rather than trimmed from an older desktop video. Each preserves the
-whole viewer window (1280 × 720, or 1280 × 1440 for the taller XAI dialogs),
-including its header and controls; there is no
-board-only crop. The metrics clip opens the **Metrics dashboard**, while the
-main playback clip selects an animal to show its sight and inspector.
-
-| Asset | View | Encoding |
-| --- | --- | --- |
-| [simulation-playback.gif](simulation-playback.gif) | Playback with selected-animal inspector | 3.5 s, 14 frames, 4 fps, 128 colors |
-| [species-metrics.gif](species-metrics.gif) | Per-species dashboard following the replay position | 3.5 s, 14 frames, 4 fps, 128 colors |
-| [day-night.gif](day-night.gif) | Sunlight transitions and moving time dial | 3.5 s, 14 frames, 4 fps, 128 colors |
-| [animal-brain.gif](animal-brain.gif) | Selected animal’s actual sampled inputs, outputs and network activity | 3.5 s, 14 frames, 4 fps, 128 colors |
-| [archived-brain.gif](archived-brain.gif) | Fixed archived brain evaluated on changing replay observations | 3.5 s, 14 frames, 4 fps, 128 colors |
-
-Ten simulation steps separate exported frames (20 for day–night), so these are time-compressed
-previews rather than real-time screen recordings. Chart history stops at the
-playhead. The small demonstration replays illustrate the interface and do not
-establish learning quality. Source frames and temporary replays stay outside
-Git; only optimized GIFs and [the provenance manifest](playback-manifest.json)
-are tracked, along with the paired light-theme WebP animations under `themed/`.
-Pages selects the export using its theme toggle; GitHub uses picture media.
-See [the export workflow](terrains/README.md#refresh-the-clips).
+Eight [animated SVG demonstrations](viewer/README.md#animated-vector-demonstrations)
+replace the older raster clips: world playback, per-species metrics, day–night,
+selected-animal brain activity, archived-model comparison, river crossing,
+highlands and enclosed valleys. They are not experiment recordings or full UI
+captures. Current board/inspector components render illustrative states; metrics
+use schematic bars. One file supports both themes without color inversion or
+embedded raster images. See the [terrain catalog](terrains/README.md).
 
 ## Physics diagrams and interactive explorer
 
@@ -62,16 +46,15 @@ standalone explorer, with provenance and regeneration commands. The
 [illustrated guide](../physics.md) presents the cases in context. These contain
 controlled physics snapshots and no training results or model weights.
 
-## Full-viewer terrain previews
+## Animated terrain previews
 
 [Landscape map diagrams](geography/README.md) show four additional maps directly
 from their JSON: a meandering river, delta, alpine passes and lake islands. These
-small vector diagrams have a separate provenance from the recorded GIFs below.
+small vector diagrams use actual preset maps; the animations use controlled example maps.
 
-[Terrain previews](terrains/README.md) documents three 3.5-second GIFs exported
-from the current viewer. The [geography gallery](../geography.md#recorded-terrain-previews)
-embeds them. Like the main clips, these retain the full viewer window and are
-sampled from replay steps rather than captured desktop video.
+[Terrain previews](terrains/README.md) documents three animated SVG examples.
+The [geography gallery](../geography.md#recorded-terrain-previews) embeds them;
+the section anchor is retained for existing links.
 
 ## Software and learning flows
 

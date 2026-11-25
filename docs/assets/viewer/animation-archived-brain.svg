@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-labelledby="title desc"><title id="title">Archived-model explanation follows input samples</title><desc id="desc">Animated vector demonstration · illustrative states, not a recorded experiment · 4-second loop</desc><style>.viewer-component text{font:12px system-ui,sans-serif;fill:#a9bacc}</style><rect class="sheet-background" width="1200" height="480" rx="14" fill="#0b1118"/><g class="sheet-heading"><text x="28" y="38" font-family="system-ui,sans-serif" font-size="25" fill="#e6edf3" text-anchor="start" font-weight="600">Archived-model explanation follows input samples</text><text x="28" y="67" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Animated vector demonstration · illustrative states, not a recorded experiment · 4-second loop</text></g><style>
+    .demo-frame:first-of-type{visibility:visible}
+    .demo-frame{visibility:hidden;animation:demo-frame 4s steps(1,end) infinite}
+    @keyframes demo-frame{0%,12.499%{visibility:visible}12.5%,100%{visibility:hidden}}
+    .demo-light{display:none}
+    @media(prefers-color-scheme:light){.demo-light{display:inline}.demo-dark{display:none}}
+    @media(prefers-reduced-motion:reduce){.demo-frame{animation:none!important;visibility:hidden}.demo-frame:first-of-type{visibility:visible}}
+  </style><g class="demo-sequence"><g class="demo-frame" style="animation-delay:-4s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.6000 × gradient -0.0200 = -0.0120</title></rect><text x="640" y="22" text-anchor="end">-0.0120</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.5" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.8500 × gradient +0.0300 = +0.0255</title></rect><text x="640" y="48" text-anchor="end">+0.0255</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.000 × gradient +0.0300 = -0.0300</title></rect><text x="640" y="100" text-anchor="end">-0.0300</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.000 × gradient +0.0300 = +0.0300</title></rect><text x="640" y="152" text-anchor="end">+0.0300</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="276" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.80000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">80.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="69" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.20000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">20.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-3.5s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.6600 × gradient -0.0200 = -0.0132</title></rect><text x="640" y="22" text-anchor="end">-0.0132</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.5" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.9350 × gradient +0.0300 = +0.0281</title></rect><text x="640" y="48" text-anchor="end">+0.0281</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.100 × gradient +0.0300 = -0.0330</title></rect><text x="640" y="100" text-anchor="end">-0.0330</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.100 × gradient +0.0300 = +0.0330</title></rect><text x="640" y="152" text-anchor="end">+0.0330</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="248.40000000000003" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.72000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">72.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="96.60000000000002" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.28000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">28.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-3s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.7200 × gradient -0.0200 = -0.0144</title></rect><text x="640" y="22" text-anchor="end">-0.0144</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.5" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.020 × gradient +0.0300 = +0.0306</title></rect><text x="640" y="48" text-anchor="end">+0.0306</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.200 × gradient +0.0300 = -0.0360</title></rect><text x="640" y="100" text-anchor="end">-0.0360</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.200 × gradient +0.0300 = +0.0360</title></rect><text x="640" y="152" text-anchor="end">+0.0360</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="220.8" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.64000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">64.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="124.19999999999999" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.36000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">36.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-2.5s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.7800 × gradient -0.0200 = -0.0156</title></rect><text x="640" y="22" text-anchor="end">-0.0156</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.5" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.105 × gradient +0.0300 = +0.0331</title></rect><text x="640" y="48" text-anchor="end">+0.0331</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.300 × gradient +0.0300 = -0.0390</title></rect><text x="640" y="100" text-anchor="end">-0.0390</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.300 × gradient +0.0300 = +0.0390</title></rect><text x="640" y="152" text-anchor="end">+0.0390</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="193.20000000000005" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.56000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">56.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="151.8" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.44000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">44.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-2s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.8400 × gradient -0.0200 = -0.0168</title></rect><text x="640" y="22" text-anchor="end">-0.0168</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.5" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.190 × gradient +0.0300 = +0.0357</title></rect><text x="640" y="48" text-anchor="end">+0.0357</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.400 × gradient +0.0300 = -0.0420</title></rect><text x="640" y="100" text-anchor="end">-0.0420</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.400 × gradient +0.0300 = +0.0420</title></rect><text x="640" y="152" text-anchor="end">+0.0420</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="165.60000000000002" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.48000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">48.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="179.39999999999998" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.52000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">52.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-1.5s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60.000000000000014" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.9000 × gradient -0.0200 = -0.0180</title></rect><text x="640" y="22" text-anchor="end">-0.0180</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.5" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.275 × gradient +0.0300 = +0.0382</title></rect><text x="640" y="48" text-anchor="end">+0.0382</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.500 × gradient +0.0300 = -0.0450</title></rect><text x="640" y="100" text-anchor="end">-0.0450</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.500 × gradient +0.0300 = +0.0450</title></rect><text x="640" y="152" text-anchor="end">+0.0450</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="138" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.40000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">40.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="207" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.60000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">60.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-1s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 0.9600 × gradient -0.0200 = -0.0192</title></rect><text x="640" y="22" text-anchor="end">-0.0192</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.50000000000001" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.360 × gradient +0.0300 = +0.0408</title></rect><text x="640" y="48" text-anchor="end">+0.0408</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.600 × gradient +0.0300 = -0.0480</title></rect><text x="640" y="100" text-anchor="end">-0.0480</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.600 × gradient +0.0300 = +0.0480</title></rect><text x="640" y="152" text-anchor="end">+0.0480</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="110.40000000000003" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.32000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">32.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="234.59999999999997" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.68000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">68.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g><g class="demo-frame" style="animation-delay:-0.5s"><rect x="28" y="100" width="1144" height="330" rx="10" fill="#111c27" stroke="#415569"/><text x="50" y="132" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">Fixed archived model · illustrative changing inputs and output comparison</text><g class="viewer-component" transform="translate(50 155) scale(0.8154)"><title>Local input sensitivity for rest</title><line x1="425" y1="6" x2="425" y2="224" stroke="var(--viz-61798f, #61798f)"></line><text x="240" y="22" text-anchor="end">Input 0</text><rect x="365" y="10" width="60.000000000000014" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input 1.020 × gradient -0.0200 = -0.0204</title></rect><text x="640" y="22" text-anchor="end">-0.0204</text><text x="240" y="48" text-anchor="end">Input 1</text><rect x="425" y="36" width="127.49999999999999" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.445 × gradient +0.0300 = +0.0433</title></rect><text x="640" y="48" text-anchor="end">+0.0433</text><text x="240" y="74" text-anchor="end">Input 2</text><rect x="425" y="62" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="74" text-anchor="end">+0.00</text><text x="240" y="100" text-anchor="end">Input 3</text><rect x="275" y="88" width="150" height="15" fill="var(--viz-ff9aab, #ff9aab)" rx="2"><title>Input -1.700 × gradient +0.0300 = -0.0510</title></rect><text x="640" y="100" text-anchor="end">-0.0510</text><text x="240" y="126" text-anchor="end">Input 4</text><rect x="425" y="114" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="126" text-anchor="end">+0.00</text><text x="240" y="152" text-anchor="end">Input 5</text><rect x="425" y="140" width="150" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 1.700 × gradient +0.0300 = +0.0510</title></rect><text x="640" y="152" text-anchor="end">+0.0510</text><text x="240" y="178" text-anchor="end">Input 6</text><rect x="425" y="166" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient -0.0200 = +0.00</title></rect><text x="640" y="178" text-anchor="end">+0.00</text><text x="240" y="204" text-anchor="end">Input 7</text><rect x="425" y="192" width="0" height="15" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Input 0.000 × gradient +0.0300 = +0.00</title></rect><text x="640" y="204" text-anchor="end">+0.00</text><text x="425" y="243" text-anchor="middle">← negative local influence · zero · positive →</text></g><g class="viewer-component" transform="translate(610 155) scale(0.8154)"><title>Archived model predictions compared with recorded animal predictions</title><text x="195" y="22" text-anchor="end">rest</text><rect x="205" y="8" width="82.80000000000001" height="11" fill="var(--viz-7de2bd, #7de2bd)" rx="2"><title>Archived inference 0.24000</title></rect><rect x="205" y="21" width="155.25" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="22" text-anchor="end">24.0%</text><text x="195" y="58" text-anchor="end">move backward</text><rect x="205" y="44" width="262.2" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.76000</title></rect><rect x="205" y="57" width="189.75" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="58" text-anchor="end">76.0%</text><text x="195" y="94" text-anchor="end">eat · masked</text><rect x="205" y="80" width="0" height="11" fill="var(--viz-8ac8ff, #8ac8ff)" rx="2"><title>Archived inference 0.0000</title></rect><rect x="205" y="93" width="0" height="6" fill="var(--viz-8b9cad, #8b9cad)" rx="2"></rect><text x="640" y="94" text-anchor="end">0.0%</text><text x="205" y="136">Color = archived inference · gray = recorded prediction (different weights/time)</text></g></g></g><style>/* Shared source for standalone viewer/inspector SVG specimens. */
+@media (prefers-color-scheme: light) {
+  [fill='#03091c'] {
+    fill: #304c52;
+  }
+  [stroke='#89d4ff90'] {
+    stroke: #145b8fb0;
+  }
+  svg {
+    --viz-0b131c: #eaf0f5;
+    --viz-415569: #a2b5c7;
+    --viz-263341: #b7c8d7;
+    --viz-8ac8ff88: #1f639c88;
+    --viz-fff: #172c3c;
+    --viz-61798f: #617385;
+    --viz-8b9cad: #667788;
+    --viz-7de2bd: #19714f;
+    --viz-ff9aab: #b33352;
+    --viz-ff9a77: #a84122;
+    --viz-c6a5ff: #7252a5;
+    --viz-a2c76b: #5c741a;
+    --viz-8ac8ff: #1f639c;
+    --viz-ffbd75: #965616;
+    --viz-a1c8b0: #416d55;
+    --viz-e1d17c: #7c6a18;
+    --viz-79d6df: #236f7c;
+  }
+  [fill='#63ab6f'] {
+    fill: #34784a;
+  }
+  [stroke='#63ab6f'] {
+    stroke: #34784a;
+  }
+  svg text {
+    fill: #172c3c;
+  }
+  svg .muted,
+  svg .viewer-component text {
+    fill: #4b6073;
+  }
+  [fill='#0b131c'] {
+    fill: #eaf0f5;
+  }
+  [stroke='#0b131c'] {
+    stroke: #eaf0f5;
+  }
+  [style*='fill:#0b131c'] {
+    fill: #eaf0f5 !important;
+  }
+  [fill='#415569'] {
+    fill: #a2b5c7;
+  }
+  [stroke='#415569'] {
+    stroke: #a2b5c7;
+  }
+  [style*='fill:#415569'] {
+    fill: #a2b5c7 !important;
+  }
+  [fill='#263341'] {
+    fill: #b7c8d7;
+  }
+  [stroke='#263341'] {
+    stroke: #b7c8d7;
+  }
+  [style*='fill:#263341'] {
+    fill: #b7c8d7 !important;
+  }
+  [fill='#fff'] {
+    fill: #172c3c;
+  }
+  [stroke='#fff'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#fff'] {
+    fill: #172c3c !important;
+  }
+  [fill='#61798f'] {
+    fill: #617385;
+  }
+  [stroke='#61798f'] {
+    stroke: #617385;
+  }
+  [style*='fill:#61798f'] {
+    fill: #617385 !important;
+  }
+  [fill='#8b9cad'] {
+    fill: #667788;
+  }
+  [stroke='#8b9cad'] {
+    stroke: #667788;
+  }
+  [style*='fill:#8b9cad'] {
+    fill: #667788 !important;
+  }
+  [fill='#7de2bd'] {
+    fill: #19714f;
+  }
+  [stroke='#7de2bd'] {
+    stroke: #19714f;
+  }
+  [style*='fill:#7de2bd'] {
+    fill: #19714f !important;
+  }
+  [fill='#ff9aab'] {
+    fill: #b33352;
+  }
+  [stroke='#ff9aab'] {
+    stroke: #b33352;
+  }
+  [style*='fill:#ff9aab'] {
+    fill: #b33352 !important;
+  }
+  [fill='#ff9a77'] {
+    fill: #a84122;
+  }
+  [stroke='#ff9a77'] {
+    stroke: #a84122;
+  }
+  [style*='fill:#ff9a77'] {
+    fill: #a84122 !important;
+  }
+  [fill='#c6a5ff'] {
+    fill: #7252a5;
+  }
+  [stroke='#c6a5ff'] {
+    stroke: #7252a5;
+  }
+  [style*='fill:#c6a5ff'] {
+    fill: #7252a5 !important;
+  }
+  [fill='#a2c76b'] {
+    fill: #5c741a;
+  }
+  [stroke='#a2c76b'] {
+    stroke: #5c741a;
+  }
+  [style*='fill:#a2c76b'] {
+    fill: #5c741a !important;
+  }
+  [fill='#8ac8ff'] {
+    fill: #1f639c;
+  }
+  [stroke='#8ac8ff'] {
+    stroke: #1f639c;
+  }
+  [style*='fill:#8ac8ff'] {
+    fill: #1f639c !important;
+  }
+  [fill='#ffbd75'] {
+    fill: #965616;
+  }
+  [stroke='#ffbd75'] {
+    stroke: #965616;
+  }
+  [style*='fill:#ffbd75'] {
+    fill: #965616 !important;
+  }
+  [fill='#a1c8b0'] {
+    fill: #416d55;
+  }
+  [stroke='#a1c8b0'] {
+    stroke: #416d55;
+  }
+  [style*='fill:#a1c8b0'] {
+    fill: #416d55 !important;
+  }
+  [fill='#e1d17c'] {
+    fill: #7c6a18;
+  }
+  [stroke='#e1d17c'] {
+    stroke: #7c6a18;
+  }
+  [style*='fill:#e1d17c'] {
+    fill: #7c6a18 !important;
+  }
+  [fill='#79d6df'] {
+    fill: #236f7c;
+  }
+  [stroke='#79d6df'] {
+    stroke: #236f7c;
+  }
+  [style*='fill:#79d6df'] {
+    fill: #236f7c !important;
+  }
+  [fill='#0b1118'] {
+    fill: #f2f5f8;
+  }
+  [stroke='#0b1118'] {
+    stroke: #f2f5f8;
+  }
+  [style*='fill:#0b1118'] {
+    fill: #f2f5f8 !important;
+  }
+  [fill='#111c21'] {
+    fill: #f2f5f8;
+  }
+  [stroke='#111c21'] {
+    stroke: #f2f5f8;
+  }
+  [style*='fill:#111c21'] {
+    fill: #f2f5f8 !important;
+  }
+  [fill='#111c27'] {
+    fill: #ffffff;
+  }
+  [stroke='#111c27'] {
+    stroke: #ffffff;
+  }
+  [style*='fill:#111c27'] {
+    fill: #ffffff !important;
+  }
+  [fill='#101a22'] {
+    fill: #dce6d8;
+  }
+  [stroke='#101a22'] {
+    stroke: #dce6d8;
+  }
+  [style*='fill:#101a22'] {
+    fill: #dce6d8 !important;
+  }
+  [fill='#e6edf3'] {
+    fill: #172c3c;
+  }
+  [stroke='#e6edf3'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#e6edf3'] {
+    fill: #172c3c !important;
+  }
+  [fill='#e1e9e8'] {
+    fill: #172c3c;
+  }
+  [stroke='#e1e9e8'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#e1e9e8'] {
+    fill: #172c3c !important;
+  }
+  [fill='#a4b5c5'] {
+    fill: #4b6073;
+  }
+  [stroke='#a4b5c5'] {
+    stroke: #4b6073;
+  }
+  [style*='fill:#a4b5c5'] {
+    fill: #4b6073 !important;
+  }
+  [fill='#a9bacc'] {
+    fill: #4b6073;
+  }
+  [stroke='#a9bacc'] {
+    stroke: #4b6073;
+  }
+  [style*='fill:#a9bacc'] {
+    fill: #4b6073 !important;
+  }
+  [fill='#3a4b5c'] {
+    fill: #6a7d89;
+  }
+  [stroke='#3a4b5c'] {
+    stroke: #6a7d89;
+  }
+  [style*='fill:#3a4b5c'] {
+    fill: #6a7d89 !important;
+  }
+  [fill='#13212a'] {
+    fill: #e3edf4;
+  }
+  [fill='#1c1019'] {
+    fill: #f6e3ea;
+  }
+  [fill='#102632'] {
+    fill: #dceef7;
+  }
+  [fill='#f0dfba75'] {
+    fill: #f7ead2;
+  }
+  /* Same-species competition uses the actual viewer's light-theme amber. */
+  [fill='#ffd08a'] {
+    fill: #9a4100;
+  }
+  [stroke='#ffd08a'] {
+    stroke: #9a4100;
+  }
+  text[stroke='#111827'] {
+    stroke: #ffffff;
+  }
+}
+@media (prefers-color-scheme: light) {}</style></svg>

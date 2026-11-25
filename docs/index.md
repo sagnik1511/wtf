@@ -14,11 +14,7 @@ brains, observe their surroundings, choose actions, learn from feedback and can
 produce descendants. Python simulates and records; JavaScript plays the saved
 world later, independently of training.
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/simulation-playback-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/simulation-playback.gif" type="image/gif" />
-  <img src="assets/simulation-playback.gif" alt="Saved ecosystem playback" />
-</picture>
+![Animated vector demonstration: simulation playback; illustrative states, not an experiment recording](assets/viewer/animation-simulation-playback.svg)
 
 ## Install the published package
 

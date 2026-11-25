@@ -65,17 +65,12 @@ initialize these worlds, but suitability requires evaluation under the cycle.
 
 ## Playback and storage
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/day-night-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/day-night.gif" type="image/gif" />
-  <img src="assets/day-night.gif" alt="Current viewer progressing from dawn through midday and dusk into night, with its moving time dial" />
-</picture>
+![Animated vector demonstration: day night; illustrative states, not an experiment recording](assets/viewer/animation-day-night.svg)
 
-This 3.5-second full-viewer preview samples the maintained day–night preset
-at 20-step intervals. It compresses world time to show the sunlight cycle and
-time dial together. [Clip sources and refresh workflow](assets/terrains/README.md#refresh-the-clips)
-are documented separately; it is a UI demonstration rather than a learning evaluation.
-
+The four-second vector loop uses the current board renderer at eight authored
+cycle phases. Both interface themes retain their own day/night lighting. This is
+a controlled demonstration, not a recording or a learning evaluation.
+[Sources and regeneration](assets/viewer/README.md#animated-vector-demonstrations).
 
 The ground brightens gradually toward midday, before animal/resource glyphs
 are drawn. The board darkens gradually with a warm dawn/dusk tint, and stays legible at

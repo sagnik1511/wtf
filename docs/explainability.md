@@ -12,18 +12,12 @@ archive or explanation API request.
 
 ## Recorded animal activations
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/animal-brain-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/animal-brain.gif" type="image/gif" />
-  <img src="assets/animal-brain.gif" alt="Selected animal’s recorded input summaries, action estimates and small-network activations updating through replay" />
-</picture>
+![Animated vector demonstration: animal brain; illustrative states, not an experiment recording](assets/viewer/animation-animal-brain.svg)
 
-This time-compressed current-viewer clip follows one selected animal through
-saved samples. Colors and scores update only when its recorded diagnostic sample
-changes. It shows observed activity and connectivity, not causal importance.
-[Clip provenance and refresh workflow](assets/terrains/README.md#refresh-the-clips)
-are maintained with the other playback assets.
-
+This animated vector demonstration uses the current inspector and network drawing
+components with illustrative inputs, action scores and activations. It is not a
+saved animal, measured inference or evidence of learning. The actual playback
+behavior described below is unchanged. [Sources and regeneration](assets/viewer/README.md#animated-vector-demonstrations).
 
 The [inspector appearance sheet](viewer-visual-reference.md#inspector-and-brain-views) shows the radar, output bars and rank-based network display.
 
@@ -79,17 +73,13 @@ new recordings that saved no champion archives.
 
 ## Archived comparison
 
-<picture class="replay-preview">
-  <source media="(prefers-color-scheme: light)" srcset="assets/themed/archived-brain-light.webp" type="image/webp" />
-  <source media="(prefers-color-scheme: dark)" srcset="assets/archived-brain.gif" type="image/gif" />
-  <img src="assets/archived-brain.gif" alt="Archived brain explanation following changing replay observations, with input sensitivities, action-score comparisons and network activations" />
-</picture>
+![Animated vector demonstration: archived brain; illustrative states, not an experiment recording](assets/viewer/animation-archived-brain.svg)
 
 Here the archive stays fixed while the selected animal's replay observations
 change. The changing input sensitivities, predicted returns and activation
 colors belong to that archived model evaluated on each sample. Gray action bars
 show the animal's separate recorded scores. Local sensitivity is not causal
-importance; the animated comparison is not a reconstruction of historical weights.
+importance; the vector demonstration uses illustrative scores and is not a reconstruction of historical weights.
 
 
 The remaining sections describe **Explain saved brain**, which analyzes a chosen

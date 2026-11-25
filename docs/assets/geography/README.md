@@ -2,7 +2,7 @@
 
 [Geography guide](../../geography.md#landscape-inspired-maps) · [Asset index](../README.md)
 
-The ten SVGs in this directory are generated from the actual editable
+The eleven SVGs in this directory are generated from the actual editable
 `maps/*.json` definitions selected by their corresponding environment presets.
 They show dry land, elevation, blocked rock, water depth and sampled current
 arrows. Water/elevation colors follow the viewer's terrain color formulas.
@@ -18,7 +18,7 @@ Regenerate from the project root with no extra packages or training:
 .venv/bin/python -m work.build_geography_previews
 ```
 
-The helper reads its ten named environment presets, resolves and validates their
+The helper reads its eleven named environment presets, resolves and validates their
 map references, and overwrites only those SVG assets. Use `--check` to verify
 that saved previews match the current maps without writing files. Both light and
 dark palettes preserve terrain/obstacle/current distinctions. Edit the map JSON first;

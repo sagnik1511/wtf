@@ -18,7 +18,15 @@ from wtf.storage.recording import RecordingStore
 from wtf.storage.replay_io import load_chunk
 from work.build_geography_previews import preview
 
-NAMES = ("grasslands", "seaside", "rolling_hills", "wetlands", "canyon", "oasis")
+NAMES = (
+    "grasslands",
+    "seaside",
+    "rolling_hills",
+    "wetlands",
+    "canyon",
+    "oasis",
+    "land_bridge",
+)
 DRY = {"grasslands", "rolling_hills"}
 
 

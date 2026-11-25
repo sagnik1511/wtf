@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { buildDocAnimations } from './build_doc_animations.mjs';
 import { drawFeedings } from '../viewer/feeding-highlights.mjs';
 import {
   drawEnvironmentObjects,
@@ -1435,6 +1436,25 @@ const socialLearning = sheet(
     .join(''),
 );
 const outputs = {
+  ...buildDocAnimations({
+    board,
+    animal,
+    sheet,
+    box,
+    text,
+    lines,
+    geography,
+    land,
+    inspectorGraphs,
+    walk,
+    component,
+    diagnostic,
+    template,
+    networkStructure,
+    animalStructure,
+    explanationCharts,
+    report: r,
+  }),
   'social-learning.svg': socialLearning,
   'object-shadows.svg': shadows,
   'river-feeding.svg': riverFeeding,

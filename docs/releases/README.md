@@ -9,7 +9,7 @@ child document. Operational instructions remain in the relevant project guides.
 **Latest committed rollout:** [0.0.2.30](0.0.2.30.md), `dc91fbd`.
 **Latest committed runtime implementation:** [0.0.2.30](0.0.2.30.md), `dc91fbd`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** None.
+**Pending rollouts:** [0.0.2.31](0.0.2.31.md) — land-bridge preset.
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,6 +25,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
+| [0.0.2.31](0.0.2.31.md) | Pending | 2026-11-26 | Not committed | Two landmasses connected by a three-cell-wide dry bridge, with packaged preset/map and adaptive preview |
 | [0.0.2.30](0.0.2.30.md) | Committed | 2026-11-25 | `dc91fbd` | Exact bulk gradient widening and resident DQN/DDQN clipping, Adam and target synchronization |
 | [0.0.2.29](0.0.2.29.md) | Committed | 2026-11-25 | `bdf213d` | Complete GPU PPO updates, compact gradient storage, weight caching, optional FP32 and component timing |
 | [0.0.2.28](0.0.2.28.md) | Committed | 2026-11-24 | `2033233` | Optional Linux/NVIDIA dense evaluation and DQN/DDQN gradients |

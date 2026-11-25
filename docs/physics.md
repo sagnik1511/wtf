@@ -71,8 +71,8 @@ If you prefer a local URL, from the repository root:
 Then open [the explorer](http://127.0.0.1:8002/explorer.html). Stop that temporary
 server with Ctrl-C. It is separate from the simulation viewer on port 8000.
 
-For full recordings of the actual viewer, see the
-[terrain GIF gallery](geography.md#recorded-terrain-previews). The diagrams below
+For animated vector examples using the current board renderer, see the
+[terrain gallery](geography.md#recorded-terrain-previews). The diagrams below
 are controlled physics illustrations, not screen recordings.
 
 For the training, archive, storage and cache diagrams, see the

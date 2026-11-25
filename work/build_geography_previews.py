@@ -24,6 +24,7 @@ NAMES = (
     "river_delta",
     "alpine_pass",
     "lake_islands",
+    "land_bridge",
     "grasslands",
     "seaside",
     "rolling_hills",

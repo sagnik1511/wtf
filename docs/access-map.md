@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **314 public documentation pages**, **122 visual files**
+Coverage: **308 public documentation pages**, **115 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -29,7 +29,7 @@ and **8 identical viewer branding copies**.
 | [Physics asset catalog](assets/physics/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Physics assets](assets/physics/README.md) |
 | [Playback, model and checkpoint structure illustrations](assets/storage/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Storage structures](assets/storage/README.md) |
 | [Selected runtime structure illustrations](assets/structures/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Runtime structures](assets/structures/README.md) |
-| [Current terrain playback previews](assets/terrains/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Terrain playback exports](assets/terrains/README.md) |
+| [Animated terrain demonstrations](assets/terrains/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Terrain playback exports](assets/terrains/README.md) |
 | [Viewer appearance assets](assets/viewer/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Viewer specimens](assets/viewer/README.md) |
 | [Binary replay and checkpoint storage](binary-storage.md) | [Home](index.md) → [binary storage](binary-storage.md) |
 | [Saved champions and model generations](brain-library.md) | [Home](index.md) → [Champions and inheritance](brain-library.md) |
@@ -96,8 +96,6 @@ and **8 identical viewer branding copies**.
 | [Playback and inspection](viewer/playback/index.md) | [Home](index.md) → [Playback and inspection](viewer/playback/index.md) |
 | [Stored artifacts](viewer/storage/index.md) | [Home](index.md) → [Stored artifacts](viewer/storage/index.md) |
 | [Visual guide to the documentation](visual-guide.md) | [Home](index.md) → [Visual guide](visual-guide.md) |
-| [Animal brain (GIF)](visual-previews/animal-brain-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Animal brain (GIF)](visual-previews/animal-brain-gif.md) |
-| [Archived brain (GIF)](visual-previews/archived-brain-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Archived brain (GIF)](visual-previews/archived-brain-gif.md) |
 | [Favicon (PNG)](visual-previews/branding/favicon-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Favicon (PNG)](visual-previews/branding/favicon-png.md) |
 | [Favicon (SVG)](visual-previews/branding/favicon-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Favicon (SVG)](visual-previews/branding/favicon-svg.md) |
 | [Github banner dark (PNG)](visual-previews/branding/github-banner-dark-png.md) | [Home](index.md) → [All visuals](visuals.md) → [Github banner dark (PNG)](visual-previews/branding/github-banner-dark-png.md) |
@@ -117,7 +115,6 @@ and **8 identical viewer branding copies**.
 | [WTF symbol light (SVG)](visual-previews/branding/wtf-symbol-light-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF symbol light (SVG)](visual-previews/branding/wtf-symbol-light-svg.md) |
 | [WTF symbol motion dark (SVG)](visual-previews/branding/wtf-symbol-motion-dark-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF symbol motion dark (SVG)](visual-previews/branding/wtf-symbol-motion-dark-svg.md) |
 | [WTF symbol motion light (SVG)](visual-previews/branding/wtf-symbol-motion-light-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [WTF symbol motion light (SVG)](visual-previews/branding/wtf-symbol-motion-light-svg.md) |
-| [Day night (GIF)](visual-previews/day-night-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night (GIF)](visual-previews/day-night-gif.md) |
 | [Additional policy structures (SVG)](visual-previews/diagrams/additional-policy-structures-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Additional policy structures (SVG)](visual-previews/diagrams/additional-policy-structures-svg.md) |
 | [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) |
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) |
@@ -157,6 +154,7 @@ and **8 identical viewer branding copies**.
 | [Canyon (SVG)](visual-previews/geography/canyon-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Canyon (SVG)](visual-previews/geography/canyon-svg.md) |
 | [Grasslands (SVG)](visual-previews/geography/grasslands-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Grasslands (SVG)](visual-previews/geography/grasslands-svg.md) |
 | [Lake islands (SVG)](visual-previews/geography/lake_islands-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Lake islands (SVG)](visual-previews/geography/lake_islands-svg.md) |
+| [Land bridge (SVG)](visual-previews/geography/land_bridge-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Land bridge (SVG)](visual-previews/geography/land_bridge-svg.md) |
 | [Meandering river (SVG)](visual-previews/geography/meandering_river-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Meandering river (SVG)](visual-previews/geography/meandering_river-svg.md) |
 | [Oasis (SVG)](visual-previews/geography/oasis-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Oasis (SVG)](visual-previews/geography/oasis-svg.md) |
 | [River delta (SVG)](visual-previews/geography/river_delta-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [River delta (SVG)](visual-previews/geography/river_delta-svg.md) |
@@ -177,8 +175,6 @@ and **8 identical viewer branding copies**.
 | [Visibility species (SVG)](visual-previews/physics/visibility-species-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Visibility species (SVG)](visual-previews/physics/visibility-species-svg.md) |
 | [Visibility valley (SVG)](visual-previews/physics/visibility-valley-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Visibility valley (SVG)](visual-previews/physics/visibility-valley-svg.md) |
 | [Visibility water (SVG)](visual-previews/physics/visibility-water-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Visibility water (SVG)](visual-previews/physics/visibility-water-svg.md) |
-| [Simulation playback (GIF)](visual-previews/simulation-playback-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Simulation playback (GIF)](visual-previews/simulation-playback-gif.md) |
-| [Species metrics (GIF)](visual-previews/species-metrics-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Species metrics (GIF)](visual-previews/species-metrics-gif.md) |
 | [Artifact retention (SVG)](visual-previews/storage/artifact-retention-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Artifact retention (SVG)](visual-previews/storage/artifact-retention-svg.md) |
 | [Binary chunk layout (SVG)](visual-previews/storage/binary-chunk-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Binary chunk layout (SVG)](visual-previews/storage/binary-chunk-layout-svg.md) |
 | [Checkpoint controller state (SVG)](visual-previews/storage/checkpoint-controller-state-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Checkpoint controller state (SVG)](visual-previews/storage/checkpoint-controller-state-svg.md) |
@@ -196,17 +192,14 @@ and **8 identical viewer branding copies**.
 | [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Package layout (SVG)](visual-previews/structures/package-layout-svg.md) |
 | [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Spatial window cache (SVG)](visual-previews/structures/spatial-window-cache-svg.md) |
 | [Tracking data flow (SVG)](visual-previews/structures/tracking-data-flow-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Tracking data flow (SVG)](visual-previews/structures/tracking-data-flow-svg.md) |
-| [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Enclosed valleys (GIF)](visual-previews/terrains/enclosed-valleys-gif.md) |
-| [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [Highlands (GIF)](visual-previews/terrains/highlands-gif.md) |
-| [River crossing (GIF)](visual-previews/terrains/river-crossing-gif.md) | [Home](index.md) → [All visuals](visuals.md) → [River crossing (GIF)](visual-previews/terrains/river-crossing-gif.md) |
-| [Animal brain light (WEBP)](visual-previews/themed/animal-brain-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Animal brain light (WEBP)](visual-previews/themed/animal-brain-light-webp.md) |
-| [Archived brain light (WEBP)](visual-previews/themed/archived-brain-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Archived brain light (WEBP)](visual-previews/themed/archived-brain-light-webp.md) |
-| [Day night light (WEBP)](visual-previews/themed/day-night-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night light (WEBP)](visual-previews/themed/day-night-light-webp.md) |
-| [Enclosed valleys light (WEBP)](visual-previews/themed/enclosed-valleys-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Enclosed valleys light (WEBP)](visual-previews/themed/enclosed-valleys-light-webp.md) |
-| [Highlands light (WEBP)](visual-previews/themed/highlands-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Highlands light (WEBP)](visual-previews/themed/highlands-light-webp.md) |
-| [River crossing light (WEBP)](visual-previews/themed/river-crossing-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [River crossing light (WEBP)](visual-previews/themed/river-crossing-light-webp.md) |
-| [Simulation playback light (WEBP)](visual-previews/themed/simulation-playback-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Simulation playback light (WEBP)](visual-previews/themed/simulation-playback-light-webp.md) |
-| [Species metrics light (WEBP)](visual-previews/themed/species-metrics-light-webp.md) | [Home](index.md) → [All visuals](visuals.md) → [Species metrics light (WEBP)](visual-previews/themed/species-metrics-light-webp.md) |
+| [Animation animal brain (SVG)](visual-previews/viewer/animation-animal-brain-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation animal brain (SVG)](visual-previews/viewer/animation-animal-brain-svg.md) |
+| [Animation archived brain (SVG)](visual-previews/viewer/animation-archived-brain-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation archived brain (SVG)](visual-previews/viewer/animation-archived-brain-svg.md) |
+| [Animation day night (SVG)](visual-previews/viewer/animation-day-night-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation day night (SVG)](visual-previews/viewer/animation-day-night-svg.md) |
+| [Animation enclosed valleys (SVG)](visual-previews/viewer/animation-enclosed-valleys-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation enclosed valleys (SVG)](visual-previews/viewer/animation-enclosed-valleys-svg.md) |
+| [Animation highlands (SVG)](visual-previews/viewer/animation-highlands-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation highlands (SVG)](visual-previews/viewer/animation-highlands-svg.md) |
+| [Animation river crossing (SVG)](visual-previews/viewer/animation-river-crossing-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation river crossing (SVG)](visual-previews/viewer/animation-river-crossing-svg.md) |
+| [Animation simulation playback (SVG)](visual-previews/viewer/animation-simulation-playback-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation simulation playback (SVG)](visual-previews/viewer/animation-simulation-playback-svg.md) |
+| [Animation species metrics (SVG)](visual-previews/viewer/animation-species-metrics-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Animation species metrics (SVG)](visual-previews/viewer/animation-species-metrics-svg.md) |
 | [Board objects (SVG)](visual-previews/viewer/board-objects-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Board objects (SVG)](visual-previews/viewer/board-objects-svg.md) |
 | [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) |
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night (SVG)](visual-previews/viewer/day-night-svg.md) |
@@ -321,6 +314,7 @@ and **8 identical viewer branding copies**.
 | [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.30 Bulk gradient conversion and resident DQN optimizers](releases/0.0.2.30.md) | [Home](index.md) → [Calibration](calibration.md) → [V3 benchmark evidence](releases/0.0.2.30.md) |
+| [0.0.2.31 Land-bridge environment](releases/0.0.2.31.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.31](releases/0.0.2.31.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
@@ -402,6 +396,7 @@ and **8 identical viewer branding copies**.
 | `assets/geography/canyon.svg` | [Home](index.md) → [All visuals](visuals.md) → [canyon.svg](assets/geography/canyon.svg) |
 | `assets/geography/grasslands.svg` | [Home](index.md) → [All visuals](visuals.md) → [grasslands.svg](assets/geography/grasslands.svg) |
 | `assets/geography/lake_islands.svg` | [Home](index.md) → [All visuals](visuals.md) → [lake_islands.svg](assets/geography/lake_islands.svg) |
+| `assets/geography/land_bridge.svg` | [Home](index.md) → [All visuals](visuals.md) → [land_bridge.svg](assets/geography/land_bridge.svg) |
 | `assets/geography/meandering_river.svg` | [Home](index.md) → [All visuals](visuals.md) → [meandering_river.svg](assets/geography/meandering_river.svg) |
 | `assets/geography/oasis.svg` | [Home](index.md) → [All visuals](visuals.md) → [oasis.svg](assets/geography/oasis.svg) |
 | `assets/geography/river_delta.svg` | [Home](index.md) → [All visuals](visuals.md) → [river_delta.svg](assets/geography/river_delta.svg) |
@@ -459,31 +454,18 @@ and **8 identical viewer branding copies**.
 | `assets/structures/spatial-window-cache.svg` | [Home](index.md) → [All visuals](visuals.md) → [spatial-window-cache.svg](assets/structures/spatial-window-cache.svg) |
 | `assets/structures/tracking-data-flow.svg` | [Home](index.md) → [All visuals](visuals.md) → [tracking-data-flow.svg](assets/structures/tracking-data-flow.svg) |
 
-## Terrain playback clips
-
-| Visual file | Click sequence from Home |
-| --- | --- |
-| `assets/terrains/enclosed-valleys.gif` | [Home](index.md) → [All visuals](visuals.md) → [enclosed-valleys.gif](assets/terrains/enclosed-valleys.gif) |
-| `assets/terrains/highlands.gif` | [Home](index.md) → [All visuals](visuals.md) → [highlands.gif](assets/terrains/highlands.gif) |
-| `assets/terrains/river-crossing.gif` | [Home](index.md) → [All visuals](visuals.md) → [river-crossing.gif](assets/terrains/river-crossing.gif) |
-
-## Light-theme playback variants
-
-| Visual file | Click sequence from Home |
-| --- | --- |
-| `assets/themed/animal-brain-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [animal-brain-light.webp](assets/themed/animal-brain-light.webp) |
-| `assets/themed/archived-brain-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [archived-brain-light.webp](assets/themed/archived-brain-light.webp) |
-| `assets/themed/day-night-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [day-night-light.webp](assets/themed/day-night-light.webp) |
-| `assets/themed/enclosed-valleys-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [enclosed-valleys-light.webp](assets/themed/enclosed-valleys-light.webp) |
-| `assets/themed/highlands-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [highlands-light.webp](assets/themed/highlands-light.webp) |
-| `assets/themed/river-crossing-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [river-crossing-light.webp](assets/themed/river-crossing-light.webp) |
-| `assets/themed/simulation-playback-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [simulation-playback-light.webp](assets/themed/simulation-playback-light.webp) |
-| `assets/themed/species-metrics-light.webp` | [Home](index.md) → [All visuals](visuals.md) → [species-metrics-light.webp](assets/themed/species-metrics-light.webp) |
-
 ## Viewer objects and appearance
 
 | Visual file | Click sequence from Home |
 | --- | --- |
+| `assets/viewer/animation-animal-brain.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-animal-brain.svg](assets/viewer/animation-animal-brain.svg) |
+| `assets/viewer/animation-archived-brain.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-archived-brain.svg](assets/viewer/animation-archived-brain.svg) |
+| `assets/viewer/animation-day-night.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-day-night.svg](assets/viewer/animation-day-night.svg) |
+| `assets/viewer/animation-enclosed-valleys.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-enclosed-valleys.svg](assets/viewer/animation-enclosed-valleys.svg) |
+| `assets/viewer/animation-highlands.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-highlands.svg](assets/viewer/animation-highlands.svg) |
+| `assets/viewer/animation-river-crossing.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-river-crossing.svg](assets/viewer/animation-river-crossing.svg) |
+| `assets/viewer/animation-simulation-playback.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-simulation-playback.svg](assets/viewer/animation-simulation-playback.svg) |
+| `assets/viewer/animation-species-metrics.svg` | [Home](index.md) → [All visuals](visuals.md) → [animation-species-metrics.svg](assets/viewer/animation-species-metrics.svg) |
 | `assets/viewer/board-objects.svg` | [Home](index.md) → [All visuals](visuals.md) → [board-objects.svg](assets/viewer/board-objects.svg) |
 | `assets/viewer/brain-views.svg` | [Home](index.md) → [All visuals](visuals.md) → [brain-views.svg](assets/viewer/brain-views.svg) |
 | `assets/viewer/day-night.svg` | [Home](index.md) → [All visuals](visuals.md) → [day-night.svg](assets/viewer/day-night.svg) |
@@ -500,12 +482,7 @@ and **8 identical viewer branding copies**.
 
 | Visual file | Click sequence from Home |
 | --- | --- |
-| `assets/animal-brain.gif` | [Home](index.md) → [All visuals](visuals.md) → [animal-brain.gif](assets/animal-brain.gif) |
-| `assets/archived-brain.gif` | [Home](index.md) → [All visuals](visuals.md) → [archived-brain.gif](assets/archived-brain.gif) |
-| `assets/day-night.gif` | [Home](index.md) → [All visuals](visuals.md) → [day-night.gif](assets/day-night.gif) |
 | `assets/github-banner.png` | [Home](index.md) → [All visuals](visuals.md) → [github-banner.png](assets/github-banner.png) |
-| `assets/simulation-playback.gif` | [Home](index.md) → [All visuals](visuals.md) → [simulation-playback.gif](assets/simulation-playback.gif) |
-| `assets/species-metrics.gif` | [Home](index.md) → [All visuals](visuals.md) → [species-metrics.gif](assets/species-metrics.gif) |
 
 ## Viewer branding copies
 
