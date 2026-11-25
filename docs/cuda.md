@@ -5,10 +5,20 @@
 CPU remains the default. The optional Linux/NVIDIA backend keeps animals' weights,
 optimizer state, replay sampling and RNG ownership independent. The initial T4
 prototype was slower than native CPU; the revised backend adds optional FP32,
-cooperative dense kernels, smaller gradient storage complete PPO training
+cooperative dense kernels, smaller gradient storage, complete PPO training
 updates and optional device-resident DQN/DDQN optimizers. The preceding ABI-2
-implementation was measured on a Colab Tesla T4; the ABI-3 DQN optimizer revision
-requires a fresh NVIDIA build and benchmark. CPU-oracle tests are not GPU execution evidence.
+implementation and ABI-3 optimizer revision were measured on Kaggle with Tesla T4 ×2
+available, using one GPU per process. V3 numerical hardware-test output remains
+unverified here. CPU-oracle tests are not GPU execution evidence.
+
+## Hardware scope of the reported benchmarks
+
+The supplied Kaggle `nvidia-smi` output lists two Tesla T4 GPUs, each with
+15,360 MiB, driver 580.178.04 and CUDA driver support 13.0. The backend uses the
+process's current CUDA device, without multi-GPU sharding or cross-device updates.
+The recorded notebook process was on GPU 0, while GPU 1 was idle. Reported timings
+therefore describe single-T4 execution on a dual-T4 Kaggle host. The notebook's
+memory sampler queried GPU 0 only; its values are not combined two-GPU usage.
 
 ## GPU and CPU responsibilities
 
@@ -133,7 +143,46 @@ work; they do not establish a new full-loop CUDA speedup.
 
 The earlier T4 FP32 DQN profile measured GPU computation at 0.134 s but CPU
 optimizer/unpacking at 7.972 s; DDQN measured 0.190 s versus 8.494 s. That motivates
-this revision. New hardware performance and numerical comparisons remain pending.
+this revision. User-supplied V3 performance results are summarized below; numerical
+hardware-regression output remains unverified here.
+
+### Measured optimizer-placement tradeoff
+
+User-supplied Kaggle T4 results, 1,000 steps, `[64,64,32]` hidden layers, matched
+seeds 100–102, 32 MiB workspace and automatic CPU inference: FP64 GPU Adam was
+1.051× faster for DQN and 1.118× for DDQN than V3's CPU-Adam path. In FP32 it was
+slower (0.948×/0.963×). The fastest tested choice was `--cuda-precision fp32
+--cuda-optimizer cpu`, with median loops of 8.637/9.173 seconds and paired overall
+CPU-to-CUDA speedups of 1.745×/2.167×. FP64 plus GPU Adam remains the faster tested
+choice within FP64. Defaults are unchanged; choose placement explicitly when tuning.
+See the [V3 release comparison](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison)
+for host RAM, numerical/workload limits and the distinction from old-V2 comparisons.
+
+### Best tested runtime settings
+
+For dense DQN/DDQN on the measured Kaggle T4 workload, use these as starting
+points rather than universal optimal settings:
+
+| Goal | CUDA arithmetic | DQN/DDQN optimizer | Other tested execution settings |
+| --- | --- | --- | --- |
+| Fastest measured training loop | `fp32` | `cpu` | `--cuda-inference auto --cuda-batch-agents 64 --cuda-workspace-mb 32` |
+| Retain FP64 arithmetic | `fp64` | `cuda` | Same inference, batch cap and workspace cap |
+
+For a compatible dense DQN/DDQN environment, append:
+
+```sh
+--device cuda --cuda-precision fp32 --cuda-optimizer cpu \
+  --cuda-inference auto --cuda-batch-agents 64 --cuda-workspace-mb 32
+```
+
+These are execution choices, not better learned weights or ecological calibration.
+Scope: V3 source, one T4 per process, `[64,64,32]` hidden layers and the tested
+population/update schedule. FP32 can alter learning numerics. The 32 MiB workspace
+is a measured configuration, not proof that smaller/larger caps cannot improve
+another workload. Other algorithms, larger brains and parallel jobs need separate
+measurements. Keep CPU on unsupported hardware; no default/preset changes or
+additional runtime experiments are implied by this recommendation. The detailed
+benchmark evidence remains in the linked release and [performance guide](performance.md#dqn-gradient-publication-and-optimizer-placement).
 
 ## PPO state residency and publication
 
@@ -323,7 +372,8 @@ profiling events. They do not establish runtime improvements.
 
 ## Original prototype baseline
 
-The user-reported single-pair Colab baseline used Python 3.13.16, a Tesla T4,
+The user-reported single-pair Kaggle baseline used Python 3.13.16 and a Tesla T4
+on a host with two T4 GPUs,
 NVCC 13.0.88, seed 100, 1000 steps, hidden layers `[64,64,32]`, FP64 and forced CUDA
 action evaluation. CPU native kernels were built in the same runtime.
 
@@ -334,7 +384,9 @@ action evaluation. CPU native kernels were built in the same runtime.
 | DDQN | 23.370 s | 38.820 s | 8714 |
 
 Those numbers establish a slowdown for the original implementation and workload.
-They are not results for the revised kernels. Revised NVIDIA correctness, RAM and
-speed measurements are pending. Follow [NVIDIA's guidance](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
+They are not results for the revised kernels. Later user-provided timing evidence
+is recorded in [V2](releases/0.0.2.29.md#cuda-v1-to-v2-optimization-and-measured-result)
+and [V3](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison); numerical hardware
+regressions and GPU-memory measurements are distinct validation requirements. Follow [NVIDIA's guidance](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
 on transfer reduction and coalesced access, and retain CPU whenever complete
 training is faster there.
