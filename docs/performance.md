@@ -1348,3 +1348,24 @@ staging and exact-content device weight caches, and batches complete private PPO
 updates with device Adam. Default automatic inference keeps CUDA-trained PPO/DQN
 actions on CPU. Optional FP32 and diagnostic timing/copy counters are described
 in the [CUDA guide](cuda.md). Revised T4 performance remains unmeasured locally.
+
+For the mechanism behind the CUDA changes, see the
+[DQN/DDQN boundary diagram](cuda.md#where-the-cuda-path-saves-work) and
+[PPO residency diagram](cuda.md#ppo-state-residency-and-publication). They show
+removed transfers/intermediates and state ownership rather than timing charts.
+
+
+### DQN gradient publication and optimizer placement
+
+The [CUDA state-publication guide](cuda.md#dqn-state-residency-and-publication)
+explains private device Adam/target state with eager CPU snapshots. The alternative
+CPU-optimizer path widens FP32 gradients once in native code instead of per-value
+Python conversion. A local 64-model `[20,64,64,32,10]` host-only conversion/unpacking
+microbenchmark measured 15.295 ms → 0.455 ms per batch (33.6×), with byte-identical
+gradients. This excludes GPU work, Adam and world simulation. Subsequent Kaggle
+T4 results for 1,000 steps, three matched seeds, `[64,64,32]` hidden layers and a
+32 MiB workspace favor GPU Adam in FP64 (DQN 1.051×, DDQN 1.118× versus V3 CPU Adam)
+but CPU Adam in FP32. The latter yielded median loops of 8.637/9.173 seconds and
+overall 1.745×/2.167× CPU-to-CUDA speedups. See the
+[scoped V3 results](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison) for
+host-RAM and precision limits. No recording, checkpoint or viewer format changes.

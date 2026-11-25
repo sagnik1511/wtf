@@ -232,5 +232,23 @@
     "asset": "early-stopping-patience.svg",
     "nodes": 10,
     "edges": 10
+  },
+  {
+    "title": "DQN and DDQN: reducing host work and GPU memory traffic",
+    "document": "docs/cuda.md",
+    "anchor": "where-the-cuda-path-saves-work",
+    "source": "cuda-dqn-dataflow.mmd",
+    "asset": "cuda-dqn-dataflow.svg",
+    "nodes": 17,
+    "edges": 16
+  },
+  {
+    "title": "PPO and masked PPO: private state stays on GPU across minibatches",
+    "document": "docs/cuda.md",
+    "anchor": "ppo-state-residency-and-publication",
+    "source": "cuda-ppo-residency.mmd",
+    "asset": "cuda-ppo-residency.svg",
+    "nodes": 10,
+    "edges": 12
   }
 ]

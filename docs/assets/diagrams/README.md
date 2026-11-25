@@ -2,7 +2,7 @@
 
 [Visual documentation guide](../../visual-guide.md) · [Asset index](../README.md)
 
-The guides embed **26 SVG diagrams** across 16 pages. Readers need no Mermaid
+The guides embed **28 SVG diagrams** across 17 pages. Readers need no Mermaid
 plugin or JavaScript. These show ownership, data dependencies and decision order;
 they do not depict measured performance or guarantee learning outcomes.
 
@@ -16,6 +16,8 @@ light/dark styles and an opaque light fallback for simpler image renderers.
 
 | Diagram | Documentation | Local source filename |
 | --- | --- | --- |
+| [CUDA DQN/DDQN data flow](cuda-dqn-dataflow.svg) | [Guide](../../cuda.md#where-the-cuda-path-saves-work) | `cuda-dqn-dataflow.mmd` |
+| [CUDA PPO residency](cuda-ppo-residency.svg) | [Guide](../../cuda.md#ppo-state-residency-and-publication) | `cuda-ppo-residency.mmd` |
 | [Runtime boundaries](runtime-boundaries.svg) | [Guide](../../architecture.md#runtime-boundaries) | `runtime-boundaries.mmd` |
 | [One simulation step](one-simulation-step.svg) | [Guide](../../architecture.md#one-simulation-step) | `one-simulation-step.mmd` |
 | [Private learning loop](private-learning-loop.svg) | [Guide](../../algorithms.md#private-learning-loop) | `private-learning-loop.mmd` |
@@ -90,3 +92,10 @@ controllers remain outside that playback path. The separate
 selected-data ownership and numerical detail without crowding this overview.
 
 [Additional policy structures](additional-policy-structures.svg) compares actor/critic ownership, TRPO trust steps and LSTM hidden/cell memory. Used in [additional learners](../../additional-policies.md).
+
+Regenerate only the CUDA architecture diagrams without refreshing other assets:
+
+```sh
+.venv/bin/python -m work.build_recent_doc_diagrams --only cuda-dqn-dataflow --only cuda-ppo-residency
+.venv/bin/python -m work.build_recent_doc_diagrams --check --only cuda-dqn-dataflow --only cuda-ppo-residency
+```

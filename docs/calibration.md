@@ -173,3 +173,19 @@ These values strengthen terrain effort; their effect on long-term survival and
 reproduction has not been established. Keep other ecology settings fixed when
 assessing them, and reduce effort if energy coverage or breeding deteriorates.
 There is no movement-duration change. See [the map and configuration](geography.md#rolling-hills).
+
+
+## CUDA execution tuning
+
+For the measured dense DQN/DDQN workload on a single Tesla T4, the current fastest
+tested execution choice is FP32 CUDA computation with CPU Adam and automatic CPU
+action inference, using a 64-agent batch cap and 32 MiB workspace cap. If retaining
+FP64 arithmetic, prefer GPU Adam within the tested workload. These choices tune
+runtime cost; they do not establish better survival, reproduction or learning
+quality and do not change environment presets or package defaults.
+
+Use the [best tested runtime settings](cuda.md#best-tested-runtime-settings) for
+flags and hardware/workload limits, and the
+[V3 benchmark evidence](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison) for
+timing and host RAM. Do not transfer these optimizer-placement recommendations to
+other learners or treat two available GPUs as a measured dual-GPU speedup.

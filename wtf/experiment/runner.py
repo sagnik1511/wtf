@@ -113,6 +113,7 @@ class Experiment:
         precision="fp64",
         profile=False,
         inference="auto",
+        optimizer="cuda",
     ):
         """Select a transient backend; checkpoints retain portable CPU-owned state."""
         # The optional CUDA loader is never imported on ordinary CPU runs.
@@ -138,6 +139,7 @@ class Experiment:
             precision=precision,
             profile=profile,
             inference=inference,
+            optimizer=optimizer,
         )
         if self._cuda_training is not None:
             self._cuda_training.close()

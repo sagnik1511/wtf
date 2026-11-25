@@ -163,8 +163,14 @@ again. Device buffers are transient. GPU math can round differently, so trajecto
 need not match CPU bit-for-bit. CUDA compilation/execution and speedups require
 Linux/NVIDIA validation; this prototype is not a published GPU-support guarantee.
 
-The revised CUDA source uses kernel ABI 2; rebuild local shared libraries after
+The revised CUDA source uses kernel ABI 3; rebuild local shared libraries after
 pulling. Optional `--cuda-precision fp32` changes GPU arithmetic, while model and
 optimizer storage remains FP32 as before. Backend choices remain transient;
 resume explicitly selects CUDA/precision again. Ordinary/masked PPO now publish
 device-trained weights and Adam state at the completed rollout-update boundary.
+
+DQN/DDQN CUDA updates now publish online/target weights and private Adam state
+before returning to world consumers. `--cuda-optimizer cpu` keeps the host-optimizer
+comparison path; this transient option is not serialized. Rebuild native CPU kernels
+to enable the exact bulk FP32 gradient-widening helper. Existing CPU extensions
+without the helper retain the previous conversion fallback.

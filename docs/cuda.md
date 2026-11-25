@@ -5,17 +5,27 @@
 CPU remains the default. The optional Linux/NVIDIA backend keeps animals' weights,
 optimizer state, replay sampling and RNG ownership independent. The initial T4
 prototype was slower than native CPU; the revised backend adds optional FP32,
-cooperative dense kernels, smaller gradient storage and complete PPO training
-updates. **The revised CUDA kernels still require compilation, correctness tests
-and performance measurements on NVIDIA hardware.** CPU-oracle tests are not GPU
-execution evidence.
+cooperative dense kernels, smaller gradient storage, complete PPO training
+updates and optional device-resident DQN/DDQN optimizers. The preceding ABI-2
+implementation and ABI-3 optimizer revision were measured on Kaggle with Tesla T4 ×2
+available, using one GPU per process. V3 numerical hardware-test output remains
+unverified here. CPU-oracle tests are not GPU execution evidence.
+
+## Hardware scope of the reported benchmarks
+
+The supplied Kaggle `nvidia-smi` output lists two Tesla T4 GPUs, each with
+15,360 MiB, driver 580.178.04 and CUDA driver support 13.0. The backend uses the
+process's current CUDA device, without multi-GPU sharding or cross-device updates.
+The recorded notebook process was on GPU 0, while GPU 1 was idle. Reported timings
+therefore describe single-T4 execution on a dual-T4 Kaggle host. The notebook's
+memory sampler queried GPU 0 only; its values are not combined two-GPU usage.
 
 ## GPU and CPU responsibilities
 
 | Learner | GPU training work | Work remaining on CPU |
 | --- | --- | --- |
 | PPO / masked PPO | Minibatch forward, clipped objective, entropy/value derivatives, backward, norm clipping, Adam and KL rejection | GAE/advantage normalization, private shuffle schedules, rollout collection |
-| DQN / DDQN | TD targets, Huber loss, backward and batch gradient reduction | Private replay sampling, gradient clipping, Adam and target synchronization |
+| DQN / DDQN | TD targets, Huber loss, backward, reduction, clipping, Adam and scheduled target synchronization | Private replay/RNG sampling and publication of portable CPU snapshots; optional CPU optimizer comparison |
 | A2C / REINFORCE / GRPO / MAPPO / TRPO / discrete SAC / QR-DQN | No training-update kernel yet; optional dense action evaluation | Existing learners and optimizers; GRPO trial worlds/evaluation |
 | Recurrent PPO / LSTM PPO / legacy `q_network` | None | Entire learner |
 
@@ -44,7 +54,8 @@ only its observations, sample metadata, masks and small metric/acceptance summar
 Updated parameters and optimizer buffers copy back once before champion selection,
 child inheritance, diagnostics or checkpointing. Device state is not authoritative
 across world steps: published CPU state remains the portable source of truth.
-DQN/DDQN still publish gradients to their existing CPU optimizer.
+DQN/DDQN use the [resident optimizer path](#dqn-state-residency-and-publication) by default.
+`--cuda-optimizer cpu` retains the gradient-download/CPU-Adam comparison path.
 
 The new kernel stores activations and layer deltas per sample, then reduces their
 products across the batch. It removes the former `animals × samples × parameters`
@@ -58,6 +69,137 @@ Python staging arrays are reused, while model validity checks run in native code
 on changed uploads. Group order/population changes still trigger uploads when bytes
 differ. Cache/buffer ownership is per experiment; LRU eviction releases both staging
 and device buffers. No cache is serialized.
+
+## Where the CUDA path saves work
+
+![Before and after DQN and DDQN data flow, showing reused staging, content-based uploads and compact gradient reduction](assets/diagrams/cuda-dqn-dataflow.svg)
+
+The improvement comes from changing work and transfers along the learning path:
+
+| Boundary | Original work | Revised work and architectural benefit |
+| --- | --- | --- |
+| Action selection | Small GPU inference calls every world step | Auto mode keeps DQN/PPO actions on native CPU, avoiding those GPU launches/transfers |
+| Host preparation | Rebuild staging arrays and scan each weight in Python | Reuse fixed buffers; bulk copies and native validation reduce Python work |
+| Weight transfer | Upload online and target weights for each training batch | Exact-content caches upload changed buffers; unchanged targets/weights stay on GPU |
+| Dense forward | Each output thread walks a weight row serially | Warp lanes cooperate on a dot product and read adjacent weight elements |
+| Gradient storage | Materialize every sample's full parameter gradient, then reduce | Keep activations/deltas and reduce their products directly, avoiding the large gradient tensor |
+| DQN optimizer | Download gradients, widen FP32 values through Python, then run CPU clipping/Adam | Keep reduced gradients on GPU; clip, update private Adam state and synchronize targets there, then bulk-publish CPU snapshots |
+
+For `M` independent brains, `B` samples, `P` parameters and `A` total activations,
+the removed gradient tensor scales as `M × B × P`. The revised training scratch
+scales with `M × B × A`, plus one `M × P` reduced gradient. Fewer large intermediate
+writes/reads and allocations reduce memory traffic; the separate
+[buffer-accounting table](#analytical-device-buffer-footprint) quantifies allocations.
+
+Caches compare actual buffer contents, not only an update counter, so raw in-place
+weight edits are observed. Changing group membership/order can require uploads.
+The diagrams describe implemented mechanisms, not a measured time allocation to
+each optimization; component profiling is required for that attribution.
+
+## DQN state residency and publication
+
+`--cuda-optimizer cuda` is the default **when the CUDA backend is selected**;
+ordinary CPU training remains unchanged. One grouped update owns separate online,
+target, first-moment and second-moment slots for every animal. The CPU samples
+private replay buffers using the same RNG and training cadence, without allocating
+an unused CPU gradient tree. Groups include architecture, sample count, algorithm,
+discount, Huber threshold, clipping limit and learning rate. Update counters and
+target synchronization decisions remain per animal.
+
+The GPU computes TD targets, gradients, clipping and Adam. Optimizer arithmetic
+widens gradients to double even with FP32 forward/backward, preserving the previous
+CPU optimizer's arithmetic/storage contract: moments, variances and weights round
+to FP32 on storage. FP32 forward/backward remains an explicit numerical tradeoff;
+CUDA math is not promised to be bit-identical to CPU or earlier CUDA revisions.
+
+Before the grouped call returns, coherent FP32 weights/moments/variances and small
+loss summaries download and publish to the existing CPU-owned brain objects.
+Targets update on the GPU and the matching CPU snapshot at each animal's configured
+interval. Selection, offspring, diagnostics, serialization and checkpoints need no
+new device-aware readers. Gradients never download on this path.
+
+Exact-content caches retain device weights, targets and optimizer state across calls
+only while their bounded workspace survives. CPU edits, model replacement, changed
+slot order and population changes cause changed buffers to upload again. Failed
+native updates invalidate all four upload caches. Eviction releases device buffers,
+host mirrors and staging together; restore starts with cold caches on CPU. This is
+bounded device residency with eager CPU publication, not GPU-only checkpoint state.
+
+`--cuda-optimizer cpu` retains the earlier gradient-download path. When the rebuilt
+CPU extension exposes `widen_f32`, one native loop exactly widens the complete FP32
+gradient/loss array into a reusable FP64 buffer. Layer unpacking then uses same-type
+bulk copies. Without that optional helper, the earlier conversion remains supported.
+PPO and other learners ignore the DQN optimizer-placement option.
+
+### Host unpacking measurement
+
+On local macOS ARM64 / CPython 3.12, 64 private networks with layout
+`[20,64,64,32,10]` contain 7,914 parameters each. A warmed microbenchmark of gradient
+conversion plus layer unpacking (nine samples, five calls per sample, median per
+call) measured **15.295 ms before versus 0.455 ms after: 33.6× faster**. Gradient
+bytes matched exactly. The isolated whole-array conversion measured 15.964 ms versus
+0.061 ms. These are host-only measurements, excluding GPU transfers, Adam and world
+work; they do not establish a new full-loop CUDA speedup.
+
+The earlier T4 FP32 DQN profile measured GPU computation at 0.134 s but CPU
+optimizer/unpacking at 7.972 s; DDQN measured 0.190 s versus 8.494 s. That motivates
+this revision. User-supplied V3 performance results are summarized below; numerical
+hardware-regression output remains unverified here.
+
+### Measured optimizer-placement tradeoff
+
+User-supplied Kaggle T4 results, 1,000 steps, `[64,64,32]` hidden layers, matched
+seeds 100–102, 32 MiB workspace and automatic CPU inference: FP64 GPU Adam was
+1.051× faster for DQN and 1.118× for DDQN than V3's CPU-Adam path. In FP32 it was
+slower (0.948×/0.963×). The fastest tested choice was `--cuda-precision fp32
+--cuda-optimizer cpu`, with median loops of 8.637/9.173 seconds and paired overall
+CPU-to-CUDA speedups of 1.745×/2.167×. FP64 plus GPU Adam remains the faster tested
+choice within FP64. Defaults are unchanged; choose placement explicitly when tuning.
+See the [V3 release comparison](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison)
+for host RAM, numerical/workload limits and the distinction from old-V2 comparisons.
+
+### Best tested runtime settings
+
+For dense DQN/DDQN on the measured Kaggle T4 workload, use these as starting
+points rather than universal optimal settings:
+
+| Goal | CUDA arithmetic | DQN/DDQN optimizer | Other tested execution settings |
+| --- | --- | --- | --- |
+| Fastest measured training loop | `fp32` | `cpu` | `--cuda-inference auto --cuda-batch-agents 64 --cuda-workspace-mb 32` |
+| Retain FP64 arithmetic | `fp64` | `cuda` | Same inference, batch cap and workspace cap |
+
+For a compatible dense DQN/DDQN environment, append:
+
+```sh
+--device cuda --cuda-precision fp32 --cuda-optimizer cpu \
+  --cuda-inference auto --cuda-batch-agents 64 --cuda-workspace-mb 32
+```
+
+These are execution choices, not better learned weights or ecological calibration.
+Scope: V3 source, one T4 per process, `[64,64,32]` hidden layers and the tested
+population/update schedule. FP32 can alter learning numerics. The 32 MiB workspace
+is a measured configuration, not proof that smaller/larger caps cannot improve
+another workload. Other algorithms, larger brains and parallel jobs need separate
+measurements. Keep CPU on unsupported hardware; no default/preset changes or
+additional runtime experiments are implied by this recommendation. The detailed
+benchmark evidence remains in the linked release and [performance guide](performance.md#dqn-gradient-publication-and-optimizer-placement).
+
+## PPO state residency and publication
+
+![Private PPO weights and Adam state stay on GPU across grouped minibatches; small reports return to the CPU scheduler before final state publication](assets/diagrams/cuda-ppo-residency.svg)
+
+The original PPO CUDA path offloaded action evaluation while training stayed on
+CPU. The revised path uploads each ready animal's weights and Adam state once,
+then performs forward, loss, backward, clipping and Adam on GPU for its minibatches.
+Only sample data and small metric/acceptance reports cross the boundary each round.
+Weights and moments copy back once when the grouped update finishes.
+
+Epochs, private shuffle RNGs, GAE and scheduling remain on CPU. A rejected animal
+keeps its weights/moments and stops independently; the others continue. Published
+CPU snapshots are coherent before champion selection, child inheritance,
+diagnostics and checkpointing. GPU batching never merges animals' parameters or
+changes their configured learning cadence. FP64 remains the default; optional
+FP32 changes arithmetic, not this ownership structure.
 
 ## Build on Linux or Colab
 
@@ -94,6 +236,7 @@ branch; use the matching checkout for these features.
 | `--cuda-inference auto\|cpu\|cuda` | Choose CPU/native or CUDA action evaluation as described above |
 | `--cuda-batch-agents N` | Maximum independent jobs grouped together; default 64, range 1–4096 |
 | `--cuda-workspace-mb N` | Device workspace LRU budget in MiB; default 256, range 1–16384 |
+| `--cuda-optimizer cpu/cuda` | DQN/DDQN optimizer placement; default cuda, cpu retains gradient download plus CPU Adam |
 | `--cuda-profile` | Opt-in CUDA event and host packing/optimizer timings |
 
 ```sh
@@ -119,7 +262,7 @@ events each. One model/minibatch exceeding the budget fails explicitly. Dense
 layouts support 1–16 layers of widths 1–4096 and sample batches up to 4096.
 
 Python callers use `experiment.set_training_device('cuda', precision='fp32',
-inference='auto', profile=False)`. Selecting CPU closes that experiment's cache.
+inference='auto', optimizer='cuda', profile=False)`. Selecting CPU closes that experiment's cache.
 Restore defaults to CPU; select CUDA and precision again after restoring. Backend
 handles, profiling counters and execution choices are not checkpoint fields.
 Evaluation remains CPU-only. Device errors abort visibly; resume a completed
@@ -127,7 +270,8 @@ checkpoint rather than retrying a partially advanced world as a transaction.
 
 ## Colab comparison
 
-From the existing checkout, pull the branch and rebuild before testing. Run the
+From the existing checkout, pull the branch and rebuild CPU and CUDA extensions before testing. Kernel ABI 3
+rejects older shared libraries explicitly. Run the
 hardware suite first. For the first timing pass, compare CPU and optimized FP64:
 
 ```sh
@@ -154,9 +298,33 @@ training kernels. Use `--cuda-inference cuda` to isolate the forced-GPU action p
 
 Reports include complete loop/startup/warmup/steady time, actual seeds, step/update
 counts, process peak RSS, native CPU backend, CUDA precision/inference strategy,
-workspace bytes and kernel-job counts. Timings include world work and transfers.
+workspace bytes and kernel-job counts. Linux peak host RAM uses post-exec VmHWM
+from `/proc/self/status` when available, avoiding inherited rusage peaks from a
+large notebook parent. Timings include world work and transfers.
 A speedup ratio is suppressed for unmatched counts, zero training updates, no CUDA
 jobs, or a profiled run. Matching counts do not prove identical trajectories.
+
+### Compare DQN optimizer placement
+
+Use the same checkout to isolate placement from other code changes. The CPU
+optimizer comparison already includes the new exact widening helper. Run each
+precision separately, with profiling disabled for headline timings:
+
+```sh
+python -m work.benchmark_cuda --algorithms dqn ddqn --devices cpu cuda \
+  --steps 1000 --warmup 32 --hidden 64 64 32 --seed 100 --repeats 3 \
+  --cuda-precision fp64 --cuda-optimizer cpu --output .cache/dqn-host-adam.json
+python -m work.benchmark_cuda --algorithms dqn ddqn --devices cpu cuda \
+  --steps 1000 --warmup 32 --hidden 64 64 32 --seed 100 --repeats 3 \
+  --cuda-precision fp64 --cuda-optimizer cuda --output .cache/dqn-device-adam.json
+```
+
+Repeat with `--cuda-precision fp32`, then use `--cuda-profile` in separate diagnostic
+runs to distinguish host publication from GPU computation. Compare actual per-seed
+steps/updates as well as timing and RAM. More state is resident on the GPU, and
+publishing full optimizer snapshots can increase transfer volume; speed is to be
+measured rather than inferred from fewer Python operations. Keep replay artifacts
+and checkpoint contracts unchanged.
 
 ## Diagnose time and bytes
 
@@ -171,7 +339,8 @@ python -m work.benchmark_cuda --algorithms ppo dqn ddqn --devices cuda \
 The `accelerator` section reports:
 
 - `packing_seconds`: host elapsed preparation/staging, including workspace allocation and PPO scheduling.
-- `cpu_optimizer_seconds`: DQN gradient unpacking and existing CPU optimizer work.
+- `cpu_optimizer_seconds`: CPU gradient conversion/unpacking and Adam in comparison mode; CPU snapshot publication only in resident DQN mode. GPU Adam is included in `cuda_compute_seconds`.
+- `dqn_optimizer`: selected DQN/DDQN optimizer placement, `cpu` or `cuda`.
 - `cuda_upload_seconds`, `cuda_compute_seconds`, `cuda_download_seconds`: CUDA event
   elapsed intervals around each phase; upload intervals may include host cache
   checks/staging gaps between synchronous copies. They are not pure device busy time.
@@ -203,7 +372,8 @@ profiling events. They do not establish runtime improvements.
 
 ## Original prototype baseline
 
-The user-reported single-pair Colab baseline used Python 3.13.16, a Tesla T4,
+The user-reported single-pair Kaggle baseline used Python 3.13.16 and a Tesla T4
+on a host with two T4 GPUs,
 NVCC 13.0.88, seed 100, 1000 steps, hidden layers `[64,64,32]`, FP64 and forced CUDA
 action evaluation. CPU native kernels were built in the same runtime.
 
@@ -214,7 +384,9 @@ action evaluation. CPU native kernels were built in the same runtime.
 | DDQN | 23.370 s | 38.820 s | 8714 |
 
 Those numbers establish a slowdown for the original implementation and workload.
-They are not results for the revised kernels. Revised NVIDIA correctness, RAM and
-speed measurements are pending. Follow [NVIDIA's guidance](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
+They are not results for the revised kernels. Later user-provided timing evidence
+is recorded in [V2](releases/0.0.2.29.md#cuda-v1-to-v2-optimization-and-measured-result)
+and [V3](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison); numerical hardware
+regressions and GPU-memory measurements are distinct validation requirements. Follow [NVIDIA's guidance](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
 on transfer reduction and coalesced access, and retain CPU whenever complete
 training is faster there.

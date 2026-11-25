@@ -100,6 +100,22 @@ def configuration(kind, steps, seed, hidden=None):
     return config
 
 
+def peak_host_rss_bytes():
+    """Prefer Linux's post-exec high-water mark over inherited rusage history."""
+    if sys.platform == "linux":
+        try:
+            for line in (
+                Path("/proc/self/status").read_text(encoding="utf-8").splitlines()
+            ):
+                fields = line.split()
+                if len(fields) == 3 and fields[0] == "VmHWM:" and fields[2] == "kB":
+                    return int(fields[1]) * 1024
+        except (OSError, ValueError):
+            pass
+    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return int(rss if sys.platform == "darwin" else rss * 1024)
+
+
 def worker(args):
     """Time initialization and the full scheduled loop separately in one process."""
     # Private accelerator status is intentionally inspected by this internal tool.
@@ -114,6 +130,7 @@ def worker(args):
         precision=args.cuda_precision,
         profile=args.cuda_profile,
         inference=args.cuda_inference,
+        optimizer=args.cuda_optimizer,
     )
     initialization = time.perf_counter() - start
     completed, warm_seconds = 0, 0.0
@@ -128,8 +145,7 @@ def worker(args):
             break
     total = time.perf_counter() - start
     status = experiment._cuda_training.status() if experiment._cuda_training else {}
-    # ru_maxrss is bytes on macOS and KiB on Linux. Each worker is a fresh process.
-    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    rss = peak_host_rss_bytes()
     updates = experiment.total_updates - initial_updates
     if completed < args.warmup:
         warm_seconds = total
@@ -146,7 +162,7 @@ def worker(args):
         "warmup_seconds": warm_seconds,
         "steady_seconds": total - warm_seconds,
         "updates": updates,
-        "peak_rss_bytes": int(rss if sys.platform == "darwin" else rss * 1024),
+        "peak_rss_bytes": rss,
         "accelerator": status,
         "config": config,
     }
@@ -176,6 +192,7 @@ def main(argv=None):
         "GPU for other dense policies",
     )
     parser.add_argument("--cuda-profile", action="store_true")
+    parser.add_argument("--cuda-optimizer", choices=("cpu", "cuda"), default="cuda")
     parser.add_argument("--batch-agents", type=int, default=64)
     parser.add_argument("--workspace-mb", type=int, default=256)
     parser.add_argument(
@@ -218,6 +235,8 @@ def main(argv=None):
                     args.cuda_precision,
                     "--cuda-inference",
                     args.cuda_inference,
+                    "--cuda-optimizer",
+                    args.cuda_optimizer,
                 ]
                 if args.cuda_profile:
                     command.append("--cuda-profile")
