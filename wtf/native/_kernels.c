@@ -184,6 +184,29 @@ done:
     release(views, 3);
     return result;
 }
+/* Exact widening: avoid Python float boxing when CUDA publishes FP32 gradients.
+ */
+static PyObject *widen_f32(PyObject *self, PyObject *args) {
+    PyObject *source, *destination;
+    Py_buffer views[2] = {{0}};
+    if (!PyArg_ParseTuple(args, "OO", &source, &destination))
+        return NULL;
+    PyObject *result = NULL;
+    if (!buffer(source, &views[0], 'f', 0) ||
+        !buffer(destination, &views[1], 'd', 1) ||
+        !length(&views[1], size(&views[0])))
+        goto done;
+    const float *src = views[0].buf;
+    double *dst = views[1].buf;
+    for (Py_ssize_t i = 0; i < size(&views[0]); i++)
+        dst[i] = (double)src[i];
+    Py_INCREF(Py_None);
+    result = Py_None;
+done:
+    release(views, 2);
+    return result;
+}
+
 static PyObject *adam(PyObject *self, PyObject *args) {
     PyObject *rows;
     Py_ssize_t count, updates;
@@ -363,6 +386,8 @@ static PyMethodDef methods[] = {
     {"backward", backward, METH_VARARGS,
      "Accumulate dense gradients in float64 buffers."},
     {"adam", adam, METH_VARARGS, "Clipped Adam with float32 storage rounding."},
+    {"widen_f32", widen_f32, METH_VARARGS,
+     "Exactly widen packed float32 into float64."},
     {"q_backward", q_backward, METH_VARARGS, "Chosen-action Q gradients."},
     {"sgd", sgd, METH_VARARGS,
      "Float32 parameter update with double arithmetic."},

@@ -43,6 +43,23 @@ from tests.test_simulation import config
     "Build supported native kernels first",
 )
 class NativeKernelTests(unittest.TestCase):
+    def test_bulk_gradient_widening_is_exact_and_validates_before_writes(self):
+        # The optional API is exercised only when this native module is built.
+        # pylint: disable=c-extension-no-member
+        source = array("f", [0.0, -0.0, 1e-40, -1e-30, 1.0, 3.4e38])
+        destination = array("d", [7.0]) * len(source)
+        _kernels.widen_f32(source, destination)
+        self.assertEqual(destination.tobytes(), array("d", source).tobytes())
+        for src, dst in (
+            (array("d", source), destination),
+            (source, array("d", [3.0])),
+        ):
+            before = dst.tobytes()
+            with self.assertRaises((TypeError, ValueError)):
+                _kernels.widen_f32(src, dst)
+            self.assertEqual(dst.tobytes(), before)
+        _kernels.widen_f32(array("f"), array("d"))
+
     def test_float_reductions_match_compensated_python_sum(self):
         # The old left-to-right native reduction returned zero for this input.
 

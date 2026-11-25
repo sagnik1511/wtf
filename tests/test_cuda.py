@@ -25,10 +25,10 @@ from wtf.experiment.runner import Experiment
 from wtf.learning.brain import Experience
 from wtf.learning.brains import create_brain
 from wtf.learning.cuda_training import CudaLibrary, CudaTraining, workspace_bytes
-from wtf.learning.dqn import huber_td
+from wtf.learning.dqn import DQNBrain, huber_td
 from wtf.learning.ppo import MLP, PPOBrain, RolloutStep, loss_and_gradient
 from wtf.native.cuda_build import main as build_cuda
-from work.benchmark_cuda import configuration, KINDS, worker
+from work.benchmark_cuda import configuration, KINDS, worker, peak_host_rss_bytes
 
 
 class ReferenceLibrary:
@@ -83,6 +83,51 @@ class ReferenceLibrary:
             output[model * sizes[-1] : (model + 1) * sizes[-1]] = array(
                 output.typecode, values
             )
+
+    def dqn_update(self, handle, buffers, moments, variances, metadata, options, loss):
+        """Independent CPU gradient/Adam oracle at the resident update boundary."""
+        # Reference fixtures spell out private state so packing bugs remain observable.
+        # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+        sizes, models, batch, mode = self.handles[handle]
+        assert mode == 3
+        width = sum((ni + 1) * no for ni, no in zip(sizes, sizes[1:]))
+        output = array(loss.typecode, [0]) * (models * (width + 1))
+        self.run(handle, buffers, options[0], options[1], bool(options[4]), output)
+        for model in range(models):
+            part = slice(model * width, (model + 1) * width)
+            brain = object.__new__(DQNBrain)
+            brain.network = self.network(sizes, buffers[0][part])
+            brain.moments = self.network(sizes, moments[part]).layers
+            brain.variances = self.network(sizes, variances[part]).layers
+            brain.updates = metadata[model * 2] - 1
+            brain.config = {"max_grad_norm": options[2], "learning_rate": options[3]}
+            gradients = brain.network.zeros()
+            offset = model * (width + 1)
+            for layer in gradients:
+                for key in ("weights", "bias"):
+                    count = len(layer[key])
+                    layer[key][:] = (
+                        array(layer[key].typecode, output[offset : offset + count])
+                        if isinstance(layer[key], array)
+                        else list(output[offset : offset + count])
+                    )
+                    offset += count
+            brain._adam_step(gradients, batch)
+            loss[model] = output[offset]
+            for destination, tree in (
+                (buffers[0], brain.network.layers),
+                (moments, brain.moments),
+                (variances, brain.variances),
+            ):
+                destination[part] = array(
+                    "f",
+                    (
+                        value
+                        for layer in tree
+                        for key in ("weights", "bias")
+                        for value in layer[key]
+                    ),
+                )
 
     # Keep the complete independent scalar oracle beside the matching ABI signature.
     # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
@@ -259,6 +304,55 @@ def accelerated(config, *, max_agents=64, workspace_mb=8):
 
 
 class CudaSchedulingTests(unittest.TestCase):
+    def test_linux_peak_ram_uses_post_exec_high_water_mark(self):
+        with (
+            patch("work.benchmark_cuda.sys.platform", "linux"),
+            patch(
+                "work.benchmark_cuda.Path.read_text",
+                return_value="Name: python\nVmHWM:\t12345 kB\n",
+            ),
+        ):
+            self.assertEqual(peak_host_rss_bytes(), 12345 * 1024)
+        with (
+            patch("work.benchmark_cuda.sys.platform", "linux"),
+            patch("work.benchmark_cuda.Path.read_text", side_effect=OSError),
+            patch(
+                "work.benchmark_cuda.resource.getrusage",
+                return_value=SimpleNamespace(ru_maxrss=300),
+            ),
+        ):
+            self.assertEqual(peak_host_rss_bytes(), 300 * 1024)
+
+    def test_resident_state_accounting_and_optimizer_qualification(self):
+        sizes, count, batch = (20, 7, 2), 3, 4
+        parameters = sum((ni + 1) * no for ni, no in zip(sizes, sizes[1:]))
+        for precision, real in (("fp64", 8), ("fp32", 4)):
+            self.assertEqual(
+                workspace_bytes(sizes, count, batch, 3, precision)
+                - workspace_bytes(sizes, count, batch, 1, precision),
+                8 * count * parameters + 8 * count + real * count,
+            )
+        brain = create_brain(settings("dqn"), ["rest", "eat"], 2, 3)
+        self.assertTrue(CudaTraining.accepts(brain))
+        brain.moments[0]["weights"] = list(brain.moments[0]["weights"])
+        self.assertFalse(CudaTraining.accepts(brain))
+        with self.assertRaisesRegex(ValueError, "optimizer"):
+            CudaTraining(library=ReferenceLibrary(), optimizer="invalid")
+
+    def test_deferred_dqn_needs_no_cpu_gradient_tree(self):
+        brain = create_brain(settings("dqn"), ["rest", "eat"], 2, 3)
+        brain.config.update(batch_size=1, learning_starts_after=1, train_every_steps=1)
+        engine = CudaTraining(library=ReferenceLibrary())
+        item = Experience((0.1,) * 20, "eat", 0.4, None, True, False)
+        with patch.object(
+            brain.network, "zeros", side_effect=AssertionError("allocated")
+        ):
+            with engine.batch():
+                brain.learn(item, defer=engine)
+        self.assertEqual(brain.updates, 1)
+        self.assertEqual(brain.last_metrics.keys(), {"td_loss"})
+        engine.close()
+
     def test_benchmark_worlds_use_the_requested_seed(self):
         for kind in KINDS:
             with self.subTest(kind=kind):
@@ -502,6 +596,7 @@ class CudaSchedulingTests(unittest.TestCase):
             cuda_precision="fp32",
             cuda_profile=True,
             cuda_inference="cuda",
+            cuda_optimizer="cuda",
         )
         with patch.object(Experiment, "set_training_device", fake_device):
             report = worker(args)
@@ -527,6 +622,75 @@ class CudaSchedulingTests(unittest.TestCase):
     "requires explicit Linux/NVIDIA CUDA test run",
 )
 class CudaHardwareTests(unittest.TestCase):
+    def test_resident_dqn_matches_gradient_optimizer_across_slot_reuse(self):
+        # Real-device numerical comparison also checks moments and target cadence.
+        # pylint: disable=too-many-locals,too-many-nested-blocks,too-many-branches
+        for precision in ("fp64", "fp32"):
+            for kind in ("dqn", "ddqn"):
+                config = settings(kind)
+                config["network"]["hidden_layers"] = [7, 5]
+                brains = [
+                    create_brain(config, ["rest", "eat"], 10 + i, 30 + i)
+                    for i in range(3)
+                ]
+                for index, brain in enumerate(brains):
+                    brain.config["target_update_every_training_steps"] = index + 1
+                resident = copy.deepcopy(brains)
+                reference = CudaTraining(
+                    optimizer="cpu", precision=precision, max_agents=2, workspace_mb=1
+                )
+                device = CudaTraining(
+                    optimizer="cuda", precision=precision, max_agents=2, workspace_mb=1
+                )
+                try:
+                    rng = random.Random(876)
+                    for iteration in range(6):
+                        # Reorder slots and mutate host state to invalidate content caches.
+                        if iteration == 3:
+                            for group in (brains, resident):
+                                group[0].moments[0]["bias"][0] += 0.01
+                                group[1].network.layers[0]["weights"][0] += 0.02
+                                group[2].target_network.layers[0]["bias"][0] -= 0.01
+                        order = (0, 1, 2) if iteration % 2 else (2, 0, 1)
+                        with reference.batch(), device.batch():
+                            for index in order:
+                                samples = [
+                                    Experience(
+                                        tuple(rng.uniform(-1, 1) for _ in range(20)),
+                                        "eat",
+                                        5.0 if terminal else -2.0,
+                                        None if terminal else (0.2,) * 20,
+                                        terminal,
+                                        not terminal,
+                                    )
+                                    for terminal in (True, False, False)
+                                ]
+                                reference.submit(brains[index], samples, None)
+                                device.submit(resident[index], samples, None)
+                        for left, right in zip(brains, resident):
+                            self.assertEqual(left.updates, right.updates)
+                            self.assertAlmostEqual(
+                                left.last_metrics["td_loss"],
+                                right.last_metrics["td_loss"],
+                                delta=2e-5,
+                            )
+                            for a, b in (
+                                (left.network.layers, right.network.layers),
+                                (
+                                    left.target_network.layers,
+                                    right.target_network.layers,
+                                ),
+                                (left.moments, right.moments),
+                                (left.variances, right.variances),
+                            ):
+                                for x, y in zip(a, b):
+                                    for key in x:
+                                        for u, v in zip(x[key], y[key]):
+                                            self.assertAlmostEqual(u, v, delta=2e-5)
+                finally:
+                    reference.close()
+                    device.close()
+
     def test_real_resident_ppo_and_fp32(self):
         # Full fixed-rollout lifecycle covers private Adam, masks, padding and epochs.
         # pylint: disable=too-many-locals,too-many-nested-blocks
@@ -652,9 +816,13 @@ class CudaHardwareTests(unittest.TestCase):
         left, right = copy.deepcopy(brain), copy.deepcopy(brain)
         ref_library = CapturingLibrary(ReferenceLibrary())
         gpu_library = CapturingLibrary(CudaLibrary())
-        reference = CudaTraining(library=ref_library)
+        reference = CudaTraining(library=ref_library, optimizer="cpu")
         device = CudaTraining(
-            library=gpu_library, precision="fp32", profile=True, inference="cuda"
+            library=gpu_library,
+            precision="fp32",
+            profile=True,
+            inference="cuda",
+            optimizer="cpu",
         )
         with reference.batch(), device.batch():
             reference.submit(left, samples, left.network.zeros())
@@ -722,8 +890,8 @@ class CudaHardwareTests(unittest.TestCase):
             oracle, device = copy.deepcopy(brains), copy.deepcopy(brains)
             reference_library = CapturingLibrary(ReferenceLibrary())
             real_library = CapturingLibrary(CudaLibrary())
-            expected = CudaTraining(library=reference_library)
-            actual = CudaTraining(library=real_library)
+            expected = CudaTraining(library=reference_library, optimizer="cpu")
+            actual = CudaTraining(library=real_library, optimizer="cpu")
             with expected.batch(), actual.batch():
                 for i in range(3):
                     expected.submit(oracle[i], samples[i], oracle[i].network.zeros())

@@ -29,7 +29,8 @@ struct Workspace {
          *summary = nullptr;
     cudaEvent_t start = nullptr, finish = nullptr;
     double stats[8] = {};
-    std::vector<float> cached_weights, cached_targets;
+    std::vector<float> cached_weights, cached_targets, cached_moments,
+        cached_variances;
     ~Workspace() {
         cudaFree(sizes);
         cudaFree(po);
@@ -90,21 +91,23 @@ bool download(Workspace *w, void *host, const void *device, size_t bytes) {
     w->stats[4] += static_cast<double>(bytes);
     return true;
 }
-bool weights(Workspace *w, const float *host, bool target = false) {
+bool cached_upload(Workspace *w, float *device, const float *host,
+                   std::vector<float> &cache, bool nonnegative = false,
+                   bool count_weights = false) {
     size_t n = static_cast<size_t>(w->models) * w->parameters;
-    auto &cache = target ? w->cached_targets : w->cached_weights;
     if (cache.size() == n &&
         std::memcmp(cache.data(), host, n * sizeof(float)) == 0) {
-        w->stats[6] += 1;
+        if (count_weights)
+            w->stats[6] += 1;
         return true;
     }
     for (size_t i = 0; i < n; ++i)
-        if (!std::isfinite(host[i])) {
+        if (!std::isfinite(host[i]) || (nonnegative && host[i] < 0)) {
             std::snprintf(last_error, sizeof(last_error),
-                          "Non-finite CUDA weights");
+                          "Invalid CUDA parameter/optimizer state");
             return false;
         }
-    if (!upload(w, target ? w->targets : w->weights, host, n * sizeof(float)))
+    if (!upload(w, device, host, n * sizeof(float)))
         return false;
     try {
         cache.assign(host, host + n);
@@ -113,8 +116,14 @@ bool weights(Workspace *w, const float *host, bool target = false) {
                       "Host CUDA weight cache allocation failed");
         return false;
     }
-    w->stats[5] += 1;
+    if (count_weights)
+        w->stats[5] += 1;
     return true;
+}
+bool weights(Workspace *w, const float *host, bool target = false) {
+    return cached_upload(w, target ? w->targets : w->weights, host,
+                         target ? w->cached_targets : w->cached_weights, false,
+                         true);
 }
 template <class R> bool finite_output(const void *pointer, size_t count) {
     const R *values = static_cast<const R *>(pointer);
@@ -375,10 +384,53 @@ __global__ void predictions(const float *weights, const R *obs, R *scratch,
             tape[ao[layers] + j];
 }
 template <class R>
+__global__ void dqn_adam(float *weights, float *targets, float *moments,
+                         float *variances, const R *output, R *losses,
+                         const int *metadata, int parameters, int batch,
+                         double norm_limit, double rate) {
+    int model = blockIdx.x, step = metadata[model * 2];
+    const R *gradient = output + static_cast<size_t>(model) * (parameters + 1);
+    __shared__ double factor, correction1, correction2;
+    if (!threadIdx.x) {
+        // The CPU optimizer widens gradients before arithmetic, including FP32
+        // CUDA gradients. Preserve that contract and compensated norm ordering.
+        double sum = 0, correction = 0;
+        for (int p = 0; p < parameters; ++p) {
+            double g = double(gradient[p]) / double(batch), x = g * g;
+            double next = sum + x;
+            correction +=
+                abs(sum) >= abs(x) ? (sum - next) + x : (x - next) + sum;
+            sum = next;
+        }
+        double norm =
+            sqrt(correction && isfinite(correction) ? sum + correction : sum);
+        factor = min(1.0, norm_limit / (norm + 1e-12)) / double(batch);
+        correction1 = 1.0 - pow(0.9, double(step));
+        correction2 = 1.0 - pow(0.999, double(step));
+        losses[model] = gradient[parameters];
+    }
+    __syncthreads();
+    for (int p = threadIdx.x; p < parameters; p += blockDim.x) {
+        size_t at = static_cast<size_t>(model) * parameters + p;
+        double g = double(gradient[p]) * factor;
+        float m = 0.9 * double(moments[at]) + 0.1 * g;
+        float v = 0.999 * double(variances[at]) + 0.001 * g * g;
+        float weight =
+            double(weights[at]) - rate * (double(m) / correction1) /
+                                      (sqrt(double(v) / correction2) + 1e-8);
+        moments[at] = m;
+        variances[at] = v;
+        weights[at] = weight;
+        if (metadata[model * 2 + 1])
+            targets[at] = weight;
+    }
+}
+
+template <class R>
 int run_dqn(Workspace *w, const float *online, const float *target,
             const void *obs, const void *next, const void *rewards,
             const int *actions, const int *terminal, double discount,
-            double threshold, int double_q, void *output) {
+            double threshold, int double_q, void *output, bool publish = true) {
     size_t samples = static_cast<size_t>(w->models) * w->batch;
     {
         Timer timer(w, 0);
@@ -408,7 +460,7 @@ int run_dqn(Workspace *w, const float *online, const float *target,
         if (fail(cudaGetLastError()))
             return 1;
     }
-    {
+    if (publish) {
         Timer timer(w, 2);
         if (!download(w, output, w->output,
                       static_cast<size_t>(w->models) * (w->parameters + 1) *
@@ -416,8 +468,83 @@ int run_dqn(Workspace *w, const float *online, const float *target,
             return 1;
     }
     return w->profile_error ||
-           !finite_output<R>(output, static_cast<size_t>(w->models) *
-                                         (w->parameters + 1));
+           (publish &&
+            !finite_output<R>(output, static_cast<size_t>(w->models) *
+                                          (w->parameters + 1)));
+}
+
+template <class R>
+int dqn_update(Workspace *w, float *online, const float *target,
+               const void *obs, const void *next, const void *rewards,
+               const int *actions, const int *terminal, float *moments,
+               float *variances, const int *metadata, const double *options,
+               void *losses) {
+    for (int model = 0; model < w->models; ++model)
+        if (metadata[model * 2] < 1 ||
+            (metadata[model * 2 + 1] != 0 && metadata[model * 2 + 1] != 1)) {
+            std::snprintf(last_error, sizeof(last_error),
+                          "Invalid CUDA DQN update metadata");
+            return 1;
+        }
+    for (int i = 0; i < 5; ++i)
+        if (!std::isfinite(options[i])) {
+            std::snprintf(last_error, sizeof(last_error),
+                          "Invalid CUDA DQN options");
+            return 1;
+        }
+    if (options[0] < 0 || options[0] > 1 || options[1] <= 0 ||
+        options[2] <= 0 || options[3] <= 0 ||
+        (options[4] != 0 && options[4] != 1)) {
+        std::snprintf(last_error, sizeof(last_error),
+                      "Invalid CUDA DQN options");
+        return 1;
+    }
+    {
+        Timer timer(w, 0);
+        if (!cached_upload(w, w->moments, moments, w->cached_moments) ||
+            !cached_upload(w, w->variances, variances, w->cached_variances,
+                           true) ||
+            !upload(w, w->metadata, metadata, w->models * 2 * sizeof(int)))
+            return 1;
+    }
+    if (run_dqn<R>(w, online, target, obs, next, rewards, actions, terminal,
+                   options[0], options[1], int(options[4]), nullptr, false))
+        return 1;
+    {
+        Timer timer(w, 1);
+        dqn_adam<<<w->models, 128>>>(
+            w->weights, w->targets, w->moments, w->variances,
+            static_cast<R *>(w->output), static_cast<R *>(w->summary),
+            w->metadata, w->parameters, w->batch, options[2], options[3]);
+        if (fail(cudaGetLastError()))
+            return 1;
+    }
+    size_t n = static_cast<size_t>(w->models) * w->parameters;
+    {
+        Timer timer(w, 2);
+        if (!download(w, online, w->weights, n * sizeof(float)) ||
+            !download(w, moments, w->moments, n * sizeof(float)) ||
+            !download(w, variances, w->variances, n * sizeof(float)) ||
+            !download(w, losses, w->summary, w->models * sizeof(R)))
+            return 1;
+    }
+    if (w->profile_error || !finite_output<float>(online, n) ||
+        !finite_output<float>(moments, n) ||
+        !finite_output<float>(variances, n) ||
+        !finite_output<R>(losses, w->models))
+        return 1;
+    // Refresh exact-content host mirrors after publication. Slot reuse with a
+    // different brain or arbitrary CPU edits must invalidate all private state.
+    std::copy(online, online + n, w->cached_weights.begin());
+    std::copy(moments, moments + n, w->cached_moments.begin());
+    std::copy(variances, variances + n, w->cached_variances.begin());
+    for (int model = 0; model < w->models; ++model)
+        if (metadata[model * 2 + 1])
+            std::copy(online + static_cast<size_t>(model) * w->parameters,
+                      online + static_cast<size_t>(model + 1) * w->parameters,
+                      w->cached_targets.begin() +
+                          static_cast<size_t>(model) * w->parameters);
+    return 0;
 }
 template <class R>
 int predict(Workspace *w, const float *online, const void *obs, void *output) {
@@ -494,7 +621,7 @@ int ppo(Workspace *w, const void *obs, const void *data, const int *actions,
 }
 } // namespace
 extern "C" {
-int wtf_cuda_api_version() { return 2; }
+int wtf_cuda_api_version() { return 3; }
 const char *wtf_cuda_error() { return last_error; }
 int wtf_cuda_probe(char *name, int capacity) {
     int device;
@@ -508,7 +635,7 @@ int wtf_cuda_probe(char *name, int capacity) {
 void *wtf_cuda_create(const int *sizes, int layers, int models, int batch,
                       int mode, int fp32, int profile) {
     if (layers < 1 || layers > 16 || models < 1 || models > 4096 || batch < 1 ||
-        batch > 4096 || mode < 0 || mode > 2 || (mode == 0 && batch != 1) ||
+        batch > 4096 || mode < 0 || mode > 3 || (mode == 0 && batch != 1) ||
         (fp32 != 0 && fp32 != 1) || (profile != 0 && profile != 1)) {
         std::snprintf(last_error, sizeof(last_error),
                       "Invalid CUDA workspace dimensions/mode");
@@ -559,9 +686,13 @@ void *wtf_cuda_create(const int *sizes, int layers, int models, int batch,
                  allocate(&w->valid, samples) &&
                  allocate(&w->metrics, samples * (mode == 2 ? 5 : 1) * real) &&
                  allocate(&w->rewards, samples * (mode == 2 ? 3 : 1) * real);
-        if (ok && mode == 1)
+        if (ok && (mode == 1 || mode == 3))
             ok = allocate(&w->targets, n) &&
                  allocate(&w->next, samples * w->inputs * real);
+        if (ok && mode == 3)
+            ok = allocate(&w->moments, n) && allocate(&w->variances, n) &&
+                 allocate(&w->metadata, models * 2) &&
+                 allocate(&w->summary, models * real);
         if (ok && mode == 2)
             ok = allocate(&w->moments, n) && allocate(&w->variances, n) &&
                  allocate(&w->masks, samples * (w->outputs - 1)) &&
@@ -617,6 +748,35 @@ int wtf_cuda_predict(void *p, const float *weights, const void *obs,
     }
     return w->fp32 ? predict<float>(w, weights, obs, output)
                    : predict<double>(w, weights, obs, output);
+}
+int wtf_cuda_dqn_update(void *p, float *weights, const float *targets,
+                        const void *obs, const void *next, const void *rewards,
+                        const int *actions, const int *terminal, float *moments,
+                        float *variances, const int *metadata,
+                        const double *options, void *losses) {
+    auto *w = static_cast<Workspace *>(p);
+    if (w->mode != 3) {
+        std::snprintf(last_error, sizeof(last_error),
+                      "Resident DQN workspace required");
+        return 1;
+    }
+    int result = w->fp32
+                     ? dqn_update<float>(w, weights, targets, obs, next,
+                                         rewards, actions, terminal, moments,
+                                         variances, metadata, options, losses)
+                     : dqn_update<double>(w, weights, targets, obs, next,
+                                          rewards, actions, terminal, moments,
+                                          variances, metadata, options, losses);
+    if (result) {
+        // A failed publication may have left mutated device slots. Force fresh
+        // uploads on retry rather than treating stale CPU snapshots as cache
+        // hits.
+        w->cached_weights.clear();
+        w->cached_targets.clear();
+        w->cached_moments.clear();
+        w->cached_variances.clear();
+    }
+    return result;
 }
 int wtf_cuda_ppo_begin(void *p, const float *online, const float *moments,
                        const float *variances) {

@@ -110,3 +110,13 @@ figures, tables and prose remain the better choice.
 ## Viewer appearance catalog
 
 [Source-rendered viewer specimens](viewer/README.md) identify animal/sex glyphs, resources, events, terrain, visibility and inspector/brain graphics. The [appearance reference](../viewer-visual-reference.md) embeds the seven sheets with their meaning; chart values are illustrative.
+
+## CUDA architecture diagrams
+
+[CUDA data flow and state residency](../cuda.md#where-the-cuda-path-saves-work)
+show CPU/GPU ownership, exact-content upload caches, compact gradient reduction
+and private PPO optimizer state across minibatches. These adaptive SVGs describe
+mechanisms rather than attributing measured time savings. Sources live in
+`work/build_recent_doc_diagrams.py`; regenerate with
+`python -m work.build_recent_doc_diagrams --only cuda-dqn-dataflow --only cuda-ppo-residency`.
+Local `.mmd` exports remain ignored.

@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **311 public documentation pages**, **120 visual files**
+Coverage: **314 public documentation pages**, **122 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -123,6 +123,8 @@ and **8 identical viewer branding copies**.
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) |
 | [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Competition (SVG)](visual-previews/diagrams/competition-svg.md) |
+| [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) |
+| [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) |
 | [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) |
 | [Early stopping patience (SVG)](visual-previews/diagrams/early-stopping-patience-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Early stopping patience (SVG)](visual-previews/diagrams/early-stopping-patience-svg.md) |
 | [Escape and consent (SVG)](visual-previews/diagrams/escape-and-consent-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Escape and consent (SVG)](visual-previews/diagrams/escape-and-consent-svg.md) |
@@ -318,6 +320,7 @@ and **8 identical viewer branding copies**.
 | [0.0.2.28 Experimental CUDA dense training backend](releases/0.0.2.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.28](releases/0.0.2.28.md) |
 | [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
+| [0.0.2.30 Bulk gradient conversion and resident DQN optimizers](releases/0.0.2.30.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.30](releases/0.0.2.30.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
@@ -360,6 +363,8 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/child-only-mutation-path.svg` | [Home](index.md) → [All visuals](visuals.md) → [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | `assets/diagrams/choose-checks-for-the-change.svg` | [Home](index.md) → [All visuals](visuals.md) → [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
 | `assets/diagrams/competition.svg` | [Home](index.md) → [All visuals](visuals.md) → [competition.svg](assets/diagrams/competition.svg) |
+| `assets/diagrams/cuda-dqn-dataflow.svg` | [Home](index.md) → [All visuals](visuals.md) → [cuda-dqn-dataflow.svg](assets/diagrams/cuda-dqn-dataflow.svg) |
+| `assets/diagrams/cuda-ppo-residency.svg` | [Home](index.md) → [All visuals](visuals.md) → [cuda-ppo-residency.svg](assets/diagrams/cuda-ppo-residency.svg) |
 | `assets/diagrams/distributional-action-values.svg` | [Home](index.md) → [All visuals](visuals.md) → [distributional-action-values.svg](assets/diagrams/distributional-action-values.svg) |
 | `assets/diagrams/early-stopping-patience.svg` | [Home](index.md) → [All visuals](visuals.md) → [early-stopping-patience.svg](assets/diagrams/early-stopping-patience.svg) |
 | `assets/diagrams/escape-and-consent.svg` | [Home](index.md) → [All visuals](visuals.md) → [escape-and-consent.svg](assets/diagrams/escape-and-consent.svg) |

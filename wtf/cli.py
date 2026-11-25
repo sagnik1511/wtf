@@ -62,7 +62,7 @@ def main():
         "--device",
         choices=("cpu", "cuda"),
         default="cpu",
-        help="Experimental CUDA dense action evaluation and DQN/DDQN gradients; CPU remains default",
+        help="Experimental CUDA dense action evaluation and PPO/DQN training; CPU remains default",
     )
     parser.add_argument(
         "--cuda-precision",
@@ -75,6 +75,12 @@ def main():
         choices=("auto", "cpu", "cuda"),
         default="auto",
         help="auto uses CPU action evaluation for CUDA-trained PPO/DQN; GPU for other dense policies",
+    )
+    parser.add_argument(
+        "--cuda-optimizer",
+        choices=("cpu", "cuda"),
+        default="cuda",
+        help="DQN/DDQN optimizer placement; cpu retains the gradient-only comparison path",
     )
     parser.add_argument(
         "--cuda-profile",
@@ -365,6 +371,7 @@ def main():
                 precision=args.cuda_precision,
                 profile=args.cuda_profile,
                 inference=args.cuda_inference,
+                optimizer=args.cuda_optimizer,
             )
         except (ValueError, RuntimeError, OSError) as error:
             parser.error(str(error))

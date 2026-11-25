@@ -20,6 +20,7 @@ local regeneration. Physics SVGs and recorded GIFs remain separate, ordinary ima
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
 | How are input fields packed into the vector? | [Contiguous blocks and repeated slots](observations.md#input-layout) |
 | Which visible targets enter the brain? | [Top-k input pipeline](observations.md#visible-target-slots) |
+| How does CUDA avoid repeated work and transfers? | [DQN/DDQN data flow and PPO residency](cuda.md#where-the-cuda-path-saves-work) |
 | How does an animal learn? | [Private learning loop](algorithms.md#private-learning-loop) |
 | How do GRPO trials avoid changing the real world? | [Trial isolation](algorithms.md#grpo-trial-isolation) |
 | What does recurrent memory do? | [Recurrent state](advanced-algorithms.md#recurrent-decision-state) |

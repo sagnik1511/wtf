@@ -44,6 +44,8 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
 | [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [competition.svg](assets/diagrams/competition.svg) |
+| [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) | [cuda-dqn-dataflow.svg](assets/diagrams/cuda-dqn-dataflow.svg) |
+| [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) | [cuda-ppo-residency.svg](assets/diagrams/cuda-ppo-residency.svg) |
 | [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) | [distributional-action-values.svg](assets/diagrams/distributional-action-values.svg) |
 | [Early stopping patience (SVG)](visual-previews/diagrams/early-stopping-patience-svg.md) | [early-stopping-patience.svg](assets/diagrams/early-stopping-patience.svg) |
 | [Escape and consent (SVG)](visual-previews/diagrams/escape-and-consent-svg.md) | [escape-and-consent.svg](assets/diagrams/escape-and-consent.svg) |

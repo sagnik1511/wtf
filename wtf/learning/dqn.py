@@ -52,10 +52,10 @@ class DQNBrain(QRDQNBrain):
             or self.steps % c["train_every_steps"]
         ):
             return
-        gradients = self.network.zeros()
+        gradients = self.network.zeros() if defer is None else None
         samples = self.training_rng.sample(self.replay, c["batch_size"])
         if defer is not None:
-            defer.submit(self, samples, gradients)
+            defer.submit(self, samples, None)
             return
         total_loss = self._batch_loss(samples, gradients)
         self._finish_update(gradients, total_loss, c["batch_size"])

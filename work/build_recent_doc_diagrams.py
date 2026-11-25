@@ -14,6 +14,56 @@ from xml.etree import ElementTree as ET
 from work.build_doc_diagrams import ASSETS, ROOT, render
 
 FLOWS = {
+    "cuda-dqn-dataflow": (
+        "DQN and DDQN: reducing host work and GPU memory traffic",
+        "docs/cuda.md",
+        "where-the-cuda-path-saves-work",
+        """flowchart TB
+  subgraph before["Original CUDA offload"]
+    b_action["GPU action evaluation every world step"] --> b_sample["CPU samples each animal's private replay"]
+    b_sample --> b_pack["CPU rebuilds buffers and scans every weight"]
+    b_pack --> b_copy["Upload online and target weights for every batch"]
+    b_copy --> b_compute["GPU: one thread per neuron; save full parameter gradient per sample"]
+    b_compute --> b_reduce["GPU reduces sample gradients; copies batch gradients to CPU"]
+    b_reduce --> b_adam["CPU clips gradients, runs Adam and synchronizes targets"]
+  end
+  subgraph after["Revised DQN / DDQN; automatic inference"]
+    a_action["CPU native action evaluation; no per-step GPU inference call"] --> a_sample["CPU samples private replay; same cadence and batch size"]
+    a_sample --> a_stage["Reuse staging buffers; native exact-content cache check"]
+    a_stage --> a_changed{"Weights, targets or Adam state changed?"}
+    a_changed -->|Changed component| a_copy["Upload only changed private state buffers"]
+    a_changed -->|Unchanged| a_cached["Reuse that buffer already on GPU"]
+    a_copy --> a_compute["GPU warps cooperate on contiguous weights; save activations and deltas"]
+    a_cached --> a_compute
+    a_compute --> a_reduce["GPU reduces to one gradient per animal; keeps it on device"]
+    a_reduce --> a_adam["GPU clipping, private Adam and scheduled target updates"]
+    a_adam --> a_publish["Bulk publish CPU weights, Adam snapshots and loss; existing selection, births and checkpoints"]
+  end
+""",
+    ),
+    "cuda-ppo-residency": (
+        "PPO and masked PPO: private state stays on GPU across minibatches",
+        "docs/cuda.md",
+        "ppo-state-residency-and-publication",
+        """flowchart TB
+  subgraph host["CPU: biology, private schedules and published models"]
+    world["World, native action evaluation, private rollouts and GAE"] --> schedule["Group ready brains; private RNG selects each animal's minibatches"]
+    reports["Read small per-round metrics; continue active animals or stop each independently"] --> publish["After all rounds: publish coherent weights and Adam snapshots"]
+    publish --> consumers["Champions, child inheritance, diagnostics and checkpoints"]
+  end
+  subgraph device["GPU: repeated minibatches with private resident state"]
+    resident["Separate weights and Adam slots per animal; initial upload once"] --> loss["Forward, clipped loss, backward and compact gradient reduction"]
+    loss --> gate{"This animal exceeds its KL cap?"}
+    gate -->|No| update["Clip gradients; Adam updates only this animal's GPU slots"]
+    gate -->|Yes| reject["Skip update; keep its weights and moments"]
+  end
+  schedule -->|Initial weights and Adam state| resident
+  schedule -->|Each round: selected inputs and masks| loss
+  update -->|Small acceptance and metric report| reports
+  reject -->|Stopped flag; others continue| reports
+  resident -->|Updated weights and Adam state once at completion| publish
+""",
+    ),
     "top-k-observation-pipeline": (
         "Top-k observation pipeline",
         "docs/observations.md",
@@ -335,10 +385,19 @@ def main():
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument(
+        "--only",
+        action="append",
+        choices=sorted(FLOWS),
+        help="Regenerate/check only named flows; omit the inspector illustration",
+    )
     args = parser.parse_args()
     manifest_path = ASSETS / "manifest.json"
     entries = json.loads(manifest_path.read_text())
-    for name, (title, document, anchor, source) in FLOWS.items():
+    selected = {
+        name: flow for name, flow in FLOWS.items() if not args.only or name in args.only
+    }
+    for name, (title, document, anchor, source) in selected.items():
         image, nodes, edges = render(source, title, document)
         entry = {
             "title": title,
@@ -363,18 +422,21 @@ def main():
                 entries.append(entry)
             else:
                 entries[found] = entry
-    example = ROOT / "docs/assets/inspector/inspector-example.svg"
-    illustration = inspector_example()
-    ET.fromstring(illustration)
-    if args.check:
-        assert example.read_text() == illustration, example
-    else:
-        example.parent.mkdir(parents=True, exist_ok=True)
-        example.write_text(illustration)
+    if args.only is None:
+        example = ROOT / "docs/assets/inspector/inspector-example.svg"
+        illustration = inspector_example()
+        ET.fromstring(illustration)
+        if args.check:
+            assert example.read_text() == illustration, example
+        else:
+            example.parent.mkdir(parents=True, exist_ok=True)
+            example.write_text(illustration)
+    if not args.check:
         manifest_path.write_text(json.dumps(entries, indent=2) + "\n")
     print(
         ("Checked" if args.check else "Rendered")
-        + " five flow diagrams and one inspector illustration."
+        + f" {len(selected)} flow diagrams"
+        + (" and one inspector illustration." if args.only is None else ".")
     )
 
 

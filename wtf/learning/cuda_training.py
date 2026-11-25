@@ -1,4 +1,4 @@
-"""Opt-in CUDA dense prediction and DQN/DDQN gradient batches.
+"""Opt-in CUDA dense prediction and private batched learning updates.
 
 CPU snapshots remain authoritative; PPO minibatch state is transiently GPU-resident.
 
@@ -31,6 +31,7 @@ from wtf.learning.discrete_sac import DiscreteSACBrain
 from wtf.learning.trpo import TRPOBrain
 from wtf.learning.ppo import MLP
 from wtf.native.numeric import Float32
+from wtf.native import kernels
 
 
 class CudaLibrary:
@@ -73,7 +74,7 @@ class CudaLibrary:
         lib = self.library
         lib.wtf_cuda_api_version.argtypes = []
         lib.wtf_cuda_api_version.restype = ctypes.c_int
-        if lib.wtf_cuda_api_version() != 2:
+        if lib.wtf_cuda_api_version() != 3:
             raise RuntimeError("Unsupported CUDA kernel API; rebuild the library.")
         lib.wtf_cuda_error.argtypes = []
         lib.wtf_cuda_error.restype = ctypes.c_char_p
@@ -92,6 +93,8 @@ class CudaLibrary:
         lib.wtf_cuda_run.restype = ctypes.c_int
         lib.wtf_cuda_predict.argtypes = [ctypes.c_void_p] * 4
         lib.wtf_cuda_predict.restype = ctypes.c_int
+        lib.wtf_cuda_dqn_update.argtypes = [ctypes.c_void_p] * 13
+        lib.wtf_cuda_dqn_update.restype = ctypes.c_int
         for name, count in (("stats", 2), ("ppo_begin", 4), ("ppo", 9), ("ppo_end", 4)):
             function = getattr(lib, "wtf_cuda_" + name)
             function.argtypes = [ctypes.c_void_p] * count
@@ -157,6 +160,21 @@ class CudaLibrary:
             )
         )
 
+    # The versioned ABI names each mutable state buffer explicitly.
+    # pylint: disable-next=too-many-arguments,too-many-positional-arguments
+    def dqn_update(self, handle, buffers, moments, variances, metadata, options, loss):
+        """Keep gradients/clipping/Adam/target synchronization on the device."""
+        self.check(
+            self.library.wtf_cuda_dqn_update(
+                handle,
+                *(b.buffer_info()[0] for b in buffers),
+                *(
+                    b.buffer_info()[0]
+                    for b in (moments, variances, metadata, options, loss)
+                ),
+            )
+        )
+
     def stats(self, handle):
         """Read counters without synchronizing an unprofiled device."""
         result = array("d", [0.0]) * 8
@@ -209,12 +227,15 @@ def workspace_bytes(sizes, models, batch, training=True, precision="fp64"):
             + 8 * models
             + real * models * 6
         )
-    return (
+    result = (
         base
         + 4 * models * parameters
         + real * models * (parameters + 1)
         + samples * (8 + 2 * real + real * sizes[0])
     )
+    if training == 3:
+        result += 8 * models * parameters + 8 * models + real * models
+    return result
 
 
 # Workspace ownership, limits and execution counters have separate lifetimes.
@@ -233,6 +254,7 @@ class CudaTraining:
         precision="fp64",
         profile=False,
         inference="auto",
+        optimizer="cuda",
     ):
         # Exact integers reject bool and accidental implicit coercion.
         # pylint: disable=unidiomatic-typecheck
@@ -246,6 +268,9 @@ class CudaTraining:
             )
         if inference not in ("auto", "cpu", "cuda"):
             raise ValueError("CUDA inference must be auto/cpu/cuda")
+        if optimizer not in ("cpu", "cuda"):
+            raise ValueError("CUDA optimizer must be cpu/cuda")
+        self.optimizer = optimizer
         self.inference = inference
         self.precision, self.profile = precision, profile
         self.typecode = "f" if precision == "fp32" else "d"
@@ -432,6 +457,11 @@ class CudaTraining:
                 for values in layer.values()
             )
             for net in (brain.network, brain.target_network)
+        ) and all(
+            isinstance(value, Float32)
+            for tree in (brain.moments, brain.variances)
+            for layer in tree
+            for value in layer.values()
         )
 
     @contextmanager
@@ -458,6 +488,8 @@ class CudaTraining:
             raise RuntimeError("Submit CUDA updates inside batch()")
         if not 1 <= len(samples) <= 4096:
             raise ValueError("CUDA sample batch must be 1..4096")
+        if any(queued is brain for queued, _, _ in self.pending):
+            self.flush()
         self.pending.append((brain, samples, gradients))
         if len(self.pending) >= self.max_agents:
             self.flush()
@@ -503,14 +535,25 @@ class CudaTraining:
                 brain.algorithm,
                 brain.config["discount_factor"],
                 brain.config["huber_threshold"],
+                brain.config["max_grad_norm"],
+                brain.config["learning_rate"],
             )
             groups.setdefault(key, []).append(job)
-        for (sizes, batch, algorithm, discount, threshold), group in groups.items():
+        mode = 3 if self.optimizer == "cuda" else 1
+        for (
+            sizes,
+            batch,
+            algorithm,
+            discount,
+            threshold,
+            _clip,
+            _rate,
+        ), group in groups.items():
             if not 2 <= len(sizes) <= 17 or any(not 1 <= n <= 4096 for n in sizes):
                 raise RuntimeError(
                     "CUDA supports 1..16 dense layers, each 1..4096 wide"
                 )
-            per_model = workspace_bytes(sizes, 1, batch, True, self.precision) - 4 * (
+            per_model = workspace_bytes(sizes, 1, batch, mode, self.precision) - 4 * (
                 3 * len(sizes) + 1
             )
             capacity = min(
@@ -744,9 +787,10 @@ class CudaTraining:
     # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-branches
     def _run(self, jobs, sizes, batch, discount, threshold, double_q):
         # Buffer ordering is the explicit C ABI; keep it visible beside the pack/readback loop.
-        # pylint: disable=too-many-locals,protected-access
+        # pylint: disable=too-many-locals,protected-access,too-many-statements
         started = time.perf_counter() if self.profile else 0.0
-        handle = self._workspace(sizes, len(jobs), batch)
+        mode = 3 if self.optimizer == "cuda" else 1
+        handle = self._workspace(sizes, len(jobs), batch, mode)
         weights = self.pack_models(
             handle, "dqn_weights", [b.network.layers for b, _, _ in jobs]
         )
@@ -802,6 +846,13 @@ class CudaTraining:
             raise RuntimeError("CUDA ABI requires float32/float64/int32 host buffers")
         if any(not math.isfinite(value) for buffer in buffers[2:5] for value in buffer):
             raise ValueError("Non-finite CUDA input")
+        if self.optimizer == "cuda":
+            # Separate publication helper keeps the synchronous ABI boundary explicit.
+            # pylint: disable=import-outside-toplevel
+            from wtf.learning.cuda_dqn import update
+
+            update(self, handle, jobs, buffers, discount, threshold, double_q, started)
+            return
         output = self.buffer(
             handle, "dqn_result", self.typecode, len(jobs) * (parameters + 1)
         )
@@ -813,7 +864,15 @@ class CudaTraining:
         ):
             raise RuntimeError("CUDA returned non-finite gradients/loss")
         started = time.perf_counter() if self.profile else 0.0
+        if output.typecode == "f" and kernels.available("widen_f32"):
+            widened = self.buffer(handle, "dqn_widened", "d", len(output))
+            # Exact widening in one C loop, rather than Python float boxing per value.
+            # pylint: disable-next=c-extension-no-member
+            kernels.native.widen_f32(output, widened)
+            output = widened
         for index, (brain, samples, gradients) in enumerate(jobs):
+            if gradients is None:
+                gradients = brain.network.zeros()
             offset = index * (parameters + 1)
             for layer in gradients:
                 for key in ("weights", "bias"):
@@ -840,6 +899,7 @@ class CudaTraining:
             "precision": self.precision,
             "profile": self.profile,
             "inference": self.inference,
+            "dqn_optimizer": self.optimizer,
             "packing_seconds": self.packing_seconds,
             "cpu_optimizer_seconds": self.optimizer_seconds,
             "cuda_upload_seconds": stats[0],
