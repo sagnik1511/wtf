@@ -170,7 +170,7 @@ python -m work.benchmark_cuda --algorithms ppo dqn ddqn --devices cuda \
 
 The `accelerator` section reports:
 
-- `packing_seconds`: measured Python preparation/staging, including PPO scheduling.
+- `packing_seconds`: host elapsed preparation/staging, including workspace allocation and PPO scheduling.
 - `cpu_optimizer_seconds`: DQN gradient unpacking and existing CPU optimizer work.
 - `cuda_upload_seconds`, `cuda_compute_seconds`, `cuda_download_seconds`: CUDA event
   elapsed intervals around each phase; upload intervals may include host cache

@@ -590,6 +590,47 @@ class CudaHardwareTests(unittest.TestCase):
                 reference.close()
                 device.close()
 
+    def test_real_ppo_kl_rejection_is_per_animal(self):
+        # One animal rejects its first batch while another completes all epochs.
+        # pylint: disable=too-many-locals
+        for precision in ("fp64", "fp32"):
+            config = settings("ppo")
+            config.update(
+                epochs=3,
+                batch_size=2,
+                target_kl=1e-6,
+                learning_rate=1e-6,
+                normalize_advantages=False,
+            )
+            brains = [
+                create_brain(config, ["rest", "eat"], 2 + i, 20 + i) for i in range(2)
+            ]
+            for i, brain in enumerate(brains):
+                obs = (0.1,) * 20
+                outputs = brain.network.predict(obs)
+                old = brain.distribution(outputs, obs)[1][0] - (10 if i else 0)
+                brain.rollout = [
+                    RolloutStep(obs, 0, 0.2, old, outputs[-1], 0.0, False, True)
+                ] * 2
+            expected, actual = copy.deepcopy(brains), copy.deepcopy(brains)
+            reference = CudaTraining(library=ReferenceLibrary())
+            device = CudaTraining(precision=precision)
+            for engine, population in ((reference, expected), (device, actual)):
+                with engine.batch():
+                    for brain in population:
+                        brain._update()
+            self.assertEqual(actual[0].updates, 3)
+            self.assertEqual(actual[1].updates, 0)
+            self.assertTrue(actual[1].last_metrics["early_stopped"])
+            self.assertEqual(actual[1].network.layers, brains[1].network.layers)
+            self.assertEqual(actual[1].moments, brains[1].moments)
+            self.assertEqual(actual[1].variances, brains[1].variances)
+            for a, b in zip(expected, actual):
+                self.assertEqual(a.updates, b.updates)
+                self.assertEqual(a.training_rng.getstate(), b.training_rng.getstate())
+            reference.close()
+            device.close()
+
     # Raw gradients plus repeated-call cache and numerical checks share one GPU lifecycle.
     # pylint: disable-next=too-many-locals
     def test_real_fp32_forward_gradient_cache_and_timing(self):

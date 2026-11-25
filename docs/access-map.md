@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **310 public documentation pages**, **120 visual files**
+Coverage: **311 public documentation pages**, **120 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -316,6 +316,7 @@ and **8 identical viewer branding copies**.
 | [0.0.2.26 Combined general and context consequence inputs](releases/0.0.2.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.26](releases/0.0.2.26.md) |
 | [0.0.2.27 Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.27](releases/0.0.2.27.md) |
 | [0.0.2.28 Experimental CUDA dense training backend](releases/0.0.2.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.28](releases/0.0.2.28.md) |
+| [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
