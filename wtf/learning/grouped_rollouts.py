@@ -211,9 +211,9 @@ def collect_group(world, brains, focal_id, *, reuse_world=True):
                         "recurrent_ppo",
                         "lstm_ppo",
                     ):
-                        memories[event.target] = [0.0] * policies[event.target].config[
-                            "recurrent_size"
-                        ]
+                        # The policy owns the complete reset state: LSTM includes
+                        # both hidden and cell vectors, unlike GRU's single vector.
+                        memories[event.target] = policies[event.target].hidden[:]
                     generators[event.target] = random.Random(
                         offspring_seed(trial, event.target)
                     )

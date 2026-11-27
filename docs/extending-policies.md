@@ -137,3 +137,15 @@ Those commands exercise existing coverage; extend their fixtures/lists so the
 new algorithm is actually included. When adding a shipped module or preset,
 verify the built wheel/source archive and [asset manifest](packaging.md#what-is-included) too. Update algorithm documentation, presets,
 compatibility notes and a pending implementation rollout only after integration.
+
+
+## Optional native execution
+
+New Python policies remain available through the reference engine. The
+[native episode engine](native-engine.md) covers the 14 built-in CPU learners;
+adding another Python type identifier does not automatically add a native learner.
+A native port must implement native construction/model signatures, independent
+buffers/RNGs, numerical/update ordering, frozen trial choices, inheritance,
+diagnostics and checkpoint interchange, then pass complete-session
+and saved-replay comparisons before admission. Do not fall back into Python
+inside native batches or claim kernel-only timings as an end-to-end improvement.

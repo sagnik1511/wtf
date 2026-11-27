@@ -8,8 +8,14 @@ rather than loading every document or result into context.
 
 - The Python namespace is `wtf`. Keep implementations in the responsibility-based subpackages documented in [package layout](docs/package-layout.md). Preserve the lazy root API and use current imports in public commands, tutorials and extension examples.
 
-- Python owns simulation and learning; plain JavaScript owns saved-run playback.
-  Keep training independent of the read-only viewer/server.
+- Python provides the reference engine and public API; optional C++ owns built-in
+  CPU experiment execution: native genesis/chaining, all 14 learners, V1–V7
+  sensing, physical/social rules and diagnostics. Plain JavaScript owns saved-run playback. Keep training
+  independent of the read-only viewer/server. See [native execution](docs/native-engine.md).
+  Native batches must not call Python per animal/step; keep private model/optimizer/RNG
+  ownership, FP32 storage/FP64 arithmetic and existing artifact contracts. CUDA,
+  legacy FP64-stored continuation and Python execution overrides use the Python
+  engine. New unsupported features reject explicit C++ execution. Detached Python query copies never mutate native state.
 - Environments belong in `environments/*.json`, validated by `wtf/config.py`
   and `environment.schema.json`. Prefer CLI selectors for run-specific brain
   initialization; avoid hardcoding a result path into Python.

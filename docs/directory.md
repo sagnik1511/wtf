@@ -118,6 +118,7 @@ narrow screens. The top tabs open the same section pages.
 | [GRPO trials and actor batches](training-workflow-performance.md) | Construction/inference ownership, matched benchmarks and fallback limits. |
 | [Experimental CUDA](cuda.md) | Linux/Colab build, per-learner boundaries and full-loop benchmarking. |
 | [Performance](performance.md) | Shared work, bounded caches, allocation reductions and invalidation. |
+| [Native C++ engine](native-engine.md) | Native episode ownership, Python queries, build/selection and compatibility limits. |
 | [Native kernels](native-kernels.md) | Optional native learning kernels and portable fallback behavior. |
 | [Native top-k perception](native-top-k.md) | Exact selector behavior, cache ownership and matched benchmarks. |
 | [Extended native kernels](native-kernels-v2.md) | Additional compiled paths and equivalence boundaries. |

@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **340 public documentation pages**, **127 visual files**
+Coverage: **343 public documentation pages**, **128 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -75,6 +75,7 @@ and **8 identical viewer branding copies**.
 | [Mating intent and proximal reproduction](mating-intent.md) | [Home](index.md) → [mating intent](mating-intent.md) |
 | [Mating readiness and guarded inheritance](mating-observations.md) | [Home](index.md) → [mating observations](mating-observations.md) |
 | [Rare mutations at birth](mutation.md) | [Home](index.md) → [rare mutation](mutation.md) |
+| [Native execution and Python queries](native-engine.md) | [Home](index.md) → [Native episode engine](native-engine.md) |
 | [Second native-kernel rollout](native-kernels-v2.md) | [Home](index.md) → [extended kernels](native-kernels-v2.md) |
 | [Optional CPU kernels](native-kernels.md) | [Home](index.md) → [native kernels](native-kernels.md) |
 | [Native kernels and runtime data widths](native-performance-review.md) | [Home](index.md) → [native performance review](native-performance-review.md) |
@@ -146,6 +147,7 @@ and **8 identical viewer branding copies**.
 | [Masked decisions (SVG)](visual-previews/diagrams/masked-decisions-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Masked decisions (SVG)](visual-previews/diagrams/masked-decisions-svg.md) |
 | [Mating intent (SVG)](visual-previews/diagrams/mating-intent-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Mating intent (SVG)](visual-previews/diagrams/mating-intent-svg.md) |
 | [Names roles and private brains (SVG)](visual-previews/diagrams/names-roles-and-private-brains-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Names roles and private brains (SVG)](visual-previews/diagrams/names-roles-and-private-brains-svg.md) |
+| [Native PPO episode (SVG)](visual-previews/diagrams/native-ppo-episode-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Native PPO episode (SVG)](visual-previews/diagrams/native-ppo-episode-svg.md) |
 | [Native top k (SVG)](visual-previews/diagrams/native-top-k-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Native top k (SVG)](visual-previews/diagrams/native-top-k-svg.md) |
 | [Observation cache dependencies (SVG)](visual-previews/diagrams/observation-cache-dependencies-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation cache dependencies (SVG)](visual-previews/diagrams/observation-cache-dependencies-svg.md) |
 | [One simulation step (SVG)](visual-previews/diagrams/one-simulation-step-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [One simulation step (SVG)](visual-previews/diagrams/one-simulation-step-svg.md) |
@@ -353,6 +355,7 @@ and **8 identical viewer branding copies**.
 | [0.0.3.2 Native late-adapter PPO batching](releases/0.0.3.2.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.2](releases/0.0.3.2.md) |
 | [0.0.3.3 Compact data flow and native auxiliary batching](releases/0.0.3.3.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.3](releases/0.0.3.3.md) |
 | [0.0.3.4 V7 sensory defaults across maintained presets](releases/0.0.3.4.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.4](releases/0.0.3.4.md) |
+| [0.1.0.0 Native C++ core and Python queries](releases/0.1.0.0.md) | [Home](index.md) → [Native episode engine](native-engine.md) → [release notes](releases/0.1.0.0.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [release records](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -404,6 +407,7 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/masked-decisions.svg` | [Home](index.md) → [All visuals](visuals.md) → [masked-decisions.svg](assets/diagrams/masked-decisions.svg) |
 | `assets/diagrams/mating-intent.svg` | [Home](index.md) → [All visuals](visuals.md) → [mating-intent.svg](assets/diagrams/mating-intent.svg) |
 | `assets/diagrams/names-roles-and-private-brains.svg` | [Home](index.md) → [All visuals](visuals.md) → [names-roles-and-private-brains.svg](assets/diagrams/names-roles-and-private-brains.svg) |
+| `assets/diagrams/native-ppo-episode.svg` | [Home](index.md) → [All visuals](visuals.md) → [native-ppo-episode.svg](assets/diagrams/native-ppo-episode.svg) |
 | `assets/diagrams/native-top-k.svg` | [Home](index.md) → [All visuals](visuals.md) → [native-top-k.svg](assets/diagrams/native-top-k.svg) |
 | `assets/diagrams/observation-cache-dependencies.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-cache-dependencies.svg](assets/diagrams/observation-cache-dependencies.svg) |
 | `assets/diagrams/one-simulation-step.svg` | [Home](index.md) → [All visuals](visuals.md) → [one-simulation-step.svg](assets/diagrams/one-simulation-step.svg) |

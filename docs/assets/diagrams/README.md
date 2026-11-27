@@ -106,3 +106,6 @@ Regenerate only the CUDA architecture diagrams without refreshing other assets:
 .venv/bin/python -m work.build_recent_doc_diagrams --only cuda-dqn-dataflow --only cuda-ppo-residency
 .venv/bin/python -m work.build_recent_doc_diagrams --check --only cuda-dqn-dataflow --only cuda-ppo-residency
 ```
+
+[Native experiment boundary](native-ppo-episode.svg) shows native genesis,
+private learners, lifecycle ownership, Python queries and the unchanged artifact layer; see [native execution](../../native-engine.md).

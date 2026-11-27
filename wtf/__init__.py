@@ -13,7 +13,7 @@ if sys.version_info < (3, 12):
 
 # Experiment is resolved by __getattr__; eager binding would import training here.
 # pylint: disable-next=undefined-all-variable
-__all__ = ["Experiment", "load_config"]
+__all__ = ["Experiment", "NativeExperiment", "load_config"]
 
 
 def load_config(name_or_path="baseline"):
@@ -34,6 +34,10 @@ def __getattr__(name):
     # path.
     # pylint: disable=import-outside-toplevel
 
+    if name == "NativeExperiment":
+        from wtf.experiment.native import NativeExperiment
+
+        return NativeExperiment
     if name == "Experiment":
         from wtf.experiment.runner import Experiment
 

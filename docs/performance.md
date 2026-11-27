@@ -19,6 +19,76 @@ Earlier benchmark tables retain their measured contracts, including legacy
 Reproducing older timings requires the documented baseline revision/configuration,
 while fresh comparisons must hold the full sensory settings equal.
 
+## Native PPO episode engine
+
+The optional [C++ core](native-engine.md) owns the complete CPU world/learning
+loop, initialization and episode chaining for all 14 built-in learners. The
+measurements here use ordinary PPO; other learners have differential correctness
+coverage, without a performance guarantee inferred from these timings.
+
+Local CPython 3.12.9/macOS ARM64 measurements compare the two engines with the
+existing C numerical kernels enabled in the Python baseline. Three alternating
+fresh-process samples per workflow use seed 100 and identical configuration,
+private brains, recording cadence and saved formats. Timings include the
+backend's initialization, bounded CLI transfers, metrics and final binary/XZ
+checkpoint writing. Process startup and subsequent artifact verification are
+outside timing. Champion-library publication is disabled; champion selection
+and checkpointed champion records remain part of the workload.
+
+| Workflow | Python | C++ | Speedup | Peak RSS Python / C++ |
+| --- | ---: | ---: | ---: | ---: |
+| Training, no playback | 15.952 s | 7.951 s | 2.01× | 71.8 / 159.9 MiB |
+| Evaluation, no playback | 4.517 s | 1.391 s | 3.25× | 46.3 / 88.0 MiB |
+| Training + playback | 21.377 s | 14.591 s | 1.47× | 82.9 / 163.9 MiB |
+| Evaluation + playback | 6.655 s | 4.237 s | 1.57× | 57.7 / 99.0 MiB |
+
+Values are per-workflow medians, including median process peak RSS. Training
+completed 1,000 steps and 13,032 optimizer updates. Evaluation reached natural
+extinction at step 816 under the same 1,000-step limit and performed no learning.
+All 12 paired cases matched complete logical checkpoints, checkpoint file bytes,
+metrics CSV, replay chunks and workload counts. Lifecycle tests separately
+exercise forced births, rare mutation, deaths and restoration.
+
+A second headless workload uses `land_bridge_collective`: elevated terrain,
+day/night, movement history, scent, shared consequences and private PPO auxiliary
+heads. Its three paired 256-step cases completed 3,320 optimizer updates and
+matched all retained artifacts. Median time was **7.254 → 4.009 seconds
+(1.81×)**; median peak RSS was **100.8 → 165.0 MiB**.
+This is a separate workload, rather than a direct timing comparison with the
+1,000-step table.
+
+The native loop removes repeated per-animal Python dispatch, experience/input
+packaging and boundary conversions around individual numerical operations.
+Private typed model/optimizer buffers, reusable learner workspaces and shared
+observation-phase views keep computation inside C++. See the
+[ownership/data-flow diagram](native-engine.md#execution-and-ownership).
+
+**This is a speed/RAM tradeoff.** Native state and detached Python artifact/query
+projections coexist at boundaries; exporting complete ordinary-list checkpoints
+also expands parameter representations temporarily. Packed internal FP32 buffers
+reduce repeated model trees, but do not remove that peak. Recorded workflows
+also spend time in the existing frame transport and encoding/compression layer.
+The measured improvement does not establish lower memory use or a speedup for
+every configuration. Linux and other interpreter results require their own
+execution; their CI configuration is not local benchmark evidence.
+
+Reproduce with:
+
+```sh
+.venv/bin/python -m work.build_native_engine
+.venv/bin/python -m work.benchmark_native_engine \
+  --steps 1000 --runs 1 --repeats 3 --seeds 100 \
+  --profiles headless replay --modes train evaluate \
+  --output .cache/native-engine/benchmark-full-core-1000.json
+.venv/bin/python -m work.benchmark_native_engine \
+  --presets land_bridge_collective --steps 256 --runs 1 --repeats 3 --seeds 100 \
+  --profiles headless --modes train \
+  --output .cache/native-engine/benchmark-full-core-rich-256.json
+```
+
+Raw reports stay in ignored caches. Each benchmark retains temporary artifacts
+only long enough to verify them; no training campaign is added to `results/`.
+
 ## Recent export and inspector work
 
 Champion export now serializes and hashes each shared configuration object once

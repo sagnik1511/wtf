@@ -142,3 +142,13 @@ projection and input labels are part of the optional social/consequence model
 contract. Change the versioned contract and persistence validation when changing
 that layout. Never label hidden outcomes or copy another agent's reward/rollout
 into a private learner. See [collective learning](social-learning.md).
+
+
+## Native backend admission
+
+The optional [native CPU path](native-engine.md) has an explicit world/action
+support boundary. A Python geography, action or execution hook needs its own
+native implementation and parity tests before that backend can admit it.
+Preserve resolution/RNG order, rewards, observations, births and captured events;
+do not silently omit a new mechanism to keep an experiment running in C++.
+The reference backend remains available for the full Python feature set.

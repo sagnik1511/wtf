@@ -45,10 +45,10 @@ Installed commands are `wtf`, `wtf-run`, `wtf-view` and `wtf-analyze`.
 | `wtf` | Public API, configuration, resource lookup and command entry points | `config`, `resources`, `commands`, `cli`, `server`, `progress` |
 | `wtf.simulation` | Bodies, physical actions, terrain, visibility and placement | `world`, `actions`, `geography`, `perception`, `placement`, `day_night` |
 | `wtf.learning` | Independent models, updates, inheritance and activation samples | `brain`, `brains`, `ppo`, `policy_gradients`, `recurrent_ppo`, `qrdqn`, `contextual_ppo`, `grouped_rollouts`, `optimization`, `mutation`, `activation_diagnostics` |
-| `wtf.experiment` | Episode scheduling, feedback, family ranking and plateau stopping | `runner`, `lineage`, `early_stopping` |
+| `wtf.experiment` | Reference scheduling plus native ownership/query and artifact adapters | `runner`, `native`, `native_cli`, `lineage`, `early_stopping` |
 | `wtf.storage` | Artifact encoding, persistence, champion libraries and storage conversion | `binary_io`, `checkpoint_io`, `model_io`, `replay_io`, `replay_codec`, `recording`, `library`, `compress_recordings`, `optimize_storage`, `optimize_checkpoints` |
 | `wtf.inspection` | Read-only behavior, telemetry and archived-model explanations | `analyze`, `telemetry`, `explainability`, `explanations` |
-| `wtf.native` | Numeric buffer helpers, optional compiled kernels and Python fallback selection | `numeric`, `kernels`, private `_kernels` extension and headers |
+| `wtf.native` | Optional C++ episode core, compiled numerical kernels and numeric buffers | Private `_engine`, C++ sources under `native/core/`, `numeric`, `kernels`, `_kernels` and CUDA sources |
 
 The subpackages organize ownership; they do not introduce a new plugin registry,
 shared species policy or live-training dependency in playback. JavaScript still
@@ -132,6 +132,12 @@ The extension is `wtf.native._kernels`; do not copy a binary from the old packag
 or another interpreter/machine. `WTF_KERNELS=python` selects the reference path.
 No GPU, precision, learning, RNG, physics or replay-format changes accompany this
 namespace/layout migration.
+
+The standalone [C++ core](native-engine.md) builds separately with
+`.venv/bin/python -m work.build_native_engine` and is selected with `--engine cpp`.
+Its C++ sources live under `wtf/native/core/`; this directory is implementation
+source rather than a public Python API. Use `NativeExperiment` for detached
+Python queries. The portable reference remains `Experiment`.
 
 ## Existing experiment data
 

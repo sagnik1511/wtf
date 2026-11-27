@@ -129,6 +129,14 @@ Generated `results/`, `brain_library/`, `.cache/` and `.venv/` remain local and 
 ignored by Git. Observed survival and champion scores are useful diagnostics;
 checking learning quality requires matched evaluation on unseen world seeds.
 
+## Optional native execution
+
+The experimental [C++ CPU engine](docs/native-engine.md) runs all 14 built-in
+learners, world/sensory features and episode initialization/chaining while
+preserving detached Python queries and existing saved artifacts. Build it
+explicitly and select `--engine cpp`. Python remains the portable default and
+the backend for CUDA or custom Python execution hooks.
+
 ## License
 
 Copyright © 2026 Sagnik Roy. Released under the [MIT License](LICENSE).

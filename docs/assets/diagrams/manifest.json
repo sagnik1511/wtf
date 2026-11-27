@@ -304,5 +304,14 @@
     "asset": "consequence-episode-clock.svg",
     "nodes": 11,
     "edges": 11
+  },
+  {
+    "title": "Python boundaries surround a native experiment core",
+    "document": "docs/native-engine.md",
+    "anchor": "execution-and-ownership",
+    "source": "native-ppo-episode.mmd",
+    "asset": "native-ppo-episode.svg",
+    "nodes": 12,
+    "edges": 14
   }
 ]

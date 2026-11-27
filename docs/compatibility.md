@@ -4,7 +4,8 @@
 
 Package releases, internal rollout numbers and file-format versions describe
 different contracts. Package version [0.0.2.9 is published on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
-with a portable wheel and source archive.
+with a portable wheel and source archive. The current checkout prepares
+`0.1.0.0`; this does not establish a PyPI upload.
 Four-component records under `docs/releases/` track implementation rollouts,
 not importable-package versions. Binary magic, checkpoint envelopes, logical
 state and observation versions each have their own version identifiers.
@@ -238,3 +239,34 @@ summary settings or enabling the adapter requires matching weights. V1–V6
 readers and saved artifacts remain supported. V7 champions retain the adapter's
 weights; checkpoints additionally retain its private Adam moments/counter and
 unchanged sampled evidence. No legacy replay or checkpoint migration is needed.
+
+
+## Native episode backend
+
+The [C++ CPU engine](native-engine.md) uses the existing logical checkpoint,
+model-signature, metrics and replay contracts. Current source covers all 14
+built-in CPU learners, V1–V7 sensing, terrain/day-night/contests, configured
+social/consequence knowledge, and the auxiliary/late heads supported by
+ordinary/masked PPO. Native genesis and next-run chaining preserve the same
+seed, founder, inheritance, champion and publication contracts. The 0.1.0.0
+release is unpublished; local validation and workflow benchmarks are documented.
+
+| Boundary | Compatibility rule |
+| --- | --- |
+| Stored model/optimizer precision | Native live controllers require FP32 storage and retain FP64 arithmetic; exact legacy FP64-stored continuation uses Python |
+| Policy/input contract | Existing signature checks still apply; a backend switch does not make another algorithm, layout or action order compatible |
+| Recovery/brains/replay | Existing formats/readers remain authoritative; no migration or discarded playback data is required |
+| Native library | Rebuild for the interpreter ABI, operating system and architecture; never copy a host `.so`/`.pyd` to another machine |
+| Custom Python hooks | Execute with the Python engine; C++ cannot honor Python subclass or monkeypatch overrides inside its loop |
+| CUDA | Use the Python engine; the standalone C++ episode backend is CPU-only |
+
+Fresh native construction and episode chaining do not construct Python worlds or
+learners. Explicit query/import/restore compatibility and batch artifact
+projections still use Python. Detached query edits cannot mutate the active
+native owner. Existing Python readers can inspect or resume its logical
+checkpoints without a compiler.
+
+Exact differential checks on a tested interpreter/platform are required for
+execution parity. They do not establish universal cross-platform floating-point
+agreement across libm implementations or compiler versions. Python remains the
+portable default and fallback for unsupported execution contracts.

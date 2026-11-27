@@ -280,6 +280,20 @@ class Recorder:
                 )
                 frame["diagnostics"][str(i)] = dict(tick=tick, **diagnostic)
             self.last_diagnostic_tick = tick
+        return self.capture_frame(frame)
+
+    def capture_frame(self, frame):
+        """Write one already prepared native frame through the existing codec.
+
+        Native execution owns observation/diagnostic sampling. This boundary
+        streams its captured frames without rerunning simulation or inference.
+        """
+        if self.run is None or frame["tick"] == self.last_tick:
+            return False
+        if self.stream is None:
+            self._open_chunk()
+        if "diagnostics" in frame:
+            self.last_diagnostic_tick = frame["tick"]
         packet = self.encoder.encode(frame) if self.encoder else frame
         if self.binary_writer is not None:
             self.binary_writer.write(packet)
@@ -290,7 +304,7 @@ class Recorder:
                 json.dumps(packet, separators=(",", ":"), allow_nan=False)
             )
         self.chunk_frames += 1
-        self.last_tick = tick
+        self.last_tick = frame["tick"]
         if self.chunk_frames >= self.options["frames_per_chunk"]:
             self._commit_chunk()
         return True

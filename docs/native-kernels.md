@@ -6,8 +6,9 @@ The optional CPython C extension accelerates dense-layer inference/backpropagati
 chosen-action DQN gradients, SGD and clipped Adam updates. These kernels remove
 Python iteration over parameters and avoid allocating a slice of every weight
 row. They do not change model sizes, training schedules, policy sampling or
-per-animal ownership. Python remains responsible for environment logic, replay,
-rollouts, rewards, reproduction, mutation and recording.
+per-animal ownership. In the Python reference engine, Python still schedules
+environment logic, replay/rollouts, rewards, reproduction and recording around
+these numerical calls. This differs from the standalone C++ episode core below.
 
 The [second rollout report](native-kernels-v2.md) covers the current GRU,
 PPO minibatch, perception, world, replay and dashboard extensions, with benchmarks
@@ -24,6 +25,26 @@ weights, samplers or optimizer state.
 The optional [LSTM cell extension](performance.md#native-lstm-forward-and-backward)
 accelerates four-gate forward and hidden/cell BPTT while retaining the Python
 reference and existing artifact formats.
+
+## Native episode engine versus kernels
+
+[Native execution](native-engine.md) moves complete world/sensing/learning
+batches and episode initialization/chaining into a separate C++ CPU owner. It
+covers all 14 built-in learners and current world/sensory contracts, including
+terrain, social/consequence learning and the heads supported by ordinary/masked
+PPO. The kernels in this guide accelerate individual operations while the Python
+reference engine still schedules them.
+
+| Choice | Build | Execution owner |
+| --- | --- | --- |
+| Python reference, optional C kernels | `python -m work.build_native` | Python schedules steps; `WTF_KERNELS` controls supported operation dispatch |
+| Standalone C++ CPU engine | `python -m work.build_native_engine` | `--engine cpp` owns worlds, learners and episode lifecycle |
+| Optional CUDA training | See [CUDA training](cuda.md) | Python engine; separate CUDA training dispatch |
+
+These are independent controls. `WTF_KERNELS=native` does not select the C++
+episode engine, and the C++ engine does not require the C numerical extension.
+A kernel speedup is not a measurement of the complete episode backend. CUDA
+requires `--engine python`; the C++ core is currently CPU-only.
 
 ## Build and select
 
@@ -95,7 +116,9 @@ add bias after the reduction, round moments/variances before using them in Adam,
 and disable fast-math/FMA contraction. They own no RNG or global scratch data.
 The GIL remains held: these are single-process CPU-loop improvements, not
 threading or GPU acceleration. Perception, flat-world phases, replay and dashboard helpers are covered by
-the [second rollout](native-kernels-v2.md); terrain-specific physics stays Python.
+the [second rollout](native-kernels-v2.md). Terrain-specific physics stays
+Python in this per-operation kernel path; the standalone C++ engine owns its
+ported terrain physics.
 
 Checkpoints/champion/replay formats are unchanged by the kernels. Backend
 selection is a process option, not part of saved learned state. Native and Python

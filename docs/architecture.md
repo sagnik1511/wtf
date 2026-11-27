@@ -9,7 +9,14 @@ For trial and inference ownership, see [GRPO resets and actor batches](training-
 
 ## Runtime boundaries
 
-Python owns simulation and learning. Playback reads saved artifacts; it does not call a live world or load controllers.
+The Python reference engine owns simulation and learning. The optional
+[native CPU engine](native-engine.md) owns fresh world/controller construction,
+all 14 built-in learners, V1–V7 sensing, physical/social rules and run chaining.
+Python retains configuration/file resolution, explicit query/import
+compatibility and artifact orchestration. The Python engine remains the default;
+`--engine cpp` opts into the native owner. Playback reads
+saved artifacts and never advances a live world. Archived explanations can load
+selected champion weights separately from ordinary playback.
 
 ![Runtime boundaries, including the optional archived-model analysis branch](assets/diagrams/runtime-boundaries.svg)
 
@@ -30,7 +37,9 @@ The [package layout guide](package-layout.md) maps every former import to its cu
 | `wtf/learning/brain.py`, `ppo.py`, `policy_gradients.py` | Independent learned models |
 | `wtf/learning/grouped_rollouts.py` | Matched, resettable group-private GRPO trial worlds |
 | `wtf/learning/batched.py` | Independent dense-policy inference jobs and ordered per-animal sampling |
-| `wtf/experiment/runner.py` | Run lifecycle, feedback, checkpoints and champion selection |
+| `wtf/experiment/runner.py` | Reference run lifecycle, feedback, checkpoints and champion selection |
+| `wtf/native/core/` | Native world/sensing, private controllers, consequence knowledge, genesis, lifecycle, diagnostics and champions |
+| `wtf/experiment/native.py`, `native_cli.py` | Optional C++ bridge, detached Python queries and bounded CLI/artifact projections |
 | `wtf/storage/library.py` | Compact model artifacts, compatibility and model ancestry |
 | `wtf/storage/recording.py` | Frame streaming and read-only recording access |
 | `wtf/inspection/analyze.py` | Offline behavior analysis from saved frames |
@@ -50,7 +59,10 @@ See [adding species](species.md) for behavior and configuration details.
 
 ## Simulation steps and observations
 
-`world.py` owns physical state and emits events. `brain.py` owns individual learning. `runner.py` connects observations, actions, consequences and experiences. `recording.py` writes playback files; `server.py` serves those files and can analyze archived model weights on demand without restoring a world or learner; `viewer/` renders saved data and controls playback.
+In the Python reference path, `world.py` owns physical state and emits events;
+learning modules own individual controllers; `runner.py` connects observations,
+actions, consequences and experiences. The optional C++ core mirrors those
+ownership boundaries without dispatching Python callbacks inside its step loop. `recording.py` writes playback files; `server.py` serves those files and can analyze archived model weights on demand without restoring a world or learner; `viewer/` renders saved data and controls playback.
 
 
 ## One simulation step
@@ -98,7 +110,10 @@ for ownership and compatibility guarantees.
 
 `train` explores and learns; `evaluate` chooses greedily and does not learn; `random` chooses random allowed actions and does not learn. A population that survives longer is not by itself evidence of learning. Compare frozen trained brains with fresh and random policies across multiple held-out seeds. The initial settings are experimental, not calibrated for stable coexistence. Independent simultaneous learners can be unstable. Each new CLI invocation starts fresh controllers, optionally with saved weights selected through `initial_brain`. Exact continuation uses `--resume`; see [saved models](brain-library.md). With `--seed` or a deterministic seed policy, repeating a single run reproduces its outcome; it does not continue learning from a previous invocation. Randomized mode varies fresh runs but is not a substitute for retaining or resuming learned brains. Use multiple runs with champion chaining or resume an intermediate checkpoint to continue training. Making successful attacks lethal increases predation opportunities; it is a physical rule change, not evidence that the model learned to hunt.
 
-The standard-library implementation prioritizes inspectability and small populations. Large worlds and many private networks will be slower than a vectorized implementation. CLI metrics stream to disk, and playback charts retain the current run’s lightweight history across world-chunk changes. The simulation runner retains at most 2,000 sampled metric points per current run for checkpoint compatibility; this is separate from playback recording.
+The Python reference implementation prioritizes inspectability and small
+populations. Native execution removes interpreter scheduling from complete
+supported loops, while retaining private networks and ordered scalar semantics;
+it does not turn animals into one shared policy or distribute them across GPUs. CLI metrics stream to disk, and playback charts retain the current run’s lightweight history across world-chunk changes. The simulation runner retains at most 2,000 sampled metric points per current run for checkpoint compatibility; this is separate from playback recording.
 
 Completed-state reporting shares metrics explicitly between CLI recording, CSV,
 progress and terminal output when their schedules coincide. Summaries and

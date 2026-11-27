@@ -57,6 +57,12 @@ def main():
     parser.add_argument("environment", nargs="?", default="environments/baseline.json")
     parser.add_argument("--mode", choices=("train", "evaluate", "random"), default=None)
     parser.add_argument("--runs", type=int)
+    parser.add_argument(
+        "--engine",
+        choices=("python", "cpp"),
+        default="python",
+        help="Experimental C++ PPO episode loop; Python remains the portable default",
+    )
     parser.add_argument("--steps", type=int)
     parser.add_argument(
         "--device",
@@ -259,6 +265,9 @@ def main():
         help="Embed metadata instead of using the run-local binary checkpoint pool",
     )
     args = parser.parse_args()
+    native_session = None
+    if args.engine == "cpp" and args.device != "cpu":
+        parser.error("--engine cpp currently requires --device cpu")
     if args.record_last_episodes is not None and args.record_last_episodes < -1:
         parser.error("--record-last-episodes must be -1 or nonnegative")
     if args.resume:
@@ -334,12 +343,25 @@ def main():
                 config["consequence_learning"][
                     "update_schedule"
                 ] = args.consequence_update_schedule
-            experiment = Experiment(
-                config,
-                args.mode or "train",
-                library_root=args.library_dir or DEFAULT_LIBRARY,
-            )
-        except (ValueError, OSError) as error:
+            if args.engine == "cpp":
+                from wtf.experiment.native import NativeExperiment
+
+                native_session = NativeExperiment(
+                    config,
+                    args.mode or "train",
+                    library_root=args.library_dir or DEFAULT_LIBRARY,
+                    freeze_evaluation_brains=args.freeze_brains,
+                )
+                # Artifact writers consume a detached projection; initialization
+                # and all subsequent training remain owned by the native core.
+                experiment = native_session.to_python()
+            else:
+                experiment = Experiment(
+                    config,
+                    args.mode or "train",
+                    library_root=args.library_dir or DEFAULT_LIBRARY,
+                )
+        except (ValueError, RuntimeError, OSError) as error:
             parser.error(str(error))
     if args.resume and args.consequence_update_schedule is not None:
         parser.error("--consequence-update-schedule cannot override exact resume")
@@ -360,6 +382,7 @@ def main():
                 experiment.config, args.consequences_from
             )
             experiment.observations = experiment.world.observe_all()
+            native_session = None
         except (ValueError, OSError, EOFError) as error:
             parser.error(str(error))
     if args.device == "cuda":
@@ -395,6 +418,13 @@ def main():
         experiment.config.setdefault("recording", dict(DEFAULT_RECORDING))[
             "record_last_episodes"
         ] = args.record_last_episodes
+    if args.engine == "cpp" and native_session is None:
+        from wtf.experiment.native import NativeExperiment
+
+        try:
+            native_session = NativeExperiment.from_experiment(experiment)
+        except (ValueError, RuntimeError, OSError) as error:
+            parser.error(str(error))
     recording_options = settings(experiment.config, experiment.mode)
     if args.no_record:
         recording_options["enabled"] = False
@@ -434,6 +464,7 @@ def main():
                 if experiment._cuda_training is not None
                 else {}
             ),
+            "engine": args.engine,
             "mode": experiment.mode,
             "python": sys.version,
             "platform": platform.platform(),
@@ -483,6 +514,8 @@ def main():
             save_brains=not args.no_library,
             checkpoint_format=args.checkpoint_format,
             storage_options=storage_options,
+            engine=args.engine,
+            native_session=native_session,
         )
         completed = True
     finally:
@@ -502,6 +535,8 @@ def run_experiment(
     save_brains=True,
     checkpoint_format="compact",
     storage_options=None,
+    engine="python",
+    native_session=None,
 ):
     """Execute the scheduled episodes and persist their configured artifacts."""
 
@@ -530,6 +565,9 @@ def run_experiment(
         else storage_options
     )
     retention = ArtifactRetention(folder, storage_options, checkpoint_format)
+    if engine not in ("python", "cpp"):
+        raise ValueError("engine must be python or cpp")
+    native = native_session
     species = list(experiment.config["species"])
     with (folder / "metrics.csv").open("w", newline="") as handle:
         fields = (
@@ -586,7 +624,22 @@ def run_experiment(
             progress.start(experiment, metrics=metrics)
         while not experiment.done:
             if experiment.finished_run:
-                experiment.next_run()
+                if engine == "cpp":
+                    from wtf.experiment.native import NativeExperiment
+
+                    if native is None:
+                        native = NativeExperiment.from_experiment(experiment)
+                    if not native.next_run(
+                        champion_artifacts=experiment.champion_artifacts
+                    ):
+                        raise RuntimeError(
+                            "Native episode scheduler rejected an unfinished experiment"
+                        )
+                    projection = native.to_python()
+                    experiment.__dict__.clear()
+                    experiment.__dict__.update(projection.__dict__)
+                else:
+                    experiment.next_run()
                 save("run_seeds.json", experiment.run_seeds)
                 metrics = experiment.world.metrics()
                 record(metrics)
@@ -594,16 +647,35 @@ def run_experiment(
                     recorder.begin_run(experiment, metrics=metrics)
                 if progress is not None:
                     progress.start(experiment, metrics=metrics)
-            experiment.step()
+            new_records = None
+            if engine == "cpp":
+                from wtf.experiment.native_cli import advance
+
+                projection, native, new_records = advance(
+                    experiment,
+                    native,
+                    recorder,
+                    storage_options,
+                    save_brains,
+                    folder / ".native-frames.jsonl",
+                )
+                # Preserve caller identity while replacing the query projection.
+                experiment.__dict__.clear()
+                experiment.__dict__.update(projection.__dict__)
+            else:
+                experiment.step()
             if progress is not None:
                 progress.tick(experiment)
-            if recorder is not None:
+            if recorder is not None and engine == "python":
                 recorder.capture(
                     experiment,
                     force=experiment.finished_run,
                     metrics=experiment.last_record,
                 )
-            if experiment.last_record:
+            if new_records is not None:
+                for metrics in new_records:
+                    record(metrics)
+            elif experiment.last_record:
                 record(experiment.last_record)
             if not experiment.finished_run:
                 checkpoint_interval = storage_options.get("checkpoint_every_steps", 500)

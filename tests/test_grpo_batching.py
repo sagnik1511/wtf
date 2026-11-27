@@ -29,6 +29,7 @@ from tests.test_mutation import KINDS, environment
 from tests import test_policy_algorithms as policy_fixtures
 from tests.test_advanced_algorithms import settings
 from tests.test_simulation import animal
+from tests.reproduction_support import force_action
 
 
 def scalar_backend():
@@ -94,6 +95,43 @@ class TrialReuseTests(unittest.TestCase):
                 self.assertEqual(
                     {i: b.checkpoint() for i, b in brains.items()}, brain_states
                 )
+
+    def test_lstm_newborn_in_matched_trial_receives_hidden_and_cell_memory(self):
+        config = environment("lstm_ppo", 0)
+        config["species"]["prey"]["initial_population"] = 2
+        config["species"]["predator"]["initial_population"] = 1
+        config["world"]["max_steps"] = 4
+        experiment = Experiment(config)
+        parents = [a for a in experiment.world.animals.values() if a.species == "prey"]
+        for index, parent in enumerate(parents):
+            parent.x, parent.y = 1 + index, 1
+            parent.sex = "female" if index == 0 else "male"
+            force_action(experiment.brains[parent.id], "reproduce")
+        focal = next(
+            a for a in experiment.world.animals.values() if a.species == "predator"
+        )
+        focal.x = focal.y = 4
+        template = policy_fixtures.settings("grpo")
+        template.update(group_size=2, rollout_horizon=3)
+        experiment.brains[focal.id] = create_brain(template, ["rest"], 3, 4)
+        before = copy.deepcopy(experiment.world.checkpoint())
+        brains = {i: brain.checkpoint() for i, brain in experiment.brains.items()}
+        group_rng = experiment.brains[focal.id].group_rng.getstate()
+        with patch.object(
+            grouped_rollouts,
+            "mix_parent_brains",
+            wraps=grouped_rollouts.mix_parent_brains,
+        ) as inherited:
+            trajectories = grouped_rollouts.collect_group(
+                experiment.world, experiment.brains, focal.id
+            )
+        self.assertGreater(inherited.call_count, 0)
+        self.assertEqual([len(trajectory) for trajectory in trajectories], [3, 3])
+        self.assertEqual(before, experiment.world.checkpoint())
+        experiment.brains[focal.id].group_rng.setstate(group_rng)
+        self.assertEqual(
+            brains, {i: brain.checkpoint() for i, brain in experiment.brains.items()}
+        )
 
     def test_terrain_and_day_night_groups_match_fresh_worlds(self):
         for preset in ("meandering_river", "day_night"):
@@ -170,7 +208,6 @@ class TrialReuseTests(unittest.TestCase):
         # this path.
         # pylint: disable=import-outside-toplevel
 
-        from tests.reproduction_support import force_action
         from wtf.learning.mutation import mutate_birth
 
         e = Experiment(environment("grpo", 1))

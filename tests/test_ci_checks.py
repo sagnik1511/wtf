@@ -59,6 +59,7 @@ class CICheckTests(unittest.TestCase):
             def run(command, _root, env=None):
                 if "build" in command:
                     self.assertEqual(env["WTF_BUILD_NATIVE"], "0")
+                    self.assertEqual(env["WTF_BUILD_ENGINE"], "0")
                     output = Path(command[command.index("--outdir") + 1])
                     built.extend([output / "new.whl", output / "new.tar.gz"])
                     for path in built:
@@ -69,7 +70,9 @@ class CICheckTests(unittest.TestCase):
                 return 0
 
             with (
-                patch.dict(os.environ, {"WTF_BUILD_NATIVE": "1"}),
+                patch.dict(
+                    os.environ, {"WTF_BUILD_NATIVE": "1", "WTF_BUILD_ENGINE": "1"}
+                ),
                 patch.object(check_ci, "run_command", side_effect=run),
             ):
                 self.assertEqual(check_ci.check_build(root), 0)

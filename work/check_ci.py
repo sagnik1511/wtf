@@ -55,7 +55,7 @@ def check_build(root=ROOT):
     parent = root / ".cache/ci-builds"
     parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="portable-", dir=parent) as folder:
-        env = {**os.environ, "WTF_BUILD_NATIVE": "0"}
+        env = {**os.environ, "WTF_BUILD_NATIVE": "0", "WTF_BUILD_ENGINE": "0"}
         result = run_command(
             [sys.executable, "-m", "build", "--outdir", folder], root, env
         )

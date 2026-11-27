@@ -44,10 +44,12 @@ class BuildPy(build_py):
             raise ValueError("Build directory must not be the source package")
         if (target_package / "assets").exists():
             shutil.rmtree(target_package / "assets")
-        if not self.distribution.ext_modules:
-            for pattern in ("_kernels*.so", "_kernels*.pyd"):
-                for stale in target_package.rglob(pattern):
-                    stale.unlink()
+        compiled = {extension.name for extension in self.distribution.ext_modules or []}
+        for module in ("_kernels", "_engine"):
+            if "wtf.native." + module not in compiled:
+                for pattern in (module + "*.so", module + "*.pyd"):
+                    for stale in target_package.rglob(pattern):
+                        stale.unlink()
         # An existing checkout may contain build output from the former namespace.
         legacy = Path(self.build_lib) / "ecosystem"
         if legacy.exists():
@@ -97,5 +99,13 @@ if mode == "1":
             ),
         )
     ]
+
+engine_mode = os.environ.get("WTF_BUILD_ENGINE", "0")
+if engine_mode not in ("0", "1"):
+    raise ValueError("WTF_BUILD_ENGINE must be 0 or 1")
+if engine_mode == "1":
+    extensions.append(
+        runpy.run_path(str(ROOT / "_build_support.py"))["engine_extension"](ROOT)
+    )
 
 setup(cmdclass={"build_py": BuildPy}, ext_modules=extensions)

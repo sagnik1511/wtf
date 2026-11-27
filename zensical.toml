@@ -161,6 +161,7 @@ Development = [
     { Performance = "performance.md" },
     { "Experimental CUDA" = "cuda.md" },
     { "GRPO trials and actor batches" = "training-workflow-performance.md" },
+    { "Native C++ engine" = "native-engine.md" },
     { "Native kernels" = "native-kernels.md" },
     { "Extended native kernels" = "native-kernels-v2.md" },
     { "Native top-k perception" = "native-top-k.md" },

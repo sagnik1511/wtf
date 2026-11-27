@@ -27,5 +27,41 @@ def configure_compiler():
                 sdk = developer / "SDKs/MacOSX.sdk"
             if cc.is_file() and (sdk / "usr/include/stdio.h").is_file():
                 os.environ.setdefault("CC", str(cc))
+                cxx = cc.with_name("clang++")
+                if cxx.is_file():
+                    os.environ.setdefault("CXX", str(cxx))
                 os.environ.setdefault("SDKROOT", str(sdk))
                 break
+
+
+def engine_extension(root):
+    """Share strict native-engine build settings between wheels and local builds."""
+    # Build dependencies stay optional for runtime imports.
+    # pylint: disable=import-outside-toplevel
+    from setuptools import Extension
+
+    if sys.implementation.name != "cpython" or not (3, 12) <= sys.version_info[:2] < (
+        3,
+        14,
+    ):
+        raise RuntimeError("The native engine currently supports CPython 3.12–3.13")
+    configure_compiler()
+    root = Path(root)
+    core = root / "wtf/native/core"
+    return Extension(
+        "wtf.native._engine",
+        sorted(str(path.relative_to(root)) for path in core.glob("*.cpp")),
+        language="c++",
+        depends=sorted(str(path.relative_to(root)) for path in core.glob("*.hpp")),
+        extra_compile_args=(
+            ["/std:c++17", "/O2", "/fp:strict"]
+            if os.name == "nt"
+            else [
+                "-std=c++17",
+                "-O3",
+                "-fno-fast-math",
+                "-ffp-contract=off",
+                "-fno-builtin-pow",
+            ]
+        ),
+    )

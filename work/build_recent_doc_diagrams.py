@@ -14,6 +14,29 @@ from xml.etree import ElementTree as ET
 from work.build_doc_diagrams import ASSETS, ROOT, render
 
 FLOWS = {
+    "native-ppo-episode": (
+        "Python boundaries surround a native experiment core",
+        "docs/native-engine.md",
+        "execution-and-ownership",
+        """flowchart TB
+  python["Python: validate args/config; resolve model files and metadata"] --> bridge["Explicit native bootstrap or bounded batch call"]
+  subgraph native["Native CPU owner; no per-animal Python callbacks"]
+    bridge --> init["World and private-founder genesis; exact seeds and warm starts"]
+    init --> world["Bodies, terrain/current, day/night, food, combat and reproduction"]
+    world --> sense["V1-V7 sensed inputs; phase occupancy, visibility, motion and scent"]
+    sense --> policy["14 independent learner types; own weights, optimizer, buffers and RNGs"]
+    policy --> world
+    world --> lifecycle["Visible outcomes and species knowledge; child brains, lineage and champions"]
+    policy --> lifecycle
+    lifecycle -->|Next episode| init
+    lifecycle --> capture["Checkpoint boundary; sampled frames, predictions and activations"]
+  end
+  capture --> artifacts["Python batch projection: existing metrics, delta/binary/XZ codecs and retention"]
+  artifacts --> viewer["Unchanged saved-run JavaScript viewer"]
+  lifecycle --> query["Explicit detached Python query/import compatibility"]
+  query --> inspect["Ordinary analysis tools; edits never mutate native state"]
+""",
+    ),
     "one-simulation-step": (
         "One simulation step",
         "docs/architecture.md",

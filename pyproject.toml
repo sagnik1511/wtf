@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wtf-wildlife-trial-framework"
-version = "0.0.2.9"
+version = "0.1.0.0"
 description = "WTF — Wildlife Trial Framework: a reinforcement learning ecosystem simulator"
 readme = "PYPI_README.md"
 license = "MIT"

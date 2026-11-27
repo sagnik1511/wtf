@@ -162,3 +162,19 @@ does not convert saved artifacts; consult the [compatibility policy](docs/compat
   field/command definitions and species/policy extension workflows.
 - [Development setup](docs/development.md): formatters and tests; these are not
   needed just to run the simulator or viewer.
+
+
+## Optional native episode engine
+
+The [C++ CPU engine](docs/native-engine.md) is separate from the C numerical
+kernels. It needs a C++17 compiler and Python development headers when built.
+From a checkout, run `.venv/bin/python -m work.build_native_engine`; select it
+with `wtf run ppo --engine cpp`. To build a native wheel, set
+`WTF_BUILD_ENGINE=1` when running `python -m build --wheel`. Set
+`WTF_BUILD_NATIVE=1` too if that wheel should also contain the existing C kernels.
+Portable wheels keep the Python reference engine; imports never compile code.
+The native engine covers all 14 built-in CPU learners and current world/sensory
+features, including native episode initialization/chaining. Python remains the
+default and is required for CUDA, Python execution overrides and exact legacy
+FP64-stored controller continuation. Rebuild for each interpreter/platform;
+a compiler is not required to read the resulting saved recordings.

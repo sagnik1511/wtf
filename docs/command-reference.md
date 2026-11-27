@@ -21,6 +21,7 @@ lists bundled environment names. `python -m wtf` offers the same hub;
 | Argument | Definition |
 | --- | --- |
 | `environment` | Complete environment JSON; defaults to `environments/baseline.json` when omitted |
+| `--engine python\|cpp` | Python default; optional [native C++ core](native-engine.md) for the built-in CPU learners and world features. Explicit C++ selection rejects unsupported features; it never falls back inside the loop |
 | `--device cpu\|cuda` | CPU default; optional experimental Linux/NVIDIA dense forwards, PPO/masked-PPO and DQN/DDQN training. [Build and limits](cuda.md) |
 | `--cuda-precision fp64\|fp32` | CUDA arithmetic; FP64 default. Optional FP32 changes learning numerics, not world physics/storage |
 | `--cuda-inference auto\|cpu\|cuda` | Auto uses CPU actions for CUDA-trained PPO/DQN and CUDA actions for other supported dense policies |

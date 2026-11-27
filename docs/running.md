@@ -355,3 +355,22 @@ runs export `consequences.json.xz`; use `--consequences-from results/EXPERIMENT`
 with a compatible enabled environment to reuse it independently of `--brains-from`.
 Exact checkpoint resume restores its own knowledge and accepts no replacement.
 See [the full configuration and playback guide](social-learning.md).
+
+
+## Run built-in CPU policies in C++
+
+Build and select the [native CPU engine](native-engine.md) explicitly:
+
+```sh
+.venv/bin/python -m work.build_native_engine
+.venv/bin/python -m wtf run ppo --engine cpp --runs 2 --seed 100 --progress
+```
+
+Python remains the portable default. C++ selection runs all 14 built-in CPU
+learners and current world/sensory features, including native world/controller
+initialization and episode chaining. CUDA and custom Python execution hooks
+require the Python engine; unsupported native execution is rejected. Recording
+selection, retained checkpoints and champion exports keep their existing meaning.
+Python queries remain available through `NativeExperiment`; query copies are
+independent of execution. See the native guide's precise support and ownership
+boundaries before selecting it for a customized preset.

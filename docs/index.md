@@ -47,6 +47,7 @@ of support for newer source features.
 | Identify animal pointers and board markers | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
 | Inspect animals and their decisions | [Viewer appearance](viewer-visual-reference.md) and [brain explainability](explainability.md) |
 | Understand a diagram or visual | [Visual guide](visual-guide.md) |
+| Run native CPU episodes and query them from Python | [Native episode engine](native-engine.md) |
 | Configure V7, scent, memory and consequence learning | [Detailed sensing handbook](learning/features.md), then [Tutorial 6](tutorials/06-sensing-and-learning.md) |
 | Add collective visible outcomes and persistent species consequence estimates | [Collective learning](social-learning.md) |
 | Add movement memory and anonymous scent | [Tracking senses](tracking.md) |

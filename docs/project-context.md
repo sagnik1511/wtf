@@ -223,7 +223,9 @@ and unchanged world precision. Optional [CPU kernels](native-kernels.md) acceler
 dense/PPO/GRU/quantile math, perception, flat-world phases and replay/dashboard
 helpers, with a selectable Python fallback and no format change. The
 [second report](native-kernels-v2.md) records strict type/arithmetic/cache boundaries
-and native-to-native benchmarks; terrain-specific body physics stays Python. Checkpoints without precision metadata retain
+and native-to-native benchmarks. In this per-operation C-kernel path,
+terrain-specific body physics stays Python; the standalone C++ core also ports
+terrain physics. Checkpoints without precision metadata retain
 float64 continuation, including future births/episodes. New warm starts convert
 compatible saved weights to the new run's precision. See
 [numeric precision](running.md#numeric-precision). Binary codecs narrow numeric
@@ -429,3 +431,38 @@ ordered reductions, masks and gradient accumulation; Python retains shuffle,
 KL acceptance, auxiliary proposals and optimizer commits. The bounded staging is
 not checkpointed. Missing extensions, non-FP32 parameters and custom hooks retain
 the reference path. Inspector text simplification does not alter recorded values.
+
+
+## Native experiment ownership
+
+[The optional C++ CPU engine](native-engine.md) owns native genesis, all 14
+built-in private learners, V1–V7 sensing, physical/social rules, diagnostics and
+next-run champion/knowledge initialization. Python validates arguments/config,
+resolves model files and retains explicit detached queries/import compatibility
+and existing CLI artifact projections. Normal fresh construction and next-run
+initialization do not instantiate Python worlds or learners. `--engine cpp` is
+opt-in; Python remains the portable default, and CUDA requires that backend.
+
+Native state never retains a `PyObject` during execution. Each learner owns
+typed parameters, optimizer/target/reference state, RNGs and temporal buffers.
+Species consequence evidence is shared according to its publication schedule;
+neural weights, losses and private replay/rollouts are independent. Auxiliary
+and late-consequence heads remain limited to ordinary/masked PPO, matching the
+reference feature contract rather than being enabled for all algorithms.
+
+Observation-phase occupancy, mating eligibility, spatial/scent lookups and
+visibility caches are rebuilt at decision boundaries. Template layouts and
+terrain are immutable structural data. Effective body settings cache per tick;
+consequence-rate caches invalidate at publication. Scratch caches do not enter
+checkpoints; RNGs, recurrent state, replay/rollouts and staged/published knowledge
+do. Native champion snapshots may trust private update counters because Python
+cannot modify live arrays. Do not apply that shortcut to Python's mutable models.
+
+Preserve integer headings, signed zeros, mixed int/float food summation,
+CPython-compatible RNG consumption and post-parent-learning child inheritance.
+The native core requires FP32-stored weights and uses FP64 arithmetic; exact
+legacy FP64-stored continuation uses Python. Read the native differential tests
+and rebuild after C++ changes. A new policy/world/action/hook needs explicit
+native support; never silently discard behavior. Release 0.1.0.0 remains pending
+publication; local validation and complete-workflow measurements cover the
+expanded implementation.

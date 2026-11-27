@@ -9,7 +9,7 @@ child document. Operational instructions remain in the relevant project guides.
 **Latest committed rollout:** [0.0.2.31](0.0.2.31.md), `39bde7e`.
 **Latest committed runtime implementation:** [0.0.2.31](0.0.2.31.md), `39bde7e`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** [0.0.2.32](0.0.2.32.md) — persistent collective totals and private PPO outcome heads; [0.0.2.33](0.0.2.33.md) — optional forward vision; [0.0.2.34](0.0.2.34.md) — body-relative V5 observations; [0.0.2.35](0.0.2.35.md) — soft semantic V6 observations; [0.0.3.0](0.0.3.0.md) — exact V6 coefficient reuse and auxiliary allocation reduction; [0.0.3.1](0.0.3.1.md) — compact V7 and private late consequence adjustments; [0.0.3.2](0.0.3.2.md) — native late-adapter PPO batching and inspector text cleanup; [0.0.3.3](0.0.3.3.md) — compact data flow and native auxiliary batching; [0.0.3.4](0.0.3.4.md) — V7 sensory defaults across maintained presets.
+**Pending rollouts:** [0.1.0.0](0.1.0.0.md) — optional native C++ training core and detached Python queries; [0.0.2.32](0.0.2.32.md) — persistent collective totals and private PPO outcome heads; [0.0.2.33](0.0.2.33.md) — optional forward vision; [0.0.2.34](0.0.2.34.md) — body-relative V5 observations; [0.0.2.35](0.0.2.35.md) — soft semantic V6 observations; [0.0.3.0](0.0.3.0.md) — exact V6 coefficient reuse and auxiliary allocation reduction; [0.0.3.1](0.0.3.1.md) — compact V7 and private late consequence adjustments; [0.0.3.2](0.0.3.2.md) — native late-adapter PPO batching and inspector text cleanup; [0.0.3.3](0.0.3.3.md) — compact data flow and native auxiliary batching; [0.0.3.4](0.0.3.4.md) — V7 sensory defaults across maintained presets.
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,6 +25,7 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
+| [0.1.0.0](0.1.0.0.md) | Pending | 2026-11-27 | Not committed | Opt-in C++ world and all 14 CPU learners, native lifecycle, Python queries and unchanged artifacts |
 | [0.0.3.4](0.0.3.4.md) | Pending | 2026-11-27 | Not committed | V7 compact sensing, three-step visual history and blended scent across 40 presets; GRPO trial memory parity |
 | [0.0.3.3](0.0.3.3.md) | Pending | 2026-11-27 | Not committed | Compact V7 boundaries, per-update auxiliary preparation and exact native auxiliary minibatches |
 | [0.0.3.2](0.0.3.2.md) | Pending | 2026-11-27 | Not committed | Exact native late-adapter PPO minibatches, bounded FP64 staging and concise sensory inspector |

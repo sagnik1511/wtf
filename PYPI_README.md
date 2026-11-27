@@ -5,9 +5,8 @@ species, configurable JSON worlds, terrain, rivers, day/night cycles and paired
 reproduction. A bundled JavaScript viewer replays saved experiments separately
 from training. It requires no Node.js build step.
 
-Supported learners include Q-network/DQN, PPO, A2C, REINFORCE, experimental GRPO,
-recurrent PPO, QR-DQN, masked PPO and MAPPO. Current source additionally implements
-Discrete SAC, TRPO and LSTM PPO; these additions are not in published 0.0.2.9.
+Supported learners include Q-network, DQN, DDQN, PPO, A2C, REINFORCE, experimental
+GRPO, recurrent PPO, QR-DQN, masked PPO, MAPPO, Discrete SAC, TRPO and LSTM PPO.
 Controllers, optimizers and RNGs are
 private to each animal. These are experimental implementations, not claims of
 biological realism or established policy improvement.
@@ -22,8 +21,12 @@ Use Python 3.12+ in a virtual environment:
 ```sh
 python3.12 -m venv .venv
 # Activate .venv using your platform's shell command.
-python -m pip install wtf-wildlife-trial-framework==0.0.2.9
+python -m pip install wtf-wildlife-trial-framework
 ```
+
+The checkout prepares **0.1.0.0**; publication is a separate step. The latest
+verified published snapshot below remains 0.0.2.9 and predates current V7 inputs
+and later learners. Build the checkout for the current features.
 
 The distribution name is `wtf-wildlife-trial-framework`; the Python import is
 `wtf`. Version [0.0.2.9](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
@@ -52,8 +55,8 @@ To install your own checkout build instead, build and install its wheel:
 
 ```sh
 python -m pip install build
-python -m build --outdir dist/0.0.2.9
-python -m pip install dist/0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl
+python -m build --outdir dist/0.1.0.0
+python -m pip install dist/0.1.0.0/wtf_wildlife_trial_framework-0.1.0.0-py3-none-any.whl
 ```
 
 Run from any writable working directory:
@@ -79,3 +82,26 @@ installation, Docker, complete tutorials, all configuration definitions, species
 policy/action/geography extension guidance, storage and artifact compatibility.
 
 MIT License. Copyright (c) 2026 Sagnik Roy.
+
+## Optional C++ CPU engine
+
+CPython 3.12–3.13 source builds with a C++17 compiler can opt in:
+
+```sh
+WTF_BUILD_ENGINE=1 python -m pip install --no-binary wtf-wildlife-trial-framework .
+wtf run ppo --engine cpp --runs 1 --seed 100 --progress
+```
+
+The experimental CPU engine owns all 14 built-in learners, world/observation
+features and episode initialization/chaining. This includes terrain, day/night,
+contests, movement/scent, shared consequence knowledge and the optional heads
+supported by ordinary/masked PPO. Controllers retain independent weights,
+optimizer state, experience buffers and RNGs. Python retains file/config setup,
+explicit detached queries/import compatibility and existing artifact writers.
+
+The portable Python engine remains the default and is required for CUDA, custom
+Python hooks and exact legacy FP64-stored continuation. Native live parameters
+use FP32 storage with FP64 arithmetic. Saved formats and viewer behavior remain
+unchanged. See the [native guide](https://sagnik1511.github.io/wtf/native-engine/)
+for scope, build requirements and validation. The expanded 0.1.0.0 release remains
+unpublished; local validation and measured tradeoffs are documented.
