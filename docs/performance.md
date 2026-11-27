@@ -1369,3 +1369,225 @@ but CPU Adam in FP32. The latter yielded median loops of 8.637/9.173 seconds and
 overall 1.745×/2.167× CPU-to-CUDA speedups. See the
 [scoped V3 results](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison) for
 host-RAM and precision limits. No recording, checkpoint or viewer format changes.
+
+
+## V6 semantic encoding and auxiliary work
+
+V6 retains its complete expanded observation vectors and numerical precision.
+The encoder starts from a compiled zero-input basis, fills current values and
+reuses immutable scalar/bearing coefficient tuples. Each animal still receives
+a fresh observation container. Shared numeric entries contain no animal identity,
+world, model, optimizer or RNG state. Cache eviction changes work, never values.
+
+![Exact V6 coefficient reuse and private learning](assets/diagrams/v6-coefficient-reuse.svg)
+
+| Reused work | Bound | Key / ownership |
+| --- | --- | --- |
+| Structural plan, zero basis and block offsets | 128 layouts | Complete optional layout and resolved category configuration |
+| Scalar memberships | 4,096 entries | Value, knot tuple and signed-zero marker |
+| Circular bearings | 2,048 entries | Forward/right vector |
+| Scalar reconstruction | 4,096 entries | Membership tuple and knot tuple |
+
+Plans use slotted immutable records and indexed tail offsets. The auxiliary PPO
+branch checks compiled confidence positions before decoding: no published
+evidence means zero loss already, so target reconstruction and the masked input
+copy can be skipped. Nonzero evidence uses the same target arithmetic, gradient
+order and KL gate. Custom target hooks bypass this shortcut. This is independent
+of action availability. All consequence input channels remain excluded from the
+auxiliary prediction branch.
+
+### Local matched benchmark
+
+On macOS ARM64, Python 3.12.9, with the same CPU native kernels enabled in both
+source snapshots, three isolated repetitions produced these medians. Baseline is
+the immediately preceding uncommitted V6 implementation, not the older committed
+runtime that has no V6. Ordinary PPO, seed 100 and `seaside_150_v6` were unchanged.
+
+| Workload | Before | After | Speedup |
+| --- | ---: | ---: | ---: |
+| 13,167 semantic encodes | 0.669 s | 0.427 s | 1.57× |
+| First episode, 128 training steps | 5.390 s | 3.245 s | 1.66× |
+| Published-evidence episode, 64 timed training steps | 3.835 s | 3.138 s | 1.22× |
+
+The encoding fixture retains 4,389 observations from 64 canonical world steps,
+with controlled species/action evidence windows added to cover repeated published
+knowledge. A separate cold-cache allocation pass, including new caches and plans,
+reduced retained traced Python memory from **47,120,590 to 28,097,054 bytes**
+(**40.4%**). This is observation-bank allocation, not total training RAM. Median
+process peak RSS was **99.2 → 96.1 MiB** in the first-episode test and
+**112.0 → 95.0 MiB** in the published-evidence test. RSS includes interpreter and
+native allocations; small differences depend on the allocator and workload.
+
+The published-evidence measurement first completes 64 untimed steps and starts a
+second episode. Its 2,175 total updates include that warmup; the first-episode
+probe performs 2,116 updates. Initialization, checkpoint hashing and file I/O are
+outside these training timings. No all-policy or GPU speedup is inferred.
+
+Every paired encode hash, full checkpoint (world, weights, biases, optimizers
+and RNG), work count and decoded replay matched. A separate 128-step recording
+probe also matched the compressed binary+XZ chunk bytes exactly, including
+sampled inspector data. Replays are retained and no storage format changed.
+Tests additionally compare float64 bits, signed zeros, raw scalar types, custom
+knots, partial decoding, cache bounds and instance/class target hooks.
+
+Reproduce against a preserved pre-change source tree containing the same V6
+preset and native extension; results stay in ignored local cache:
+
+```sh
+.venv/bin/python -m work.benchmark_v6 \
+  --baseline /path/to/pre-change-source \
+  --steps 128 --repeats 3 --passes 3 \
+  --output .cache/v6-optimization.json
+```
+
+The harness alternates before/after order, rejects unequal state/work hashes and
+uses temporary replay files. Its printed speedups are ratios of median times;
+timing remains machine- and workload-dependent. No new kernel was needed:
+these savings remove Python allocation and repeated pure calculations before
+existing private learner/native arithmetic.
+
+
+## V7 late-adapter training batches
+
+The initial late consequence adapter used the per-sample reference PPO path.
+That rebuilt evidence features for both the objective and adapter-gradient pass
+on every epoch, and crossed the Python/native boundary separately for each actor
+layer and sample. Smaller observations alone did not remove that overhead.
+
+The revised stock PPO/masked-PPO path prepares each rollout sample's immutable
+evidence features once, then computes physical-network forward/backward, bounded
+logit residuals, final-policy loss and both gradients in one native CPU minibatch.
+Features use contiguous **FP64** temporary buffers, preserving their original
+values rather than quantizing them. This avoids retaining nested Python-float
+matrices throughout the update. Current weights are read every minibatch; no
+stale predictions or gradients are cached. Staging lives for one animal's update
+and is omitted from checkpoints. The feature payload bound is
+`len(rollout) × action_count × (12 × source_count) × 8` bytes
+(normally bounded by configured `rollout_steps`), plus containers,
+physical-input slices and native minibatch scratch. Sources are local/general/
+context as configured. Sample object overhead and interpreter arenas are separate.
+
+Learning rate, cadence, epochs, masks, RNG draws, FP32 weight storage and FP64
+arithmetic are unchanged. Python retains advantage calculation, shuffle order,
+KL rejection, auxiliary scheduling and Adam commits. Auxiliary computation can
+use its separate [native minibatch](#v7-data-flow-and-auxiliary-batching). A rejected batch
+commits neither actor nor adapter. Exact stock contracts are required: custom
+instance/class adapter hooks and actor network overrides retain the reference
+implementation. Custom actor or adapter optimizer overrides also bypass cached
+preparation, including class-level overrides. Older or missing native builds work normally. This is a CPU
+kernel, not new CUDA support.
+
+### Local matched measurements
+
+Python 3.12.9 on macOS ARM64, seed 100, the unchanged `seaside_150_v7` preset,
+three isolated repetitions per policy/phase, alternating before/after source
+order. Baseline is the immediately preceding V7 reference-adapter implementation
+with its existing CPU extension. Both runs retain all configured learning,
+tracking, scent and auxiliary behavior.
+
+| Timed workload | Before | After | Speedup |
+| --- | ---: | ---: | ---: |
+| Ordinary PPO · first 128 steps | 6.485 s | 3.235 s | 2.00× |
+| Ordinary PPO · published-evidence 64 steps | 3.995 s | 2.330 s | 1.71× |
+| Masked PPO · first 128 steps | 6.741 s | 3.315 s | 2.03× |
+| Masked PPO · published-evidence 64 steps | 4.342 s | 2.441 s | 1.78× |
+
+Published-evidence tests first complete 64 untimed steps and start a second
+64-step episode; only that second episode is timed. First-phase update counts
+are 2,132 ordinary / 2,112 masked; published-phase total counts are 2,172 / 2,180
+including warmup. Every paired complete checkpoint and update/step count matched.
+Separate 128-step replay probes for both policies also matched decoded frames
+and compressed binary+XZ chunk bytes exactly, including inspector samples.
+
+Median host peak RSS before → after was 65.94 → 63.78 MiB for ordinary first,
+67.73 → 65.88 MiB for ordinary published, 65.73 → 63.88 MiB for masked first,
+and 65.69 → 66.00 MiB for masked published. Memory is roughly similar, not a
+uniform RAM reduction. These short local runs establish a training-time gain for
+the measured setup, not a guaranteed speedup for every configuration.
+
+
+Reproduce from the checkout against a preserved pre-optimization V7 source tree
+with its original compiled CPU extension. Both sources must use the same preset,
+interpreter and native build flags:
+
+```sh
+.venv/bin/python -m work.build_native
+.venv/bin/python -m work.benchmark_v7_training \
+  --baseline /path/to/pre-optimization-v7-source \
+  --steps 128 --repeats 3 \
+  --output .cache/v7-training-optimization.json
+```
+
+The harness alternates source order in fresh processes, excludes initialization,
+I/O and checkpoint hashing from training times, and rejects mismatched complete
+checkpoint hashes or work counts. A separate recording check requires identical
+decoded frames and compressed binary+XZ chunks. Host RSS is captured before
+checkpoint hashing; allocator/OS variance limits small peak-RSS comparisons.
+Local software timings do not establish other-OS/GPU performance or biological
+improvement. Replay storage/layout, diagnostics cadence and sampled data stay
+unchanged. The separately requested inspector cleanup removes verbose V7 text
+and uses a small scent compass; it does not change recorded observations.
+
+
+This new late-adapter CPU kernel is specific to `ppo` and `maskable_ppo`. Compact
+V7 observations and ordinary consequence-input mode support all fourteen
+algorithms. The [algorithm matrix](observations.md#algorithm-support-for-v7-and-consequence-handling)
+distinguishes those capabilities and explains why each other learner needs its
+own loss/target/recurrent integration before late placement can be enabled.
+
+
+## V7 data flow and auxiliary batching
+
+V7 observation assembly sends compact social action rows directly to the final
+vector. It no longer pads scent to nine values, builds unsupported-action rows,
+or copies a complete V5-sized social tail only to discard those entries. Physical
+and visual-history calculations retain their established ordered projection;
+this is not a new observation version or a precision change. Published general
+consequence rates are immutable shared tuples, invalidated by species publication
+(or each continuous update); final observation tuples remain independently owned.
+Custom social and consequence providers retain the reference call contract.
+
+Each stock PPO/masked-PPO update prepares auxiliary targets and masked physical
+inputs once per rollout, after its first accepted KL gate. Preparation is bounded
+by the owning rollout, recomputed for the next update and never checkpointed.
+Current network outputs, gradients and Adam steps are **not** cached across epochs.
+V7 avoids allocating zero-filled evidence padding that the physical trunk would
+immediately discard. V1–V6 continue using their existing target semantics.
+
+An optional native CPU auxiliary minibatch reuses model buffer views and one
+activation workspace across samples. It runs after actor/adapter gradients, in
+the original sample and reduction order, preserving exact additive gradients
+and KL-gated commits. Missing/older extensions, FP64 parameter archives and
+custom numerical/evidence hooks retain Python execution. This does not add a
+CUDA kernel or share animals' weights, optimizer state or trajectories.
+
+Recorded stock late-adapter diagnostics compute one residual instead of three,
+reusing it for final probabilities and inspector fields. No diagnostic sample,
+activation, replay frame, event, metric or playback is removed. Checkpoint and
+replay formats are unchanged; rebuild CPU kernels and start a new Python process
+for native auxiliary batching.
+
+### Matched data-flow measurements
+
+Python 3.12.9, macOS ARM64, seed 100, unchanged `seaside_150_v7`, three isolated
+alternating repetitions against the immediately preceding native late-PPO setup.
+Use the same `work.benchmark_v7_training` command above with a preserved baseline
+containing its original native extension. The first phase times 128 steps; the
+published phase warms up a 64-step episode and times the next 64-step episode.
+Initialization, recording I/O and checkpoint hashing are outside these timings.
+
+| Workload | Before median | After median | Speedup | Median peak host RSS before → after |
+| --- | ---: | ---: | ---: | ---: |
+| Ordinary PPO, first episode | 3.276 s | 2.932 s | 1.12× | 66.61 → 62.77 MiB |
+| Ordinary PPO, published evidence | 2.363 s | 1.715 s | 1.38× | 69.61 → 69.20 MiB |
+| Masked PPO, first episode | 3.529 s | 3.483 s | 1.01× | 59.30 → 62.20 MiB |
+| Masked PPO, published evidence | 2.441 s | 1.772 s | 1.38× | 69.42 → 65.19 MiB |
+
+Complete checkpoint hashes and step/update counts matched in every pair.
+Separate 128-step recording probes matched decoded frames and compressed chunk
+bytes exactly for both policies. All 28 benchmark records passed. First-episode
+masked PPO is effectively unchanged; most speed benefit arrives when published
+consequence targets become available. Peak RSS does not show a consistent large
+reduction; Python allocator variation and extra bounded target staging matter.
+These short measurements are not a promise of the same speedup on larger worlds,
+other machines, other learners or GPU execution. Storage size remains unchanged.

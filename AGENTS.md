@@ -36,12 +36,27 @@ rather than loading every document or result into context.
   mating readiness for 42 inputs, with terrain padding on flat maps. These sizes
   assume default `observation_top_k: 1`; each extra slot adds 12 inputs. Include k
   in model compatibility and preserve nearest-only legacy signatures. Version 4
-  appends three local consent signals (45 inputs at k=1); preserve versions 1–3. Preserve
+  appends three local consent signals (45 inputs at k=1); preserve versions 1–3.
+  Version 5 uses forward/right spatial encoding and three attack/eat/swim
+  opportunity inputs (48 at k=1); keep V1–V4 exact. Project optional memory and
+  scent consistently, without changing their internal world state. Ordinary PPO
+  remains unmasked; viewer diagrams use the recorded heading to recover world
+  coordinates, and model signatures reject cross-version weights. V6 adds soft
+  semantic categories over V5 cues; resolved knots enter signatures, flags stay
+  exact, saturation is explicit, and every encoded consequence channel must be
+  zeroed for private auxiliary prediction. Preserve V1–V5 and the V6 input cap. Preserve
   RNG-free observation/mask eligibility and reject incompatible saved weights.
   Keep map geometry in
   metadata, not repeated frames. GRPO may share read-only geography, while bodies,
   obstacles, RNGs and transient observation caches remain independent. Record
   final death positions after drift rather than inferring one-cell movement.
+- V7 compact numeric observations are optional and preserve V1–V6 artifacts.
+  Keep per-template ordered action contracts, explicit presence, sensed-only
+  movement summaries and anonymous off-cell four-value scent. Late consequence
+  adapters support PPO/masked PPO: keep learned arrays private, snapshot evidence,
+  use final-policy log probabilities and reject both updates at the KL gate.
+  Never move evidence into the physical trunk or drop dynamically masked action
+  knowledge; preserve archived inference/gradients and lifecycle parameter blocks.
 - Optional collective/consequence observations append after tracking/scent and
   enter model signatures. Consequence scopes context/species_action use 48 inputs;
   both concatenates general then context for 96, with independent confidence and
@@ -50,6 +65,12 @@ rather than loading every document or result into context.
   training knowledge, not shared policy weights or biological remote sensing.
   Persist tables once, freeze updates outside training and isolate GRPO trial
   copies; see [collective learning](docs/social-learning.md).
+- Optional persistent species/action totals must survive context LRU eviction and
+  respect episode publication. Auxiliary outcome heads support PPO/masked PPO;
+  train only on the owning animal's current rollout observations, zero consequence
+  target inputs on the auxiliary branch, and honor the PPO KL gate. Do not pool
+  foreign actor trajectories or share private head/optimizer arrays. Preserve
+  head signature, champion weights, child inheritance/mutation and exact recovery.
 - Optimize disk, RAM and repeated computation while preserving recorded values,
   playback controls, chart history, random seeking and legacy readers. Caches of
   dynamic observations must invalidate when relevant animals/resources change.

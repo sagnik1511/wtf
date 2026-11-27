@@ -2,7 +2,7 @@
 
 [Visual documentation guide](../../visual-guide.md) · [Asset index](../README.md)
 
-The guides embed **28 SVG diagrams** across 17 pages. Readers need no Mermaid
+The guides embed maintained SVG diagrams across the relevant architecture pages. Readers need no Mermaid
 plugin or JavaScript. These show ownership, data dependencies and decision order;
 they do not depict measured performance or guarantee learning outcomes.
 
@@ -16,6 +16,9 @@ light/dark styles and an opaque light fallback for simpler image renderers.
 
 | Diagram | Documentation | Local source filename |
 | --- | --- | --- |
+| [V7 late consequence policy](v7-late-consequence.svg) | [Guide](../../observations.md#opt-in-late-consequence-policy) | `v7-late-consequence.mmd` |
+| [V6 coefficient reuse](v6-coefficient-reuse.svg) | [Guide](../../performance.md#v6-semantic-encoding-and-auxiliary-work) | `v6-coefficient-reuse.mmd` |
+| [Collective evidence and private auxiliary heads](collective-auxiliary.svg) | [Guide](../../social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains) | `collective-auxiliary.mmd` |
 | [CUDA DQN/DDQN data flow](cuda-dqn-dataflow.svg) | [Guide](../../cuda.md#where-the-cuda-path-saves-work) | `cuda-dqn-dataflow.mmd` |
 | [CUDA PPO residency](cuda-ppo-residency.svg) | [Guide](../../cuda.md#ppo-state-residency-and-publication) | `cuda-ppo-residency.mmd` |
 | [Runtime boundaries](runtime-boundaries.svg) | [Guide](../../architecture.md#runtime-boundaries) | `runtime-boundaries.mmd` |

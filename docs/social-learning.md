@@ -131,7 +131,7 @@ context does not erase known general evidence. The two sources are correlated
 summaries of the same experience, not independent trials; enabling both does not
 collect or count an event twice.
 
-`species_action` aggregates published outcome counts for each action across the
+By default, `species_action` aggregates published outcome counts for each action across the
 species' retained contexts. It supplies the same general knowledge to all
 consuming animals of that exact species, regardless of sex, current health,
 energy, position, chosen action or dynamic action mask. Every supported action's
@@ -192,6 +192,144 @@ GRPO trial worlds have private copies of this state; trials cannot update the
 real world's knowledge. Local histories and incomplete windows reset between
 episodes; the species tables survive independently of champion selection and
 `--no-chain-brains`.
+
+## Persistent species/action totals
+
+Enable `consequence_learning.persistent_action_totals: true` to retain general
+physical-outcome counts independently of the bounded context LRU. The default is
+`false`, preserving the older retained-context aggregation and trajectories when
+the new option is omitted.
+
+There are twelve action rows per exact species. Each row stores count, harm,
+feeding and birth totals: **48 numbers per species**, rather than episodes or
+trajectories. Context eviction still bounds detailed memory but cannot remove
+those general totals. Published estimates use a revision-local cache. In episode
+mode, one additional fixed-size row set per updated species holds staged totals;
+publication swaps both contextual and general knowledge together. Counter ratios
+are rescaled only near the portable exact-integer limit (`2**52`), preserving
+rates without unbounded integer growth. Local observations and policy weights
+remain private.
+
+Legacy knowledge imports initialize totals from the context rows actually saved.
+They cannot recover evidence discarded by the old LRU. New logical consequence
+state uses version 3: a wrapper around the legacy table state plus published and
+staged action totals. Checkpoint envelopes and replay encodings are unchanged.
+Use this source version to restore the new state; older readers reject it.
+
+## Auxiliary outcome prediction for private PPO brains
+
+![Species-owned persistent counts and bounded contexts feed private supervised outcome heads while PPO retains each animal's own rollout](assets/diagrams/collective-auxiliary.svg)
+
+Ordinary `ppo` and `maskable_ppo` templates can opt in with:
+
+```json
+"consequence_observation": true,
+"consequence_scope": "both",
+"auxiliary_consequence": {"coefficient": 0.1}
+```
+
+Other algorithms reject this auxiliary setting explicitly. They can still use
+persistent totals and their existing consequence input observations.
+
+Each animal owns a small **36-output head**: harm, feeding and birth estimates
+for the twelve stable actions. Targets are the published empirical outcome
+rates already present in that animal's own observation. Known context estimates
+take priority; otherwise general estimates are used when available. Unknown
+rows contribute no loss. Confidence weights the binary cross-entropy loss;
+confidence is an evidence-size heuristic, not calibrated correctness. Masked
+PPO can learn outcome estimates for an action that is currently unavailable;
+its physical action mask still governs action selection.
+
+The auxiliary forward pass zeros **all consequence-estimate input fields**,
+including both sources in combined mode. This prevents directly copying target
+values from those inputs. It retains the animal's other physical, tracking and
+local social inputs. The head attaches to that animal's hidden trunk, adding
+supervised gradients to its existing PPO trunk gradients. Its output layer has
+private Adam state; the actor/critic output layer receives no direct auxiliary
+output gradient. The normal policy path still sees configured consequence inputs.
+
+Only the current animal's own rollout observations are used, at accepted PPO
+minibatch boundaries. Stored actions, rewards, old log probabilities, GAE,
+clipping, shuffle order and KL checks retain their own on-policy trajectory.
+No other animal's action/reward samples enter that actor rollout. A KL-rejected
+minibatch updates neither trunk nor auxiliary head; rollouts are cleared as
+usual. Changing a shared trunk may change subsequent action probabilities, as
+with ordinary value learning; the auxiliary objective does not guarantee
+cooperation, causal understanding or better survival.
+
+Evaluation never updates the head, trunk or shared evidence. Birth mixes the
+parents' private head weights alongside policy parameters, resets the child's
+optimizer state and buffers, and keeps rare mutation child-local. Champions
+include the head weights; checkpoints additionally retain its Adam arrays and
+update counter for exact continuation. The optional head is a model-signature
+distinction: start a compatible new model rather than silently loading an old
+headless champion. The head does not enlarge observations or actor output arrays.
+
+Diagnostics add weighted `auxiliary_loss` and `auxiliary_coverage` (fraction of
+training sample presentations with known labels). No extra per-frame prediction
+array is recorded. The live policy/activation viewer continues to show the actor
+path, not a new auxiliary-head visualization. Stock auxiliary PPO updates prepare
+fixed targets once per rollout update and use an optional ordered **CPU**
+minibatch kernel, with existing affine/backward execution as the fallback. Current
+weights and gradients are recomputed each accepted minibatch. See the
+[data-flow optimization measurements](performance.md#v7-data-flow-and-auxiliary-batching).
+The CUDA PPO training shortcut is
+bypassed for this objective so it cannot silently skip the supervised gradient.
+
+### Run the combined example
+
+[land_bridge_collective.json](../environments/land_bridge_collective.json) uses
+the same map and body costs as `land_bridge_behaviors`, enabling durable
+totals and a `0.1` auxiliary coefficient for both independent PPO species. It
+also opts into [180° forward vision](observations.md#forward-visual-field). It
+retains all playbacks and publishes consequence evidence between episodes.
+This is an explicit learning variant, not a validated ecological calibration.
+
+```sh
+.venv/bin/python -m wtf run land_bridge_collective \
+  --runs 5 --steps 1500 --seed 100 --progress
+```
+
+The `land_bridge_collective_150` preset keeps the collective bridge setup with
+`field_of_view_degrees: 150` for both species; use it to compare a narrower
+forward cone with `land_bridge_collective` (180°). Other settings remain the same.
+
+The `seaside_150` preset also enables the same social/consequence inputs,
+persistent totals, episode publication and private auxiliary coefficient `0.1`
+for both PPO species, on the seaside map with 150° vision. It retains the
+seaside body/reproduction and PPO update settings. Scent and day/night are
+separate options and are not enabled by this preset.
+
+### Compare changes without collecting large artifacts
+
+`work.compare_collective_learning` runs legacy, persistent-only and auxiliary
+arms in separate processes, using the same seed schedules and physical setup.
+Keep an unchanged source snapshot outside tracked source, then run:
+
+```sh
+.venv/bin/python -m work.compare_collective_learning \
+  --baseline /path/to/unchanged-source \
+  --environment environments/land_bridge_behaviors.json \
+  --seeds 100 200 300 --episodes 3 --steps 900 \
+  --evaluation-seeds 900 901 --output .cache/collective-comparison.json
+```
+
+For a controlled comparison on the 180° preset, use `--baseline .` with
+`--environment environments/land_bridge_collective.json`. The current source's
+legacy arm disables durable totals and the auxiliary head while keeping the same
+forward-vision physics. A source snapshot predating forward vision cannot read
+that new body setting; use its matching 360° configuration instead.
+
+Each trained species/sex lifespan champion is evaluated greedily in identical
+held-out worlds with learning, mutation and crossover disabled. Its retained
+knowledge is frozen too. The helper asserts no policy or knowledge updates and
+stores compact outcome counters, training time and peak host RAM. It records no
+replays, checkpoint files or model archives. Same-sex champions are mandatory;
+it never substitutes a different sex. Seed groups are paired treatments, not
+independent evidence for each episode. Wall time includes differing trajectories
+and update counts, so it is not an equal-work speedup benchmark. A small campaign
+can reject an improvement claim or remain inconclusive; it cannot establish
+reliable ecological behavior across maps.
 
 ## Publication timing
 
@@ -356,3 +494,24 @@ rather than a validated biological ecosystem.
 Assess usefulness with matched-seed, held-out coast/inland evaluations: drowning,
 energy coverage, survival, reproduction and successful crossings matter alongside
 training reward. More cautious behaviour alone does not establish improvement.
+
+
+## Late policy adjustment in V7
+
+The optional [V7 adapter](observations.md#opt-in-late-consequence-policy) moves
+local/general/context evidence out of the physical input trunk and into a small
+private learned action-logit residual. Published evidence is an input snapshot,
+not frozen neural weights. It uses final adjusted probabilities for PPO ratios,
+keeps existing masks separate, and commits its private Adam update only after the
+actor KL gate accepts the minibatch. This changes the architecture and needs
+matching new weights; it is not an optimization claiming identical trajectories.
+The inspector displays base probabilities, signed residuals and final
+probabilities. Counts remain species-shared; policy and adapter weights do not.
+
+
+Late placement is a separate capability from consequence inputs. All fourteen
+learners support the existing input-feature mode and compact V7. Only ordinary
+PPO and masked PPO currently support the learned late adapter/native batch.
+The [support matrix](observations.md#algorithm-support-for-v7-and-consequence-handling)
+lists remaining work for each learner; adding the residual only at action
+selection would leave its training objective inconsistent.

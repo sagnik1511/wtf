@@ -23,6 +23,7 @@ class Consequences:
         self.update_schedule = settings.get("update_schedule", "continuous")
         self.capacity = settings.get("max_contexts", 512)
         self.horizon = settings.get("horizon_steps", 16)
+        self.persistent_actions = settings.get("persistent_action_totals", False)
         self.contracts = {
             name: {
                 key: copy.deepcopy(spec.get(key))
@@ -43,9 +44,17 @@ class Consequences:
         self.published_updates = 0
         self.staged_tables = {}
         self._action_cache = {}
+        self.action_totals = (
+            {name: [[0, 0, 0, 0] for _ in ACTIONS] for name in self.contracts}
+            if self.persistent_actions
+            else {}
+        )
+        self.staged_action_totals = {}
 
     def learn(self, species, key, labels):
         """Accumulate physical outcome counts in the configured publication table."""
+        # Keep total/context updates and publication invalidation atomic per outcome.
+        # pylint: disable=too-many-branches
         if self.update_schedule == "episode":
             # Copy only a species receiving its first new evidence this episode.
             if species not in self.staged_tables:
@@ -55,6 +64,23 @@ class Consequences:
             table = self.staged_tables[species]
         else:
             table = self.tables[species]
+        if self.persistent_actions:
+            if self.update_schedule == "episode":
+                if species not in self.staged_action_totals:
+                    self.staged_action_totals[species] = [
+                        row[:] for row in self.action_totals[species]
+                    ]
+                totals = self.staged_action_totals[species]
+            else:
+                totals = self.action_totals[species]
+            row = totals[key[0]]
+            # Preserve old evidence across context eviction; rescale only near the
+            # exact-integer limit of portable double-precision interchange.
+            if row[0] >= 2**52:
+                row[:] = [value * 0.5 for value in row]
+            row[0] += 1
+            for i, value in enumerate(labels, 1):
+                row[i] += int(value > 0)
         values = table.pop(key, [0, 0, 0, 0])
         # Bound counters too; halving avoids overflow without keeping raw samples.
         if values[0] >= 65535:
@@ -76,6 +102,9 @@ class Consequences:
             self.tables[species] = table
             self._action_cache.pop(species, None)
         self.staged_tables.clear()
+        for species, totals in self.staged_action_totals.items():
+            self.action_totals[species] = totals
+        self.staged_action_totals.clear()
         self.published_updates = self.updates
 
     def predict(self, species, key):
@@ -96,13 +125,22 @@ class Consequences:
         # pylint: disable=unidiomatic-typecheck
         if type(action) is not int or not 0 <= action < len(ACTIONS):
             raise ValueError("Invalid consequence action")
+        return list(self.action_rates(species)[action])
+
+    def action_rates(self, species):
+        """Borrow immutable published rows until that species publishes again."""
         rows = self._action_cache.get(species)
         if rows is None:
-            rows = [[0, 0, 0, 0] for _ in ACTIONS]
-            for key, values in self.tables[species].items():
-                row = rows[key[0]]
-                for i, value in enumerate(values):
-                    row[i] += value
+            rows = (
+                [row[:] for row in self.action_totals[species]]
+                if self.persistent_actions
+                else [[0, 0, 0, 0] for _ in ACTIONS]
+            )
+            if not self.persistent_actions:
+                for key, values in self.tables[species].items():
+                    row = rows[key[0]]
+                    for i, value in enumerate(values):
+                        row[i] += value
             # Immutable cached rates share float values across consumers/replay
             # observations; return a fresh list so callers cannot mutate the cache.
             rows = tuple(
@@ -117,7 +155,7 @@ class Consequences:
                 for values in rows
             )
             self._action_cache[species] = rows
-        return list(rows[action])
+        return rows
 
     @staticmethod
     def _table_state(tables):
@@ -145,18 +183,36 @@ class Consequences:
                 published_updates=self.published_updates,
                 staged_tables=self._table_state(self.staged_tables),
             )
-        return state
+        return self._with_action_totals(
+            state, self.action_totals, self.staged_action_totals
+        )
+
+    def _with_action_totals(self, model, totals, staged):
+        """Versioned wrapper keeps old bounded-table snapshots readable."""
+        if not self.persistent_actions:
+            return model
+        return {
+            "version": 3,
+            "model": model,
+            "action_totals": copy.deepcopy(totals),
+            "staged_action_totals": copy.deepcopy(staged),
+        }
 
     def export_state(self):
         # A completed-run warm start receives all finished windows, including
         # the final episode's evidence, without publishing into its old replay.
         """Build the aggregate population-knowledge warm-start representation."""
-        return self._state(
+        model = self._state(
             {
                 name: self.staged_tables.get(name, table)
                 for name, table in self.tables.items()
             }
         )
+        totals = {
+            name: self.staged_action_totals.get(name, rows)
+            for name, rows in self.action_totals.items()
+        }
+        return self._with_action_totals(model, totals, {})
 
     @classmethod
     def restore(cls, config, state):
@@ -164,12 +220,56 @@ class Consequences:
 
         # Keep this ordered phase and its shared state together; splitting it only to
         # meet a count obscures the contract.
-        # pylint: disable=too-many-boolean-expressions
+        # Published/staged and legacy validation stay together so their counts
+        # cannot be accepted independently of their matching context tables.
+        # pylint: disable=too-many-boolean-expressions,too-many-branches,too-many-locals
         # Exact types intentionally reject bool/subclass substitutions in persisted
         # numeric contracts.
         # pylint: disable=unidiomatic-typecheck
 
         result = cls(config)
+        if isinstance(state, dict) and state.get("version") == 3:
+            if (
+                type(state["version"]) is not int
+                or not isinstance(state.get("model"), dict)
+                or state["model"].get("version") not in (1, 2)
+            ):
+                raise ValueError("Invalid persistent consequence model")
+            if not result.persistent_actions or set(state) != {
+                "version",
+                "model",
+                "action_totals",
+                "staged_action_totals",
+            }:
+                raise ValueError(
+                    "Persistent consequence totals require enabled matching configuration"
+                )
+            result = cls.restore(config, state["model"])
+            totals = cls._restore_action_totals(
+                state["action_totals"], set(result.tables)
+            )
+            staged = cls._restore_action_totals(
+                state["staged_action_totals"], set(result.staged_tables)
+            )
+            for tables, counts in (
+                (result.tables, totals),
+                (result.staged_tables, staged),
+            ):
+                for name, rows in tables.items():
+                    retained = [[0, 0, 0, 0] for _ in ACTIONS]
+                    for key, values in rows.items():
+                        for index, value in enumerate(values):
+                            retained[key[0]][index] += value
+                    if any(
+                        total < part
+                        for total_row, part_row in zip(counts[name], retained)
+                        for total, part in zip(total_row, part_row)
+                    ):
+                        raise ValueError(
+                            "Persistent totals cannot omit retained context evidence"
+                        )
+            result.action_totals, result.staged_action_totals = totals, staged
+            return result
         if isinstance(state, dict) and state.get("version") == 2:
             required = {
                 "version",
@@ -216,6 +316,11 @@ class Consequences:
                 name: restored_staged.tables[name] for name in state["staged_tables"]
             }
             result.published_updates = state["published_updates"]
+            if result.persistent_actions:
+                result.staged_action_totals = {
+                    name: restored_staged.action_totals[name]
+                    for name in state["staged_tables"]
+                }
             return result
         if not isinstance(state, dict) or set(state) != {
             "version",
@@ -263,10 +368,37 @@ class Consequences:
                 if tuple(key) in result.tables[name]:
                     raise ValueError("Duplicate consequence context")
                 result.tables[name][tuple(key)] = list(row)
+                if result.persistent_actions:
+                    total = result.action_totals[name][key[0]]
+                    for index, value in enumerate(row):
+                        total[index] += value
             while len(result.tables[name]) > result.capacity:
                 result.tables[name].popitem(last=False)
         result.updates = state["updates"]
         result.published_updates = result.updates
+        return result
+
+    @staticmethod
+    def _restore_action_totals(value, species):
+        """Validate bounded fixed-width published/staged counts without aliases."""
+        if not isinstance(value, dict) or set(value) != species:
+            raise ValueError("Invalid consequence total species")
+        result = {}
+        for name, rows in value.items():
+            if not isinstance(rows, list) or len(rows) != len(ACTIONS):
+                raise ValueError("Invalid consequence total actions")
+            for row in rows:
+                if (
+                    not isinstance(row, list)
+                    or len(row) != 4
+                    or any(
+                        type(v) not in (int, float) or not math.isfinite(v) for v in row
+                    )
+                    or not 0 <= row[0] <= 2**53
+                    or any(not 0 <= v <= row[0] for v in row[1:])
+                ):
+                    raise ValueError("Invalid persistent consequence counts")
+            result[name] = [row[:] for row in rows]
         return result
 
     def save(self, path):

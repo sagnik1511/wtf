@@ -284,3 +284,176 @@ test('Blended scent renders exactly one anonymous heatmap', () => {
   assert(!text(root).includes('all sexes'));
   assert(text(root).includes('40% blended strength'));
 });
+
+test('Sampled radar marks the front half using recorded heading; old full circles remain', () => {
+  const root = inspectorGraphs({
+    diagnostic: { tick: 10, features, action_probabilities: { rest: 1 } },
+    template: { observation_version: 1 },
+    spec: { body: { ...body, field_of_view_degrees: 180 } },
+    hasWater: false,
+  });
+  const sector = walk(root).find(
+    (n) => n.attributes['data-visual-field'] === '180',
+  );
+  assert(sector);
+  assert(sector.attributes.d.includes('A 76 76'));
+  assert(text(root).includes('front 180°'));
+  const legacy = inspectorGraphs({
+    diagnostic: { tick: 10, features, action_probabilities: { rest: 1 } },
+    template: { observation_version: 1 },
+    spec: { body },
+    hasWater: false,
+  });
+  assert(
+    !walk(legacy).some((n) => n.attributes['data-visual-field'] === '180'),
+  );
+});
+
+test('Narrow sampled radar uses a 150-degree sector and caption', () => {
+  const root = inspectorGraphs({
+    diagnostic: { tick: 10, features, action_probabilities: { rest: 1 } },
+    template: { observation_version: 1 },
+    spec: { body: { ...body, field_of_view_degrees: 150 } },
+    hasWater: false,
+  });
+  assert(walk(root).some((n) => n.attributes['data-visual-field'] === '150'));
+  assert(text(root).includes('front 150°'));
+});
+
+test('V5 inspector identifies its input frame and shows unmasked immediate opportunities', () => {
+  const values = Array(48).fill(0);
+  values.splice(0, 4, 0.2, 1, 1, 0);
+  values.splice(45, 3, 1, 0, 1);
+  const root = inspectorGraphs({
+    diagnostic: {
+      tick: 9,
+      features: values,
+      action_probabilities: { attack: 0.2, rest: 0.8 },
+    },
+    template: { observation_version: 5 },
+    spec: { body },
+    hasWater: true,
+  });
+  assert(text(root).includes('v5'));
+  assert(text(root).includes('forward/right inputs'));
+  assert(text(root).includes('attack: possible'));
+  assert(text(root).includes('eat: unavailable'));
+  assert(text(root).includes('swim: possible'));
+  assert(!text(root).includes('attack · masked'));
+});
+
+test('V6 inspector shows semantic memberships without masking ordinary predictions', () => {
+  const template = { observation_version: 6 };
+  // Mixed memberships must be visible while the raw flags remain unmasked.
+  const values = Array(130).fill(0);
+  values.splice(0, 4, 0, 0.7, 0.3, 0);
+  values[7] = 1;
+  const root = inspectorGraphs({
+    diagnostic: {
+      tick: 9,
+      features: values,
+      action_probabilities: { attack: 0.3, rest: 0.7 },
+    },
+    template,
+    spec: { body },
+    hasWater: true,
+    sections: { semantic: true },
+  });
+  assert(text(root).includes('V6 soft categories'));
+  assert(text(root).includes('Energy hungry: 70%'));
+  assert(text(root).includes('Energy comfortable: 30%'));
+  assert(text(root).includes('category-derived positions'));
+  assert(!text(root).includes('attack · masked'));
+});
+
+test('V7 inspector separates compact scent from regional heatmaps and shows final-policy adjustments', async () => {
+  const { compactLayout } = await import('../viewer/input-layout.mjs');
+  const template = {
+    observation_version: 7,
+    observation_top_k: 1,
+    observation_actions: ['rest', 'eat'],
+    network: { hidden_layers: [4] },
+    scent_observation: { mode: 'blended', radius: 2 },
+    consequence_observation: true,
+    consequence_scope: 'both',
+    late_consequence: { max_adjustment: 2 },
+  };
+  const layout = compactLayout(template),
+    values = Array(layout.width).fill(0);
+  values[2] = 1;
+  values.splice(layout.scentStart, 4, 1, 0, 0.9, 0.4);
+  const d = {
+    tick: 2,
+    algorithm: 'ppo',
+    features: values,
+    action_probabilities: { rest: 0.2, eat: 0.8 },
+    late_consequence: {
+      base_logits: [0, 0],
+      adjustments: [-0.5, 0.5],
+      final_logits: [-0.5, 0.5],
+    },
+  };
+  const root = inspectorGraphs({
+    diagnostic: d,
+    template,
+    spec: { body },
+    hasWater: false,
+  });
+  assert(
+    walk(root).some(
+      (n) =>
+        n.attributes?.['aria-label'] === 'Scent bearing relative to the animal',
+    ),
+  );
+  assert(!text(root).includes('Body-relative bearing:'));
+  assert(!text(root).includes('Movement shows a trend'));
+  assert(text(root).includes('Before consequences'));
+  assert(text(root).includes('Strength'));
+  assert(text(root).includes('Freshness'));
+  assert(text(root).includes('80.0%'));
+  assert(
+    walk(root).some(
+      (n) =>
+        n.attributes?.['aria-label'] ===
+        'Signed consequence adjustments to action logits',
+    ),
+  );
+  assert(!walk(root).some((n) => n.attributes?.class === 'scent-grid'));
+});
+
+test('Masked late-policy comparison uses the same mask before and after consequences', async () => {
+  const { compactLayout } = await import('../viewer/input-layout.mjs');
+  const template = {
+    observation_version: 7,
+    observation_actions: ['rest', 'eat'],
+    consequence_observation: true,
+    late_consequence: { max_adjustment: 2 },
+    network: { hidden_layers: [4] },
+  };
+  const layout = compactLayout(template),
+    features = Array(layout.width).fill(0);
+  features[2] = 1;
+  const root = inspectorGraphs({
+    diagnostic: {
+      tick: 1,
+      algorithm: 'maskable_ppo',
+      features,
+      action_probabilities: { rest: 1, eat: 0 },
+      action_mask: { rest: true, eat: false },
+      late_consequence: {
+        base_logits: [0, 0],
+        adjustments: [0, 0],
+        final_logits: [0, 0],
+      },
+    },
+    template,
+    spec: { body },
+    hasWater: false,
+  });
+  const before = walk(root).find(
+    (n) => n.children?.[0]?.textContent === 'Before consequences',
+  );
+  assert.ok(before);
+  assert(text(before).includes('100.0%'));
+  assert(!text(before).includes('50.0%'));
+});

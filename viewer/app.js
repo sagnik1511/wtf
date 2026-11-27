@@ -440,7 +440,7 @@ function drawWorld() {
       body,
     );
     sight.hidden = false;
-    sight.textContent = `Current sight #${observed.id} · radius ${body?.vision_radius ?? '?'}${bonus ? ` + up to ${bonus} across water` : ''}`;
+    sight.textContent = `Current sight #${observed.id}${[150, 180].includes(body?.field_of_view_degrees) ? ` · front ${body.field_of_view_degrees}°` : ''} · radius ${body?.vision_radius ?? '?'}${bonus ? ` + up to ${bonus} across water` : ''}`;
   } else {
     observationOverlay.clear();
     sight.hidden = true;
@@ -893,6 +893,9 @@ function drawInspector() {
     );
     fields.push(
       ['Current sight radius', body.vision_radius],
+      ...([150, 180].includes(body.field_of_view_degrees)
+        ? [['Visual field', `Front ${body.field_of_view_degrees}°`]]
+        : []),
       ['Current living cost', body.living_cost.toFixed(3)],
       ['Current movement cost', body.movement_cost.toFixed(3)],
     );

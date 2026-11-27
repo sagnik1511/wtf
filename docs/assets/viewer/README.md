@@ -5,6 +5,12 @@ They contain no run IDs, measurements, recordings or saved model weights.
 
 | Asset | Contents |
 | --- | --- |
+| [Compact V7](observation-v7.svg) | Numeric movement/scent summaries, evidence side channel and source-rendered learned logit adjustments |
+| [V5 → V6 data comparison](observation-v5-v6.svg) | Same sensed values before/after semantic encoding, unchanged raw flags and optional block widths |
+| [V6 input layout](observation-v6-layout.svg) | Ordered vector blocks, actual preset offsets, optional tails and one 12-channel target slot |
+| [Observation V6](observation-v6.svg) | Semantic membership groups, range/bearing overlap and the category-derived inspector radar |
+| [Observation V5](observation-v5.svg) | Body-relative input encoding, immediate opportunities and the sampled north-up inspector radar |
+| [Forward vision](forward-vision.svg) | Four heading-relative board half-fields and recorded-heading 150°/180°/360° inspector radars |
 | [Interface themes](themes.svg) | Schematic light/dark UI specimens from the actual CSS palette tokens |
 | [Day and night](day-night.svg) | Same objects under actual dawn/midday/dusk/night lighting and a deterministic sunlight curve |
 | [Collective learning](social-learning.svg) | Actual inspector charts for pooled local outcomes, species consequence estimates and unknown evidence |

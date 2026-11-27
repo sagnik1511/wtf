@@ -18,6 +18,17 @@ changing training frequency. Presets use prey 1.0× and predator 1.25×; see
 [species learning rates](configuration.md#learning-rates-per-species).
 
 
+## V7 and late consequence support
+
+All fourteen algorithms accept compact V7 observations, including optional
+movement summaries, four-value scent and local/general/context consequence
+inputs. Only `ppo` and `maskable_ppo` currently support learned consequence
+adjustments after the physical forward pass and the associated native CPU batch.
+Other learners retain consequence information as ordinary input features; their
+unsupported late option is rejected. See the explicit
+[algorithm support matrix and integration reasons](observations.md#algorithm-support-for-v7-and-consequence-handling).
+This distinction does not disable their existing native learning kernels.
+
 ## Multilayer DQN
 
 Use `type: "dqn"` for scalar DQN or `type: "ddqn"` for scalar Double DQN,

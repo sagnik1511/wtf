@@ -255,3 +255,65 @@ separate confidence and are never blended by the viewer.
 Charts update in place, pause and rewind with playback, adapt to both themes and
 add no replay fields. Raw inputs and model predictions remain the original saved
 values. See the linked guide for averaging, sparse-sample and seek semantics.
+
+## Forward vision
+
+![Four current-sight half-fields and sampled inspector radars under 360, 180 and 150 degrees](assets/viewer/forward-vision.svg)
+
+With `species.<name>.body.field_of_view_degrees: 180`, the blue board overlay
+follows the selected animal's **current heading**. The sampled radar shades the
+configured forward sector using its saved input heading. The 150° option
+uses a narrower ±75° cone, shown alongside 180° and 360° in the radars. The viewer overview still displays
+all world objects; the overlay identifies what the selected animal can see.
+Rear visual targets are excluded from fresh observations, while old personal
+sightings can fade in memory and scent remains omnidirectional. Immediate
+physical affordances and learned species knowledge are separate input sources.
+See [forward-field rules](observations.md#forward-visual-field).
+
+## Observation V5
+
+![V5 raw forward/right blocks and north-up sampled radar](assets/viewer/observation-v5.svg)
+
+The inspector identifies V5 inputs and shows immediate attack/eat/swim
+opportunities with the existing light/dark-aware status styling. These indicators
+do not mask predictions. Raw input/attribution labels use forward/right and
+body-relative scent sectors. Radar targets, flow, histories and scent grids are
+projected back through the **sampled heading** so they stay north-up alongside
+the world board. Current sight remains tied to the current selected body; sampled
+inputs can lag it. Older recordings retain their original appearance.
+See [layout and opportunity definitions](observations.md#observation-version-5).
+
+## Observation V6
+
+![Overlapping V6 category memberships and representative north-up radar](assets/viewer/observation-v6.svg)
+
+The inspector's **V6 soft categories** disclosure shows up to 48 nonempty groups
+from the selected animal's saved input, updating during replay. Full semantic
+labels remain available in the raw vector, network structure and saved-weight
+explanations. Opportunity indicators retain their exact flags and do not mask
+ordinary PPO predictions. Existing charts decode category-derived values for
+health, terrain, mating, social/consequence estimates, movement memory and scent.
+Radar/history positions are representative after any band saturation; the world
+board always uses exact saved positions. Both modes use the viewer theme.
+See [bands, widths and saturation](observations.md#observation-version-6) and the
+[complete ordered input layout](observations.md#v6-input-layout), plus the
+[V5 → V6 data comparison](observations.md#what-changed-from-v5-to-v6).
+
+
+## Compact V7 and late consequence adjustment
+
+![V7 compact sensory inputs and source-rendered adjustment bars](assets/viewer/observation-v7.svg)
+
+The selected animal's saved V7 sample shows summary movement and four-value scent
+bearing/strength/freshness. Scent uses a compact body-relative compass beside
+strength/freshness gauges; redundant numerical-direction, motion-reliability and
+explanatory text rows are omitted. Channel captions and axis/gauge labels remain
+for interpretation, including multiple species/sex channels. A scent bearing does not identify a source animal or
+reconstruct alternative patches. The late-policy panel shows base action
+probabilities and signed learned logit residuals; the usual output chart contains
+final adjusted probabilities. All values are sampled at the diagnostic timestamp,
+not recomputed from a later world. The base network structure excludes evidence
+channels; archived local input attributions include the late branch. Base-network
+edge drawings do not depict that branch's individual parameter routes. These
+controls use the existing light/dark palette and respect the loaded recording.
+See [V7 definitions and compatibility](observations.md#observation-version-7).

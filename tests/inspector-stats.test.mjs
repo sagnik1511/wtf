@@ -149,7 +149,7 @@ test('Prediction history is bounded, seek-safe, agent-specific and excludes carr
 test('Sight overlay matches Python geometry across maps, species, river banks and occluders', () => {
   const root = fileURLToPath(new URL('..', import.meta.url));
   const script = `
-import json
+import json, copy
 from wtf.config import load
 from wtf.simulation.world import World
 cases=[]
@@ -277,4 +277,74 @@ test('Sample collection validates finite scores without constructing bar or mask
     predictionSamples(frames, 3, 3).map((p) => p.tick),
     [0, 3],
   );
+});
+
+test('Forward overlay includes side boundaries and invalidates on stationary turns only when needed', () => {
+  const state = {
+    width: 9,
+    height: 9,
+    obstacles: [],
+    species: {
+      deer: { body: { vision_radius: 3, field_of_view_degrees: 180 } },
+    },
+  };
+  const animal = { id: 1, species: 'deer', x: 4, y: 4, heading: 1 };
+  let cells = visibilityCells(state, animal, null);
+  assert(cells.some(([x, y]) => x === 4 && y === 1));
+  assert(cells.every(([x]) => x >= 4));
+  const overlay = new ObservationOverlay(),
+    ctx = { fillRect() {} };
+  overlay.draw(ctx, state, animal, null, 10, 10);
+  const east = overlay.cells;
+  animal.heading = 3;
+  overlay.draw(ctx, state, animal, null, 10, 10);
+  assert.notEqual(overlay.cells, east);
+  assert(overlay.cells.every(([x]) => x <= 4));
+  state.species.deer.body.field_of_view_degrees = 360;
+  overlay.draw(ctx, state, animal, null, 10, 10);
+  const all = overlay.cells;
+  animal.heading = 1;
+  overlay.draw(ctx, state, animal, null, 10, 10);
+  assert.equal(overlay.cells, all);
+});
+
+test('Forward overlay matches Python across turns, rivers, occluders and night', () => {
+  const root = fileURLToPath(new URL('..', import.meta.url));
+  const script = `
+import json, copy
+from wtf.config import load
+from wtf.simulation.world import World
+from wtf.simulation.vision import in_field
+cases=[]
+for name, degrees in ((n,d) for n in ('land_bridge_collective','enclosed_valleys','river_crossing_strong_predator') for d in (150,180)):
+ c=load('environments/'+name+'.json')
+ for spec in c['species'].values():spec['body']['field_of_view_degrees']=degrees
+ w=World(c,100);w._observation_context()
+ for species in c['species']:
+  a=next(v for v in w.animals.values() if v.species==species)
+  for tick in (0,200):
+   w.tick=tick;body=w.body(a);base=body['vision_radius'];bonus=body.get('water_vision_bonus',0) if w.geography and w.geography.water else 0
+   for heading in range(4):
+    a.heading=heading;expected=[]
+    for y in range(w.height):
+     for x in range(w.width):
+      d=(x-a.x)**2+(y-a.y)**2
+      if d>(base+bonus)**2 or not in_field(a.position,(x,y),heading,degrees) or not w.visible(a.position,(x,y)):continue
+      allowed=base+min(bonus,w._water_sight_cells(a.position,(x,y))) if bonus else base
+      if d<=allowed**2:expected.append([x,y])
+    cases.append(dict(name=name,animal=dict(id=a.id,x=a.x,y=a.y,heading=heading,species=species),state=dict(width=w.width,height=w.height,species=copy.deepcopy(c['species']),day_night=c.get('day_night'),tick=tick,obstacles=list(w.obstacles)),terrain=c.get('terrain'),expected=expected))
+print(json.dumps(cases))`;
+  const result = spawnSync(root + '.venv/bin/python', ['-c', script], {
+    cwd: root,
+    env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
+    encoding: 'utf8',
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  for (const row of JSON.parse(result.stdout))
+    assert.deepEqual(
+      visibilityCells(row.state, row.animal, terrainView(row.terrain)),
+      row.expected,
+      `${row.name} heading ${row.animal.heading} tick ${row.state.tick}`,
+    );
 });

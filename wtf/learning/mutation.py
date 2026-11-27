@@ -39,6 +39,10 @@ def mutate_weights(brain, settings, rng):
             for key, values in layer.items()
             if key in ("weights", "input_weights", "recurrent_weights")
         ]
+    if hasattr(brain, "auxiliary"):
+        arrays.extend(layer["weights"] for layer in brain.auxiliary.network.layers)
+    if hasattr(brain, "late"):
+        arrays.extend(layer["weights"] for layer in brain.late.network.layers)
     ends = []
     total = 0
     for values in arrays:

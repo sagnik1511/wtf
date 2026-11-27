@@ -1,6 +1,8 @@
 """Bounded personal sightings and anonymous ground-scent fields; no policy/RNG use."""
 
 from collections import OrderedDict, deque
+import math
+from wtf.simulation.actions import DIRECTIONS
 
 SECTORS = ((0, 0), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1))
 SECTOR_NAMES = (
@@ -13,6 +15,19 @@ SECTOR_NAMES = (
     "southwest",
     "west",
     "northwest",
+)
+
+
+BODY_SECTOR_NAMES = (
+    "here",
+    "front",
+    "front-right",
+    "right",
+    "back-right",
+    "back",
+    "back-left",
+    "left",
+    "front-left",
 )
 
 
@@ -45,7 +60,7 @@ def scent_channels(template):
 
 
 def tracking_width(template):
-    """Compute the optional visual-history and scent input width."""
+    """Compute canonical optional width before the V6 semantic projection."""
     steps = template.get("movement_history_steps", 0)
     return (
         2 * template.get("observation_top_k", 1) * (7 + 3 * steps) if steps else 0
@@ -84,6 +99,33 @@ def tracking_names(template):
             else f"Scent {species} {sex}"
         )
         names.extend(f"{prefix} {side}" for side in SECTOR_NAMES)
+    if template.get("observation_version", 1) == 5:
+        replacements = {
+            "last dx": "last forward",
+            "last dy": "last right",
+            "velocity x": "velocity forward",
+            "velocity y": "velocity right",
+            " dx": " forward",
+            " dy": " right",
+        }
+        for old, new in replacements.items():
+            names = [
+                (
+                    name.replace(old, new)
+                    if name.startswith(("Prey track ", "Predator track "))
+                    else name
+                )
+                for name in names
+            ]
+        mapping = dict(zip(SECTOR_NAMES, BODY_SECTOR_NAMES))
+        names = [
+            (
+                name.rsplit(" ", 1)[0] + " " + mapping[name.rsplit(" ", 1)[1]]
+                if name.startswith("Scent ")
+                else name
+            )
+            for name in names
+        ]
     return names
 
 
@@ -287,6 +329,65 @@ class ScentField:
             if len(self._reachable) > 128:
                 self._reachable.popitem(last=False)
         return cells
+
+    # One bounded reduction keeps patch selection, strength and age aligned.
+    # pylint: disable-next=too-many-locals
+    def sample_compact(self, world, animal, template, phase=None):
+        """Strongest off-cell reachable patch; anonymous mixture and source recency.
+
+        The observer's cell is excluded so its fresh deposit cannot dominate every
+        reading. Own earlier traces remain present. Ties are deterministic.
+        """
+        spec = scent_contract(template)
+        channels = scent_channels(template)
+        blended = spec.get("mode") == "blended"
+        groups = (
+            [tuple(range(self.channels))]
+            if blended
+            else [
+                tuple(
+                    self.groups[name, item]
+                    for item in (("female", "male") if sex == "any" else (sex,))
+                )
+                for name, sex in channels
+            ]
+        )
+        best = [None] * len(groups)
+        for base, _ in self._cells(
+            world, animal.position, spec.get("radius", 2), phase is not None
+        ):
+            cell = base // self.channels
+            x, y = cell % self.width, cell // self.width
+            dx, dy = x - animal.x, y - animal.y
+            if not dx and not dy:
+                continue
+            for index, members in enumerate(groups):
+                strength = freshness = 0.0
+                for group in members:
+                    when = self.cells.get(base + group)
+                    if when is not None:
+                        value = max(0.0, 1 - (world.tick - when) / self.lifetime)
+                        strength = (
+                            min(1.0, strength + value)
+                            if blended
+                            else max(strength, value)
+                        )
+                        freshness = max(freshness, value)
+                if strength:
+                    key = (strength, freshness, -(dx * dx + dy * dy), -cell)
+                    if best[index] is None or key > best[index][0]:
+                        best[index] = key, dx, dy
+        result = []
+        for patch in best:
+            if patch is None:
+                result.extend((0.0, 0.0, 0.0, 0.0))
+            else:
+                key, dx, dy = patch
+                hx, hy = DIRECTIONS[animal.heading]
+                forward, right = dx * hx + dy * hy, -dx * hy + dy * hx
+                distance = math.hypot(dx, dy)
+                result.extend((forward / distance, right / distance, key[0], key[1]))
+        return result
 
     def sample(self, world, animal, template, phase=None):
         """Sample the local scent field using the configured sensory contract."""

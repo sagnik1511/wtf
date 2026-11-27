@@ -340,7 +340,12 @@ class CudaTraining:
         """Only stock PPO/masked-PPO objectives and packed private Adam state."""
         # Exact types keep custom objectives and recurrent training on CPU.
         # pylint: disable=unidiomatic-typecheck
-        if type(brain) not in (PPOBrain, MaskablePPOBrain) or not cls.supports(brain):
+        if (
+            type(brain) not in (PPOBrain, MaskablePPOBrain)
+            or hasattr(brain, "auxiliary")
+            or hasattr(brain, "late")
+            or not cls.supports(brain)
+        ):
             return False
         names = ("learn", "_update", "objective", "_adam_step")
         if any(

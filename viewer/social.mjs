@@ -1,3 +1,5 @@
+import { compactLayout } from './input-layout.mjs';
+import { decodeCompact } from './compact-observations.mjs';
 // Decode saved collective inputs only; no live inference or hidden-world lookup.
 export const SOCIAL_ACTIONS = [
   'move_forward',
@@ -80,6 +82,19 @@ export function socialLabels(template = {}) {
   return names;
 }
 export function socialView(features, template, offset) {
+  if (template?.observation_version === 7) {
+    try {
+      const l = compactLayout(template),
+        d = decodeCompact(features, l, template);
+      return socialView(
+        d.features,
+        { ...template, observation_version: 5 },
+        l.rawSocial,
+      );
+    } catch {
+      return null;
+    }
+  }
   if (!socialWidth(template)) return null;
   const rows = (actions) =>
     actions.map((action) => {

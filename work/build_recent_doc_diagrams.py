@@ -14,6 +14,75 @@ from xml.etree import ElementTree as ET
 from work.build_doc_diagrams import ASSETS, ROOT, render
 
 FLOWS = {
+    "v7-late-consequence": (
+        "Compact V7 evidence reaches a private policy after the physical forward pass",
+        "docs/observations.md",
+        "opt-in-late-consequence-policy",
+        """flowchart TB
+  world["Current sensed state and personally observed history"] --> physical["Compact physical vector: numeric state, motion summaries, four-value scent"]
+  physical --> network["Own actor/critic forward pass; evidence excluded from trunk"]
+  network --> base["Base action logits and physical-state value"]
+  tables["Published species knowledge plus local witnesses"] --> evidence["Local, general and context evidence saved with this observation"]
+  evidence --> adapter["Own learned adapter: confidence-weighted rates and own hunger, health, readiness"]
+  physical --> adapter
+  adapter --> residual["Bounded residual per action; zero when evidence is unknown"]
+  base --> final["Add residual to action logits; existing mask only for masked PPO"]
+  residual --> final
+  final --> sample["Final probabilities: sample action and save its log probability"]
+  sample --> rollout["Own rollout: fixed evidence; prepare FP64 features once per update"]
+  rollout --> objective["Optional fused CPU minibatch: same final-policy loss and both gradients"]
+  objective --> gate{"Minibatch passes KL gate?"}
+  gate -->|No| skip["Skip actor, adapter and auxiliary updates"]
+  gate -->|Yes| commit["Commit own actor, adapter and optional auxiliary Adam updates"]
+  commit --> stored["Own champion weights; checkpoint also stores optimizers and RNG"]
+""",
+    ),
+    "v6-coefficient-reuse": (
+        "Exact V6 coefficient reuse with independent private learning",
+        "docs/performance.md",
+        "v6-semantic-encoding-and-auxiliary-work",
+        """flowchart TB
+  sensed["Current canonical V5 sensed values"] --> plan["Immutable plan: offsets and zero basis; 128 layouts"]
+  plan --> scalar["Scalar coefficients: value + knots + signed zero; LRU 4096"]
+  plan --> angle["Bearing coefficients: forward + right; LRU 2048"]
+  scalar --> own["Fresh exact V6 observation container for each animal"]
+  angle --> own
+  own --> policy["Own rollout, actor/critic, optimizer and RNG remain private"]
+  own --> confidence{"Published consequence confidence?"}
+  confidence -->|Zero| skip["Same zero auxiliary loss; skip decode and masked copy"]
+  confidence -->|Nonzero| decode["Indexed tail decode; reconstruction LRU 4096"]
+  decode --> auxiliary["Own auxiliary head; exclude all consequence input channels"]
+  auxiliary --> gate["Same gradient order and PPO KL gate"]
+  policy --> gate
+  gate --> artifacts["Same model state and compressed replay; no format change"]
+""",
+    ),
+    "collective-auxiliary": (
+        "Shared physical evidence, durable totals and independent PPO outcome heads",
+        "docs/social-learning.md",
+        "auxiliary-outcome-prediction-for-private-ppo-brains",
+        """flowchart TB
+  subgraph species["One exact species: shared outcome counts, no policy parameters"]
+    evidence["Finished physical-outcome windows"] --> contexts["Bounded LRU: context rows"]
+    evidence --> totals["Persistent totals: 12 actions x 4 counts; not evicted"]
+    contexts --> publication["Published context and general estimates; episode gate when configured"]
+    totals --> publication
+  end
+  subgraph animal["One animal: private weights, buffers, Adam and RNG; another animal owns another copy"]
+    own["Own observation and on-policy action/reward/log probability"] --> rollout["Own PPO rollout, GAE and clipped objective"]
+    rollout --> kl{"Minibatch passes KL gate?"}
+    kl -->|No| skip["Skip both updates; clear rollout as usual"]
+    own --> strip["Auxiliary inputs: zero every consequence-estimate field"]
+    strip --> prediction["Own hidden trunk plus private 36-output outcome head"]
+    prediction --> loss["Confidence-weighted physical-outcome prediction loss"]
+    kl -->|Yes| loss
+    publication -->|Own saved sample targets| loss
+    loss --> commit["Accepted commit: own PPO gradients plus auxiliary trunk gradients; private head Adam"]
+    commit --> policy["Own actor/critic outputs for future decisions"]
+    commit --> storage["Champion: policy + head weights; checkpoint also stores both optimizers and RNG"]
+  end
+""",
+    ),
     "cuda-dqn-dataflow": (
         "DQN and DDQN: reducing host work and GPU memory traffic",
         "docs/cuda.md",

@@ -1,3 +1,12 @@
+import { decodeCompact } from './compact-observations.mjs';
+import { semanticLayout, compactLayout } from './input-layout.mjs';
+import { decodeSoft } from './soft-observations.mjs';
+import {
+  BASE_WIDTHS,
+  BODY_SECTORS,
+  worldVector,
+  worldScent,
+} from './observation-v5.mjs';
 import { socialWidth } from './social.mjs';
 // Decode only the selected agent's sampled inputs; never reconstruct hidden paths.
 export const SCENT_SECTORS = [
@@ -98,30 +107,68 @@ export function trackingLabels(template) {
             names.push(`${prefix} lag ${lag} ${part}`);
       }
   for (const { species, sex, blended } of layout.channels)
-    for (const side of SCENT_SECTORS)
+    for (const side of template.observation_version === 5
+      ? BODY_SECTORS
+      : SCENT_SECTORS)
       names.push(
         blended ? `Scent blended ${side}` : `Scent ${species} ${sex} ${side}`,
       );
+  if (template.observation_version === 5)
+    return names.map((n) =>
+      n.startsWith('Prey track ') || n.startsWith('Predator track ')
+        ? n
+            .replace('last dx', 'last forward')
+            .replace('last dy', 'last right')
+            .replace('velocity x', 'velocity forward')
+            .replace('velocity y', 'velocity right')
+            .replace(' dx', ' forward')
+            .replace(' dy', ' right')
+        : n,
+    );
   return names;
 }
 
 export function trackingView(features, template, offset) {
+  if (template?.observation_version === 7) {
+    try {
+      const d = decodeCompact(features, compactLayout(template), template);
+      const view = trackingView(
+        d.features,
+        { ...template, observation_version: 5 },
+        48 + 12 * ((template.observation_top_k ?? 1) - 1),
+      );
+      if (view) {
+        view.scent = [];
+        view.summary = true;
+      }
+      return view;
+    } catch {
+      return null;
+    }
+  }
+
   const layout = trackingLayout(template);
   if (!layout) return null;
   const tracks = [];
   if (layout.steps)
     for (const category of ['prey', 'predator'])
       for (let slot = 1; slot <= layout.k; slot++) {
-        const [dx, dy, vx, vy, age, confidence, visible] = features.slice(
+        let [dx, dy, vx, vy, age, confidence, visible] = features.slice(
           offset,
           offset + 7,
         );
         offset += 7;
         const history = [];
         for (let lag = 1; lag <= layout.steps; lag++) {
-          const [x, y, seen] = features.slice(offset, offset + 3);
+          let [x, y, seen] = features.slice(offset, offset + 3);
           offset += 3;
+          if (template.observation_version === 5)
+            [x, y] = worldVector(x, y, features.slice(2, 4));
           history.push({ lag, dx: x, dy: y, seen: seen > 0 });
+        }
+        if (template.observation_version === 5) {
+          [dx, dy] = worldVector(dx, dy, features.slice(2, 4));
+          [vx, vy] = worldVector(vx, vy, features.slice(2, 4));
         }
         if (confidence > 0)
           tracks.push({
@@ -138,7 +185,9 @@ export function trackingView(features, template, offset) {
           });
       }
   const scent = layout.channels.map((channel) => {
-    const strengths = features.slice(offset, offset + 9);
+    let strengths = features.slice(offset, offset + 9);
+    if (template.observation_version === 5)
+      strengths = worldScent(strengths, features.slice(2, 4));
     offset += 9;
     return { ...channel, strengths };
   });
@@ -155,9 +204,53 @@ export function trackingSample(
   template,
   radius,
 ) {
+  if (template?.observation_version === 7) {
+    try {
+      const d = decodeCompact(
+        diagnostic.features,
+        compactLayout(template),
+        template,
+      );
+      const value = trackingSample(
+        frames,
+        localIndex,
+        animalId,
+        { ...diagnostic, features: d.features },
+        { ...template, observation_version: 5 },
+        radius,
+      );
+      if (value) {
+        value.scent = [];
+        value.summary = true;
+      }
+      return value;
+    } catch {
+      return null;
+    }
+  }
+  if (template?.observation_version === 6) {
+    try {
+      const layout = semanticLayout(template);
+      if (
+        !Array.isArray(diagnostic?.features) ||
+        diagnostic.features.length !== layout.width
+      )
+        return null;
+      return trackingSample(
+        frames,
+        localIndex,
+        animalId,
+        { ...diagnostic, features: decodeSoft(diagnostic.features, layout) },
+        { ...template, observation_version: 5 },
+        radius,
+      );
+    } catch {
+      return null;
+    }
+  }
   const layout = trackingLayout(template ?? {});
   const base =
-    { 1: 20, 2: 32, 3: 42, 4: 45 }[template?.observation_version ?? 1] +
+    BASE_WIDTHS[template?.observation_version ?? 1] +
     12 * ((template?.observation_top_k ?? 1) - 1);
   if (
     !layout?.width ||

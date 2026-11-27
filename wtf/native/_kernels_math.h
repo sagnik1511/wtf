@@ -1040,3 +1040,311 @@ done:
     release(views, 4);
     return result;
 }
+
+/* Same per-sample arithmetic and gradient order as the Python late PPO path.
+   Immutable evidence features are prepared once per owning rollout; all buffers
+   and scratch belong to this call. Adam and KL acceptance stay in Python. */
+static PyObject *late_ppo_batch_native(PyObject *self, PyObject *args) {
+    PyObject *layers, *grads, *wobj, *gobj, *samples;
+    double clip, ec, vc, bound;
+    if (!PyArg_ParseTuple(args, "OOOOOdddd", &layers, &grads, &wobj, &gobj,
+                          &samples, &clip, &ec, &vc, &bound))
+        return NULL;
+    if (!PyList_Check(samples) || !PyList_GET_SIZE(samples) ||
+        !isfinite(bound) || bound <= 0 || bound > 10) {
+        PyErr_SetString(PyExc_ValueError, "Invalid late PPO batch or bound");
+        return NULL;
+    }
+    PyObject *first = PyList_GET_ITEM(samples, 0);
+    if (!PyTuple_Check(first) || PyTuple_GET_SIZE(first) != 7) {
+        PyErr_SetString(PyExc_ValueError, "Invalid late PPO sample");
+        return NULL;
+    }
+    Py_ssize_t n = PySequence_Size(PyTuple_GET_ITEM(first, 0)), count = 0,
+               total = 0, maximum = 0;
+    if (n < 0)
+        return NULL;
+    DenseRow *rows = dense_rows(layers, grads, n, &count, &total, &maximum);
+    if (!rows)
+        return NULL;
+    Py_buffer head[2] = {{0}}, *feature_views = NULL;
+    Py_ssize_t batch_size = PyList_GET_SIZE(samples);
+    double *tape = NULL, *scratch = NULL, *values = NULL, totals[5] = {0};
+    PyObject *result = NULL;
+    Py_ssize_t m = rows[count - 1].m, a = m - 1, f = 0;
+    if (a < 1) {
+        PyErr_SetString(PyExc_ValueError, "Late PPO needs an action");
+        goto done;
+    }
+    if (!buffer(wobj, head, 'f', 0) || !buffer(gobj, head + 1, 'd', 1))
+        goto done;
+    f = size(head) / a;
+    if (f < 1 || size(head) % a || !length(head + 1, size(head))) {
+        if (!PyErr_Occurred())
+            PyErr_SetString(PyExc_ValueError, "Invalid late head dimensions");
+        goto done;
+    }
+    if (batch_size > PY_SSIZE_T_MAX / (Py_ssize_t)sizeof(Py_buffer)) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    feature_views = PyMem_Calloc(batch_size, sizeof(Py_buffer));
+    if (!feature_views) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    /* Validate all shapes/numeric features before modifying either gradient. */
+    for (Py_ssize_t s = 0; s < PyList_GET_SIZE(samples); s++) {
+        PyObject *sample = PyList_GET_ITEM(samples, s);
+        if (!PyTuple_Check(sample) || PyTuple_GET_SIZE(sample) != 7 ||
+            PySequence_Size(PyTuple_GET_ITEM(sample, 0)) != n) {
+            PyErr_SetString(PyExc_ValueError, "Invalid late PPO sample shape");
+            goto done;
+        }
+        Py_ssize_t action = PyLong_AsSsize_t(PyTuple_GET_ITEM(sample, 1));
+        if (PyErr_Occurred())
+            goto done;
+        if (action < 0 || action >= a) {
+            PyErr_SetString(PyExc_ValueError, "Invalid late PPO action");
+            goto done;
+        }
+        PyObject *mask = PyTuple_GET_ITEM(sample, 5),
+                 *features = PyTuple_GET_ITEM(sample, 6);
+        if (!PyTuple_Check(mask) || PyTuple_GET_SIZE(mask) != a) {
+            PyErr_SetString(PyExc_ValueError, "Invalid late PPO mask shape");
+            goto done;
+        }
+        if (!buffer(features, feature_views + s, 'd', 0) ||
+            !length(feature_views + s, size(head)))
+            goto done;
+        const double *feature_data = feature_views[s].buf;
+        for (Py_ssize_t j = 0; j < size(head); j++)
+            if (!isfinite(feature_data[j])) {
+                PyErr_SetString(PyExc_ValueError, "Nonfinite late feature");
+                goto done;
+            }
+        int valid = 0;
+        for (Py_ssize_t k = 0; k < a; k++) {
+            PyObject *flag = PyTuple_GET_ITEM(mask, k);
+            if (!PyBool_Check(flag)) {
+                PyErr_SetString(PyExc_ValueError, "Invalid late PPO mask flag");
+                goto done;
+            }
+            valid |= flag == Py_True;
+        }
+        if (!valid) {
+            PyErr_SetString(PyExc_ValueError, "Empty late PPO mask");
+            goto done;
+        }
+    }
+    tape = PyMem_Calloc(total, sizeof(double));
+    scratch = PyMem_Calloc(4 * maximum, sizeof(double));
+    values = PyMem_Calloc(a, sizeof(double));
+    if (!tape || !scratch || !values) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    double *delta = scratch + 2 * maximum, *previous = delta + maximum;
+    const float *weights = head[0].buf;
+    double *grad = head[1].buf;
+    for (Py_ssize_t s = 0; s < PyList_GET_SIZE(samples); s++) {
+        PyObject *sample = PyList_GET_ITEM(samples, s),
+                 *mask = PyTuple_GET_ITEM(sample, 5);
+        const double *features = feature_views[s].buf;
+        if (!fill_sequence(PyTuple_GET_ITEM(sample, 0), tape, n))
+            goto done;
+        Py_ssize_t action = PyLong_AsSsize_t(PyTuple_GET_ITEM(sample, 1));
+        double old = PyFloat_AsDouble(PyTuple_GET_ITEM(sample, 2)),
+               adv = PyFloat_AsDouble(PyTuple_GET_ITEM(sample, 3)),
+               target = PyFloat_AsDouble(PyTuple_GET_ITEM(sample, 4));
+        if (PyErr_Occurred())
+            goto done;
+        dense_forward(rows, count, tape, 0, m);
+        for (Py_ssize_t k = 0; k < a; k++) {
+            const double *row = features + k * f;
+            FloatSum sum = {0};
+            for (Py_ssize_t j = 0; j < f; j++)
+                sum_add(&sum, (double)weights[k * f + j] * row[j]);
+            values[k] = tanh(sum_finish(sum));
+            tape[total - m + k] += bound * values[k];
+            if (PyTuple_GET_ITEM(mask, k) != Py_True)
+                tape[total - m + k] = -1e30;
+        }
+        double info[5], loss;
+        if (!ppo_derivative(tape + total - m, m, action, old, adv, target, clip,
+                            ec, vc, delta, info, scratch, &loss))
+            goto done;
+        for (Py_ssize_t k = 0; k < a; k++) {
+            if (PyTuple_GET_ITEM(mask, k) != Py_True)
+                delta[k] = 0.0;
+            double scale = delta[k] * bound * (1 - values[k] * values[k]);
+            const double *row = features + k * f;
+            for (Py_ssize_t j = 0; j < f; j++)
+                grad[k * f + j] += scale * row[j];
+        }
+        for (Py_ssize_t j = count; j-- > 0;) {
+            DenseRow *r = rows + j;
+            double *x = tape + r->offset, *dw = r->dw.buf, *db = r->db.buf;
+            const float *w = r->w.buf;
+            if (j)
+                memset(previous, 0, r->n * sizeof(double));
+            for (Py_ssize_t k = 0; k < r->m; k++) {
+                double d = delta[k];
+                db[k] += d;
+                for (Py_ssize_t i = 0; i < r->n; i++) {
+                    dw[k * r->n + i] += d * x[i];
+                    if (j)
+                        previous[i] += d * (double)w[k * r->n + i];
+                }
+            }
+            if (j)
+                for (Py_ssize_t i = 0; i < r->n; i++)
+                    delta[i] = previous[i] * (1.0 - x[i] * x[i]);
+        }
+        for (int k = 0; k < 5; k++)
+            totals[k] += info[k];
+    }
+    result = ppo_metrics(totals);
+done:
+    PyMem_Free(tape);
+    PyMem_Free(scratch);
+    PyMem_Free(values);
+    if (feature_views) {
+        for (Py_ssize_t s = 0; s < batch_size; s++)
+            if (feature_views[s].obj)
+                PyBuffer_Release(feature_views + s);
+        PyMem_Free(feature_views);
+    }
+    release(head, 2);
+    dense_release(rows, count);
+    return result;
+}
+
+/* Separate auxiliary batch preserves actor-then-auxiliary accumulation order.
+ */
+static PyObject *auxiliary_batch_native(PyObject *self, PyObject *args) {
+    PyObject *layers, *grads, *samples;
+    double coefficient;
+    if (!PyArg_ParseTuple(args, "OOOd", &layers, &grads, &samples,
+                          &coefficient))
+        return NULL;
+    if (!PyList_Check(samples) || !PyList_GET_SIZE(samples) ||
+        !isfinite(coefficient) || coefficient < 0) {
+        PyErr_SetString(PyExc_ValueError, "Invalid auxiliary batch");
+        return NULL;
+    }
+    PyObject *first = PyList_GET_ITEM(samples, 0);
+    if (!PyTuple_Check(first) || PyTuple_GET_SIZE(first) != 2) {
+        PyErr_SetString(PyExc_ValueError, "Invalid auxiliary sample");
+        return NULL;
+    }
+    Py_ssize_t n = PySequence_Size(PyTuple_GET_ITEM(first, 0)), count = 0,
+               total = 0, maximum = 0, batch = PyList_GET_SIZE(samples);
+    if (n < 0)
+        return NULL;
+    DenseRow *rows = dense_rows(layers, grads, n, &count, &total, &maximum);
+    if (!rows)
+        return NULL;
+    PyObject *result = NULL;
+    double *data = NULL, *tape = NULL, *scratch = NULL, loss = 0;
+    if (rows[count - 1].m != 36 || n > PY_SSIZE_T_MAX - 48 ||
+        batch > PY_SSIZE_T_MAX / (n + 48) / (Py_ssize_t)sizeof(double) ||
+        total > PY_SSIZE_T_MAX / (Py_ssize_t)sizeof(double) ||
+        maximum > PY_SSIZE_T_MAX / 2 / (Py_ssize_t)sizeof(double)) {
+        PyErr_SetString(PyExc_ValueError, "Invalid auxiliary dimensions");
+        goto done;
+    }
+    data = PyMem_Malloc(batch * (n + 48) * sizeof(double));
+    tape = PyMem_Calloc(total, sizeof(double));
+    scratch = PyMem_Calloc(2 * maximum, sizeof(double));
+    if (!data || !tape || !scratch) {
+        PyErr_NoMemory();
+        goto done;
+    }
+    /* Convert all observations and targets before any gradient write. */
+    for (Py_ssize_t s = 0; s < batch; s++) {
+        PyObject *sample = PyList_GET_ITEM(samples, s);
+        if (!PyTuple_Check(sample) || PyTuple_GET_SIZE(sample) != 2) {
+            PyErr_SetString(PyExc_ValueError, "Invalid auxiliary sample");
+            goto done;
+        }
+        double *dest = data + s * (n + 48);
+        if (!fill_sequence(PyTuple_GET_ITEM(sample, 0), dest, n))
+            goto done;
+        PyObject *targets = PySequence_Fast(PyTuple_GET_ITEM(sample, 1),
+                                            "Expected auxiliary targets");
+        if (!targets)
+            goto done;
+        if (PySequence_Fast_GET_SIZE(targets) != 12) {
+            Py_DECREF(targets);
+            PyErr_SetString(PyExc_ValueError, "Invalid auxiliary target count");
+            goto done;
+        }
+        int valid = 1;
+        for (Py_ssize_t a = 0; a < 12 && valid; a++)
+            valid = fill_sequence(PySequence_Fast_GET_ITEM(targets, a),
+                                  dest + n + 4 * a, 4);
+        Py_DECREF(targets);
+        if (!valid)
+            goto done;
+        for (Py_ssize_t i = 0; i < n + 48; i++)
+            if (!isfinite(dest[i])) {
+                PyErr_SetString(PyExc_ValueError, "Nonfinite auxiliary sample");
+                goto done;
+            }
+    }
+    double *delta = scratch, *previous = scratch + maximum;
+    Py_ssize_t covered = 0;
+    for (Py_ssize_t s = 0; s < batch; s++) {
+        double *input = data + s * (n + 48), *targets = input + n;
+        FloatSum confidence = {0};
+        for (Py_ssize_t a = 0; a < 12; a++)
+            sum_add(&confidence, targets[4 * a]);
+        if (!sum_finish(confidence))
+            continue;
+        covered++;
+        memcpy(tape, input, n * sizeof(double));
+        dense_forward(rows, count, tape, 0, 36);
+        double *outputs = tape + total - 36;
+        for (Py_ssize_t a = 0; a < 12; a++) {
+            double weight = targets[4 * a];
+            for (Py_ssize_t o = 0; o < 3; o++) {
+                double target = targets[4 * a + 1 + o],
+                       logit = outputs[3 * a + o];
+                double limited = fmax(-60.0, fmin(60.0, logit));
+                double probability = 1 / (1 + exp(-limited));
+                double scale = coefficient * weight / 36;
+                loss += scale * ((logit > 0 ? logit : 0) - logit * target +
+                                 log1p(exp(-fabs(logit))));
+                delta[3 * a + o] = scale * (probability - target);
+            }
+        }
+        for (Py_ssize_t j = count; j-- > 0;) {
+            DenseRow *r = rows + j;
+            double *x = tape + r->offset, *dw = r->dw.buf, *db = r->db.buf;
+            const float *w = r->w.buf;
+            if (j)
+                memset(previous, 0, r->n * sizeof(double));
+            for (Py_ssize_t k = 0; k < r->m; k++) {
+                double d = delta[k];
+                db[k] += d;
+                for (Py_ssize_t i = 0; i < r->n; i++) {
+                    dw[k * r->n + i] += d * x[i];
+                    if (j)
+                        previous[i] += d * (double)w[k * r->n + i];
+                }
+            }
+            if (j)
+                for (Py_ssize_t i = 0; i < r->n; i++)
+                    delta[i] = previous[i] * (1.0 - x[i] * x[i]);
+        }
+    }
+    result = Py_BuildValue("{s:d,s:n}", "auxiliary_loss", loss,
+                           "auxiliary_coverage", covered);
+done:
+    PyMem_Free(data);
+    PyMem_Free(tape);
+    PyMem_Free(scratch);
+    dense_release(rows, count);
+    return result;
+}

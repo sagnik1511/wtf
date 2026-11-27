@@ -189,3 +189,17 @@ flags and hardware/workload limits, and the
 [V3 benchmark evidence](releases/0.0.2.30.md#kaggle-t4-optimizer-comparison) for
 timing and host RAM. Do not transfer these optimizer-placement recommendations to
 other learners or treat two available GPUs as a measured dual-GPU speedup.
+
+## Optional collective prediction
+
+Persistent species/action totals preserve general evidence across context-cache
+eviction. Enable `consequence_learning.persistent_action_totals` when that
+retention is desired; contextual capacity still bounds detailed memory.
+
+Private PPO/masked-PPO auxiliary outcome prediction is an experimental objective,
+not an adopted survival or reproduction calibration. The `0.1` coefficient in
+`land_bridge_collective` is a starting value for controlled comparisons, not a
+best-performing recommendation. Keep the observation-only preset as a baseline;
+limited matched checks do not establish a reliable held-out improvement. Do not
+combine changes to health, rewards, mating radius or populations when attributing
+an effect to this objective. See [semantics and comparison workflow](social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains).

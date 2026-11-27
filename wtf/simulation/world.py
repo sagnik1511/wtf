@@ -11,13 +11,18 @@ import random
 from collections import Counter, OrderedDict, defaultdict, deque
 from dataclasses import dataclass
 from wtf.native import kernels
+from wtf.simulation.compact_observations import compact_layout, encode_compact
 from wtf.simulation.actions import (
+    DIRECTIONS,
     WALK_OFFSETS,
     WALK_ACTIONS,
     MOVE_ACTIONS,
     ATTEMPT_ACTIONS,
 )
 from wtf.simulation.perception import SpatialIndex
+from wtf.simulation.vision import in_field, HALF_ANGLE_COS2
+from wtf.simulation.observations import encode_v5, opportunities
+from wtf.simulation.soft_observations import encode_soft
 from wtf.simulation.tracking import Tracking
 from wtf.simulation.social import SocialState, enabled as social_enabled
 from wtf.simulation.geography import Geography, resolve_map
@@ -25,7 +30,6 @@ from wtf.simulation.placement import place_adjacent_pairs
 from wtf.simulation.day_night import sunlight, effective_body
 
 
-DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
 VISIBILITY_CACHE_LIMIT = 2048
 _TRIAL_STATE_FIELDS = frozenset(
     (
@@ -704,7 +708,12 @@ class World:
                 for mate in buckets.get((a.species, opposite, bx, by), ()):
                     dx, dy = mate.x - a.x, mate.y - a.y
                     squared = dx * dx + dy * dy
-                    if squared > limit * limit:
+                    if squared > limit * limit or not in_field(
+                        a.position,
+                        mate.position,
+                        a.heading,
+                        body.get("field_of_view_degrees", 360),
+                    ):
                         continue
                     allowed = (
                         radius
@@ -773,7 +782,8 @@ class World:
         # Keep this ordered phase and its shared state together; splitting it only to
         # meet a count obscures the contract.
         # pylint: disable=too-many-branches
-        # pylint: disable=too-many-locals
+        # Keep versioned observation assembly in the established phase order.
+        # pylint: disable=too-many-locals,too-many-statements
         # This internal collaborator intentionally inspects the owning component's
         # private state.
         # pylint: disable=protected-access
@@ -803,15 +813,22 @@ class World:
             if self.geography and self.geography.water
             else 0
         )
-        if bonus:
+        degrees = body.get("field_of_view_degrees", 360)
+        forward = degrees != 360
+        if bonus or forward:
 
             def in_range(start, end, squared):
+                if forward and not in_field(start, end, a.heading, degrees):
+                    return False
                 if squared <= radius * radius:
                     return True
                 allowed = radius + min(bonus, self._water_sight_cells(start, end))
                 return squared <= allowed * allowed
 
             in_range._native_sight_range = (radius, bonus)
+            if forward:
+                in_range._native_sight_heading = DIRECTIONS[a.heading]
+                in_range._native_sight_cosine_squared = HALF_ANGLE_COS2[degrees]
             for index in (food, prey, predators):
                 features += index.nearest_many(
                     a,
@@ -819,7 +836,7 @@ class World:
                     self._perception_visible,
                     top_k,
                     in_range,
-                    (radius, bonus),
+                    (radius, bonus, a.heading, degrees) if forward else (radius, bonus),
                 )
         else:
             for index in (food, prey, predators):
@@ -850,12 +867,37 @@ class World:
             features += self._tracking.visual.observe(
                 a, self.tick, radius + bonus, top_k, history_steps, targets
             )
-        if "scent_observation" in template:
+        if "scent_observation" in template and version != 7:
             features += self._tracking.scent.sample(
                 self, a, template, self._scent_context
             )
-        if self._social is not None:
+        if version >= 5:
+            encode_v5(
+                features, template, a.heading, opportunities(self, a, occupied, body)
+            )
+        if self._social is not None and version != 7:
             features += self._social.observe(self, a, template)
+        if version == 7:
+            scent = (
+                self._tracking.scent.sample_compact(
+                    self, a, template, self._scent_context
+                )
+                if "scent_observation" in template
+                else ()
+            )
+            # Only physical/history scratch crosses the V5 projection. Scent and
+            # social evidence go straight into their final compact positions.
+            plan = compact_layout(template)
+            social = (
+                self._social.observe_compact(self, a, template, plan.actions)
+                if self._social is not None
+                else ()
+            )
+            features = encode_compact(
+                features, template, scent, layout=plan, social=social
+            )
+        if version == 6:
+            features = encode_soft(features, template)
         return tuple(features)
 
     def observe_all(self):

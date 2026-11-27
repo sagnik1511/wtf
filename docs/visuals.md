@@ -43,6 +43,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) | [champion-chaining-between-runs.svg](assets/diagrams/champion-chaining-between-runs.svg) |
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
+| [Collective auxiliary (SVG)](visual-previews/diagrams/collective-auxiliary-svg.md) | [collective-auxiliary.svg](assets/diagrams/collective-auxiliary.svg) |
 | [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [competition.svg](assets/diagrams/competition.svg) |
 | [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) | [cuda-dqn-dataflow.svg](assets/diagrams/cuda-dqn-dataflow.svg) |
 | [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) | [cuda-ppo-residency.svg](assets/diagrams/cuda-ppo-residency.svg) |
@@ -73,6 +74,8 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |
 | [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) | [trial-actor-batching.svg](assets/diagrams/trial-actor-batching.svg) |
 | [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) | [two-payloads-one-bounded-file-at-a-time.svg](assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg) |
+| [V6 coefficient reuse (SVG)](visual-previews/diagrams/v6-coefficient-reuse-svg.md) | [v6-coefficient-reuse.svg](assets/diagrams/v6-coefficient-reuse.svg) |
+| [V7 late consequence (SVG)](visual-previews/diagrams/v7-late-consequence-svg.md) | [v7-late-consequence.svg](assets/diagrams/v7-late-consequence.svg) |
 | [Weights versus exact state (SVG)](visual-previews/diagrams/weights-versus-exact-state-svg.md) | [weights-versus-exact-state.svg](assets/diagrams/weights-versus-exact-state.svg) |
 
 ## Map diagrams
@@ -157,7 +160,13 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) | [brain-views.svg](assets/viewer/brain-views.svg) |
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [day-night.svg](assets/viewer/day-night.svg) |
 | [Environment objects (SVG)](visual-previews/viewer/environment-objects-svg.md) | [environment-objects.svg](assets/viewer/environment-objects.svg) |
+| [Forward vision (SVG)](visual-previews/viewer/forward-vision-svg.md) | [forward-vision.svg](assets/viewer/forward-vision.svg) |
 | [Object shadows (SVG)](visual-previews/viewer/object-shadows-svg.md) | [object-shadows.svg](assets/viewer/object-shadows.svg) |
+| [Observation v5 v6 (SVG)](visual-previews/viewer/observation-v5-v6-svg.md) | [observation-v5-v6.svg](assets/viewer/observation-v5-v6.svg) |
+| [Observation v5 (SVG)](visual-previews/viewer/observation-v5-svg.md) | [observation-v5.svg](assets/viewer/observation-v5.svg) |
+| [Observation v6 layout (SVG)](visual-previews/viewer/observation-v6-layout-svg.md) | [observation-v6-layout.svg](assets/viewer/observation-v6-layout.svg) |
+| [Observation v6 (SVG)](visual-previews/viewer/observation-v6-svg.md) | [observation-v6.svg](assets/viewer/observation-v6.svg) |
+| [Observation v7 (SVG)](visual-previews/viewer/observation-v7-svg.md) | [observation-v7.svg](assets/viewer/observation-v7.svg) |
 | [River feeding (SVG)](visual-previews/viewer/river-feeding-svg.md) | [river-feeding.svg](assets/viewer/river-feeding.svg) |
 | [Social learning (SVG)](visual-previews/viewer/social-learning-svg.md) | [social-learning.svg](assets/viewer/social-learning.svg) |
 | [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) | [terrain-and-sight.svg](assets/viewer/terrain-and-sight.svg) |

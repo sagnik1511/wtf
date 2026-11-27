@@ -250,5 +250,32 @@
     "asset": "cuda-ppo-residency.svg",
     "nodes": 10,
     "edges": 12
+  },
+  {
+    "title": "Shared physical evidence, durable totals and independent PPO outcome heads",
+    "document": "docs/social-learning.md",
+    "anchor": "auxiliary-outcome-prediction-for-private-ppo-brains",
+    "source": "collective-auxiliary.mmd",
+    "asset": "collective-auxiliary.svg",
+    "nodes": 14,
+    "edges": 15
+  },
+  {
+    "title": "Exact V6 coefficient reuse with independent private learning",
+    "document": "docs/performance.md",
+    "anchor": "v6-semantic-encoding-and-auxiliary-work",
+    "source": "v6-coefficient-reuse.mmd",
+    "asset": "v6-coefficient-reuse.svg",
+    "nodes": 12,
+    "edges": 13
+  },
+  {
+    "title": "Compact V7 evidence reaches a private policy after the physical forward pass",
+    "document": "docs/observations.md",
+    "anchor": "opt-in-late-consequence-policy",
+    "source": "v7-late-consequence.mmd",
+    "asset": "v7-late-consequence.svg",
+    "nodes": 16,
+    "edges": 16
   }
 ]

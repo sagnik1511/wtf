@@ -30,6 +30,67 @@ encodings are unchanged: recorded episodes keep their original numbers, and
 existing viewer readers already support that subset. No older replay is deleted.
 See [selection rules](recording.md#record-only-the-final-scheduled-episodes).
 
+## Persistent consequence totals and private auxiliary heads
+
+Current source optionally reads logical consequence state v3, wrapping v1/v2
+context tables with fixed-size published/staged species/action totals. Legacy
+imports seed totals only from surviving rows; lost evidence cannot be recovered.
+Restoring v3 requires `persistent_action_totals: true`. Omission of this setting
+keeps legacy table exports and behavior. This logical version is separate from
+the experiment checkpoint envelope version and binary codec magic.
+
+PPO/masked-PPO `auxiliary_consequence` adds a versioned signature field and
+`auxiliary_parameters` in champion models; recovery state also stores private
+head optimizer arrays/counters. The actor's input/output layout is unchanged.
+Champions with and without the head are not silently interchangeable. Existing
+headless artifacts retain their readers. Use feature-aware source for the new
+configuration/state; published package 0.0.2.9 predates it. Replay frame formats
+remain compatible; optional diagnostic scalar fields may be ignored by old UI.
+See [collective learning](social-learning.md#persistent-speciesaction-totals).
+
+## Observation V6
+
+V6 expands already sensed V5 values into soft semantic memberships. Earlier
+versions remain supported without conversion. Both observation version and the
+resolved `soft_categories` knot lists enter model signatures. Different V6 knots
+are incompatible even when input widths agree; start with matching fresh weights.
+Checkpoints preserve the saved version/configuration, private optimizer/RNG and
+auxiliary state. The auxiliary output head's physical targets are unchanged.
+
+Replay codecs and exact world frames are unchanged. V6 sampled vectors are
+larger; their category-derived inspector reconstruction can saturate outside the
+configured bands and is labeled accordingly. Use the current viewer for semantic
+labels, categorical disclosures and sampled-heading projections. Older readers
+may show raw values or reject the new layout. See [V6 definitions](observations.md#observation-version-6).
+
+## Observation V5
+
+V5 uses body-relative spatial inputs and three additional immediate affordance
+values. Versions 1–4 keep their existing exact semantics. Model signatures include
+the observation version and width; V4/V5 weights are incompatible even with the
+same policy/layers/top-k. Do not edit metadata to bypass validation. Checkpoints
+retain their saved version, private optimizer/RNG, history and consequence state.
+
+Replay codecs are unchanged: sampled features carry the configured layout in
+recording metadata. Use the current viewer to read V5. Raw labels show
+forward/right; the sampled radar, movement history and scent maps project through
+the recorded heading back into north-up world coordinates. An older viewer may
+show raw values or reject the unknown layout. See [V5 definitions](observations.md#observation-version-5).
+
+## Optional forward vision
+
+`species.<name>.body.field_of_view_degrees` accepts 150, 180 or 360; omission keeps
+legacy 360° sight. No observation width, policy signature or per-frame replay
+field is added. The body setting is saved once in experiment/replay metadata;
+use the current viewer for the correct forward-field overlay. Older strict source
+or package validators reject the new configuration field. Existing recordings
+without it retain the original appearance and full visual range rules.
+
+The field changes perception, not physical movement or mating. Compatible policy
+weights may be reused, but performance under 360° does not establish performance
+under 150° or 180°. Consequence knowledge uses an exact physical/body contract and
+rejects a mismatching visual-field setting. See [observation semantics](observations.md#forward-visual-field).
+
 ## Python runtime
 
 The `ecosystem` → `wtf` import migration changes Python paths, not artifact formats. See the [complete import map](package-layout.md#migrate-existing-imports); old namespace aliases are not shipped.
@@ -60,7 +121,7 @@ limited to the runtimes actually tested. See [package verification](packaging.md
 | Experiment checkpoint | Legacy logical state v1 JSON; compact `wtf-checkpoint-v2` envelope; binary checkpoint envelopes v3 (standalone) and v4 (optional shared metadata), inside supported plain/gzip/XZ transport | Decoders normalize to logical state v1; controllers/configuration must still be supported |
 | Champion brain | `brain_artifact_version` 1, 2 and 3; library manifests 1 and 2 | v3 metadata references binary/XZ weights; older readers do not necessarily support it |
 | Replay | `recording_version: 1`, legacy full JSON chunks, `wtf-delta-v1` chunks and current structured binary chunks, with supported none/gzip/XZ compression | Current binary magic is `WTFB` codec v1; keep the recording manifest, chunks and run metadata together |
-| Brain inputs | Supported observation versions 1–4 with configured top-k | Algorithm, architecture, action order, observation version/top-k, optional movement/scent layout and other signature fields must match |
+| Brain inputs | Supported observation versions 1–6 with configured top-k | Algorithm, architecture, action order, observation version/top-k, optional movement/scent layout and other signature fields must match |
 
 Use the loader appropriate to the artifact. A checkpoint restores world,
 controllers, optimizer state, buffers and RNGs. A champion initializes weights
@@ -174,3 +235,13 @@ before returning to world consumers. `--cuda-optimizer cpu` keeps the host-optim
 comparison path; this transient option is not serialized. Rebuild native CPU kernels
 to enable the exact bulk FP32 gradient-widening helper. Existing CPU extensions
 without the helper retain the previous conversion fallback.
+
+
+## Compact V7 models
+
+Observation V7 has distinct numeric summaries, an ordered species-action contract,
+and optional late-consequence adapter metadata. Changing version, action order,
+summary settings or enabling the adapter requires matching weights. V1–V6
+readers and saved artifacts remain supported. V7 champions retain the adapter's
+weights; checkpoints additionally retain its private Adam moments/counter and
+unchanged sampled evidence. No legacy replay or checkpoint migration is needed.

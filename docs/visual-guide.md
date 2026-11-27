@@ -19,8 +19,15 @@ local regeneration. Physics SVGs and animated vector demonstrations are ordinary
 | Where do Python and JavaScript meet? | [Runtime boundaries](architecture.md#runtime-boundaries) |
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
 | How are input fields packed into the vector? | [Contiguous blocks and repeated slots](observations.md#input-layout) |
+| How does compact V7 use scent and consequences? | [Input contract](observations.md#observation-version-7) and [viewer specimen](viewer-visual-reference.md#compact-v7-and-late-consequence-adjustment) |
+| What changed in the data from V5 to V6? | [Side-by-side values, flags and channel counts](observations.md#what-changed-from-v5-to-v6) |
+| How is the V6 input vector arranged? | [Ordered input blocks and target-slot expansion](observations.md#v6-input-layout) |
+| How do V6 soft categories look? | [Semantic layout](observations.md#observation-version-6) and [inspector example](viewer-visual-reference.md#observation-v6) |
+| How does V5 encode what the animal senses? | [Layout](observations.md#observation-version-5) and [inspector appearance](viewer-visual-reference.md#observation-v5) |
+| How does forward 150°/180° vision change sight and inspector overlays? | [Field rules](observations.md#forward-visual-field) and [appearance](viewer-visual-reference.md#forward-vision) |
 | Which visible targets enter the brain? | [Top-k input pipeline](observations.md#visible-target-slots) |
 | How does CUDA avoid repeated work and transfers? | [DQN/DDQN data flow and PPO residency](cuda.md#where-the-cuda-path-saves-work) |
+| How do shared outcomes train private brains without mixing PPO trajectories? | [Durable totals and private auxiliary heads](social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains) |
 | How does an animal learn? | [Private learning loop](algorithms.md#private-learning-loop) |
 | How do GRPO trials avoid changing the real world? | [Trial isolation](algorithms.md#grpo-trial-isolation) |
 | What does recurrent memory do? | [Recurrent state](advanced-algorithms.md#recurrent-decision-state) |
@@ -128,3 +135,8 @@ light/dark symbol. The landing-page banner switches between forest-on-sage and
 pale-mint-on-forest variants with the site toggle and scales to narrow screens.
 The header home-link symbol and the viewer's recording-loading indicator
 respect reduced-motion preferences.
+
+
+The [V6 coefficient reuse diagram](performance.md#v6-semantic-encoding-and-auxiliary-work)
+shows bounded immutable numeric sharing and private learner ownership, including
+the no-evidence auxiliary shortcut. It uses the same light/dark flow styles.

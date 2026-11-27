@@ -11,6 +11,9 @@ from operator import mul
 from typing import NamedTuple, Optional
 from wtf.learning.activation_diagnostics import activation_sample
 from wtf.simulation.tracking import tracking_width
+from wtf.simulation.observations import BASE_WIDTHS
+from wtf.simulation.soft_observations import soft_layout
+from wtf.simulation.compact_observations import compact_layout
 from wtf.simulation.social import social_width
 from wtf.native import kernels
 from wtf.native.kernels import gradient_zeros
@@ -25,9 +28,11 @@ INTENT_INPUTS = 45
 
 def observation_inputs(config):
     """Compute the observation width required by the brain contract."""
-    base = {1: INPUTS, 2: TERRAIN_INPUTS, 3: MATING_INPUTS, 4: INTENT_INPUTS}[
-        config.get("observation_version", 1)
-    ]
+    if config.get("observation_version", 1) == 7:
+        return compact_layout(config).width
+    if config.get("observation_version", 1) == 6:
+        return soft_layout(config).width
+    base = BASE_WIDTHS[config.get("observation_version", 1)]
     return (
         base
         + 12 * (config.get("observation_top_k", 1) - 1)

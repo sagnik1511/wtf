@@ -9,6 +9,7 @@ import heapq
 import math
 
 from wtf.simulation.actions import ACTIONS, MOVE_ACTIONS
+from wtf.simulation.vision import in_field
 from wtf.learning.consequences import Consequences
 
 GROUPS = ("walk", "swim", "feed", "combat", "reproduce", "idle")
@@ -62,7 +63,7 @@ def consequence_scope(template):
 
 
 def social_width(template):
-    """Compute the optional social and consequence input width."""
+    """Compute canonical optional width before the V6 semantic projection."""
     scope = consequence_scope(template)
     return (24 if social_contract(template) is not None else 0) + (
         48 * (2 if scope == "both" else 1)
@@ -113,7 +114,9 @@ def _can_see(world, observer, target):
     # state.
     # pylint: disable=protected-access
 
-    x, y, radius, bonus = observer
+    x, y, radius, bonus, heading, degrees = observer
+    if not in_field((x, y), target, heading, degrees):
+        return False
     dx, dy = target[0] - x, target[1] - y
     if dx * dx + dy * dy > (radius + bonus) ** 2:
         return False
@@ -130,7 +133,14 @@ def _sight(world, animal):
         if world.geography and world.geography.water
         else 0
     )
-    return animal.x, animal.y, body["vision_radius"], bonus
+    return (
+        animal.x,
+        animal.y,
+        body["vision_radius"],
+        bonus,
+        animal.heading,
+        body.get("field_of_view_degrees", 360),
+    )
 
 
 def _depth_bin(depth):
@@ -382,7 +392,7 @@ class SocialState:
                 if dead:
                     del self.pending[animal_id]
 
-    def observe(self, world, animal, template):
+    def observe(self, world, animal, template, *, actions=None):
         """Append only the configured local social and consequence features."""
         features = []
         contract = social_contract(template)
@@ -398,10 +408,37 @@ class SocialState:
                     *(v / n if n else 0.0 for v in totals[i + 1 : i + 4]),
                 ]
         if template.get("consequence_observation", False):
-            features += self._consequence_features(world, animal, template)
+            features += (
+                self._consequence_features(world, animal, template)
+                if actions is None
+                else self._consequence_features(
+                    world, animal, template, actions=actions
+                )
+            )
         return features
 
-    def _consequence_features(self, world, animal, template):
+    def observe_compact(self, world, animal, template, actions):
+        """Emit only the requested V7 action rows; preserve custom observation hooks."""
+        if (
+            getattr(self.observe, "__func__", None) is _STOCK_OBSERVE
+            and getattr(self._consequence_features, "__func__", None)
+            is _STOCK_CONSEQUENCES
+            and all(
+                getattr(getattr(self.knowledge, name), "__func__", None) is method
+                for name, method in _STOCK_PREDICTIONS.items()
+            )
+        ):
+            return self.observe(world, animal, template, actions=actions)
+        values = self.observe(world, animal, template)
+        start = 24 if template.get("social_observation") is not None else 0
+        result = values[:start]
+        for block in range(start, len(values), 48):
+            for action in actions:
+                offset = block + 4 * ACTIONS.index(action)
+                result.extend(values[offset : offset + 4])
+        return result
+
+    def _consequence_features(self, world, animal, template, *, actions=None):
         """General block first in combined mode; each retains its own confidence."""
         allowed = world.config["species"][animal.species]["allowed_actions"]
         scope = template.get("consequence_scope", "context")
@@ -411,11 +448,24 @@ class SocialState:
         )
         features = []
         for lookup in scopes:
-            for index, action in enumerate(ACTIONS):
+            general = (
+                self.knowledge.action_rates(animal.species)
+                if actions is not None
+                and lookup == "species_action"
+                and getattr(self.knowledge.predict_action, "__func__", None)
+                is _STOCK_PREDICT_ACTION
+                else None
+            )
+            for action in ACTIONS if actions is None else actions:
+                index = ACTIONS.index(action)
                 if action not in allowed:
                     features += [0.0] * 4
                 elif lookup == "species_action":
-                    features += self.knowledge.predict_action(animal.species, index)
+                    features += (
+                        general[index]
+                        if general is not None
+                        else self.knowledge.predict_action(animal.species, index)
+                    )
                 else:
                     features += self.knowledge.predict(
                         animal.species, _context(world, animal, action, local)
@@ -537,3 +587,15 @@ class SocialState:
             for i, (name, totals, queue) in state["pending"].items()
         }
         return result
+
+
+# Custom class/instance providers retain their original call contract.
+_STOCK_OBSERVE = SocialState.observe
+# Capture our own class implementation solely to preserve extension dispatch.
+# pylint: disable-next=protected-access
+_STOCK_CONSEQUENCES = SocialState._consequence_features
+_STOCK_PREDICT_ACTION = Consequences.predict_action
+_STOCK_PREDICTIONS = {
+    name: getattr(Consequences, name)
+    for name in ("predict", "predict_action", "action_rates")
+}

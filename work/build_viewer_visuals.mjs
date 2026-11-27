@@ -1,4 +1,15 @@
 #!/usr/bin/env node
+import {
+  observationLayout,
+  observationComparison,
+  compactPolicyVisual,
+} from './build_observation_layout.mjs';
+import {
+  semanticLayout,
+  rawInputLabels,
+  compactLayout,
+} from '../viewer/input-layout.mjs';
+import { decodeSoft } from '../viewer/soft-observations.mjs';
 import { buildDocAnimations } from './build_doc_animations.mjs';
 import { drawFeedings } from '../viewer/feeding-highlights.mjs';
 import {
@@ -200,6 +211,7 @@ function board({
   tick = 0,
   tracking = null,
   reduced = false,
+  fieldOfView = 360,
 } = {}) {
   const canvas = new SVGCanvas(width * 48, height * 48),
     terrain = terrainView(definition),
@@ -211,7 +223,18 @@ function board({
       animals,
       resources,
       obstacles,
-      species: baseSpecies,
+      species:
+        fieldOfView === 360
+          ? baseSpecies
+          : Object.fromEntries(
+              Object.entries(baseSpecies).map(([name, spec]) => [
+                name,
+                {
+                  ...spec,
+                  body: { ...spec.body, field_of_view_degrees: fieldOfView },
+                },
+              ]),
+            ),
       resource_capacity: 20,
       contest_highlights: contests,
       birth_highlights: births,
@@ -1435,7 +1458,285 @@ const socialLearning = sheet(
     )
     .join(''),
 );
+const forwardBoards = ['North', 'East', 'South', 'West']
+  .map((name, heading) => {
+    const x = 28 + heading * 288;
+    return (
+      box(x, 95, 268, 320) +
+      text(x + 16, 124, `Facing ${name}`, 18) +
+      `<g transform="translate(${x + 24} 144) scale(.65)">${board({ width: 7, height: 5, fieldOfView: 180, selected: 0, sight: true, animals: [animal('prey', 'female', heading, 0, 3, 2), animal('predator', 'male', 3, 1, 5, 2), animal('prey', 'male', 1, 2, 1, 2)], resources: [{ x: 4, y: 1, quantity: 20 }] })}</g>` +
+      lines(
+        x + 16,
+        350,
+        [
+          'Blue cells = selected visual field.',
+          'Overview still shows all bodies.',
+        ],
+        13,
+      )
+    );
+  })
+  .join('');
+const forwardRadars = [360, 180, 150]
+  .map((degrees, index) => {
+    const vector = [
+      0.6,
+      0.85,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      ...(degrees === 360 ? [-0.5, 0, 0.5, 1] : [0, 0, 0, 0]),
+      0.25,
+      0,
+      0.25,
+      1,
+      ...(degrees === 360
+        ? [-0.5, -0.25, Math.hypot(0.5, 0.25), 1]
+        : [0, 0, 0, 0]),
+    ];
+    const tree = inspectorGraphs({
+      diagnostic: {
+        tick: 10,
+        features: vector,
+        action_probabilities: { rest: 1 },
+      },
+      template: { observation_version: 1 },
+      spec: { body: { vision_radius: 4, field_of_view_degrees: degrees } },
+      hasWater: false,
+    });
+    const plot = walk(tree).find((node) => node.tagName === 'svg');
+    const x = 28 + index * 390;
+    return (
+      box(x, 435, 368, 310) +
+      text(x + 16, 465, `${degrees}° radar · facing east`, 17) +
+      component(plot, x + 16, 488, 336, 240)
+    );
+  })
+  .join('');
+const forwardVision = sheet(
+  'Forward visual fields',
+  'Current board and inspector renderers · controlled states · scent and remembered sightings remain separate',
+  770,
+  forwardBoards +
+    forwardRadars +
+    `<style>@media(prefers-color-scheme:light){[fill='#8ac8ff22']{fill:#2d78b82e}}</style>`,
+);
+const v5Example = Array(48).fill(0);
+v5Example.splice(0, 4, 0.15, 1, 1, 0);
+v5Example.splice(12, 4, 1 / 11, -1 / 11, Math.SQRT2 / 11, 1);
+v5Example.splice(45, 3, 0, 0, 0);
+const v5Tree = inspectorGraphs({
+  diagnostic: {
+    tick: 10,
+    features: v5Example,
+    action_probabilities: {
+      move_forward: 0.2,
+      turn_left: 0.4,
+      turn_right: 0.1,
+      rest: 0.05,
+      attack: 0.15,
+      reproduce: 0.05,
+      swim: 0.05,
+    },
+  },
+  template: { observation_version: 5 },
+  spec: {
+    body: {
+      vision_radius: 8,
+      water_vision_bonus: 3,
+      field_of_view_degrees: 150,
+    },
+  },
+  hasWater: true,
+});
+const v5Radar = walk(v5Tree).find((node) => node.tagName === 'svg');
+const v5Structure = sheet(
+  'Observation V5: body-relative inputs, world-relative diagrams',
+  'Controlled input/renderer demonstration; example probabilities are authored, not experimental results',
+  660,
+  box(28, 95, 545, 225) +
+    text(48, 125, 'V4 · world-axis target vector', 22) +
+    lines(
+      48,
+      164,
+      [
+        'Heading: east',
+        'Prey: dx = 1/11, dy = -1/11',
+        'The network combines heading and position.',
+        'Base width: 45 + 12 × (k − 1)',
+      ],
+      17,
+    ) +
+    box(28, 344, 545, 285) +
+    text(48, 376, 'V5 · forward/right target vector', 22) +
+    lines(
+      48,
+      417,
+      [
+        'Same prey: forward = 1/11, right = -1/11',
+        'Negative right means left of the animal.',
+        'Attack / eat / swim opportunities: 0 / 0 / 0',
+        'Base width: 48 + 12 × (k − 1)',
+        'Optional memory and scent rotate consistently.',
+        'Brains remain independent; PPO is unmasked.',
+      ],
+      17,
+    ) +
+    box(601, 95, 571, 534) +
+    text(625, 132, 'Agent inspector · facing east', 22) +
+    component(v5Radar, 650, 170, 470, 326) +
+    lines(
+      625,
+      550,
+      [
+        'Raw features use forward/right labels.',
+        'Radar, history and scent diagrams face north.',
+        'The selected board overlay keeps world geometry.',
+      ],
+      16,
+    ),
+);
+const v6Template = { observation_version: 6 };
+const v6Layout = semanticLayout(v6Template),
+  v6Values = Array(v6Layout.width).fill(0);
+for (const field of v6Layout.fields) {
+  const values =
+    field.label === 'Energy'
+      ? [0, 0.7, 0.3, 0]
+      : field.label === 'Health'
+        ? [0, 0.2, 0.8]
+        : field.label === 'Heading x'
+          ? [1]
+          : field.label === 'Prey 1'
+            ? [0.7, 0.3, 0, 0.2, 0, 0, 0, 0, 0, 0, 0.8]
+            : field.label === 'Prey 1 present'
+              ? [1]
+              : null;
+  if (values) values.forEach((v, i) => (v6Values[field.offset + i] = v));
+}
+const v6Tree = inspectorGraphs({
+  diagnostic: {
+    tick: 10,
+    features: v6Values,
+    action_probabilities: { rest: 0.5, attack: 0.5 },
+  },
+  template: v6Template,
+  spec: {
+    body: {
+      vision_radius: 8,
+      water_vision_bonus: 3,
+      field_of_view_degrees: 150,
+    },
+  },
+  hasWater: true,
+});
+const v6Radar = walk(v6Tree).find((node) => node.tagName === 'svg');
+const softRows = [
+  ['Energy', ['critical', 'hungry', 'comfortable', 'full'], [0, 0.7, 0.3, 0]],
+  ['Prey 1 range', ['near', 'medium', 'far'], [0.7, 0.3, 0]],
+  ['Prey 1 bearing', ['front', 'front-left'], [0.2, 0.8]],
+  ['Health', ['critical', 'weak', 'healthy'], [0, 0.2, 0.8]],
+];
+const v6Diagram = sheet(
+  'Observation V6: overlapping semantic memberships',
+  'Authored category example using the current V6 decoder and inspector; no experimental predictions',
+  660,
+  box(28, 95, 545, 534) +
+    text(48, 130, 'What the independent brain receives', 22) +
+    softRows
+      .map(([name, labels, values], i) => {
+        const y = 174 + i * 95;
+        return (
+          text(48, y, name, 18) +
+          labels
+            .map((label, j) => {
+              const x = 48 + j * 125;
+              return (
+                `<rect x="${x}" y="${y + 12}" width="110" height="16" rx="3" fill="#263341"/><rect x="${x}" y="${y + 12}" width="${values[j] * 110}" height="16" rx="3" fill="#7de2bd"/>` +
+                text(x, y + 48, `${label} ${Math.round(values[j] * 100)}%`, 12)
+              );
+            })
+            .join('')
+        );
+      })
+      .join('') +
+    lines(
+      48,
+      585,
+      [
+        'Opportunity and consent flags remain exact.',
+        'Unknown evidence stays distinct from low outcome rates.',
+      ],
+      14,
+    ) +
+    box(601, 95, 571, 534) +
+    text(625, 132, 'Inspector: category-derived position', 22) +
+    component(v6Radar, 650, 170, 470, 326) +
+    lines(
+      625,
+      550,
+      [
+        'Soft ranges and bearings reconstruct the radar.',
+        'Saturated values show the edge of their category range.',
+        'The board still uses exact saved world positions.',
+      ],
+      16,
+    ),
+);
 const outputs = {
+  'observation-v7.svg': compactPolicyVisual({
+    sheet,
+    box,
+    text,
+    lines,
+    component,
+    walk,
+    inspectorGraphs,
+    compactLayout,
+    assert,
+    config: JSON.parse(
+      fs.readFileSync(
+        path.join(root, 'environments/seaside_150_v7.json'),
+        'utf8',
+      ),
+    ),
+  }),
+  'observation-v5-v6.svg': observationComparison({
+    sheet,
+    box,
+    text,
+    lines,
+    semanticLayout,
+    rawInputLabels,
+    decodeSoft,
+    assert,
+    config: JSON.parse(
+      fs.readFileSync(
+        path.join(root, 'environments/seaside_150_v6.json'),
+        'utf8',
+      ),
+    ),
+  }),
+  'observation-v6-layout.svg': observationLayout({
+    sheet,
+    box,
+    text,
+    lines,
+    semanticLayout,
+    assert,
+    config: JSON.parse(
+      fs.readFileSync(
+        path.join(root, 'environments/seaside_150_v6.json'),
+        'utf8',
+      ),
+    ),
+  }),
+  'observation-v6.svg': v6Diagram,
+  'observation-v5.svg': v5Structure,
+  'forward-vision.svg': forwardVision,
   ...buildDocAnimations({
     board,
     animal,

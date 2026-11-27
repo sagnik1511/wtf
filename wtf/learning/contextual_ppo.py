@@ -2,6 +2,7 @@
 
 from wtf.simulation.actions import WALK_ACTIONS
 from wtf.learning.brain import observation_inputs
+from wtf.learning.late_consequence import policy_input_width
 from wtf.learning.ppo import MLP, PPOBrain, loss_and_gradient, policy_distribution
 
 CENTRAL_INPUTS = 16
@@ -142,16 +143,18 @@ class MaskablePPOBrain(PPOBrain):
             config["network"]["hidden_layers"],
             actions,
             seed,
-            inputs=observation_inputs(config),
+            inputs=policy_input_width(config),
         )
 
     def _pack(self, observation):
-        return tuple(observation[: self.network.sizes[0]]) + tuple(self.mask)
+        return tuple(observation[: observation_inputs(self.config)]) + tuple(self.mask)
 
     def distribution(self, outputs, observation):
-        mask = observation[self.network.sizes[0] :]
+        mask = observation[observation_inputs(self.config) :]
         if len(mask) != len(self.actions) or not any(mask):
             raise ValueError("Missing or empty action mask")
+        if hasattr(self, "late"):
+            outputs = self.late.adjusted(outputs, observation)
         return policy_distribution(
             [v if valid else -1e30 for v, valid in zip(outputs[:-1], mask)]
         )
@@ -179,7 +182,9 @@ class MaskablePPOBrain(PPOBrain):
         )
 
     def objective(self, outputs, step, advantage, target):
-        mask = step.observation[self.network.sizes[0] :]
+        mask = step.observation[observation_inputs(self.config) :]
+        if hasattr(self, "late"):
+            outputs = self.late.adjusted(outputs, step.observation)
         masked = [v if valid else -1e30 for v, valid in zip(outputs[:-1], mask)] + [
             outputs[-1]
         ]
@@ -337,3 +342,9 @@ class MAPPOBrain(PPOBrain):
             state["next_context"]
         )
         return b
+
+
+# A wrapped/replaced class objective must retain the reference training path.
+_NATIVE_MASKED_OBJECTIVE = MaskablePPOBrain.objective
+
+_NATIVE_MASKED_DISTRIBUTION = MaskablePPOBrain.distribution

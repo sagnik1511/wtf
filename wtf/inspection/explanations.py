@@ -216,6 +216,21 @@ class ExplanationStore:
             != template.get("consequence_scope", "context")
             or sig.get("consequence_observation", False)
             != template.get("consequence_observation", False)
+            or (
+                sig.get("observation_version") == 7
+                and sig.get("observation_actions")
+                != template.get("observation_actions")
+            )
+            or sig.get("late_consequence", None)
+            != (
+                {
+                    "max_adjustment": template["late_consequence"].get(
+                        "max_adjustment", 2.0
+                    )
+                }
+                if "late_consequence" in template
+                else None
+            )
             or sig["actions"] != spec["allowed_actions"]
         ):
             raise ValueError(

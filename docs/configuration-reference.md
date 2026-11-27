@@ -189,6 +189,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `bite_size` | Maximum food units consumed by one successful eat action. | number; min: `0` | Required; — |
 | `energy_per_food_unit` | Energy granted per consumed food unit, subject to the animal energy cap. | number; min: `0` | Required; — |
 | `water_vision_bonus` | Maximum additional sight cells permitted along open-water rays. | integer; min: `0`; max: `32` | Optional; — |
+| `field_of_view_degrees` | Visual angular field around heading: 150 is a narrower forward sector, 180 is the front half-plane including sides, and 360 retains circular sight. Applies to targets, mates and witnessed outcomes, not scent or physical action eligibility. | integer; choices: `[150, 180, 360]` | Optional; `360` |
 
 ## `config.species.<name>.body (oneOf variant 2)`
 
@@ -205,6 +206,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `attack_cost` | Additional energy cost of selecting attack. | number; min: `0` | Required; — |
 | `energy_per_kill` | Energy supplied by a kill, subject to the killer energy cap and shared-kill accounting. | number; min: `0` | Required; — |
 | `water_vision_bonus` | Maximum additional sight cells permitted along open-water rays. | integer; min: `0`; max: `32` | Optional; — |
+| `field_of_view_degrees` | Visual angular field around heading: 150 is a narrower forward sector, 180 is the front half-plane including sides, and 360 retains circular sight. Applies to targets, mates and witnessed outcomes, not scent or physical action eligibility. | integer; choices: `[150, 180, 360]` | Optional; `360` |
 
 ## `config.species.<name>.champion_selection`
 
@@ -284,7 +286,7 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"q_network"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `hidden_layers` | Hidden processing-layer widths in order; location differs between legacy Q-network and network-based templates. | array; min items: `1`; max items: `1`; items: integer; min: `1`; max: `256` | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -300,6 +302,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (q_network).exploration`
 
@@ -325,12 +330,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (q_network).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (q_network).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (ppo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"ppo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -350,6 +375,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `auxiliary_consequence` | Optional private supervised outcome head training PPO hidden features on own rollout inputs with consequence estimates zeroed. Requires consequence_observation; actor rollout remains on-policy. | object | Optional; — |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (ppo).network`
 
@@ -375,12 +404,38 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (ppo).auxiliary_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `coefficient` | Weight of confidence-weighted physical outcome prediction loss during accepted PPO minibatch updates. | number; min: `1e-06`; max: `1` | Required; — |
+
+## `config.brains.<name> (ppo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (ppo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (a2c)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"a2c"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -396,6 +451,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (a2c).network`
 
@@ -421,12 +479,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (a2c).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (a2c).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (reinforce)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"reinforce"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -441,6 +519,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (reinforce).network`
 
@@ -466,12 +547,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (reinforce).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (reinforce).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (grpo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"grpo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -491,6 +592,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (grpo).network`
 
@@ -516,12 +620,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (grpo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (grpo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (recurrent_ppo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"recurrent_ppo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -543,6 +667,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (recurrent_ppo).network`
 
@@ -568,12 +695,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (recurrent_ppo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (recurrent_ppo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (maskable_ppo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"maskable_ppo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -593,6 +740,10 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `auxiliary_consequence` | Optional private supervised outcome head training PPO hidden features on own rollout inputs with consequence estimates zeroed. Requires consequence_observation; actor rollout remains on-policy. | object | Optional; — |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (maskable_ppo).network`
 
@@ -618,12 +769,38 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (maskable_ppo).auxiliary_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `coefficient` | Weight of confidence-weighted physical outcome prediction loss during accepted PPO minibatch updates. | number; min: `1e-06`; max: `1` | Required; — |
+
+## `config.brains.<name> (maskable_ppo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (maskable_ppo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (mappo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"mappo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -644,6 +821,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (mappo).network`
 
@@ -669,12 +849,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (mappo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (mappo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (qrdqn)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"qrdqn"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
 | `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `1000000` | Required; — |
@@ -693,6 +893,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (qrdqn).exploration`
 
@@ -726,12 +929,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (qrdqn).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (qrdqn).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (lstm_ppo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"lstm_ppo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -753,6 +976,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (lstm_ppo).network`
 
@@ -778,12 +1004,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (lstm_ppo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (lstm_ppo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (trpo)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"trpo"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -808,6 +1054,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (trpo).network`
 
@@ -833,12 +1082,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (trpo).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (trpo).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (discrete_sac)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"discrete_sac"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `network` | Neural architecture used by this controller; each animal has its own live parameters. | object | Required; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
@@ -855,6 +1124,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (discrete_sac).network`
 
@@ -880,12 +1152,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (discrete_sac).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (discrete_sac).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (dqn)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"dqn"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
 | `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `1000000` | Required; — |
@@ -903,6 +1195,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (dqn).exploration`
 
@@ -936,12 +1231,32 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
 
+## `config.brains.<name> (dqn).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (dqn).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
+
 ## `config.brains.<name> (ddqn)`
 
 | Field | Definition | Type and constraints | Required / schema default |
 | --- | --- | --- | --- |
 | `type` | Algorithm identifier for a brain, or architecture identifier inside network; allowed values depend on the object. | value; exact: `"ddqn"` | Required; — |
-| `observation_version` | Input-layout version; affects feature meanings, width and saved-model compatibility. | value; choices: `[1, 2, 3, 4]`; max: `4` | Optional; — |
+| `observation_version` | Observation layout: 1 legacy, 2 terrain, 3 mating, 4 consent, 5 forward/right spatial coordinates and attack/eat/swim opportunity inputs. Older layouts retain their semantics; changing versions requires compatible fresh weights. Version 6 encodes V5 cues as soft categories, retains exact flags and requires compatible fresh weights. Version 7 uses compact numeric cues, summarized personal movement, four-value scent bearings and configured-action consequence rows; earlier versions remain supported. | value; choices: `[1, 2, 3, 4, 5, 6, 7]`; max: `7` | Optional; — |
 | `learning_rate` | Base optimizer update rate before the species multiplier. | number; min: `1e-06`; max: `0.1` | Required; — |
 | `discount_factor` | Future-reward discount gamma, applied per simulation transition. | number; min: `0`; max: `1` | Required; — |
 | `batch_size` | Samples per optimizer batch; exact interpretation depends on replay or rollout algorithm. | integer; min: `1`; max: `1000000` | Required; — |
@@ -959,6 +1274,9 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `social_observation` | Opt-in pooled recent visible same-species action/outcome summaries (24 additional inputs). No identities or exact rewards. | object | Optional; — |
 | `consequence_observation` | Append consequence knowledge inputs: 48 for context or species_action scope, 96 for both. Each action has confidence, harm, feeding and birth estimates. Requires consequence_learning.enabled. | boolean | Optional; `false` |
 | `consequence_scope` | Consequence inputs: context provides 48 state-matched estimates (legacy); species_action provides 48 published same-species action estimates independent of state/mask; both concatenates 48 general then 48 context inputs, each with confidence, allowing learned neural relevance. Requires consequence_observation=true; participates in model compatibility. | string; choices: `["context", "species_action", "both"]` | Optional; `"context"` |
+| `soft_categories` | V6 only: fixed-length, strictly increasing soft-category knots on normalized V5 values. Omitted groups use defaults. Endpoints remain fixed; values beyond the represented range saturate. | object | Optional; — |
+| `observation_actions` | V7 ordered action contract, resolved from the species allowed_actions; incompatible order changes require matching weights. | array; min items: `1`; unique items: `true`; items: value; choices: `["move_forward", "move_backward", "strafe_left", "strafe_right", "turn_left", "turn_right", "rest", "eat", "attack", "swim", "reproduce", "challenge"]` | Optional; — |
+| `late_consequence` | Optional V7 PPO/masked-PPO private learned late logit adjustment. Published evidence bypasses the physical input trunk and stays frozen in each rollout sample. | object | Optional; — |
 
 ## `config.brains.<name> (ddqn).exploration`
 
@@ -991,6 +1309,26 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | --- | --- | --- | --- |
 | `history_steps` | Recent observed steps pooled for collective action/outcome rates; no hidden outcomes are backfilled. | integer; min: `1`; max: `16` | Optional; `4` |
 | `max_neighbors` | Maximum nearest visible same-species neighbors sampled per observer per step before aggregation. | integer; min: `1`; max: `16` | Optional; `8` |
+
+## `config.brains.<name> (ddqn).soft_categories`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `distance` | Normalized distance membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.3, 1.0]` |
+| `energy` | Normalized energy membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `4`; max items: `4`; items: number | Optional; `[0.0, 0.25, 0.75, 1.0]` |
+| `health` | Normalized health membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `level` | Normalized level membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.5, 1.0]` |
+| `depth` | Normalized depth membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `elevation` | Normalized elevation membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.1, 1.0]` |
+| `climb` | Normalized climb membership centers; fixed endpoints -1.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[-1.0, -0.1, 0.0, 0.1, 1.0]` |
+| `speed` | Normalized speed membership centers; fixed endpoints 0.0 and 1.4142135623730951. | array; min items: `3`; max items: `3`; items: number | Optional; `[0.0, 0.25, 1.4142135623730951]` |
+| `outcome` | Normalized outcome membership centers; fixed endpoints 0.0 and 1.0. | array; min items: `5`; max items: `5`; items: number | Optional; `[0.0, 0.001, 0.01, 0.1, 1.0]` |
+
+## `config.brains.<name> (ddqn).late_consequence`
+
+| Field | Definition | Type and constraints | Required / schema default |
+| --- | --- | --- | --- |
+| `max_adjustment` | Maximum absolute learned consequence residual added to each action logit. | number; min: `0.001`; max: `10` | Optional; `2` |
 
 ## `config.experiment`
 
@@ -1074,5 +1412,6 @@ The Python validator also checks cross-field rules (map dimensions, population c
 | `max_contexts` | Maximum context records retained per participating species using deterministic update-order LRU eviction. | integer; min: `16`; max: `8192` | Optional; `512` |
 | `horizon_steps` | Observed step window for harm, feeding and birth outcomes; death closes the window and episode truncation discards incomplete windows. | integer; min: `1`; max: `64` | Optional; `16` |
 | `update_schedule` | When collected outcome evidence becomes visible as consequence estimates: continuous updates immediately after closed windows; episode freezes the published model and publishes staged evidence before the next episode starts. | string; choices: `["continuous", "episode"]` | Optional; `"continuous"` |
+| `persistent_action_totals` | Retain species/action outcome totals independently of bounded context eviction; publication follows update_schedule. Legacy imports bootstrap from available context counts. | boolean | Optional; `false` |
 
-Field entries documented: **597**.
+Field entries documented: **786**.

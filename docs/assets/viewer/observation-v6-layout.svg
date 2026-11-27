@@ -1,0 +1,289 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1150" viewBox="0 0 1200 1150" role="img" aria-labelledby="title desc"><title id="title">Observation V6: the complete input vector</title><desc id="desc">Ordered scalar channels, optional blocks and one target-slot expansion · schematic, blocks not to scale</desc><style>.viewer-component text{font:12px system-ui,sans-serif;fill:#a9bacc}</style><rect class="sheet-background" width="1200" height="1150" rx="14" fill="#0b1118"/><g class="sheet-heading"><text x="28" y="38" font-family="system-ui,sans-serif" font-size="25" fill="#e6edf3" text-anchor="start" font-weight="600">Observation V6: the complete input vector</text><text x="28" y="67" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Ordered scalar channels, optional blocks and one target-slot expansion · schematic, blocks not to scale</text></g><rect x="28" y="96" width="352" height="103" rx="10" fill="#111c27" stroke="#415569"/><text x="48" y="127" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">1. Sense the current world</text><text x="48" y="153" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">V5 sensed cues, visible / remembered only</text><text x="48" y="173" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">No hidden positions or future outcomes</text><rect x="398" y="96" width="378" height="103" rx="10" fill="#111c27" stroke="#415569"/><text x="418" y="127" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">2. Encode soft categories</text><text x="418" y="153" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Overlapping memberships + exact raw flags</text><text x="418" y="173" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Same field order; independent top-k slots</text><rect x="794" y="96" width="378" height="103" rx="10" fill="#111c27" stroke="#415569"/><text x="814" y="127" font-family="system-ui,sans-serif" font-size="20" fill="#e6edf3" text-anchor="start">3. Feed one private brain</text><text x="814" y="153" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">One flat vector → private network → actions</text><text x="814" y="173" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Private weights, optimizer and RNG</text><rect x="28" y="224" width="560" height="896" rx="10" fill="#111c27" stroke="#415569"/><text x="48" y="259" font-family="system-ui,sans-serif" font-size="22" fill="#e6edf3" text-anchor="start">Ordered vector · seaside_150_v6 prey</text><text x="48" y="285" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">k=3 · history/scent off · both consequence scopes</text><rect x="48" y="305" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="327" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Own state</text><text x="552" y="327" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[0, 13) · 13</text><text x="63" y="349" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">Energy 4 · health 3 · heading 2 · blocked directions 4</text><rect x="48" y="370" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="392" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Food slots</text><text x="552" y="392" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[13, 49) · 36</text><text x="63" y="414" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">3 slots × 12 channels; each slot keeps its own presence</text><rect x="48" y="435" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="457" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Prey slots</text><text x="552" y="457" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[49, 85) · 36</text><text x="63" y="479" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">3 slots × 12 channels; no pooling of visible animals</text><rect x="48" y="500" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="522" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Predator slots</text><text x="552" y="522" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[85, 121) · 36</text><text x="63" y="544" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">3 slots × 12 channels; body-relative bearings</text><rect x="48" y="565" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="587" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Terrain</text><text x="552" y="587" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[121, 170) · 49</text><text x="63" y="609" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">Water 3 · flow 11 · height 3 · four adjacent cells × 8</text><rect x="48" y="630" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="652" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Mating and consent</text><text x="552" y="652" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[170, 199) · 29</text><text x="63" y="674" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">Sex, readiness, maturity, cooldown, mate and consent</text><rect x="48" y="695" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="717" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Immediate opportunities</text><text x="552" y="717" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[199, 202) · 3</text><text x="63" y="739" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">Attack · eat · swim; exact flags, ordinary PPO unmasked</text><rect x="48" y="760" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="782" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Local visible outcomes</text><text x="552" y="782" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[202, 310) · 108</text><text x="63" y="804" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">6 action groups × (3 confidence + 3 outcomes × 5)</text><rect x="48" y="825" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="847" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">General consequences</text><text x="552" y="847" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[310, 526) · 216</text><text x="63" y="869" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">12 × (5 harm + 5 feeding + 5 birth + 3 confidence)</text><rect x="48" y="890" width="520" height="57" rx="10" fill="#111c27" stroke="#415569"/><text x="63" y="912" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">Context consequences</text><text x="552" y="912" font-family="system-ui,sans-serif" font-size="14" fill="#7de2bd" text-anchor="end">[526, 742) · 216</text><text x="63" y="934" font-family="system-ui,sans-serif" font-size="12" fill="#e6edf3" text-anchor="start">Same groups, conditioned on the current context</text><text x="48" y="990" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Indices are zero-based [start, end); the end is excluded.</text><text x="48" y="1010" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">The first 202 channels are the core: 94 + 36k.</text><text x="48" y="1030" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Then append enabled blocks in the order shown.</text><text x="48" y="1050" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Total prey inputs: 742 · predator k=10: 994.</text><text x="48" y="1070" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Widths are computed/checked against the current layout.</text><rect x="610" y="224" width="562" height="465" rx="10" fill="#111c27" stroke="#415569"/><text x="630" y="259" font-family="system-ui,sans-serif" font-size="21" fill="#e6edf3" text-anchor="start">Zoom: one target slot becomes 12 inputs</text><text x="630" y="289" font-family="system-ui,sans-serif" font-size="16" fill="#e6edf3" text-anchor="start">V5: forward · right · distance · present  →  V6:</text><text x="630" y="324" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">3 range memberships</text><rect x="630" y="339" width="166" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="713" y="363" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">near</text><text x="713" y="386" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0.7</text><rect x="801" y="339" width="166" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="884" y="363" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">medium</text><text x="884" y="386" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0.3</text><rect x="972" y="339" width="166" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="1055" y="363" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">far</text><text x="1055" y="386" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><text x="630" y="433" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">8 bearing memberships · relative to body heading</text><rect x="630" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="660" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">F</text><text x="660" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0.2</text><rect x="695" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="725" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">FR</text><text x="725" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><rect x="760" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="790" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">R</text><text x="790" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><rect x="825" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="855" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">BR</text><text x="855" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><rect x="890" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="920" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">B</text><text x="920" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><rect x="955" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="985" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">BL</text><text x="985" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><rect x="1020" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="1050" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">L</text><text x="1050" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0</text><rect x="1085" y="448" width="60" height="61" rx="10" fill="#111c27" stroke="#415569"/><text x="1115" y="472" font-family="system-ui,sans-serif" font-size="12" fill="#a9bacc" text-anchor="middle">FL</text><text x="1115" y="495" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="middle">0.8</text><text x="630" y="544" font-family="system-ui,sans-serif" font-size="17" fill="#e6edf3" text-anchor="start">1 exact presence flag: 1</text><path d="M900 555L900 584" stroke="#7de2bd" stroke-width="2" fill="none"/><path d="M895 577L900 584L905 577" stroke="#7de2bd" stroke-width="2" fill="none"/><text x="630" y="610" font-family="system-ui,sans-serif" font-size="16" fill="#7de2bd" text-anchor="start">Concatenate: [range × 3 | bearing × 8 | present]</text><text x="630" y="643" font-family="system-ui,sans-serif" font-size="13" fill="#a9bacc" text-anchor="start">Illustrative near/front-left target; remaining slots repeat.</text><text x="630" y="663" font-family="system-ui,sans-serif" font-size="13" fill="#a9bacc" text-anchor="start">Absent slot: zero range + bearing + presence channels.</text><rect x="610" y="709" width="562" height="411" rx="10" fill="#111c27" stroke="#415569"/><text x="630" y="746" font-family="system-ui,sans-serif" font-size="21" fill="#e6edf3" text-anchor="start">Optional tails · append only when enabled</text><text x="630" y="784" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">After the core, before local/general/context outcomes:</text><text x="630" y="804" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Movement history: 2k × (29 + 12H) channels</text><text x="630" y="824" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Scent: 27 × C channels</text><text x="630" y="844" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start"></text><text x="630" y="864" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">H = remembered steps; C = configured scent channels.</text><text x="630" y="884" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Local outcomes: 108; each consequence scope: 216.</text><text x="630" y="904" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">One scope or both, as selected by configuration.</text><text x="630" y="924" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start"></text><text x="630" y="944" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Soft categories are memberships, not probabilities</text><text x="630" y="964" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">over actions. Opportunity flags do not mask ordinary PPO.</text><text x="630" y="984" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Unknown evidence has zero confidence; it is not failure.</text><text x="630" y="1004" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start"></text><text x="630" y="1024" font-family="system-ui,sans-serif" font-size="14" fill="#a9bacc" text-anchor="start">Earlier observation versions keep their original layouts.</text><style>/* Shared source for standalone viewer/inspector SVG specimens. */
+@media (prefers-color-scheme: light) {
+  [fill='#03091c'] {
+    fill: #304c52;
+  }
+  [stroke='#89d4ff90'] {
+    stroke: #145b8fb0;
+  }
+  svg {
+    --viz-0b131c: #eaf0f5;
+    --viz-415569: #a2b5c7;
+    --viz-263341: #b7c8d7;
+    --viz-8ac8ff88: #1f639c88;
+    --viz-fff: #172c3c;
+    --viz-61798f: #617385;
+    --viz-8b9cad: #667788;
+    --viz-7de2bd: #19714f;
+    --viz-ff9aab: #b33352;
+    --viz-ff9a77: #a84122;
+    --viz-c6a5ff: #7252a5;
+    --viz-a2c76b: #5c741a;
+    --viz-8ac8ff: #1f639c;
+    --viz-ffbd75: #965616;
+    --viz-a1c8b0: #416d55;
+    --viz-e1d17c: #7c6a18;
+    --viz-79d6df: #236f7c;
+  }
+  [fill='#63ab6f'] {
+    fill: #34784a;
+  }
+  [stroke='#63ab6f'] {
+    stroke: #34784a;
+  }
+  svg text {
+    fill: #172c3c;
+  }
+  svg .muted,
+  svg .viewer-component text {
+    fill: #4b6073;
+  }
+  [fill='#0b131c'] {
+    fill: #eaf0f5;
+  }
+  [stroke='#0b131c'] {
+    stroke: #eaf0f5;
+  }
+  [style*='fill:#0b131c'] {
+    fill: #eaf0f5 !important;
+  }
+  [fill='#415569'] {
+    fill: #a2b5c7;
+  }
+  [stroke='#415569'] {
+    stroke: #a2b5c7;
+  }
+  [style*='fill:#415569'] {
+    fill: #a2b5c7 !important;
+  }
+  [fill='#263341'] {
+    fill: #b7c8d7;
+  }
+  [stroke='#263341'] {
+    stroke: #b7c8d7;
+  }
+  [style*='fill:#263341'] {
+    fill: #b7c8d7 !important;
+  }
+  [fill='#fff'] {
+    fill: #172c3c;
+  }
+  [stroke='#fff'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#fff'] {
+    fill: #172c3c !important;
+  }
+  [fill='#61798f'] {
+    fill: #617385;
+  }
+  [stroke='#61798f'] {
+    stroke: #617385;
+  }
+  [style*='fill:#61798f'] {
+    fill: #617385 !important;
+  }
+  [fill='#8b9cad'] {
+    fill: #667788;
+  }
+  [stroke='#8b9cad'] {
+    stroke: #667788;
+  }
+  [style*='fill:#8b9cad'] {
+    fill: #667788 !important;
+  }
+  [fill='#7de2bd'] {
+    fill: #19714f;
+  }
+  [stroke='#7de2bd'] {
+    stroke: #19714f;
+  }
+  [style*='fill:#7de2bd'] {
+    fill: #19714f !important;
+  }
+  [fill='#ff9aab'] {
+    fill: #b33352;
+  }
+  [stroke='#ff9aab'] {
+    stroke: #b33352;
+  }
+  [style*='fill:#ff9aab'] {
+    fill: #b33352 !important;
+  }
+  [fill='#ff9a77'] {
+    fill: #a84122;
+  }
+  [stroke='#ff9a77'] {
+    stroke: #a84122;
+  }
+  [style*='fill:#ff9a77'] {
+    fill: #a84122 !important;
+  }
+  [fill='#c6a5ff'] {
+    fill: #7252a5;
+  }
+  [stroke='#c6a5ff'] {
+    stroke: #7252a5;
+  }
+  [style*='fill:#c6a5ff'] {
+    fill: #7252a5 !important;
+  }
+  [fill='#a2c76b'] {
+    fill: #5c741a;
+  }
+  [stroke='#a2c76b'] {
+    stroke: #5c741a;
+  }
+  [style*='fill:#a2c76b'] {
+    fill: #5c741a !important;
+  }
+  [fill='#8ac8ff'] {
+    fill: #1f639c;
+  }
+  [stroke='#8ac8ff'] {
+    stroke: #1f639c;
+  }
+  [style*='fill:#8ac8ff'] {
+    fill: #1f639c !important;
+  }
+  [fill='#ffbd75'] {
+    fill: #965616;
+  }
+  [stroke='#ffbd75'] {
+    stroke: #965616;
+  }
+  [style*='fill:#ffbd75'] {
+    fill: #965616 !important;
+  }
+  [fill='#a1c8b0'] {
+    fill: #416d55;
+  }
+  [stroke='#a1c8b0'] {
+    stroke: #416d55;
+  }
+  [style*='fill:#a1c8b0'] {
+    fill: #416d55 !important;
+  }
+  [fill='#e1d17c'] {
+    fill: #7c6a18;
+  }
+  [stroke='#e1d17c'] {
+    stroke: #7c6a18;
+  }
+  [style*='fill:#e1d17c'] {
+    fill: #7c6a18 !important;
+  }
+  [fill='#79d6df'] {
+    fill: #236f7c;
+  }
+  [stroke='#79d6df'] {
+    stroke: #236f7c;
+  }
+  [style*='fill:#79d6df'] {
+    fill: #236f7c !important;
+  }
+  [fill='#0b1118'] {
+    fill: #f2f5f8;
+  }
+  [stroke='#0b1118'] {
+    stroke: #f2f5f8;
+  }
+  [style*='fill:#0b1118'] {
+    fill: #f2f5f8 !important;
+  }
+  [fill='#111c21'] {
+    fill: #f2f5f8;
+  }
+  [stroke='#111c21'] {
+    stroke: #f2f5f8;
+  }
+  [style*='fill:#111c21'] {
+    fill: #f2f5f8 !important;
+  }
+  [fill='#111c27'] {
+    fill: #ffffff;
+  }
+  [stroke='#111c27'] {
+    stroke: #ffffff;
+  }
+  [style*='fill:#111c27'] {
+    fill: #ffffff !important;
+  }
+  [fill='#101a22'] {
+    fill: #dce6d8;
+  }
+  [stroke='#101a22'] {
+    stroke: #dce6d8;
+  }
+  [style*='fill:#101a22'] {
+    fill: #dce6d8 !important;
+  }
+  [fill='#e6edf3'] {
+    fill: #172c3c;
+  }
+  [stroke='#e6edf3'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#e6edf3'] {
+    fill: #172c3c !important;
+  }
+  [fill='#e1e9e8'] {
+    fill: #172c3c;
+  }
+  [stroke='#e1e9e8'] {
+    stroke: #172c3c;
+  }
+  [style*='fill:#e1e9e8'] {
+    fill: #172c3c !important;
+  }
+  [fill='#a4b5c5'] {
+    fill: #4b6073;
+  }
+  [stroke='#a4b5c5'] {
+    stroke: #4b6073;
+  }
+  [style*='fill:#a4b5c5'] {
+    fill: #4b6073 !important;
+  }
+  [fill='#a9bacc'] {
+    fill: #4b6073;
+  }
+  [stroke='#a9bacc'] {
+    stroke: #4b6073;
+  }
+  [style*='fill:#a9bacc'] {
+    fill: #4b6073 !important;
+  }
+  [fill='#3a4b5c'] {
+    fill: #6a7d89;
+  }
+  [stroke='#3a4b5c'] {
+    stroke: #6a7d89;
+  }
+  [style*='fill:#3a4b5c'] {
+    fill: #6a7d89 !important;
+  }
+  [fill='#13212a'] {
+    fill: #e3edf4;
+  }
+  [fill='#1c1019'] {
+    fill: #f6e3ea;
+  }
+  [fill='#102632'] {
+    fill: #dceef7;
+  }
+  [fill='#f0dfba75'] {
+    fill: #f7ead2;
+  }
+  /* Same-species competition uses the actual viewer's light-theme amber. */
+  [fill='#ffd08a'] {
+    fill: #9a4100;
+  }
+  [stroke='#ffd08a'] {
+    stroke: #9a4100;
+  }
+  text[stroke='#111827'] {
+    stroke: #ffffff;
+  }
+}
+@media (prefers-color-scheme: light) {}</style></svg>

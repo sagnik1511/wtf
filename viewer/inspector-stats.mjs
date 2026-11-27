@@ -1,9 +1,13 @@
+import { decodeCompact } from './compact-observations.mjs';
+import { semanticLayout, compactLayout } from './input-layout.mjs';
+import { decodeSoft, semanticPreview } from './soft-observations.mjs';
+import { BASE_WIDTHS, worldVector } from './observation-v5.mjs';
 import { socialWidth, socialView } from './social.mjs';
 import { trackingLayout, trackingView } from './tracking.mjs';
 import { visualColor } from './theme.mjs';
 import { circadianBody } from './day-night.mjs';
 // Read recorded inputs only. No inference, model weights or simulation updates.
-const WIDTHS = { 1: 20, 2: 32, 3: 42, 4: 45 };
+const WIDTHS = BASE_WIDTHS;
 export const TARGET_COLORS = {
   food: visualColor('#a2c76b'),
   prey: visualColor('#7de2bd'),
@@ -23,9 +27,60 @@ export const ACTION_COLORS = [
 
 export function observationView(features, template) {
   if (!Array.isArray(features) || !features.every(Number.isFinite)) return null;
+  if (template?.observation_version === 7) {
+    try {
+      const decoded = decodeCompact(
+        features,
+        compactLayout(template),
+        template,
+      );
+      const view = observationView(decoded.features, {
+        ...template,
+        observation_version: 5,
+      });
+      if (!view) return null;
+      if (view.tracking) {
+        view.tracking.scent = [];
+        view.tracking.summary = true;
+      }
+      return {
+        ...view,
+        version: 7,
+        inputs: features.length,
+        compactScents: decoded.scents,
+        motionSummary: decoded.tracks,
+      };
+    } catch {
+      return null;
+    }
+  }
+  if (template?.observation_version === 6) {
+    try {
+      const layout = semanticLayout(template);
+      if (
+        features.length !== layout.width ||
+        features.some((v) => Math.abs(v) > 1 + 1e-8)
+      )
+        return null;
+      const view = observationView(decodeSoft(features, layout), {
+        ...template,
+        observation_version: 5,
+      });
+      return view
+        ? {
+            ...view,
+            version: 6,
+            inputs: features.length,
+            semantic: semanticPreview(features, layout),
+          }
+        : null;
+    } catch {
+      return null;
+    }
+  }
   const version = template
     ? (template.observation_version ?? 1)
-    : { 20: 1, 32: 2, 42: 3, 45: 4 }[features.length];
+    : { 20: 1, 32: 2, 42: 3, 45: 4, 48: 5 }[features.length];
   const k = template?.observation_top_k ?? 1;
   const tracking = trackingLayout(template ?? {});
   const extra = socialWidth(template ?? {});
@@ -43,8 +98,9 @@ export function observationView(features, template) {
   const targets = [];
   for (const category of ['food', 'prey', 'predator'])
     for (let slot = 1; slot <= k; slot++) {
-      const [dx, dy, distance, present] = features.slice(offset, offset + 4);
+      let [dx, dy, distance, present] = features.slice(offset, offset + 4);
       offset += 4;
+      if (version === 5) [dx, dy] = worldVector(dx, dy, features.slice(2, 4));
       if (present > 0) targets.push({ category, slot, dx, dy, distance });
     }
   const result = {
@@ -67,10 +123,12 @@ export function observationView(features, template) {
         climb: features[offset + 5 + 2 * i] * 100,
       })),
     };
+    if (version === 5)
+      result.terrain.flow = worldVector(...result.terrain.flow, result.heading);
     offset += 12;
   }
   if (version >= 3) {
-    const [
+    let [
       sex,
       maturity,
       cooldown,
@@ -91,6 +149,7 @@ export function observationView(features, template) {
       pair,
       present,
     };
+    if (version === 5) [dx, dy] = worldVector(dx, dy, result.heading);
     if (present > 0)
       targets.push({ category: 'mate', slot: 1, dx, dy, distance });
     if (version >= 4) {
@@ -99,6 +158,12 @@ export function observationView(features, template) {
       );
       Object.assign(result.mating, { selfIntent, mateIntent, consentingPair });
     }
+  }
+  if (version === 5) {
+    const start = WIDTHS[4] + 12 * (k - 1);
+    result.opportunities = Object.fromEntries(
+      ['attack', 'eat', 'swim'].map((name, i) => [name, features[start + i]]),
+    );
   }
   result.social = socialView(
     features,
@@ -224,8 +289,23 @@ export function visibilityCells(
       x <= Math.min(state.width - 1, animal.x + max);
       x++
     ) {
-      const squared = (x - animal.x) ** 2 + (y - animal.y) ** 2;
+      const dx = x - animal.x,
+        dy = y - animal.y;
+      const squared = dx ** 2 + dy ** 2;
       if (squared > max * max) continue;
+      if ([150, 180].includes(body.field_of_view_degrees)) {
+        const [hx, hy] = [
+          [0, -1],
+          [1, 0],
+          [0, 1],
+          [-1, 0],
+        ][animal.heading];
+        const dot = dx * hx + dy * hy;
+        const cosineSquared =
+          body.field_of_view_degrees === 150 ? (2 - Math.sqrt(3)) / 4 : 0;
+        if (dot < 0 || (cosineSquared && dot * dot < squared * cosineSquared))
+          continue;
+      }
       const sight = ray([animal.x, animal.y], [x, y], blocked, wet),
         allowed = base + Math.min(bonus, sight.wet);
       if (sight.visible && squared <= allowed * allowed) cells.push([x, y]);
@@ -257,6 +337,8 @@ export class ObservationOverlay {
       animal.y,
       body?.vision_radius,
       body?.water_vision_bonus,
+      body?.field_of_view_degrees ?? 360,
+      [150, 180].includes(body?.field_of_view_degrees) ? animal.heading : null,
       state.width,
       state.height,
       state.obstacles,

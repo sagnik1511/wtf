@@ -166,6 +166,8 @@ def offspring_seed(world, child_id):
 
 def model_signature(config, actions):
     """The exact input/action/architecture contract required for warm starts."""
+    # Explicit branches keep each public algorithm/signature distinction visible.
+    # pylint: disable=too-many-branches
 
     # Keep imports lazy so optional tools and training dependencies load only on this
     # path.
@@ -188,6 +190,27 @@ def model_signature(config, actions):
         "value_head": kind
         in ("ppo", "a2c", "recurrent_ppo", "maskable_ppo", "mappo", "trpo", "lstm_ppo"),
     }
+    if config.get("observation_version", 1) == 7:
+        from wtf.simulation.compact_observations import compact_layout
+
+        signature["observation_actions"] = list(compact_layout(config).actions)
+        signature["compact_layout_version"] = 1
+        signature["movement_summary_version"] = 1
+        signature["scent_summary_version"] = 1
+    if "late_consequence" in config:
+        from wtf.simulation.compact_observations import compact_layout
+
+        signature["late_consequence_version"] = 1
+        signature["late_consequence"] = {
+            "max_adjustment": config["late_consequence"].get("max_adjustment", 2.0)
+        }
+        signature["policy_inputs"] = compact_layout(config).physical_width
+    if config.get("observation_version", 1) == 6:
+        from wtf.simulation.soft_observations import soft_contract
+
+        signature["soft_categories"] = {
+            key: list(value) for key, value in soft_contract(config).items()
+        }
     if config.get("observation_top_k", 1) != 1:
         signature["observation_top_k"] = config["observation_top_k"]
     if config.get("movement_history_steps", 0):
@@ -200,6 +223,8 @@ def model_signature(config, actions):
 
     if config.get("social_observation") is not None:
         signature["social_observation"] = social_contract(config)
+    if "auxiliary_consequence" in config:
+        signature["auxiliary_consequence_version"] = 1
     if config.get("consequence_observation", False):
         signature["consequence_observation"] = True
         if config.get("consequence_scope", "context") != "context":
@@ -232,13 +257,20 @@ def model_snapshot(brain):
         parameters = plain(brain.weights)
     else:
         parameters = brain.network.checkpoint()
-    return {
+    model = {
         "signature": model_signature(brain.config, brain.actions),
         "precision": precision_of(brain),
         "parameters": parameters,
     }
+    if hasattr(brain, "auxiliary"):
+        model["auxiliary_parameters"] = brain.auxiliary.network.checkpoint()
+    if hasattr(brain, "late"):
+        model["late_parameters"] = brain.late.network.checkpoint()
+    return model
 
 
+# Validate and prepare every parameter block before committing any live weights.
+# pylint: disable-next=too-many-branches
 def load_model_weights(brain, model):
     """Load compatible finite weights into a freshly constructed controller.
 
@@ -280,15 +312,33 @@ def load_model_weights(brain, model):
         raise ValueError(
             "Saved brain has invalid parameter dimensions or non-finite weights"
         )
+    if hasattr(brain, "auxiliary"):
+        auxiliary_parameters = model.get("auxiliary_parameters")
+        if not valid(auxiliary_parameters, brain.auxiliary.network.layers):
+            raise ValueError("Saved brain has invalid auxiliary head parameters")
+        auxiliary_parameters = packed(auxiliary_parameters, precision_of(brain))
+    if hasattr(brain, "late"):
+        if not valid(model.get("late_parameters"), brain.late.network.layers) or any(
+            model["late_parameters"][0]["bias"]
+        ):
+            raise ValueError("Saved brain has invalid late-consequence parameters")
+        late_parameters = packed(model["late_parameters"], precision_of(brain))
+    # Convert all components before committing live parameters: finite JSON
+    # values can still overflow FP32 storage. Failed imports leave the brain intact.
+    prepared_parameters = packed(parameters, precision_of(brain))
     if brain.config["type"] == "q_network":
-        brain.weights = packed(parameters, precision_of(brain))
+        brain.weights = prepared_parameters
         brain.target = packed(parameters, precision_of(brain))
     else:
-        brain.network.layers = packed(parameters, precision_of(brain))
+        brain.network.layers = prepared_parameters
         if hasattr(brain, "target_network"):
             brain.target_network.layers = packed(parameters, precision_of(brain))
         if hasattr(brain, "reference_network"):
             brain.reference_network.layers = packed(parameters, precision_of(brain))
+    if hasattr(brain, "auxiliary"):
+        brain.auxiliary.network.layers = auxiliary_parameters
+    if hasattr(brain, "late"):
+        brain.late.network.layers = late_parameters
 
     if hasattr(brain, "synchronize_targets"):
         brain.synchronize_targets()
@@ -328,6 +378,15 @@ def reset_birth_training(brain):
     if hasattr(brain, "moments"):
         brain.moments = packed(brain.network.zeros(), precision_of(brain))
         brain.variances = packed(brain.network.zeros(), precision_of(brain))
+    if hasattr(brain, "auxiliary"):
+        auxiliary = brain.auxiliary
+        auxiliary.moments = packed(auxiliary.network.zeros(), precision_of(brain))
+        auxiliary.variances = packed(auxiliary.network.zeros(), precision_of(brain))
+        auxiliary.updates = 0
+    if hasattr(brain, "late"):
+        brain.late.moments = packed(brain.late.network.zeros(), precision_of(brain))
+        brain.late.variances = packed(brain.late.network.zeros(), precision_of(brain))
+        brain.late.updates = 0
     if hasattr(brain, "reset_memory"):
         brain.reset_memory()
     if hasattr(brain, "target"):
@@ -388,5 +447,9 @@ def mix_parent_brains(mother, father, seed):
                     a[index] = b[index]
 
     cross(left, right)
+    if hasattr(child, "auxiliary"):
+        cross(child.auxiliary.network.layers, father.auxiliary.network.layers)
+    if hasattr(child, "late"):
+        cross(child.late.network.layers, father.late.network.layers)
     reset_birth_training(child)
     return child

@@ -1,5 +1,3 @@
-import { socialLabels } from './social.mjs';
-import { trackingLabels } from './tracking.mjs';
 import { visualColor } from './theme.mjs';
 // Display-only topology from existing observations and layer arrays. No weight requests.
 import { observationView, predictionView } from './inspector-stats.mjs';
@@ -22,45 +20,9 @@ const svg = (tag, attrs = {}, text) => {
   if (text !== undefined) n.textContent = text;
   return n;
 };
-export function inputLabels(template = {}, length = 20) {
-  template ??= {};
-  const names = [
-    'Energy',
-    'Health',
-    'Heading x',
-    'Heading y',
-    'Blocked front',
-    'Blocked right',
-    'Blocked back',
-    'Blocked left',
-  ];
-  for (const category of ['Food', 'Prey', 'Predator'])
-    for (let i = 1; i <= (template.observation_top_k ?? 1); i++)
-      for (const part of ['dx', 'dy', 'distance', 'present'])
-        names.push(`${category} ${i} ${part}`);
-  if ((template.observation_version ?? 1) >= 2) {
-    names.push('Water depth', 'Flow x', 'Flow y', 'Elevation');
-    for (const side of ['Front', 'Right', 'Back', 'Left'])
-      names.push(`${side} water`, `${side} climb`);
-  }
-  if ((template.observation_version ?? 1) >= 3)
-    names.push(
-      'Sex',
-      'Maturity',
-      'Cooldown',
-      'Self ready',
-      'Mate dx',
-      'Mate dy',
-      'Mate distance',
-      'Mate present',
-      'Mate ready',
-      'Pair opportunity',
-    );
-  if ((template.observation_version ?? 1) >= 4)
-    names.push('Self consent', 'Mate consent', 'Consenting pair');
-  names.push(...trackingLabels(template), ...socialLabels(template));
-  return Array.from({ length }, (_, i) => names[i] ?? `Input ${i}`);
-}
+export { inputLabels } from './input-layout.mjs';
+import { compactLayout, inputLabels } from './input-layout.mjs';
+
 export function inputInterpretation(diagnostic, template) {
   const root = el('section', undefined, 'brain-input-meaning'),
     o = observationView(diagnostic?.features, template);
@@ -95,6 +57,9 @@ export function inputInterpretation(diagnostic, template) {
       ['Mating readiness', o.mating.ready ? 'ready' : 'not ready'],
       ['Visible mate', o.mating.present ? 'present' : 'absent'],
     );
+  if (o.opportunities)
+    for (const [action, value] of Object.entries(o.opportunities))
+      rows.push([`${action} opportunity`, value ? 'available' : 'unavailable']);
   const grid = el('div', undefined, 'brain-input-grid');
   for (const [name, value] of rows) {
     const item = el('div');
@@ -158,7 +123,17 @@ export function animalStructure(
   return {
     rank: widths.length,
     stages: [
-      { label: 'Observation', values: diagnostic.features, labels },
+      {
+        label: template.late_consequence
+          ? 'Physical input · consequence evidence joins after logits'
+          : 'Observation',
+        values: template.late_consequence
+          ? diagnostic.features.slice(0, compactLayout(template).physical)
+          : diagnostic.features,
+        labels: template.late_consequence
+          ? labels.slice(0, compactLayout(template).physical)
+          : labels,
+      },
       ...widths.map((size, i) => ({
         label:
           recurrent && i === 0 ? `${cell} memory block` : `Hidden ${i + 1}`,

@@ -6,10 +6,10 @@ The rollout history links implementation commits to their behavior changes,
 compatibility requirements and validation. Open a version below for its detailed
 child document. Operational instructions remain in the relevant project guides.
 
-**Latest committed rollout:** [0.0.2.30](0.0.2.30.md), `dc91fbd`.
-**Latest committed runtime implementation:** [0.0.2.30](0.0.2.30.md), `dc91fbd`.
+**Latest committed rollout:** [0.0.2.31](0.0.2.31.md), `39bde7e`.
+**Latest committed runtime implementation:** [0.0.2.31](0.0.2.31.md), `39bde7e`.
 **Published package:** [0.0.2.9 on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/).
-**Pending rollouts:** [0.0.2.31](0.0.2.31.md) — land-bridge preset.
+**Pending rollouts:** [0.0.2.32](0.0.2.32.md) — persistent collective totals and private PPO outcome heads; [0.0.2.33](0.0.2.33.md) — optional forward vision; [0.0.2.34](0.0.2.34.md) — body-relative V5 observations; [0.0.2.35](0.0.2.35.md) — soft semantic V6 observations; [0.0.3.0](0.0.3.0.md) — exact V6 coefficient reuse and auxiliary allocation reduction; [0.0.3.1](0.0.3.1.md) — compact V7 and private late consequence adjustments; [0.0.3.2](0.0.3.2.md) — native late-adapter PPO batching and inspector text cleanup; [0.0.3.3](0.0.3.3.md) — compact data flow and native auxiliary batching.
 
 New release records include a **Fixes and optimizations** section maintained by
 `wtf-reviewer` after stable-diff review. It distinguishes verified fixes,
@@ -25,7 +25,15 @@ dates, or explicitly labeled preparation dates for pending work.
 
 | Version | Status | Date | Implementation commit | Scope |
 | --- | --- | --- | --- | --- |
-| [0.0.2.31](0.0.2.31.md) | Pending | 2026-11-26 | Not committed | Two landmasses connected by a three-cell-wide dry bridge, with packaged preset/map and adaptive preview |
+| [0.0.3.3](0.0.3.3.md) | Pending | 2026-11-27 | Not committed | Compact V7 boundaries, per-update auxiliary preparation and exact native auxiliary minibatches |
+| [0.0.3.2](0.0.3.2.md) | Pending | 2026-11-27 | Not committed | Exact native late-adapter PPO minibatches, bounded FP64 staging and concise sensory inspector |
+| [0.0.3.1](0.0.3.1.md) | Pending | 2026-11-27 | Not committed | Compact V7 summaries, four-value scent and private PPO late consequence adapters |
+| [0.0.3.0](0.0.3.0.md) | Pending | 2026-11-26 | Not committed | Exact V6 coefficient reuse, indexed auxiliary decoding and measured allocation/training reductions |
+| [0.0.2.35](0.0.2.35.md) | Pending | 2026-11-26 | Not committed | Opt-in V6 soft categories, categorical inspector, compatible auxiliary targets and matched comparison versions |
+| [0.0.2.34](0.0.2.34.md) | Pending | 2026-11-26 | Not committed | Body-relative V5 observations, immediate opportunities, version-aware inspector and matched comparison tooling |
+| [0.0.2.33](0.0.2.33.md) | Pending | 2026-11-26 | Not committed | Optional 180° vision across visual sensing, native selection and inspector overlays |
+| [0.0.2.32](0.0.2.32.md) | Pending | 2026-11-26 | Not committed | Durable species/action evidence, private on-policy PPO auxiliary outcome prediction and compact matched comparisons |
+| [0.0.2.31](0.0.2.31.md) | Committed | 2026-11-26 | `39bde7e` | Two landmasses connected by a three-cell-wide dry bridge, with packaged preset/map and adaptive preview |
 | [0.0.2.30](0.0.2.30.md) | Committed | 2026-11-25 | `dc91fbd` | Exact bulk gradient widening and resident DQN/DDQN clipping, Adam and target synchronization |
 | [0.0.2.29](0.0.2.29.md) | Committed | 2026-11-25 | `bdf213d` | Complete GPU PPO updates, compact gradient storage, weight caching, optional FP32 and component timing |
 | [0.0.2.28](0.0.2.28.md) | Committed | 2026-11-24 | `2033233` | Optional Linux/NVIDIA dense evaluation and DQN/DDQN gradients |

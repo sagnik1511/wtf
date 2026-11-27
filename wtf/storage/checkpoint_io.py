@@ -61,7 +61,13 @@ class Encoder:
             or isinstance(value, dict)
             and {"signature", "parameters"}
             <= set(value)
-            <= {"signature", "parameters", "precision"}
+            <= {
+                "signature",
+                "parameters",
+                "precision",
+                "auxiliary_parameters",
+                "late_parameters",
+            }
         ):
             memo = self._identity_refs
             identity = id(value)

@@ -98,12 +98,19 @@ def validate(c):
             rules,
             "consequence_learning",
             ("enabled",),
-            optional=("max_contexts", "horizon_steps", "update_schedule"),
+            optional=(
+                "max_contexts",
+                "horizon_steps",
+                "update_schedule",
+                "persistent_action_totals",
+            ),
         )
         if rules.get("update_schedule", "continuous") not in ("continuous", "episode"):
             fail(
                 "consequence_learning.update_schedule", "must be continuous or episode"
             )
+        if type(rules.get("persistent_action_totals", False)) is not bool:
+            fail("consequence_learning.persistent_action_totals", "must be boolean")
         if type(rules["enabled"]) is not bool:
             fail("consequence_learning.enabled", "must be boolean")
         num(
@@ -202,6 +209,90 @@ def validate(c):
         p = f"brains.{name}"
         if not isinstance(b, dict) or "type" not in b:
             fail(p + ".type", "required brain type")
+        if b.get("observation_version", 1) == 7:
+            if not isinstance(c.get("species"), dict) or not c["species"]:
+                fail("species", "at least one species required")
+            referenced = [
+                spec.get("allowed_actions")
+                for spec in c.get("species", {}).values()
+                if isinstance(spec, dict) and spec.get("brain") == name
+            ]
+            if referenced and any(value != referenced[0] for value in referenced):
+                fail(
+                    p,
+                    "V7 templates shared across species require identical ordered allowed_actions",
+                )
+            actions = b.get(
+                "observation_actions", referenced[0] if referenced else list(ACTIONS)
+            )
+            # Validate the complete ordered action contract before deriving widths.
+            if (
+                not isinstance(actions, list)
+                or not actions
+                or any(not isinstance(action, str) for action in actions)
+                or len(set(actions)) != len(actions)
+                or any(action not in ACTIONS for action in actions)
+            ):
+                fail(
+                    p + ".observation_actions",
+                    "must match the species ordered allowed_actions",
+                )
+            if referenced and actions != referenced[0]:
+                fail(
+                    p + ".observation_actions",
+                    "must match the species ordered allowed_actions",
+                )
+            c["brains"][name]["observation_actions"] = list(actions)
+            b = {**b, "observation_actions": list(actions)}
+        if "observation_actions" in b:
+            if b.get("observation_version", 1) != 7:
+                fail(p + ".observation_actions", "requires observation_version 7")
+            b = {key: value for key, value in b.items() if key != "observation_actions"}
+        if "late_consequence" in b:
+            obj(b["late_consequence"], p + ".late_consequence", (), ("max_adjustment",))
+            num(
+                b["late_consequence"].get("max_adjustment", 2.0),
+                p + ".late_consequence.max_adjustment",
+                0.001,
+                10,
+            )
+            if (
+                b.get("observation_version") != 7
+                or b["type"] not in ("ppo", "maskable_ppo")
+                or not b.get("consequence_observation")
+            ):
+                fail(
+                    p + ".late_consequence",
+                    "requires V7 PPO/masked PPO with consequence observations",
+                )
+            b = {key: value for key, value in b.items() if key != "late_consequence"}
+        if b.get("observation_version", 1) == 6 or "soft_categories" in b:
+            from wtf.simulation.soft_observations import soft_contract
+
+            if b.get("observation_version", 1) != 6:
+                fail(p + ".soft_categories", "requires observation_version 6")
+            try:
+                soft_contract(b)
+            except ValueError as error:
+                fail(p + ".soft_categories", str(error))
+            b = {k: v for k, v in b.items() if k != "soft_categories"}
+        if "auxiliary_consequence" in b:
+            auxiliary = b["auxiliary_consequence"]
+            obj(auxiliary, p + ".auxiliary_consequence", ("coefficient",))
+            num(
+                auxiliary["coefficient"],
+                p + ".auxiliary_consequence.coefficient",
+                0.000001,
+                1,
+            )
+            if b["type"] not in ("ppo", "maskable_ppo") or not b.get(
+                "consequence_observation", False
+            ):
+                fail(
+                    p + ".auxiliary_consequence",
+                    "requires PPO/masked PPO and consequence observations",
+                )
+            b = {k: v for k, v in b.items() if k != "auxiliary_consequence"}
         if "consequence_scope" in b:
             from wtf.simulation.social import consequence_scope
 
@@ -267,7 +358,7 @@ def validate(c):
             num(b["observation_top_k"], p + ".observation_top_k", 1, 16, True)
             b = {k: v for k, v in b.items() if k != "observation_top_k"}
         if "observation_version" in b:
-            num(b["observation_version"], p + ".observation_version", 1, 4, True)
+            num(b["observation_version"], p + ".observation_version", 1, 7, True)
             b = {k: v for k, v in b.items() if k != "observation_version"}
         if b["type"] == "q_network":
             obj(
@@ -620,6 +711,21 @@ def validate(c):
                 p + ".type",
                 "supported types are q_network, dqn, ddqn, ppo, a2c, reinforce, grpo, recurrent_ppo, qrdqn, maskable_ppo, mappo, discrete_sac, trpo and lstm_ppo",
             )
+    for name, template in c["brains"].items():
+        if template.get("observation_version", 1) == 7:
+            from wtf.simulation.compact_observations import compact_layout
+
+            if compact_layout(template).width > 4096:
+                fail(f"brains.{name}.observation_version", "V7 exceeds 4096 inputs")
+        if template.get("observation_version", 1) == 6:
+            from wtf.simulation.soft_observations import soft_layout
+
+            if soft_layout(template).width <= 4096:
+                continue
+            fail(
+                f"brains.{name}.soft_categories",
+                "V6 exceeds 4096 inputs; reduce top-k, history or scent channels",
+            )
     if not isinstance(c["species"], dict) or not c["species"]:
         fail("species", "at least one species required")
     population = 0
@@ -883,10 +989,13 @@ def validate(c):
             2,
             3,
             4,
+            5,
+            6,
+            7,
         ):
             fail(
                 p + ".brain",
-                "terrain maps require observation_version 2, 3 or 4 on referenced brain templates",
+                "terrain maps require observation_version 2, 3, 4, 5, 6 or 7 on referenced brain templates",
             )
         if "swim" in s["allowed_actions"] and geography is None:
             fail(p + ".allowed_actions", "swim requires a terrain map")
@@ -904,12 +1013,21 @@ def validate(c):
             if s["diet"] == "resource"
             else ["attack_damage", "attack_cost", "energy_per_kill"]
         )
-        obj(s["body"], p + ".body", fields, optional=("water_vision_bonus",))
+        obj(
+            s["body"],
+            p + ".body",
+            fields,
+            optional=("water_vision_bonus", "field_of_view_degrees"),
+        )
         for k in fields:
             num(s["body"][k], f"{p}.body.{k}")
         for k in ("max_energy", "max_health"):
             num(s["body"][k], f"{p}.body.{k}", 0.001)
         num(s["body"]["vision_radius"], p + ".body.vision_radius", 1, 256, True)
+        if type(s["body"].get("field_of_view_degrees", 360)) is not int or s[
+            "body"
+        ].get("field_of_view_degrees", 360) not in (150, 180, 360):
+            fail(p + ".body.field_of_view_degrees", "must be 150, 180 or 360")
         if "water_vision_bonus" in s["body"]:
             num(
                 s["body"]["water_vision_bonus"],

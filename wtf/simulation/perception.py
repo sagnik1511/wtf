@@ -34,6 +34,24 @@ def _difference(bounds, overlap):
     yield from _cells((middle_left, middle_right, max(top, ob + 1), bottom))
 
 
+def _front_points(points, x, y, direction, cosine_squared):
+    """Filter once before the existing native range/occlusion/top-k kernel."""
+    if direction is None:
+        return points
+    hx, hy = direction
+
+    def selected():
+        for point in points:
+            dx, dy = point[2] - x, point[3] - y
+            dot = dx * hx + dy * hy
+            if dot >= 0 and (
+                not cosine_squared or dot * dot >= (dx * dx + dy * dy) * cosine_squared
+            ):
+                yield point
+
+    return selected()
+
+
 class SpatialIndex:
     """Bucket world entities for bounded local perception queries."""
 
@@ -175,7 +193,13 @@ class SpatialIndex:
         ):
             base, bonus = native_range if native_range is not None else (radius, 0)
             point = kernels.native.nearest(
-                points,
+                _front_points(
+                    points,
+                    ax,
+                    ay,
+                    getattr(range_check, "_native_sight_heading", None),
+                    getattr(range_check, "_native_sight_cosine_squared", 0.0),
+                ),
                 ax,
                 ay,
                 animal_id,
@@ -276,7 +300,13 @@ class SpatialIndex:
         ):
             base, bonus = native_range if native_range is not None else (radius, 0)
             offsets = kernels.native.nearest_many(
-                points,
+                _front_points(
+                    points,
+                    ax,
+                    ay,
+                    getattr(range_check, "_native_sight_heading", None),
+                    getattr(range_check, "_native_sight_cosine_squared", 0.0),
+                ),
                 ax,
                 ay,
                 animal_id,

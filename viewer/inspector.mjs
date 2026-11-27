@@ -38,7 +38,7 @@ function gauge(name, value) {
   n.append(el('span', `${name} ${(value * 100).toFixed(0)}%`), track);
   return n;
 }
-function radar(observation, baseFraction) {
+function radar(observation, baseFraction, fieldOfView = 360) {
   const chart = svg('svg', {
     viewBox: '0 0 280 194',
     role: 'img',
@@ -58,6 +58,24 @@ function radar(observation, baseFraction) {
       stroke: visualColor('#415569'),
     }),
   );
+  if ([150, 180].includes(fieldOfView)) {
+    const angle = Math.atan2(observation.heading[1], observation.heading[0]);
+    const half = (fieldOfView * Math.PI) / 360;
+    const start = angle - half,
+      end = angle + half;
+    chart.append(
+      svg('path', {
+        d: `M ${cx} ${cy} L ${cx + r * Math.cos(start)} ${cy + r * Math.sin(start)} A ${r} ${r} 0 0 1 ${cx + r * Math.cos(end)} ${cy + r * Math.sin(end)} Z`,
+        fill: visualColor('#8ac8ff22'),
+        stroke: visualColor('#8ac8ff88'),
+        'data-visual-field': String(fieldOfView),
+      }),
+    );
+    chart.setAttribute(
+      'aria-label',
+      `Sampled observation radar: front ${fieldOfView}-degree visual field; north is up.`,
+    );
+  }
   for (const [x1, y1, x2, y2] of [
     [cx - r, cy, cx + r, cy],
     [cx, cy - r, cx, cy + r],
@@ -130,7 +148,9 @@ function radar(observation, baseFraction) {
     svg(
       'text',
       { x: cx, y: 190, 'text-anchor': 'middle' },
-      'Heading shown · circle = maximum sight',
+      [150, 180].includes(fieldOfView)
+        ? `Blue sector = front ${fieldOfView}° sight`
+        : 'Heading shown · circle = maximum sight',
     ),
   );
   return chart;
@@ -334,6 +354,49 @@ function inputDetails(observation, sections) {
     ),
   );
   fragment.append(neighbors);
+  if (observation.semantic) {
+    const details = el('details', undefined, 'feature-details');
+    details.append(el('summary', 'V6 soft categories'));
+    savedDisclosure(details, 'semantic', sections);
+    const render = () => {
+      if (details.children.length > 1) return;
+      for (const row of observation.semantic)
+        details.append(
+          el(
+            'p',
+            row.members
+              .map((m) => `${m.name}: ${(m.value * 100).toFixed(0)}%`)
+              .join(' · '),
+            'muted',
+          ),
+        );
+      details.append(
+        el(
+          'p',
+          'First 48 nonempty groups. Full semantic inputs remain in the raw vector and brain view.',
+          'muted',
+        ),
+      );
+    };
+    details.ontoggle = () => {
+      sections.semantic = details.open;
+      if (details.open) render();
+    };
+    if (details.open) render();
+    fragment.append(details);
+  }
+  if (observation.opportunities) {
+    const opportunities = el('div', undefined, 'blocked-inputs');
+    for (const [action, value] of Object.entries(observation.opportunities))
+      opportunities.append(
+        el(
+          'span',
+          `${action}: ${value ? 'possible' : 'unavailable'}`,
+          value ? 'open' : 'blocked',
+        ),
+      );
+    fragment.append(opportunities);
+  }
   if (observation.terrain) {
     const t = observation.terrain,
       d = el('details', undefined, 'feature-details');
@@ -395,12 +458,13 @@ function inputDetails(observation, sections) {
   }
   return fragment;
 }
-function predictions(diagnostic) {
+function predictions(diagnostic, heading) {
   const values = predictionView(diagnostic),
     root = section(
-      diagnostic.action_probabilities
-        ? 'Action probabilities'
-        : 'Estimated action returns',
+      heading ??
+        (diagnostic.action_probabilities
+          ? 'Action probabilities'
+          : 'Estimated action returns'),
     );
   if (!values) {
     root.append(el('p', 'No recorded action predictions.', 'muted'));
@@ -538,6 +602,143 @@ function historyGraph(samples, policy, sections) {
   return d;
 }
 
+function compactSenses(observation) {
+  const root = el('div', undefined, 'inspector-visual');
+  for (const scent of observation.compactScents ?? []) {
+    root.append(
+      el(
+        'h4',
+        scent.species === 'blended'
+          ? 'Blended scent'
+          : `${scent.species} ${scent.sex}`,
+      ),
+    );
+    const chart = svg('svg', {
+      viewBox: '0 0 140 140',
+      role: 'img',
+      'aria-label': 'Scent bearing relative to the animal',
+      class: 'compact-scent-bearing',
+      style: 'max-width:96px;display:block',
+    });
+    chart.append(
+      svg('circle', {
+        cx: 70,
+        cy: 70,
+        r: 43,
+        fill: visualColor('#0b131c'),
+        stroke: visualColor('#415569'),
+      }),
+    );
+    for (const [letter, x, y] of [
+      ['F', 70, 18],
+      ['R', 125, 75],
+      ['B', 70, 132],
+      ['L', 15, 75],
+    ])
+      chart.append(svg('text', { x, y, 'text-anchor': 'middle' }, letter));
+    chart.append(
+      svg('circle', { cx: 70, cy: 70, r: 3, fill: visualColor('#fff') }),
+    );
+    if (scent.strength > 0) {
+      const x = 70 + scent.right * 38,
+        y = 70 - scent.forward * 38,
+        color = visualColor('#7de2bd');
+      chart.append(
+        svg('line', {
+          x1: 70,
+          y1: 70,
+          x2: x,
+          y2: y,
+          stroke: color,
+          'stroke-width': 2,
+          opacity: 0.25 + 0.75 * scent.freshness,
+        }),
+        svg('circle', { cx: x, cy: y, r: 4, fill: color }),
+      );
+    }
+    const row = el('div'),
+      signals = el('div');
+    row.style.display = 'grid';
+    row.style.gridTemplateColumns = '96px minmax(0, 1fr)';
+    row.style.alignItems = 'center';
+    row.style.gap = '10px';
+    signals.append(
+      gauge('Strength', scent.strength),
+      gauge('Freshness', scent.freshness),
+    );
+    row.append(chart, signals);
+    root.append(row);
+  }
+  return root;
+}
+function lateConsequences(diagnostic) {
+  const late = diagnostic.late_consequence;
+  if (!late) return null;
+  const actions = Object.keys(diagnostic.action_probabilities ?? {});
+  if (
+    !actions.length ||
+    ![late.base_logits, late.adjustments, late.final_logits].every(
+      (a) =>
+        Array.isArray(a) &&
+        a.length === actions.length &&
+        a.every(Number.isFinite),
+    )
+  )
+    return null;
+  const valid = actions.map(
+    (action) => diagnostic.action_mask?.[action] !== false,
+  );
+  if (!valid.some(Boolean)) return null;
+  const max = Math.max(...late.base_logits.filter((_, i) => valid[i])),
+    weights = late.base_logits.map((v, i) =>
+      valid[i] ? Math.exp(v - max) : 0,
+    ),
+    sum = weights.reduce((a, b) => a + b, 0);
+  const root = section('Learned consequence adjustment');
+  root.append(
+    el(
+      'p',
+      'Private learned logit residual from the evidence saved with this input. Final probabilities below include this adjustment.',
+      'muted',
+    ),
+  );
+  root.append(
+    predictions(
+      {
+        ...diagnostic,
+        action_probabilities: Object.fromEntries(
+          actions.map((a, i) => [a, weights[i] / sum]),
+        ),
+      },
+      'Before consequences',
+    ),
+  );
+  const chart = svg('svg', {
+    viewBox: `0 0 320 ${actions.length * 23 + 15}`,
+    role: 'img',
+    'aria-label': 'Signed consequence adjustments to action logits',
+  });
+  const bound = Math.max(0.001, ...late.adjustments.map(Math.abs));
+  actions.forEach((action, i) => {
+    const v = late.adjustments[i],
+      y = i * 23 + 15,
+      w = (75 * Math.abs(v)) / bound;
+    chart.append(
+      svg('text', { x: 2, y }, label(action)),
+      svg('rect', {
+        x: v < 0 ? 210 - w : 210,
+        y: y - 10,
+        width: w,
+        height: 12,
+        fill: visualColor(v < 0 ? '#ff9aab' : '#7de2bd'),
+      }),
+      svg('text', { x: 316, y, 'text-anchor': 'end' }, v.toFixed(3)),
+    );
+  });
+  root.append(chart);
+  return root;
+}
+
 export function inspectorGraphs({
   consequenceSchedule = 'continuous',
   collectiveAverages = null,
@@ -558,11 +759,17 @@ export function inspectorGraphs({
     inputs.append(
       el(
         'p',
-        `Step ${diagnostic.tick} · v${observation.version} · k=${observation.k} · ${observation.inputs} inputs`,
+        `Step ${diagnostic.tick} · v${observation.version} · k=${observation.k} · ${observation.inputs} inputs${observation.version >= 5 ? ' · forward/right inputs; diagrams face north' : ''}`,
         'muted inspector-note',
       ),
     );
-    inputs.append(radar(observation, base / (base + bonus)));
+    inputs.append(
+      radar(
+        observation,
+        base / (base + bonus),
+        spec.body?.field_of_view_degrees ?? 360,
+      ),
+    );
     const legend = el('div', undefined, 'observation-legend');
     for (const [category, title] of [
       ['food', '■ Food'],
@@ -589,6 +796,14 @@ export function inspectorGraphs({
           'muted inspector-note',
         ),
       );
+    if (observation.version === 6)
+      inputs.append(
+        el(
+          'p',
+          'V6 semantic memberships · diagrams reconstruct category-derived positions. Out-of-band values saturate.',
+          'muted inspector-note',
+        ),
+      );
     inputs.append(inputDetails(observation, sections));
   } else
     inputs.append(
@@ -612,6 +827,10 @@ export function inspectorGraphs({
     inputs,
     ...(observation?.tracking ? [trackingPanel(observation.tracking)] : []),
     ...(collective ? [collective] : []),
+    ...(observation?.compactScents?.length ? [compactSenses(observation)] : []),
+    ...(diagnostic.late_consequence
+      ? [lateConsequences(diagnostic)].filter(Boolean)
+      : []),
     predictions(diagnostic),
     activationPanel(diagnostic, template, { rank, sections }),
     historyGraph(samples, Boolean(diagnostic.action_probabilities), sections),

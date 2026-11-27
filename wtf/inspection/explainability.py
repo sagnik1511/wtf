@@ -2,8 +2,10 @@
 
 from array import array
 import math
-from wtf.simulation.tracking import tracking_names
-from wtf.simulation.social import social_names, social_contract, consequence_scope
+from wtf.simulation.observations import raw_feature_names
+from wtf.simulation.compact_observations import compact_layout
+from wtf.simulation.soft_observations import soft_layout
+from wtf.simulation.social import social_contract, consequence_scope
 
 
 MAX_PARAMETERS = 1_000_000
@@ -25,46 +27,12 @@ POLICIES = {
 
 
 def feature_names(signature):
-    """Name the model inputs in their exact observation-vector order."""
-    names = [
-        "Energy",
-        "Health",
-        "Heading x",
-        "Heading y",
-        "Blocked front",
-        "Blocked right",
-        "Blocked back",
-        "Blocked left",
-    ]
-    for category in ("Food", "Prey", "Predator"):
-        for slot in range(1, signature.get("observation_top_k", 1) + 1):
-            names.extend(
-                f"{category} {slot} {part}"
-                for part in ("dx", "dy", "distance", "present")
-            )
-    version = signature.get("observation_version", 1)
-    if version >= 2:
-        names.extend(["Water depth", "Flow x", "Flow y", "Elevation"])
-        for side in ("Front", "Right", "Back", "Left"):
-            names.extend([f"{side} water", f"{side} climb"])
-    if version >= 3:
-        names.extend(
-            [
-                "Sex",
-                "Maturity",
-                "Cooldown",
-                "Self ready",
-                "Mate dx",
-                "Mate dy",
-                "Mate distance",
-                "Mate present",
-                "Mate ready",
-                "Pair opportunity",
-            ]
-        )
-    if version >= 4:
-        names.extend(["Self consent", "Mate consent", "Consenting pair"])
-    return names + tracking_names(signature) + social_names(signature)
+    """Name exactly the scalar or semantic inputs in the saved model contract."""
+    if signature.get("observation_version", 1) == 7:
+        return list(compact_layout(signature).names)
+    if signature.get("observation_version", 1) == 6:
+        return list(soft_layout(signature).names)
+    return raw_feature_names(signature)
 
 
 def prepare_model(model):
@@ -91,7 +59,7 @@ def prepare_model(model):
     ):
         raise ValueError("Invalid explanation input/action dimensions")
     if (
-        sig.get("observation_version", 1) not in (1, 2, 3, 4)
+        sig.get("observation_version", 1) not in (1, 2, 3, 4, 5, 6, 7)
         or type(sig.get("observation_top_k", 1)) is not int
         or not 1 <= sig.get("observation_top_k", 1) <= 16
     ):
@@ -174,7 +142,7 @@ def prepare_model(model):
         ]
     else:
         p = list(p)
-        width = inputs
+        width = sig.get("policy_inputs", inputs)
         if kind in ("recurrent_ppo", "lstm_ppo"):
             h = sig["recurrent_size"]
             if type(h) is not int or not 1 <= h <= MAX_UNITS:
@@ -238,7 +206,40 @@ def prepare_model(model):
                 dense(layer, width, outputs, "tanh" if i < len(shapes) else "linear")
             )
             width = outputs
-    return {"signature": sig, "layers": layers, "parameters": count}
+    result = {"signature": sig, "layers": layers, "parameters": count}
+    if sig.get("late_consequence_version"):
+        # Load the optional adapter only for explicit archived-weight inference.
+        # Importing the playback server must not load live policy controllers.
+        # pylint: disable-next=import-outside-toplevel
+        from wtf.learning.late_consequence import LateConsequence
+
+        if (
+            sig.get("late_consequence_version") != 1
+            or kind not in ("ppo", "maskable_ppo")
+            or sig.get("observation_version") != 7
+        ):
+            raise ValueError("Invalid late consequence contract")
+        late = LateConsequence(
+            {**sig, "learning_rate": 0.001, "max_grad_norm": 1}, actions
+        )
+        parameters = model.get("late_parameters")
+        if not isinstance(parameters, list) or len(parameters) != 1:
+            raise ValueError("Missing late consequence parameters")
+        late.network.layers = [
+            {
+                "weights": numbers(
+                    parameters[0]["weights"], len(actions) * late.features
+                ),
+                "bias": numbers(parameters[0]["bias"], len(actions)),
+            }
+        ]
+        if any(late.network.layers[0]["bias"]):
+            raise ValueError("Late consequence bias must remain zero")
+        if sig.get("policy_inputs") != late.layout.physical_width:
+            raise ValueError("Invalid late consequence physical width")
+        result["late"] = late
+        result["parameters"] = count
+    return result
 
 
 def _sigmoid(v):
@@ -365,6 +366,8 @@ def explain_model(model, features, action=None, mask=None):
         activations.append(current)
         jacobians.append(jac)
     raw = activations[-1]
+    if "late" in model:
+        raw = model["late"].adjusted(raw, features)
     n_actions = len(actions)
     policy = kind in POLICIES
     valid = [
@@ -399,6 +402,9 @@ def explain_model(model, features, action=None, mask=None):
             gradient[i] = 1 / q
     else:
         gradient[target] = 1.0
+    late_gradient = (
+        model["late"].input_gradient(features, gradient) if "late" in model else None
+    )
     gradients = [None] * len(activations)
     gradients[-1] = gradient
     for index in range(len(layers) - 1, -1, -1):
@@ -417,6 +423,12 @@ def explain_model(model, features, action=None, mask=None):
             sum(local[j] * w[j * width + i] for j in range(size)) for i in range(width)
         ]
         gradients[index] = gradient
+    if late_gradient is not None:
+        gradient = [
+            late_gradient[i] + (gradient[i] if i < len(gradient) else 0.0)
+            for i in range(len(features))
+        ]
+        gradients[0] = gradient
     names = feature_names(sig)
     ranked = sorted(
         range(len(features)), key=lambda i: abs(features[i] * gradient[i]), reverse=True
@@ -463,7 +475,11 @@ def explain_model(model, features, action=None, mask=None):
             ) + " · zero prior memory"
         elif index == len(layers):
             layer_label = (
-                "Output logits"
+                (
+                    "Base logits · late adjustment follows"
+                    if "late" in model
+                    else "Output logits"
+                )
                 if policy
                 else ("Output quantiles" if kind == "qrdqn" else "Output Q")
             )
@@ -504,7 +520,7 @@ def explain_model(model, features, action=None, mask=None):
         width = layer["inputs"]
         for j in selected[index + 1]:
             best = sorted(
-                selected[index],
+                [i for i in selected[index] if i < width],
                 key=lambda i: abs(activations[index][i] * w[j * width + i]),
                 reverse=True,
             )[:3]
@@ -521,6 +537,17 @@ def explain_model(model, features, action=None, mask=None):
                 )
     return {
         "algorithm": kind,
+        **(
+            {
+                "late_consequence": {
+                    "base_logits": activations[-1][:-1],
+                    "adjustments": model["late"].residuals(features),
+                    "final_logits": raw[:-1],
+                }
+            }
+            if "late" in model
+            else {}
+        ),
         "target": actions[target],
         "policy": policy,
         "outputs": [

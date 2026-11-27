@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **308 public documentation pages**, **115 visual files**
+Coverage: **325 public documentation pages**, **124 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -119,6 +119,7 @@ and **8 identical viewer branding copies**.
 | [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Champion chaining between runs (SVG)](visual-previews/diagrams/champion-chaining-between-runs-svg.md) |
 | [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Child only mutation path (SVG)](visual-previews/diagrams/child-only-mutation-path-svg.md) |
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) |
+| [Collective auxiliary (SVG)](visual-previews/diagrams/collective-auxiliary-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Collective auxiliary (SVG)](visual-previews/diagrams/collective-auxiliary-svg.md) |
 | [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Competition (SVG)](visual-previews/diagrams/competition-svg.md) |
 | [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) |
 | [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) |
@@ -149,6 +150,8 @@ and **8 identical viewer branding copies**.
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) |
 | [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Trial actor batching (SVG)](visual-previews/diagrams/trial-actor-batching-svg.md) |
 | [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Two payloads one bounded file at a time (SVG)](visual-previews/diagrams/two-payloads-one-bounded-file-at-a-time-svg.md) |
+| [V6 coefficient reuse (SVG)](visual-previews/diagrams/v6-coefficient-reuse-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [V6 coefficient reuse (SVG)](visual-previews/diagrams/v6-coefficient-reuse-svg.md) |
+| [V7 late consequence (SVG)](visual-previews/diagrams/v7-late-consequence-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [V7 late consequence (SVG)](visual-previews/diagrams/v7-late-consequence-svg.md) |
 | [Weights versus exact state (SVG)](visual-previews/diagrams/weights-versus-exact-state-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Weights versus exact state (SVG)](visual-previews/diagrams/weights-versus-exact-state-svg.md) |
 | [Alpine pass (SVG)](visual-previews/geography/alpine_pass-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Alpine pass (SVG)](visual-previews/geography/alpine_pass-svg.md) |
 | [Canyon (SVG)](visual-previews/geography/canyon-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Canyon (SVG)](visual-previews/geography/canyon-svg.md) |
@@ -204,7 +207,13 @@ and **8 identical viewer branding copies**.
 | [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Brain views (SVG)](visual-previews/viewer/brain-views-svg.md) |
 | [Day night (SVG)](visual-previews/viewer/day-night-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Day night (SVG)](visual-previews/viewer/day-night-svg.md) |
 | [Environment objects (SVG)](visual-previews/viewer/environment-objects-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Environment objects (SVG)](visual-previews/viewer/environment-objects-svg.md) |
+| [Forward vision (SVG)](visual-previews/viewer/forward-vision-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Forward vision (SVG)](visual-previews/viewer/forward-vision-svg.md) |
 | [Object shadows (SVG)](visual-previews/viewer/object-shadows-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Object shadows (SVG)](visual-previews/viewer/object-shadows-svg.md) |
+| [Observation v5 (SVG)](visual-previews/viewer/observation-v5-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation v5 (SVG)](visual-previews/viewer/observation-v5-svg.md) |
+| [Observation v5 v6 (SVG)](visual-previews/viewer/observation-v5-v6-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation v5 v6 (SVG)](visual-previews/viewer/observation-v5-v6-svg.md) |
+| [Observation v6 layout (SVG)](visual-previews/viewer/observation-v6-layout-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation v6 layout (SVG)](visual-previews/viewer/observation-v6-layout-svg.md) |
+| [Observation v6 (SVG)](visual-previews/viewer/observation-v6-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation v6 (SVG)](visual-previews/viewer/observation-v6-svg.md) |
+| [Observation v7 (SVG)](visual-previews/viewer/observation-v7-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Observation v7 (SVG)](visual-previews/viewer/observation-v7-svg.md) |
 | [River feeding (SVG)](visual-previews/viewer/river-feeding-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [River feeding (SVG)](visual-previews/viewer/river-feeding-svg.md) |
 | [Social learning (SVG)](visual-previews/viewer/social-learning-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Social learning (SVG)](visual-previews/viewer/social-learning-svg.md) |
 | [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Terrain and sight (SVG)](visual-previews/viewer/terrain-and-sight-svg.md) |
@@ -315,12 +324,20 @@ and **8 identical viewer branding copies**.
 | [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.30 Bulk gradient conversion and resident DQN optimizers](releases/0.0.2.30.md) | [Home](index.md) → [Calibration](calibration.md) → [V3 benchmark evidence](releases/0.0.2.30.md) |
 | [0.0.2.31 Land-bridge environment](releases/0.0.2.31.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.31](releases/0.0.2.31.md) |
+| [0.0.2.32 Durable collective evidence and private PPO outcome prediction](releases/0.0.2.32.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.32](releases/0.0.2.32.md) |
+| [0.0.2.33 Heading-relative forward vision](releases/0.0.2.33.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.33](releases/0.0.2.33.md) |
+| [0.0.2.34 Body-relative observation V5](releases/0.0.2.34.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.34](releases/0.0.2.34.md) |
+| [0.0.2.35 Soft semantic observation V6](releases/0.0.2.35.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.35](releases/0.0.2.35.md) |
 | [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
 | [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
 | [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
 | [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7](releases/0.0.2.7.md) |
 | [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.8](releases/0.0.2.8.md) |
 | [0.0.2.9 Training capture profiles and frozen inference](releases/0.0.2.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.9](releases/0.0.2.9.md) |
+| [0.0.3.0 Exact V6 allocation and training optimization](releases/0.0.3.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.0](releases/0.0.3.0.md) |
+| [0.0.3.1 Compact V7 and late consequence decisions](releases/0.0.3.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.1](releases/0.0.3.1.md) |
+| [0.0.3.2 Native late-adapter PPO batching](releases/0.0.3.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.2](releases/0.0.3.2.md) |
+| [0.0.3.3 Compact data flow and native auxiliary batching](releases/0.0.3.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.3](releases/0.0.3.3.md) |
 | [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
@@ -356,6 +373,7 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/champion-chaining-between-runs.svg` | [Home](index.md) → [All visuals](visuals.md) → [champion-chaining-between-runs.svg](assets/diagrams/champion-chaining-between-runs.svg) |
 | `assets/diagrams/child-only-mutation-path.svg` | [Home](index.md) → [All visuals](visuals.md) → [child-only-mutation-path.svg](assets/diagrams/child-only-mutation-path.svg) |
 | `assets/diagrams/choose-checks-for-the-change.svg` | [Home](index.md) → [All visuals](visuals.md) → [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
+| `assets/diagrams/collective-auxiliary.svg` | [Home](index.md) → [All visuals](visuals.md) → [collective-auxiliary.svg](assets/diagrams/collective-auxiliary.svg) |
 | `assets/diagrams/competition.svg` | [Home](index.md) → [All visuals](visuals.md) → [competition.svg](assets/diagrams/competition.svg) |
 | `assets/diagrams/cuda-dqn-dataflow.svg` | [Home](index.md) → [All visuals](visuals.md) → [cuda-dqn-dataflow.svg](assets/diagrams/cuda-dqn-dataflow.svg) |
 | `assets/diagrams/cuda-ppo-residency.svg` | [Home](index.md) → [All visuals](visuals.md) → [cuda-ppo-residency.svg](assets/diagrams/cuda-ppo-residency.svg) |
@@ -386,6 +404,8 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/top-k-observation-pipeline.svg` | [Home](index.md) → [All visuals](visuals.md) → [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |
 | `assets/diagrams/trial-actor-batching.svg` | [Home](index.md) → [All visuals](visuals.md) → [trial-actor-batching.svg](assets/diagrams/trial-actor-batching.svg) |
 | `assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg` | [Home](index.md) → [All visuals](visuals.md) → [two-payloads-one-bounded-file-at-a-time.svg](assets/diagrams/two-payloads-one-bounded-file-at-a-time.svg) |
+| `assets/diagrams/v6-coefficient-reuse.svg` | [Home](index.md) → [All visuals](visuals.md) → [v6-coefficient-reuse.svg](assets/diagrams/v6-coefficient-reuse.svg) |
+| `assets/diagrams/v7-late-consequence.svg` | [Home](index.md) → [All visuals](visuals.md) → [v7-late-consequence.svg](assets/diagrams/v7-late-consequence.svg) |
 | `assets/diagrams/weights-versus-exact-state.svg` | [Home](index.md) → [All visuals](visuals.md) → [weights-versus-exact-state.svg](assets/diagrams/weights-versus-exact-state.svg) |
 
 ## Map diagrams
@@ -470,7 +490,13 @@ and **8 identical viewer branding copies**.
 | `assets/viewer/brain-views.svg` | [Home](index.md) → [All visuals](visuals.md) → [brain-views.svg](assets/viewer/brain-views.svg) |
 | `assets/viewer/day-night.svg` | [Home](index.md) → [All visuals](visuals.md) → [day-night.svg](assets/viewer/day-night.svg) |
 | `assets/viewer/environment-objects.svg` | [Home](index.md) → [All visuals](visuals.md) → [environment-objects.svg](assets/viewer/environment-objects.svg) |
+| `assets/viewer/forward-vision.svg` | [Home](index.md) → [All visuals](visuals.md) → [forward-vision.svg](assets/viewer/forward-vision.svg) |
 | `assets/viewer/object-shadows.svg` | [Home](index.md) → [All visuals](visuals.md) → [object-shadows.svg](assets/viewer/object-shadows.svg) |
+| `assets/viewer/observation-v5-v6.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-v5-v6.svg](assets/viewer/observation-v5-v6.svg) |
+| `assets/viewer/observation-v5.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-v5.svg](assets/viewer/observation-v5.svg) |
+| `assets/viewer/observation-v6-layout.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-v6-layout.svg](assets/viewer/observation-v6-layout.svg) |
+| `assets/viewer/observation-v6.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-v6.svg](assets/viewer/observation-v6.svg) |
+| `assets/viewer/observation-v7.svg` | [Home](index.md) → [All visuals](visuals.md) → [observation-v7.svg](assets/viewer/observation-v7.svg) |
 | `assets/viewer/river-feeding.svg` | [Home](index.md) → [All visuals](visuals.md) → [river-feeding.svg](assets/viewer/river-feeding.svg) |
 | `assets/viewer/social-learning.svg` | [Home](index.md) → [All visuals](visuals.md) → [social-learning.svg](assets/viewer/social-learning.svg) |
 | `assets/viewer/terrain-and-sight.svg` | [Home](index.md) → [All visuals](visuals.md) → [terrain-and-sight.svg](assets/viewer/terrain-and-sight.svg) |

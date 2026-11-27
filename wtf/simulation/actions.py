@@ -1,5 +1,7 @@
 """Shared action groups and replay movement labels; no world dependencies."""
 
+DIRECTIONS = ((0, -1), (1, 0), (0, 1), (-1, 0))
+
 ACTIONS = (
     "move_forward",
     "move_backward",

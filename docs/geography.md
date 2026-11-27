@@ -20,9 +20,13 @@ Optional presets cover several map layouts, keeping one prey species and one pre
 | [alpine_pass.json](../environments/alpine_pass.json) | PPO rocky ridge, stepped slopes and two broad low passes; no swim action |
 | [land_bridge.json](../environments/land_bridge.json) | PPO for both species; two terraced hilltops connected by a three-cell-wide low dry bridge, with shallow shores and still water |
 | [land_bridge_behaviors.json](../environments/land_bridge_behaviors.json) | Same hilltops and bridge with ordinary PPO, local social inputs, both consequence scopes, scent/history, day–night and challenges |
+| [land_bridge_collective.json](../environments/land_bridge_collective.json) | Same behavior-rich bridge with durable species/action totals and private PPO auxiliary outcome heads |
 | [lake_islands.json](../environments/lake_islands.json) | PPO still-water lake, shallow shores, deeper basin and three dry islands |
 | [grasslands.json](../environments/grasslands.json) | PPO for both species; open dry plain, sparse rocky outcrops and a low knoll |
 | [seaside.json](../environments/seaside.json) | PPO for both species; coastline, shallow shore, deeper water and an alongshore current |
+| [seaside_150_v6.json](../environments/seaside_150_v6.json) | Same ordinary-PPO collective coast as V5, using opt-in soft semantic observations |
+| [seaside_150_v5.json](../environments/seaside_150_v5.json) | Same collective PPO coast as seaside_150, with V5 body-relative inputs and immediate opportunities |
+| [seaside_150.json](../environments/seaside_150.json) | PPO coast with 150° vision, visible social outcomes, persistent collective consequences and private auxiliary heads; evidence published between episodes |
 | [seaside_social.json](../environments/seaside_social.json) | The same coast with optional [collective learning](social-learning.md) and compact capture |
 | [rolling_hills.json](../environments/rolling_hills.json) | PPO for both species; rounded terraced hills, gradual slopes and summit rocks |
 | [wetlands.json](../environments/wetlands.json) | PPO for both species; slow shallow channels and two broad dry causeways |
@@ -295,6 +299,11 @@ See [collective learning](social-learning.md), [tracking and scent](tracking.md)
 [day–night](day-night.md) and [competition](competition.md) for each feature's
 semantics. Continuous publication is still selectable with
 `--consequence-update-schedule continuous`.
+
+The [collective-learning variant](social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains)
+adds persistent general totals, independent auxiliary outcome heads and front
+180° vision without changing this map or movement/reproduction costs. Use `land_bridge_collective` to opt in;
+keep `land_bridge_behaviors` for the earlier observation-only setup.
 
 ## Recorded terrain previews
 
@@ -598,3 +607,7 @@ The per-species [`spawn.mode`](species.md#adjacent-founder-pairs) option can sta
 female/male founders on adjacent dry cells. It respects existing enclosure zones,
 obstacles and walkable slopes. It changes neither terrain physics nor mating
 radius, eligibility, consent or newborn placement.
+
+The `land_bridge_collective_150` preset keeps the collective bridge setup with
+`field_of_view_degrees: 150` for both species; use it to compare a narrower
+forward cone with `land_bridge_collective` (180°). Other settings remain the same.

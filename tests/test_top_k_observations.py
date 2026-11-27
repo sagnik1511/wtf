@@ -80,7 +80,7 @@ def reference_targets(world, animal, k):
 
 class TopKObservationTests(unittest.TestCase):
     def test_dimensions_defaults_validation_and_model_signatures(self):
-        for version, base in ((1, 20), (2, 32), (3, 42)):
+        for version, base in ((1, 20), (2, 32), (3, 42), (4, 45), (5, 48)):
             for k in (1, 4, 16):
                 c = config()
                 for b in c["brains"].values():
@@ -206,7 +206,7 @@ class TopKObservationTests(unittest.TestCase):
         # pylint: disable=duplicate-code
 
         for kind in KINDS:
-            for version in (1, 2, 3):
+            for version in (1, 2, 3, 4, 5):
                 with self.subTest(kind=kind, version=version):
                     c = environment(kind, 0)
                     # Species can have different k even when they formerly shared a template.

@@ -5,6 +5,8 @@ Each animal owns all network, optimizer, rollout, and random-generator state.
 """
 
 import copy
+from array import array
+from itertools import chain
 import math
 import random
 from operator import mul
@@ -15,11 +17,16 @@ from wtf.native import kernels
 from wtf.native.kernels import gradient_zeros
 from wtf.native.numeric import Float32, packed, plain, precision_of, restore_numeric
 from wtf.learning.brain import INPUTS, observation_inputs
+from wtf.learning.late_consequence import LateConsequence, policy_input_width
 from wtf.learning.optimization import AdamOptimizer
 
 
 # Transient, thread/task-local execution context; never retained by a brain/checkpoint.
 PPO_ACCELERATOR = ContextVar("ppo_accelerator", default=None)
+# Retain the stock optimizer identity even when callers replace a class method.
+# This private mixin method is deliberately captured as the native eligibility contract.
+# pylint: disable-next=protected-access
+_STANDARD_ADAM_STEP = AdamOptimizer._adam_step
 
 
 class RolloutStep(NamedTuple):
@@ -354,6 +361,22 @@ class MLP:
         ]
 
 
+# Auxiliary fusion must not bypass later class-level numerical customizations.
+_AUXILIARY_MLP_HOOKS = {
+    name: getattr(MLP, name) for name in ("forward", "accumulate_gradient")
+}
+
+
+class PhysicalMLP(MLP):
+    """Evidence travels with rollout samples but enters only the late adapter."""
+
+    def forward(self, observation):
+        return super().forward(observation[: self.sizes[0]])
+
+    def _predict(self, observation, value_only=False, output_range=None):
+        return super()._predict(observation[: self.sizes[0]], value_only, output_range)
+
+
 class PPOBrain(AdamOptimizer):
     """Independent clipped policy-gradient learner with private rollout state."""
 
@@ -376,13 +399,24 @@ class PPOBrain(AdamOptimizer):
         self.pending = None
         self.steps = self.updates = self.rollout_updates = 0
         self.last_metrics = {}
+        if "late_consequence" in config:
+            self.late = LateConsequence(config, actions)
+        if "auxiliary_consequence" in config:
+            # Optional only: constructing the head never consumes policy RNGs.
+            # pylint: disable=import-outside-toplevel,cyclic-import
+            from wtf.learning.auxiliary_consequence import AuxiliaryConsequence
+
+            self.auxiliary = AuxiliaryConsequence(
+                config, self.network.sizes[-2], base_seed
+            )
 
     def _new_network(self, config, actions, seed):
-        return MLP(
+        cls = PhysicalMLP if "late_consequence" in config else MLP
+        return cls(
             config["network"]["hidden_layers"],
             actions,
             seed,
-            inputs=observation_inputs(config),
+            inputs=policy_input_width(config),
         )
 
     def distribution(self, outputs, observation):
@@ -392,10 +426,14 @@ class PPOBrain(AdamOptimizer):
         # consume every input.
         # pylint: disable=unused-argument
 
+        if hasattr(self, "late"):
+            outputs = self.late.adjusted(outputs, observation)
         return policy_distribution(outputs[:-1])
 
     def objective(self, outputs, step, advantage, target):
         """Compute the policy objective and gradients for a stored sample."""
+        if hasattr(self, "late"):
+            outputs = self.late.adjusted(outputs, step.observation)
         return loss_and_gradient(
             outputs, step.action, step.log_probability, advantage, target, self.config
         )
@@ -475,6 +513,8 @@ class PPOBrain(AdamOptimizer):
 
     def _update(self):
 
+        # Keep the KL gate and both accepted optimizer commits in one transaction.
+        # pylint: disable=too-many-statements
         # Keep this ordered phase and its shared state together; splitting it only to
         # meet a count obscures the contract.
         # pylint: disable=too-many-branches
@@ -511,16 +551,83 @@ class PPOBrain(AdamOptimizer):
         totals, samples, stopped = {}, 0, False
         gradients = None
         indices = list(range(len(self.rollout)))
-        from wtf.learning.contextual_ppo import LocalMLP, MaskablePPOBrain
+        from wtf.learning.contextual_ppo import (
+            LocalMLP,
+            MaskablePPOBrain,
+            _NATIVE_MASKED_OBJECTIVE,
+        )
 
         prepared_samples = None
+        prepared_auxiliary = None
         masked_batch = (
             type(self) is MaskablePPOBrain
+            and not hasattr(self, "late")
             and type(self.network) is LocalMLP
             and "forward" not in vars(self.network)
             and getattr(self.objective, "__func__", None) is MaskablePPOBrain.objective
             and kernels.available("masked_ppo_batch")
         )
+        late_batch = (
+            kernels.available("late_ppo_batch")
+            and type(self) in (PPOBrain, MaskablePPOBrain)
+            and type(self.network) in (PhysicalMLP, LocalMLP)
+            and getattr(self.objective, "__func__", None)
+            is (
+                _NATIVE_MASKED_OBJECTIVE
+                if type(self) is MaskablePPOBrain
+                else _NATIVE_PPO_OBJECTIVE
+            )
+            and getattr(self.objective, "__module__", "")
+            in ("wtf.learning.ppo", "wtf.learning.contextual_ppo")
+            and "_adam_step" not in vars(self)
+            and getattr(self._adam_step, "__func__", None) is _STANDARD_ADAM_STEP
+            and hasattr(self, "late")
+            and self.late.native_compatible()
+            and all(
+                name not in vars(self.network)
+                for name in (
+                    "forward",
+                    "accumulate_gradient",
+                    "zeros",
+                    "clear_gradients",
+                )
+            )
+            and all(
+                getattr(getattr(type(self.network), name), "__module__", "")
+                in ("wtf.learning.ppo", "wtf.learning.contextual_ppo")
+                for name in (
+                    "forward",
+                    "accumulate_gradient",
+                    "zeros",
+                    "clear_gradients",
+                )
+            )
+            and isinstance(self.network.layers[0]["weights"], Float32)
+            and isinstance(self.late.network.layers[0]["weights"], Float32)
+        )
+        if late_batch:
+            width = self.network.sizes[0]
+            masks = type(self) is MaskablePPOBrain
+            inputs = observation_inputs(self.config)
+            prepared_late = [
+                (
+                    step.observation[:width],
+                    step.action,
+                    step.log_probability,
+                    advantage,
+                    target,
+                    (
+                        tuple(step.observation[inputs:])
+                        if masks
+                        else (True,) * len(self.actions)
+                    ),
+                    array(
+                        "d",
+                        chain.from_iterable(self.late.feature_rows(step.observation)),
+                    ),
+                )
+                for step, advantage, target in zip(self.rollout, advantages, targets)
+            ]
         for _ in range(c["epochs"]):
             self.training_rng.shuffle(indices)
             for offset in range(0, len(indices), c["batch_size"]):
@@ -530,7 +637,22 @@ class PPOBrain(AdamOptimizer):
                 else:
                     self.network.clear_gradients(gradients)
                 batch_metrics = {}
-                if (
+                late_gradients = (
+                    self.late.network.zeros() if hasattr(self, "late") else None
+                )
+                if late_batch:
+                    batch_metrics = kernels.native.late_ppo_batch(
+                        self.network.layers,
+                        gradients,
+                        self.late.network.layers[0]["weights"],
+                        late_gradients[0]["weights"],
+                        [prepared_late[i] for i in batch],
+                        c["clip_ratio"],
+                        c["entropy_coefficient"],
+                        c["value_coefficient"],
+                        self.late.bound,
+                    )
+                elif (
                     masked_batch
                     or (
                         kernels.available("ppo_batch")
@@ -570,6 +692,10 @@ class PPOBrain(AdamOptimizer):
                         self.network.accumulate_gradient(
                             activations, derivative, gradients
                         )
+                        if late_gradients is not None:
+                            self.late.accumulate(
+                                step.observation, derivative, late_gradients
+                            )
                         for key, value in info.items():
                             batch_metrics[key] = batch_metrics.get(key, 0.0) + value
                 # Stop before an excessive policy update; value and policy
@@ -581,7 +707,41 @@ class PPOBrain(AdamOptimizer):
                 ):
                     stopped = True
                     break
+                auxiliary = getattr(self, "auxiliary", None)
+                auxiliary_proposal = None
+                if auxiliary is not None:
+                    if (
+                        auxiliary.preparation_compatible()
+                        and getattr(self._adam_step, "__func__", None)
+                        is _STANDARD_ADAM_STEP
+                    ):
+                        if prepared_auxiliary is None:
+                            prepared_auxiliary = auxiliary.prepare(
+                                [step.observation for step in self.rollout],
+                                self.network.sizes[0],
+                            )
+                        auxiliary_metrics, auxiliary_proposal = (
+                            auxiliary.accumulate_prepared(
+                                self.network,
+                                [prepared_auxiliary[i] for i in batch],
+                                gradients,
+                            )
+                        )
+                    else:
+                        auxiliary_metrics, auxiliary_proposal = auxiliary.accumulate(
+                            self.network,
+                            [self.rollout[i].observation for i in batch],
+                            gradients,
+                        )
+                    batch_metrics.update(auxiliary_metrics)
                 self._adam_step(gradients, len(batch))
+                if late_gradients is not None:
+                    self.late.apply(late_gradients, len(batch))
+                if (
+                    auxiliary_proposal is not None
+                    and auxiliary_metrics["auxiliary_coverage"]
+                ):
+                    auxiliary.apply(auxiliary_proposal, len(batch))
                 samples += len(batch)
                 for key, value in batch_metrics.items():
                     totals[key] = totals.get(key, 0.0) + value
@@ -601,7 +761,9 @@ class PPOBrain(AdamOptimizer):
             outputs, layers = forward(observation)
         else:
             outputs = self.network.predict(observation)
-        probabilities, logs = self.distribution(outputs, observation)
+        probabilities, logs, late_info = self._diagnostic_distribution(
+            outputs, observation
+        )
         info = {
             "algorithm": self.algorithm,
             "buffer_kind": "rollout",
@@ -615,7 +777,53 @@ class PPOBrain(AdamOptimizer):
             "rollout_size": len(self.rollout),
             "training_metrics": self.last_metrics.copy(),
         }
+        if late_info is not None:
+            info["late_consequence"] = late_info
         return activation_sample(info, layers[1:-1]) if include_activations else info
+
+    def _diagnostic_distribution(self, outputs, observation):
+        """Reuse one stock residual; custom distribution/adapter hooks stay authoritative."""
+        # Contextual PPO imports this module, so defer its stock hook identities.
+        # Exact stock classes prevent bypassing custom distribution semantics.
+        # pylint: disable=import-outside-toplevel,cyclic-import,unidiomatic-typecheck
+        from wtf.learning.contextual_ppo import (
+            MaskablePPOBrain,
+            _NATIVE_MASKED_DISTRIBUTION,
+        )
+
+        if not hasattr(self, "late"):
+            return (*self.distribution(outputs, observation), None)
+        distribution = getattr(self.distribution, "__func__", None)
+        stock = (
+            type(self) is PPOBrain and distribution is _NATIVE_PPO_DISTRIBUTION
+        ) or (
+            type(self) is MaskablePPOBrain
+            and distribution is _NATIVE_MASKED_DISTRIBUTION
+        )
+        if stock and self.late.native_compatible():
+            adjustments = self.late.residuals(observation)
+            final = [a + b for a, b in zip(outputs[:-1], adjustments)]
+            if type(self) is MaskablePPOBrain:
+                mask = observation[observation_inputs(self.config) :]
+                if len(mask) != len(self.actions) or not any(mask):
+                    raise ValueError("Missing or empty action mask")
+                logits = [v if valid else -1e30 for v, valid in zip(final, mask)]
+            else:
+                logits = final
+            probabilities, logs = policy_distribution(logits)
+        else:
+            probabilities, logs = self.distribution(outputs, observation)
+            adjustments = self.late.residuals(observation)
+            final = self.late.adjusted(outputs, observation)[:-1]
+        return (
+            probabilities,
+            logs,
+            {
+                "base_logits": list(outputs[:-1]),
+                "adjustments": adjustments,
+                "final_logits": final,
+            },
+        )
 
     def checkpoint(self):
         """Serialize state required to resume this component."""
@@ -624,7 +832,7 @@ class PPOBrain(AdamOptimizer):
         # preserve their exact contracts.
         # pylint: disable=duplicate-code
 
-        return {
+        state = {
             "algorithm": self.algorithm,
             "precision": precision_of(self),
             "config": copy.deepcopy(self.config),
@@ -641,6 +849,11 @@ class PPOBrain(AdamOptimizer):
             "rng_state": self.rng.getstate(),
             "training_rng_state": self.training_rng.getstate(),
         }
+        if hasattr(self, "auxiliary"):
+            state["auxiliary"] = self.auxiliary.checkpoint()
+        if hasattr(self, "late"):
+            state["late"] = self.late.checkpoint()
+        return state
 
     @classmethod
     def restore(cls, state):
@@ -659,6 +872,10 @@ class PPOBrain(AdamOptimizer):
         ):
             setattr(b, key, copy.deepcopy(state[key]))
         restore_numeric(b, state)
+        if hasattr(b, "late"):
+            b.late.restore_state(state["late"], precision_of(b))
+        if hasattr(b, "auxiliary"):
+            b.auxiliary.restore_state(state["auxiliary"])
         b.rollout = [
             RolloutStep(
                 tuple(s["observation"]),
@@ -685,3 +902,9 @@ class PPOBrain(AdamOptimizer):
         b.rng.setstate(tuples(state["rng_state"]))
         b.training_rng.setstate(tuples(state["training_rng_state"]))
         return b
+
+
+# Preserve the original late-batch loss contract across class-level wrappers.
+_NATIVE_PPO_OBJECTIVE = PPOBrain.objective
+
+_NATIVE_PPO_DISTRIBUTION = PPOBrain.distribution

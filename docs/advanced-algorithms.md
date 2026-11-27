@@ -2,6 +2,12 @@
 
 [Algorithms](algorithms.md) · [Configuration](configuration.md) · [Saved brains](brain-library.md) · [Analysis](analysis.md)
 
+Compact V7 is supported by every learner here. The optional learned late
+consequence adapter currently supports **masked PPO only among these variants**;
+recurrent PPO, QR-DQN and MAPPO keep consequences in the ordinary input path.
+See the [full support matrix](observations.md#algorithm-support-for-v7-and-consequence-handling)
+for ordinary PPO and the other algorithm families.
+
 For the additional generic `discrete_sac`, `trpo` and `lstm_ppo` types, see
 [complete templates and lifecycle contracts](additional-policies.md).
 

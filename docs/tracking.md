@@ -117,7 +117,10 @@ sex channels do not reveal individual identity, age, health or mating consent.
 
 ## Input contract and model compatibility
 
-The existing observation-version 1–4 blocks stay in their current order. Optional
+The existing observation-version 1–4 blocks stay in their current order. V5
+projects directional memory and scent into the current body frame and adds three
+opportunities before these optional blocks; the viewer projects them back to
+north-up using the sampled heading. See [V5](observations.md#observation-version-5). Optional
 movement and scent blocks are appended afterwards. For `K` visible slots per
 category and `H > 0` history steps, movement adds `2 * K * (7 + 3 * H)` values:
 
@@ -255,3 +258,15 @@ has been studied in [rats](https://www.nature.com/articles/ncomms1712) and
 [dogs](https://pubmed.ncbi.nlm.nih.gov/8371085/). These motivate separate visual
 memory and environmental traces. Fixed windows, linear fading and grouped sector
 strengths are engineering abstractions, not universal biological laws.
+
+
+## Compact V7 sensing
+
+V1–V6 retain the full numeric/semantic layouts described above. Optional
+[V7](observations.md#observation-version-7) summarizes each movement track in
+seven values independent of history-window length and each scent channel in
+four values: body-relative direction, strength and freshness. This loses path
+turns and alternative scent directions; it does not expose hidden movement.
+The current-cell scent is excluded from the directional summary, while older
+own traces remain. Replay inspection labels summaries explicitly and does not
+invent a nine-region scent heatmap or historical sightings.

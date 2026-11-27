@@ -124,7 +124,7 @@ class InferenceExplanationTests(unittest.TestCase):
                     )
 
     def test_feature_names_and_masked_action_have_explicit_semantics(self):
-        for version, width in ((1, 20), (2, 32), (3, 42), (4, 45)):
+        for version, width in ((1, 20), (2, 32), (3, 42), (4, 45), (5, 48)):
             self.assertEqual(
                 len(
                     feature_names(

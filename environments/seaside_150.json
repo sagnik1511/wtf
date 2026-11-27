@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "name": "seaside_150",
+  "description": "Seaside PPO with 150-degree forward vision, visible social outcomes, persistent species/action totals, both consequence scopes and independent auxiliary heads; consequence evidence published between episodes",
+  "seed": 42,
+  "world": {
+    "width": 40,
+    "height": 28,
+    "boundary": "closed",
+    "max_steps": 1500
+  },
+  "obstacles": {
+    "generation": "explicit",
+    "occupied_fraction": 0,
+    "explicit_cells": []
+  },
+  "resources": {
+    "patch_count": 80,
+    "capacity_per_patch": 20,
+    "initial_quantity_per_patch": 10,
+    "growth_per_step": 0.1
+  },
+  "species": {
+    "prey": {
+      "initial_population": 64,
+      "diet": "resource",
+      "allowed_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce",
+        "swim"
+      ],
+      "body": {
+        "initial_energy": 60,
+        "max_energy": 100,
+        "max_health": 40,
+        "vision_radius": 10,
+        "living_cost": 0.1,
+        "movement_cost": 0.1,
+        "starvation_damage": 1,
+        "bite_size": 4,
+        "energy_per_food_unit": 2,
+        "water_vision_bonus": 3,
+        "field_of_view_degrees": 150
+      },
+      "brain": "prey_ppo",
+      "rewards": {
+        "per_energy_gained": 0.1,
+        "per_damage_taken": -0.2,
+        "death": -10,
+        "per_damage_dealt": 0.0,
+        "per_energy_cost": -0.01,
+        "failed_action": -0.01,
+        "per_offspring": 3.0
+      },
+      "reproduction": {
+        "enabled": true,
+        "health_threshold": 32.0,
+        "min_age_steps": 300,
+        "cooldown_steps": 225,
+        "min_energy": 30,
+        "energy_cost": 10,
+        "max_population": 96,
+        "age_deviation_pct": 10,
+        "cooldown_deviation_pct": 10,
+        "mate_radius": 2,
+        "intent_steps": 5
+      },
+      "learning_rate_multiplier": 1.0,
+      "champion_selection": {
+        "criterion": "lifespan"
+      },
+      "mutation": {
+        "enabled": true,
+        "probability_per_birth": 0.0001,
+        "max_changed_weights": 3,
+        "noise_std": 0.005
+      },
+      "locomotion": {
+        "swim_min_health": 18,
+        "swim_energy_cost": 1.5,
+        "water_energy_cost": 0.25,
+        "drowning_damage": 2,
+        "uphill_energy_cost": 1.0,
+        "max_climb": 1
+      }
+    },
+    "predator": {
+      "initial_population": 6,
+      "diet": "prey",
+      "allowed_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce",
+        "swim"
+      ],
+      "body": {
+        "initial_energy": 80,
+        "max_energy": 120,
+        "max_health": 55,
+        "vision_radius": 8,
+        "living_cost": 0.15,
+        "movement_cost": 0.2,
+        "starvation_damage": 1,
+        "attack_damage": 40,
+        "attack_cost": 0.25,
+        "energy_per_kill": 80,
+        "water_vision_bonus": 3,
+        "field_of_view_degrees": 150
+      },
+      "brain": "predator_ppo",
+      "rewards": {
+        "per_energy_gained": 0.1,
+        "per_damage_taken": -0.2,
+        "death": -10,
+        "per_damage_dealt": 0.05,
+        "per_energy_cost": -0.01,
+        "failed_action": -0.01,
+        "per_offspring": 3.0
+      },
+      "reproduction": {
+        "enabled": true,
+        "health_threshold": 44.0,
+        "min_age_steps": 100,
+        "cooldown_steps": 200,
+        "min_energy": 30,
+        "energy_cost": 10,
+        "max_population": 24,
+        "age_deviation_pct": 10,
+        "cooldown_deviation_pct": 10,
+        "mate_radius": 3,
+        "intent_steps": 5
+      },
+      "learning_rate_multiplier": 1.25,
+      "champion_selection": {
+        "criterion": "lifespan"
+      },
+      "mutation": {
+        "enabled": true,
+        "probability_per_birth": 0.0001,
+        "max_changed_weights": 3,
+        "noise_std": 0.005
+      },
+      "locomotion": {
+        "swim_min_health": 25,
+        "swim_energy_cost": 2.0,
+        "water_energy_cost": 0.25,
+        "drowning_damage": 2,
+        "uphill_energy_cost": 1.3,
+        "max_climb": 1
+      }
+    }
+  },
+  "brains": {
+    "prey_ppo": {
+      "type": "ppo",
+      "network": {
+        "type": "mlp",
+        "hidden_layers": [16],
+        "activation": "tanh"
+      },
+      "learning_rate": 0.001,
+      "discount_factor": 0.98,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coefficient": 0.03,
+      "value_coefficient": 0.5,
+      "rollout_steps": 64,
+      "epochs": 4,
+      "batch_size": 16,
+      "max_grad_norm": 0.5,
+      "normalize_advantages": true,
+      "target_kl": 0.03,
+      "observation_version": 4,
+      "observation_top_k": 3,
+      "social_observation": {
+        "history_steps": 4,
+        "max_neighbors": 8
+      },
+      "consequence_observation": true,
+      "consequence_scope": "both",
+      "auxiliary_consequence": {
+        "coefficient": 0.1
+      }
+    },
+    "predator_ppo": {
+      "type": "ppo",
+      "network": {
+        "type": "mlp",
+        "hidden_layers": [64, 32],
+        "activation": "tanh"
+      },
+      "learning_rate": 0.001,
+      "discount_factor": 0.98,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coefficient": 0.03,
+      "value_coefficient": 0.5,
+      "rollout_steps": 64,
+      "epochs": 4,
+      "batch_size": 16,
+      "max_grad_norm": 0.5,
+      "normalize_advantages": true,
+      "target_kl": 0.03,
+      "observation_version": 4,
+      "observation_top_k": 10,
+      "social_observation": {
+        "history_steps": 4,
+        "max_neighbors": 8
+      },
+      "consequence_observation": true,
+      "consequence_scope": "both",
+      "auxiliary_consequence": {
+        "coefficient": 0.1
+      }
+    }
+  },
+  "experiment": {
+    "runs": 5,
+    "retain_brains_between_runs": true,
+    "world_seed_policy": "random",
+    "record_metrics_every_steps": 10,
+    "checkpoint_every_runs": 1,
+    "chain_best_brains": true,
+    "checkpoint_every_steps": 500,
+    "checkpoint_keep_last": 2,
+    "checkpoint_shared_metadata": false,
+    "brain_save_every_steps": 250,
+    "brain_keep_last": 2,
+    "brain_save_min_score_delta": 0,
+    "promote_only_improved": true
+  },
+  "recording": {
+    "enabled": true,
+    "frame_every_steps": 1,
+    "frames_per_chunk": 64,
+    "diagnostics_every_steps": 10,
+    "encoding": "binary",
+    "compression": "xz",
+    "compression_level": 6,
+    "profile": "full",
+    "record_activations": true,
+    "record_last_episodes": 2
+  },
+  "terrain": {
+    "map_file": "maps/seaside.json"
+  },
+  "consequence_learning": {
+    "enabled": true,
+    "max_contexts": 512,
+    "horizon_steps": 16,
+    "update_schedule": "episode",
+    "persistent_action_totals": true
+  }
+}

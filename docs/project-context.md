@@ -51,6 +51,29 @@ and checkpoint/resume numbering. Disabled capture still wins, and early stopping
 can end before the selected window. No past files are pruned.
 Discarded storage-format probes remain local and Git-ignored, not runtime codecs.
 
+## Optional private consequence auxiliary objective
+
+`consequence_learning.persistent_action_totals` keeps 48 species-owned general
+counts outside context eviction, following the configured publication schedule.
+Logical v3 consequence snapshots retain published and staged counts; legacy
+imports bootstrap only available rows. PPO/masked-PPO `auxiliary_consequence`
+trains a private 36-output physical-outcome head at accepted minibatches using
+own rollout observations, with target-bearing consequence fields zeroed. No
+foreign PPO actions/rewards are shared. Heads participate in signatures,
+champions, inheritance, mutation and exact optimizer recovery. Other algorithms
+reject this setting. Auxiliary PPO training falls back to CPU; see
+[contracts and comparison workflow](social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains).
+
+## Optional forward vision
+
+Species body `field_of_view_degrees` defaults to 360 and accepts front-facing
+150 and 180. Filter fresh targets, mates, visual history updates and local witnesses
+consistently; preserve nonvisual scent/memory, local physical affordances and
+mating radius/consent. Top-k cache keys must include heading and angle for a directional field.
+Existing native selectors receive filtered candidates without a new kernel ABI.
+Current board overlays and sampled inspector sectors use their own correct
+heading/time. See [forward visual fields](observations.md#forward-visual-field).
+
 ## Purpose and decisions
 
 WTF — Wildlife Trial Framework — explores independently learning prey and
@@ -337,3 +360,57 @@ checks, and a fresh portable wheel/sdist build with strict metadata
 validation. Reviewers also inspect full changed-file Pylint and relevant native,
 installation and documentation checks; see the
 [preflight guide](development.md#python-ci-and-build-preflight).
+
+## Observation V5
+
+V5 is opt-in; V1–V4 remain unchanged. Keep coordinate transforms in
+`wtf/simulation/observations.py`: target/mate vectors, flow, personal history and
+scent rotate into the current forward/right basis. Three sensed immediate
+attack/eat/swim opportunities follow consent, before tracking/social blocks.
+These never mask ordinary PPO. Distinct signatures reject V4 weights; viewer
+raw labels use the input frame while diagrams use recorded-heading world
+projections. Preserve all optional widths and private brain ownership. See
+[observation definitions](observations.md#observation-version-5).
+
+## Observation V6
+
+`soft_observations.py` compiles bounded immutable layout plans over canonical V5
+features. V6 uses soft scalar/bearing categories, retaining exact flags. Custom
+knots are validated, resolved into signatures and incompatible across different
+values. Saturation is explicit; category-derived viewer coordinates are not
+new world truth. Optional blocks expand too, with a 4096-input V6 guard. Keep
+private auxiliary targets decoded and every encoded consequence channel zeroed
+on that branch. Earlier versions remain exact. See [V6](observations.md#observation-version-6).
+
+
+V6 layout plans own slotted immutable offsets and zero bases. Process-wide numeric
+LRUs contain only complete scalar/knot or vector keys and immutable coefficients;
+never retain animals, observations or private learner state. Scalar signed-zero
+handling and raw scalar types are part of exactness. Auxiliary no-evidence
+shortcuts apply only to the original target decoder, preserving extension hooks.
+See [V6 performance contracts](performance.md#v6-semantic-encoding-and-auxiliary-work).
+
+
+## Compact V7 and late policy evidence
+
+Keep `compact_observations.py` the owner of numeric V7 ordering: remove derivable
+distances, retain explicit presence, summarize personally seen motion and encode
+four-value anonymous scent bearings. V7 action order is resolved/validated per
+brain template; unlike dynamic masks, it removes only unconfigured actions.
+History paths and alternate scent directions are deliberately summarized.
+`late_consequence.py` owns each PPO animal's neutral-initialized bounded residual
+and Adam state. Saved evidence bypasses the physical trunk, then adjusts actor
+logits before final probabilities/masking. Training and sampled diagnostics must
+use that same final policy; never query live evidence for an old rollout. Preserve
+KL rejection atomicity, auxiliary target exclusion, birth/private ownership,
+model/checkpoint blocks and archived local derivatives. Server imports stay lazy.
+See [V7](observations.md#observation-version-7).
+
+
+Stock V7 PPO/masked-PPO updates can use `late_ppo_batch`: immutable evidence
+features are prepared once per owning rollout update as contiguous FP64 buffers;
+current actor/adapter weights remain live each minibatch. Native code preserves
+ordered reductions, masks and gradient accumulation; Python retains shuffle,
+KL acceptance, auxiliary proposals and optimizer commits. The bounded staging is
+not checkpointed. Missing extensions, non-FP32 parameters and custom hooks retain
+the reference path. Inspector text simplification does not alter recorded values.
