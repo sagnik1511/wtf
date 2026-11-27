@@ -227,14 +227,14 @@ hashes when their encoded values differ. Keep the shared pool when moving archiv
 For a feed-forward PPO MLP, `parameters` is an ordered list of layers. Each layer
 has a flat `weights` array and `bias` array. Weight offset
 `output_index * input_count + input_index` gives row-major indexing for the
-logical `[outputs, inputs]` matrix. The illustrated 68 → 16 → 8 network stores:
+logical `[outputs, inputs]` matrix. The illustrated 130 → 16 → 8 network stores:
 
 | Layer | Logical weight shape | Flat weight count | Bias count |
 | --- | --- | ---: | ---: |
-| 0 | `[16, 68]` | 1,088 | 16 |
+| 0 | `[16, 130]` | 2,080 | 16 |
 | 1 | `[8, 16]` | 128 | 8 |
 
-That is 1,240 learned scalars. For this PPO example, the last eight outputs are
+That is 2,232 learned scalars. For this PPO example, the last eight outputs are
 seven action logits and one critic value; action order comes from the signature.
 These are parameter shapes, not a dense matrix of textual JSON numbers on disk.
 The binary codec stores eligible flat arrays as typed numeric bytes under XZ.

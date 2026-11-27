@@ -312,7 +312,7 @@ accounting. Reproduction/window fixtures now require eligible pairs; JavaScript
 birth-marker checks retain both parents across chunk transitions.
 
 `tests/test_sex_champions.py` covers four independent champion groups, sex-specific
-archive paths/ancestry, all-nine-algorithm warm starts and chaining, broad/narrow
+archive paths/ancestry, all-supported-algorithm warm starts and chaining, broad/narrow
 CLI precedence, fresh/missing-sex behavior, incompatible sex rejection, shared
 library filtering, version-1 migration and source-independent checkpoint resume.
 
@@ -326,7 +326,7 @@ without fixed-name or fixed-palette assumptions.
 
 `tests/test_geography.py` covers swim/health/energy/depth gates, fractional and
 negative river vectors, intermediate-cell collision/corner handling, slope costs,
-drowning attribution, terrain mating isolation, all-nine-algorithm 32-input
+drowning attribution, terrain mating isolation, all-supported-algorithm 32-input
 training and exact JSON/binary resume, mutations, GRPO static-map isolation,
 embedded map restoration, CSV/CLI output and Python/JS binary replay parity.
 `tests/terrain.test.mjs` covers static map rendering, metadata across seeks/runs,
@@ -345,7 +345,7 @@ seeds/maps/variants when a small smoke check is sufficient.
 
 Build with `.venv/bin/python -m work.build_native` on a supported interpreter.
 `tests/test_native_kernels.py` checks strict dense/output-range/backprop agreement,
-all-nine-algorithm checkpoint/backend switching, nonzero Adam momentum/clipping,
+all-supported-algorithm checkpoint/backend switching, nonzero Adam momentum/clipping,
 legacy fallback, malformed buffers/dimensions and missing-extension behavior.
 Run the full suite with both `WTF_KERNELS=native` and `WTF_KERNELS=python` after
 changes. Native-specific checks skip when no supported extension is built. See
@@ -445,21 +445,21 @@ features and reproduction masks. Final birth eligibility must always be checked
 after costs/combat rather than inherited from a decision-phase context.
 
 `tests/test_founder_reporting_efficiency.py` guards founder-template construction
-and model-load counts, original seeded state across all nine controllers, and
+and model-load counts, original seeded state across all fourteen controllers, and
 independent weights/configuration/RNGs. It also checks shared report scan counts
 through the CLI, detached summary/snapshot maps, unsampled captures and fresh
 standalone reads after same-tick edits. Keep report reuse explicit and confined
 to the unchanged completed state; never infer freshness from tick alone.
 
 `tests/test_explainability.py` compares archived inference and analytic local
-gradients across all nine learners, verifies deep/top-k contracts, blob-cache
+gradients across all fourteen learners, verifies deep/top-k contracts, blob-cache
 freshness/deduplication, inline compatibility, path bounds and the read-only HTTP
 endpoint. `tests/explainability-view.test.mjs` checks signed charts, explicit
 selected-animal requests, missing-model behavior, stale-response rejection and
 release on close. Keep archived predictions distinct from recorded animal scores;
 never label zero-state GRU analysis as historical recurrent inference.
 
-`tests/test_activation_diagnostics.py` checks all nine learners for unchanged
+`tests/test_activation_diagnostics.py` checks all fourteen learners for unchanged
 controller/world checkpoints and existing prediction fields with recording on
 and off, one diagnostic inference pass, actual recurrent memory, detached FP32
 visualization-only arrays, diagnostic scheduling and option validation.

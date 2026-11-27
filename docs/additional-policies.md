@@ -55,12 +55,19 @@ Temperature is fixed and positive: this implementation does not automatically
 tune entropy. It supports discrete configured actions, not continuous actions.
 The formulation follows [Discrete SAC](https://arxiv.org/abs/1910.07207).
 
-Complete brain-template example:
+Complete brain-template example (enable world `scent_trails` too; use separate
+templates when species have different ordered action lists):
 
 ```json
 {
   "type": "discrete_sac",
-  "network": {"type": "mlp", "hidden_layers": [32], "activation": "tanh"},
+  "network": {
+    "type": "mlp",
+    "hidden_layers": [
+      32
+    ],
+    "activation": "tanh"
+  },
   "learning_rate": 0.001,
   "discount_factor": 0.98,
   "max_grad_norm": 0.5,
@@ -70,7 +77,12 @@ Complete brain-template example:
   "train_every_steps": 4,
   "temperature": 0.1,
   "target_tau": 0.01,
-  "observation_version": 4,
+  "observation_version": 7,
+  "movement_history_steps": 3,
+  "scent_observation": {
+    "mode": "blended",
+    "radius": 2
+  },
   "observation_top_k": 3
 }
 ```
@@ -100,7 +112,13 @@ improvement in a changing multi-agent ecosystem.
 ```json
 {
   "type": "trpo",
-  "network": {"type": "mlp", "hidden_layers": [32], "activation": "tanh"},
+  "network": {
+    "type": "mlp",
+    "hidden_layers": [
+      32
+    ],
+    "activation": "tanh"
+  },
   "learning_rate": 0.001,
   "discount_factor": 0.98,
   "gae_lambda": 0.95,
@@ -118,7 +136,12 @@ improvement in a changing multi-agent ecosystem.
   "backtrack_steps": 10,
   "backtrack_coefficient": 0.5,
   "accept_ratio": 0.1,
-  "observation_version": 4,
+  "observation_version": 7,
+  "movement_history_steps": 3,
+  "scent_observation": {
+    "mode": "blended",
+    "radius": 2
+  },
   "observation_top_k": 3
 }
 ```
@@ -139,7 +162,13 @@ history-dependent policies but does not guarantee useful long-term behaviour.
 ```json
 {
   "type": "lstm_ppo",
-  "network": {"type": "mlp", "hidden_layers": [32], "activation": "tanh"},
+  "network": {
+    "type": "mlp",
+    "hidden_layers": [
+      32
+    ],
+    "activation": "tanh"
+  },
   "learning_rate": 0.001,
   "discount_factor": 0.98,
   "gae_lambda": 0.95,
@@ -154,7 +183,12 @@ history-dependent policies but does not guarantee useful long-term behaviour.
   "target_kl": 0.03,
   "recurrent_size": 16,
   "sequence_length": 8,
-  "observation_version": 4,
+  "observation_version": 7,
+  "movement_history_steps": 3,
+  "scent_observation": {
+    "mode": "blended",
+    "radius": 2
+  },
   "observation_top_k": 3
 }
 ```

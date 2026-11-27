@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "rolling_hills",
-  "description": "Three rounded terraced hills with gradual slopes, saddles and sparse summit rocks",
+  "description": "Three rounded terraced hills with gradual slopes, saddles and sparse summit rocks; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -174,8 +174,24 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
-      "observation_top_k": 3
+      "observation_version": 7,
+      "observation_top_k": 3,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
     },
     "predator_ppo": {
       "type": "ppo",
@@ -196,8 +212,21 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
-      "observation_top_k": 10
+      "observation_version": 7,
+      "observation_top_k": 10,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -229,5 +258,9 @@
   },
   "terrain": {
     "map_file": "maps/rolling_hills.json"
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

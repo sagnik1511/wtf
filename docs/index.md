@@ -16,19 +16,23 @@ world later, independently of training.
 
 ![Animated vector demonstration: simulation playback; illustrative states, not an experiment recording](assets/viewer/animation-simulation-playback.svg)
 
-## Install the published package
+## Run the current source
 
-The [0.0.2.9 release on PyPI](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
-includes the maintained presets, maps and viewer. In a Python 3.12+ virtual environment:
+Use a source checkout for the current features described here:
 
 ```sh
-python -m pip install wtf-wildlife-trial-framework==0.0.2.9
-wtf run baseline --runs 1 --steps 200 --seed 100 --progress
-wtf view --results results
+git clone https://github.com/sagnik1511/wtf.git
+cd wtf
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/wtf run ppo --runs 1 --steps 200 --seed 100 --progress
+.venv/bin/wtf view --results results
 ```
 
-Use a writable working directory for results. See [installation](../INSTALL.md)
-for creating the environment, source builds and Docker.
+Use a writable results directory. [Installation](../INSTALL.md) covers source,
+built wheels and Docker. The older published-package instructions are retained
+in [historical reference](archive/published-installation.md); they are not proof
+of support for newer source features.
 
 ## Start here
 
@@ -43,6 +47,7 @@ for creating the environment, source builds and Docker.
 | Identify animal pointers and board markers | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
 | Inspect animals and their decisions | [Viewer appearance](viewer-visual-reference.md) and [brain explainability](explainability.md) |
 | Understand a diagram or visual | [Visual guide](visual-guide.md) |
+| Configure V7, scent, memory and consequence learning | [Detailed sensing handbook](learning/features.md), then [Tutorial 6](tutorials/06-sensing-and-learning.md) |
 | Add collective visible outcomes and persistent species consequence estimates | [Collective learning](social-learning.md) |
 | Add movement memory and anonymous scent | [Tracking senses](tracking.md) |
 | Enable optional food/path rivalry | [Same-species competition](competition.md) |
@@ -56,7 +61,7 @@ physics examples can be opened directly from [Physics illustrated](physics.md).
 ## Installation and tutorials
 
 Use [Linux/Ubuntu setup](linux.md) for platform details or [Docker](docker.md)
-for container commands. The [three-part Python tutorial](tutorial.md) covers
+for container commands. The [complete experiment tutorial](tutorial.md) covers
 configuration, recording, analysis, restoration and playback. The
 [command reference](command-reference.md) lists the CLI controls.
 
@@ -71,7 +76,9 @@ the current supported tuning recommendations and their limits.
 ## Learning and behavior
 
 [Algorithms and networks](algorithms.md) and [advanced learners](advanced-algorithms.md)
-explain the available policies. Read [observations](observations.md),
+explain the available policies. The [sensing and consequence handbook](learning/features.md)
+connects V7 inputs, personal memory, scent, shared evidence, private learning and
+playback with worked examples and flows. Read [observations](observations.md),
 [rewards](rewards.md) and the [feedback contracts](feedback-review.md) to understand
 what enters a brain and how outcomes affect learning.
 
@@ -91,6 +98,12 @@ and [explainability](explainability.md) cover the viewer and agent inspector.
 [Replay structures](replay-data-structures.md), [checkpoint structures](checkpoint-data-structures.md)
 and [binary storage](binary-storage.md) explain saved artifacts, compression,
 restoration and memory boundaries.
+
+## Historical compatibility
+
+Use [Historical feature contracts](archive/index.md) for older layouts, settings
+and viewer sheets, or [release records](releases/README.md) for prior fixes.
+Current guides and examples target the maintained source features.
 
 ## Development
 

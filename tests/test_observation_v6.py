@@ -71,8 +71,10 @@ class ObservationV6Tests(unittest.TestCase):
             c5["experiment"].update(runs=1, world_seed_policy="fixed")
             c6 = copy.deepcopy(c5)
             for b in c5["brains"].values():
+                b.pop("observation_actions", None)
                 b["observation_version"] = 5
             for b in c6["brains"].values():
+                b.pop("observation_actions", None)
                 b["observation_version"] = 6
             left, right = Experiment(c5), Experiment(c6)
             for _ in range(3):

@@ -3,9 +3,9 @@
 [Tutorial hub](../tutorial.md) · [Next: run and record](02-run-record-analyze.md)
 
 Use Python 3.12+ in an isolated `.venv`, following [installation](../../INSTALL.md).
-Install `wtf-wildlife-trial-framework==0.0.2.9` from PyPI, or use a source checkout
-with its runtime dependencies. The imports and bundled preset names below work
-with either installation. Run checkout-only example-module commands from the
+Use the current source checkout or a newly built artifact for the features
+described here. The older published-package snapshot has separate
+[historical installation instructions](../archive/published-installation.md). Run checkout-only example-module commands from the
 repository root; installed-package users can save the complete script in Tutorial 2.
 
 Load a complete preset instead of constructing partial configuration dictionaries:

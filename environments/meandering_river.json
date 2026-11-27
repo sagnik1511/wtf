@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "meandering_river",
-  "description": "A2C prey and GRPO predators with mating-readiness observations on a winding floodplain river",
+  "description": "A2C prey and GRPO predators with mating-readiness observations on a winding floodplain river; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -163,7 +163,21 @@
       "value_coefficient": 0.5,
       "rollout_steps": 32,
       "normalize_advantages": true,
-      "observation_version": 3
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "swim",
+        "reproduce"
+      ]
     },
     "small_grpo": {
       "network": {
@@ -184,7 +198,21 @@
       "epochs": 2,
       "batch_size": 16,
       "target_kl": 0.03,
-      "observation_version": 3
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "swim",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -208,5 +236,9 @@
   },
   "terrain": {
     "map_file": "maps/meandering_river.json"
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

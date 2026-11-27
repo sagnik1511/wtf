@@ -259,7 +259,7 @@ class TopKObservationTests(unittest.TestCase):
         c["world"]["max_steps"] = 4
         c["recording"]["frames_per_chunk"] = 2
         expected, recorded = Experiment(c), Experiment(c)
-        self.assertTrue(all(len(o) == 68 for o in recorded.observations.values()))
+        self.assertTrue(all(len(o) == 130 for o in recorded.observations.values()))
         with tempfile.TemporaryDirectory() as folder:
             writer = Recorder(folder, c, "train")
             writer.begin_run(recorded)

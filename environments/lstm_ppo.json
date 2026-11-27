@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "lstm_ppo",
-  "description": "Independent LSTM PPO for both species, using the ordinary PPO flat-world calibration and final-two-episode playback",
+  "description": "Independent LSTM PPO for both species, using the ordinary PPO flat-world calibration and final-two-episode playback; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 32,
@@ -158,10 +158,26 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 3,
       "recurrent_size": 16,
-      "sequence_length": 8
+      "sequence_length": 8,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
     },
     "predator_lstm_ppo": {
       "type": "lstm_ppo",
@@ -182,10 +198,23 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 10,
       "recurrent_size": 16,
-      "sequence_length": 8
+      "sequence_length": 8,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -214,5 +243,9 @@
     "profile": "full",
     "record_activations": true,
     "record_last_episodes": 2
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

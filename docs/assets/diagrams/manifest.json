@@ -14,8 +14,8 @@
     "anchor": "one-simulation-step",
     "source": "one-simulation-step.mmd",
     "asset": "one-simulation-step.svg",
-    "nodes": 6,
-    "edges": 6
+    "nodes": 9,
+    "edges": 8
   },
   {
     "title": "Private learning loop",
@@ -95,7 +95,7 @@
     "anchor": "reproduction-gates",
     "source": "reproduction-gates.mmd",
     "asset": "reproduction-gates.svg",
-    "nodes": 6,
+    "nodes": 8,
     "edges": 8
   },
   {
@@ -277,5 +277,32 @@
     "asset": "v7-late-consequence.svg",
     "nodes": 16,
     "edges": 16
+  },
+  {
+    "title": "Sensed state and published evidence reach one independent animal's decision",
+    "document": "docs/learning/features.md",
+    "anchor": "from-environment-to-decision",
+    "source": "sensing-decision-loop.mmd",
+    "asset": "sensing-decision-loop.svg",
+    "nodes": 12,
+    "edges": 12
+  },
+  {
+    "title": "Anonymous scent is reduced from reachable ground patches to a four-value bearing",
+    "document": "docs/learning/memory-and-scent.md",
+    "anchor": "scent-deposit-fade-choose-a-patch",
+    "source": "scent-patch-selection.mmd",
+    "asset": "scent-patch-selection.svg",
+    "nodes": 10,
+    "edges": 10
+  },
+  {
+    "title": "Outcome windows, publication and private neural learning have separate clocks",
+    "document": "docs/learning/consequence-pipeline.md",
+    "anchor": "continuous-versus-episode-publication",
+    "source": "consequence-episode-clock.mmd",
+    "asset": "consequence-episode-clock.svg",
+    "nodes": 11,
+    "edges": 11
   }
 ]

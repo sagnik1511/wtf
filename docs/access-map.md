@@ -8,7 +8,7 @@ automatic image requests and this index's outgoing links are excluded from
 the reachability proof. Use All visuals → the preview name for theme controls;
 the original-file column opens the exact saved file separately.
 
-Coverage: **325 public documentation pages**, **124 visual files**
+Coverage: **340 public documentation pages**, **127 visual files**
 and **8 identical viewer branding copies**.
 
 ## Documentation pages
@@ -21,6 +21,12 @@ and **8 identical viewer branding copies**.
 | [Learning algorithms and networks](algorithms.md) | [Home](index.md) → [Algorithms and networks](algorithms.md) |
 | [Behavior and learning analysis](analysis.md) | [Home](index.md) → [behavior analysis](analysis.md) |
 | [Architecture and simulation rules](architecture.md) | [Home](index.md) → [architecture](architecture.md) |
+| [Historical feedback audit](archive/feedback-audit.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Earlier feedback audit](archive/feedback-audit.md) |
+| [Historical feature contracts and settings](archive/index.md) | [Home](index.md) → [Historical feature contracts](archive/index.md) |
+| [Archived mating inputs and earlier river setup](archive/mating-inputs-v3.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Earlier mating inputs](archive/mating-inputs-v3.md) |
+| [Archived observation layouts: V1–V6](archive/observation-layouts.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Older observation layouts](archive/observation-layouts.md) |
+| [Published installation snapshot](archive/published-installation.md) | [Home](index.md) → [historical reference](archive/published-installation.md) |
+| [Archived sensory inputs and inspector views](archive/sensory-viewer.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Older sensory viewer sheets](archive/sensory-viewer.md) |
 | [Best-brain milestones and rolling recovery](artifact-retention.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Artifact retention](artifact-retention.md) |
 | [Documentation assets](assets/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Visual assets and sources](assets/README.md) |
 | [Flow diagram sources and SVG exports](assets/diagrams/README.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Flow diagrams](assets/diagrams/README.md) |
@@ -55,12 +61,16 @@ and **8 identical viewer branding copies**.
 | [Animal brain activity and archived-model explanations](explainability.md) | [Home](index.md) → [brain explainability](explainability.md) |
 | [Adding or changing policy models](extending-policies.md) | [Home](index.md) → [new policies](extending-policies.md) |
 | [Custom geography, physics and animal actions](extending-worlds-and-actions.md) | [Home](index.md) → [new geography/actions](extending-worlds-and-actions.md) |
-| [Generic environment feedback review](feedback-review.md) | [Home](index.md) → [feedback contracts](feedback-review.md) |
+| [Environment feedback contracts](feedback-review.md) | [Home](index.md) → [feedback contracts](feedback-review.md) |
 | [Geography, rivers and elevation](geography.md) | [Home](index.md) → [geography](geography.md) |
 | [Get started](getting-started/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Installation and first experiment](getting-started/index.md) |
 | [Wildlife Trial Framework](index.md) | [Home](index.md) |
-| [Install Wildlife Trial Framework](installation.md) | [Home](index.md) → [installation](installation.md) |
+| [Install Wildlife Trial Framework](installation.md) | [Home](index.md) → [Installation](installation.md) |
+| [Consequences: evidence, publication and private learning](learning/consequence-pipeline.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Consequence learning pipeline](learning/consequence-pipeline.md) |
+| [Sensing and consequence learning](learning/features.md) | [Home](index.md) → [Detailed sensing handbook](learning/features.md) |
 | [Learning and behavior](learning/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Inputs, learners, feedback and inheritance](learning/index.md) |
+| [Personal movement memory and blended scent](learning/memory-and-scent.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Personal memory and scent](learning/memory-and-scent.md) |
+| [V7 observations: layout and examples](learning/v7-observations.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [V7 layout and examples](learning/v7-observations.md) |
 | [Linux and Ubuntu setup](linux.md) | [Home](index.md) → [Linux/Ubuntu setup](linux.md) |
 | [Mating intent and proximal reproduction](mating-intent.md) | [Home](index.md) → [mating intent](mating-intent.md) |
 | [Mating readiness and guarded inheritance](mating-observations.md) | [Home](index.md) → [mating observations](mating-observations.md) |
@@ -91,6 +101,7 @@ and **8 identical viewer branding copies**.
 | [3. Restore state and view the recording](tutorials/03-restore-and-view.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Tutorial 3: Restore and view](tutorials/03-restore-and-view.md) |
 | [4. Train with less output, then record inference](tutorials/04-training-and-inference.md) | [Home](index.md) → [Training and inference tutorial](tutorials/04-training-and-inference.md) |
 | [5. Compare saved policy banks on matched worlds](tutorials/05-compare-saved-policies.md) | [Home](index.md) → [Policy-bank comparison tutorial](tutorials/05-compare-saved-policies.md) |
+| [Tutorial 6: Configure, train and inspect sensory learning](tutorials/06-sensing-and-learning.md) | [Home](index.md) → [Tutorial 6](tutorials/06-sensing-and-learning.md) |
 | [Board objects and viewer guide](viewer-visual-reference.md) | [Home](index.md) → [Board-piece legend](viewer-visual-reference.md) |
 | [Viewer and storage](viewer/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Viewer and artifact overview](viewer/index.md) |
 | [Playback and inspection](viewer/playback/index.md) | [Home](index.md) → [Playback and inspection](viewer/playback/index.md) |
@@ -121,6 +132,7 @@ and **8 identical viewer branding copies**.
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) |
 | [Collective auxiliary (SVG)](visual-previews/diagrams/collective-auxiliary-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Collective auxiliary (SVG)](visual-previews/diagrams/collective-auxiliary-svg.md) |
 | [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Competition (SVG)](visual-previews/diagrams/competition-svg.md) |
+| [Consequence episode clock (SVG)](visual-previews/diagrams/consequence-episode-clock-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Consequence episode clock (SVG)](visual-previews/diagrams/consequence-episode-clock-svg.md) |
 | [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) |
 | [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) |
 | [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) |
@@ -144,7 +156,9 @@ and **8 identical viewer branding copies**.
 | [Rollout record lifecycle (SVG)](visual-previews/diagrams/rollout-record-lifecycle-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Rollout record lifecycle (SVG)](visual-previews/diagrams/rollout-record-lifecycle-svg.md) |
 | [Run continue or view (SVG)](visual-previews/diagrams/run-continue-or-view-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Run continue or view (SVG)](visual-previews/diagrams/run-continue-or-view-svg.md) |
 | [Runtime boundaries (SVG)](visual-previews/diagrams/runtime-boundaries-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Runtime boundaries (SVG)](visual-previews/diagrams/runtime-boundaries-svg.md) |
+| [Scent patch selection (SVG)](visual-previews/diagrams/scent-patch-selection-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Scent patch selection (SVG)](visual-previews/diagrams/scent-patch-selection-svg.md) |
 | [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) |
+| [Sensing decision loop (SVG)](visual-previews/diagrams/sensing-decision-loop-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Sensing decision loop (SVG)](visual-previews/diagrams/sensing-decision-loop-svg.md) |
 | [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) |
 | [Social learning (SVG)](visual-previews/diagrams/social-learning-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Social learning (SVG)](visual-previews/diagrams/social-learning-svg.md) |
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) |
@@ -222,123 +236,124 @@ and **8 identical viewer branding copies**.
 | [Workspace map (SVG)](visual-previews/viewer/workspace-map-svg.md) | [Home](index.md) → [All visuals](visuals.md) → [Workspace map (SVG)](visual-previews/viewer/workspace-map-svg.md) |
 | [All visuals](visuals.md) | [Home](index.md) → [All visuals](visuals.md) |
 | [Worlds and species](worlds/index.md) | [Home](index.md) → [Complete documentation directory](directory.md) → [Configuration, maps and animals](worlds/index.md) |
-| [0.0.0.0 Initial simulation and recorded playback](releases/0.0.0.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.0](releases/0.0.0.0.md) |
-| [0.0.0.1 Randomized experiments and playback outcomes](releases/0.0.0.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.1](releases/0.0.0.1.md) |
-| [0.0.0.10 Behavior and learning analysis](releases/0.0.0.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.10](releases/0.0.0.10.md) |
-| [0.0.0.11 Saved champions and documentation guides](releases/0.0.0.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.11](releases/0.0.0.11.md) |
-| [0.0.0.12 Run-local archives and CLI model selectors](releases/0.0.0.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.12](releases/0.0.0.12.md) |
-| [0.0.0.13 Champion chaining and multiple-run playback](releases/0.0.0.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.13](releases/0.0.0.13.md) |
-| [0.0.0.14 Compact replay storage](releases/0.0.0.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.14](releases/0.0.0.14.md) |
-| [0.0.0.15 Species learning-rate controls](releases/0.0.0.15.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.15](releases/0.0.0.15.md) |
-| [0.0.0.16 Per-step dashboard and compact checkpoints](releases/0.0.0.16.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.16](releases/0.0.0.16.md) |
-| [0.0.0.17 Balanced champions and DQN lifecycle efficiency](releases/0.0.0.17.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.17](releases/0.0.0.17.md) |
-| [0.0.0.18 Shared policy training efficiency](releases/0.0.0.18.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.18](releases/0.0.0.18.md) |
-| [0.0.0.19 Release history and maintenance workflow](releases/0.0.0.19.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.19](releases/0.0.0.19.md) |
-| [0.0.0.2 Streamed saves and simulation efficiency](releases/0.0.0.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.2](releases/0.0.0.2.md) |
-| [0.0.0.20 Larger predator PPO and lifespan champion selection](releases/0.0.0.20.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.20](releases/0.0.0.20.md) |
-| [0.0.0.21 Recurrent, distributional and multi-agent PPO variants](releases/0.0.0.21.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.21](releases/0.0.0.21.md) |
-| [0.0.0.22 Per-animal reproduction timing windows](releases/0.0.0.22.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.22](releases/0.0.0.22.md) |
-| [0.0.0.23 Reduce repeated RL training work](releases/0.0.0.23.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.23](releases/0.0.0.23.md) |
-| [0.0.0.24 Lossless binary storage and bounded telemetry caching](releases/0.0.0.24.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.24](releases/0.0.0.24.md) |
-| [0.0.0.25 Bounded simulation caches and final-winner snapshots](releases/0.0.0.25.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.25](releases/0.0.0.25.md) |
-| [0.0.0.26 Rare sparse newborn weight mutation](releases/0.0.0.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.26](releases/0.0.0.26.md) |
-| [0.0.0.27 Playback server compatibility diagnostics](releases/0.0.0.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.27](releases/0.0.0.27.md) |
-| [0.0.0.28 Documentation playback clips](releases/0.0.0.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.28](releases/0.0.0.28.md) |
-| [0.0.0.29 Repository context and reusable workflows](releases/0.0.0.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.29](releases/0.0.0.29.md) |
-| [0.0.0.3 Ignore generated performance artifacts](releases/0.0.0.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.3](releases/0.0.0.3.md) |
-| [0.0.0.30 Paired reproduction and mixed child brains](releases/0.0.0.30.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.30](releases/0.0.0.30.md) |
-| [0.0.0.31 Species/sex champions and distinct viewer colors](releases/0.0.0.31.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.31](releases/0.0.0.31.md) |
-| [0.0.0.32 Configurable named species](releases/0.0.0.32.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.32](releases/0.0.0.32.md) |
-| [0.0.0.33 Terrain maps, rivers and elevation](releases/0.0.0.33.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.33](releases/0.0.0.33.md) |
-| [0.0.0.34 Reproduction decisions and action feedback](releases/0.0.0.34.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.34](releases/0.0.0.34.md) |
-| [0.0.0.35 Terrain energy and reproduction configuration](releases/0.0.0.35.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.35](releases/0.0.0.35.md) |
-| [0.0.0.36 Enclosed founder zones and boundary food](releases/0.0.0.36.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.36](releases/0.0.0.36.md) |
-| [0.0.0.37 Directional water sight](releases/0.0.0.37.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.37](releases/0.0.0.37.md) |
-| [0.0.0.38 Portable physics illustrations and explorer](releases/0.0.0.38.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.38](releases/0.0.0.38.md) |
-| [0.0.0.39 Full-viewer terrain recording GIFs](releases/0.0.0.39.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.39](releases/0.0.0.39.md) |
-| [0.0.0.4 Remove generated benchmark files from Git](releases/0.0.0.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.4](releases/0.0.0.4.md) |
-| [0.0.0.40 Visual explanations throughout the guides](releases/0.0.0.40.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.40](releases/0.0.0.40.md) |
-| [0.0.0.41 Native-kernel and runtime-dtype assessment](releases/0.0.0.41.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.41](releases/0.0.0.41.md) |
-| [0.0.0.42 Float32 model storage and narrow binary arrays](releases/0.0.0.42.md) | [Home](index.md) → [Performance](performance.md) → [rollout 42](releases/0.0.0.42.md) |
-| [0.0.0.43 Optional compiled CPU learning kernels](releases/0.0.0.43.md) | [Home](index.md) → [native kernels](native-kernels.md) → [0.0.0.43](releases/0.0.0.43.md) |
-| [0.0.0.5 Wildlife Trial Framework naming](releases/0.0.0.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.5](releases/0.0.0.5.md) |
-| [0.0.0.6 Policy algorithms and training progress](releases/0.0.0.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.6](releases/0.0.0.6.md) |
-| [0.0.0.7 Reproduction and inherited brains](releases/0.0.0.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.7](releases/0.0.0.7.md) |
-| [0.0.0.8 Source formatting](releases/0.0.0.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.8](releases/0.0.0.8.md) |
-| [0.0.0.9 Incremental spatial perception](releases/0.0.0.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.0.9](releases/0.0.0.9.md) |
-| [0.0.1.0 Second native-kernel rollout](releases/0.0.1.0.md) | [Home](index.md) → [extended kernels](native-kernels-v2.md) → [Rollout 0.0.1.0](releases/0.0.1.0.md) |
-| [0.0.1.1 Landscape geography presets](releases/0.0.1.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.1](releases/0.0.1.1.md) |
-| [0.0.1.10 Visual observations and agent prediction graphs](releases/0.0.1.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.10](releases/0.0.1.10.md) |
-| [0.0.1.11 Recent-feature visual documentation](releases/0.0.1.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.11](releases/0.0.1.11.md) |
-| [0.0.1.12 Export and inspector work reuse](releases/0.0.1.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.12](releases/0.0.1.12.md) |
-| [0.0.1.13 Mandatory developer formatting](releases/0.0.1.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.13](releases/0.0.1.13.md) |
-| [0.0.1.14 Repository-wide source formatting](releases/0.0.1.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.14](releases/0.0.1.14.md) |
-| [0.0.1.15 Playback data-structure block diagrams](releases/0.0.1.15.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.15](releases/0.0.1.15.md) |
-| [0.0.1.16 Selective structural documentation](releases/0.0.1.16.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.16](releases/0.0.1.16.md) |
-| [0.0.1.17 Nature Machine Intelligence paper and explanatory figures](releases/0.0.1.17.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.17](releases/0.0.1.17.md) |
-| [0.0.1.19 Proximal mating intent and failure diagnostics](releases/0.0.1.19.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.19](releases/0.0.1.19.md) |
-| [0.0.1.2 Biological lineage champion selection](releases/0.0.1.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.2](releases/0.0.1.2.md) |
-| [0.0.1.20 Learned escape and observable mating consent](releases/0.0.1.20.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.20](releases/0.0.1.20.md) |
-| [0.0.1.21 Generated-file tracking hygiene](releases/0.0.1.21.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.21](releases/0.0.1.21.md) |
-| [0.0.1.22 Consolidated masked-PPO calibration](releases/0.0.1.22.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.22](releases/0.0.1.22.md) |
-| [0.0.1.23 Shared mating phase data and short-circuit birth checks](releases/0.0.1.23.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.23](releases/0.0.1.23.md) |
-| [0.0.1.24 Founder templates and shared step reporting](releases/0.0.1.24.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.24](releases/0.0.1.24.md) |
-| [0.0.1.25 Animal brain activity and archived explanations](releases/0.0.1.25.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.25](releases/0.0.1.25.md) |
-| [0.0.1.26 Day–night physics and replay lighting](releases/0.0.1.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.26](releases/0.0.1.26.md) |
-| [0.0.1.27 Viewer themes and brighter daylight](releases/0.0.1.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.27](releases/0.0.1.27.md) |
-| [0.0.1.28 Shared lighting work and native cycle metabolism](releases/0.0.1.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.28](releases/0.0.1.28.md) |
-| [0.0.1.29 Docker workflows, compatibility policy and tutorial](releases/0.0.1.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.29](releases/0.0.1.29.md) |
-| [0.0.1.3 Generic feedback contract review](releases/0.0.1.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.3](releases/0.0.1.3.md) |
-| [0.0.1.30 Installable Python distributions and Ubuntu checks](releases/0.0.1.30.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.30](releases/0.0.1.30.md) |
-| [0.0.1.31 Python 3.12 minimum and native reduction port](releases/0.0.1.31.md) | [Home](index.md) → [installation](installation.md) → [Python 3.12 rollout](releases/0.0.1.31.md) |
-| [0.0.1.32 Theme-aware inspector and replay previews; TestPyPI preparation](releases/0.0.1.32.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.32](releases/0.0.1.32.md) |
-| [0.0.1.4 Guarded promotion and mating observations](releases/0.0.1.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.4](releases/0.0.1.4.md) |
-| [0.0.1.5 Fewer lineage ranking allocations](releases/0.0.1.5.md) | [Home](index.md) → [Performance](performance.md) → [rollout 0.0.1.5](releases/0.0.1.5.md) |
-| [0.0.1.6 River crossing with deeper brains and predator sight](releases/0.0.1.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.6](releases/0.0.1.6.md) |
-| [0.0.1.7 Configurable top-k visible target inputs](releases/0.0.1.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.7](releases/0.0.1.7.md) |
-| [0.0.1.8 Best-so-far promotion and compact champion weights](releases/0.0.1.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.8](releases/0.0.1.8.md) |
-| [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
-| [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
-| [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.1](releases/0.0.2.1.md) |
-| [0.0.2.10 Record only the final scheduled episodes](releases/0.0.2.10.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.10](releases/0.0.2.10.md) |
-| [0.0.2.11 Modern ordinary-PPO preset](releases/0.0.2.11.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.11](releases/0.0.2.11.md) |
-| [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.12](releases/0.0.2.12.md) |
-| [0.0.2.13 Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.13](releases/0.0.2.13.md) |
-| [0.0.2.14 Native LSTM forward and backward](releases/0.0.2.14.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.14](releases/0.0.2.14.md) |
-| [0.0.2.15 Bundled LSTM PPO preset](releases/0.0.2.15.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.15](releases/0.0.2.15.md) |
-| [0.0.2.16 Environment-object and feeding visuals](releases/0.0.2.16.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.16](releases/0.0.2.16.md) |
-| [0.0.2.17 Additional geography presets](releases/0.0.2.17.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.17](releases/0.0.2.17.md) |
-| [0.0.2.18 Collective sensing and persistent consequence learning](releases/0.0.2.18.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.18](releases/0.0.2.18.md) |
-| [0.0.2.19 Episode publication and independent review workflow](releases/0.0.2.19.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.19](releases/0.0.2.19.md) |
-| [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
-| [0.0.2.20 Clean-environment Python quality checks](releases/0.0.2.20.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.20](releases/0.0.2.20.md) |
-| [0.0.2.21 Configurable adjacent founder pairs](releases/0.0.2.21.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.21](releases/0.0.2.21.md) |
-| [0.0.2.22 Multilayer scalar DQN and DDQN](releases/0.0.2.22.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.22](releases/0.0.2.22.md) |
-| [0.0.2.23 Native scalar updates and shared sensory work](releases/0.0.2.23.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.23](releases/0.0.2.23.md) |
-| [0.0.2.24 Cumulative collective outcome views](releases/0.0.2.24.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.24](releases/0.0.2.24.md) |
-| [0.0.2.25 General consequence knowledge with learned relevance](releases/0.0.2.25.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.25](releases/0.0.2.25.md) |
-| [0.0.2.26 Combined general and context consequence inputs](releases/0.0.2.26.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.26](releases/0.0.2.26.md) |
-| [0.0.2.27 Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.27](releases/0.0.2.27.md) |
-| [0.0.2.28 Experimental CUDA dense training backend](releases/0.0.2.28.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.28](releases/0.0.2.28.md) |
-| [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
-| [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
+| [0.0.0.0 Initial simulation and recorded playback](releases/0.0.0.0.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.0](releases/0.0.0.0.md) |
+| [0.0.0.1 Randomized experiments and playback outcomes](releases/0.0.0.1.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.1](releases/0.0.0.1.md) |
+| [0.0.0.10 Behavior and learning analysis](releases/0.0.0.10.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.10](releases/0.0.0.10.md) |
+| [0.0.0.11 Saved champions and documentation guides](releases/0.0.0.11.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.11](releases/0.0.0.11.md) |
+| [0.0.0.12 Run-local archives and CLI model selectors](releases/0.0.0.12.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.12](releases/0.0.0.12.md) |
+| [0.0.0.13 Champion chaining and multiple-run playback](releases/0.0.0.13.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.13](releases/0.0.0.13.md) |
+| [0.0.0.14 Compact replay storage](releases/0.0.0.14.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.14](releases/0.0.0.14.md) |
+| [0.0.0.15 Species learning-rate controls](releases/0.0.0.15.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.15](releases/0.0.0.15.md) |
+| [0.0.0.16 Per-step dashboard and compact checkpoints](releases/0.0.0.16.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.16](releases/0.0.0.16.md) |
+| [0.0.0.17 Balanced champions and DQN lifecycle efficiency](releases/0.0.0.17.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.17](releases/0.0.0.17.md) |
+| [0.0.0.18 Shared policy training efficiency](releases/0.0.0.18.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.18](releases/0.0.0.18.md) |
+| [0.0.0.19 Release history and maintenance workflow](releases/0.0.0.19.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.19](releases/0.0.0.19.md) |
+| [0.0.0.2 Streamed saves and simulation efficiency](releases/0.0.0.2.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.2](releases/0.0.0.2.md) |
+| [0.0.0.20 Larger predator PPO and lifespan champion selection](releases/0.0.0.20.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.20](releases/0.0.0.20.md) |
+| [0.0.0.21 Recurrent, distributional and multi-agent PPO variants](releases/0.0.0.21.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.21](releases/0.0.0.21.md) |
+| [0.0.0.22 Per-animal reproduction timing windows](releases/0.0.0.22.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.22](releases/0.0.0.22.md) |
+| [0.0.0.23 Reduce repeated RL training work](releases/0.0.0.23.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.23](releases/0.0.0.23.md) |
+| [0.0.0.24 Lossless binary storage and bounded telemetry caching](releases/0.0.0.24.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.24](releases/0.0.0.24.md) |
+| [0.0.0.25 Bounded simulation caches and final-winner snapshots](releases/0.0.0.25.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.25](releases/0.0.0.25.md) |
+| [0.0.0.26 Rare sparse newborn weight mutation](releases/0.0.0.26.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.26](releases/0.0.0.26.md) |
+| [0.0.0.27 Playback server compatibility diagnostics](releases/0.0.0.27.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.27](releases/0.0.0.27.md) |
+| [0.0.0.28 Documentation playback clips](releases/0.0.0.28.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.28](releases/0.0.0.28.md) |
+| [0.0.0.29 Repository context and reusable workflows](releases/0.0.0.29.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.29](releases/0.0.0.29.md) |
+| [0.0.0.3 Ignore generated performance artifacts](releases/0.0.0.3.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.3](releases/0.0.0.3.md) |
+| [0.0.0.30 Paired reproduction and mixed child brains](releases/0.0.0.30.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.30](releases/0.0.0.30.md) |
+| [0.0.0.31 Species/sex champions and distinct viewer colors](releases/0.0.0.31.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.31](releases/0.0.0.31.md) |
+| [0.0.0.32 Configurable named species](releases/0.0.0.32.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.32](releases/0.0.0.32.md) |
+| [0.0.0.33 Terrain maps, rivers and elevation](releases/0.0.0.33.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.33](releases/0.0.0.33.md) |
+| [0.0.0.34 Reproduction decisions and action feedback](releases/0.0.0.34.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.34](releases/0.0.0.34.md) |
+| [0.0.0.35 Terrain energy and reproduction configuration](releases/0.0.0.35.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.35](releases/0.0.0.35.md) |
+| [0.0.0.36 Enclosed founder zones and boundary food](releases/0.0.0.36.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.36](releases/0.0.0.36.md) |
+| [0.0.0.37 Directional water sight](releases/0.0.0.37.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.37](releases/0.0.0.37.md) |
+| [0.0.0.38 Portable physics illustrations and explorer](releases/0.0.0.38.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.38](releases/0.0.0.38.md) |
+| [0.0.0.39 Full-viewer terrain recording GIFs](releases/0.0.0.39.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.39](releases/0.0.0.39.md) |
+| [0.0.0.4 Remove generated benchmark files from Git](releases/0.0.0.4.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.4](releases/0.0.0.4.md) |
+| [0.0.0.40 Visual explanations throughout the guides](releases/0.0.0.40.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.40](releases/0.0.0.40.md) |
+| [0.0.0.41 Native-kernel and runtime-dtype assessment](releases/0.0.0.41.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.41](releases/0.0.0.41.md) |
+| [0.0.0.42 Float32 model storage and narrow binary arrays](releases/0.0.0.42.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.42](releases/0.0.0.42.md) |
+| [0.0.0.43 Optional compiled CPU learning kernels](releases/0.0.0.43.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.43](releases/0.0.0.43.md) |
+| [0.0.0.5 Wildlife Trial Framework naming](releases/0.0.0.5.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.5](releases/0.0.0.5.md) |
+| [0.0.0.6 Policy algorithms and training progress](releases/0.0.0.6.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.6](releases/0.0.0.6.md) |
+| [0.0.0.7 Reproduction and inherited brains](releases/0.0.0.7.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.7](releases/0.0.0.7.md) |
+| [0.0.0.8 Source formatting](releases/0.0.0.8.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.8](releases/0.0.0.8.md) |
+| [0.0.0.9 Incremental spatial perception](releases/0.0.0.9.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.0.9](releases/0.0.0.9.md) |
+| [0.0.1.0 Second native-kernel rollout](releases/0.0.1.0.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.0](releases/0.0.1.0.md) |
+| [0.0.1.1 Landscape geography presets](releases/0.0.1.1.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.1](releases/0.0.1.1.md) |
+| [0.0.1.10 Visual observations and agent prediction graphs](releases/0.0.1.10.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.10](releases/0.0.1.10.md) |
+| [0.0.1.11 Recent-feature visual documentation](releases/0.0.1.11.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.11](releases/0.0.1.11.md) |
+| [0.0.1.12 Export and inspector work reuse](releases/0.0.1.12.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.12](releases/0.0.1.12.md) |
+| [0.0.1.13 Mandatory developer formatting](releases/0.0.1.13.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.13](releases/0.0.1.13.md) |
+| [0.0.1.14 Repository-wide source formatting](releases/0.0.1.14.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.14](releases/0.0.1.14.md) |
+| [0.0.1.15 Playback data-structure block diagrams](releases/0.0.1.15.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.15](releases/0.0.1.15.md) |
+| [0.0.1.16 Selective structural documentation](releases/0.0.1.16.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.16](releases/0.0.1.16.md) |
+| [0.0.1.17 Nature Machine Intelligence paper and explanatory figures](releases/0.0.1.17.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.17](releases/0.0.1.17.md) |
+| [0.0.1.19 Proximal mating intent and failure diagnostics](releases/0.0.1.19.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.19](releases/0.0.1.19.md) |
+| [0.0.1.2 Biological lineage champion selection](releases/0.0.1.2.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.2](releases/0.0.1.2.md) |
+| [0.0.1.20 Learned escape and observable mating consent](releases/0.0.1.20.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.20](releases/0.0.1.20.md) |
+| [0.0.1.21 Generated-file tracking hygiene](releases/0.0.1.21.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.21](releases/0.0.1.21.md) |
+| [0.0.1.22 Consolidated masked-PPO calibration](releases/0.0.1.22.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.22](releases/0.0.1.22.md) |
+| [0.0.1.23 Shared mating phase data and short-circuit birth checks](releases/0.0.1.23.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.23](releases/0.0.1.23.md) |
+| [0.0.1.24 Founder templates and shared step reporting](releases/0.0.1.24.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.24](releases/0.0.1.24.md) |
+| [0.0.1.25 Animal brain activity and archived explanations](releases/0.0.1.25.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.25](releases/0.0.1.25.md) |
+| [0.0.1.26 Day–night physics and replay lighting](releases/0.0.1.26.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.26](releases/0.0.1.26.md) |
+| [0.0.1.27 Viewer themes and brighter daylight](releases/0.0.1.27.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.27](releases/0.0.1.27.md) |
+| [0.0.1.28 Shared lighting work and native cycle metabolism](releases/0.0.1.28.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.28](releases/0.0.1.28.md) |
+| [0.0.1.29 Docker workflows, compatibility policy and tutorial](releases/0.0.1.29.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.29](releases/0.0.1.29.md) |
+| [0.0.1.3 Generic feedback contract review](releases/0.0.1.3.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.3](releases/0.0.1.3.md) |
+| [0.0.1.30 Installable Python distributions and Ubuntu checks](releases/0.0.1.30.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.30](releases/0.0.1.30.md) |
+| [0.0.1.31 Python 3.12 minimum and native reduction port](releases/0.0.1.31.md) | [Home](index.md) → [Installation](installation.md) → [Python 3.12 rollout](releases/0.0.1.31.md) |
+| [0.0.1.32 Theme-aware inspector and replay previews; TestPyPI preparation](releases/0.0.1.32.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.32](releases/0.0.1.32.md) |
+| [0.0.1.4 Guarded promotion and mating observations](releases/0.0.1.4.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.4](releases/0.0.1.4.md) |
+| [0.0.1.5 Fewer lineage ranking allocations](releases/0.0.1.5.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.5](releases/0.0.1.5.md) |
+| [0.0.1.6 River crossing with deeper brains and predator sight](releases/0.0.1.6.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.6](releases/0.0.1.6.md) |
+| [0.0.1.7 Configurable top-k visible target inputs](releases/0.0.1.7.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.7](releases/0.0.1.7.md) |
+| [0.0.1.8 Best-so-far promotion and compact champion weights](releases/0.0.1.8.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.8](releases/0.0.1.8.md) |
+| [0.0.1.9 Stop training on selected champion plateaus](releases/0.0.1.9.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.1.9](releases/0.0.1.9.md) |
+| [0.0.2.0 WTF namespace and responsibility-based package layout](releases/0.0.2.0.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.0](releases/0.0.2.0.md) |
+| [0.0.2.1 Opt-in same-species challenge contests](releases/0.0.2.1.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.1](releases/0.0.2.1.md) |
+| [0.0.2.10 Record only the final scheduled episodes](releases/0.0.2.10.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.10](releases/0.0.2.10.md) |
+| [0.0.2.11 Modern ordinary-PPO preset](releases/0.0.2.11.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.11](releases/0.0.2.11.md) |
+| [0.0.2.12 Checkpoint and PPO preparation reuse](releases/0.0.2.12.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.12](releases/0.0.2.12.md) |
+| [0.0.2.13 Discrete SAC, TRPO and LSTM PPO](releases/0.0.2.13.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.13](releases/0.0.2.13.md) |
+| [0.0.2.14 Native LSTM forward and backward](releases/0.0.2.14.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.14](releases/0.0.2.14.md) |
+| [0.0.2.15 Bundled LSTM PPO preset](releases/0.0.2.15.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.15](releases/0.0.2.15.md) |
+| [0.0.2.16 Environment-object and feeding visuals](releases/0.0.2.16.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.16](releases/0.0.2.16.md) |
+| [0.0.2.17 Additional geography presets](releases/0.0.2.17.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.17](releases/0.0.2.17.md) |
+| [0.0.2.18 Collective sensing and persistent consequence learning](releases/0.0.2.18.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.18](releases/0.0.2.18.md) |
+| [0.0.2.19 Episode publication and independent review workflow](releases/0.0.2.19.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.19](releases/0.0.2.19.md) |
+| [0.0.2.2 Champion and competition reuse](releases/0.0.2.2.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.2](releases/0.0.2.2.md) |
+| [0.0.2.20 Clean-environment Python quality checks](releases/0.0.2.20.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.20](releases/0.0.2.20.md) |
+| [0.0.2.21 Configurable adjacent founder pairs](releases/0.0.2.21.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.21](releases/0.0.2.21.md) |
+| [0.0.2.22 Multilayer scalar DQN and DDQN](releases/0.0.2.22.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.22](releases/0.0.2.22.md) |
+| [0.0.2.23 Native scalar updates and shared sensory work](releases/0.0.2.23.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.23](releases/0.0.2.23.md) |
+| [0.0.2.24 Cumulative collective outcome views](releases/0.0.2.24.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.24](releases/0.0.2.24.md) |
+| [0.0.2.25 General consequence knowledge with learned relevance](releases/0.0.2.25.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.25](releases/0.0.2.25.md) |
+| [0.0.2.26 Combined general and context consequence inputs](releases/0.0.2.26.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.26](releases/0.0.2.26.md) |
+| [0.0.2.27 Species heatmaps and aligned consequence charts](releases/0.0.2.27.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.27](releases/0.0.2.27.md) |
+| [0.0.2.28 Experimental CUDA dense training backend](releases/0.0.2.28.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.28](releases/0.0.2.28.md) |
+| [0.0.2.29 CUDA training batches, compact gradients and optional FP32](releases/0.0.2.29.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.29](releases/0.0.2.29.md) |
+| [0.0.2.3 Native top-k perception](releases/0.0.2.3.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.3](releases/0.0.2.3.md) |
 | [0.0.2.30 Bulk gradient conversion and resident DQN optimizers](releases/0.0.2.30.md) | [Home](index.md) → [Calibration](calibration.md) → [V3 benchmark evidence](releases/0.0.2.30.md) |
-| [0.0.2.31 Land-bridge environment](releases/0.0.2.31.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.31](releases/0.0.2.31.md) |
-| [0.0.2.32 Durable collective evidence and private PPO outcome prediction](releases/0.0.2.32.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.32](releases/0.0.2.32.md) |
-| [0.0.2.33 Heading-relative forward vision](releases/0.0.2.33.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.33](releases/0.0.2.33.md) |
-| [0.0.2.34 Body-relative observation V5](releases/0.0.2.34.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.34](releases/0.0.2.34.md) |
-| [0.0.2.35 Soft semantic observation V6](releases/0.0.2.35.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.35](releases/0.0.2.35.md) |
-| [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
-| [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
-| [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
-| [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.7](releases/0.0.2.7.md) |
-| [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.8](releases/0.0.2.8.md) |
-| [0.0.2.9 Training capture profiles and frozen inference](releases/0.0.2.9.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.2.9](releases/0.0.2.9.md) |
-| [0.0.3.0 Exact V6 allocation and training optimization](releases/0.0.3.0.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.0](releases/0.0.3.0.md) |
-| [0.0.3.1 Compact V7 and late consequence decisions](releases/0.0.3.1.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.1](releases/0.0.3.1.md) |
-| [0.0.3.2 Native late-adapter PPO batching](releases/0.0.3.2.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.2](releases/0.0.3.2.md) |
-| [0.0.3.3 Compact data flow and native auxiliary batching](releases/0.0.3.3.md) | [Home](index.md) → [Existing release history](releases/README.md) → [0.0.3.3](releases/0.0.3.3.md) |
-| [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [Existing release history](releases/README.md) |
+| [0.0.2.31 Land-bridge environment](releases/0.0.2.31.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.31](releases/0.0.2.31.md) |
+| [0.0.2.32 Durable collective evidence and private PPO outcome prediction](releases/0.0.2.32.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.32](releases/0.0.2.32.md) |
+| [0.0.2.33 Heading-relative forward vision](releases/0.0.2.33.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.33](releases/0.0.2.33.md) |
+| [0.0.2.34 Body-relative observation V5](releases/0.0.2.34.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.34](releases/0.0.2.34.md) |
+| [0.0.2.35 Soft semantic observation V6](releases/0.0.2.35.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.35](releases/0.0.2.35.md) |
+| [0.0.2.4 GRPO trial reuse and independent actor batches](releases/0.0.2.4.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.4](releases/0.0.2.4.md) |
+| [0.0.2.5 Shared wheel and source-archive asset collection](releases/0.0.2.5.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.5](releases/0.0.2.5.md) |
+| [0.0.2.6 Stable board event overlays](releases/0.0.2.6.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.6](releases/0.0.2.6.md) |
+| [0.0.2.7 Optional visual movement memory and anonymous scent](releases/0.0.2.7.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.7](releases/0.0.2.7.md) |
+| [0.0.2.8 Bounded best-brain saves and native masked-PPO batches](releases/0.0.2.8.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.8](releases/0.0.2.8.md) |
+| [0.0.2.9 Training capture profiles and frozen inference](releases/0.0.2.9.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.2.9](releases/0.0.2.9.md) |
+| [0.0.3.0 Exact V6 allocation and training optimization](releases/0.0.3.0.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.0](releases/0.0.3.0.md) |
+| [0.0.3.1 Compact V7 and late consequence decisions](releases/0.0.3.1.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.1](releases/0.0.3.1.md) |
+| [0.0.3.2 Native late-adapter PPO batching](releases/0.0.3.2.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.2](releases/0.0.3.2.md) |
+| [0.0.3.3 Compact data flow and native auxiliary batching](releases/0.0.3.3.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.3](releases/0.0.3.3.md) |
+| [0.0.3.4 V7 sensory defaults across maintained presets](releases/0.0.3.4.md) | [Home](index.md) → [release records](releases/README.md) → [0.0.3.4](releases/0.0.3.4.md) |
+| [Release and commit rollout hub](releases/README.md) | [Home](index.md) → [release records](releases/README.md) |
 | [X.X.X.X Descriptive rollout title](releases/TEMPLATE.md) | [Home](index.md) → [Development](development.md) → [release template](releases/TEMPLATE.md) |
 
 ## Logos and theme variants
@@ -375,6 +390,7 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/choose-checks-for-the-change.svg` | [Home](index.md) → [All visuals](visuals.md) → [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
 | `assets/diagrams/collective-auxiliary.svg` | [Home](index.md) → [All visuals](visuals.md) → [collective-auxiliary.svg](assets/diagrams/collective-auxiliary.svg) |
 | `assets/diagrams/competition.svg` | [Home](index.md) → [All visuals](visuals.md) → [competition.svg](assets/diagrams/competition.svg) |
+| `assets/diagrams/consequence-episode-clock.svg` | [Home](index.md) → [All visuals](visuals.md) → [consequence-episode-clock.svg](assets/diagrams/consequence-episode-clock.svg) |
 | `assets/diagrams/cuda-dqn-dataflow.svg` | [Home](index.md) → [All visuals](visuals.md) → [cuda-dqn-dataflow.svg](assets/diagrams/cuda-dqn-dataflow.svg) |
 | `assets/diagrams/cuda-ppo-residency.svg` | [Home](index.md) → [All visuals](visuals.md) → [cuda-ppo-residency.svg](assets/diagrams/cuda-ppo-residency.svg) |
 | `assets/diagrams/distributional-action-values.svg` | [Home](index.md) → [All visuals](visuals.md) → [distributional-action-values.svg](assets/diagrams/distributional-action-values.svg) |
@@ -398,7 +414,9 @@ and **8 identical viewer branding copies**.
 | `assets/diagrams/rollout-record-lifecycle.svg` | [Home](index.md) → [All visuals](visuals.md) → [rollout-record-lifecycle.svg](assets/diagrams/rollout-record-lifecycle.svg) |
 | `assets/diagrams/run-continue-or-view.svg` | [Home](index.md) → [All visuals](visuals.md) → [run-continue-or-view.svg](assets/diagrams/run-continue-or-view.svg) |
 | `assets/diagrams/runtime-boundaries.svg` | [Home](index.md) → [All visuals](visuals.md) → [runtime-boundaries.svg](assets/diagrams/runtime-boundaries.svg) |
+| `assets/diagrams/scent-patch-selection.svg` | [Home](index.md) → [All visuals](visuals.md) → [scent-patch-selection.svg](assets/diagrams/scent-patch-selection.svg) |
 | `assets/diagrams/seeking-and-charts-use-separate-data.svg` | [Home](index.md) → [All visuals](visuals.md) → [seeking-and-charts-use-separate-data.svg](assets/diagrams/seeking-and-charts-use-separate-data.svg) |
+| `assets/diagrams/sensing-decision-loop.svg` | [Home](index.md) → [All visuals](visuals.md) → [sensing-decision-loop.svg](assets/diagrams/sensing-decision-loop.svg) |
 | `assets/diagrams/shared-champion-weights.svg` | [Home](index.md) → [All visuals](visuals.md) → [shared-champion-weights.svg](assets/diagrams/shared-champion-weights.svg) |
 | `assets/diagrams/social-learning.svg` | [Home](index.md) → [All visuals](visuals.md) → [social-learning.svg](assets/diagrams/social-learning.svg) |
 | `assets/diagrams/top-k-observation-pipeline.svg` | [Home](index.md) → [All visuals](visuals.md) → [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |

@@ -13,6 +13,12 @@ immutable snapshots; it is bounded by distinct champion models in that export
 and discarded afterward. It never caches live controller parameters or enters
 checkpoints. No training throughput/RAM improvement is claimed for this change.
 
+Preset defaults now use [V7 with history and scent](configuration.md#v7-sensory-preset-defaults).
+Earlier benchmark tables retain their measured contracts, including legacy
+153-/482-input workloads; those sizes do not describe the promoted presets.
+Reproducing older timings requires the documented baseline revision/configuration,
+while fresh comparisons must hold the full sensory settings equal.
+
 ## Recent export and inspector work
 
 Champion export now serializes and hashes each shared configuration object once
@@ -684,7 +690,7 @@ alternating order, matching seed 100, CPython
 3.12 and native kernels. It compares full state hashes and restore round trips.
 Temporary outputs are isolated from `results/`. The update workload applies 12
 64-sample masked-PPO updates (four epochs, minibatches of 16) to the tracking
-preset's 482-input, 64/32-hidden-unit predator network. Training covers one
+preset's then-current V4 482-input, 64/32-hidden-unit predator network. Training covers one
 160-step tracking world, 48 prey and six predators, including initialization and
 champion selection but excluding recording and disk writes. Storage writes eight
 successive states of that setup and times the writers separately from stepping
@@ -837,11 +843,11 @@ The metadata component encodes the same borrowed metadata ten times with fresh
 encoders, excluding world stepping and compression. Update-only workers use
 64-sample rollouts, four epochs, minibatches of 16 and disabled KL stopping;
 ordinary PPO uses 153 inputs and hidden `[64, 32]`, while masked PPO uses the
-tracking preset's 482 inputs and hidden `[64, 32]`. Synthetic rollout generation
+tracking preset's then-current V4 482 inputs and hidden `[64, 32]`. Synthetic rollout generation
 and a separate traced allocation probe are outside the update timer. Neither
 learning schedule nor production KL settings are changed by the benchmark.
 
-The workflow uses the current ordinary-PPO preset: 32×24 cells, 64 prey and six
+The measured workflow used the then-current V4 ordinary-PPO preset: 32×24 cells, 64 prey and six
 predators, 128 steps, full world capture every step, diagnostics every ten steps,
 64 frames per chunk and binary/XZ recovery at steps 64 and 128. Its timer includes
 initialization, training, recording/finalization and checkpoint writes; restore,

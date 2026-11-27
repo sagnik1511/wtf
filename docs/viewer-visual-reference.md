@@ -224,19 +224,19 @@ ribbon animation. See [motion assets and behavior](branding.md#motion-policy).
 
 ## Movement memory and scent
 
-![Current inspector movement-memory and blended scent components](assets/viewer/tracking.svg)
+![V7 movement summaries and four-value scent compass](assets/viewer/observation-v7.svg)
 
-With the optional [tracking senses](tracking.md) enabled, select an animal to see
-its sampled movement history and anonymous local scent patterns. **Tracks & scent
-charts** jumps to those panels. A selected-only board overlay shows personal
-visual tracks, while **All-species heatmap** opens the combined sidebar map. **Metrics dashboard**
-keeps compact maps beside every species' metrics and a **Species** selector to
-enlarge one group; all maps count arrivals through the current replay step. Scent itself stays off the main board. Hollow markers
-are last-seen memories; dashed inspector lines are velocity estimates, and gaps remain
-unknown. Blended mode shows one heatmap for all animals; legacy separated mode retains
-its named species/sex grids. A scent field is not
-one animal. These controlled SVG specimens come from the actual inspector
-renderers and adapt to interface light/dark palettes.
+Select an animal to inspect its recorded personal movement trend and anonymous
+scent bearing/strength/freshness. **Tracks & scent charts** jumps to the relevant
+panels. The summary cannot reconstruct unknown intermediate positions. Its
+sampled heading can differ from the current board heading.
+
+The selected-only board overlay and **All-species heatmap** are separate from
+scent. Species occupancy maps appear together in **Metrics dashboard**; the
+sidebar retains the combined map. These maps count arrivals only through the
+current replay step and honor backward seeks. Scent itself stays off the main
+board. See [sensing details](learning/memory-and-scent.md) and
+[historical grids](archive/sensory-viewer.md) for old recordings.
 
 ## Collective learning
 
@@ -270,35 +270,11 @@ sightings can fade in memory and scent remains omnidirectional. Immediate
 physical affordances and learned species knowledge are separate input sources.
 See [forward-field rules](observations.md#forward-visual-field).
 
-## Observation V5
+<a id="observation-v5"></a>
+<a id="observation-v6"></a>
 
-![V5 raw forward/right blocks and north-up sampled radar](assets/viewer/observation-v5.svg)
-
-The inspector identifies V5 inputs and shows immediate attack/eat/swim
-opportunities with the existing light/dark-aware status styling. These indicators
-do not mask predictions. Raw input/attribution labels use forward/right and
-body-relative scent sectors. Radar targets, flow, histories and scent grids are
-projected back through the **sampled heading** so they stay north-up alongside
-the world board. Current sight remains tied to the current selected body; sampled
-inputs can lag it. Older recordings retain their original appearance.
-See [layout and opportunity definitions](observations.md#observation-version-5).
-
-## Observation V6
-
-![Overlapping V6 category memberships and representative north-up radar](assets/viewer/observation-v6.svg)
-
-The inspector's **V6 soft categories** disclosure shows up to 48 nonempty groups
-from the selected animal's saved input, updating during replay. Full semantic
-labels remain available in the raw vector, network structure and saved-weight
-explanations. Opportunity indicators retain their exact flags and do not mask
-ordinary PPO predictions. Existing charts decode category-derived values for
-health, terrain, mating, social/consequence estimates, movement memory and scent.
-Radar/history positions are representative after any band saturation; the world
-board always uses exact saved positions. Both modes use the viewer theme.
-See [bands, widths and saturation](observations.md#observation-version-6) and the
-[complete ordered input layout](observations.md#v6-input-layout), plus the
-[V5 → V6 data comparison](observations.md#what-changed-from-v5-to-v6).
-
+Older numeric/soft inspector sheets are in the
+[historical sensory viewer reference](archive/sensory-viewer.md).
 
 ## Compact V7 and late consequence adjustment
 

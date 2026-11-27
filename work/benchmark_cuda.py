@@ -50,7 +50,13 @@ def configuration(kind, steps, seed, hidden=None):
         key: copy.deepcopy(b if b["type"] == source else template)
         for key, b in config["brains"].items()
     }
-    for brain in config["brains"].values():
+    for key, brain in config["brains"].items():
+        if brain.get("observation_version") == 7:
+            brain["observation_actions"] = next(
+                list(spec["allowed_actions"])
+                for spec in config["species"].values()
+                if spec["brain"] == key
+            )
         brain["type"] = kind
         if kind in ("dqn", "ddqn"):
             brain.pop("num_quantiles", None)
@@ -67,6 +73,9 @@ def configuration(kind, steps, seed, hidden=None):
                 "max_grad_norm",
                 "observation_version",
                 "observation_top_k",
+                "observation_actions",
+                "movement_history_steps",
+                "scent_observation",
             )
             # pylint: enable=duplicate-code
             replacement = {key: brain[key] for key in keep if key in brain}

@@ -1,58 +1,31 @@
 # Mating readiness and guarded inheritance
 
-[Saved brains](brain-library.md) · [Rewards](rewards.md) · [Geography](geography.md)
+[Mating intent](mating-intent.md) · [V7 observations](learning/v7-observations.md) · [Champion selection](brain-library.md)
 
-The meandering-river preset now exposes mating opportunities and uses longer,
-more frequent predator GRPO trials. Reward coefficients and physical mating
-rules are unchanged. These changes have not yet been validated as an ecological
-improvement in a long experiment.
+The current V7 input includes twelve mating/consent values, after the terrain
+block. They help an animal react to observed opportunities without granting
+automatic reproduction or access to hidden mate state.
 
-The optional [mating-intent preset](mating-intent.md) combines these inputs with
-masked PPO and persistent proximal consent. It uses the existing version-3 layout: 66 inputs for prey at k=3 and
-42 for predators at k=1.
+## Current mating input block
 
-## Observation version 3
+| Values | Meaning |
+| --- | --- |
+| Sex, maturity, cooldown, own readiness | Own body/readiness state; timing windows use the configured personal clocks |
+| Mate forward/right and presence | Observed mate position in the current heading frame, with explicit absence |
+| Mate readiness and pair opportunity | Current observed eligibility; a positive cue is not a future birth guarantee |
+| Own consent, observed mate consent, consenting pair | Existing active intent, subject to physical and visibility rules |
 
-Set `observation_version: 3` on any algorithm's brain template. All nine
-controllers support it on flat and terrain maps. With default k=1, its **42
-inputs** contain 20 local inputs, 12 terrain inputs (zero on flat maps) and ten
-mating values. Each extra target slot adds 12 inputs: k=4 has 78. The
-[vector block diagram](observations.md#input-layout) shows how these sections
-shift. Versions 1/2 retain their signatures when k is unchanged.
+The redundant mate-distance field is omitted in V7. A hidden mate's state is not
+added just because it is physically nearby. Radius, directional field, water
+sight and walls govern visual mate cues; smell does not reveal a consenting mate.
+Own maturity and cooldown expose current progress, not future RNG samples.
+Observation production does not advance reproduction clocks or consume RNG.
 
-The indexes below assume k=1. Add `12 * (k - 1)` to each mating index for
-a larger target count; the ten-field mating summary itself stays the same.
-
-| Zero-based index | Feature | Meaning |
-| --- | --- | --- |
-| 32 | Sex | -1 female, +1 male |
-| 33 | Maturity progress | Age / due maturity age, capped at 1; already-reproduced animals stay at 1 |
-| 34 | Cooldown remaining | Remaining cooldown for the next action phase / cooldown interval, from 0 to 1; zero before first birth |
-| 35 | Self readiness | Personal age, strict HP, energy and dry-cell gates allow attempting reproduction next step |
-| 36–37 | Nearest mate dx, dy | World-axis displacement / maximum sight range, including water bonus |
-| 38 | Nearest mate distance | Euclidean distance / the same sight scale |
-| 39 | Mate visible | Visible opposite-sex animal of the same species exists |
-| 40 | Mate readiness | That nearest visible animal passes the same personal gates |
-| 41 | Pair opportunity | At least one visible, eligible nearby mate has line of sight, dry route, population capacity and reachable free birth space |
-
-Mate position/presence/readiness values are zero without a visible mate.
-Nearest-mate ties prefer lower IDs. A nearer unready mate can be reported while
-another nearby ready mate makes pair opportunity true. These inputs do not
-predict another controller's action: both animals must still consent to reproduction (same-step by default, or
-overlapping configured intent while resting).
-Movement, combat, expenditure or contention can invalidate an opportunity.
-
-Readiness shares the action mask's read-only eligibility calculation. Births
-resolve after aging, so readiness checks `age + 1`. Before a timing deviation is
-sampled, it uses the earliest possible due age; once sampled by physical
-simulation, it uses the actual due age. Thus initial/newborn opportunities can
-be optimistic. Observing never samples or changes a clock or RNG state.
-
-Mate sight uses ordinary radius, directional water bonus and wall occlusion.
-There is no distant/invisible mate state or future-consent input. Phase-local
-species/sex spatial buckets, counts and readiness are rebuilt once per observation
-phase, including stationary animals whose health, energy or age changed. These
-derived lookups stay out of checkpoints.
+Both parents must have active consent, same species/opposite sex, eligible
+health/energy/age/cooldown, dry reachable proximity and birth space/capacity.
+`reproduce` grants or refreshes eligible consent; configured `rest` steps can
+retain it. Other actions cancel it under the current implementation. See
+[consent state and failed attempts](mating-intent.md).
 
 ## Guard provisional lineage winners
 
@@ -72,29 +45,18 @@ mutating input configuration. Legacy checkpoints lacking both a saved effective
 flag and configuration flag preserve their original unguarded behavior on exact
 resume. Their observation versions and trial settings also remain unchanged.
 
-## Updated meandering-river experiment
 
-| Setting | Previous | Updated |
-| --- | --- | --- |
-| Both observation versions | 2 / 32 inputs | 3 / 42 inputs |
-| Predator GRPO trial horizon | 4 | 16 |
-| Predator GRPO training interval | 128 | 32 |
-| Maximum GRPO group updates per world step | 1 | 1 |
-| Lineage promotion guard | Unconditional fallback promotion | Enabled |
+## Presets and saved brains
 
-The preset retains A2C prey and GRPO predators. Longer, more frequent trials
-increase computation; their runtime has not been benchmarked here. Other presets
-retain their observation versions and learning cadence; version 3 is opt-in.
+The ordinary and masked PPO profiles keep proximal prey/predator radii 2/3.
+The meandering-river preset uses V7 inputs with A2C prey and GRPO predators;
+its trial horizon and training interval are still 16 and 32. Its current k=1
+sensory vectors have 61 values, including history and blended scent.
+Use matching complete model contracts or start fresh. Exact checkpoint resumes
+retain their captured versions, clocks, private training state and knowledge.
 
-Start fresh with lineage selection:
+<a id="observation-version-3"></a>
+<a id="updated-meandering-river-experiment"></a>
 
-```sh
-.venv/bin/python -m wtf.cli environments/meandering_river.json \
-  --runs 10 --seed 100 --progress \
-  --champion prey=lineage --champion predator=lineage
-```
-
-Existing 20/32-input weights cannot initialize 42-input brains; signature checks
-reject them. Use fresh initialization or version-3-compatible models. Existing
-recordings remain playable, and legacy resume uses its embedded configuration.
-The viewer handles dynamic diagnostic arrays without a replay-format change.
+Earlier V3 layouts and river settings are preserved only in the
+[historical mating-input reference](archive/mating-inputs-v3.md).

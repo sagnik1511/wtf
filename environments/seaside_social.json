@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "seaside_social",
-  "description": "Coastal PPO with collective visible outcomes and bounded persistent species consequence learning",
+  "description": "Coastal PPO with collective visible outcomes and bounded persistent species consequence learning; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -178,14 +178,31 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 3,
       "social_observation": {
         "history_steps": 4,
         "max_neighbors": 8
       },
       "consequence_observation": true,
-      "consequence_scope": "species_action"
+      "consequence_scope": "species_action",
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce",
+        "swim"
+      ]
     },
     "predator_ppo": {
       "type": "ppo",
@@ -206,14 +223,28 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 10,
       "social_observation": {
         "history_steps": 4,
         "max_neighbors": 8
       },
       "consequence_observation": true,
-      "consequence_scope": "species_action"
+      "consequence_scope": "species_action",
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce",
+        "swim"
+      ]
     }
   },
   "experiment": {
@@ -250,5 +281,9 @@
     "enabled": true,
     "max_contexts": 512,
     "horizon_steps": 16
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

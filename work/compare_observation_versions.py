@@ -56,6 +56,8 @@ def version_config(config, version):
                 "This comparison isolates ordinary PPO; every brain must use ppo"
             )
         brain["observation_version"] = version
+        if version < 7:
+            brain.pop("observation_actions", None)
         if version < 6:
             brain.pop("soft_categories", None)
     return result

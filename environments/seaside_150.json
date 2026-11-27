@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "seaside_150",
-  "description": "Seaside PPO with 150-degree forward vision, visible social outcomes, persistent species/action totals, both consequence scopes and independent auxiliary heads; consequence evidence published between episodes",
+  "description": "Seaside PPO with 150-degree forward vision, visible social outcomes, persistent species/action totals, both consequence scopes and independent auxiliary heads; consequence evidence published between episodes; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -180,7 +180,7 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 3,
       "social_observation": {
         "history_steps": 4,
@@ -190,7 +190,24 @@
       "consequence_scope": "both",
       "auxiliary_consequence": {
         "coefficient": 0.1
-      }
+      },
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce",
+        "swim"
+      ]
     },
     "predator_ppo": {
       "type": "ppo",
@@ -211,7 +228,7 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 10,
       "social_observation": {
         "history_steps": 4,
@@ -221,7 +238,21 @@
       "consequence_scope": "both",
       "auxiliary_consequence": {
         "coefficient": 0.1
-      }
+      },
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce",
+        "swim"
+      ]
     }
   },
   "experiment": {
@@ -260,5 +291,9 @@
     "horizon_steps": 16,
     "update_schedule": "episode",
     "persistent_action_totals": true
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

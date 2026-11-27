@@ -132,7 +132,7 @@ class MatingObservationTests(unittest.TestCase):
         self.assertEqual(c["brains"]["small_grpo"]["rollout_horizon"], 16)
         self.assertEqual(c["brains"]["small_grpo"]["train_every_steps"], 32)
         self.assertTrue(
-            all(b["observation_version"] == 3 for b in c["brains"].values())
+            all(b["observation_version"] == 7 for b in c["brains"].values())
         )
         c["experiment"]["guard_lineage_chaining"] = "true"
         with self.assertRaisesRegex(ValueError, "guard_lineage_chaining"):
@@ -168,7 +168,7 @@ class MatingObservationTests(unittest.TestCase):
         w.config["species"]["prey"]["body"]["water_vision_bonus"] = 0
         self.assertEqual(w.observe_all()[0][39], 0)
 
-    def test_longer_grpo_trials_keep_v3_inputs_and_isolate_real_world(self):
+    def test_longer_grpo_trials_keep_v7_inputs_and_isolate_real_world(self):
 
         # Keep imports lazy so optional tools and training dependencies load only on
         # this path.
@@ -186,7 +186,7 @@ class MatingObservationTests(unittest.TestCase):
         others = {i: b.checkpoint() for i, b in e.brains.items() if i != focal}
         group = collect_group(e.world, e.brains, focal)
         self.assertEqual([len(t) for t in group], [16] * 4)
-        self.assertTrue(all(len(s.observation) == 42 for t in group for s in t))
+        self.assertTrue(all(len(s.observation) == 61 for t in group for s in t))
         self.assertEqual(e.world.checkpoint(), before)
         self.assertEqual(
             {i: b.checkpoint() for i, b in e.brains.items() if i != focal}, others

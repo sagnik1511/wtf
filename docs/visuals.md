@@ -45,6 +45,7 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Choose checks for the change (SVG)](visual-previews/diagrams/choose-checks-for-the-change-svg.md) | [choose-checks-for-the-change.svg](assets/diagrams/choose-checks-for-the-change.svg) |
 | [Collective auxiliary (SVG)](visual-previews/diagrams/collective-auxiliary-svg.md) | [collective-auxiliary.svg](assets/diagrams/collective-auxiliary.svg) |
 | [Competition (SVG)](visual-previews/diagrams/competition-svg.md) | [competition.svg](assets/diagrams/competition.svg) |
+| [Consequence episode clock (SVG)](visual-previews/diagrams/consequence-episode-clock-svg.md) | [consequence-episode-clock.svg](assets/diagrams/consequence-episode-clock.svg) |
 | [Cuda DQN dataflow (SVG)](visual-previews/diagrams/cuda-dqn-dataflow-svg.md) | [cuda-dqn-dataflow.svg](assets/diagrams/cuda-dqn-dataflow.svg) |
 | [Cuda PPO residency (SVG)](visual-previews/diagrams/cuda-ppo-residency-svg.md) | [cuda-ppo-residency.svg](assets/diagrams/cuda-ppo-residency.svg) |
 | [Distributional action values (SVG)](visual-previews/diagrams/distributional-action-values-svg.md) | [distributional-action-values.svg](assets/diagrams/distributional-action-values.svg) |
@@ -68,7 +69,9 @@ when opened directly. The editable explorer fragment is source, not the full app
 | [Rollout record lifecycle (SVG)](visual-previews/diagrams/rollout-record-lifecycle-svg.md) | [rollout-record-lifecycle.svg](assets/diagrams/rollout-record-lifecycle.svg) |
 | [Run continue or view (SVG)](visual-previews/diagrams/run-continue-or-view-svg.md) | [run-continue-or-view.svg](assets/diagrams/run-continue-or-view.svg) |
 | [Runtime boundaries (SVG)](visual-previews/diagrams/runtime-boundaries-svg.md) | [runtime-boundaries.svg](assets/diagrams/runtime-boundaries.svg) |
+| [Scent patch selection (SVG)](visual-previews/diagrams/scent-patch-selection-svg.md) | [scent-patch-selection.svg](assets/diagrams/scent-patch-selection.svg) |
 | [Seeking and charts use separate data (SVG)](visual-previews/diagrams/seeking-and-charts-use-separate-data-svg.md) | [seeking-and-charts-use-separate-data.svg](assets/diagrams/seeking-and-charts-use-separate-data.svg) |
+| [Sensing decision loop (SVG)](visual-previews/diagrams/sensing-decision-loop-svg.md) | [sensing-decision-loop.svg](assets/diagrams/sensing-decision-loop.svg) |
 | [Shared champion weights (SVG)](visual-previews/diagrams/shared-champion-weights-svg.md) | [shared-champion-weights.svg](assets/diagrams/shared-champion-weights.svg) |
 | [Social learning (SVG)](visual-previews/diagrams/social-learning-svg.md) | [social-learning.svg](assets/diagrams/social-learning.svg) |
 | [Top k observation pipeline (SVG)](visual-previews/diagrams/top-k-observation-pipeline-svg.md) | [top-k-observation-pipeline.svg](assets/diagrams/top-k-observation-pipeline.svg) |

@@ -3,7 +3,7 @@
 [Mating intent](mating-intent.md) · [Observations](observations.md) · [Feedback](rewards.md)
 
 Optional walking actions let a policy move away from threats without turning.
-Observation version 4 exposes current local mating consent. These mechanisms
+Current V7 observations expose local mating readiness and consent. These mechanisms
 retain ordinary collision, effort and reproduction eligibility rules; populations,
 radii, health and learning settings belong to the chosen environment JSON.
 
@@ -37,35 +37,19 @@ Native and Python metabolism charge the same effort. Rebuild native kernels with
 steps containing escape choices use Python metabolism to avoid undercharging.
 Other supported native kernels remain available.
 
-## Observation version 4
+## Current consent observations
 
-Version 4 preserves the version-3 vector and appends three values:
+V7 includes own consent, observed mate consent and consenting-pair cues inside
+the twelve-field mating block. They describe current intent, not a partner's
+future choice, and never bypass radius, visibility, health/energy or birth-space
+rules. See [current mating inputs](mating-observations.md) and
+[exact V7 offsets](learning/v7-observations.md).
 
-| Index at k=1 | Signal | Range |
-| --- | --- | --- |
-| 42 | Own consent time remaining / configured intent duration | 0–1 |
-| 43 | Nearest visible same-species, opposite-sex mate's remaining consent | 0–1 |
-| 44 | A visible, physically eligible proximal consenting mate with birth space exists, and self is ready | 0 or 1 |
+<a id="observation-version-4"></a>
 
-Add `12 * (k - 1)` to these indices for larger top-k. Inputs total
-`45 + 12 * (k - 1)`: 69 inputs at k=3 and 45 at k=1.
-All nine controller implementations accept the same version.
-The inspector labels the recorded signals and shows escape action predictions.
-
-Signals describe current consent only. They do not read a partner's upcoming
-choice or sample a policy. Visibility, range, walls and dry routes still apply;
-occluded or out-of-sight mates reveal no consent. The nearest mate can be
-unwilling while another eligible nearby mate makes the last flag true. No signal
-identifies an invisible distant mate or bypasses mutual consent. Reads do not
-advance cooldowns, consent, RNG state or recurrent memory.
-
-Versions 1–3 keep their original vector contracts. Version-3 intent remains
-inspector-only; use version 4 to expose it to a brain. Existing models from
-another observation version are incompatible with this contract.
-Use fresh or compatible saved models. Checkpoints, replay chunks and viewer
-seeking retain their current formats; new action event labels are decoded by
-updated readers, while old recordings remain readable. Walking statistics now
-include backward/sideways attempts and reconstruct their effort and failures.
+The earlier V4 append-only layout is kept in the
+[historical observation reference](archive/observation-layouts.md), not as a
+current preset example. Matching older recordings remain readable.
 
 Choose parameters through the [configuration guide](configuration.md); consult
 [current calibration](calibration.md) for recommendations and their scope.

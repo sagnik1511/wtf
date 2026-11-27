@@ -23,8 +23,8 @@ for controlled examples of board appearance on three map types.
 
 Click a living animal on the board. **Show selected animal’s sight on board**
 highlights its current visible cells using recorded body/map settings, wall
-occlusion and directional water bonuses. Heading does not restrict sight to a
-cone; elevation and other animals do not occlude sight under the current rules.
+occlusion and directional water bonuses. The configured 150°/180° visual field follows heading; 360° remains available.
+Elevation and other animals do not occlude sight under the current rules.
 The highlighted area is current-frame geometry, not a replayed older input.
 
 This [controlled illustration](assets/inspector/README.md) uses actual observation
@@ -47,7 +47,7 @@ The inspector adds:
   energy/health gauges and blocked walking directions. Food at the animal's own
   position remains a present target. Wet maps show a dashed base-range ring
   inside the maximum range; actual wall/water-limited visibility is on the board.
-- Terrain and version-3 mating inputs in expandable sections. Target categories
+- Current V7 terrain, mating/consent and configured sensory inputs. Target categories
   are grouped by diet; general target slots do not reveal identities or sex.
 - Horizontal action-probability bars for policies, and signed Q-return bars with
   a zero axis for Q learners. Masked actions are marked; the outline means highest

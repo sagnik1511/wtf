@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 920" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1080" role="img" aria-labelledby="title desc"><style id="figure-palette">svg{--figure-101720:#101720;--figure-14202d:#14202d;--figure-192532:#192532;--figure-486077:#486077;--figure-8ac8ff:#8ac8ff;--figure-9bb5ce:#9bb5ce;--figure-acbfd1:#acbfd1;--figure-e6edf3:#e6edf3;}@media(prefers-color-scheme:light){svg{--figure-101720:#f5f8fb;--figure-14202d:#f8fafc;--figure-192532:#f0f4f8;--figure-486077:#a2b5c7;--figure-8ac8ff:#1f639c;--figure-9bb5ce:#415b70;--figure-acbfd1:#4b6073;--figure-e6edf3:#172c3c;}}</style>
 <title id="title">Inside one private brain checkpoint</title><desc id="desc">Algorithm-specific state is grouped here by responsibility; not every controller contains every block.</desc>
 <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="var(--figure-9bb5ce)"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:var(--figure-e6edf3)}.mono{font-family:monospace}</style>
-<rect width="1040" height="920" fill="var(--figure-101720)"/>
+<rect width="1040" height="1080" fill="var(--figure-101720)"/>
 <text x="26" y="39" font-size="25" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)">Inside one private brain checkpoint</text>
 <text x="26" y="68" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Algorithm-specific state is grouped here by responsibility; not every controller contains every block.</text>
 <rect x="24" y="96" width="992" height="770" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
@@ -73,7 +73,7 @@
 <text x="765.0" y="664" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Algorithm-specific working state</text>
 <rect x="548" y="681" width="213" height="124" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
 <text x="654.5" y="708" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Recurrent / masked</text>
-<text x="654.5" y="733" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">hidden state</text>
+<text x="654.5" y="733" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">GRU h / LSTM [h,c]</text>
 <text x="654.5" y="755" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">sequence hidden inputs</text>
 <text x="654.5" y="777" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">action mask</text>
 <rect x="777" y="681" width="205" height="124" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
@@ -82,4 +82,10 @@
 <text x="879.5" y="755" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">GRPO last_group_step</text>
 <text x="879.5" y="777" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">additional pending data</text>
 <text x="26" y="895" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Q-network SGD has no Adam moments. Neural parameters, buffers and RNG objects remain private after restoration.</text>
+<path d="M520 850 V930" fill="none" stroke="var(--figure-9bb5ce)" marker-end="url(#arrow)"/>
+<rect x="26" y="932" width="988" height="120" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
+<text x="48" y="960" font-size="17">Optional private PPO heads: auxiliary / late-consequence networks</text>
+<text x="48" y="986" font-size="14">Parameters, Adam moments and counters restore with the owning brain; no shared policy weights.</text>
+<text x="48" y="1012" font-size="14">Separate world.social_state owns published/staged species counts and pending outcome windows.</text>
+<text x="48" y="1038" font-size="14">SAC restores actor, twin critics and targets; TRPO restores actor/value working state.</text>
 </svg>

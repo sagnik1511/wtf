@@ -2,6 +2,10 @@
 
 [Observations](observations.md) · [Tracking](tracking.md) · [Rewards](rewards.md) · [Playback and inspection](viewer-visual-reference.md#collective-learning)
 
+The [consequence pipeline handbook](learning/consequence-pipeline.md) provides
+worked rates, publication timing, learning branches and a playback checklist.
+Use [Tutorial 6](tutorials/06-sensing-and-learning.md) for complete configurations.
+
 Two independent opt-ins add social information while keeping every animal's
 policy parameters, optimizer, exploration and learning experiences independent.
 Local collective observations pool visible same-species behavior. A separate
@@ -116,11 +120,14 @@ Choose which consequence sources each consuming brain receives:
 "consequence_scope": "species_action"
 ```
 
-| `consequence_scope` | Inputs | Meaning |
+| `consequence_scope` | V1–V5 numeric inputs | Meaning |
 | --- | ---: | --- |
 | `context` (default) | 48 | Current physical context, preserving the legacy lookup |
 | `species_action` | 48 | General action knowledge across the species' retained contexts |
 | `both` | 96 | General 48 first, then context 48; independent confidence per action/source |
+
+V7 uses `4 × configured_action_count` values per source; V6 uses its expanded
+semantic representation. The table above describes the legacy numeric blocks.
 
 Use `"consequence_scope": "both"` to give the NN both sources without manually
 blending them or choosing a source for it. All ordinary state inputs remain.
@@ -157,8 +164,9 @@ this is not unlimited lifetime memory.
 
 Omitting `consequence_scope`, or setting `context`, preserves the previous
 context-matched lookup. In that mode a new physical context can be unknown even
-when the action has evidence elsewhere. Each single-source mode keeps 48 inputs;
-`both` adds another 48. Non-default scopes are explicit model-signature distinctions: use fresh matching
+when the action has evidence elsewhere. In legacy numeric layouts, each single-source mode keeps 48 inputs;
+`both` adds another 48. V7 instead uses four inputs per configured action per
+source, while V6 expands its soft categories. Non-default scopes are explicit model-signature distinctions: use fresh matching
 brains, or resume an existing checkpoint with its original scope. Weights are not silently
 exchanged across different scopes, including the wider combined layout. The physical
 consequence export can be reused across scopes when its physical/horizon
@@ -242,8 +250,9 @@ its physical action mask still governs action selection.
 
 The auxiliary forward pass zeros **all consequence-estimate input fields**,
 including both sources in combined mode. This prevents directly copying target
-values from those inputs. It retains the animal's other physical, tracking and
-local social inputs. The head attaches to that animal's hidden trunk, adding
+values from those inputs. It retains the animal's other physical and tracking inputs. In input mode
+local social cues remain; with late placement local/general/context evidence
+is outside the physical trunk. The head attaches to that animal's hidden trunk, adding
 supervised gradients to its existing PPO trunk gradients. Its output layer has
 private Adam state; the actor/critic output layer receives no direct auxiliary
 output gradient. The normal policy path still sees configured consequence inputs.

@@ -517,8 +517,9 @@ sex-specific criterion uses `champion_selection.criterion` or the existing
 species default. Balanced scoring parameters remain species-wide, but candidate
 ranking is independent for male and female predators.
 
-New manifests/indexes use `library_version: 2` and artifacts use
-`brain_artifact_version: 2`. Readers accept versions 1 and 2. No old archive is
+New manifests/indexes use `library_version: 2`; current model artifacts use
+`brain_artifact_version: 3` with shared binary/XZ weight references. Readers
+retain artifact versions 1, 2 and 3. No old archive is
 rewritten. Older checkpoints with a species-only champion book retain historical
 winners only when their sex was recorded, and seed missing groups from currently
 living controllers. Unsaved historical winners cannot be reconstructed. Old

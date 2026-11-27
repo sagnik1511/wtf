@@ -4,7 +4,7 @@
 
 During training, a newborn can receive a small sparse change after inheriting its
 parents' mixed learned weights. Both parents are unchanged by crossover/mutation. Founders and existing adults
-are not mutated. All nine algorithms support this optional mechanism.
+are not mutated. All fourteen algorithms support this optional mechanism.
 
 
 ## Child-only mutation path

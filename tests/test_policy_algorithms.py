@@ -25,6 +25,10 @@ def settings(kind):
     c = copy.deepcopy(
         load(ROOT / f"environments/{kind}.json")["brains"][f"small_{kind}"]
     )
+    # Algorithm math fixtures retain their original 20-input sensory contract.
+    c["observation_version"] = 1
+    for key in ("observation_actions", "movement_history_steps", "scent_observation"):
+        c.pop(key, None)
     c["network"]["hidden_layers"] = [4]
     if kind == "a2c":
         c["rollout_steps"] = 4
@@ -196,6 +200,12 @@ class GRPOTests(unittest.TestCase):
             if kind == "ppo":
                 c = load(ROOT / "environments/ppo.json")["brains"]["prey_ppo"]
                 c.update(observation_version=1, observation_top_k=1)
+                for key in (
+                    "observation_actions",
+                    "movement_history_steps",
+                    "scent_observation",
+                ):
+                    c.pop(key, None)
             else:
                 c = settings(kind)
             brains[0] = create_brain(c, ["rest"], 3, 4)

@@ -7,6 +7,11 @@ then choose a learner and decide how descendants and champions inherit knowledge
 
 | Task | Guide |
 | --- | --- |
+| [Follow the complete sensing-to-learning path](features.md) | Feature choices, ownership, decision flow and saved-state boundaries. |
+| [Read the V7 vector](v7-observations.md) | Exact blocks, example offsets, action contracts and version differences. |
+| [Understand personal memory and scent](memory-and-scent.md) | Worked sightings, mixture/fading arithmetic and reachable-patch selection. |
+| [Trace consequence learning](consequence-pipeline.md) | Outcome windows, publication, private auxiliary/late learning and inspection. |
+| [Configure a complete sensory experiment](../tutorials/06-sensing-and-learning.md) | Executable profiles, multi-episode commands and troubleshooting. |
 | [Choose algorithms and network depth](../algorithms.md) | Private learning, architectures and supported algorithms. |
 | [Use SAC, TRPO or LSTM PPO](../additional-policies.md) | Replay-based soft control, trust regions and hidden/cell memory. |
 | [Use advanced algorithms](../advanced-algorithms.md) | Recurrent, distributional, masked and multi-agent variants. |

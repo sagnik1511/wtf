@@ -21,8 +21,8 @@ Each preset configures both species with its named algorithm and explicitly
 selects longest-lived champions for cross-episode inheritance. Recurrent PPO,
 QR-DQN and MAPPO preserve the world, bodies, rewards and reproduction settings
 of `ppo_large_predator.json`. The masked-PPO preset instead uses the maintained
-flat-world [survival calibration](calibration.md), with six predators, version-4
-consent inputs and prey escape actions.
+flat-world [survival calibration](calibration.md), with six predators, V7
+consent/physical inputs, three-step history, blended scent and prey escape actions.
 The feedforward hidden layers are `[16]` for prey and `[64, 32]` for predators.
 Recurrent PPO adds a GRU before those layers; MAPPO adds a separate critic.
 
@@ -52,8 +52,9 @@ Exact checkpoints retain the full training state instead.
 ## Recurrent PPO
 
 Template type: `recurrent_ppo`. This combines a single GRU cell, a tanh MLP,
-categorical PPO policy and scalar value output. The GRU processes the configured local observation: 20 flat features or 32
-terrain features. This is a GRU
+categorical PPO policy and scalar value output. The GRU processes the configured V7 observation, including enabled history and
+scent. Its current k=1 preset uses 60 values per species; larger k and optional
+evidence blocks change that width. This is a GRU
 implementation, not an LSTM or an adapter to a third-party trainer.
 
 Additional fields:

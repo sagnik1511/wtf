@@ -8,6 +8,35 @@ logs, individual run identifiers, observation tables and rejected candidates out
 of this guide. This is a living decision reference, not a chronological history.
 Environment JSON remains authoritative for the settings actually used.
 
+## Current sensory defaults
+
+New runs from the maintained scenario and algorithm presets use **V7 compact
+observations, three-step personal visual history and blended scent**. Smell
+radius is two dry-cell steps; the field retains the preset's existing lifetime,
+or 32 steps where scent is newly enabled. History records personally visible
+movement, while scent remains anonymous and does not reveal a target identity.
+Top-k, vision radius/angle, geography and physical eligibility are unchanged.
+
+This is the adopted sensory starting point. Forty presets were promoted; the
+minimal `baseline`, archived-brain `champion_lineage` example and explicit
+`seaside_150_v5`/`seaside_150_v6` comparison controls retain their contracts.
+`seaside_150_v7` remains the separate late-adapter/auxiliary reference. V1–V6
+remain supported for custom configurations and exact saved-state restoration.
+
+The ecological recommendations below retain their existing health, food,
+reproduction and reward settings. Their earlier matched evidence predates this
+sensory promotion; promising V7 observations do not establish better survival
+or reproduction across every learner/map. Compare the richer sensory profile on
+matched seeds before retuning those physical budgets. In particular, predator
+mate-finding and energy balance remain separate calibration concerns; keep
+proximal mating radii and mutual consent.
+
+Changing observation/scent/history contracts requires fresh or matching brains.
+Exact checkpoint resume keeps its captured old configuration. Optional social,
+auxiliary and late-consequence objectives are not newly enabled by this rollout;
+existing enabled settings and their learner restrictions remain intact. See
+[preset migration](configuration.md#v7-sensory-preset-defaults).
+
 ## Current survival-oriented flat-world profile
 
 For the flat escape/consent setup with trained, compatible species/sex brain
@@ -25,8 +54,8 @@ remain local and are not package presets.
 | Predator mating radius | 3 cells | Preserve physical proximity, visibility and dry-route gates |
 | Prey mating radius | 2 cells | Retain proximal pairing |
 | Predator kill energy | 60 | Improve feeding support, subject to the existing 120-energy cap |
-| Observation top-k | Predator 10, prey 3 | Retain the compatible observation/model contract |
-| Observation and controller | Version 4, masked PPO | Local consent signals and immediate physical action masks |
+| Observation top-k | Predator 10, prey 3 | Keep the existing visible-target budgets; V7 requires matching new weights |
+| Observation and controller | Version 7, masked PPO; three-step history and blended scent | Compact sensed cues and private tracking; physical action masks remain |
 | Escape actions | Existing prey backward/sideways actions | Provide learned evasion without automatic escape |
 | Child inheritance | Existing scalar crossover | A reliable ecological advantage from whole-parent copying is not established |
 | Mutation | Rare child-only mutation, probability 0.0001 | Preserve the existing exploration mechanism without treating it as proven improvement |
@@ -72,7 +101,7 @@ radii 2/3, health gates 32/44, maturity centers 300/100, cooldown centers 225/20
 sufficient energy guarantees a birth: both animals must choose consent and pass
 the physical gates. Reproduction deducts energy, not health directly.
 
-Separate version-4 templates use prey top-k 3 with `[16]` hidden layers and
+Separate version-7 templates use prey top-k 3 with `[16]` hidden layers and
 predator top-k 10 with `[64, 32]`. Both select lifespan champions; rare child-only
 mutation remains enabled. Other PPO optimizer settings remain unchanged.
 
@@ -84,10 +113,10 @@ The smaller world, larger prey buffer and energy budgets change ecological
 support as well as learning incentives. Keep these factors explicit in comparisons;
 more births or survival alone are not evidence of learning.
 
-The templates have 69 inputs/nine actions for prey and 153 inputs/six actions for
-predators. Stock legacy 20-input PPO banks cannot initialize them. Start fresh or
-load compatible ordinary-PPO weights; changing these body/reward settings does
-not itself change the current signatures. Exact checkpoints and recordings keep
+The templates now have 106 inputs/nine actions for prey and 267 inputs/six
+actions for predators, including movement history and blended scent. Stock legacy 20-input PPO banks cannot initialize them. Start fresh or
+load compatible ordinary-PPO V7 weights. Body/reward settings alone do not
+change the sensory signature, but this V7/scent promotion does. Exact checkpoints and recordings keep
 their captured configuration, so resuming an older campaign does not apply this
 calibration.
 
@@ -151,7 +180,8 @@ copy a flat-world result into unrelated algorithm/terrain presets without eviden
 Keep superseded controls local; small test fixtures may retain old input/action
 contracts solely for regression coverage.
 
-The maintained masked-PPO profile uses version-4 observations, prey k=3 and
+The maintained masked-PPO profile uses version-7 observations with personal
+three-step visual history and blended scent, prey k=3 and
 predator k=10, with prey escape actions. Old nearest-only/version-1 weight banks
 are incompatible with those signatures. Start fresh or load compatible weights;
 exact checkpoints and recordings continue using their captured configurations.

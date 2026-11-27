@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "river_crossing_strong_predator_deep",
-  "description": "River crossing with three-hidden-layer PPO prey, four-hidden-layer PPO predators, longer predator sight and four visible targets per category",
+  "description": "River crossing with three-hidden-layer PPO prey, four-hidden-layer PPO predators, longer predator sight and four visible targets per category; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -167,8 +167,22 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 2,
-      "observation_top_k": 4
+      "observation_version": 7,
+      "observation_top_k": 4,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "swim",
+        "reproduce"
+      ]
     },
     "large_predator_ppo": {
       "type": "ppo",
@@ -189,8 +203,22 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 2,
-      "observation_top_k": 4
+      "observation_version": 7,
+      "observation_top_k": 4,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "swim",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -212,5 +240,9 @@
   },
   "terrain": {
     "map_file": "maps/river_crossing.json"
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

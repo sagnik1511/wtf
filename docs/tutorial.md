@@ -2,8 +2,8 @@
 
 [Project overview](../README.md) · [Runnable Python example](../examples/complete_experiment.py) · [Docker](docker.md)
 
-Use the [PyPI release](../INSTALL.md#install-from-pypi) or a source checkout in an
-isolated `.venv`. No notebook or Jupyter installation is needed. All example code
+Use a [current source installation](../INSTALL.md#current-source-quick-start) or
+a locally built artifact in an isolated `.venv`. No notebook or Jupyter installation is needed. All example code
 is included in Markdown; installed-package users can save the Tutorial 2 code as
 `complete_experiment.py`. The checkout also provides it under `examples/`.
 
@@ -14,9 +14,11 @@ is included in Markdown; installed-package users can save the Tutorial 2 code as
 | [3. Restore and view](tutorials/03-restore-and-view.md) | Load exact state, understand champion warm starts and open offline playback |
 | [4. Train, then record inference](tutorials/04-training-and-inference.md) | Choose a recording profile, retain models/recovery data, and record new frozen-policy worlds |
 | [5. Compare saved policy banks](tutorials/05-compare-saved-policies.md) | Evaluate two compatible banks on matched seeds and inspect paired outcomes |
+| [6. Configure senses and consequence learning](tutorials/06-sensing-and-learning.md) | V7/history/scent profiles, optional PPO objectives, multi-episode commands and inspector interpretation |
 
 Tutorials 1–3 teach the small Python API workflow. Tutorials 4–5 use the installed
-CLI for larger campaigns and controlled evaluation. Existing step-by-step guides
+CLI for larger campaigns and controlled evaluation. Tutorial 6 provides complete
+local configurations for current source sensory/consequence features. Existing step-by-step guides
 cover [adding species](species.md#add-entries-to-a-json-environment),
 [editing maps](geography.md) and [extending policies](extending-policies.md);
 use those instead of duplicating their recipes here.

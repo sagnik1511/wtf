@@ -143,6 +143,13 @@ def collect_group(world, brains, focal_id, *, reuse_world=True):
             observations = trial.observe_all()
             if reuse_world:
                 initial_observations = observations
+                if trial._tracking is not None and trial._tracking.history_enabled:
+                    # Seeing the initial frame updates personal visual memory.
+                    # Cached observations must restart with that same memory,
+                    # especially when the saved frame predates the trial tick.
+                    initial_world["sensory_state"][
+                        "visual"
+                    ] = trial._tracking.visual.checkpoint()
         else:
             observations = initial_observations
         trajectory = []

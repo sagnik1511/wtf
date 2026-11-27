@@ -106,11 +106,14 @@ those individual controllers.
 | PPO / A2C | `network`, `moments`, `variances`, `rollout`, `pending` and update counters |
 | REINFORCE | `trajectory`, `pending`, running `baseline`, network and Adam state |
 | GRPO | Actor trajectory/pending state, `reference_network`, `group_rng_state`, `last_group_step`, baseline and Adam state |
-| Recurrent PPO | PPO state plus `hidden`, saved sequence hidden inputs and recurrent pending data |
+| Recurrent PPO | PPO state plus GRU `hidden`, saved sequence hidden inputs and recurrent pending data |
+| LSTM PPO | PPO state plus hidden/cell recurrent state and chronological sequence inputs |
+| Discrete SAC | Actor, twin online/target critics, private replay/cursor, Adam arrays and temperature configuration |
+| TRPO | Local actor, separate value critic, pending rollout, trust-region settings and private RNGs |
 | Maskable PPO | PPO state plus current `mask`; rollout/pending inputs preserve decision mask information |
 | MAPPO | Actor/critic parameters, PPO state and current/next centralized `context` |
 
-All nine algorithms preserve their applicable learning state; the drawing groups
+All fourteen algorithms preserve their applicable learning state; the drawing groups
 possible fields and does not imply every algorithm uses every block.
 
 ### Optimizer arrays and counters
@@ -211,7 +214,7 @@ The [storage asset catalog](assets/storage/README.md) records diagram provenance
 Record order, shared-value detachment, nonempty Q replay and PPO rollout, nonzero
 Adam moments, RNG restoration and exact subsequent steps were checked with short
 controlled fixtures. The existing all-algorithm binary continuation test also
-covers all nine algorithms with XZ/gzip. These validate the explanations; no
+originally covered nine algorithms with XZ/gzip. These validate the explanations; no
 experiment files were changed and no learning-quality claim is made.
 
 For package-versus-format support and cross-machine limits, see the
@@ -225,3 +228,19 @@ frames and sparse integer cell/group deposit times; query caches are rebuilt.
 The [ownership diagram](tracking.md) separates this exact-resume state from
 sampled replay inputs. GRPO restores detached sensory collections; newborns
 and weight-only warm starts do not inherit personal sighting histories.
+
+## Optional population knowledge and private heads
+
+`world.social_state` stores its training mode, knowledge state, private sighting
+histories and pending action-horizon windows. Depending on configured publication
+and persistence, knowledge contains published/staged context tables and durable
+species/action totals. Exact continuation needs pending window openings and
+counters as well as the published rates; a knowledge-only export is not a full
+recovery checkpoint.
+
+PPO/masked-PPO controller state includes optional `auxiliary` and `late` entries.
+Each owns its network, Adam moments/variances and update counter. They restore
+with the owning animal, not a species-shared policy. Native minibatch scratch,
+prepared target arrays and observation/perception caches are transient and are
+rebuilt rather than checkpointed. The [consequence lifecycle](learning/consequence-pipeline.md#state-across-birth-episodes-and-restoration)
+connects these fields to publication, birth and warm starts.

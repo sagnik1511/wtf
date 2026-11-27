@@ -178,7 +178,7 @@ class LandscapeTests(unittest.TestCase):
                     self.assertEqual(saved["terrain"], source["terrain"])
                     self.assertNotIn("map_file", saved["terrain"])
                     manifest = json.loads((folder / "manifest.json").read_text())
-                    self.assertEqual(manifest["observation_version"], 4)
+                    self.assertEqual(manifest["observation_version"], 7)
                     store = RecordingStore(output)
                     metadata = store.metadata(folder.name)
                     self.assertEqual(metadata["config"]["terrain"], source["terrain"])

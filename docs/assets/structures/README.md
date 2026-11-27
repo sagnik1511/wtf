@@ -16,7 +16,7 @@ These original SVGs are directly editable source assets with accessible titles
 and descriptions. They require no external fonts/images, scripts or Mermaid.
 Raster previews and local drafting helpers remain under ignored `.cache/`.
 
-The vector layout follows `World.observe` and `observation_inputs`: v3/k=4 has
+The historical vector illustration preserves the earlier V3/k=4 contract, which has
 78 fields, with terrain at 56–67 and mating at 68–77. The diagram expands a target
 slot's schema; it is not a captured animal observation.
 

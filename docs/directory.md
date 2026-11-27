@@ -53,6 +53,7 @@ narrow screens. The top tabs open the same section pages.
 | [Tutorial 3: Restore and view](tutorials/03-restore-and-view.md) | Restore checkpoints, initialize champions and open playback. |
 | [Tutorial 4: Training and inference](tutorials/04-training-and-inference.md) | Recording profiles, recovery artifacts, saved brains and fresh frozen-policy playback. |
 | [Tutorial 5: Compare saved policies](tutorials/05-compare-saved-policies.md) | Complete matched-seed bank comparison with paired endpoint metrics. |
+| [Tutorial 6: Senses and learning](tutorials/06-sensing-and-learning.md) | Complete local JSON profiles, commands, inspection and compatibility. |
 | [Python example](examples.md) | Runnable Python example and its output contract. |
 
 ## Worlds and species
@@ -72,6 +73,10 @@ narrow screens. The top tabs open the same section pages.
 
 | Guide | What it covers |
 | --- | --- |
+| [Sensing and consequence handbook](learning/features.md) | Full decision path, feature defaults and independent/shared ownership. |
+| [V7 layout and examples](learning/v7-observations.md) | Exact numerical blocks, offsets and action contracts. |
+| [Personal memory and scent](learning/memory-and-scent.md) | Worked temporal and scent-mixture examples, reachability and information limits. |
+| [Consequence learning pipeline](learning/consequence-pipeline.md) | Witnesses, outcome windows, publication, auxiliary/late models and playback. |
 | [Algorithms and networks](algorithms.md) | Available learning rules, private controllers and network depth. |
 | [SAC, TRPO and LSTM PPO](additional-policies.md) | Generic learners, complete JSON templates, lifecycle and viewer contracts. |
 | [Advanced algorithms](advanced-algorithms.md) | Recurrent PPO, QR-DQN, masked PPO and multi-agent PPO contracts. |
@@ -155,3 +160,18 @@ are indexed by the release hub rather than repeated in the sidebar.
 
 Research observations, local experiments, results and the paper workspace are
 excluded from the published documentation.
+
+
+## Historical contracts
+
+Primary guides describe current behavior. Older feature contracts remain here
+for saved artifacts or deliberate historical comparisons.
+
+| Guide | What it preserves |
+| --- | --- |
+| [Historical feature contracts](archive/index.md) | Current-versus-archived boundaries and captured settings. |
+| [Older observation layouts](archive/observation-layouts.md) | V1–V6 numeric/soft layouts and comparisons. |
+| [Older sensory viewer sheets](archive/sensory-viewer.md) | Earlier grids, lag traces and inspector layouts. |
+| [Earlier mating inputs](archive/mating-inputs-v3.md) | V3 blocks and earlier meandering setup. |
+| [Earlier feedback audit](archive/feedback-audit.md) | Original audit scope and checks. |
+| [Published installation snapshot](archive/published-installation.md) | Tested older package instructions, separate from current source. |

@@ -14,6 +14,94 @@ from xml.etree import ElementTree as ET
 from work.build_doc_diagrams import ASSETS, ROOT, render
 
 FLOWS = {
+    "one-simulation-step": (
+        "One simulation step",
+        "docs/architecture.md",
+        "one-simulation-step",
+        """flowchart TB
+  act["Private brains choose configured actions from saved observations"] --> move["Resolve movement, swimming and current drift"]
+  move --> contest["Optional same-species challenges: damage and priority"]
+  contest --> feed["Resolve food consumption, then predator attacks"]
+  feed --> cost["Apply effort, decay, starvation and deaths"]
+  cost --> birth["Check proximal eligible consenting pairs; place newborn bodies"]
+  birth --> finish["Grow resources; update scent and completed outcome evidence"]
+  finish --> observe["Build next sensed observations and own feedback"]
+  observe --> learn["Update each private learner; initialize independent child brains"]
+""",
+    ),
+    "reproduction-gates": (
+        "Reproduction gates",
+        "docs/configuration.md",
+        "reproduction-gates",
+        """flowchart TB
+  consent["Both consent: reproduce now, or valid configured resting intent"] --> pair["Same exact species; opposite sex"]
+  pair --> ready["Each parent: mature, healthy, sufficient energy and cooldown complete"]
+  ready --> near["Within proximal radius and allowed dry route"]
+  near --> space["Population capacity and free birth cell"]
+  space --> birth["Birth body: configured health/energy; charge parent reproduction costs"]
+  birth --> child["After parent learning: mix or select parent weights; optional rare child mutation"]
+  near -->|Not eligible| fail["No birth; configured failed-attempt feedback and reason"]
+  space -->|Unavailable| fail
+""",
+    ),
+    "sensing-decision-loop": (
+        "Sensed state and published evidence reach one independent animal's decision",
+        "docs/learning/features.md",
+        "from-environment-to-decision",
+        """flowchart TB
+  subgraph sensed["Personally available information; no omniscient hidden routes"]
+    visible["Visible targets: range, angle, walls, nearest k"] --> vector["Ordered V7 vector: state, targets, terrain, mating, optional sensory summaries"]
+    memory["Own bounded visual sightings"] --> vector
+    scent["Reachable anonymous ground patches"] --> vector
+  end
+  evidence["Saved local witnesses and published species consequence rows"] -->|Input mode| vector
+  subgraph private["One private controller"]
+    vector --> model["Own learner: policy or Q network"]
+    model --> scores["Action scores; optional late PPO residual"]
+    adapter["Optional private late adapter; PPO or masked PPO only"] --> scores
+    scores --> choose["Choose action; physical masks only where configured"]
+  end
+  evidence -->|Late mode| adapter
+  choose --> outcome["World resolves action: physics, eligibility, own reward and visible outcomes"]
+  outcome --> ownlearn["Own learner updates from own experience"]
+  outcome --> tables["Completed outcome windows update species counts under publication schedule"]
+""",
+    ),
+    "scent-patch-selection": (
+        "Anonymous scent is reduced from reachable ground patches to a four-value bearing",
+        "docs/learning/memory-and-scent.md",
+        "scent-deposit-fade-choose-a-patch",
+        """flowchart TB
+  field["World field: latest timestamp per cell and internal species/sex group"] --> fade["Fade each deposit: max(0, 1 - age / lifetime)"]
+  fade --> reach["Reachable dry cells within cardinal-step radius; exclude observer cell"]
+  reach --> a["Example A: NE, groups 0.75 and 0.50; strength 1.00, freshness 0.75"]
+  reach --> b["Example B: W, one group 0.875; strength and freshness 0.875"]
+  a --> rank["Rank strength, freshness, squared distance, stable cell order"]
+  b --> rank
+  rank --> selected["A wins by strength; no source identity or route is returned"]
+  selected --> body["Facing north: unit forward/right bearing to NE"]
+  body --> four["V7 input: [0.7071, 0.7071, 1.00, 0.75]"]
+  reach -->|No eligible patch| zero["Four zeros; no fabricated target direction"]
+""",
+    ),
+    "consequence-episode-clock": (
+        "Outcome windows, publication and private neural learning have separate clocks",
+        "docs/learning/consequence-pipeline.md",
+        "continuous-versus-episode-publication",
+        """flowchart TB
+  action["Action at tick t; save physical context and open bounded outcome window"] --> immediate["Own reward and next observation; private learner follows its normal cadence"]
+  action --> window["Collect harm, feeding and birth labels through horizon or death"]
+  window --> closed["Completed window: update exact-species context and action counts"]
+  closed --> mode{"Publication schedule?"}
+  mode -->|Continuous| published["Published rows; later observations can read completed evidence"]
+  mode -->|Episode| staged["Staged rows; current episode still reads prior published snapshot"]
+  staged --> boundary["Before next training episode: publish staged context and general totals together"]
+  boundary --> published
+  published --> saved["Snapshot evidence in each animal's observation and rollout"]
+  saved --> learn["Input mode or supported PPO heads; private updates use saved evidence"]
+  action --> unfinished["Living animal at time limit: incomplete windows discarded on new world"]
+""",
+    ),
     "v7-late-consequence": (
         "Compact V7 evidence reaches a private policy after the physical forward pass",
         "docs/observations.md",
@@ -138,11 +226,11 @@ FLOWS = {
         "docs/observations.md",
         "visible-target-slots",
         """flowchart TB
-  area["Species sight radius and water extension"] --> visible["Filter targets by range and wall visibility"]
-  visible --> slots["Nearest k in each category; four values per slot; zero padding"]
-  slots --> vector["Pack one fixed-width observation vector"]
-  extras["Self and blocked moves: 8; terrain v2/3: 12; mating v3: 10"] --> vector
-  vector --> sizes["k=4: version 1 / 2 / 3 has 56 / 68 / 78 inputs"]
+  area["Species sight radius and water extension"] --> visible["Filter by range, field of view and wall visibility"]
+  visible --> slots["Nearest k in each category; relative coordinates and explicit presence"]
+  slots --> vector["Pack the selected version; fixed width for its complete contract"]
+  extras["Own state, terrain, mating; optional memory, scent and consequence evidence"] --> vector
+  vector --> sizes["Example V7 PPO: prey k=3 has 106 inputs; predator k=10 has 267; H=3 and blended scent"]
   sizes --> brain["One private animal brain"]
   brain --> action["Choose this animal's next action"]
 """,
@@ -255,7 +343,7 @@ def inspector_example():
     }
     c["resources"]["patch_count"] = 0
     for b in c["brains"].values():
-        b.update(observation_version=2, observation_top_k=4)
+        b.update(observation_version=7, observation_top_k=4)
     for s in c["species"].values():
         s["body"].update(vision_radius=4, water_vision_bonus=3)
     w = World(c, 100)
@@ -366,7 +454,7 @@ def inspector_example():
     text(26, 635, "the highlighted area shows what the animal can see.", 14, "#a4b5c5")
     rect(512, 105, 502, 548, "#111c27", "#415569", 8)
     text(532, 138, "INSPECTOR • RECORDED SAMPLE 110", 16, "#8ac8ff")
-    text(532, 162, "Version 2 • k=4 • 68 inputs", 14, "#a4b5c5")
+    text(532, 162, f"Version 7 • k=4 • {len(old)} inputs", 14, "#a4b5c5")
     cx, cy, r = 654, 279, 93
     circle(cx, cy, r, "#0b131c", "#415569")
     circle(cx, cy, r * 4 / 7, "none", "#8ac8ff", "4 5")
@@ -379,9 +467,11 @@ def inspector_example():
     ):
         count = 0
         for slot in range(4):
-            dx, dy, _distance, present = old[
-                8 + 16 * i + 4 * slot : 12 + 16 * i + 4 * slot
+            forward, right, present = old[
+                8 + 12 * i + 3 * slot : 11 + 12 * i + 3 * slot
             ]
+            hx, hy = old[2:4]
+            dx, dy = forward * hx - right * hy, forward * hy + right * hx
             if not present:
                 continue
             count += 1

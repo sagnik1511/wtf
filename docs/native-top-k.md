@@ -104,7 +104,7 @@ bytes** per sample on both paths, including diagnostics and activations.
 
 Validation covers randomized target ordering/ties, own-cell food, self exclusion,
 water range and occlusion, unsupported input cleanup/error propagation, k=1
-routing, custom callbacks and missing-symbol fallback. All nine controllers have
+routing, custom callbacks and missing-symbol fallback. All fourteen controllers have
 matched per-step checkpoints and byte-identical short replay chunks across chunk
 boundaries. Dynamic world comparisons include walls, food disappearance, deaths,
 terrain, restored worlds and different day/night observation radii. Existing

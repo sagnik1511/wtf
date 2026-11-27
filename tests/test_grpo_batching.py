@@ -100,10 +100,12 @@ class TrialReuseTests(unittest.TestCase):
             c = load("environments/" + preset + ".json")
             if preset == "day_night":
                 template = load("environments/grpo.json")["brains"]["small_grpo"]
+                predator = next(
+                    spec for spec in c["species"].values() if spec["diet"] == "prey"
+                )
+                template["observation_actions"] = list(predator["allowed_actions"])
                 c["brains"]["trial_grpo"] = template
-                next(spec for spec in c["species"].values() if spec["diet"] == "prey")[
-                    "brain"
-                ] = "trial_grpo"
+                predator["brain"] = "trial_grpo"
             c["seed"] = 100
             c["experiment"].update(runs=1, world_seed_policy="fixed")
             e = Experiment(c)
@@ -124,6 +126,26 @@ class TrialReuseTests(unittest.TestCase):
                     )
                 self.assertEqual(actual, expected, (preset, tick))
                 self.assertEqual(e.world.checkpoint(), before)
+
+    def test_cached_initial_visual_memory_also_matches_legacy_v4_trials(self):
+        c = load("environments/meandering_river.json")
+        for template in c["brains"].values():
+            template["observation_version"] = 4
+            template.pop("observation_actions", None)
+        e = Experiment(c)
+        focal_id = next(i for i, b in e.brains.items() if b.config["type"] == "grpo")
+        e.world.tick = 200  # The previous personally seen frame is now stale.
+        focal = e.brains[focal_id]
+        focal.config.update(group_size=2, rollout_horizon=2)
+        before = copy.deepcopy(e.world.checkpoint())
+        rng = focal.group_rng.getstate()
+        actual = grouped_rollouts.collect_group(e.world, e.brains, focal_id)
+        focal.group_rng.setstate(rng)
+        expected = grouped_rollouts.collect_group(
+            e.world, e.brains, focal_id, reuse_world=False
+        )
+        self.assertEqual(actual, expected)
+        self.assertEqual(e.world.checkpoint(), before)
 
     def test_frozen_model_qualification_is_once_per_group(self):
 

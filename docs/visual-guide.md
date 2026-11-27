@@ -13,6 +13,9 @@ local regeneration. Physics SVGs and animated vector demonstrations are ordinary
 
 | Question | Guide and visual |
 | --- | --- |
+| How do current sensing and consequence features fit together? | [Decision path and ownership](learning/features.md#from-environment-to-decision) |
+| How is one anonymous scent patch chosen? | [Reachability, mixing, ranking and four-value projection](learning/memory-and-scent.md#scent-deposit-fade-choose-a-patch) |
+| Why do evidence and neural predictions change at different times? | [Outcome windows and publication clocks](learning/consequence-pipeline.md#continuous-versus-episode-publication) |
 | What do animal pointers, food and birth/death markers mean? | [Board-piece legend](viewer-visual-reference.md#animals-resources-and-event-markers) |
 | What do viewer overlays and brain graphs look like? | [Board objects and viewer guide](viewer-visual-reference.md) |
 | How does dawn/day/dusk/night change the board and animals? | [Day–night appearance and rules](day-night.md) |
@@ -20,11 +23,8 @@ local regeneration. Physics SVGs and animated vector demonstrations are ordinary
 | What happens during a step? | [Simulation order](architecture.md#one-simulation-step) |
 | How are input fields packed into the vector? | [Contiguous blocks and repeated slots](observations.md#input-layout) |
 | How does compact V7 use scent and consequences? | [Input contract](observations.md#observation-version-7) and [viewer specimen](viewer-visual-reference.md#compact-v7-and-late-consequence-adjustment) |
-| What changed in the data from V5 to V6? | [Side-by-side values, flags and channel counts](observations.md#what-changed-from-v5-to-v6) |
-| How is the V6 input vector arranged? | [Ordered input blocks and target-slot expansion](observations.md#v6-input-layout) |
-| How do V6 soft categories look? | [Semantic layout](observations.md#observation-version-6) and [inspector example](viewer-visual-reference.md#observation-v6) |
-| How does V5 encode what the animal senses? | [Layout](observations.md#observation-version-5) and [inspector appearance](viewer-visual-reference.md#observation-v5) |
 | How does forward 150°/180° vision change sight and inspector overlays? | [Field rules](observations.md#forward-visual-field) and [appearance](viewer-visual-reference.md#forward-vision) |
+| Where are older layouts and viewer sheets? | [Historical feature contracts](archive/index.md) |
 | Which visible targets enter the brain? | [Top-k input pipeline](observations.md#visible-target-slots) |
 | How does CUDA avoid repeated work and transfers? | [DQN/DDQN data flow and PPO residency](cuda.md#where-the-cuda-path-saves-work) |
 | How do shared outcomes train private brains without mixing PPO trajectories? | [Durable totals and private auxiliary heads](social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains) |

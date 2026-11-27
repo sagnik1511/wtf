@@ -256,7 +256,7 @@ class VisibleConsentTests(unittest.TestCase):
         c["experiment"].update(runs=1, world_seed_policy="fixed")
         e = Experiment(c)
         for i, animal in e.world.animals.items():
-            expected = 69 if animal.species == "prey" else 153
+            expected = 106 if animal.species == "prey" else 267
             self.assertEqual(len(e.observations[i]), expected)
             self.assertEqual(observation_inputs(e.brains[i].config), expected)
         e.step()

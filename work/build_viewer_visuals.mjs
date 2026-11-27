@@ -604,7 +604,7 @@ function component(n, x, y, w, h) {
     scale = Math.min(w / vb[2], h / vb[3]);
   return `<g class="viewer-component" transform="translate(${x} ${y}) scale(${num(scale)})">${n.children.map(serialize).join('')}</g>`;
 }
-const features = [
+const legacyFeatures = [
   0.6,
   0.85,
   0,
@@ -626,6 +626,18 @@ const features = [
   0.6,
   1,
 ];
+const template = {
+  type: 'ppo',
+  observation_version: 7,
+  observation_top_k: 3,
+  observation_actions: ['rest', 'move_backward', 'eat'],
+  movement_history_steps: 3,
+  scent_observation: { mode: 'blended', radius: 2 },
+  network: { hidden_layers: [4, 3] },
+};
+const features = Array(compactLayout(template).names.length).fill(0);
+features.splice(0, 8, 0.6, 0.85, 0, -1, 0, 1, 0, 0);
+features.splice(8, 3, 0.25, 0.5, 1);
 const diagnostic = {
   tick: 20,
   algorithm: 'ppo',
@@ -641,12 +653,6 @@ const diagnostic = {
       [0.35, -0.2, 0.1],
     ],
   },
-};
-const template = {
-  type: 'ppo',
-  observation_version: 1,
-  observation_top_k: 1,
-  network: { hidden_layers: [4, 3] },
 };
 const inspector = inspectorGraphs({
   diagnostic,
@@ -677,7 +683,7 @@ const r = {
     {
       label: 'Observation',
       activation: 'input',
-      size: 20,
+      size: features.length,
       nodes: [],
       values: [],
     },
@@ -761,7 +767,7 @@ body +=
     630,
     548,
     [
-      '20 inputs → 4 → 3 → 2 → action scores',
+      `${features.length} inputs → 4 → 3 → 2 → action scores`,
       'Default: input/output summary.',
       'Advanced: neuron maps and weighted routes.',
       'Rank threshold changes display only.',
@@ -786,7 +792,7 @@ const sensoryTemplate = {
   scent_observation: { mode: 'blended', radius: 2 },
 };
 const sensoryFeatures = [
-  ...features,
+  ...legacyFeatures,
   0.6,
   0,
   0.2,

@@ -5,8 +5,8 @@
 ![Controlled inspector illustration](inspector-example.svg)
 
 `inspector-example.svg` is an explanatory vector illustration, not a screenshot
-or a training result. A controlled 21 × 14 world supplies real version-2, k=4
-observations (68 inputs), with a wall and three-column river. Both species use
+or a training result. A controlled 21 × 14 world supplies real version-7, k=4
+observations (130 inputs), with a wall and three-column river. Both species use
 base sight 4 plus up to 3 across water. The actor moves between the labelled
 sample step 110 and current frame 120; no training is performed. Target slots,
 heading, health/energy and current sight are derived from that constructed state.

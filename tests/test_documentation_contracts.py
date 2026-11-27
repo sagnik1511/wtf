@@ -6,6 +6,11 @@
 import ast
 import copy
 import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -28,6 +33,44 @@ def excerpt(path, marker):
 
 
 class DocumentationContractsTests(unittest.TestCase):
+    def test_sensing_tutorial_profiles_execute_and_validate(self):
+        tutorial = (ROOT / "docs/tutorials/06-sensing-and-learning.md").read_text()
+        script = re.findall(r"```python\n(.*?)\n```", tutorial, re.S)[0]
+        ast.parse(script)
+        for profile in ("senses", "input", "auxiliary", "late"):
+            with (
+                self.subTest(profile=profile),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                code = script.replace('PROFILE = "input"', f'PROFILE = "{profile}"', 1)
+                completed = subprocess.run(
+                    [sys.executable, "-c", code],
+                    cwd=temporary,
+                    env={**os.environ, "PYTHONPATH": str(ROOT)},
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                path = (
+                    Path(temporary)
+                    / "environments/local"
+                    / f"ppo_{profile}_sensing.json"
+                )
+                config = load(path)
+                self.assertEqual(config["recording"]["record_last_episodes"], -1)
+                for template in config["brains"].values():
+                    self.assertEqual(template["observation_version"], 7)
+                    self.assertEqual("late_consequence" in template, profile == "late")
+                    self.assertEqual(
+                        "auxiliary_consequence" in template,
+                        profile in ("auxiliary", "late"),
+                    )
+                self.assertEqual(
+                    config.get("consequence_learning", {}).get("update_schedule"),
+                    None if profile == "senses" else "episode",
+                )
+
     def test_every_field_is_defined_and_reference_is_current(self):
         schema = json.loads((ROOT / "environment.schema.json").read_text())
         self.assertEqual(
@@ -123,6 +166,12 @@ class DocumentationContractsTests(unittest.TestCase):
             observation_version=1,
             observation_top_k=1,
         )
+        for key in (
+            "observation_actions",
+            "movement_history_steps",
+            "scent_observation",
+        ):
+            template.pop(key, None)
         brain = cls(template, ["rest", "turn_left"], 31, 47)
         obs = (0.0,) * 20
         before = copy.deepcopy(brain.config)

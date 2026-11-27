@@ -98,7 +98,7 @@ keeps its cell; it does not automatically push its challenger.
 
 ## Learning, inspection and artifacts
 
-All nine controllers support the action. Maskable PPO exposes it only when the
+All fourteen controllers support the action. Maskable PPO exposes it only when the
 current physical opportunity exists; the mask does not read a neighbour's
 forthcoming action or predict later movement. Other controllers can try an
 unavailable challenge and receive ordinary failed-action feedback.

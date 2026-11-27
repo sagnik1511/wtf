@@ -54,14 +54,14 @@
 <text x="850.0" y="564" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">example layers below</text>
 <path d="M850 599V662" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
 <rect x="24" y="663" width="992" height="162" rx="7" fill="var(--figure-14202d)" stroke="var(--figure-486077)"/>
-<text x="42" y="693" font-size="18" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Example PPO MLP: 68 inputs -&gt; hidden 16 -&gt; 7 action logits + 1 value</text>
+<text x="42" y="693" font-size="18" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)">Example PPO MLP: 130 inputs -&gt; hidden 16 -&gt; 7 action logits + 1 value</text>
 <rect x="42" y="714" width="122" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
 <text x="103.0" y="741" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Inputs</text>
-<text x="103.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">68 features</text>
+<text x="103.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">130 features</text>
 <path d="M164 759H187" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
 <rect x="188" y="714" width="278" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>
 <text x="327.0" y="741" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Layer 0</text>
-<text x="327.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights [16 x 68] = 1088</text>
+<text x="327.0" y="766" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">weights [16 x 130] = 2080</text>
 <text x="327.0" y="788" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">bias [16]</text>
 <path d="M466 759H489" fill="none" stroke="var(--figure-9bb5ce)" stroke-width="1.6" marker-end="url(#arrow)"/>
 <rect x="490" y="714" width="278" height="87" rx="7" fill="var(--figure-192532)" stroke="var(--figure-486077)"/>

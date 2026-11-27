@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "land_bridge_collective",
-  "description": "Terraced land-bridge PPO with durable species/action totals and independent auxiliary consequence heads, both consequence scopes, episode publication, scent/history, day-night and challenges; forward 180-degree vision for both species",
+  "description": "Terraced land-bridge PPO with durable species/action totals and independent auxiliary consequence heads, both consequence scopes, episode publication, scent/history, day-night and challenges; forward 180-degree vision for both species; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -208,7 +208,7 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 3,
       "movement_history_steps": 3,
       "scent_observation": {
@@ -223,7 +223,20 @@
       "consequence_scope": "both",
       "auxiliary_consequence": {
         "coefficient": 0.1
-      }
+      },
+      "observation_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce",
+        "swim",
+        "challenge"
+      ]
     },
     "predator_ppo": {
       "type": "ppo",
@@ -244,7 +257,7 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
+      "observation_version": 7,
       "observation_top_k": 10,
       "movement_history_steps": 3,
       "scent_observation": {
@@ -259,7 +272,17 @@
       "consequence_scope": "both",
       "auxiliary_consequence": {
         "coefficient": 0.1
-      }
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce",
+        "swim",
+        "challenge"
+      ]
     }
   },
   "experiment": {

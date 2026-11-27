@@ -62,30 +62,25 @@ Body births resolve inside the world step. Child controllers inherit only after 
 The world collects all actions before changing animal state:
 
 1. Resolve turns and voluntary movement (including terrain-enabled swimming), then apply river currents through intermediate cells. Charge successful swim/climb costs. On flat maps, resolve turns and movement as before. Walls and initial animal occupancy block moves. Swaps and following into cells vacated during the same step are disallowed. Competing claims to an empty cell use seeded random selection.
-2. Resolve resource feeding with seeded contention order. Prey eat from their current cell, or the cell directly ahead. Eating stops at maximum energy.
-3. Resolve simultaneous attacks against prey in the cell directly ahead. Combined damage is capped at remaining health. Exactly one seeded attacker gets energy for a kill. A prey's chosen feeding action can complete in the same step it is killed.
-4. Charge living and action costs, including failed movement and attack attempts. On terrain maps, charge water maintenance and apply drowning damage when appropriate. At zero energy, apply starvation damage. Swim/uphill movement separately enforces terrain affordability; ordinary living and attempt costs clamp energy at zero.
-5. Record deaths and individual rewards, remove dead bodies, resolve eligible births, regrow resources up to capacity, and construct the next observations.
-6. Give each learning agent its own experience, including a terminal experience on death, then mix both parents’ model parameters into independent newborn controllers.
+2. Resolve enabled same-species `challenge` contests after movement/drift. Apply configured costs/damage and winner food/cell priority.
+3. Resolve resource feeding with seeded contention order. Prey eat from their current cell, or the cell directly ahead. Eating stops at maximum energy.
+4. Resolve simultaneous attacks against prey in the cell directly ahead. Combined damage is capped at remaining health. Exactly one seeded attacker gets energy for a kill. A prey's chosen feeding action can complete in the same step it is killed.
+5. Charge living and action costs, including failed movement and attack attempts. On terrain maps, charge water maintenance and apply drowning damage when appropriate. At zero energy, apply starvation damage. Swim/uphill movement separately enforces terrain affordability; ordinary living and attempt costs clamp energy at zero.
+6. Record deaths and individual rewards, remove dead bodies, resolve eligible births, regrow resources up to capacity, and construct the next observations.
+7. Give each learning agent its own experience, including a terminal experience on death, then mix both parents’ model parameters into independent newborn controllers.
 
-Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. The baseline now uses 30 attack damage against 30 prey health, giving `1.5` damage reward for a healthy prey killed by one attack; a kill still earns the existing food reward, up to `4.0` for 40 energy at `0.1` per energy point. Other scenarios can keep weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no proximity or survival bonus. Presets penalize energy demand and failed actions and reward each successful parent; see [reward accounting](rewards.md). Reproduction requires mutual consent through `reproduce`, simultaneously by default or through overlapping configured intent while resting and follows the configured distance, maturity, health, energy, cooldown and population rules in the [configuration guide](configuration.md#reproduction). There is no corpse persistence or health recovery.
+Food rewards use actual energy gained. Predators also receive the configurable `species.predator.rewards.per_damage_dealt` reward for successful hits (default environment value: `0.05` per actual damage point). A 10-damage hit earns `0.5`. For example, 40 actual damage at coefficient `0.05` earns `2.0`. Food reward uses only actual energy gained up to the configured cap; scenarios can use weaker multi-hit predators. Hit rewards do not restore energy. Missed attacks earn no hit reward. When several predators attack the same prey, its actual health loss is split proportionally to their attack strengths, so overkill cannot multiply damage credit. Omitting `per_damage_dealt` preserves the previous zero-hit-reward behavior, including for old checkpoints. Damage taken and death give configurable penalties. There is no proximity or survival bonus. Presets penalize energy demand and failed actions and reward each successful parent; see [reward accounting](rewards.md). Reproduction requires mutual consent through `reproduce`, simultaneously by default or through overlapping configured intent while resting and follows the configured distance, maturity, health, energy, cooldown and population rules in the [configuration guide](configuration.md#reproduction). There is no corpse persistence or health recovery.
 
-Flat observation version 1 has 20 entries. Terrain version 2 appends 12 local
-water/flow/elevation features; [geography](geography.md#terrain-observations-and-model-compatibility)
-documents all 32 and the optional swim action. The base entries are:
+Current presets use V7 inputs: own state, nearest-k relative targets,
+terrain, mating/consent and opportunities, plus configured motion/scent and
+optional evidence blocks. Inputs are body-relative with explicit presence.
+Visibility respects configured radius, wall occlusion, optional 150°/180°
+heading sectors, day/night modifiers and water credit. Elevation and animals
+currently do not occlude sight. Read [current vector layouts](learning/v7-observations.md)
+and [the sensing-to-learning flow](learning/features.md) instead of assuming one
+universal input width or nearest-only sensor.
 
-| Indices | Meaning |
-| --- | --- |
-| 0–1 | Energy and health as fractions of their maxima |
-| 2–3 | Facing direction as dx/dy |
-| 4–7 | Blocked neighbors: forward, right, backward, left |
-| 8–11 | Nearest visible food: dx/radius, dy/radius, distance/radius, visible |
-| 12–15 | Nearest visible prey: same four features |
-| 16–19 | Nearest visible predator: same four features |
-
-Distances use a circular base radius, with optional directional water credit and obstacle occlusion by integer line rays; see [water sight](geography.md#directional-sight-across-water). Direction deltas use world axes; there is no field-of-view angle limit. Missing targets have four zero values. The current animal is excluded from animal targets. Resources with negligible quantity are omitted from perception.
-
-Q-learning brains use one small tanh hidden layer and linear action-value outputs, independent replay buffers, uniformly sampled mini-batches, Huber-loss gradients, plain SGD, target networks, and epsilon-greedy exploration. PPO uses the [actor-critic implementation](algorithms.md), including its own Adam state. A2C, REINFORCE and GRPO share the small-network/optimizer infrastructure described in the [algorithm guide](algorithms.md). No learning algorithm requires a third-party ML framework. Fresh founders start from sex-specific copied base weights but have separate policy and learning randomness. Target networks synchronize after the configured number of training updates.
+The minimal `q_network` uses one tanh hidden layer, private replay and SGD. DQN/DDQN and other learners use their documented architectures, optimizers and target-update rules. PPO uses the [actor-critic implementation](algorithms.md), including its own Adam state. A2C, REINFORCE and GRPO share the small-network/optimizer infrastructure described in the [algorithm guide](algorithms.md). No learning algorithm requires a third-party ML framework. Fresh founders start from sex-specific copied base weights but have separate policy and learning randomness. Target networks synchronize after the configured number of training updates.
 
 The same brain template can be referenced by multiple species without sharing live weights. Learning updates occur at the configured cadence. Death is terminal. Time-limit truncations retain bootstrapped future value for Q/PPO/A2C; actor-only REINFORCE and GRPO use their finite returns. Modern run-to-run chaining imports matching species/sex champion weights into
 fresh controllers with empty experience buffers, new optimizer state and the

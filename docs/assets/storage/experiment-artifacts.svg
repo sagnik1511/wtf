@@ -74,5 +74,5 @@
 <text x="923.0" y="657" font-size="17" fill="var(--figure-8ac8ff)" style="fill:var(--figure-8ac8ff)" text-anchor="middle">Weight blob</text>
 <text x="923.0" y="682" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">models/&lt;sha&gt;.bin.xz</text>
 <text x="923.0" y="704" font-size="13" fill="var(--figure-e6edf3)" style="fill:var(--figure-e6edf3)" text-anchor="middle" class="mono" xml:space="preserve">shared across runs</text>
-<text x="26" y="754" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Charts use metrics.csv when available, otherwise committed chunks. The viewer never loads training weights.</text>
+<text x="26" y="754" font-size="14" fill="var(--figure-acbfd1)" style="fill:var(--figure-acbfd1)">Ordinary playback reads replays; optional archived explanations load selected champion weights server-side.</text>
 </svg>

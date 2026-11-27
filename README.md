@@ -61,18 +61,22 @@ required. [Installation](INSTALL.md) covers commands and platform details;
 
 ## Quick start
 
-Requires Python 3.12+. Install the [published package](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/)
-in a fresh writable working directory:
+Requires Python 3.12+. The current feature guides target the source checkout:
 
 ```sh
+git clone https://github.com/sagnik1511/wtf.git
+cd wtf
 python3.12 -m venv .venv
-.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.9
-.venv/bin/wtf run baseline --runs 1 --steps 200 --seed 100 --progress
+.venv/bin/python -m pip install -e .
+.venv/bin/wtf run ppo --runs 1 --steps 200 --seed 100 --progress
 .venv/bin/wtf view --results results
 ```
 
-Presets, terrain maps and viewer assets are included; a checkout is optional.
-For source development or Docker, follow [installation](INSTALL.md).
+Use [installation](INSTALL.md) for a locally built wheel, Docker and the
+published-version boundary. The older 0.0.2.9 registry snapshot predates the
+current V7/learning-head features. The short run demonstrates setup, not stable
+reproduction. [Current sensing and learning](docs/learning/features.md) explains
+the defaults and optional features.
 
 Open <http://127.0.0.1:8000>, select the saved experiment and click **Play recording**.
 You can close the simulator before starting playback. Python packages stay in

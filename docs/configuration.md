@@ -30,7 +30,7 @@ Each JSON file is a complete experiment definition:
 `champion_lineage.json` requires archived compatible Q models; the other presets start fresh unless you add `initial_brain`.
 
 The common `maskable_ppo.json` contains the supported flat-world survival profile:
-version-4 consent inputs, prey escape actions, predator/prey top-k 10/3, predator
+version-7 compact inputs, three-step visual history, blended scent, prey escape actions, predator/prey top-k 10/3, predator
 radius 3 and 60 energy per kill. See [current calibration](calibration.md) for its
 scope and unresolved tradeoffs. Other algorithm and terrain presets retain their
 own contracts. Superseded exploratory JSONs stay local instead of expanding the
@@ -65,15 +65,49 @@ The earlier `river_crossing_strong_predator.json` keeps prey `[16]` and predator
 `[128, 64]`;
 see the [river preset details](geography.md#river-crossing-with-stronger-predator-capacity).
 Rivers require swimming, currents carry animals, and elevation adds climbing
-costs and limits. Terrain-enabled brains use observation version 2 (32 features with default k=1;
-both enhanced river presets use k=4 for 68 features).
+costs and limits. Terrain presets now use V7 compact observations with visual
+history and blended scent. Both enhanced river presets retain k=4 and now have
+130 inputs per species; legacy V2 configurations remain supported.
 See [geography](geography.md) for map syntax, locomotion settings and model
 compatibility. These presets still contain one prey species and one predator.
 
 The [plains/coasts gallery](geography.md#plains-coasts-and-interior-landscapes)
 adds `grasslands`, `seaside`, `rolling_hills`, `wetlands`, `canyon` and `oasis`.
-These use current PPO version-4/top-k observations, unlike the older version-2
-terrain presets. Their JSON files remain independently editable.
+These and the older terrain presets use V7 sensing while retaining their own
+learner, top-k and body settings. Their JSON files remain independently editable.
+
+## V7 sensory preset defaults
+
+New runs from the maintained algorithm and terrain presets opt into:
+
+```json
+"observation_version": 7,
+"movement_history_steps": 3,
+"scent_observation": { "mode": "blended", "radius": 2 }
+```
+
+The environment also enables `scent_trails`, retaining an existing lifetime or
+using 32 steps for a newly enabled field. Each V7 brain template has an explicit
+`observation_actions` list matching its species' ordered `allowed_actions`.
+Templates formerly shared by species with different action lists have separate
+configuration entries; algorithms, architectures and private learning remain
+unchanged. Geography, bodies, populations, rewards, mating gates, vision settings,
+recording choices and existing consequence/auxiliary settings are preserved.
+No social, auxiliary or late-adapter objective is enabled solely by selecting V7.
+The separate `seaside_150_v7` reference retains its previously enabled heads.
+
+The minimal `baseline`, archived-weight `champion_lineage` example and explicit
+`seaside_150_v5`/`seaside_150_v6` controls are unchanged. Local experiment JSONs are
+not rewritten. All earlier observation versions remain available in custom JSONs.
+V7 is compact relative to richer representations; adding history and scent can
+still make a model larger than its old V1/V2 counterpart.
+
+Start fresh or load brains matching the new complete contract. Old V1–V6 or
+scent-free brains cannot silently initialize these presets. Use the original
+captured `environment.json` for an older warm start; exact checkpoint resume
+already restores the captured configuration. Existing playbacks remain intact.
+The viewer uses recorded metadata for old and new sensory diagrams. See
+[calibration scope](calibration.md#current-sensory-defaults).
 
 ## Adding species
 
@@ -167,7 +201,7 @@ environment does not retune an already saved checkpoint or recording.
 
 Current source `environments/ppo.json` uses ordinary, unmasked PPO on a 32×24
 flat world with 64 prey and six predators. Prey have 40 health, escape actions,
-version-4 consent inputs, top-k 3 and a `[16]` network. Predators use top-k 10
+version-7 compact inputs, three-step history, blended scent, top-k 3 and a `[16]` network. Predators use top-k 10
 and a `[64, 32]` network, with attack damage 40, attack cost 0.25 and 80 energy
 per kill. Predator breeding requires 30 energy and spends 10 per parent.
 Both species use failed-action reward −0.01, offspring reward +3 and PPO entropy
@@ -181,7 +215,7 @@ it does not guarantee stable populations. See the
 [calibration scope](calibration.md#ordinary-ppo-adaptation).
 
 Templates are `brains.prey_ppo` and `brains.predator_ppo`. Their inputs/actions
-are 69/9 and 153/6 respectively. Richer inputs and the deeper predator network increase per-animal compute/model
+are 106/9 and 267/6 respectively. Richer inputs and the deeper predator network increase per-animal compute/model
 cost; fewer predators do not establish a total runtime or memory improvement.
 Legacy stock 20-input PPO weights are incompatible;
 start fresh or provide matching signatures. Existing exact resumes retain their

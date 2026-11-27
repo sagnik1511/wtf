@@ -560,7 +560,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
                 folder = next((root / name).iterdir())
                 manifest = json.loads((folder / "manifest.json").read_text())
                 saved = json.loads((folder / "environment.json").read_text())
-                self.assertEqual(manifest["observation_version"], 2)
+                self.assertEqual(manifest["observation_version"], 7)
                 self.assertIn("rows", saved["terrain"])
                 self.assertNotIn("map_file", saved["terrain"])
                 header = (folder / "metrics.csv").read_text().splitlines()[0]
@@ -579,7 +579,7 @@ class TerrainLearningAndStorageTests(unittest.TestCase):
                     "swim" in species["allowed_actions"], name != "highlands"
                 )
             self.assertTrue(
-                all(b.get("observation_version") == 2 for b in c["brains"].values())
+                all(b.get("observation_version") == 7 for b in c["brains"].values())
             )
             e = Experiment(c)
             self.assertTrue(

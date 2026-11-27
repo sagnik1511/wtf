@@ -2,8 +2,8 @@
 
 [Configuration](configuration.md) · [Architecture](architecture.md) · [Analysis](analysis.md)
 
-The [cross-environment feedback review](feedback-review.md) maps all nine
-controllers and seven geography maps to these shared rules, documents current
+The [cross-environment feedback review](feedback-review.md) maps the supported
+controllers and geography presets to these shared rules, documents current
 coefficient scales and explains the distinction between raw feedback and
 MAPPO's training reward.
 
@@ -22,7 +22,7 @@ Reward accounting describes the consequence without spending the body’s energy
 
 ## Configuring feedback
 
-Edit each `species.<name>.rewards` object. Supplied presets add these coefficients:
+Edit each `species.<name>.rewards` object. Example coefficients (configure them per species and preset):
 
 ```json
 "per_energy_cost": -0.01,
@@ -63,7 +63,8 @@ required. Each parent can participate in one birth per step.
 
 Failed reproduction produces no child, takes no reproduction energy and starts
 no cooldown. It receives the failure penalty plus normal living-cost feedback.
-A successful parent receives +1 by default, less its energy-demand penalty.
+A successful parent receives its configured `per_offspring` reward, less its
+energy-demand penalty. Omission means zero; the current `ppo` preset uses +3.
 Children still mix both parents’ weights, start with configured body health and
 energy, and may receive the existing rare child-only mutation. Their optimizer
 and temporal training state starts fresh. Newborns do not learn on their birth step.
@@ -79,8 +80,10 @@ Adding `reproduce` changes the action output signature. Old champion weights
 without this output cannot initialize the updated presets. Use fresh brains or
 an exactly compatible action list. Old checkpoints remain readable, but their
 old controllers cannot choose reproduction and will not reproduce automatically.
-Existing observation sizes remain 20 for flat maps and 32 for terrain maps;
-there are no new explicit age, sex or cooldown observation inputs in this change.
+Current presets use V7 with maturity, sex, cooldown, consent and opportunity
+cues, plus configured movement/scent and optional consequence inputs. Use the
+[complete V7 contract](learning/v7-observations.md); earlier layouts belong to
+[the historical reference](archive/observation-layouts.md).
 
 These coefficients provide feedback, not evidence that a policy has learned.
 Mutual reproduction is harder than automatic birth and population stability is

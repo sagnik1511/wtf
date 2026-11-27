@@ -17,3 +17,7 @@ a specific setting, command, visual or compatibility question.
 | [Visual assets and sources](../assets/README.md) | Asset provenance and regeneration catalogs. |
 | [Project identity](../branding.md) | SVG/PNG logos, light/dark forms and animation rules. |
 | [Release history](../releases/README.md) | Existing versioned implementation records. |
+
+For older feature layouts, viewer sheets, package instructions or captured settings,
+use [Historical feature contracts](../archive/index.md). They are separated from
+the current guides rather than relabeled as current defaults.

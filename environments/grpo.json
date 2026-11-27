@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "grpo",
-  "description": "Independent GRPO agents; experimental matched-world GRPO trials",
+  "description": "Independent GRPO agents; experimental matched-world GRPO trials; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -151,7 +151,21 @@
       "train_every_steps": 128,
       "epochs": 2,
       "batch_size": 16,
-      "target_kl": 0.03
+      "target_kl": 0.03,
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     },
     "small_q": {
       "type": "q_network",
@@ -167,7 +181,21 @@
         "initial": 0.35,
         "minimum": 0.05,
         "decay_per_decision": 0.999
-      }
+      },
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -187,5 +215,9 @@
     "encoding": "binary",
     "compression": "xz",
     "compression_level": 6
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

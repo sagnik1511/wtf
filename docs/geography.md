@@ -41,13 +41,15 @@ Optional presets cover several map layouts, keeping one prey species and one pre
 
 `enclosed_valleys.json` uses **DQN for prey and PPO for predators**. The
 `river_crossing_ppo.json` preset uses PPO for both; `river_crossing.json` and
-`highlands.json` use Q networks. Supported policy implementations can use terrain with compatible version-2,
-version-3 or version-4 observations and species action lists. Keep those contracts
+`highlands.json` use Q networks. Maintained terrain presets now use V7 compact
+observations, three-step visual history and blended scent. Earlier terrain
+observation versions remain supported. Keep complete observation/action contracts
 when switching templates; see [observation versions](observations.md).
 Enclosed-valley prey can load matching terrain Q/DQN weights; predators need
 matching terrain PPO weights. The river presets provide corresponding compatible
 signatures. Dry highlands omits `swim` and has a different action signature.
-Older 20-input flat brains cannot initialize these 32-input terrain models.
+Older 20-input flat or V2 terrain brains cannot initialize the promoted V7
+models. See [sensory migration](configuration.md#v7-sensory-preset-defaults).
 
 ## River crossing with stronger predator capacity
 
@@ -59,8 +61,9 @@ Two enhanced river presets share the same map, top-k inputs and predator sight:
 | `river_crossing_strong_predator_deep.json` | `[64, 16]` | `[128, 96, 64, 32]` |
 
 The separate `_deep` JSON keeps the configured two-/four-hidden-layer networks
-available without replacing the earlier architecture. Both use version-2
-observations with `observation_top_k: 4` (68 inputs each). Predator sight is 14
+available without replacing the earlier architecture. Both use version-7
+observations with `observation_top_k: 4`, three-step visual history and blended
+scent (130 inputs each). Predator sight is 14
 plus up to 6 across water; prey sight remains 6 plus up to 3. PPO training settings
 match `river_crossing_ppo.json`, including the predator learning-rate multiplier
 of 1.25. See the [observation layout](observations.md).
@@ -77,14 +80,14 @@ water cells. Walls still occlude, and the normal swimming/health/current rules
 apply. Both presets preserve the PPO baseline's populations, health, costs,
 rewards, reproduction and recording settings.
 
-The current deep networks have 5,592 parameters per prey and 29,768 per predator,
+The current deep networks have 9,560 parameters per prey and 37,704 per predator,
 including biases and action/value outputs. They require more computation and
 memory; better decisions still need evaluation. To compare architectures, run
 both JSONs on matching seeds and align champion criteria.
 
 Weights must match the selected architecture, observation version and k.
 The earlier `[16]` prey and `[128, 64]` predator weights cannot initialize the
-deeper networks, even with the same 68 inputs. Exact checkpoint resume continues
+deeper networks, even with the same observation width. Exact checkpoint resume continues
 to use its saved configuration.
 
 ## Landscape-inspired maps
@@ -93,7 +96,7 @@ The meandering-river preset uses **A2C prey and GRPO predators**. The other thre
 new presets use **PPO for both species**. Population, health, food and
 reproduction settings match `river_crossing_ppo.json`. Meandering-river learning
 templates come from `a2c.json` and `grpo.json`. It now uses
-[version 3](mating-observations.md) (42 inputs), a 16-step predator trial horizon
+[version 7](observations.md#observation-version-7) (61 inputs), a 16-step predator trial horizon
 and a 32-step training interval, keeping one GRPO group update per world step.
 Each map is 40 × 28 cells. These are stylized landscapes using the existing
 swimming, current, elevation and obstacle rules, rather than geographic surveys
@@ -108,11 +111,11 @@ flooding, erosion, snow, temperature or vegetation-specific effects.
 
 No saved weights are requested by these presets. Multiple runs use the existing
 matching species/sex champion chaining unless disabled with `--no-chain-brains`.
-The three wet presets keep the river action lists. Meandering river uses 42
-inputs; river delta and lake islands retain the 32-input contract.
+The three wet presets keep the river action lists. Meandering river, river delta
+and lake islands use 61-input V7 vectors including history and blended scent.
 Loading saved weights also requires a matching algorithm and model signature:
-meandering-river prey need version-3 A2C weights and predators need version-3 GRPO
-weights. Previous 32-input models cannot initialize the updated preset.
+meandering-river prey need matching V7 A2C weights and predators need matching
+V7 GRPO weights. Previous V2/V3 models cannot initialize the updated preset.
 A different landscape can need new learning. Alpine omits `swim` and
 water sight bonuses and has a different action signature.
 
@@ -167,11 +170,12 @@ long-term population balance and reproduction have not been calibrated.
 ## Plains, coasts and interior landscapes
 
 These six 40 × 28 presets start from the current `ppo.json` ecology: 64 prey,
-6 predators, ordinary PPO for both, 1,500 steps and version-4 observations.
+6 predators, ordinary PPO for both, 1,500 steps and version-7 observations with
+three-step visual history and blended scent.
 They keep prey top-k=3, predator top-k=10, proximal mating radii 2/3 and the
 baseline's reproduction, health, reward and recording settings. They add
 explicit map-defined obstacles and the established swim/climb locomotion costs.
-Existing presets and saved runs are unchanged.
+Existing saved runs keep their original captured configuration.
 
 Dry grasslands and rolling hills omit `swim`. Seaside, wetlands, canyon and oasis
 include it for both species, with a three-cell water sight bonus. Initial animals

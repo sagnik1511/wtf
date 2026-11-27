@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "day_night",
-  "description": "Masked PPO with a gradual day-night cycle and species-specific night vision and energy costs.",
+  "description": "Masked PPO with a gradual day-night cycle and species-specific night vision and energy costs; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -168,8 +168,24 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
-      "observation_top_k": 3
+      "observation_version": 7,
+      "observation_top_k": 3,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "move_backward",
+        "strafe_left",
+        "strafe_right",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
     },
     "predator_maskable_ppo": {
       "type": "maskable_ppo",
@@ -190,8 +206,21 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 4,
-      "observation_top_k": 10
+      "observation_version": 7,
+      "observation_top_k": 10,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -215,5 +244,9 @@
     "enabled": true,
     "cycle_steps": 400,
     "start_phase": 0.25
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

@@ -31,7 +31,7 @@ raster previews for readable labels and clipping. No recorded files are copied
 into these assets.
 
 The model diagram follows `model_snapshot`, `write_model`/`read_model` and the PPO
-MLP implementation. Its example shapes (68 → 16 → 8, 1,240 scalars) were checked
+MLP implementation. Its example shapes (130 → 16 → 8, 2,232 scalars) were checked
 against a constructed controller without training. Two writes reused one blob;
 SHA-256, exact readback and loading into a fresh controller were verified. Other
 algorithms' parameter trees differ, as the guide explains.
@@ -40,5 +40,5 @@ Checkpoint diagrams follow the I/O writer/reader, `Experiment.restore`, world
 restore and each algorithm's checkpoint/restore methods. A controlled Q/PPO check
 verified record order, shared-value detachment, nonempty buffers, nonzero Adam
 state, restored RNGs and identical next steps. The existing binary continuation
-test passed across all nine algorithms with XZ and gzip. The diagrams describe
+test originally covered nine algorithms with XZ and gzip. The diagrams describe
 state ownership/access, not a changed simulation execution order.

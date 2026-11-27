@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "enclosed_valleys",
-  "description": "One elevated walled enclosure with two three-cell-wide gates; prey start inside, predators outside, food concentrated near both sides of the boundary",
+  "description": "One elevated walled enclosure with two three-cell-wide gates; prey start inside, predators outside, food concentrated near both sides of the boundary; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -167,7 +167,21 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 2
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "swim",
+        "reproduce"
+      ]
     },
     "small_dqn": {
       "type": "q_network",
@@ -184,7 +198,21 @@
         "minimum": 0.05,
         "decay_per_decision": 0.999
       },
-      "observation_version": 2
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "swim",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -218,5 +246,9 @@
       "boundary_width": 2,
       "inside_fraction": 0.5
     }
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

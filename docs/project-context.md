@@ -51,6 +51,16 @@ and checkpoint/resume numbering. Disabled capture still wins, and early stopping
 can end before the selected window. No past files are pruned.
 Discarded storage-format probes remain local and Git-ignored, not runtime codecs.
 
+## Sensory and consequence documentation
+
+Use the [sensing handbook](learning/features.md) for current defaults, exact V7
+input blocks, visual/scent worked examples and private-versus-shared ownership.
+The [consequence lifecycle](learning/consequence-pipeline.md) distinguishes local
+witnesses, publication, auxiliary targets, late policy routing and replay averages.
+[Tutorial 6](tutorials/06-sensing-and-learning.md) is the complete configuration recipe.
+Keep those pages consistent with source and link them rather than duplicating
+partial feature descriptions in releases or the README.
+
 ## Optional private consequence auxiliary objective
 
 `consequence_learning.persistent_action_totals` keeps 48 species-owned general
@@ -85,12 +95,16 @@ The priorities established during development are:
 
 - Configurable experiments as JSON, with Python simulation and JavaScript rendering.
 - Optional editable geography maps add swim-only rivers, fractional currents
-  and elevation costs. Flat brains use 20 features; terrain version 2 uses 32.
-  Optional version 3 uses 42 inputs including local mating readiness; the
-  meandering-river preset opts in. [Mating observations](mating-observations.md)
+  and elevation costs. Legacy V1 flat brains use 20 features; terrain V2 uses 32.
+  Optional version 3 uses 42 inputs including local mating readiness. Current
+  maintained run presets instead select compact V7, three-step personal history
+  and blended scent; baseline/archive and named comparison controls retain
+  their earlier contracts. [Mating observations](mating-observations.md)
   describes compatibility and guarded lineage promotion. Configurable
-  [top-k observations](observations.md) add 12 inputs per additional target slot;
-  defaults remain one target per category.
+  [top-k observations](observations.md) add 12 canonical inputs per extra slot
+  in V1–V5; V6/V7 and optional histories have their own documented widths;
+  the schema default remains one target per category, while presets can choose
+  larger species-specific budgets.
   [Geography guide](geography.md) covers physics and saved-model compatibility.
   Landscape presets include meandering rivers, a branching delta, alpine passes
   and lake islands, with editable map JSON and generated static diagrams.
@@ -325,16 +339,17 @@ Never replace exact optimizer/buffer/RNG state with warm-start weights.
 ## Collective sensing and persistent outcome estimates
 
 Optional [collective learning](social-learning.md) adds 24 pooled witnessed
-same-species action/outcome inputs and 48 per-action consequence estimates after
-tracking/scent. Keep all policy weights, optimizers, exploration streams and
+same-species action/outcome inputs and V7 consequence blocks of four values per
+configured action after tracking/scent. Keep all policy weights, optimizers, exploration streams and
 rollout/replay buffers independent. Local cues require visibility at both ends;
 never infer death from an out-of-view disappearance or expose numerical rewards.
 The shared empirical predictor pools own physical outcomes per exact species,
 including both sexes and unsuccessful animals. Templates may set
 `consequence_scope: "species_action"` to read published action-level aggregates
 regardless of current state/mask; omission/`context` preserves context lookup.
-Keep scope in model compatibility. Single-source modes use 48 inputs; `both`
-concatenates general then context for 96. Preserve separate confidence, no
+Keep scope in model compatibility. V7 single-source modes use `4A` inputs for A configured actions; `both`
+concatenates general then context for `8A`. Canonical legacy layouts use 48/96;
+V6 additionally expands memberships. Preserve separate confidence, no
 hand-coded behavioral gates and no duplicate event collection. The derived action cache is species-owned, invalidated by publication or
 continuous learning and excluded from persistence. It is an explicit population-level
 training abstraction, without a claim of biological long-distance communication.

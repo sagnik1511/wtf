@@ -41,7 +41,11 @@ single-hidden-layer format and behavior. For example:
   "type": "dqn",
   "network": {
     "type": "mlp",
-    "hidden_layers": [64, 32, 16],
+    "hidden_layers": [
+      64,
+      32,
+      16
+    ],
     "activation": "tanh"
   },
   "learning_rate": 0.001,
@@ -57,6 +61,12 @@ single-hidden-layer format and behavior. For example:
     "initial": 0.35,
     "minimum": 0.05,
     "decay_per_decision": 0.999
+  },
+  "observation_version": 7,
+  "movement_history_steps": 3,
+  "scent_observation": {
+    "mode": "blended",
+    "radius": 2
   }
 }
 ```
@@ -113,9 +123,9 @@ See the [advanced algorithms guide](advanced-algorithms.md) for presets, command
 configuration, memory behavior and the changed action/reward rules of these variants.
 
 The maintained ordinary-PPO preset now uses separate `prey_ppo`/`predator_ppo`
-templates with version-4 inputs; see [current PPO configuration](configuration.md#current-ordinary-ppo-preset).
+templates with V7 compact inputs, three-step personal history and blended scent; see [current PPO configuration](configuration.md#current-ordinary-ppo-preset).
 The standalone `brains.small_ppo` example below illustrates the base algorithm
-fields and retains its legacy default input contract:
+fields with the current V7 sensory contract:
 
 
 ```json
@@ -139,7 +149,13 @@ fields and retains its legacy default input contract:
   "batch_size": 16,
   "max_grad_norm": 0.5,
   "normalize_advantages": true,
-  "target_kl": 0.03
+  "target_kl": 0.03,
+  "observation_version": 7,
+  "movement_history_steps": 3,
+  "scent_observation": {
+    "mode": "blended",
+    "radius": 2
+  }
 }
 ```
 
@@ -178,7 +194,7 @@ The default example uses four trials, four steps per trial, `train_every_steps: 
 
 Trial worlds do not advance the real simulation or contribute kills, deaths, food, or frame recordings to it. Progress and playback counts describe only the real timeline. Checkpoints preserve the frozen reference policy, group/training RNG states and update scheduling, so a restored run reproduces its future trials. The example keeps prey on Q-learning to limit overhead; either species can reference a GRPO template.
 
-All nine algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
+All fourteen algorithms can coexist through species-to-brain references. Their checkpoints include the relevant partial rollout/episode buffers and optimizer state. The inspector shows action probabilities for policy-based methods, Q-values for Q-learning, critic values only where a critic exists, and episode/group details where applicable. Algorithm correctness tests do not establish better ecosystem performance; compare multiple held-out seeds before drawing that conclusion.
 
 See [saved champions](brain-library.md) for transferring compatible learned weights to a fresh experiment, and [analysis](analysis.md) for checking whether updates lead to useful behavior.
 
@@ -198,13 +214,11 @@ or reference networks. Parents and evaluation policies remain unchanged. This
 is independent of the algorithm's normal parameter updates and does not change
 model signatures or require additional packages.
 
-## Optional terrain observations
+## Terrain and sensory observations
 
-All nine algorithms also support observation version 2, with 32 inputs and the
-optional swim action. Flat presets retain version 1 and 20 inputs. Models must
-match input version and action order when warm-started. See
-[terrain observations](geography.md#terrain-observations-and-model-compatibility).
-
-Version 3 adds generic [mating-readiness observations](mating-observations.md)
-for 42 inputs on flat and terrain maps, with a distinct model signature. The
-meandering-river preset opts in; other presets retain their existing versions.
+All fourteen learners support current V7 terrain, mating, personal-history and
+blended-scent inputs, subject to the same configured action/geometry contracts.
+Use [the exact current layout](learning/v7-observations.md) and
+[geography](geography.md) when selecting a map or changing target capacity.
+Older input contracts are documented only in the [historical reference](archive/index.md).
+They are not the current preset defaults.

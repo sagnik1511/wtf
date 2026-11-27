@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "recurrent_ppo",
-  "description": "Independent GRU PPO with bounded sequence training and lifespan champions",
+  "description": "Independent GRU PPO with bounded sequence training and lifespan champions; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -154,7 +154,21 @@
       "normalize_advantages": true,
       "target_kl": 0.03,
       "recurrent_size": 16,
-      "sequence_length": 8
+      "sequence_length": 8,
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
     },
     "predator_recurrent_ppo": {
       "type": "recurrent_ppo",
@@ -176,7 +190,21 @@
       "normalize_advantages": true,
       "target_kl": 0.03,
       "recurrent_size": 32,
-      "sequence_length": 8
+      "sequence_length": 8,
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -195,5 +223,9 @@
     "encoding": "binary",
     "compression": "xz",
     "compression_level": 6
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

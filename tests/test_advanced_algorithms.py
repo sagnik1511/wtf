@@ -46,6 +46,8 @@ def settings(kind):
         load(ROOT / f"environments/{source_kind}.json")["brains"]["prey_" + source_kind]
     )
     # Numerical unit fixtures keep their fixed 20-input contract as presets evolve.
+    for key in ("observation_actions", "movement_history_steps", "scent_observation"):
+        c.pop(key, None)
     c.update(observation_version=1, observation_top_k=1)
     c["network"]["hidden_layers"] = [3]
     if kind in ("qrdqn", "dqn", "ddqn"):

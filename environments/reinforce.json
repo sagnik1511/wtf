@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "reinforce",
-  "description": "Independent REINFORCE agents",
+  "description": "Independent REINFORCE agents; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -96,7 +96,7 @@
         "attack_cost": 1,
         "energy_per_kill": 40
       },
-      "brain": "small_reinforce",
+      "brain": "predator_small_reinforce",
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
@@ -141,7 +141,50 @@
       "type": "reinforce",
       "max_episode_steps": 1500,
       "baseline_decay": 0.9,
-      "normalize_advantages": false
+      "normalize_advantages": false,
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
+    },
+    "predator_small_reinforce": {
+      "network": {
+        "type": "mlp",
+        "hidden_layers": [16],
+        "activation": "tanh"
+      },
+      "learning_rate": 0.001,
+      "discount_factor": 0.98,
+      "entropy_coefficient": 0.01,
+      "max_grad_norm": 0.5,
+      "type": "reinforce",
+      "max_episode_steps": 1500,
+      "baseline_decay": 0.9,
+      "normalize_advantages": false,
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -160,5 +203,9 @@
     "encoding": "binary",
     "compression": "xz",
     "compression_level": 6
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

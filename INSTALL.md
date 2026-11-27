@@ -9,42 +9,51 @@ separate steps; see the [trial release procedure](docs/packaging.md#testpypi-tri
 
 For renamed imports and module locations, see [package layout and migration](docs/package-layout.md).
 
-## Install from PyPI
+## Current source quick start
 
-Version [0.0.2.9](https://pypi.org/project/wtf-wildlife-trial-framework/0.0.2.9/) is available from production PyPI.
-In a fresh working directory:
+Current guides describe the maintained source features and V7 presets. Until
+those features are separately published and validated, use a source checkout or
+locally built artifact rather than assuming an older registry release contains
+them. The distribution name is `wtf-wildlife-trial-framework`; import `wtf`.
 
 ```sh
+git clone https://github.com/sagnik1511/wtf.git
+cd wtf
 python3.12 -m venv .venv
-.venv/bin/python -m pip install wtf-wildlife-trial-framework==0.0.2.9
-.venv/bin/wtf presets
-.venv/bin/wtf run baseline --runs 1 --steps 200 --seed 100 --progress
+.venv/bin/python -m pip install -e .
+.venv/bin/wtf run ppo --runs 1 --steps 200 --seed 100 --progress
 .venv/bin/wtf view --results results
 ```
 
-The portable wheel includes presets, maps and viewer assets; no compiler is needed.
-For the optional native extension, use the [native build instructions](docs/packaging.md#optional-native-source-build).
+The short run checks setup; 200 steps cannot establish reproduction or sustained
+learning. Use configured horizons and multiple matched seeds for evaluation.
+Python fallback needs no compiler; native kernels are optional. See
+[the sensory tutorial](docs/tutorials/06-sensing-and-learning.md) for current
+features and [compatibility](docs/compatibility.md) for artifact boundaries.
+
+## Install from PyPI
+
+The documented published 0.0.2.9 snapshot predates current V7 and optional learning
+heads. Its pinned instructions remain in the
+[historical installation reference](docs/archive/published-installation.md).
+Do not assume source documentation applies unchanged to that older package.
 
 ## Install the built wheel
 
-Build from the checkout in its development environment, then install the wheel
-into a fresh environment:
+Build and validate the current checkout, then install its wheel in a fresh env:
 
 ```sh
 .venv/bin/python -m pip install build twine
-.venv/bin/python -m build --outdir dist/0.0.2.9
-.venv/bin/python -m twine check dist/0.0.2.9/*
+.venv/bin/python -m build --outdir dist/current
+.venv/bin/python -m twine check --strict dist/current/*
 python3.12 -m venv /path/to/test-env
-/path/to/test-env/bin/python -m pip install dist/0.0.2.9/wtf_wildlife_trial_framework-0.0.2.9-py3-none-any.whl
+/path/to/test-env/bin/python -m pip install dist/current/*.whl
 ```
 
-From any writable working directory, use `wtf presets`,
-`wtf run maskable_ppo --runs 1 --steps 200 --seed 100 --progress`, then
-`wtf view --results results` (activate that environment or use its full script
-paths). Presets, maps and viewer assets are included. See
-[package verification](docs/packaging.md) and [Linux/Ubuntu setup](docs/linux.md).
-Do not confuse installing this wheel with publishing it, or substitute a package
-named only `wtf` from a registry.
+Build into a clean output directory. A local artifact's version label alone does
+not establish equivalence to an older registry download; retain source provenance
+and the artifact actually tested. Presets, maps and viewer assets are included.
+See [package verification](docs/packaging.md) for isolated install checks.
 
 ## Local Python installation
 

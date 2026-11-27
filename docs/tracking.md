@@ -2,7 +2,9 @@
 
 [Brain inputs](observations.md) · [Inspector appearances](viewer-visual-reference.md#movement-memory-and-scent) · [Configuration fields](configuration-reference.md)
 
-Both senses are opt-in and work with all nine controller algorithms. Visual
+Both senses are configurable and work with all fourteen controller algorithms.
+For worked temporal/mixture examples and the current V7 path, start with the
+[detailed memory and scent guide](learning/memory-and-scent.md). Visual
 memory belongs to an observer; scent belongs to the world. Neither sense tells
 an animal which action to choose, guarantees improved hunting, or relaxes mating
 radius, readiness, consent or challenge eligibility. No sniff action is required.
@@ -13,7 +15,8 @@ radius, readiness, consent or challenge eligibility. No sniff action is required
 
 The maintained [tracking preset](../environments/tracking.json) extends masked
 PPO with three previous steps of visual memory and automatic ground-scent
-sampling. Existing presets retain their current settings.
+sampling. Maintained run presets now enable these senses alongside V7;
+custom configurations can still omit either one. See [sensory defaults](configuration.md#v7-sensory-preset-defaults).
 
 ```sh
 .venv/bin/python -m wtf run tracking --runs 1 --seed 100 --progress
@@ -117,52 +120,31 @@ sex channels do not reveal individual identity, age, health or mating consent.
 
 ## Input contract and model compatibility
 
-The existing observation-version 1–4 blocks stay in their current order. V5
-projects directional memory and scent into the current body frame and adds three
-opportunities before these optional blocks; the viewer projects them back to
-north-up using the sampled heading. See [V5](observations.md#observation-version-5). Optional
-movement and scent blocks are appended afterwards. For `K` visible slots per
-category and `H > 0` history steps, movement adds `2 * K * (7 + 3 * H)` values:
+V7 uses seven values per personal motion track, independent of the configured
+history length, plus four values per scent channel. One blended channel combines
+all species/sex groups anonymously. The maintained tracking preset has 106 prey
+and 267 predator inputs, using k=3/10 and H=3. The
+[worked memory/scent guide](learning/memory-and-scent.md) explains fields,
+fading, reachability, mixture arithmetic and information loss.
 
-| Per tracking slot | Meaning |
-| --- | --- |
-| 7 summary values | Last-seen dx/dy, estimated velocity x/y per step, normalized age, confidence, currently-visible flag |
-| 3 values per previous step | Historical dx/dy and observed flag, newest lag first; zeros mark unknown steps |
-
-Blended scent adds nine values total. Separated scent adds nine values per
-channel: one channel per sensed species, or female then male channels per species
-with sex separation enabled. Legacy channel order follows `scent_observation.species`. Version 1, K=1, H=3 and two sex-separated species has
-`20 + 32 + 36 = 88` inputs. The tracking preset's version-4 prey K=3 and predator
-K=10 now have 174 and 482 inputs respectively with blended scent.
-
-Model signatures include history length and the ordered scent contract. Changing
-those fields, including scent mode, requires fresh compatible weights; equal input width alone is not
-sufficient. Explicit history zero retains the legacy signature. Old recordings
-and configurations remain readable and keep their original input layouts.
+Changing version, action order, k, H, scent mode/radius/channel order or optional
+learning heads requires a matching model contract. Equal width is insufficient.
+Exact checkpoint resume restores its captured sensory state; weights alone do
+not recreate a previous animal's sightings or a world's deposits.
 
 ## Inspector and replay
 
-![Actual inspector SVG components with controlled movement and scent samples](assets/viewer/tracking.svg)
+![Current V7 input, movement summary and scent compass](assets/viewer/observation-v7.svg)
 
-Select an animal during saved playback, then click **Tracks & scent charts** in
-the inspector to jump directly to **Movement memory & scent**. This section is
-below **Sampled observation** in the independently scrollable sidebar and shows
-its recorded sensory inputs. Movement
-dots are personal sightings; missing steps break the connecting line. Hollow
-markers and fading opacity identify remembered targets. Dashed line segments in the inspector show the
-last velocity estimate, not confirmed future movement. Prey/predator colors
-refer to the existing diet categories. The scent panel shows the local
-blended strength pattern in a single heatmap (or the original species/sex grids
-for separated recordings), with north upwards and
-the observer's current cell in the center. Compact headings keep the diagrams
-stable; hover a movement marker for its slot, visibility, age and confidence
-instead of repeating those details in paragraphs below the chart.
+Select an animal and open **Tracks & scent charts**. V7 shows the compact
+movement summary and scent compass, with recorded diagnostic timing. It does
+not fabricate a lag-by-lag path or nine-cell scent map from the summary. The
+selected agent's board trails and cumulative occupancy heatmaps are separate
+views. Actual hidden/prediction activity also follows saved samples.
 
-Panels update at diagnostic samples as playback advances, rather than inventing
-intermediate data. Use a nonzero `recording.diagnostics_every_steps`; lower
-intervals give smoother updates and larger recordings. The existing diagnostic
-step label distinguishes the sampled observation from the current replay frame.
-Old recordings without these inputs do not acquire retrospective tracks.
+Older numeric grids and full lag displays are documented in the
+[historical sensory viewer reference](archive/sensory-viewer.md), not as current
+preset defaults. The current viewer still decodes matching older recordings.
 
 ## Selected-agent trails on the board
 

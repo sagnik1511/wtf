@@ -48,34 +48,25 @@ configuration/state; published package 0.0.2.9 predates it. Replay frame formats
 remain compatible; optional diagnostic scalar fields may be ignored by old UI.
 See [collective learning](social-learning.md#persistent-speciesaction-totals).
 
-## Observation V6
+## Preset sensory promotion
 
-V6 expands already sensed V5 values into soft semantic memberships. Earlier
-versions remain supported without conversion. Both observation version and the
-resolved `soft_categories` knot lists enter model signatures. Different V6 knots
-are incompatible even when input widths agree; start with matching fresh weights.
-Checkpoints preserve the saved version/configuration, private optimizer/RNG and
-auxiliary state. The auxiliary output head's physical targets are unchanged.
+Maintained run presets now select V7 compact observations with three-step visual
+history and blended scent. Their previous V1–V6/scent-free brain signatures do
+not match the new defaults. Start fresh, load matching V7 weights, or run the
+original captured environment for older warm starts. Exact checkpoint resumes
+and existing playback use their saved configuration; no artifacts are converted.
+The minimal baseline, archived-model example and named V5/V6 controls remain
+available. See [the migration guide](configuration.md#v7-sensory-preset-defaults).
 
-Replay codecs and exact world frames are unchanged. V6 sampled vectors are
-larger; their category-derived inspector reconstruction can saturate outside the
-configured bands and is labeled accordingly. Use the current viewer for semantic
-labels, categorical disclosures and sampled-heading projections. Older readers
-may show raw values or reject the new layout. See [V6 definitions](observations.md#observation-version-6).
+## Historical sensory contracts
 
-## Observation V5
+<a id="observation-v6"></a>
+<a id="observation-v5"></a>
 
-V5 uses body-relative spatial inputs and three additional immediate affordance
-values. Versions 1–4 keep their existing exact semantics. Model signatures include
-the observation version and width; V4/V5 weights are incompatible even with the
-same policy/layers/top-k. Do not edit metadata to bypass validation. Checkpoints
-retain their saved version, private optimizer/RNG, history and consequence state.
-
-Replay codecs are unchanged: sampled features carry the configured layout in
-recording metadata. Use the current viewer to read V5. Raw labels show
-forward/right; the sampled radar, movement history and scent maps project through
-the recorded heading back into north-up world coordinates. An older viewer may
-show raw values or reject the unknown layout. See [V5 definitions](observations.md#observation-version-5).
+Readers preserve earlier numeric/soft layouts and their exact saved signatures.
+Those layouts, older inspector sheets and settings are documented in
+[historical reference](archive/index.md), not presented as current defaults.
+Current source models use the [V7 contract](learning/v7-observations.md).
 
 ## Optional forward vision
 
@@ -110,18 +101,20 @@ historical continuation is required.
 
 ## Current reader capabilities
 
-This table describes the current source readers, not an untested historical
-package-version matrix. The published 0.0.2.9 wheel/source archive carry these
-capabilities; the production-download smoke check covers all maintained presets,
-recording, checkpoint restoration and viewer assets. Platform coverage remains
-limited to the runtimes actually tested. See [package verification](packaging.md).
+This table describes the current source readers, not a historical published
+package matrix. The published 0.0.2.9 snapshot predates V7, private auxiliary/late
+heads and other subsequently added source features. Its earlier installation
+smoke check does not establish support for those additions. Use a current
+source installation or a separately validated newer artifact for this guide.
+Platform coverage remains limited to the runtimes actually tested. See
+[package verification](packaging.md).
 
 | Artifact | Current source can read | Compatibility boundary |
 | --- | --- | --- |
 | Experiment checkpoint | Legacy logical state v1 JSON; compact `wtf-checkpoint-v2` envelope; binary checkpoint envelopes v3 (standalone) and v4 (optional shared metadata), inside supported plain/gzip/XZ transport | Decoders normalize to logical state v1; controllers/configuration must still be supported |
 | Champion brain | `brain_artifact_version` 1, 2 and 3; library manifests 1 and 2 | v3 metadata references binary/XZ weights; older readers do not necessarily support it |
 | Replay | `recording_version: 1`, legacy full JSON chunks, `wtf-delta-v1` chunks and current structured binary chunks, with supported none/gzip/XZ compression | Current binary magic is `WTFB` codec v1; keep the recording manifest, chunks and run metadata together |
-| Brain inputs | Supported observation versions 1–6 with configured top-k | Algorithm, architecture, action order, observation version/top-k, optional movement/scent layout and other signature fields must match |
+| Brain inputs | Supported observation versions 1–7 with configured top-k | Algorithm, architecture, action order, observation version/top-k, optional movement/scent layout and other signature fields must match |
 
 Use the loader appropriate to the artifact. A checkpoint restores world,
 controllers, optimizer state, buffers and RNGs. A champion initializes weights

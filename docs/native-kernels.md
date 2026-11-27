@@ -76,11 +76,16 @@ probability/objective helpers use equivalent double arithmetic when available.
 
 | Path | Compiled work |
 | --- | --- |
-| DQN | Hidden/output inference, chosen output, replay gradient accumulation and SGD |
+| `q_network` | Hidden/output inference, chosen output, replay gradient accumulation and SGD |
+| DQN / DDQN | Dense online/target forward, scalar TD minibatch gradients and Adam |
 | PPO, A2C, REINFORCE, GRPO, Maskable PPO | Shared MLP forward/backward and Adam |
 | MAPPO | Independent actor/critic MLPs and Adam |
 | QR-DQN | Network forward/backward, pairwise quantile loss and Adam |
 | Recurrent PPO | GRU gates/BPTT, output MLP and whole-network Adam |
+| LSTM PPO | Four-gate forward and hidden/cell BPTT, output MLP and Adam |
+| Discrete SAC | Dense actor/twin critics, categorical policy math and Adam; learner scheduling remains Python |
+| TRPO | Dense forward/backward and policy math; trust-region/line-search scheduling remains Python |
+| Optional PPO heads | Ordered late-actor/adapter and separate auxiliary minibatches for supported stock models |
 
 Parameters and optimizer state keep their float32 storage. C expressions use
 double arithmetic, matching the reference's Python floats. Temporary parameter

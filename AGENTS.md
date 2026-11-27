@@ -50,7 +50,8 @@ rather than loading every document or result into context.
   metadata, not repeated frames. GRPO may share read-only geography, while bodies,
   obstacles, RNGs and transient observation caches remain independent. Record
   final death positions after drift rather than inferring one-cell movement.
-- V7 compact numeric observations are optional and preserve V1–V6 artifacts.
+- Maintained run presets use V7 compact numeric observations, three-step personal
+  history and blended scent; explicit legacy controls remain available. Preserve V1–V6 artifacts.
   Keep per-template ordered action contracts, explicit presence, sensed-only
   movement summaries and anonymous off-cell four-value scent. Late consequence
   adapters support PPO/masked PPO: keep learned arrays private, snapshot evidence,
@@ -58,8 +59,9 @@ rather than loading every document or result into context.
   Never move evidence into the physical trunk or drop dynamically masked action
   knowledge; preserve archived inference/gradients and lifecycle parameter blocks.
 - Optional collective/consequence observations append after tracking/scent and
-  enter model signatures. Consequence scopes context/species_action use 48 inputs;
-  both concatenates general then context for 96, with independent confidence and
+  enter model signatures. V7 consequence scopes context/species_action use four values per configured action;
+  both concatenates general then context. Legacy canonical scopes use 48/96 values,
+  while V6 expands memberships. Preserve independent confidence and
   no duplicate evidence collection. Keep same-species local visibility, hidden-outcome and
   reward boundaries explicit. Shared consequence counts are population-level
   training knowledge, not shared policy weights or biological remote sensing.

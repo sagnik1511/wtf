@@ -16,6 +16,9 @@ light/dark styles and an opaque light fallback for simpler image renderers.
 
 | Diagram | Documentation | Local source filename |
 | --- | --- | --- |
+| [Sensing-to-decision path](sensing-decision-loop.svg) | [Handbook](../../learning/features.md#from-environment-to-decision) | `sensing-decision-loop.mmd` |
+| [Scent patch selection](scent-patch-selection.svg) | [Worked scent guide](../../learning/memory-and-scent.md#scent-deposit-fade-choose-a-patch) | `scent-patch-selection.mmd` |
+| [Consequence publication clocks](consequence-episode-clock.svg) | [Evidence and learning](../../learning/consequence-pipeline.md#continuous-versus-episode-publication) | `consequence-episode-clock.mmd` |
 | [V7 late consequence policy](v7-late-consequence.svg) | [Guide](../../observations.md#opt-in-late-consequence-policy) | `v7-late-consequence.mmd` |
 | [V6 coefficient reuse](v6-coefficient-reuse.svg) | [Guide](../../performance.md#v6-semantic-encoding-and-auxiliary-work) | `v6-coefficient-reuse.mmd` |
 | [Collective evidence and private auxiliary heads](collective-auxiliary.svg) | [Guide](../../social-learning.md#auxiliary-outcome-prediction-for-private-ppo-brains) | `collective-auxiliary.mmd` |
@@ -75,7 +78,8 @@ PNG previews used for visual review stay under ignored `.cache/docs-viz/`.
 
 ## Recent feature diagrams
 
-The four recent flows above and the revised champion-chaining flow have portable
+Recent feature flows, including the sensing handbook diagrams and the revised
+champion-chaining flow, have portable
 authoring definitions in [build_recent_doc_diagrams.py](../../../work/build_recent_doc_diagrams.py).
 They can be regenerated from a fresh clone without retained `.mmd` files:
 

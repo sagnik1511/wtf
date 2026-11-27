@@ -39,8 +39,9 @@ after that simulation step's learning update. They do not reconstruct the action
 already taken or prove that an animal understood its environment. Policy scores,
 Q estimates, masks and value/quantile fields retain their existing interpretation.
 MAPPO records its local actor's hidden layers; the separate central critic is not
-shown as an action route. Recurrent PPO records both actual prior memory and the
-resulting GRU activation, without resetting or advancing its live memory.
+shown as an action route. Recurrent PPO records prior GRU memory and resulting activation. LSTM PPO
+records its prior hidden/cell state and resulting hidden/head activations without resetting or
+advancing the live controller.
 
 The new diagnostic field is deliberately small:
 
@@ -48,7 +49,7 @@ The new diagnostic field is deliberately small:
 activations
 ├── version: 1
 ├── layers: [hidden_layer_0[], hidden_layer_1[], ...]
-└── recurrent_prior: [...]  (recurrent PPO only)
+└── recurrent_prior: [...]  (GRU h; LSTM concatenated [h, c])
 ```
 
 Only these visualization arrays are rounded to FP32 before storage. Learning,
@@ -174,18 +175,30 @@ omitted for clarity. See the [asset provenance](assets/structures/README.md).
 
 | Algorithms | Interpretation |
 | --- | --- |
-| DQN / `q_network` | Tanh hidden state and action Q values; exploration may choose a different action |
+| DQN / DDQN / `q_network` | Tanh hidden state and action Q values; exploration may choose a different action |
 | PPO, A2C, REINFORCE, GRPO | Feed-forward policy activations and normalized action probabilities; GRPO reference policies/trials are not reconstructed |
 | Maskable PPO | Uses the selected diagnostic's recorded action mask; masked probabilities and their gradients are zero |
 | QR-DQN | Routes end at return quantiles; the action chart and attribution use each action's quantile mean |
 | Recurrent PPO | Explicitly resets prior GRU memory to zero because archives store weights, not the animal's historical recurrent state; exposes update/reset/candidate/current-state maps |
 | MAPPO | Explains the local actor only; its independent centralized critic does not select actions |
+| Discrete SAC / TRPO | Explains the local actor; separate critics are not displayed as the selected action route |
+| LSTM PPO | Archived analysis uses zero prior hidden and cell state; recorded replay activity instead uses the actual saved prior state and sampled activations |
 
 For zero-state GRU analysis, reset gates are displayed but multiply zero prior
 memory. GRU links represent a local Jacobian times the input, rather than an
 additive decomposition through a dense layer. The header and tooltips distinguish
 these routes. This view does not establish how recurrent memory affected a
 historical decision.
+
+## Late-consequence explanations
+
+For supported PPO/masked-PPO late models, archived inference applies the saved
+adapter to the selected saved observation before normalizing action logits. The
+explanation includes base logits, signed residuals and final logits; local input
+sensitivity propagates through both the physical route and the late evidence
+route. It does not substitute current live species tables. Masked outputs retain
+zero action probability/sensitivity. A nonzero residual does not establish a
+causal plan or improved behavior. See [the complete routing description](learning/consequence-pipeline.md#late-consequence-adjustment).
 
 ## Data access and cost
 

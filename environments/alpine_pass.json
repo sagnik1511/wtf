@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "alpine_pass",
-  "description": "PPO alpine ridge with stepped slopes, rocky crests and two broad low mountain passes",
+  "description": "PPO alpine ridge with stepped slopes, rocky crests and two broad low mountain passes; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -104,7 +104,7 @@
         "attack_cost": 1,
         "energy_per_kill": 40
       },
-      "brain": "small_ppo",
+      "brain": "predator_small_ppo",
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
@@ -163,7 +163,54 @@
       "max_grad_norm": 0.5,
       "normalize_advantages": true,
       "target_kl": 0.03,
-      "observation_version": 2
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
+    },
+    "predator_small_ppo": {
+      "type": "ppo",
+      "network": {
+        "type": "mlp",
+        "hidden_layers": [16],
+        "activation": "tanh"
+      },
+      "learning_rate": 0.001,
+      "discount_factor": 0.98,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coefficient": 0.01,
+      "value_coefficient": 0.5,
+      "rollout_steps": 64,
+      "epochs": 4,
+      "batch_size": 16,
+      "max_grad_norm": 0.5,
+      "normalize_advantages": true,
+      "target_kl": 0.03,
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -185,5 +232,9 @@
   },
   "terrain": {
     "map_file": "maps/alpine_pass.json"
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

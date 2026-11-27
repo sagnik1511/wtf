@@ -89,6 +89,7 @@ Home = "index.md"
     { "Tutorial 3: Restore and view" = "tutorials/03-restore-and-view.md" },
     { "Tutorial 4: Training and inference" = "tutorials/04-training-and-inference.md" },
     { "Tutorial 5: Compare saved policies" = "tutorials/05-compare-saved-policies.md" },
+    { "Tutorial 6: Senses and learning" = "tutorials/06-sensing-and-learning.md" },
     { "Python example" = "examples.md" },
 ]
 
@@ -108,6 +109,10 @@ Home = "index.md"
 [[project.nav]]
 "Learning and behavior" = [
     "learning/index.md",
+    { "Sensing and consequence handbook" = "learning/features.md" },
+    { "V7 layout and examples" = "learning/v7-observations.md" },
+    { "Personal memory and scent" = "learning/memory-and-scent.md" },
+    { "Consequence learning pipeline" = "learning/consequence-pipeline.md" },
     { "Algorithms and networks" = "algorithms.md" },
     { "Advanced algorithms" = "advanced-algorithms.md" },
     { "SAC, TRPO and LSTM PPO" = "additional-policies.md" },
@@ -174,6 +179,14 @@ Reference = [
     { "Configuration fields" = "configuration-reference.md" },
     { "Command reference" = "command-reference.md" },
     { "Compatibility policy" = "compatibility.md" },
+    { "Historical feature contracts" = [
+        "archive/index.md",
+        { "Older observation layouts" = "archive/observation-layouts.md" },
+        { "Older sensory viewer sheets" = "archive/sensory-viewer.md" },
+        { "Earlier mating inputs" = "archive/mating-inputs-v3.md" },
+        { "Earlier feedback audit" = "archive/feedback-audit.md" },
+        { "Published installation snapshot" = "archive/published-installation.md" },
+    ] },
     { "Visual guide" = "visual-guide.md" },
     { "Project identity" = "branding.md" },
     { "Release history" = "releases/README.md" },

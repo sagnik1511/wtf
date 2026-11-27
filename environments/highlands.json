@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "highlands",
-  "description": "Terraced plateau with steep cliffs, a north ramp and guarded approaches",
+  "description": "Terraced plateau with steep cliffs, a north ramp and guarded approaches; V7 compact sensing, visual movement history and blended scent.",
   "seed": 42,
   "world": {
     "width": 40,
@@ -104,7 +104,7 @@
         "attack_cost": 0.35,
         "energy_per_kill": 40
       },
-      "brain": "small_q",
+      "brain": "predator_small_q",
       "rewards": {
         "per_energy_gained": 0.1,
         "per_damage_taken": -0.2,
@@ -159,7 +159,50 @@
         "minimum": 0.05,
         "decay_per_decision": 0.999
       },
-      "observation_version": 2
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "eat",
+        "reproduce"
+      ]
+    },
+    "predator_small_q": {
+      "type": "q_network",
+      "hidden_layers": [16],
+      "learning_rate": 0.003,
+      "discount_factor": 0.98,
+      "batch_size": 8,
+      "replay_capacity": 512,
+      "learning_starts_after": 32,
+      "train_every_steps": 8,
+      "target_update_every_training_steps": 50,
+      "exploration": {
+        "initial": 0.35,
+        "minimum": 0.05,
+        "decay_per_decision": 0.999
+      },
+      "observation_version": 7,
+      "movement_history_steps": 3,
+      "scent_observation": {
+        "mode": "blended",
+        "radius": 2
+      },
+      "observation_actions": [
+        "move_forward",
+        "turn_left",
+        "turn_right",
+        "rest",
+        "attack",
+        "reproduce"
+      ]
     }
   },
   "experiment": {
@@ -181,5 +224,9 @@
   },
   "terrain": {
     "map_file": "maps/highlands.json"
+  },
+  "scent_trails": {
+    "enabled": true,
+    "lifetime_steps": 32
   }
 }

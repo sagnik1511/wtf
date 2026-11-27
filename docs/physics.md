@@ -99,7 +99,8 @@ credit; enabling the bonus does not increase the range equally in every directio
 
 Dry rays retain the base radius. Walls block line of sight even across water.
 Elevation currently changes movement cost but does **not** occlude sight; other
-animals also do not occlude it. Vision is 360°, independent of facing. Range is
+animals also do not occlude it. These illustrated cases use a 360° field. Current species can instead configure
+150°/180° front-facing fields; turning then changes visible targets. Range is
 Euclidean distance; occlusion and water credit follow integer Bresenham rays.
 
 ![Prey and predator visibility at the same target distance](assets/physics/visibility-species.svg)
